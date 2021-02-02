@@ -20,8 +20,10 @@ class StartCreatingEnergyLineStringState : StartCreatingLineStringState
                 {
                     //Get and add the centerpoint layer
                     EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;
-                    LayerManager.AddNonReferenceLayer(polyLayer.centerPointLayer, true);
-                }
+                    LayerManager.AddNonReferenceLayer(polyLayer.centerPointLayer, false); //Redrawing a centerpoint layer doesn't work, so manually redraw active entities
+					foreach (Entity entity in polyLayer.centerPointLayer.activeEntities)
+						entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
+				}
                 else if (layer.editingType == AbstractLayer.EditingType.SourcePoint ||
                 layer.editingType == AbstractLayer.EditingType.Socket ||
                 layer.editingType == AbstractLayer.EditingType.Transformer)

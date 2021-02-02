@@ -81,9 +81,11 @@ public class InterfaceCanvas : MonoBehaviour
 	void Start()
 	{
 		canvas.scaleFactor = GameSettings.UIScale;
-        //ColorPalette.instance.ApplyAccent();
-        menuBarActiveLayers.toggle.isOn = true;
-
+		menuBarActiveLayers.toggle.isOn = true;
+		for (int i = 0; i < lineMaterials.Length; i++)
+		{
+			lineMaterials[i] = new Material(lineMaterials[i]);
+		}
     }
 
 	public void SetRegionWithName(string name)

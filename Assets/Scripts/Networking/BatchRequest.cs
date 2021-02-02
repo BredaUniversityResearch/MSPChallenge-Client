@@ -163,7 +163,6 @@ public class BatchRequest
 
 	private void ExecuteBatch()
 	{
-		Debug.Log($"Batch execution attempted. Current status: {status}, oustanding requests: {outstandingCallRequests.Count}");
 		if(status == EBatchStatus.Failed)
 		{
 			//Something caused the batch to already fail, call the failure callback directly

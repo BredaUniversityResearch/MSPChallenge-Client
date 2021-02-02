@@ -13,8 +13,6 @@ public class GenericWindow : MonoBehaviour
 	public LayoutElement contentLayout;
     public TextMeshProUGUI title;
     public Transform contentLocation;
-    //public bool editEnabled;
-    //public bool isPropertyWindow;
     public bool shouldCenter;
 
     // Buttons
@@ -82,15 +80,7 @@ public class GenericWindow : MonoBehaviour
 		//40f = topbar size
 		SetPosition(new Vector2((corners[1].x - corners[2].x) * 0.5f * (1f / scale), (corners[1].y - corners[0].y - 40f) * 0.5f * (1f / scale)));
 	}
-
-    //protected void Update()
-    //{
-    //    if (isPropertyWindow && !EventSystem.current.IsPointerOverGameObject() && Input.GetMouseButtonUp(0))
-    //    {
-    //        Destroy();
-    //    }
-    //}
-
+	
     /// <summary>
     /// Set window title
     /// </summary>
@@ -183,62 +173,6 @@ public class GenericWindow : MonoBehaviour
         return content;
     }
 
-    ///// <summary>
-    ///// Create a content window
-    ///// </summary>
-    ///// <param name="title">The title of the content window</param>
-    //public GenericContent CreateContentWindow(string title) {
-
-    //    GenericContent content = GenerateContentWindow();
-
-    //    content.SetTitle(title);
-
-    //    return content;
-    //}
-
-    ///// <summary>
-    ///// Create a content window
-    ///// </summary>
-    ///// <param name="title">The title of the content window</param>
-    ///// <param name="maxHeight">The maximum height of the window</param>
-    //public GenericContent CreateContentWindow(string title, float maxHeight) {
-
-    //    GenericContent content = GenerateContentWindow();
-
-    //    content.SetTitle(title);
-    //    content.SetPrefHeight(maxHeight);
-
-    //    return content;
-    //}
-
-    ///// <summary>
-    ///// Create a content window
-    ///// </summary>
-    ///// <param name="showTitle">Show the content title</param>
-    //public GenericContent CreateContentWindow(bool showTitle) {
-
-    //    GenericContent content = GenerateContentWindow();
-
-    //    content.ShowTitle(showTitle);
-
-    //    return content;
-    //}
-
-    ///// <summary>
-    ///// Create a content window
-    ///// </summary>
-    ///// <param name="showTitle">Show the content title</param>
-    ///// <param name="maxHeight">The maximum height of the window</param>
-    //public GenericContent CreateContentWindow(bool showTitle, float maxHeight) {
-
-    //    GenericContent content = GenerateContentWindow();
-
-    //    content.ShowTitle(showTitle);
-    //    content.SetPrefHeight(maxHeight);
-
-    //    return content;
-    //}
-
     /// <summary>
     /// Generates the content window
     /// </summary>
@@ -292,14 +226,9 @@ public class GenericWindow : MonoBehaviour
     {
         get {
 			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-			//return Vector2.Scale(
-			//	new Vector2((Screen.width / 2f) - ((windowTransform.rect.width * scale) / 2f), 
-			//		(-Screen.height / 2f) + ((windowTransform.rect.height * scale) / 2f)), 
-			//	new Vector2(1 / scale, 1 / scale));
 			Vector3[] corners = new Vector3[4];
 			windowTransform.GetWorldCorners(corners);
 			return new Vector2((corners[1].x - corners[2].x) * 0.5f * (1f / scale), (corners[1].y - corners[0].y) * 0.5f * (1f / scale));
-			//return new Vector2(-(windowTransform.rect.width) /2f, (windowTransform.rect.height) / 2f);
 		}
     }
 

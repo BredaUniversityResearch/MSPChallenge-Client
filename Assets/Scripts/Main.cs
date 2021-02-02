@@ -33,9 +33,7 @@ public class Main : MonoBehaviour
     private static bool editingPlanDetailsContent = false;
     private static bool preventPlanAndTabChange = false;
 
-	private static Plan currentlyEditingPlan;
-
-    private static ProjectionInfo mspCoordinateProjection;
+	private static ProjectionInfo mspCoordinateProjection;
     private static ProjectionInfo geoJSONCoordinateProjection;
     public static int currentExpertiseIndex;
     public static MspGlobalData MspGlobalData { get; set; }
@@ -175,19 +173,14 @@ public class Main : MonoBehaviour
         LayerImporter.ImportLayerMetaData();
     }
 
-    //public static PlanLayer CurrentlyEditingPlanLayer
-    //{
-    //    get { return currentlyEditingLayer; }
-    //}
-
     public static Plan CurrentlyEditingPlan
     {
-        get { return currentlyEditingPlan; }
-    }
+        get { return PlanDetails.LayersTab.LockedPlan; }
+	}
 
     public static bool InEditMode
     {
-        get { return currentlyEditingPlan != null; }
+        get { return CurrentlyEditingPlan != null; }
     }
 
     public static bool EditingPlanDetailsContent

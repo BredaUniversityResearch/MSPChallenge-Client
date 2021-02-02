@@ -1,26 +1,15 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &100100000
-Prefab:
-  m_ObjectHideFlags: 1
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications: []
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1000012500473056}
-  m_IsPrefabParent: 1
 --- !u!1 &1000012500473056
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
   m_Component:
-  - 4: {fileID: 4000013721825210}
-  - 114: {fileID: 114000012222646848}
-  - 114: {fileID: 114000011018770704}
+  - component: {fileID: 4000013721825210}
+  - component: {fileID: 114000012222646848}
   m_Layer: 0
   m_Name: SceneCaptureManager
   m_TagString: Untagged
@@ -30,50 +19,28 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &4000013721825210
 Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1000012500473056}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &114000011018770704
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1000012500473056}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84614f86de6b97240806b8238fa63cc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mVideoList:
-  - name: Ports
-    movieTexture: {fileID: 15200000, guid: 9701643be774ade4090330a4fedfdeb7, type: 3}
-  - name: 
-    movieTexture: {fileID: 15200000, guid: 47a3f4d6788513f4cb71bc53cc8192f4, type: 3}
-  - name: 
-    movieTexture: {fileID: 15200000, guid: 48b5e3591de2fe3448b7a7632a451fde, type: 3}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114000012222646848
 MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1000012500473056}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 39c4ab0a6e3ab3b4db0ddc62913222b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mCaptureEntries:
-  - Name: Military Areas
-    CapturePrefab: {fileID: 1000014101351502, guid: ff04eccb794d72d4b9976703406d71d2,
-      type: 2}
-  - Name: Ports
-    CapturePrefab: {fileID: 1000014101351502, guid: 4569caef5ed344340a1275b2b955b7e2,
-      type: 2}
+  m_CaptureEntries: []

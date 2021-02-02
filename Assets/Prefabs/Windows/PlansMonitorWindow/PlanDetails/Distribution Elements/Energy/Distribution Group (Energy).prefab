@@ -454,6 +454,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: The grid's name.
   timeBeforeShowing: 0.5
+  passClickToParent: 0
 --- !u!1 &1000010459122830
 GameObject:
   m_ObjectHideFlags: 0
@@ -1855,6 +1856,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Total power available in the the grid.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1000011581610580
 GameObject:
   m_ObjectHideFlags: 0
@@ -2040,6 +2042,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: View on map
   timeBeforeShowing: 0.5
+  passClickToParent: 0
 --- !u!1 &1000011652384330
 GameObject:
   m_ObjectHideFlags: 0
@@ -2147,6 +2150,7 @@ MonoBehaviour:
   text: Teams adding energy to this grid, either through connected sources or contributing
     sockets.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1000011906925676
 GameObject:
   m_ObjectHideFlags: 0
@@ -2301,7 +2305,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3878,6 +3882,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Show breakdown
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1000013928510386
 GameObject:
   m_ObjectHideFlags: 0
@@ -4339,6 +4344,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Distribution of available power over teams with connected sockets.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1000014163434792
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,6 +7,7 @@ using TMPro;
 public class LockablePlanDetailsTab : PlanDetailsTab
 {
 	protected Plan lockedPlan;
+	public Plan LockedPlan => lockedPlan;
 
 	public override void UpdateTabAvailability()
 	{

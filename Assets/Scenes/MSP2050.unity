@@ -989,7 +989,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eca2ab9eae279e34f83c9a7f3d8aee9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &44102020 stripped
+--- !u!114 &44102019 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1041011255717171675, guid: 170b25c79f65e204fb9babde21f0bb14,
     type: 3}
@@ -9534,7 +9534,6 @@ GameObject:
   - component: {fileID: 1428924124}
   - component: {fileID: 1428924127}
   - component: {fileID: 1428924126}
-  - component: {fileID: 1428924125}
   m_Layer: 5
   m_Name: Simulation Screen Border Gradient
   m_TagString: Untagged
@@ -9574,18 +9573,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gradientImage: {fileID: 1428924126}
---- !u!114 &1428924125
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1428924122}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d72efa2ea14b1246be5076c76a71bc6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1428924126
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9889,8 +9876,8 @@ MonoBehaviour:
   fixedPriorityWindowsHigh:
   - {fileID: 1274850060}
   - {fileID: 4020942073550323733}
-  - {fileID: 44102020}
   - {fileID: 1905696745}
+  - {fileID: 44102019}
   m_kpiToggleGroup: {fileID: 1615785011}
 --- !u!224 &1512290744 stripped
 RectTransform:
@@ -9975,7 +9962,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:

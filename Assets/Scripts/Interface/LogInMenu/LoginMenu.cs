@@ -313,11 +313,7 @@ public class LoginMenu : MonoBehaviour
 		form.AddField("visibility", 0);
 		form.AddField("client_version", ApplicationBuildIdentifier.FindBuildIdentifier().GetSvnRevisionNumber());
 
-#if UNITY_EDITOR
-		string host = "localhost/dev/";
-#else
 		string host = "localhost";
-#endif
 		if (!string.IsNullOrEmpty(serverAdressInputField.text))
 		{
 			host = serverAdressInputField.text.Trim(' ', '\r', '\n', '\t');

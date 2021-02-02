@@ -29,11 +29,16 @@ class KPIGraphDateMarker: MonoBehaviour, IOnResizeHandler
 
 		if(matchingWindow != null)
 			matchingWindow.RegisterResizeHandler(this);
+	}
+
+	void OnEnable()
+	{
 		StartCoroutine(DelayedResize());
 	}
 
 	IEnumerator DelayedResize()
 	{
+		yield return new WaitForEndOfFrame();
 		yield return new WaitForEndOfFrame();
 		OnResize();
 	}
