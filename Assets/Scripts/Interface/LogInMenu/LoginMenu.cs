@@ -267,7 +267,7 @@ public class LoginMenu : MonoBehaviour
 		crDemoSession = null;
 
 		WWWForm form = new WWWForm();
-		form.AddField("client_version", ApplicationBuildIdentifier.FindBuildIdentifier().GetSvnRevisionNumber());
+		form.AddField("client_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier().GetBuildTime());
 		form.AddField("visibility", "private");
 		form.AddField("demo_servers", 1);
 
@@ -311,7 +311,7 @@ public class LoginMenu : MonoBehaviour
 	{
 		WWWForm form = new WWWForm();
 		form.AddField("visibility", 0);
-		form.AddField("client_version", ApplicationBuildIdentifier.FindBuildIdentifier().GetSvnRevisionNumber());
+		form.AddField("client_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier().GetBuildTime());
 
 		string host = "localhost";
 		if (!string.IsNullOrEmpty(serverAdressInputField.text))
@@ -488,18 +488,18 @@ public class LoginMenu : MonoBehaviour
 
 		int countryIndex = teamsIDByCountryName[countryName];
 
-		int buildVersion = 0;
+		string buildTime = null;
 		ApplicationBuildIdentifier buildIdentifier = ApplicationBuildIdentifier.FindBuildIdentifier();
 		if (buildIdentifier != null)
 		{
-			buildVersion = buildIdentifier.GetSvnRevisionNumber();
+			buildTime = buildIdentifier.GetBuildTime();
 		}
 
 		NetworkForm form = new NetworkForm();
 		form.AddField("country_id", countryIndex);
 		if (passwordContainer.activeInHierarchy)
 			form.AddField("country_password", passwordInputField.text);
-		form.AddField("build_version", buildVersion);
+		form.AddField("build_timestamp", buildTime);
 		ServerCommunication.DoRequest<RequestSessionResponse>(Server.RequestSession(), form, (response) => RequestSessionSuccess(response, countryIndex), RequestSessionFailure);
 	}
 

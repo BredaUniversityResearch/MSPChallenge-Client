@@ -30,7 +30,7 @@ public class Options : MonoBehaviour
 	// Other
 	public Toggle developerModeToggle;
     public TextMeshProUGUI buildDateText;
-	public TextMeshProUGUI buildRevisionText;
+	//public TextMeshProUGUI buildRevisionText;
 	public TextMeshProUGUI apiEndpointText;
 
     public Button cancel, accept;
@@ -106,7 +106,7 @@ public class Options : MonoBehaviour
 		if (identifier != null)
 		{
 			buildDateText.text = identifier.GetBuildTime();
-			buildRevisionText.text = identifier.GetSvnRevisionNumber().ToString();
+			//buildRevisionText.text = identifier.GetSvnRevisionNumber().ToString();
 		}
 	}
 
