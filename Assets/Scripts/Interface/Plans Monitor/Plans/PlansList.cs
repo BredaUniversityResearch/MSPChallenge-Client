@@ -71,7 +71,7 @@ public class PlansList : MonoBehaviour
 	{
 		designStatePlans = CreatePlansGroup("Design", "A plan's content (layers and policies) can only be edited in the DESIGN state.\nPlans in DESIGN are not visible in other plans or to other teams.");
 		consultationStatePlans = CreatePlansGroup("Consultation", "Plans in CONSULTATION are visible in other plans and to other teams.\nUse the CONSULTATION state for early drafts that will need to be discussed with other teams.");
-		needApprovalStatePlans = CreatePlansGroup("Awaiting Approval", "Plans in the APPROVAL state will automatically be set to APPROVED once all required teams have approved.\nPlans that require approval cannot be manually set to APPRROVED, they must go through APPROVAL.");
+		needApprovalStatePlans = CreatePlansGroup("Awaiting Approval", "Plans in the APPROVAL state will automatically be set to APPROVED once all required teams have accepted.\nPlans that require approval cannot be manually set to APPROVED, they must go through APPROVAL.");
 		approvedStatePlans = CreatePlansGroup("Approved", "Plans in the APPROVED state will be implemented when their implementation time is reached.");
 		implementedStatePlans = CreatePlansGroup("Implemented", "IMPLEMENTED plans have had their proposed changes applied to the world.");
 		deletedPlans = CreatePlansGroup("Archived", "When a plan's implementation time is reached and it is not in APPROVED or it has issues, it will automatically be ARCHIVED.\nIf an ARCHIVED plan's implementation time has passed, it must be updated before it can be set back to another state.");

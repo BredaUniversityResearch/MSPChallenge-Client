@@ -187,6 +187,7 @@ public class RasterLayer : Layer<RasterEntity>
 			return;
 		}
 
+		viewingRaster = texture;
 		viewingRaster.wrapMode = TextureWrapMode.Clamp;
 		viewingRaster.filterMode = rasterFilterMode;
 

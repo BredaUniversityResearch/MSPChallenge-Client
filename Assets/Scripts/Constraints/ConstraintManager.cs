@@ -276,7 +276,9 @@ public static class ConstraintManager
 			notificationText.Append("The accepted changes have created issues in the following plans:\n\n");
 			for (int i = 0; i < externalPlans.Count; ++i)
 			{
+				notificationText.Append("<color=#").Append(Util.ColorToHex(TeamManager.GetTeamByTeamID(externalPlans[i].Country).color)).Append(">");
 				notificationText.Append(" - ").Append(externalPlans[i].Name).Append("\n");
+				notificationText.Append("</color>");
 			}
 			DialogBoxManager.instance.NotificationWindow("Issues in other plans plans", notificationText.ToString(), () => { });
 		}

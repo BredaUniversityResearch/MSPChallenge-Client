@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.Networking;
 using Sirenix.OdinInspector;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 public class PlanDetails : SerializedMonoBehaviour
 {
@@ -491,20 +492,21 @@ public class PlanDetails : SerializedMonoBehaviour
             Plan errorPlan = PlanManager.GetPlanWithID(planErrorsIDs[0]);
 
             //Create text for warning message, with names of affected plans
-            string names = "<color=#" + Util.ColorToHex(TeamManager.GetTeamByTeamID(errorPlan.Country).color) + ">" + errorPlan.Name;
-            for (int i = 1; i < planErrorsIDs.Length && i < 4; i++)
-            {
-                errorPlan = PlanManager.GetPlanWithID(planErrorsIDs[i]);
-                names += "</color>, <color=#" + Util.ColorToHex(TeamManager.GetTeamByTeamID(errorPlan.Country).color) + ">" + errorPlan.Name;
-            }
-            if (planErrorsIDs.Length > 4)
-                names += "</color> and " + (planErrorsIDs.Length - 4).ToString() + " others.";
-            else
-                names += "</color>.";
+			StringBuilder notificationText = new StringBuilder(256);
+			notificationText.Append("Changing this plan's state will cause errors for other plans, they will be moved to design and need to have their energy distribution confirmed.\n\nThe affected plans are:\n\n");
+			for (int i = 0; i < planErrorsIDs.Length && i < 4; i++)
+			{
+				errorPlan = PlanManager.GetPlanWithID(planErrorsIDs[i]);
+				notificationText.Append("<color=#").Append(Util.ColorToHex(TeamManager.GetTeamByTeamID(errorPlan.Country).color)).Append(">");
+				notificationText.Append(" - ").Append(errorPlan.Name).Append("\n");
+				notificationText.Append("</color>");
+			}
+			if (planErrorsIDs.Length > 4)
+				notificationText.Append("and " + (planErrorsIDs.Length - 4).ToString() + " others.");
 
 			//Create confirmation window
 			BatchRequest batchRequest = batch; //Create local variable for batch
-            string description = "Changing this plan's state will cause errors for other plans, they will be moved to design and need to have their energy distribution confirmed.\n\nThe affected plans are:\n" + names;
+            string description = notificationText.ToString();
             UnityEngine.Events.UnityAction lb = new UnityEngine.Events.UnityAction(() =>
 			{
 				batchRequest.ExecuteBatch(null, null);

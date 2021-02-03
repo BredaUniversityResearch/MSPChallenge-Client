@@ -106,6 +106,11 @@ public class EnergyGrid
 				Debug.LogError(String.Format("Grid (id: {0}) is expecting socket with db id: {1}, but it can't be found.", databaseID, socket.geometry_id));
 		}
 
+		if(sockets.Count < 2 && sources.Count == 0)
+		{
+			Debug.LogError($"Grid received with a single socket and no sources. This should be impossible. Grid id: {databaseID}");
+		}
+
 		//Set expected values to those in the GridObject
 		sharedPower = 0;
 		foreach (CountryExpectedObject countryExpected in gridObject.energy)

@@ -308,6 +308,7 @@ public static class ServerCommunication
 			if (requests[i].Www.isDone)
 			{
 				ARequest r = requests[i];
+				requests.RemoveAt(i);
 
 				if (OnRequestResponseReceived != null)
 				{
@@ -320,8 +321,6 @@ public static class ServerCommunication
 				{
 					OnRequestResponseProcessed(r);
 				}
-
-				requests.RemoveAt(i);
 			}
 		}
 
