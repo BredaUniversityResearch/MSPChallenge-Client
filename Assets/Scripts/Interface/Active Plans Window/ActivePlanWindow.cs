@@ -272,7 +272,7 @@ public class ActivePlanWindow : MonoBehaviour
 
 		//Ignore callback from Main.StartEditingLayer
 		ignoreLayerCallback = true;
-		PlanManager.StartEditingLayer(planLayer);
+		PlanDetails.LayersTab.StartEditingLayer(planLayer);
 		ignoreLayerCallback = false;
 	}
 

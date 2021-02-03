@@ -244,13 +244,6 @@ public static class PlanManager
 		plan.AttemptUnlock(true);
 	}
 
-	public static void StartEditingLayer(PlanLayer planLayer)
-	{
-        LayerManager.SetNonReferenceLayers(new HashSet<AbstractLayer>() { planLayer.BaseLayer }, false, true);
-		LayerManager.ShowLayer(planLayer.BaseLayer);
-		PlanDetails.LayersTab.StartEditingLayer(planLayer);
-	}
-
 	public static int GetPlanCount()
 	{
 		return plans.Count;

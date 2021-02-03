@@ -52,14 +52,14 @@ public class PlanDetailsTabLayers : LockablePlanDetailsTab
 
 	protected override void BeginEditing(Plan plan)
 	{
+		//Show the plan to be edited before edit mode is entered!
+		PlanManager.ShowPlan(plan);
+
 		//Should not use base, as this is diverted into the usual geom editing flow
 		lockedPlan = plan;
 		SetAcceptChangesButtonEnabled(true);
 		PlansMonitor.instance.plansMonitorToggle.toggle.isOn = false;
-
-		//Show the plan to be edited (also recalculates active entities)
-		PlanManager.ShowPlan(plan);
-		PlanDetails.SelectPlan(plan);
+		PlanDetails.SelectPlan(plan); 
 
 		if (plan.energyPlan)
 		{
@@ -68,6 +68,7 @@ public class PlanDetailsTabLayers : LockablePlanDetailsTab
 		}
 
 		//Enter edit mode in FSM
+		InterfaceCanvas.Instance.activePlanWindow.SetToPlan(lockedPlan);
 		InterfaceCanvas.Instance.activePlanWindow.OpenEditingUI(plan.PlanLayers[0]);
 		StartEditingLayer(plan.PlanLayers[0]);
 
@@ -79,6 +80,9 @@ public class PlanDetailsTabLayers : LockablePlanDetailsTab
 	/// </summary>
 	public void StartEditingLayer(PlanLayer layer, bool calledByUndo = false)
 	{
+		LayerManager.SetNonReferenceLayers(new HashSet<AbstractLayer>() { layer.BaseLayer }, false, true);
+		LayerManager.ShowLayer(layer.BaseLayer);
+
 		if (!calledByUndo)
 			Main.FSM.SetInterruptState(null);
 
@@ -92,7 +96,6 @@ public class PlanDetailsTabLayers : LockablePlanDetailsTab
 		InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
 		UIManager.SetLayerVisibilityLock(layer.BaseLayer, true);
 		currentlyEditingLayer = layer;
-		lockedPlan = layer.Plan;
 		UIManager.StartEditingLayer(layer.BaseLayer);
 		Main.FSM.StartEditingLayer(layer);
 		LayerManager.RedrawVisibleLayers();
