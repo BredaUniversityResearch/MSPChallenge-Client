@@ -1151,6 +1151,11 @@ public abstract class Layer<T> : AbstractLayer where T : Entity
 				foreach (EnergyPointSubEntity socket in newGrid.sockets)
 					visitedSockets.Add(socket);
 
+				//if(newGrid.sockets.Count < 2 && newGrid.sources.Count == 0)
+				//{
+				//	continue;
+				//}
+
 				//Determine if the new grid is the same as one of the old ones, if so: take over distribution and persistentID
 				bool identicalGridFound = false;
 				bool initialDistributionSet = false;

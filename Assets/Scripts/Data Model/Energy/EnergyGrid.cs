@@ -106,10 +106,10 @@ public class EnergyGrid
 				Debug.LogError(String.Format("Grid (id: {0}) is expecting socket with db id: {1}, but it can't be found.", databaseID, socket.geometry_id));
 		}
 
-		if(sockets.Count < 2 && sources.Count == 0)
-		{
-			Debug.LogError($"Grid received with a single socket and no sources. This should be impossible. Grid id: {databaseID}");
-		}
+		//if(sockets.Count < 2 && sources.Count == 0)
+		//{
+		//	Debug.LogError($"Grid received with a single socket and no sources. This should be impossible. Grid id: {databaseID}");
+		//}
 
 		//Set expected values to those in the GridObject
 		sharedPower = 0;
@@ -636,8 +636,8 @@ public class EnergyGrid
 	public GridPlanState GetGridPlanStateAtPlan(Plan targetPlan)
 	{
 		// Check if the grid is relevant at all ======================================
-		if (!ShouldBeShown)
-			return GridPlanState.Hidden;
+		//if (!ShouldBeShown)
+		//	return GridPlanState.Hidden;
 
 		// If grid is part of plan, it is sure to be relevant ========================
 		if (targetPlan == plan)

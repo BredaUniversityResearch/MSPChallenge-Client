@@ -28,7 +28,7 @@ public class ApplicationBuildIdentifier: ScriptableObject
 #if UNITY_EDITOR
 	public void UpdateBuildTime()
 	{
-		buildTime = System.DateTime.Now.ToString("s", CultureInfo.InvariantCulture);
+		buildTime = System.DateTime.Now.ToString("u", CultureInfo.InvariantCulture);
 
 		//string svnInfo = GetSVNInfo();
 		//svnRevisionNumber = GetCurrentRevisionFromSvnInfo(svnInfo);

@@ -466,6 +466,11 @@ public class PlanDetails : SerializedMonoBehaviour
 						}
                     });
                 }
+				else if(plan.State == Plan.PlanState.DELETED && plan.energyPlan)
+				{
+					//If an energy plan is moved out of archived, always add an energy error
+					plan.SubmitEnergyError(true, false, batch);
+				}
             }
 
             if (!submitDelayed)
