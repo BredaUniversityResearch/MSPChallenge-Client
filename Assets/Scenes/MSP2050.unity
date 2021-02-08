@@ -944,6 +944,12 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8284208108098344673, guid: 170b25c79f65e204fb9babde21f0bb14,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 8284208108098344673, guid: 170b25c79f65e204fb9babde21f0bb14,
+        type: 3}
     - target: {fileID: 8787366244998121441, guid: 170b25c79f65e204fb9babde21f0bb14,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -6248,6 +6254,7 @@ MonoBehaviour:
   text: The current state of the session and the time remaining until the era's simulation
     phase starts.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &1073273563
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9813,6 +9820,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Open time view control
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1457981042
 GameObject:
   m_ObjectHideFlags: 0
@@ -18527,12 +18535,12 @@ PrefabInstance:
     - target: {fileID: 4752142007391373287, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4752142007391373287, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4752142007391373287, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
@@ -18652,12 +18660,12 @@ PrefabInstance:
     - target: {fileID: 6022415168049706793, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6022415168049706793, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6022415168049706793, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
@@ -18942,12 +18950,12 @@ PrefabInstance:
     - target: {fileID: 6617775658513826179, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6617775658513826179, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6617775658513826179, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
@@ -19097,12 +19105,12 @@ PrefabInstance:
     - target: {fileID: 8871638826165690326, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8871638826165690326, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8871638826165690326, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
@@ -20196,6 +20204,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Open time view control
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!114 &6661609636848726466
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20449,6 +20458,7 @@ MonoBehaviour:
     The Time View window allows the world
     to be viewed at a previous time.'
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &6765608692352219588
 GameObject:
   m_ObjectHideFlags: 0

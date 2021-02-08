@@ -26,6 +26,8 @@ public class PlanDetailsTabFeedback : PlanDetailsTab
 	Transform planApprovalEntryParent;
 	[SerializeField]
 	GameObject planApprovalEntryPrefab;
+	[SerializeField]
+	GameObject approvalRequiredIndicator;
 
 	List<PlanApprovalEntry> planApprovalEntries = new List<PlanApprovalEntry>();
 	List<TextMeshProUGUI> feedbackEntries = new List<TextMeshProUGUI>();
@@ -56,7 +58,12 @@ public class PlanDetailsTabFeedback : PlanDetailsTab
 
 	public override void UpdateTabContent()
 	{
-		if (!isActive || planDetails.SelectedPlan == null)
+		if (planDetails.SelectedPlan == null)
+			return;
+
+		approvalRequiredIndicator.SetActive(planDetails.SelectedPlan.State == Plan.PlanState.APPROVAL);	
+
+		if (!isActive)
 			return;
 
 		UpdateFeedbackEntries();

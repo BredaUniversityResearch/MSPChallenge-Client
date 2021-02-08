@@ -47,8 +47,8 @@ class ProjectBuilder
 		string path = EditorUtility.SaveFolderPanel("Choose folder to build game", "", "");
 		if (path.Length != 0)
 		{
-			BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/msp.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.None);
-			BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/DevBuild/msp_dev.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.Development);
+			BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/Windows/msp.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.None);
+			BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/Windows_Dev/msp_dev.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.Development);
 		}
 	}
 

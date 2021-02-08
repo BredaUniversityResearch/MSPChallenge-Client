@@ -14,7 +14,6 @@ public class ActivePlanWindow : MonoBehaviour
 	public GenericWindow window;
 
 	[Header("Start Editing")]
-	public GameObject startEditingSection;
 	public Button startEditingButton;
 
 	[Header("Plan name")]
@@ -173,7 +172,7 @@ public class ActivePlanWindow : MonoBehaviour
 
 	public void UpdateEditButtonActivity()
 	{
-		startEditingSection.SetActive(!Main.InEditMode && !Main.EditingPlanDetailsContent
+		startEditingButton.gameObject.SetActive(!Main.InEditMode && !Main.EditingPlanDetailsContent
 			&& selectedPlan != null 
 			&& selectedPlan.State == Plan.PlanState.DESIGN
 			&& (TeamManager.IsManager || selectedPlan.Country == TeamManager.CurrentUserTeamID)
@@ -202,7 +201,7 @@ public class ActivePlanWindow : MonoBehaviour
 		if (!viewAllToggle.isOn)
 			viewAllToggle.isOn = true;
 		viewModeSection.SetActive(false);
-		startEditingSection.SetActive(false);
+		startEditingButton.gameObject.SetActive(false);
 
 		//If not a layerless plan, enable editing UI
 		if (editingLayer != null)

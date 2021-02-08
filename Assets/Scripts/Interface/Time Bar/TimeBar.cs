@@ -175,8 +175,10 @@ public class TimeBar : MonoBehaviour
         {
             if(Main.InEditMode || Main.EditingPlanDetailsContent)
             {
-                DialogBoxManager.instance.NotificationWindow("In edit mode", "View settings are unavailable while editing a plan. Please confirm or cancel your changes before trying again.", null);
+                DialogBoxManager.instance.NotificationWindow("Editing plan content", "View settings are unavailable while editing a plan's content. Please confirm or cancel your changes before trying again.", null);
+				ignoreActivityCallback = true;
 				viewTimeToggle.isOn = false;
+				ignoreActivityCallback = false;
 				return;
             }
             if (PlanManager.planViewing != null)

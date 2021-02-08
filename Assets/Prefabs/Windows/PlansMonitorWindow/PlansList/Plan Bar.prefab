@@ -132,8 +132,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010d00000063006f006c006f007200530065006c0065006300740065006400010000000b010e00000063006f006c006f00720048006900670068006c006900670068007400020000002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 7b62ecff57f93e240b11b927cbdacf05, type: 2}
     - {fileID: 11400000, guid: 5fdfc46aa76d9814db260e5b8ec51b28, type: 2}
@@ -142,19 +142,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorSelected
-      Entry: 10
-      Data: 1
-    - Name: colorHighlight
-      Entry: 10
-      Data: 2
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 1943306814174523096}
   highlightIfOn: 0
@@ -173,8 +161,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010d00000063006f006c006f007200530065006c0065006300740065006400010000002d010e00000063006f006c006f00720048006900670068006c0069006700680074002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: a4b951e863d8ad740bc98f7f693e1708, type: 2}
     - {fileID: 11400000, guid: ff5e44244d4c3774bb85af67c338665d, type: 2}
@@ -182,19 +170,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorSelected
-      Entry: 10
-      Data: 1
-    - Name: colorHighlight
-      Entry: 6
-      Data: 
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 866459209028854439}
   - {fileID: 866459147069635313}
@@ -565,6 +541,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Locked for editing
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!114 &866459209408200529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -670,6 +647,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Action Required
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &977500924888810837
 GameObject:
   m_ObjectHideFlags: 0
@@ -933,6 +911,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: View the map at the plan's implementation
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!114 &866049454496669289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1090,8 +1069,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 12
-  m_fontSizeBase: 12
+  m_fontSize: 14
+  m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1146,6 +1125,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: This plan has unresolved issues. See the plan's details for more information,
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &977500925530371415
 GameObject:
   m_ObjectHideFlags: 0
@@ -1515,45 +1495,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 01010b00000063006f006c006f0072004e006f0072006d0061006c002f00000000012900000043006f006c006f0075007200500061006c0065007400740065002e0043006f006e007300740043006f006c006f00750072002c0020004d0053005000320030003500300050006c007500670069006e007300000000000301080000006d005f0063006f006c006f00750072002f01000000012900000055006e0069007400790045006e00670069006e0065002e0043006f006c006f0072002c00200055006e0069007400790045006e00670069006e0065002e0043006f00720065004d006f00640075006c006500200000000020000000002000000000200000000005050b010e00000063006f006c006f00720048006900670068006c006900670068007400000000002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: d21645b6bd6c5674d808a9823ea0e8a3, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 7
-      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
-    - Name: m_colour
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: colorHighlight
-      Entry: 10
-      Data: 0
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 866459146316779907}
   useHighlightColor: 1
@@ -1648,6 +1598,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: This plan has been modified
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!114 &866459143363635375
 MonoBehaviour:
   m_ObjectHideFlags: 0

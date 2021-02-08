@@ -66,7 +66,8 @@ class EditEnergyLineStringsState : EditLineStringsState
                     }
 
                     selectedSubEntities.Remove(subEntity);
-                    fsm.AddToUndoStack(new BatchUndoOperationMarker());
+					subEntity.SetInFrontOfLayer(false);
+					fsm.AddToUndoStack(new BatchUndoOperationMarker());
                 }
                 else
                 {

@@ -384,6 +384,7 @@ public class PlanWizard : MonoBehaviour
 
 	private void HandleChangesSubmissionSuccess(BatchRequest batch)
 	{
+		editingPlan = null;
 		CloseWindow(true);
 		InterfaceCanvas.HideNetworkingBlocker();
 	}

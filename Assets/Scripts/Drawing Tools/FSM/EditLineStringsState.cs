@@ -68,7 +68,7 @@ public class EditLineStringsState : FSMState
 		fsm.SetSnappingEnabled(true);
 		IssueManager.instance.SetIssueInteractability(false);
 	}
-
+	
 	public void SetSelectedSubEntities(HashSet<LineStringSubEntity> subEntities)
 	{
 		selectedSubEntities = subEntities;
@@ -95,6 +95,8 @@ public class EditLineStringsState : FSMState
 				break;
 			}
 		UIManager.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+		foreach (LineStringSubEntity line in subEntities)
+			line.SetInFrontOfLayer(true);
 	}
 
 	private void RedrawObject(LineStringSubEntity entity)
@@ -237,9 +239,11 @@ public class EditLineStringsState : FSMState
 	protected void switchSelectionFromBaseLineStringToDuplicate(LineStringSubEntity baseLineString, LineStringSubEntity duplicate)
 	{
 		selectedSubEntities.Add(duplicate);
+		duplicate.SetInFrontOfLayer(true);
 		if (selectedPoints.ContainsKey(baseLineString)) { selectedPoints.Add(duplicate, selectedPoints[baseLineString]); }
 		HashSet<int> duplicateSelection = selectedPoints.ContainsKey(duplicate) ? selectedPoints[duplicate] : null;
 		selectedSubEntities.Remove(baseLineString);
+		baseLineString.SetInFrontOfLayer(false);
 		selectedPoints.Remove(baseLineString);
 
 		//Change active geom 
@@ -333,6 +337,7 @@ public class EditLineStringsState : FSMState
 					if (clickedSubEntity.IsPlannedForRemoval())
 						return;
 					selectedSubEntities.Add(clickedSubEntity);
+					clickedSubEntity.SetInFrontOfLayer(true);
 					clickedSubEntity.RedrawGameObject(SubEntityDrawMode.Selected);
 					UpdateActivePlanWindowToSelection();
 					return;
@@ -804,7 +809,8 @@ public class EditLineStringsState : FSMState
                     }
 
                     selectedSubEntities.Remove(subEntity);
-                }
+					subEntity.SetInFrontOfLayer(false);
+				}
                 else
                 {
                     LineStringSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
@@ -1037,6 +1043,7 @@ public class EditLineStringsState : FSMState
 	{
 		foreach (LineStringSubEntity lsse in selectedSubEntities)
 		{
+			lsse.SetInFrontOfLayer(false);
 			lsse.RedrawGameObject();
 		}
 		selectedSubEntities = new HashSet<LineStringSubEntity>();
