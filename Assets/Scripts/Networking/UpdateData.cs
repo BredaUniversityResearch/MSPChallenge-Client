@@ -179,6 +179,7 @@ public static class UpdateData
 			UpdateConnection(connection);
 		}
 
+		GameState.UpdateTime(updates.tick);
 
 		if (updates.kpi != null)
 		{
@@ -204,8 +205,6 @@ public static class UpdateData
 		}
 
 		PlanDetails.AddFeedbackFromServer(updates.planmessages);
-
-		GameState.UpdateTime(updates.tick);
 
 		if (PlanManager.planViewing != null && !Main.InEditMode && !Main.EditingPlanDetailsContent)
 		{

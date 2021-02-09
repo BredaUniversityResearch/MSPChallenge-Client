@@ -82,7 +82,8 @@ namespace KPI
             {
                 foreach (KeyValuePair<int, KPIValueCollectionEnergy> kvp in energyKPIs)
                     kvp.Value.FinishedUpdatingKPI(highestMonthProcessed);
-            }
+				EnergyGridReceivedEvent.Invoke();
+			}
         }
 
         void AssignActualAndWastedToGrids(Dictionary<int, GridActualAndWasted> gridDataForMonth)

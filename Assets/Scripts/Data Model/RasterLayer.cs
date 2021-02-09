@@ -100,7 +100,7 @@ public class RasterLayer : Layer<RasterEntity>
 		if (rasterObject.request_from_server)
 		{
 			string imageURL = Server.GetRasterUrl();
-			Debug.Log("Requesting " + FileName + " at " + imageURL);
+			//Debug.Log("Requesting " + FileName + " at " + imageURL);
 			NetworkForm form = new NetworkForm();
 			form.AddField("layer_name", FileName);
 			ServerCommunication.DoRequest<RasterRequestResponse>(imageURL, form, HandleImportLatestRasterCallback);

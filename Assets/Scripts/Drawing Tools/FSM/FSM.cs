@@ -284,51 +284,56 @@ public class FSM
 		}
 	}
 
-    public void SubmitAllChanges(BatchRequest batch)
-    {
+	public void SubmitAllChanges(BatchRequest batch)
+	{
 		GetChangedObjects(out var newSubEntities, out var modifiedSubEntities, out var removedSubEntities, out var planRemovalModifiedEntities);
-		
-        List<EnergyLineStringSubEntity> addedCables = new List<EnergyLineStringSubEntity>();
+
+		List<EnergyLineStringSubEntity> addedCables = new List<EnergyLineStringSubEntity>();
+		List<EnergyLineStringSubEntity> updatedCables = new List<EnergyLineStringSubEntity>();
 
 		//This includes both completely new geometry, as well as existing geometry that is newly modified in this plan
-        foreach (SubEntity newSubEntity in newSubEntities)
-        {
-            newSubEntity.SubmitNew(batch);
-            if (newSubEntity is EnergyLineStringSubEntity)//Check for created connections
-                addedCables.Add(newSubEntity as EnergyLineStringSubEntity);
-        }
+		foreach (SubEntity newSubEntity in newSubEntities)
+		{
+			newSubEntity.SubmitNew(batch);
+			if (newSubEntity is EnergyLineStringSubEntity)//Check for created connections
+				addedCables.Add(newSubEntity as EnergyLineStringSubEntity);
+		}
 
 		//These are only modified subentities that already existed on the planlayer, so just update the content
 		foreach (SubEntity modifiedSubEntity in modifiedSubEntities)
-        {
-            if (modifiedSubEntity is EnergyLineStringSubEntity)//Check for updated connections
-                addedCables.Add(modifiedSubEntity as EnergyLineStringSubEntity);
+		{
+			if (modifiedSubEntity is EnergyLineStringSubEntity)//Check for updated connections
+				updatedCables.Add(modifiedSubEntity as EnergyLineStringSubEntity);
 
 			modifiedSubEntity.SubmitUpdate(batch);
-        }
+		}
 
 		//These are subentities that used to be added/modified in the plan, but are no longer
 		foreach (SubEntity removedSubEntity in removedSubEntities)
-        {
-            removedSubEntity.SubmitDelete(batch);
-        }
-
-        foreach (KeyValuePair<SubEntity, PlanLayer> kvp in planRemovalModifiedEntities)
-        {
-            if (kvp.Value.RemovedGeometry.Contains(kvp.Key.GetPersistentID()))
-				kvp.Value.SubmitMarkForDeletion(kvp.Key, batch);
-            else
-				kvp.Value.SubmitUnmarkForDeletion(kvp.Key, batch);
-        }
-
-        //Submit connections operation
-        if (addedCables.Count > 0)
-        {
-			SubmitConnections(addedCables, batch);
+		{
+			removedSubEntity.SubmitDelete(batch);
 		}
-    }
 
-    public static void SubmitConnections(List<EnergyLineStringSubEntity> addedCables, BatchRequest batch)
+		foreach (KeyValuePair<SubEntity, PlanLayer> kvp in planRemovalModifiedEntities)
+		{
+			if (kvp.Value.RemovedGeometry.Contains(kvp.Key.GetPersistentID()))
+				kvp.Value.SubmitMarkForDeletion(kvp.Key, batch);
+			else
+				kvp.Value.SubmitUnmarkForDeletion(kvp.Key, batch);
+		}
+
+		//Submit connections operation
+		if (addedCables.Count > 0)
+		{
+			SubmitConnections(addedCables, Server.CreateConnection(), batch);
+		}
+		if (updatedCables.Count > 0)
+		{
+			SubmitConnections(updatedCables, Server.UpdateConnection(), batch);
+		}
+	}
+
+    public static void SubmitConnections(List<EnergyLineStringSubEntity> addedCables, string endPoint, BatchRequest batch)
     {
         for(int i = 0; i < addedCables.Count; i++)
         {
@@ -358,7 +363,7 @@ public class FSM
 				dataObject.Add("end", second.GetDataBaseOrBatchIDReference());
 				dataObject.Add("cable", addedCables[i].GetDataBaseOrBatchIDReference());
 				dataObject.Add("coords", $"[{coordinate.x},{coordinate.y}]");
-				batch.AddRequest(Server.CreateConnection(), dataObject, BatchRequest.BATCH_GROUP_CONNECTIONS);
+				batch.AddRequest(endPoint, dataObject, BatchRequest.BATCH_GROUP_CONNECTIONS);
 			}
         }		
 	}

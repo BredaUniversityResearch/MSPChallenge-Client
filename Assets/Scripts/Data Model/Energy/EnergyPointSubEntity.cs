@@ -153,8 +153,9 @@ public class EnergyPointSubEntity : PointSubEntity, IEnergyDataHolder
 		//Set energy_output
 		JObject dataObject = new JObject();
 		dataObject.Add("id", GetDataBaseOrBatchIDReference());
+		dataObject.Add("capacity", 0);
 		dataObject.Add("maxcapacity", Capacity.ToString());
-		batch.AddRequest(Server.AddEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
+		batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
 	}
 
 	public long Capacity

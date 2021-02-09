@@ -320,6 +320,11 @@ public static class Server
 		return "api/energy/CreateConnection";
 	}
 
+	public static string UpdateConnection()
+	{
+		return "api/energy/UpdateConnection";
+	}
+
 	public static string DeleteEnergyConection()
 	{
 		return "api/energy/DeleteConnection";
@@ -402,11 +407,6 @@ public static class Server
 	public static string AddSource()
 	{
 		return "api/energy/AddSource";
-	}
-
-	public static string AddEnergyOutput()
-	{
-		return "api/energy/AddOutput";
 	}
 
 	public static string AddEnergyGrid()

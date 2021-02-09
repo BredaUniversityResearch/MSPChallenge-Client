@@ -8,7 +8,6 @@ public class KPIEnergyGridDisplay: MonoBehaviour
 	private KPIGroups kpiGroups = null;
 
 	private int targetTeamId = -1;
-	private int latestKPIMonth = 0;
 	private KPIValueCollection targetKPICollection = null;
 
 	private void Start()
@@ -53,13 +52,12 @@ public class KPIEnergyGridDisplay: MonoBehaviour
 
 	private void OnTargetCollectionValuesUpdated(KPIValueCollection sourceCollection, int previousMostRecentMonth, int mostRecentMonthReceived)
 	{
-		latestKPIMonth = mostRecentMonthReceived;
 		ShowGridsForCountry(targetTeamId);
 	}
 
 	private void ShowGridsForCountry(int teamId)
 	{
-		List<EnergyGrid> grids = PlanManager.GetEnergyGridsAtTime(latestKPIMonth, EnergyGrid.GridColor.Either);
+		List<EnergyGrid> grids = PlanManager.GetEnergyGridsAtTime(GameState.GetCurrentMonth(), EnergyGrid.GridColor.Either);//Or should this be current month -1
 		kpiGroups.SetBarsToGrids(grids, teamId);
 	}
 }

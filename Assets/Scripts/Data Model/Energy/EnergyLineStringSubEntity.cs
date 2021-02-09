@@ -59,8 +59,9 @@ public class EnergyLineStringSubEntity : LineStringSubEntity, IEnergyDataHolder
 		//Set energy_output
 		JObject dataObject = new JObject();
 		dataObject.Add("id", GetDataBaseOrBatchIDReference());
+		dataObject.Add("capacity", 0);
 		dataObject.Add("maxcapacity", Capacity.ToString());
-		batch.AddRequest(Server.AddEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
+		batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
         //Added connections are handled by the FSM, as they require all geom to have database or batch call IDs
 	}
 
