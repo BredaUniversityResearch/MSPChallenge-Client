@@ -30,8 +30,8 @@ public class EraHUD : MonoBehaviour {
     {
         LayerImporter.OnDoneImporting += () =>
         {
-            timeManagerButton.interactable = TeamManager.IsGameMaster;
-			background.SetActive(TeamManager.IsGameMaster); //Deactivate the gameobject so the info popup doesn't show up for players.
+            timeManagerButton.interactable = TeamManager.AreWeGameMaster;
+			background.SetActive(TeamManager.AreWeGameMaster); //Deactivate the gameobject so the info popup doesn't show up for players.
 
 		};
     }

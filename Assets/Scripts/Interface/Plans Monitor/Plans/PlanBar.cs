@@ -101,7 +101,7 @@ public class PlanBar : MonoBehaviour
 			}
 		}
 		//Non GM players cant interact with plans during setup
-		else if(GameState.CurrentState == GameState.PlanningState.Setup && !TeamManager.IsGameMaster)
+		else if(GameState.CurrentState == GameState.PlanningState.Setup && !TeamManager.AreWeGameMaster)
 		{
 			value = false;
 		}

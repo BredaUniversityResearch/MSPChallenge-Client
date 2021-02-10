@@ -34,7 +34,7 @@ public class LineStringLayer : Layer<LineStringEntity>
     {
 		LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(planLayer, entityType);
         LineStringSubEntity subEntity = new LineStringSubEntity(lineStringEntity);
-        if (TeamManager.IsGameMaster)
+        if (TeamManager.AreWeGameMaster)
             lineStringEntity.Country = UIManager.GetCurrentTeamSelection();
         lineStringEntity.AddSubEntity(subEntity);
         subEntity.AddPoint(initialPoint);
@@ -47,7 +47,7 @@ public class LineStringLayer : Layer<LineStringEntity>
     {
         LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(planLayer, entityType);
         EnergyLineStringSubEntity subEntity = new EnergyLineStringSubEntity(lineStringEntity);
-        if (TeamManager.IsGameMaster)
+        if (TeamManager.AreWeGameMaster)
             lineStringEntity.Country = UIManager.GetCurrentTeamSelection();
         lineStringEntity.AddSubEntity(subEntity);
         subEntity.AddPoint(initialPoint);

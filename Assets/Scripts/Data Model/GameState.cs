@@ -114,7 +114,7 @@ public static class GameState
 
 	private static void OnSetupPhaseStarted()
 	{
-		if(!TeamManager.IsGameMaster)
+		if(!TeamManager.AreWeGameMaster)
 			InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = false;
 		//PlansMonitor.RefreshPlanEditButtonInteractablity();
 	}

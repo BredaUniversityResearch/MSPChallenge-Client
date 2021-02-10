@@ -22,6 +22,7 @@ class PlanDetailsTabIssues : PlanDetailsTab
 		if (!isActive)
 			return;
 
+		ClearIssues();
 		PopulateIssuesList(PlanDetails.GetSelectedPlan());
 		emptyContentOverlay.SetActive(issueEntries != null && issueEntries.Count == 0);
 	}

@@ -60,6 +60,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -200,10 +201,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: Current Value
-  consumeUpEvent: 0
-  consumeDownEvent: 0
-  consumeEnterEvent: 1
-  consumeExitEvent: 1
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1572245673
 GameObject:
   m_ObjectHideFlags: 0
@@ -264,6 +263,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -406,6 +406,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.34901962, g: 0.34901962, b: 0.34509805, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -616,6 +617,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -662,10 +664,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: Show breakdown
-  consumeUpEvent: 0
-  consumeDownEvent: 0
-  consumeEnterEvent: 1
-  consumeExitEvent: 1
+  timeBeforeShowing: 0.5
+  passClickToParent: 0
 --- !u!1 &1000010427856360
 GameObject:
   m_ObjectHideFlags: 0
@@ -726,6 +726,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -881,6 +882,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1015,6 +1017,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.49411765, g: 0.80784315, b: 0.99215686, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1258,10 +1261,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: Show on graph
-  consumeUpEvent: 0
-  consumeDownEvent: 1
-  consumeEnterEvent: 1
-  consumeExitEvent: 1
+  timeBeforeShowing: 0.5
+  passClickToParent: 0
 --- !u!1 &1000014188120506
 GameObject:
   m_ObjectHideFlags: 0
@@ -1381,6 +1382,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1461,10 +1463,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: Starting Value
-  consumeUpEvent: 0
-  consumeDownEvent: 0
-  consumeEnterEvent: 1
-  consumeExitEvent: 1
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1599767378176038
 GameObject:
   m_ObjectHideFlags: 0
@@ -1525,6 +1525,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1658,6 +1659,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []

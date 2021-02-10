@@ -510,7 +510,7 @@ public static class PlanManager
 			PlanLayerAdded(plan, planLayer, false);
 
 		//Show plan if it isnt a hidden plan
-		if (plan.StartTime >= 0 || TeamManager.IsGameMaster)
+		if (plan.StartTime >= 0 || TeamManager.AreWeGameMaster)
 		{
 			PlansMonitor.AddPlan(plan);
 			if (plan.ShouldBeVisibleInTimeline)

@@ -801,7 +801,7 @@ public class Plan : IComparable<Plan>
 	{
 		get
         {
-            return (InInfluencingState && StartTime >= 0) || TeamManager.CurrentUserTeamID == Country || TeamManager.IsManager;
+            return (InInfluencingState && StartTime >= 0) || TeamManager.CurrentUserTeamID == Country || TeamManager.AreWeManager;
         }
 	}
 

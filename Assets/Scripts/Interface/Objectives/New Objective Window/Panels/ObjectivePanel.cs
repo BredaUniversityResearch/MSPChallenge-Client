@@ -58,7 +58,7 @@ public class ObjectivePanel : MonoBehaviour
 
 	private void Start()
     {
-        allCountries.SetActive(TeamManager.IsManager);
+        allCountries.SetActive(TeamManager.AreWeManager);
 
 		title.onValueChanged.AddListener(OnValueChanged);
 		description.onValueChanged.AddListener(OnValueChanged);

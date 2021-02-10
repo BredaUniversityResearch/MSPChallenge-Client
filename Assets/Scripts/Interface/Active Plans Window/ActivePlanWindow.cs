@@ -175,7 +175,7 @@ public class ActivePlanWindow : MonoBehaviour
 		startEditingButton.gameObject.SetActive(!Main.InEditMode && !Main.EditingPlanDetailsContent
 			&& selectedPlan != null 
 			&& selectedPlan.State == Plan.PlanState.DESIGN
-			&& (TeamManager.IsManager || selectedPlan.Country == TeamManager.CurrentUserTeamID)
+			&& (TeamManager.AreWeManager || selectedPlan.Country == TeamManager.CurrentUserTeamID)
 			&& selectedPlan.PlanLayers.Count > 0);
 	}
 
@@ -209,7 +209,7 @@ public class ActivePlanWindow : MonoBehaviour
 			//Activate editing sections
 			layerTypeSection.SetActive(true);
 			layerSection.SetActive(true);
-			countrySection.SetActive(TeamManager.IsManager);
+			countrySection.SetActive(TeamManager.AreWeManager);
 
 			//Clear and create new layers
 			ClearLayers();
@@ -259,7 +259,7 @@ public class ActivePlanWindow : MonoBehaviour
 		}
 
         //Set admin country option available/unavailable
-        if (TeamManager.IsGameMaster)
+        if (TeamManager.AreWeGameMaster)
             GMSelectable = !layer.BaseLayer.IsEnergyLayer();
     }
 

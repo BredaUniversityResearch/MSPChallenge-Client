@@ -68,7 +68,7 @@ public class PolygonLayer : Layer<PolygonEntity>
         PolygonSubEntity subEntity = editingType == EditingType.SourcePolygon ? new EnergyPolygonSubEntity(polygonEntity) : new PolygonSubEntity(polygonEntity);
         polygonEntity.AddSubEntity(subEntity);
 
-        if (TeamManager.IsGameMaster)
+        if (TeamManager.AreWeGameMaster)
             polygonEntity.Country = UIManager.GetCurrentTeamSelection();
 
         subEntity.AddPoint(initialPoint);

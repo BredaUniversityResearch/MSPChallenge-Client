@@ -29,7 +29,7 @@ public class PointLayer : Layer<PointEntity>
     public PointEntity CreateNewPointEntity(Vector3 point, List<EntityType> entityType, PlanLayer planLayer)
     {
         PointEntity pointEntity = new PointEntity(this, planLayer, point, entityType, null);
-        if (TeamManager.IsGameMaster)
+        if (TeamManager.AreWeGameMaster)
             pointEntity.Country = UIManager.GetCurrentTeamSelection();
         
         planLayer.AddNewGeometry(pointEntity);

@@ -88,7 +88,7 @@ public class PlanDetails : SerializedMonoBehaviour
 		IssueManager.instance.SubscribeToIssueChangedEvent(OnPlanLayerIssuesChanged);
 
 		forceUnlockButton.gameObject.SetActive(false);
-		if (TeamManager.IsGameMaster)
+		if (TeamManager.AreWeGameMaster)
 		{
 			forceUnlockButton.onClick.AddListener(() =>
 			{
@@ -193,7 +193,7 @@ public class PlanDetails : SerializedMonoBehaviour
 	{
 		if (instance.selectedPlan != null)
 		{
-			instance.changeDetailsButton.interactable = (instance.isOwner || TeamManager.IsManager) && !instance.selectedPlan.InInfluencingState && !Main.InEditMode && !Main.EditingPlanDetailsContent;
+			instance.changeDetailsButton.interactable = (instance.isOwner || TeamManager.AreWeManager) && !instance.selectedPlan.InInfluencingState && !Main.InEditMode && !Main.EditingPlanDetailsContent;
 			UpdateTabAvailability();
 		}
 	}
@@ -202,7 +202,7 @@ public class PlanDetails : SerializedMonoBehaviour
 	{
 		get
 		{
-			return (isOwner || TeamManager.IsManager) && selectedPlan.State == Plan.PlanState.DESIGN && !Main.InEditMode && !Main.EditingPlanDetailsContent;
+			return (isOwner || TeamManager.AreWeManager) && selectedPlan.State == Plan.PlanState.DESIGN && !Main.InEditMode && !Main.EditingPlanDetailsContent;
 		}
 	}
 
@@ -233,7 +233,7 @@ public class PlanDetails : SerializedMonoBehaviour
 		if (plan != null)
 		{
 			detailsCover.SetActive(false);
-			forceUnlockButton.gameObject.SetActive(TeamManager.IsGameMaster);	
+			forceUnlockButton.gameObject.SetActive(TeamManager.AreWeGameMaster);	
 			PlansMonitor.SetPlanBarToggleState(plan, true);
 		}
 		else
@@ -352,7 +352,7 @@ public class PlanDetails : SerializedMonoBehaviour
 		if (planState != Plan.PlanState.IMPLEMENTED)
 		{
             //If owner/manager
-            if (isOwner || TeamManager.IsManager)
+            if (isOwner || TeamManager.AreWeManager)
             {
                 statusDropdown.interactable = true;
                 SetStatusDropdownOptions();
@@ -376,7 +376,7 @@ public class PlanDetails : SerializedMonoBehaviour
         if (selectedPlan.HasErrors() || selectedPlan.State == Plan.PlanState.DELETED)
             availableStates = new List<Plan.PlanState>() { Plan.PlanState.DELETED, Plan.PlanState.DESIGN };        
         else if (selectedPlan.NeedsApproval())
-            availableStates = TeamManager.IsManager ?
+            availableStates = TeamManager.AreWeManager ?
               new List<Plan.PlanState>() { Plan.PlanState.DELETED, Plan.PlanState.DESIGN, Plan.PlanState.CONSULTATION, Plan.PlanState.APPROVAL, Plan.PlanState.APPROVED }
             : new List<Plan.PlanState>() { Plan.PlanState.DELETED, Plan.PlanState.DESIGN, Plan.PlanState.CONSULTATION, Plan.PlanState.APPROVAL };
         else

@@ -53,7 +53,7 @@ public class PlanApprovalEntry : MonoBehaviour
 		}
 		else
 		{
-			playerCanChangeApproval = TeamManager.IsGameMaster;
+			playerCanChangeApproval = TeamManager.AreWeGameMaster;
 			backgroundImage.enabled = false;
 			countryNameText.color = normalTextColour.GetColour();
 		}

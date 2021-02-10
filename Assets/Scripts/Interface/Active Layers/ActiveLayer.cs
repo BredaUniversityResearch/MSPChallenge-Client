@@ -90,7 +90,7 @@ public class ActiveLayer : MonoBehaviour {
 		int key = layerRepresenting.GetEntityTypeKey(type);
 
 		string mapKeyName = type.Name;
-		if (TeamManager.IsGameMaster)
+		if (TeamManager.AreWeGameMaster)
 			mapKeyName += " (" + key + ")";		
 		
 		// Instantiate prefab

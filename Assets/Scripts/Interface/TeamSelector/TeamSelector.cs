@@ -24,7 +24,7 @@ public class TeamSelector : MonoBehaviour
         dropdown.onValueChanged.AddListener(OnDropDownValueChanged);
         LayerImporter.OnDoneImporting += () =>
         {
-            if (!TeamManager.IsGameMaster)
+            if (!TeamManager.AreWeGameMaster)
                 gameObject.SetActive(false);
         };
     }

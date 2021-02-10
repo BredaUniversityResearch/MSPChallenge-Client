@@ -312,7 +312,7 @@ public static class UIManager
     {
 		interfaceCanvas.activePlanWindow.SetSelectedEntityTypes(entityTypes);
 		interfaceCanvas.activePlanWindow.SetSelectedParameters(selectedParams);
-		if (TeamManager.IsGameMaster)
+		if (TeamManager.AreWeGameMaster)
 		{
 			interfaceCanvas.activePlanWindow.SelectedTeam = team;
 		}
@@ -321,7 +321,7 @@ public static class UIManager
     public static void SetTeamAndTypeToBasicIfEmpty()
     {
         interfaceCanvas.activePlanWindow.SetEntityTypeToBasicIfEmpty();
-        if (TeamManager.IsGameMaster)
+        if (TeamManager.AreWeGameMaster)
             interfaceCanvas.activePlanWindow.SetTeamToBasicIfEmpty();
     }
 
@@ -331,7 +331,7 @@ public static class UIManager
 		if (!value)
 		{
 			interfaceCanvas.activePlanWindow.DeselectAllEntityTypes();	
-			if (TeamManager.IsGameMaster)
+			if (TeamManager.AreWeGameMaster)
 				interfaceCanvas.activePlanWindow.SelectedTeam = -2;
 		}
     }

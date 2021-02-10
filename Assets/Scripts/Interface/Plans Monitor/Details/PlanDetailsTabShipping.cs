@@ -103,7 +103,7 @@ class PlanDetailsTabShipping: LockablePlanDetailsTab
 			PlanLayer layer = selectedPlan.PlanLayers[i];
 			foreach (var kvp in layer.BaseLayer.EntityTypes)
 			{
-				if (TeamManager.IsManager)
+				if (TeamManager.IsManager(selectedPlan.Country))
 				{
 					foreach (Team team in TeamManager.GetTeams())
 					{
@@ -115,7 +115,7 @@ class PlanDetailsTabShipping: LockablePlanDetailsTab
 				}
 				else
 				{
-					CreateDistributionForTeam(selectedPlan, TeamManager.CurrentUserTeamID, kvp, layer);
+					CreateDistributionForTeam(selectedPlan, selectedPlan.Country, kvp, layer);
 				}
 			}
 		}

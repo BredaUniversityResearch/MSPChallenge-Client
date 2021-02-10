@@ -15,9 +15,13 @@ public static class TeamManager
 	public static int CurrentUserTeamID { get; private set; }
 	public static string CurrentUserName { get; private set; }
 
-	public static bool IsGameMaster { get { return CurrentUserTeamID == GM_ID; } }
-	public static bool IsAreaManager { get { return CurrentUserTeamID == AM_ID; } }
-	public static bool IsManager { get { return CurrentUserTeamID == AM_ID || CurrentUserTeamID == GM_ID; } }
+	public static bool AreWeGameMaster { get { return CurrentUserTeamID == GM_ID; } }
+	public static bool AreWeAreaManager { get { return CurrentUserTeamID == AM_ID; } }
+	public static bool AreWeManager { get { return CurrentUserTeamID == AM_ID || CurrentUserTeamID == GM_ID; } }
+
+	public static bool IsGameMaster(int id) { return  id == GM_ID; }
+	public static bool IsAreaManager(int id) { return id == AM_ID; }
+	public static bool IsManager(int id) { return id == AM_ID || id == GM_ID; }
 
 	public static event Action OnTeamsLoadComplete;
 

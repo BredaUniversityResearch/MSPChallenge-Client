@@ -442,7 +442,7 @@ public class PlanWizard : MonoBehaviour
             }
 
             UpdateMinAndSetTime(plan.StartTime);
-            if (TeamManager.IsGameMaster && !GameState.GameStarted)
+            if (TeamManager.AreWeGameMaster && !GameState.GameStarted)
             {
                 startPlanArea.SetActive(true);
                 startPlanToggle.isOn = plan.StartTime < 0;
@@ -487,7 +487,7 @@ public class PlanWizard : MonoBehaviour
             }
 
             timeSelectArea.SetActive(true);
-            startPlanArea.SetActive(TeamManager.IsGameMaster && !GameState.GameStarted);
+            startPlanArea.SetActive(TeamManager.AreWeGameMaster && !GameState.GameStarted);
             startPlanToggle.isOn = false;
 
             if (cablePlanLayerGreenLeft != null)
