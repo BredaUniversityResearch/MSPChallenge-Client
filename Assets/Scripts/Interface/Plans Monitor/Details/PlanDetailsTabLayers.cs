@@ -353,6 +353,9 @@ public class PlanDetailsTabLayers : LockablePlanDetailsTab
 		issuesBackup = null;
 		backupMade = false;
 
+		//Open & maximize plansmonitor
+		InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn = true;
+		PlansMonitor.instance.plansMinMax.Maximize();
 		PlanDetails.UpdateTabAvailability();
 
 		LayerManager.ClearNonReferenceLayers();
@@ -360,9 +363,6 @@ public class PlanDetailsTabLayers : LockablePlanDetailsTab
 		InterfaceCanvas.Instance.activePlanWindow.CloseEditingUI();
 		PlansMonitor.RefreshPlanButtonInteractablity();
 
-		//Open & maximize plansmonitor
-		InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn = true;
-		PlansMonitor.instance.plansMinMax.Maximize();
 	}
 
 	public AbstractLayer CurrentlyEditingBaseLayer

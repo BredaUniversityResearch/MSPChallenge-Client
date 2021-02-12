@@ -204,10 +204,9 @@ public static class ConstraintManager
 		foreach (PlanLayer planLayer in plan.PlanLayers)
 		{
 			CheckRestrictionsForLayer(cache, plan, planLayer, true, issueCollection);
-			CheckRestrictionsForFuture(cache, planLayer, plan, issueCollection);
 
-			// this will update all the issues in the database for this layer.
-			//SendIssues(planLayer);
+			//For now don't check for future restrictions. This currently puts issues in plans that are in approved, which is undesired. Scheduled for a rework.
+			//CheckRestrictionsForFuture(cache, planLayer, plan, issueCollection);
 		}
 
 		CheckTypeUnavailableConstraints(plan, plan.StartTime, issueCollection);
@@ -280,7 +279,7 @@ public static class ConstraintManager
 				notificationText.Append(" - ").Append(externalPlans[i].Name).Append("\n");
 				notificationText.Append("</color>");
 			}
-			DialogBoxManager.instance.NotificationWindow("Issues in other plans plans", notificationText.ToString(), () => { });
+			DialogBoxManager.instance.NotificationWindow("Issues in other plans", notificationText.ToString(), () => { });
 		}
 	}
 
