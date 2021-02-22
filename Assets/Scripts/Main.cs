@@ -52,7 +52,8 @@ public class Main : MonoBehaviour
     protected void Start()
     {
 		instance = this;
-        VisualizationUtil.VisualizationSettings = DataVisualizationSettings;
+		System.Threading.Thread.CurrentThread.CurrentCulture = Localisation.NumberFormatting;
+		VisualizationUtil.VisualizationSettings = DataVisualizationSettings;
         
         //Setup projection parameters for later conversion
         mspCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs");

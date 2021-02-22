@@ -20,7 +20,7 @@ public static class UpdateData
 		canUpdate = false;
 		NetworkForm form = new NetworkForm();
 		form.AddField("team_id", TeamManager.CurrentUserTeamID);
-		form.AddField("last_update_time", lastUpdateTimestamp.ToString());
+		form.AddField("last_update_time", lastUpdateTimestamp.ToString(Localisation.NumberFormatting));
 		form.AddField("user", TeamManager.CurrentSessionID.ToString());
 		ServerCommunication.DoRequest<UpdateObject>(Server.Update(), form, HandleUpdateSucessCallback, HandleUpdateFailCallback);
 
@@ -39,7 +39,7 @@ public static class UpdateData
 			canUpdate = false;
 			NetworkForm form = new NetworkForm();
 			form.AddField("team_id", TeamManager.CurrentUserTeamID);
-			form.AddField("last_update_time", lastUpdateTimestamp.ToString());
+			form.AddField("last_update_time", lastUpdateTimestamp.ToString(Localisation.NumberFormatting));
 			form.AddField("user", TeamManager.CurrentSessionID.ToString());
 			ServerCommunication.DoRequest<UpdateObject>(Server.Update(), form, HandleUpdateSucessCallback, HandleUpdateFailCallback);
 
