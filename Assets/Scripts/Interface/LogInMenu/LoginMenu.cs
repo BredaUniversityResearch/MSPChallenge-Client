@@ -102,6 +102,7 @@ public class LoginMenu : MonoBehaviour
 	private void Awake()
 	{
 		instance = this;
+
 		if (SystemInfo.systemMemorySize < 8000)
 			DialogBoxManager.instance.NotificationWindow("Device not supported", "The current device does not satisfy MSP Challenge's minimum requirements. Effects may range from none to the program feeling unresponsive and/or crashing. Switching to another device is recommended.", null);
 	}

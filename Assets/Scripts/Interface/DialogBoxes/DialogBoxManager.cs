@@ -18,11 +18,11 @@ public class DialogBoxManager : MonoBehaviour
     
     public DialogBox dialogBoxPrefab;
     public GameObject modalBackgroundPrefab;
-    private List<DialogBox> boxes;
+    private List<DialogBox> boxes = new List<DialogBox>(2);
 
     void Awake()
     {
-	    boxes = new List<DialogBox>(2);
+	    //boxes = new List<DialogBox>(2);
     }
 
     public bool CancelTopDialog()
