@@ -104,4 +104,14 @@ public class LayerSubCategoryToggleGroup: MonoBehaviour
 		gameObject.SetActive(state);
 		subcategoryButton.SetSelectedVisuals(state);
 	}
+
+	public void SortLayerToggles()
+	{
+		List<GenericLayer> toggles = new List<GenericLayer>(layerToggles.Count);
+		foreach (var kvp in layerToggles)
+			toggles.Add(kvp.Value);
+		toggles.Sort((a, b) => a.title.text.CompareTo(b.title.text));
+		for (int i = 0; i < toggles.Count; i++)
+			toggles[i].transform.SetSiblingIndex(i);
+	}
 }

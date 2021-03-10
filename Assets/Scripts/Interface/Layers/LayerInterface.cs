@@ -245,4 +245,10 @@ public class LayerInterface : MonoBehaviour
 		InterfaceCanvas.Instance.activeLayers.AddLayer(layer);
 		//activeLayerTab.UpdateInterfaceVisibility(); // This is so that if one the layertab has been closed, itll open again so you can see changes
 	}
+
+	public static void SortLayerToggles()
+	{
+		foreach (var kvp in instance.subCategories)
+			kvp.Value.SortLayerToggles();
+	}
 }

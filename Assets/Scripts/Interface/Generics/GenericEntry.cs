@@ -58,8 +58,11 @@ public class GenericEntry : MonoBehaviour
             type = typeof(T);
         }
         label.text = name;
-        value.text = param.ToString();
-    }
+		if (param == null)
+			value.text = "";
+		else
+			value.text = param.ToString();
+	}
 
 	public void PropertyLabel<T>(string name, T param, UnityAction callBack)
 	{
@@ -70,7 +73,10 @@ public class GenericEntry : MonoBehaviour
 			type = typeof(T);
 		}
 		label.text = name;
-		value.text = param.ToString();
+		if (param == null)
+			value.text = "";
+		else
+			value.text = param.ToString();
 		valueButton.onClick.AddListener(callBack);
 	}
 

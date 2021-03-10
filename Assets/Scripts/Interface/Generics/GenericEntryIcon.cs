@@ -18,7 +18,10 @@ public class GenericEntryIcon : GenericEntry {
 			type = typeof(T);
 		}
 		label.text = name;
-		value.text = param.ToString();
+		if (param == null)
+			value.text = "";
+		else
+			value.text = param.ToString();
 		iconImage.sprite = icon;
 		iconImage.color = color;
 	}

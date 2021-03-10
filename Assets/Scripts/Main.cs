@@ -142,7 +142,8 @@ public class Main : MonoBehaviour
         if (OnPostFinishedLoadingLayers != null)
             OnPostFinishedLoadingLayers();
 
-        //TeamManager.SetEEZs();
+		//TeamManager.SetEEZs();
+		LayerInterface.SortLayerToggles();
         InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("Existing plans");
         instance.StartCoroutine(UpdateData.GetFirstUpdate());
 		instance.StartCoroutine(UpdateData.TickServerCoroutine());

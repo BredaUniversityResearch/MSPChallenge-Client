@@ -85,12 +85,14 @@ public static class ServerCommunication
     public class FormRequest<T> : Request<T>
     {
         public List<IMultipartFormSection> formData;
+		private bool addDefaultHeaders;
 
-		public FormRequest(string url, List<IMultipartFormSection> formData, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesRemaining)
+		public FormRequest(string url, List<IMultipartFormSection> formData, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
 			: base(url, successCallback, failureCallback, retriesRemaining)
         {
             this.formData = formData;
-        }
+			this.addDefaultHeaders = addDefaultHeaders;
+		}
 
 		public override void CreateRequest(Dictionary<string, string> defaultHeaders)
 		{
@@ -102,7 +104,7 @@ public static class ServerCommunication
 			{
 				Www = UnityWebRequest.Post(Url, formData);
 			}
-			if(defaultHeaders != null)
+			if(defaultHeaders != null && addDefaultHeaders)
 				AddHeaders(Www, defaultHeaders);
 			Www.timeout = REQUEST_TIMEOUT;
 		}
@@ -111,20 +113,24 @@ public static class ServerCommunication
     public class RawDataRequest<T> : Request<T>
     {
         public string data;
+		private bool addDefaultHeaders;
 
-        public RawDataRequest(string url, string data, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesRemaining)
+
+		public RawDataRequest(string url, string data, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
 			: base(url, successCallback, failureCallback, retriesRemaining)
 		{
             Debug.Log("Created request with raw content: " + data);
             this.data = data;
-        }
+			this.addDefaultHeaders = addDefaultHeaders;
+		}
 
 		public override void CreateRequest(Dictionary<string, string> defaultHeaders)
 		{
 			Www = UnityWebRequest.Post(Url, data);
-			if (defaultHeaders != null)
+			if (defaultHeaders != null && addDefaultHeaders)
 				AddHeaders(Www, defaultHeaders);
 			Www.SetRequestHeader("Content-Type", "application/json");
+			//Www.uploadHandler.contentType = "application/json";
 			Www.timeout = REQUEST_TIMEOUT;
 		}
     }
@@ -260,7 +266,14 @@ public static class ServerCommunication
 		FeatureCollection featureCollection = new FeatureCollection(features);
 		string content = JsonConvert.SerializeObject(featureCollection);
 
-		DoRequest<T>(url, content, successCallback, failureCallback, retriesOnFail);
+		//DoRequest<T>(url, content, successCallback, failureCallback, retriesOnFail);
+		ARequest request = new RawDataRequest<T>(url, content, successCallback, failureCallback, retriesOnFail, false); //Needs to be seperate so the server URL is not added
+		requestsQueue.Enqueue(request);
+
+		if (OnRequestQueued != null)
+		{
+			OnRequestQueued(request);
+		}
 	}
 
 	public static void WaitForCondition(TestDelegate condition, TestSuccessfulDelegate conditionTrueDelegate)
