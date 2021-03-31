@@ -78,28 +78,50 @@ public class Main : MonoBehaviour
 		GameState.Initialise();
         Application.wantsToQuit += () => 
         {
-            StartCoroutine(QuitAtEndOfFrame());
+			if (interceptQuit)
+			{
+				NetworkForm form = new NetworkForm();
+				form.AddField("session_id", TeamManager.CurrentSessionID);
+				ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, CloseSessionSuccess, CloseSessionFail);
+				//StartCoroutine(QuitAtEndOfFrame());
+			}
             return !interceptQuit;
         };
     }
 
+	void CloseSessionSuccess(string result)
+	{
+		StartCoroutine(QuitAtEndOfFrame());
+	}
+
+	void CloseSessionFail(ServerCommunication.ARequest request, string result)
+	{
+		StartCoroutine(QuitAtEndOfFrame());
+	}
+
     IEnumerator QuitAtEndOfFrame()
     {
         InterfaceCanvas.Instance.unLoadingScreen.Activate();
-		NetworkForm form = new NetworkForm();
-		form.AddField("session_id", TeamManager.CurrentSessionID);
-		ServerCommunication.DoRequest(Server.CloseSession(), form);
 		yield return new WaitForEndOfFrame();
         interceptQuit = false;
         Application.Quit();
     }
 
     public static void QuitGame()
-    {
-        interceptQuit = false;
-        if (InterfaceCanvas.Instance != null)
-            InterfaceCanvas.Instance.unLoadingScreen.Activate();
-        Application.Quit();
+    {       
+		if (instance != null)
+		{
+			NetworkForm form = new NetworkForm();
+			form.AddField("session_id", TeamManager.CurrentSessionID);
+			ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, instance.CloseSessionSuccess, instance.CloseSessionFail);
+		}
+		else
+		{
+			interceptQuit = false;
+			if (InterfaceCanvas.Instance != null)
+				InterfaceCanvas.Instance.unLoadingScreen.Activate();
+			Application.Quit();
+		}
     }
 
     protected void Update()

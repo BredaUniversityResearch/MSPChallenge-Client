@@ -86,12 +86,14 @@ public static class ServerCommunication
     {
         public List<IMultipartFormSection> formData;
 		private bool addDefaultHeaders;
+		private bool priority = false;
 
-		public FormRequest(string url, List<IMultipartFormSection> formData, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
+		public FormRequest(string url, List<IMultipartFormSection> formData, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true, bool priority = false)
 			: base(url, successCallback, failureCallback, retriesRemaining)
         {
             this.formData = formData;
 			this.addDefaultHeaders = addDefaultHeaders;
+			this.priority = priority;
 		}
 
 		public override void CreateRequest(Dictionary<string, string> defaultHeaders)
@@ -106,7 +108,10 @@ public static class ServerCommunication
 			}
 			if(defaultHeaders != null && addDefaultHeaders)
 				AddHeaders(Www, defaultHeaders);
-			Www.timeout = REQUEST_TIMEOUT;
+			if(priority)
+				Www.timeout = 1;
+			else
+				Www.timeout = REQUEST_TIMEOUT;
 		}
 	}
 
@@ -189,6 +194,17 @@ public static class ServerCommunication
 		doingSomethingWindow.GetComponent<RectTransform>().localPosition = Vector3.zero;
 		doingSomethingWindow.SetActive(false);
 	}
+
+	public static void DoPriorityRequest(string url, NetworkForm form, Action<string> successCallback, Action<ARequest, string> failureCallback)
+	{
+		ARequest request = new FormRequest<string>(Server.Url + url, (form != null) ? form.Form : null, successCallback, failureCallback, 0, true);
+		requestsQueue.Enqueue(request);
+
+		if (OnRequestQueued != null)
+		{
+			OnRequestQueued(request);
+		}
+	}
 	
 	//Note: specifying a custom failure callback avoids all default ones, including automatic retries.
 	public static void DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesOnFail = 3)
@@ -218,7 +234,7 @@ public static class ServerCommunication
 		}
 	}
 
-	public static void DoRequest(string url, NetworkForm form, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
+	public static void DoRequest(string url, NetworkForm form, int retriesOnFail = 3)
 	{
 		DoRequest<string>(url, form, null, HandleRequestFailureError, retriesOnFail);
 	}
