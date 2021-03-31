@@ -86,7 +86,10 @@ public class Main : MonoBehaviour
     IEnumerator QuitAtEndOfFrame()
     {
         InterfaceCanvas.Instance.unLoadingScreen.Activate();
-        yield return new WaitForEndOfFrame();
+		NetworkForm form = new NetworkForm();
+		form.AddField("session_id", TeamManager.CurrentSessionID);
+		ServerCommunication.DoRequest(Server.RequestSession(), form);
+		yield return new WaitForEndOfFrame();
         interceptQuit = false;
         Application.Quit();
     }

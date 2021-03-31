@@ -235,6 +235,11 @@ public static class Server
 		return "api/user/RequestSession";
 	}
 
+	public static string CloseSession()
+	{
+		return "api/user/CloseSession";
+	}
+
 	public static string SetEndAndStartDate()
 	{
 		return "api/game/SetStartEndDate";

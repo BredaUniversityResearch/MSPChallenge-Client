@@ -399,7 +399,7 @@ public static class ServerCommunication
 				});
 				if (!result.success)
 				{
-					request.failureCallback.Invoke(request, $"Server request to url {request.Www.url} failed.\nServer response: {result.message}");
+					request.failureCallback.Invoke(request, result.message);
 				}
 				else
 					processPayload = true;

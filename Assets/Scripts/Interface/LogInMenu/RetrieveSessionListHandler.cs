@@ -69,7 +69,7 @@ public class RetrieveSessionListHandler
 			}
 			catch (Exception e)
 			{
-				Debug.LogFormat("Unexpected response from server when fetching session list: {0}. Response: {1}", e.Message, www.downloadHandler.text);
+				Debug.LogError($"Unexpected response from server when fetching session list: {e.Message}. Response: { www.downloadHandler.text}");
 			}
 		}
 	}

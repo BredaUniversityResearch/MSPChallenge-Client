@@ -498,6 +498,7 @@ public class LoginMenu : MonoBehaviour
 
 		NetworkForm form = new NetworkForm();
 		form.AddField("country_id", countryIndex);
+		form.AddField("user_name", nameInputField.text);
 		if (passwordContainer.activeInHierarchy)
 			form.AddField("country_password", passwordInputField.text);
 		form.AddField("build_timestamp", buildTime);
@@ -519,7 +520,7 @@ public class LoginMenu : MonoBehaviour
 
 	void RequestSessionFailure(ServerCommunication.ARequest request, string message)
 	{
-		ShowErrorMessage(message);
+		ShowErrorMessage(message.Split('\n')[0]);
 		Debug.LogError(message);
 	}
 
@@ -639,7 +640,7 @@ public class GameSessionList
 
 public class GameSession
 {
-	public enum GameState { Setup, Simulation, Play, Pause, End }
+	public enum GameState { Setup, Simulation, Play, Pause, End, FastForward }
 	public enum SessionState { Request, Initializing, Healthy, Failed, Archived }
 
 	public int id;
