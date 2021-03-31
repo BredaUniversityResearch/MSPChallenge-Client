@@ -88,7 +88,7 @@ public class Main : MonoBehaviour
         InterfaceCanvas.Instance.unLoadingScreen.Activate();
 		NetworkForm form = new NetworkForm();
 		form.AddField("session_id", TeamManager.CurrentSessionID);
-		ServerCommunication.DoRequest(Server.RequestSession(), form);
+		ServerCommunication.DoRequest(Server.CloseSession(), form);
 		yield return new WaitForEndOfFrame();
         interceptQuit = false;
         Application.Quit();
