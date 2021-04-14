@@ -7,9 +7,9 @@ using UnityEngine.Networking;
 
 public static class GameState
 {
-	public enum PlanningState { Setup, Play, Simulation, Pause, FastForward, End }
+	public enum PlanningState { Setup, Play, Simulation, Pause, FastForward, End, None }
 
-	private static PlanningState gameState = PlanningState.End;
+	private static PlanningState gameState = PlanningState.None;
 
 	private static int month = -1;
 
@@ -95,6 +95,10 @@ public static class GameState
 			else if (gameState == PlanningState.Simulation)
 			{
 				OnSimulationPhaseStarted();
+			}
+			else if (gameState == PlanningState.End)
+			{
+				InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = false;
 			}
 
 			//Old state left
