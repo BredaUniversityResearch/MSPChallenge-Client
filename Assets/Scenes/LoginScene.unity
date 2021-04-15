@@ -626,6 +626,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Open the options menu.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &88613483
 GameObject:
   m_ObjectHideFlags: 0
@@ -1174,6 +1175,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: The default MSP Challenge demo servers.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &168423745
 GameObject:
   m_ObjectHideFlags: 0
@@ -1601,6 +1603,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Connect to the Baltic Sea Demo session.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &196540370
 GameObject:
   m_ObjectHideFlags: 0
@@ -1995,6 +1998,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: The name you will use for communication in the session.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!224 &283255772 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1828679569769316622, guid: 50bb9b69f9ec45d4bbf0cbf981230a7e,
@@ -2396,6 +2400,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Show additional information about the selected session.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &380131307
 GameObject:
   m_ObjectHideFlags: 0
@@ -3232,6 +3237,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: The server address the session list is being fetched from.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &452418309
 GameObject:
   m_ObjectHideFlags: 0
@@ -4514,6 +4520,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Connect to the selected session.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &624587491
 GameObject:
   m_ObjectHideFlags: 0
@@ -5122,6 +5129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Connect to the North Sea Demo session.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &710879399
 GameObject:
   m_ObjectHideFlags: 0
@@ -5446,6 +5454,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: "The session password. \nPlayers and admins have different passwords."
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &800216219
 GameObject:
   m_ObjectHideFlags: 0
@@ -5613,6 +5622,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Refresh the session list.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &898080912
 GameObject:
   m_ObjectHideFlags: 0
@@ -5812,6 +5822,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Connect to the Clyde Marine Region Demo session.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &911483707
 GameObject:
   m_ObjectHideFlags: 0
@@ -7559,6 +7570,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Refresh the connection to the default MSP Challenge demo servers.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1168220374
 GameObject:
   m_ObjectHideFlags: 0
@@ -9064,6 +9076,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Connect to sessions on the default MSP Challenge server or on a custom server.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1546777377
 GameObject:
   m_ObjectHideFlags: 0
@@ -9286,6 +9299,7 @@ MonoBehaviour:
     - An Admin is an Area Manager with
     additional moderation options.'
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1574572647
 GameObject:
   m_ObjectHideFlags: 0
@@ -9799,6 +9813,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Close the application.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &1623631745
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11824,6 +11839,7 @@ MonoBehaviour:
   text: "Select your expertise. \nThis will show windows and layers with relevant
     information when the session loads."
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1836630783 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3749650084839436448, guid: f7421a5a5d465104b81f5748e841106e,
@@ -11844,6 +11860,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Return to the session list.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &1850552347
 GameObject:
   m_ObjectHideFlags: 0
@@ -12580,6 +12597,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Connect to the session.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &1925579347
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15556,6 +15574,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Reset the server address to the default MSP Challenge server.
   timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!224 &2131768197 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7392950402368140454, guid: ef4298385c8bfa949a90b9d5ca0d570f,
@@ -16605,6 +16624,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: LoginTabSessions
+      objectReference: {fileID: 0}
+    - target: {fileID: 6918180488409709356, guid: 2e69aaaaf4ea0504bafbeadc061bd275,
+        type: 3}
+      propertyPath: m_text
+      value: SESSION LIST
       objectReference: {fileID: 0}
     - target: {fileID: 6918180488409709356, guid: 2e69aaaaf4ea0504bafbeadc061bd275,
         type: 3}
