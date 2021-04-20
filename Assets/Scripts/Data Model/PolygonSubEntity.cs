@@ -611,10 +611,10 @@ public class PolygonSubEntity : SubEntity
 			float x1 = geo.geometry[(i + 1) % total][0] / Main.SCALE;
 			float y1 = geo.geometry[(i + 1) % total][1] / Main.SCALE;
 
-			//Calculate "reasonable" epsilon. Considering we have 7 digits of precision, we take a '1' value on the sixth digit as the maximum distance.
-			//1000 = 0.001 (log10(1000) = 3, 6-3 = 3, 10^3 = 1000, 1/1000 = 0.001)
-			//10000 = 0.01 (log10(10000) = 4, 6-2 = 2, 10^2 = 100, 1/100 = 0.01)
-			float epsilon = 1.0f / Mathf.Pow(10, 6 - Mathf.Floor(Mathf.Log10(x0)));
+			//Calculate "reasonable" epsilon. Considering we have 7 digits of precision, we take a '1' value on the 7th digit as the maximum distance.
+			//1000 = 0.001 (log10(1000) = 3, 7-3 = 4, 10^4 = 10000, 1/10000 = 0.0001)
+			//10000 = 0.01 (log10(10000) = 4, 7-4 = 3, 10^3 = 1000, 1/1000 = 0.001)
+			float epsilon = 1.0f / Mathf.Pow(10, 7 - Mathf.Floor(Mathf.Log10(x0)));
 
 			Vector2 v1 = new Vector2(x1, y1);
 
