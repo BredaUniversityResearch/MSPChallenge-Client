@@ -601,9 +601,8 @@ public class PolygonSubEntity : SubEntity
 
 	private List<Vector3> GetPolygonFromGeometryObject(SubEntityObject geo)
 	{
-		List<Vector3> polygon = new List<Vector3>();
-
 		int total = geo.geometry.Count;
+		List<Vector3> polygon = new List<Vector3>(total);
 
 		for (int i = 0; i < total; i++)
 		{
@@ -612,9 +611,14 @@ public class PolygonSubEntity : SubEntity
 			float x1 = geo.geometry[(i + 1) % total][0] / Main.SCALE;
 			float y1 = geo.geometry[(i + 1) % total][1] / Main.SCALE;
 
+			//Calculate "reasonable" epsilon. Considering we have 7 digits of precision, we take a '1' value on the sixth digit as the maximum distance.
+			//1000 = 0.001 (log10(1000) = 3, 6-3 = 3, 10^3 = 1000, 1/1000 = 0.001)
+			//10000 = 0.01 (log10(10000) = 4, 6-2 = 2, 10^2 = 100, 1/100 = 0.01)
+			float epsilon = 1.0f / Mathf.Pow(10, 6 - Mathf.Floor(Mathf.Log10(x0)));
+
 			Vector2 v1 = new Vector2(x1, y1);
 
-			if (x0 != x1 || y0 != y1)
+			if (Math.Abs(x0 - x1) > epsilon || Math.Abs(y0 - y1) > epsilon)
 			{
 				polygon.Add(v1);
 			}
@@ -626,7 +630,7 @@ public class PolygonSubEntity : SubEntity
 	private List<Vector3> GetPolygonFromGeometryObject(GeometryObject geo)
 	{
 		int total = geo.geometry.Count;
-		List<Vector3> polygon = new List<Vector3>(geo.geometry.Count);
+		List<Vector3> polygon = new List<Vector3>(total);
 
 		for (int i = 0; i < total; i++)
 		{
