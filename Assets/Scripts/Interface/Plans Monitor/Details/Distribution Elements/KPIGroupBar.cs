@@ -202,8 +202,8 @@ public class KPIGroupBar : MonoBehaviour
     {
         childContainer.SetActive(expanded);
         Vector3 rot = foldTrans.eulerAngles;
-        foldTrans.eulerAngles = expanded ? new Vector3(rot.x, rot.y, 90f) : new Vector3(rot.x, rot.y, 0f);
-    }
+        foldTrans.eulerAngles = expanded ? new Vector3(rot.x, rot.y, 0f) : new Vector3(rot.x, rot.y, 90f);
+	}
 
     public void SetExpanded(bool expanded)
     {
