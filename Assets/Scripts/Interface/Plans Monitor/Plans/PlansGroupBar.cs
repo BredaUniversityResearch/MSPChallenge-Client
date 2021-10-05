@@ -21,6 +21,13 @@ public class PlansGroupBar : MonoBehaviour
 		foldButtonRect.gameObject.SetActive(plansContainerOuterRect.rect.height != 0);
 	}
 
+	private void Update()
+	{
+		bool shouldBeActive = plansContainerOuterRect.rect.height != 0;
+		if (shouldBeActive != foldButtonRect.gameObject.activeSelf)
+			foldButtonRect.gameObject.SetActive(shouldBeActive);
+	}
+
 	public void ToggleContent()
 	{
 		// Ignore empty content
