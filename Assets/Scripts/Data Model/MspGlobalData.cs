@@ -26,6 +26,7 @@ public class MspGlobalData
 	public string wiki_base_url;
     public ExpertiseDefinition[] expertise_definitions;
     public string windfarm_data_api_url; // https://test-northsea-dot-hydro-engine.appspot.com/get_windfarm_data
+	public CradleImpactTool.ImpactObjectData dependencies;
 
     public int session_num_years
 	{

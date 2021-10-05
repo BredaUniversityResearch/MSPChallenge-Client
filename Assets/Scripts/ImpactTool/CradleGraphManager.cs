@@ -29,7 +29,6 @@ namespace CradleImpactTool
 	public class CradleGraphManager : MonoBehaviour
 	{
 		public delegate void OnWikiLinkClickHandler(string a_Name);
-
 		public static event OnWikiLinkClickHandler OnWikiLinkClick;
 
 		readonly int spacingBetweenLines = 10;
@@ -45,13 +44,12 @@ namespace CradleImpactTool
 		[SerializeField]
 		TextAsset m_jsonSource;
 
-		ImpactObjectData m_data;
+		static ImpactObjectData m_data;
 		RectTransform m_root;
 		GameObject m_lineContainer;
 		GameObject m_categoryContainer;
 		GraphicRaycaster m_raycaster;
 		EventSystem m_eventSystem;
-		CustomButton m_button;
 		ModalManager m_modal;
 		SaveFile m_save;
 		ImpactSave m_graphSave;
@@ -67,6 +65,8 @@ namespace CradleImpactTool
 
 		void Awake()
 		{
+			instance = this;
+
 			m_data = JsonConvert.DeserializeObject<ImpactObjectData>(m_jsonSource.text);
 			m_save = SaveFile.Load();
 			m_root = GetComponent<RectTransform>() ?? gameObject.AddComponent<RectTransform>();
@@ -107,7 +107,7 @@ namespace CradleImpactTool
 				return;
 			}
 
-			CreateGraph();
+			CreateGraph(m_data);
 		}
 
 		public static void InvokeWikiLinkClick(string link)
@@ -116,15 +116,24 @@ namespace CradleImpactTool
 				OnWikiLinkClick.Invoke(link);
 		}
 
-		public void CreateGraph()
+		public static void ForwardGraphInfo(ImpactObjectData a_data)
 		{
+			if (instance != null)
+				instance.CreateGraph(a_data);
+			else
+				m_data = a_data;
+		}
+
+		public void CreateGraph(ImpactObjectData a_data)
+		{
+			m_data = a_data;
 			if (m_graphSettings == null || m_graphSettings.Validate() == false)
 			{
 				Debug.LogError("CradleGraphManager.CreateGraph: GraphSettings do not seem to be valid. Graph was not created.");
 				return;
 			}
 
-			if (m_data == null || m_data.Validate(m_graphSettings) == false)
+			if (a_data == null || a_data.Validate(m_graphSettings) == false)
 			{
 				Debug.LogError("CradleGraphManager.CreateGraph: ImpactObjectData source does not seem to be valid. Graph was not created.");
 				return;
@@ -299,7 +308,7 @@ namespace CradleImpactTool
 				}
 
 				// Check if we're touching any edge here. This is to make sure the outer edges also are added to the related categories.
-				foreach (Vector2 pos in new Vector2[]{ lineInstance.fromPos, lineInstance.toPos })
+				foreach (Vector2 pos in new Vector2[] { lineInstance.fromPos, lineInstance.toPos })
 				{
 					Vector2 delta = pos - min;
 					if (Mathf.Abs(delta.x) < 0.03f) // Touches left edge
@@ -548,6 +557,7 @@ namespace CradleImpactTool
 			m_hasFocus = hasFocus;
 		}
 
+		public static CradleGraphManager instance { get; private set; }
 		public ImpactObjectData impactObjectData { get { return m_data; } }
 		public GraphSettings graphSettings { get { return m_graphSettings; } }
 		public Pool<Line> linePool { get { return m_linePool; } }

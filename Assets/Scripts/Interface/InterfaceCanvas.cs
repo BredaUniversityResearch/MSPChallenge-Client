@@ -43,6 +43,7 @@ public class InterfaceCanvas : MonoBehaviour
 	public LayerProbeWindow layerProbeWindow;
 	public WebViewWindow webViewWindow;
 	public GameObject networkingBlocker;
+	public GameObject impactTool;
 
     [Header("Game Menu")]
     public GameMenu gameMenu;

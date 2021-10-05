@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class MenuBarToggle : MonoBehaviour
 {
-    public enum Selection { Logo, Layers, PlanWizard, ObjectivesMonitor, PlansMonitor, ActiveLayers, GameMenu };
+    public enum Selection { Logo, Layers, PlanWizard, ObjectivesMonitor, PlansMonitor, ImpactTool, ActiveLayers, GameMenu };
 
     [Header("Connects to the correct toggle")]
     public Selection connectTo;
@@ -37,11 +37,15 @@ public class MenuBarToggle : MonoBehaviour
                     toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.objectivesMonitor.SetWindowActive(toggle.isOn));
                 }
                 break;
-            case Selection.PlansMonitor:
-                toggle.isOn = InterfaceCanvas.Instance.plansMonitor.gameObject.activeSelf; // Init
-                toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.plansMonitor.gameObject.SetActive(toggle.isOn));
-                break;
-            case Selection.ActiveLayers:
+			case Selection.PlansMonitor:
+				toggle.isOn = InterfaceCanvas.Instance.plansMonitor.gameObject.activeSelf; // Init
+				toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.plansMonitor.gameObject.SetActive(toggle.isOn));
+				break;
+			case Selection.ImpactTool:
+                toggle.isOn = InterfaceCanvas.Instance.impactTool.activeSelf;
+				toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.impactTool.SetActive(toggle.isOn));
+				break;
+			case Selection.ActiveLayers:
                 toggle.isOn = InterfaceCanvas.Instance.activeLayers.gameObject.activeSelf; // Init
                 toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.activeLayers.gameObject.SetActive(toggle.isOn));
                 break;

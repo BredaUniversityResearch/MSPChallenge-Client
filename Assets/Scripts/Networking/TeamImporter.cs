@@ -28,6 +28,8 @@ class TeamImporter : MonoBehaviour
 		NetworkForm form = new NetworkForm();
         form.AddField("name", data.countries);
 		ServerCommunication.DoRequest<LayerMeta>(Server.LayerMetaByName(), form, LoadEEZMeta);
+
+		CradleImpactTool.CradleGraphManager.ForwardGraphInfo(data.dependencies);
 	}
 
 	public void LoadEEZMeta(LayerMeta eezMeta)
