@@ -26,6 +26,12 @@ public class TimelineTrack : MonoBehaviour
 	private void Start()
 	{
 		timeline.trackCoverButton.onClick.AddListener(() => ClosePlans());
+        var parent = GetComponentInParent<GenericWindow>();
+		if (parent != null)
+		{
+            parent.exitButton.onClick.AddListener(() => ClosePlans());
+        }
+
 		//timeline.trackCoverButton.gameObject.SetActive(false);
 	}
 
