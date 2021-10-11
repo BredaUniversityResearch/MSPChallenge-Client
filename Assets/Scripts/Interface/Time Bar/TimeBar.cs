@@ -149,6 +149,14 @@ public class TimeBar : MonoBehaviour
 	/// </summary>
 	public void SetDate(int month)
 	{
+		if (GameState.GameStarted == false)
+		{
+			simulationTimeText.text =
+			planViewingText.text =
+			collapsedDate.text = "";
+			return;
+		}
+
 		fill.fillAmount = (float)month / (float)Main.MspGlobalData.session_end_month;
 		collapsedDate.text = Util.MonthToText(month);
 
