@@ -151,14 +151,20 @@ public class TimeBar : MonoBehaviour
 	{
 		fill.fillAmount = (float)month / (float)Main.MspGlobalData.session_end_month;
 		collapsedDate.text = Util.MonthToText(month);
-		simulationTimeText.text = Util.MonthToText(month);
+
+		if (isViewingPlan)
+			UpdatePlanViewing();
+		else
+			simulationTimeText.text = Util.MonthToText(month);
+
 		UpdateIndicator(simulationTimeIndicatorTop, month);
 	}
 
 	public void UpdatePlanViewing()
 	{
-		if(viewMode == WorldViewMode.Plan && PlanManager.planViewing != null)
+		if (isViewingPlan)
 		{
+			simulationTimeText.text = Util.MonthToText(PlanManager.planViewing.StartTime);
 			planViewingText.text = Util.MonthToText(PlanManager.planViewing.StartTime, false);
 			UpdateIndicator(viewingTimeIndicatorBottom, PlanManager.planViewing.StartTime);
 		}
@@ -416,5 +422,10 @@ public class TimeBar : MonoBehaviour
 		indicator.anchorMin = new Vector2(timePercent, 0);
 		indicator.anchorMax = new Vector2(timePercent, 0);
 		indicator.anchoredPosition = Vector2.zero;
+	}
+
+	bool isViewingPlan
+	{
+		get { return viewMode == WorldViewMode.Plan && PlanManager.planViewing != null; }
 	}
 }
