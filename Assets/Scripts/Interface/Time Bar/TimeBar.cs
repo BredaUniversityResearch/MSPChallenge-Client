@@ -153,11 +153,14 @@ public class TimeBar : MonoBehaviour
 		collapsedDate.text = Util.MonthToText(month);
 
 		if (isViewingPlan)
+		{
 			UpdatePlanViewing();
+		}
 		else
+		{
 			simulationTimeText.text = Util.MonthToText(month);
-
-		UpdateIndicator(simulationTimeIndicatorTop, month);
+			UpdateIndicator(simulationTimeIndicatorTop, month);
+		}
 	}
 
 	public void UpdatePlanViewing()
