@@ -63,7 +63,8 @@ namespace CradleImpactTool
 		{
 			bool isDraggable = m_selectedItem == this || m_selectedItem == null;
 			bool isMouseInside = m_selectedItem == this || GetBounds(false).Contains(Input.mousePosition);
-			if (isDraggable && Input.GetMouseButton(0) && isMouseInside)
+			bool isNotDraggingView = CradleGraphManager.instance.isDraggingView == false;
+			if (isDraggable && Input.GetMouseButton(0) && isMouseInside && isNotDraggingView)
 			{
 				// If we're not on the first drag frame, and we've confirmed we're dragging 
 				if (m_selectedItem && m_timeDragging > m_dragDelay)

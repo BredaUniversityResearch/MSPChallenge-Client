@@ -533,7 +533,8 @@ namespace CradleImpactTool
 				return;
 			}
 
-			if (Input.GetMouseButton(2) || Input.GetMouseButton(1))
+			bool isControlDragging = Input.GetMouseButton(0) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl));
+			if (Input.GetMouseButton(2) || Input.GetMouseButton(1) || isControlDragging)
 			{
 				if (m_isMouseDown == false)
 				{
@@ -565,5 +566,6 @@ namespace CradleImpactTool
 		public List<CategoryManager> categories { get { return m_categories; } }
 		public ImpactSave graphSave { get { return m_graphSave; } }
 		public SaveFile save { get { return m_save; } }
+		public bool isDraggingView { get { return m_isMouseDown; } }
 	}
 }
