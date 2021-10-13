@@ -245,7 +245,7 @@ namespace CradleImpactTool
 
 		float GetTargetScale()
 		{
-			return m_targetScale * (m_rectTransform.rect.height / Screen.safeArea.yMax) * 0.33f; // TODO: Remove magic number here
+			return m_targetScale * (m_rectTransform.rect.height / Screen.safeArea.yMax) * 0.5f; // TODO: Remove magic number here
 		}
 
 		public Vector2 GetTargetSize()
