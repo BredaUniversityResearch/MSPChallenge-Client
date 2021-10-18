@@ -117,13 +117,17 @@ class EditEnergyLineStringsState : EditLineStringsState
                     //Snap to point
                     energySubEntity.SetPointPosition(kvp.Value.First(), point.GetPosition());
                     energySubEntity.restrictionNeedsUpdate = true;
-                    if(!point.CanConnectToEnergySubEntity(energySubEntity.GetConnection(!first).point))
-                    { 
+                    if (!point.CanConnectToEnergySubEntity(energySubEntity.GetConnection(!first).point))
+                    {
                         //Redraw with red color
                         energySubEntity.RedrawGameObject(SubEntityDrawMode.Invalid, kvp.Value, null);
+                        fsm.SetCursor(FSM.CursorType.Invalid);
                     }
                     else
+                    {
                         energySubEntity.RedrawGameObject(SubEntityDrawMode.Selected, kvp.Value, null);
+						fsm.SetCursor(FSM.CursorType.Default);
+					}
                 }
                 else
                     base.UpdateSelectionDragPositions(offset);

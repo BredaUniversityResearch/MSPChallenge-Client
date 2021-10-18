@@ -51,20 +51,30 @@ public class CreatingLineStringState : FSMState
         if (ClickingWouldFinishDrawing(currentPosition, out snappingPoint, out drawAsInvalid))
 		{
 			subEntity.SetPointPosition(subEntity.GetPointCount() - 1, snappingPoint);
-            if (drawAsInvalid)
-                subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreatedInvalid);
-            else
-                subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-            fsm.SetCursor(FSM.CursorType.Complete);
+			if (drawAsInvalid)
+			{
+				subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreatedInvalid);
+				fsm.SetCursor(FSM.CursorType.Invalid);
+			}
+			else
+			{
+				subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
+				fsm.SetCursor(FSM.CursorType.Complete);
+			}
 		}
 		else
 		{
 			subEntity.SetPointPosition(subEntity.GetPointCount() - 1, snappingPoint);
-            if(drawAsInvalid)
-			    subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreatedInvalid);
-            else
-			    subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-            fsm.SetCursor(FSM.CursorType.Add);
+			if (drawAsInvalid)
+			{
+				subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreatedInvalid);
+				fsm.SetCursor(FSM.CursorType.Invalid);
+			}
+			else
+			{
+				subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
+				fsm.SetCursor(FSM.CursorType.Add);
+			}
 		}
 
 		if (cursorIsOverUI)

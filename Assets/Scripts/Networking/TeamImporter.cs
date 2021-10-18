@@ -26,7 +26,7 @@ class TeamImporter : MonoBehaviour
 		MspGlobalData = data;
 
 		NetworkForm form = new NetworkForm();
-        form.AddField("name", data.countries);
+		form.AddField("name", data.countries);
 		ServerCommunication.DoRequest<LayerMeta>(Server.LayerMetaByName(), form, LoadEEZMeta);
 
 		CradleImpactTool.CradleGraphManager.ForwardGraphInfo(data.dependencies);
