@@ -78,6 +78,8 @@ namespace CradleImpactTool
 		private string FormatText(string a_bodyText)
 		{
 			string resultString = "";
+
+			// Convert wiki-links to actual links. Implements a subset of the official format.
 			for (int i = 0; i < a_bodyText.Length && i >= 0; )
 			{
 				int startIndex = a_bodyText.IndexOf('[', i);

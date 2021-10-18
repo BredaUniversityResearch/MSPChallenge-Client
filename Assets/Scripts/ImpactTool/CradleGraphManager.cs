@@ -31,6 +31,9 @@ namespace CradleImpactTool
 		public delegate void OnWikiLinkClickHandler(string a_Name);
 		public static event OnWikiLinkClickHandler OnWikiLinkClick;
 
+		public delegate void OnGraphInitHandler();
+		public static event OnGraphInitHandler OnGraphInit;
+
 		readonly int spacingBetweenLines = 10;
 
 		[SerializeField]
@@ -44,7 +47,7 @@ namespace CradleImpactTool
 		[SerializeField]
 		TextAsset m_jsonSource;
 
-		static ImpactObjectData m_data;
+		static ImpactObjectData m_data = null;
 		RectTransform m_root;
 		GameObject m_lineContainer;
 		GameObject m_categoryContainer;
@@ -67,7 +70,6 @@ namespace CradleImpactTool
 		{
 			instance = this;
 
-			m_data = JsonConvert.DeserializeObject<ImpactObjectData>(m_jsonSource.text);
 			m_save = SaveFile.Load();
 			m_root = GetComponent<RectTransform>() ?? gameObject.AddComponent<RectTransform>();
 
@@ -107,7 +109,10 @@ namespace CradleImpactTool
 				return;
 			}
 
-			CreateGraph(m_data);
+			if (m_data != null)
+			{
+				CreateGraph(m_data);
+			}
 		}
 
 		public static void InvokeWikiLinkClick(string link)
@@ -147,6 +152,9 @@ namespace CradleImpactTool
 
 			CreateCategories();
 			CreateBackground();
+
+			if (OnGraphInit != null)
+				OnGraphInit.Invoke();
 		}
 
 		void CreateCategories()

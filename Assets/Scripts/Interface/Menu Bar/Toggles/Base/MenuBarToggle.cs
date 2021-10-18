@@ -44,6 +44,7 @@ public class MenuBarToggle : MonoBehaviour
 			case Selection.ImpactTool:
                 toggle.isOn = InterfaceCanvas.Instance.impactTool.activeSelf;
 				toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.impactTool.SetActive(toggle.isOn));
+                CradleImpactTool.CradleGraphManager.OnGraphInit += () => toggle.gameObject.SetActive(true);
 				break;
 			case Selection.ActiveLayers:
                 toggle.isOn = InterfaceCanvas.Instance.activeLayers.gameObject.activeSelf; // Init
