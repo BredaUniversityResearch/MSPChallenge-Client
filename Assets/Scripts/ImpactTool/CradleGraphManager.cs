@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -124,9 +122,17 @@ namespace CradleImpactTool
 		public static void ForwardGraphInfo(ImpactObjectData a_data)
 		{
 			if (instance != null)
+			{
 				instance.CreateGraph(a_data);
+			}
 			else
+			{
 				m_data = a_data;
+
+				CradleGraphManager graphManager = FindObjectsOfType<CradleGraphManager>(true).FirstOrDefault();
+				if (graphManager != null)
+					graphManager.gameObject.SetActive(true);
+			}
 		}
 
 		public void CreateGraph(ImpactObjectData a_data)
