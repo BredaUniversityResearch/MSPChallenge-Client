@@ -144,6 +144,8 @@ public class Main : MonoBehaviour
 		ParseAvailableSimulations(MspGlobalData.configured_simulations);
 		InterfaceCanvas.Instance.SetRegionWithName(MspGlobalData.region);
 
+		CradleImpactTool.CradleGraphManager.ForwardGraphInfo(MspGlobalData.dependencies);
+
 		if (OnGlobalDataLoaded != null)
 		{
 			OnGlobalDataLoaded();
