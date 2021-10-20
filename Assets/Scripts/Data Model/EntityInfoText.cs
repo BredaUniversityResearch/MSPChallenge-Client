@@ -28,6 +28,8 @@ public class EntityInfoText
 		rootTextObject = new GameObject("TextObject");
 		rootTextObject.transform.SetParent(parentTransform, false);
 
+		SetPosition(rootTextObject.transform.position, true);
+
 		textMesh = rootTextObject.AddComponent<TextMesh>();
 		textMesh.anchor = TextAnchor.MiddleCenter;
 		textMesh.alignment = TextAlignment.Center;
@@ -36,12 +38,12 @@ public class EntityInfoText
 		textMesh.fontSize = info.GetTextSize();
 		textMesh.color = info.textColor;
 		textRenderer = rootTextObject.GetComponent<Renderer>();
-		textRenderer.sortingOrder = 10;
+		textRenderer.sortingOrder = 11;
 		textRenderer.sharedMaterial = config.TextFont.material;
 
 		highlightBackground = new GameObject("HighlightBackground");
 		highlightBackground.transform.SetParent(rootTextObject.transform, false);
-		highlightBackground.transform.localPosition = new Vector3(0.0f, 0.0f, 0.025f);
+		highlightBackground.transform.localPosition = Vector3.zero; // Needs -7 to avoid being behind cables
 		highlightBackground.transform.localScale = new Vector3(config.BackgroundScale, config.BackgroundScale, 1.0f); //Scale it a bit up so it looks neater.
 
 		highlightBackgroundRenderer = highlightBackground.AddComponent<SpriteRenderer>();
@@ -58,6 +60,7 @@ public class EntityInfoText
 
 	public void SetPosition(Vector3 position, bool isWorldPosition)
 	{
+		position.z = -7.0f; // Needs -7 to avoid being behind cables
 		if (isWorldPosition)
 			rootTextObject.transform.position = position;
 		else
