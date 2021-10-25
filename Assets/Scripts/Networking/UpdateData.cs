@@ -52,39 +52,6 @@ public static class UpdateData
 		}
 	}
 
-	public static IEnumerator TickServerCoroutine()
-	{
-		UnityWebRequest lastTickRequest = null;
-		while (true)
-		{
-			if (lastTickRequest != null)
-			{
-				while (!lastTickRequest.isDone)
-				{
-					yield return lastTickRequest;
-				}
-
-				TickResult result = Util.DeserializeObject<TickResult>(lastTickRequest);
-				if(lastTickRequest.error != null)
-				{
-					Debug.LogError(string.Format($"Error when ticking the server ({lastTickRequest.url}): {lastTickRequest.error}"));
-				}
-				else if (!result.success || !string.IsNullOrEmpty(result.payload))
-				{
-					Debug.LogError(string.Format("Error in request to {0}: {1}", lastTickRequest.url, result.message));
-				}
-			}
-
-			lastTickRequest = UnityWebRequest.Get(Server.Url + Server.Tick());
-
-			ServerCommunication.AddDefaultHeaders(lastTickRequest);
-
-			lastTickRequest.SendWebRequest();
-			//We just need to tick the server to keep it updating. Don't care about anything that it returns.
-			yield return new WaitForSeconds(1.0f);
-		}
-	}
-
 	public class TickResult
 	{
 		public bool success;

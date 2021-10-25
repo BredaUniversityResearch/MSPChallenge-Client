@@ -173,7 +173,6 @@ public class Main : MonoBehaviour
 		LayerInterface.SortLayerToggles();
         InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("Existing plans");
         instance.StartCoroutine(UpdateData.GetFirstUpdate());
-		instance.StartCoroutine(UpdateData.TickServerCoroutine());
         instance.StartCoroutine(VisualizationUtil.UpdateScales());
 
         ConstraintManager.LoadRestrictions();
