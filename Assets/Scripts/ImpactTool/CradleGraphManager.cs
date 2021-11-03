@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -43,11 +44,14 @@ namespace CradleImpactTool
 		[SerializeField]
 		GraphSettings m_graphSettings;
 		[SerializeField]
-		TextAsset m_jsonSource;
+		bool m_useDebugData;
+		[SerializeField]
+		TextAsset m_debugData;
 
 		static ImpactObjectData m_data = null;
 		RectTransform m_root;
 		GameObject m_lineContainer;
+		RectTransform m_lineContainerTransform;
 		GameObject m_categoryContainer;
 		GraphicRaycaster m_raycaster;
 		EventSystem m_eventSystem;
@@ -61,7 +65,7 @@ namespace CradleImpactTool
 		List<Line> m_impactLines = new List<Line>();
 
 		bool m_isMouseDown = false;
-		Vector3 m_mousePosition;
+		Vector2 m_mousePosition;
 		bool m_hasFocus = true;
 
 		void Awake()
@@ -73,10 +77,11 @@ namespace CradleImpactTool
 
 			m_linePool = new Pool<Line>(m_graphSettings.linePrefab);
 
-			m_lineContainer = new GameObject("Line Container");
-			m_categoryContainer = new GameObject("Category Container");
-			m_lineContainer.transform.parent = transform;
-			m_categoryContainer.transform.parent = transform;
+			m_lineContainer = new GameObject("Line Container", typeof(RectTransform));
+			m_categoryContainer = new GameObject("Category Container", typeof(RectTransform));
+			m_lineContainer.transform.SetParent(transform, false);
+			m_categoryContainer.transform.SetParent(transform, false);
+			m_lineContainerTransform = m_lineContainer.GetComponent<RectTransform>();
 
 			Canvas canvas = GetComponentInParent<Canvas>();
 			GameObject modalInstance = Instantiate(m_graphSettings.modalPrefab, canvas.transform);
@@ -105,6 +110,11 @@ namespace CradleImpactTool
 			{
 				Debug.LogError($"CradleGraphManager is unable to find an EventSystem in the scene. Please make sure an EventSystem exist in scene \"{m_root.gameObject.scene.name}\".");
 				return;
+			}
+
+			if (m_data == null && m_useDebugData && m_debugData != null && string.IsNullOrWhiteSpace(m_debugData.text) == false)
+			{
+				m_data = JsonConvert.DeserializeObject<ImpactObjectData>(m_debugData.text);
 			}
 
 			if (m_data != null)
@@ -171,7 +181,7 @@ namespace CradleImpactTool
 				m_save.impactSaves.TryGetValue("debug", out m_graphSave);
 			}
 
-			float halfContainerWidth = m_root.GetComponent<RectTransform>().rect.width * 15.0f;
+			float halfContainerWidth = m_root.rect.width;
 			int categoryCount = m_data.categories.Length;
 			float categoryCircleStepSize = (Mathf.PI * 2) / categoryCount;
 			for (int i = 0; i < categoryCount; i++)
@@ -194,7 +204,7 @@ namespace CradleImpactTool
 				// TODO: Place categories in a more natural way
 				float categoryAngle = categoryCircleStepSize * i;
 				Vector2 categoryOffset = new Vector2(Mathf.Cos(categoryAngle), Mathf.Sin(categoryAngle)) * halfContainerWidth;
-				categoryTransform.localPosition = (Vector2)m_root.position + categoryOffset;
+				categoryTransform.anchoredPosition = categoryOffset;
 
 				categoryManager.graph = this;
 				m_categories.Add(categoryManager);
@@ -242,7 +252,7 @@ namespace CradleImpactTool
 
 						float prefXOffset = (categoryText.preferredWidth + itemText.preferredWidth) * 0.7f;
 						float prefYOffset = (categoryText.preferredHeight + itemText.preferredHeight);
-						itemTransform.localPosition = new Vector2(Mathf.Cos(itemAngle) * prefXOffset, Mathf.Sin(itemAngle) * prefYOffset);
+						itemTransform.anchoredPosition = new Vector2(Mathf.Cos(itemAngle) * prefXOffset, Mathf.Sin(itemAngle) * prefYOffset);
 					}
 
 					// Get all related links
@@ -280,7 +290,7 @@ namespace CradleImpactTool
 			// Gather all the category positions
 			foreach (CategoryManager category in m_categories)
 			{
-				Vector2 categoryPos = category.GetComponent<RectTransform>().position;
+				Vector2 categoryPos = category.GetTransform().anchoredPosition;
 				sites.Add(new FortuneSite(category.name, categoryPos.x, categoryPos.y));
 
 				Bounds bounds = category.GetCategoryBounds();
@@ -300,6 +310,9 @@ namespace CradleImpactTool
 			min -= 50.0f * Vector2.one; // TODO: Remove magic number
 			max += 50.0f * Vector2.one;
 
+			Vector2 center = (min + max) * 0.5f;
+			min -= center;
+			max -= center;
 			m_root.sizeDelta = max - min;
 
 			// Generate a voronoi, draw its edges
@@ -307,7 +320,7 @@ namespace CradleImpactTool
 			Dictionary<CategoryManager, OuterEdgeCollision> edgeCollisions = new Dictionary<CategoryManager, OuterEdgeCollision>();
 			foreach (VEdge result in results)
 			{
-				Line lineInstance = m_linePool.Get(m_lineContainer.transform);
+				Line lineInstance = m_linePool.Get(m_lineContainerTransform);
 				if (lineInstance.SetDrawingData(new Vector2((float)result.Start.X, (float)result.Start.Y), new Vector2((float)result.End.X, (float)result.End.Y), 0, lineThickness) == false)
 				{
 					m_linePool.Release(lineInstance);
@@ -376,7 +389,7 @@ namespace CradleImpactTool
 					(edge1.Key == CornerID.BottomLeft && edge2.Key == CornerID.BottomRight) ||
 					(edge2.Key == CornerID.BottomLeft && edge1.Key == CornerID.BottomRight);
 
-				Line outerEdge = m_linePool.Get(m_lineContainer.transform);
+				Line outerEdge = m_linePool.Get(m_lineContainerTransform);
 				if (outerEdge.SetDrawingData(start, end, 0, lineThickness) == false)
 				{
 					m_linePool.Release(outerEdge);
@@ -525,6 +538,7 @@ namespace CradleImpactTool
 
 			if (Input.mouseScrollDelta.y != 0)
 			{
+				var oldScale = m_root.transform.localScale;
 				var delta = m_zoomDelta * -Input.mouseScrollDelta.y;
 				m_root.transform.localScale -= Vector3.one * delta;
 				if (m_root.transform.localScale.x < m_zoomMin)
@@ -535,6 +549,8 @@ namespace CradleImpactTool
 				{
 					m_root.transform.localScale = new Vector3(m_zoomMax, m_zoomMax, m_zoomMax);
 				}
+
+				m_root.anchoredPosition -= (oldScale - m_root.transform.localScale) * m_root.anchoredPosition;
 
 				gameObject.BroadcastMessage("InvalidateCradleUI");
 			}
@@ -556,10 +572,10 @@ namespace CradleImpactTool
 					m_mousePosition = Input.mousePosition;
 				}
 
-				Vector3 deltaPos = m_mousePosition - Input.mousePosition;
+				Vector2 deltaPos = m_mousePosition - (Vector2)Input.mousePosition;
 				m_mousePosition = Input.mousePosition;
 
-				m_root.transform.position -= deltaPos;
+				m_root.anchoredPosition -= deltaPos;
 			}
 			else
 			{
