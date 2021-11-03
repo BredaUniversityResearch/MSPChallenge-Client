@@ -4590,7 +4590,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!223 &906563659
 Canvas:
   m_ObjectHideFlags: 0
@@ -9532,7 +9532,8 @@ MonoBehaviour:
   m_zoomMin: 0.3
   m_zoomMax: 1
   m_graphSettings: {fileID: 11400000, guid: 3304c0b0782da92488086c14a0684f39, type: 2}
-  m_jsonSource: {fileID: 4900000, guid: 06f60689b71c12541abe5046c5eb9c5c, type: 3}
+  m_useDebugData: 0
+  m_debugData: {fileID: 0}
 --- !u!1 &1331616886
 GameObject:
   m_ObjectHideFlags: 0
@@ -9866,6 +9867,22 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: a40e66438c6b1354191999c39071aa97,
         type: 2}
+    - target: {fileID: 1322487340, guid: 0e8a1fba80b5e8644b3d90581cb5f38b, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 1322487340, guid: 0e8a1fba80b5e8644b3d90581cb5f38b, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1322487340, guid: 0e8a1fba80b5e8644b3d90581cb5f38b, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1322487340, guid: 0e8a1fba80b5e8644b3d90581cb5f38b, type: 3}
+      propertyPath: m_enableWordWrapping
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1509162888, guid: 0e8a1fba80b5e8644b3d90581cb5f38b, type: 3}
       propertyPath: serializationData.Prefab
       value: 
