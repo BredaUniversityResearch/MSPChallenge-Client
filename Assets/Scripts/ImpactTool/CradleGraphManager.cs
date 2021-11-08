@@ -188,7 +188,7 @@ namespace CradleImpactTool
 				m_save.impactSaves.TryGetValue("debug", out m_graphSave);
 			}
 
-			float halfContainerWidth = m_graphPanel.rect.width;
+			float halfContainerWidth = m_graphPanel.rect.width * 15;
 			int categoryCount = m_data.categories.Length;
 			float categoryCircleStepSize = (Mathf.PI * 2) / categoryCount;
 			for (int i = 0; i < categoryCount; i++)
