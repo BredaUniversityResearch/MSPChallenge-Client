@@ -49,7 +49,8 @@ namespace CradleImpactTool
 		TextAsset m_debugData;
 
 		static ImpactObjectData m_data = null;
-		RectTransform m_root;
+		RectTransform m_graphPanel;
+		RectTransform m_panelParent;
 		GameObject m_lineContainer;
 		RectTransform m_lineContainerTransform;
 		GameObject m_categoryContainer;
@@ -67,13 +68,15 @@ namespace CradleImpactTool
 		bool m_isMouseDown = false;
 		Vector2 m_mousePosition;
 		bool m_hasFocus = true;
+		Vector2 m_minBounds = Vector2.one * 9e9f;
+		Vector2 m_maxBounds = Vector2.one * -9e9f;
 
 		void Awake()
 		{
 			instance = this;
 
 			m_save = SaveFile.Load();
-			m_root = GetComponent<RectTransform>() ?? gameObject.AddComponent<RectTransform>();
+			m_graphPanel = GetComponent<RectTransform>() ?? gameObject.AddComponent<RectTransform>();
 
 			m_linePool = new Pool<Line>(m_graphSettings.linePrefab);
 
@@ -82,6 +85,9 @@ namespace CradleImpactTool
 			m_lineContainer.transform.SetParent(transform, false);
 			m_categoryContainer.transform.SetParent(transform, false);
 			m_lineContainerTransform = m_lineContainer.GetComponent<RectTransform>();
+
+			m_minBounds = Vector2.one * 9e9f;
+			m_maxBounds = Vector2.one * -9e9f;
 
 			Canvas canvas = GetComponentInParent<Canvas>();
 			GameObject modalInstance = Instantiate(m_graphSettings.modalPrefab, canvas.transform);
@@ -93,7 +99,8 @@ namespace CradleImpactTool
 			}
 			m_modal.Hide();
 
-			Transform container = m_root.transform.parent;
+			Transform container = m_graphPanel.transform.parent;
+			m_panelParent = container.GetComponent<RectTransform>();
 			while (container != null && m_raycaster == null)
 			{
 				m_raycaster = container.GetComponent<GraphicRaycaster>();
@@ -101,14 +108,14 @@ namespace CradleImpactTool
 			}
 			if (m_raycaster == null)
 			{
-				Debug.LogError($"CradleGraphManager is unable to determine a parent's GraphicRaycaster. Please make sure one of the parents of {m_root.name} has a GraphicRaycaster! Graph was not created.");
+				Debug.LogError($"CradleGraphManager is unable to determine a parent's GraphicRaycaster. Please make sure one of the parents of {m_graphPanel.name} has a GraphicRaycaster! Graph was not created.");
 				return;
 			}
 
 			m_eventSystem = FindObjectOfType<EventSystem>();
 			if (m_eventSystem == null)
 			{
-				Debug.LogError($"CradleGraphManager is unable to find an EventSystem in the scene. Please make sure an EventSystem exist in scene \"{m_root.gameObject.scene.name}\".");
+				Debug.LogError($"CradleGraphManager is unable to find an EventSystem in the scene. Please make sure an EventSystem exist in scene \"{m_graphPanel.gameObject.scene.name}\".");
 				return;
 			}
 
@@ -160,7 +167,7 @@ namespace CradleImpactTool
 				return;
 			}
 
-			if (m_root == null)
+			if (m_graphPanel == null)
 			{
 				Debug.LogError("CradleGraphManager.CreateGraph: RectTransform is missing from GameObject. Graph was not created.");
 				return;
@@ -181,7 +188,7 @@ namespace CradleImpactTool
 				m_save.impactSaves.TryGetValue("debug", out m_graphSave);
 			}
 
-			float halfContainerWidth = m_root.rect.width;
+			float halfContainerWidth = m_graphPanel.rect.width;
 			int categoryCount = m_data.categories.Length;
 			float categoryCircleStepSize = (Mathf.PI * 2) / categoryCount;
 			for (int i = 0; i < categoryCount; i++)
@@ -191,9 +198,8 @@ namespace CradleImpactTool
 				GameObject categoryInstance = Instantiate(m_graphSettings.categoryTextPrefab, m_categoryContainer.transform);
 				CategoryManager categoryManager = categoryInstance.GetComponent<CategoryManager>();
 				RectTransform categoryTransform = categoryInstance.GetComponent<RectTransform>();
-				TMP_Text categoryText = categoryManager.GetText();
 
-				categoryText.text = categoryData.name.ToUpper();
+				categoryManager.text = categoryData.name.ToUpper();
 				categoryInstance.name = categoryData.name;
 
 				CategorySave categorySave = null;
@@ -250,8 +256,8 @@ namespace CradleImpactTool
 						// TODO: Place category items in a more natural way
 						float itemAngle = Mathf.Atan2(-categoryOffset.y, -categoryOffset.x) + (j + 1) * itemCircleStepSize + itemCircleOffset;
 
-						float prefXOffset = (categoryText.preferredWidth + itemText.preferredWidth) * 0.7f;
-						float prefYOffset = (categoryText.preferredHeight + itemText.preferredHeight);
+						float prefXOffset = (categoryManager.preferredWidth + itemText.preferredWidth) * 0.7f;
+						float prefYOffset = (categoryManager.preferredHeight + itemText.preferredHeight);
 						itemTransform.anchoredPosition = new Vector2(Mathf.Cos(itemAngle) * prefXOffset, Mathf.Sin(itemAngle) * prefYOffset);
 					}
 
@@ -284,8 +290,6 @@ namespace CradleImpactTool
 
 			float lineThickness = 3; // TODO: Remove magic number
 			List<FortuneSite> sites = new List<FortuneSite>();
-			Vector2 min = Vector2.one * 9e9f;
-			Vector2 max = Vector2.one * -9e9f;
 
 			// Gather all the category positions
 			foreach (CategoryManager category in m_categories)
@@ -296,27 +300,27 @@ namespace CradleImpactTool
 				Bounds bounds = category.GetCategoryBounds();
 				Vector2 boundsMin = categoryPos + (Vector2)bounds.min;
 				Vector2 boundsMax = categoryPos + (Vector2)bounds.max;
-				if (boundsMin.x < min.x)
-					min.x = boundsMin.x;
-				if (boundsMin.y < min.y)
-					min.y = boundsMin.y;
-				if (boundsMax.x > max.x)
-					max.x = boundsMax.x;
-				if (boundsMax.y > max.y)
-					max.y = boundsMax.y;
+				if (boundsMin.x < m_minBounds.x)
+					m_minBounds.x = boundsMin.x;
+				if (boundsMin.y < m_minBounds.y)
+					m_minBounds.y = boundsMin.y;
+				if (boundsMax.x > m_maxBounds.x)
+					m_maxBounds.x = boundsMax.x;
+				if (boundsMax.y > m_maxBounds.y)
+					m_maxBounds.y = boundsMax.y;
 			}
 
 			// Expand outer edges by some distance
-			min -= 50.0f * Vector2.one; // TODO: Remove magic number
-			max += 50.0f * Vector2.one;
+			m_minBounds -= 750.0f * Vector2.one;
+			m_maxBounds += 750.0f * Vector2.one;
 
-			Vector2 center = (min + max) * 0.5f;
-			min -= center;
-			max -= center;
-			m_root.sizeDelta = max - min;
+			Vector2 center = (m_minBounds + m_maxBounds) * 0.5f;
+			m_minBounds -= center;
+			m_maxBounds -= center;
+			m_graphPanel.sizeDelta = m_maxBounds - m_minBounds;
 
 			// Generate a voronoi, draw its edges
-			LinkedList<VEdge> results = FortunesAlgorithm.Run(sites, min.x, min.y, max.x, max.y);
+			LinkedList<VEdge> results = FortunesAlgorithm.Run(sites, m_minBounds.x, m_minBounds.y, m_maxBounds.x, m_maxBounds.y);
 			Dictionary<CategoryManager, OuterEdgeCollision> edgeCollisions = new Dictionary<CategoryManager, OuterEdgeCollision>();
 			foreach (VEdge result in results)
 			{
@@ -337,7 +341,7 @@ namespace CradleImpactTool
 				// Check if we're touching any edge here. This is to make sure the outer edges also are added to the related categories.
 				foreach (Vector2 pos in new Vector2[] { lineInstance.fromPos, lineInstance.toPos })
 				{
-					Vector2 delta = pos - min;
+					Vector2 delta = pos - m_minBounds;
 					if (Mathf.Abs(delta.x) < 0.03f) // Touches left edge
 					{
 						CreateOuterEdgeCollision(relatedCategories, ref edgeCollisions, a_left: true);
@@ -347,7 +351,7 @@ namespace CradleImpactTool
 						CreateOuterEdgeCollision(relatedCategories, ref edgeCollisions, a_bottom: true);
 					}
 
-					delta = pos - max;
+					delta = pos - m_maxBounds;
 					if (Mathf.Abs(delta.x) < 0.03f) // Touches right edge
 					{
 						CreateOuterEdgeCollision(relatedCategories, ref edgeCollisions, a_right: true);
@@ -362,69 +366,12 @@ namespace CradleImpactTool
 			// Draw the outer edges
 			KeyValuePair<CornerID, Vector2>[] edges = new KeyValuePair<CornerID, Vector2>[]
 			{
-				new KeyValuePair<CornerID, Vector2>(CornerID.BottomLeft, new Vector2(min.x, min.y)),
-				new KeyValuePair<CornerID, Vector2>(CornerID.BottomRight, new Vector2(max.x, min.y)),
-				new KeyValuePair<CornerID, Vector2>(CornerID.TopRight, new Vector2(max.x, max.y)),
-				new KeyValuePair<CornerID, Vector2>(CornerID.TopLeft, new Vector2(min.x, max.y)),
-				new KeyValuePair<CornerID, Vector2>(CornerID.BottomLeft, new Vector2(min.x, min.y)),
+				new KeyValuePair<CornerID, Vector2>(CornerID.BottomLeft, new Vector2(m_minBounds.x, m_minBounds.y)),
+				new KeyValuePair<CornerID, Vector2>(CornerID.BottomRight, new Vector2(m_maxBounds.x, m_minBounds.y)),
+				new KeyValuePair<CornerID, Vector2>(CornerID.TopRight, new Vector2(m_maxBounds.x, m_maxBounds.y)),
+				new KeyValuePair<CornerID, Vector2>(CornerID.TopLeft, new Vector2(m_minBounds.x, m_maxBounds.y)),
+				new KeyValuePair<CornerID, Vector2>(CornerID.BottomLeft, new Vector2(m_minBounds.x, m_minBounds.y)),
 			};
-
-			for (int i = 1; i < edges.Length; i++)
-			{
-				var edge1 = edges[i - 1];
-				var edge2 = edges[i];
-				Vector2 start = edge1.Value;
-				Vector2 end = edge2.Value;
-
-				bool isLeftEdge =
-					(edge1.Key == CornerID.BottomLeft && edge2.Key == CornerID.TopLeft) ||
-					(edge2.Key == CornerID.BottomLeft && edge1.Key == CornerID.TopLeft);
-				bool isRightEdge =
-					(edge1.Key == CornerID.BottomRight && edge2.Key == CornerID.TopRight) ||
-					(edge2.Key == CornerID.BottomRight && edge1.Key == CornerID.TopRight);
-				bool isTopEdge =
-					(edge1.Key == CornerID.TopLeft && edge2.Key == CornerID.TopRight) ||
-					(edge2.Key == CornerID.TopLeft && edge1.Key == CornerID.TopRight);
-				bool isBottomEdge =
-					(edge1.Key == CornerID.BottomLeft && edge2.Key == CornerID.BottomRight) ||
-					(edge2.Key == CornerID.BottomLeft && edge1.Key == CornerID.BottomRight);
-
-				Line outerEdge = m_linePool.Get(m_lineContainerTransform);
-				if (outerEdge.SetDrawingData(start, end, 0, lineThickness) == false)
-				{
-					m_linePool.Release(outerEdge);
-					continue;
-				}
-
-				outerEdge.name = $"Voronoi Outer Edge {i}";
-
-				foreach (var data in edgeCollisions)
-				{
-					CategoryManager category = data.Key;
-					OuterEdgeCollision collision = data.Value;
-
-					// Note: All edges are on the left side because we draw them in a clockwise order (top left, top right, bottom right, bottom left),
-					// meaning that the right side of the line is always facing the category.
-
-					if (isLeftEdge && collision.Left)
-					{
-						category.AddEdge(outerEdge, a_lineIsOnLeftSide: true);
-					}
-					else if (isRightEdge && collision.Right)
-					{
-						category.AddEdge(outerEdge, a_lineIsOnLeftSide: true);
-					}
-
-					if (isBottomEdge && collision.Bottom)
-					{
-						category.AddEdge(outerEdge, a_lineIsOnLeftSide: true);
-					}
-					else if (isTopEdge && collision.Top)
-					{
-						category.AddEdge(outerEdge, a_lineIsOnLeftSide: true);
-					}
-				}
-			}
 
 			// Ensure the items are in the correct categories
 			foreach (CategoryManager category in m_categories)
@@ -529,6 +476,30 @@ namespace CradleImpactTool
 			HandlePan();
 		}
 
+		// This function makes sure that whenever you adjust the ro
+		Vector3 ConfinePanelInScreen(Vector3 position)
+		{
+			// TODO: Due to the fact that the outer edge lines are drawn at position instead of anchoredPosition, we have to offset it for the anchor.
+			// It's an unfortunate drawback of an old system incorrectly made with positions instead of anchoredPosition, and has to be corrected in the future,
+			// or be accounted for in any case where screenspace-correct positions are required.
+			Vector2 anchoredOffset = (Vector2)m_graphPanel.position - m_graphPanel.anchoredPosition;
+
+			Vector2 min = m_minBounds * m_graphPanel.localScale + anchoredOffset;
+			Vector2 max = m_maxBounds * m_graphPanel.localScale - anchoredOffset;
+
+			if (-position.x < min.x)
+				position.x = -min.x;
+			if (-position.y < min.y)
+				position.y = -min.y;
+
+			if (-position.x > max.x)
+				position.x = -max.x;
+			if (-position.y > max.y)
+				position.y = -max.y;
+
+			return position;
+		}
+
 		void HandleZoom()
 		{
 			if (m_hasFocus == false)
@@ -538,20 +509,19 @@ namespace CradleImpactTool
 
 			if (Input.mouseScrollDelta.y != 0)
 			{
-				var oldScale = m_root.transform.localScale;
+				var oldScale = m_graphPanel.transform.localScale;
 				var delta = m_zoomDelta * -Input.mouseScrollDelta.y;
-				m_root.transform.localScale -= Vector3.one * delta;
-				if (m_root.transform.localScale.x < m_zoomMin)
+				m_graphPanel.transform.localScale -= Vector3.one * delta;
+				if (m_graphPanel.transform.localScale.x < m_zoomMin)
 				{
-					m_root.transform.localScale = new Vector3(m_zoomMin, m_zoomMin, m_zoomMin);
+					m_graphPanel.transform.localScale = new Vector3(m_zoomMin, m_zoomMin, m_zoomMin);
 				}
-				else if (m_root.transform.localScale.x > m_zoomMax)
+				else if (m_graphPanel.transform.localScale.x > m_zoomMax)
 				{
-					m_root.transform.localScale = new Vector3(m_zoomMax, m_zoomMax, m_zoomMax);
+					m_graphPanel.transform.localScale = new Vector3(m_zoomMax, m_zoomMax, m_zoomMax);
 				}
 
-				m_root.anchoredPosition -= (oldScale - m_root.transform.localScale) * m_root.anchoredPosition;
-
+				m_graphPanel.anchoredPosition = ConfinePanelInScreen(m_graphPanel.anchoredPosition - (oldScale - m_graphPanel.transform.localScale) * m_graphPanel.anchoredPosition);
 				gameObject.BroadcastMessage("InvalidateCradleUI");
 			}
 		}
@@ -574,8 +544,7 @@ namespace CradleImpactTool
 
 				Vector2 deltaPos = m_mousePosition - (Vector2)Input.mousePosition;
 				m_mousePosition = Input.mousePosition;
-
-				m_root.anchoredPosition -= deltaPos;
+				m_graphPanel.anchoredPosition = ConfinePanelInScreen(m_graphPanel.anchoredPosition - deltaPos);
 			}
 			else
 			{

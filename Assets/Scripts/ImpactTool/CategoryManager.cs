@@ -20,10 +20,13 @@ namespace CradleImpactTool
 	public class CategoryManager : MonoBehaviour
 	{
 		[SerializeField]
-		RectTransform m_child;
+		TMP_Text m_text;
+		[SerializeField]
+		TMP_Text m_shadow;
+		[SerializeField]
+		RectTransform m_textTransform;
 
 		RectTransform m_rectTransform;
-		TMP_Text m_text;
 		List<CategoryItemManager> m_items = new List<CategoryItemManager>();
 		Bounds? m_categoryBounds;
 		Bounds? m_textBounds;
@@ -32,7 +35,6 @@ namespace CradleImpactTool
 		private void Start()
 		{
 			GetTransform();
-			GetText();
 		}
 
 		//private void OnDrawGizmos()
@@ -65,16 +67,6 @@ namespace CradleImpactTool
 			return m_rectTransform;
 		}
 
-		public TMP_Text GetText()
-		{
-			if (m_text == null)
-			{
-				m_text = m_child.GetComponent<TMP_Text>();
-			}
-
-			return m_text;
-		}
-
 		public Bounds GetCategoryBounds(bool a_IsLocal = true)
 		{
 			if (m_categoryBounds.HasValue == false)
@@ -94,7 +86,7 @@ namespace CradleImpactTool
 		{
 			if (m_textBounds.HasValue == false)
 			{
-				m_textBounds = m_child.GetOwnUIBounds();
+				m_textBounds = m_textTransform.GetOwnUIBounds();
 			}
 
 			if (a_IsLocal)
@@ -102,7 +94,7 @@ namespace CradleImpactTool
 				return m_textBounds.Value;
 			}
 
-			return new Bounds(m_child.position + m_textBounds.Value.center, m_textBounds.Value.size);
+			return new Bounds(m_textTransform.position + m_textBounds.Value.center, m_textBounds.Value.size);
 		}
 
 		// Binary search algorithm to find the closest free space towards the middle of the panel.
@@ -216,6 +208,13 @@ namespace CradleImpactTool
 		public CradleGraphManager graph { get; set; }
 		public List<CategoryItemManager> items { get { return m_items; } }
 		public List<CategoryEdge> edges { get { return m_edges; } }
-		public RectTransform textTransform { get { return m_child; } }
+		public RectTransform textTransform { get { return m_textTransform; } }
+		public string text
+		{
+			get { return m_text.text; }
+			set { m_text.text = m_shadow.text = value; }
+		}
+		public float preferredWidth => m_text.preferredWidth;
+		public float preferredHeight => m_text.preferredHeight;
 	}
 }
