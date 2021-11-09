@@ -18,6 +18,7 @@ public class AddTooltip : MonoBehaviour
 
 		TriggerDelegates tooltipTrigger = gameObject.AddComponent<TriggerDelegates>();
 		tooltipTrigger.consumeDownEvent = !passClickToParent;
+		tooltipTrigger.consumeUpEvent = !passClickToParent;
 
 		tooltipTrigger.OnMouseEnterDelegate += () =>
 		{
