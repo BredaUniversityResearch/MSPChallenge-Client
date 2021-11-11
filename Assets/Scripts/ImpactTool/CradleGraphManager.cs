@@ -488,8 +488,8 @@ namespace CradleImpactTool
 
 		void Update()
 		{
-			// If the application is in view, and we're not focusing on a set if items.
-			if (Application.isFocused && isFocussing == false)
+			// If the application is in view
+			if (Application.isFocused)
 			{
 				bool t_HasMoved = false;
 				t_HasMoved |= HandleZoom();
@@ -507,7 +507,7 @@ namespace CradleImpactTool
 			// TODO: Due to the fact that the outer edge lines are drawn at position instead of anchoredPosition, we have to offset it for the anchor.
 			// It's an unfortunate drawback of an old system incorrectly made with positions instead of anchoredPosition, and has to be corrected in the future,
 			// or be accounted for in any case where screenspace-correct positions are required.
-			Vector2 anchoredOffset = (Vector2)m_graphPanel.position - m_graphPanel.anchoredPosition;
+			Vector2 anchoredOffset = m_graphPanel.anchoredPosition;
 
 			Vector2 min = m_minBounds * m_graphPanel.localScale + anchoredOffset;
 			Vector2 max = m_maxBounds * m_graphPanel.localScale - anchoredOffset;
