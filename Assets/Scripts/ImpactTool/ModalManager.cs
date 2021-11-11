@@ -85,7 +85,7 @@ namespace CradleImpactTool
 			for (int i = 0; i < a_bodyText.Length && i >= 0; )
 			{
 				int startIndex = a_bodyText.IndexOf('[', i);
-				int endIndex = a_bodyText.IndexOf(']', startIndex);
+				int endIndex = a_bodyText.IndexOf(']', Math.Max(startIndex, 0));
 
 				int modStartIndex = startIndex >= i ? startIndex : a_bodyText.Length;
 				resultString += a_bodyText.Substring(i, modStartIndex - i);
