@@ -143,6 +143,7 @@ public class PolygonSubEntity : SubEntity
 		}
 
 		UpdateBoundingBox();
+		meshIsDirty = true;
 	}
 
 	protected override void UpdateBoundingBox()
