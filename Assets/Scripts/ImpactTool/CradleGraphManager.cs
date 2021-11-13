@@ -47,10 +47,11 @@ namespace CradleImpactTool
 		bool m_useDebugData;
 		[SerializeField]
 		TextAsset m_debugData;
+		[SerializeField]
+		RectTransform m_panelParent;
 
 		static ImpactObjectData m_data = null;
 		RectTransform m_graphPanel;
-		RectTransform m_panelParent;
 		GameObject m_lineContainer;
 		RectTransform m_lineContainerTransform;
 		GameObject m_categoryContainer;
@@ -67,6 +68,14 @@ namespace CradleImpactTool
 
 		bool m_isMouseDown = false;
 		Vector2 m_mousePosition;
+
+		float m_currentFocus = 0.0f;
+		float m_targetFocus = 0.0f;
+		Vector3 m_startFocusPosition = Vector3.zero;
+		Vector3 m_targetFocusPosition = Vector3.zero;
+		float m_startFocusScale = 1.0f;
+		float m_targetFocusScale = 1.0f;
+		HashSet<CategoryItemManager> m_selectedItems = new HashSet<CategoryItemManager>();
 		bool m_hasFocus = true;
 		Vector2 m_minBounds = Vector2.one * 9e9f;
 		Vector2 m_maxBounds = Vector2.one * -9e9f;
@@ -128,6 +137,15 @@ namespace CradleImpactTool
 			{
 				CreateGraph(m_data);
 			}
+		}
+
+		void OnEnable()
+		{
+			m_graphPanel.anchoredPosition = Vector2.zero;
+			m_graphPanel.localScale = Vector3.one;
+
+			BreakFocus();
+			HideAllLinks();
 		}
 
 		public static void InvokeWikiLinkClick(string link)
@@ -430,6 +448,9 @@ namespace CradleImpactTool
 				return;
 			}
 
+			m_selectedItems.Add(fromItem);
+			m_selectedItems.Add(toItem);
+
 			int lineCount = a_link.lines.Length;
 			for (int i = 0; i < lineCount; i++)
 			{
@@ -457,23 +478,27 @@ namespace CradleImpactTool
 			// Cannot do ReleaseAll because the background voronoi edges are also lines.
 			m_linePool.ReleaseRange(m_impactLines);
 			m_impactLines.Clear();
+			StopFocus();
 
 			foreach (KeyValuePair<int, CategoryItemManager> item in m_categoryItems)
 			{
-				CustomToggle toggle = item.Value.GetComponent<CustomToggle>();
-				toggle.SetIsOnWithoutNotify(false);
+				item.Value.toggle.SetIsOnWithoutNotify(false);
 			}
 		}
 
 		void Update()
 		{
-			if (Application.isFocused == false)
+			// If the application is in view
+			if (Application.isFocused)
 			{
-				return;
+				bool t_HasMoved = false;
+				t_HasMoved |= HandleZoom();
+				t_HasMoved |= HandlePan();
+				if (t_HasMoved)
+					BreakFocus();
 			}
 
-			HandleZoom();
-			HandlePan();
+			UpdateFocus();
 		}
 
 		// This function makes sure that whenever you adjust the ro
@@ -485,7 +510,7 @@ namespace CradleImpactTool
 			Vector2 anchoredOffset = m_graphPanel.anchoredPosition;
 
 			Vector2 min = m_minBounds * m_graphPanel.localScale + anchoredOffset;
-			Vector2 max = m_maxBounds * m_graphPanel.localScale + anchoredOffset;
+			Vector2 max = m_maxBounds * m_graphPanel.localScale - anchoredOffset;
 
 			if (-position.x < min.x)
 				position.x = -min.x;
@@ -500,37 +525,67 @@ namespace CradleImpactTool
 			return position;
 		}
 
-		void HandleZoom()
+		void UpdateFocus()
 		{
-			if (m_hasFocus == false)
-			{
+			float delta = m_targetFocus - m_currentFocus;
+			if (delta == 0) // This pretty much can only happen if we force it to be 0.
 				return;
-			}
 
-			if (Input.mouseScrollDelta.y != 0)
+			if (Mathf.Abs(delta) < 0.003f) // If pretty much near the target, force it to the end, draw one last frame
 			{
-				var oldScale = m_graphPanel.transform.localScale;
-				var delta = m_zoomDelta * -Input.mouseScrollDelta.y;
-				m_graphPanel.transform.localScale -= Vector3.one * delta;
-				if (m_graphPanel.transform.localScale.x < m_zoomMin)
-				{
-					m_graphPanel.transform.localScale = new Vector3(m_zoomMin, m_zoomMin, m_zoomMin);
-				}
-				else if (m_graphPanel.transform.localScale.x > m_zoomMax)
-				{
-					m_graphPanel.transform.localScale = new Vector3(m_zoomMax, m_zoomMax, m_zoomMax);
-				}
-
-				m_graphPanel.anchoredPosition = ConfinePanelInScreen(m_graphPanel.anchoredPosition - (oldScale - m_graphPanel.transform.localScale) * m_graphPanel.anchoredPosition);
+				m_currentFocus = m_targetFocus;
 				gameObject.BroadcastMessage("InvalidateCradleUI");
 			}
+			else
+			{
+				m_currentFocus += delta * Time.deltaTime * 3.0f; // TODO: remove magic value
+			}
+
+			m_graphPanel.localScale = Vector3.one * Mathf.Lerp(m_startFocusScale, m_targetFocusScale, m_currentFocus);
+			m_graphPanel.anchoredPosition = ConfinePanelInScreen(Vector2.Lerp(m_startFocusPosition, m_targetFocusPosition * m_graphPanel.localScale.x, m_currentFocus));
+		}
+		
+
+		// This function completely unsets focus, and focusses on the
+		void BreakFocus()
+		{
+			m_currentFocus = 0.0f;
+			m_targetFocus = 0.0f;
+
+			m_startFocusScale = m_graphPanel.localScale.x;
+			m_targetFocusScale = m_graphPanel.localScale.x;
+			m_startFocusPosition = m_graphPanel.anchoredPosition;
+			m_targetFocusPosition = m_graphPanel.anchoredPosition;
 		}
 
-		void HandlePan()
+		bool HandleZoom()
 		{
+			if (Input.mouseScrollDelta.y == 0)
+				return false;
+
+			Vector3 oldScale = m_graphPanel.transform.localScale;
+			float delta = m_zoomDelta * -Input.mouseScrollDelta.y;
+			m_graphPanel.transform.localScale -= Vector3.one * delta;
+			if (m_graphPanel.transform.localScale.x < m_zoomMin)
+			{
+				m_graphPanel.transform.localScale = new Vector3(m_zoomMin, m_zoomMin, m_zoomMin);
+			}
+			else if (m_graphPanel.transform.localScale.x > m_zoomMax)
+			{
+				m_graphPanel.transform.localScale = new Vector3(m_zoomMax, m_zoomMax, m_zoomMax);
+			}
+
+			m_graphPanel.anchoredPosition = ConfinePanelInScreen(m_graphPanel.anchoredPosition - (oldScale - m_graphPanel.transform.localScale) * m_graphPanel.anchoredPosition);
+			gameObject.BroadcastMessage("InvalidateCradleUI");
+			return true;
+		}
+
+		bool HandlePan()
+		{
+			bool t_HasChanged = false;
 			if (m_hasFocus == false)
 			{
-				return;
+				return t_HasChanged;
 			}
 
 			bool isControlDragging = Input.GetMouseButton(0) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl));
@@ -545,11 +600,43 @@ namespace CradleImpactTool
 				Vector2 deltaPos = m_mousePosition - (Vector2)Input.mousePosition;
 				m_mousePosition = Input.mousePosition;
 				m_graphPanel.anchoredPosition = ConfinePanelInScreen(m_graphPanel.anchoredPosition - deltaPos);
+				t_HasChanged = true;
 			}
 			else
 			{
 				m_isMouseDown = false;
 			}
+
+			return t_HasChanged;
+		}
+
+		public void Focus()
+		{
+			m_currentFocus = 0.0f;
+			m_targetFocus = 1.0f;
+
+			Bounds totalBounds = m_selectedItems.FirstOrDefault().GetBounds(false);
+			foreach (CategoryItemManager item in m_selectedItems)
+				totalBounds.Encapsulate(item.GetBounds(false));
+			Vector2 posOffset = (totalBounds.center - m_graphPanel.position) / m_graphPanel.localScale.x;
+
+			Vector2 viewportSize = m_panelParent.rect.size;
+			Vector2 boundsSize = totalBounds.size / m_graphPanel.localScale.x;
+			Vector2 sizeOffset = viewportSize / boundsSize;
+
+			m_startFocusScale = m_graphPanel.localScale.x;
+			m_targetFocusScale = Mathf.Min(sizeOffset.x, sizeOffset.y); // Try to make the view fit in
+			m_targetFocusScale = Mathf.Max(m_zoomMin, m_targetFocusScale); 
+			Debug.Log($"Bounds size: {boundsSize}, Viewport: {viewportSize}, Scale: {m_targetFocusScale}");
+
+			m_startFocusPosition = m_graphPanel.anchoredPosition;
+			m_targetFocusPosition = -posOffset;
+		}
+
+		public void StopFocus()
+		{
+			m_targetFocus = 0.0f;
+			m_selectedItems.Clear();
 		}
 
 		void OnApplicationFocus(bool hasFocus)
@@ -563,6 +650,7 @@ namespace CradleImpactTool
 		public Pool<Line> linePool { get { return m_linePool; } }
 		public ModalManager modal { get { return m_modal; } }
 		public List<CategoryManager> categories { get { return m_categories; } }
+		public bool isFocussing { get { return m_targetFocus > 0.01f; } }
 		public ImpactSave graphSave { get { return m_graphSave; } }
 		public SaveFile save { get { return m_save; } }
 		public bool isDraggingView { get { return m_isMouseDown; } }

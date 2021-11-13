@@ -43,6 +43,12 @@ namespace CradleImpactTool
 
 				// HideAllLinks turns this toggle off, toggle it back on.
 				m_toggle.SetIsOnWithoutNotify(true);
+
+				m_graph.Focus();
+			}
+			else
+			{
+				m_graph.StopFocus();
 			}
 		}
 
