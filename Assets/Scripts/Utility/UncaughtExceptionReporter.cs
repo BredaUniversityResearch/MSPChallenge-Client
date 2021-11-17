@@ -96,9 +96,7 @@ class UncaughtExceptionReporter: MonoBehaviour
 
 	private void Awake()
 	{
-#if !UNITY_EDITOR
 		Application.logMessageReceived += OnLogMessage;
-#endif
 	}
 
 	private void Update()
@@ -156,7 +154,7 @@ class UncaughtExceptionReporter: MonoBehaviour
 			errorEventData.AddField("severity", severity);
 			errorEventData.AddField("message", dataMessage);
 			errorEventData.AddField("stack_trace", stackTrace);
-			UnityWebRequest serverReport = UnityWebRequest.Post(Server.SubmitErrorEvent(), errorEventData);
+			UnityWebRequest serverReport = UnityWebRequest.Post(Server.Url + Server.SubmitErrorEvent(), errorEventData);
 			ServerCommunication.AddDefaultHeaders(serverReport);
 			serverReport.SendWebRequest();
 			while (!serverReport.isDone)
