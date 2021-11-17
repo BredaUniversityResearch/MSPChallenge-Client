@@ -107,7 +107,7 @@ namespace CradleImpactTool
 				if (string.IsNullOrWhiteSpace(linkText))
 					linkText = link;
 
-				resultString += $"<color=#ADD8E6><link=\"{link}\">{linkText}</link></color>";
+				resultString += $"\n<color=#ADD8E6><link=\"{link}\">{linkText}</link></color>";
 			}
 
 			return resultString;
