@@ -18,6 +18,8 @@ namespace CradleImpactTool
 		TMP_Text m_titleText;
 		[SerializeField]
 		TMP_Text m_bodyText;
+		[SerializeField]
+		GameObject m_AccentGameObject;
 		[SerializeField, Range(1, 20)]
 		float m_moveSpeed;
 		[SerializeField, Range(1, 20)]
@@ -68,6 +70,7 @@ namespace CradleImpactTool
 
 			m_rectTransform = GetComponent<RectTransform>();
 			m_camera = Camera.main;
+			m_AccentGameObject.GetComponent<Graphic>().color = TeamManager.CurrentTeamColor;
 		}
 
 		public void SetTargetPosition(Vector2 a_targetPosition)
