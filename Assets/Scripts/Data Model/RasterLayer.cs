@@ -15,7 +15,9 @@ public class RasterLayer : Layer<RasterEntity>
 		public float[][] displayed_bounds = null;
 	};
 
-	public const float RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER = 1000.0f; //Constant for converting from a raster value to the EntityType's Value field.
+	public const float DEFAULT_RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER = 1000.0f; //Constant for converting from a raster value to the EntityType's Value field.
+	public readonly float rasterValueToEntityValueMultiplier = DEFAULT_RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
+
 	private const float REFERENCE_PIXELS_PER_UNIT = 100.0f;
 
 	public RasterObject rasterObject { get; private set; }
@@ -54,8 +56,8 @@ public class RasterLayer : Layer<RasterEntity>
 	{
 		entityTypesSortedByValue = new List<EntityType>(EntityTypes.Values);
 		entityTypesSortedByValue.Sort(SortMethodEntityTypesByValue);
-
 		viewingRaster = rasterAtLatestTime;
+		rasterValueToEntityValueMultiplier = layerMeta.layer_entity_value_max ?? DEFAULT_RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
 
 		try
 		{
@@ -260,13 +262,13 @@ public class RasterLayer : Layer<RasterEntity>
 
 	public EntityType GetEntityTypeForRasterAt(Vector2 worldPosition)
 	{
-		float rasterValue = GetValueAt(worldPosition).r * RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
+		float rasterValue = GetValueAt(worldPosition).r * rasterValueToEntityValueMultiplier;
 		return GetEntityTypeForRasterValue(rasterValue);
 	}
 
 	public EntityType GetEntityTypeForRasterAt(int rasterSpaceX, int rasterSpaceY)
 	{
-		float rasterValue = viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r * RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
+		float rasterValue = viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r * rasterValueToEntityValueMultiplier;
 		return GetEntityTypeForRasterValue(rasterValue);
 	}
 
