@@ -175,7 +175,6 @@ public class TimeBar : MonoBehaviour
 	{
 		if (isViewingPlan)
 		{
-			simulationTimeText.text = Util.MonthToText(PlanManager.planViewing.StartTime);
 			planViewingText.text = Util.MonthToText(PlanManager.planViewing.StartTime, false);
 			UpdateIndicator(viewingTimeIndicatorBottom, PlanManager.planViewing.StartTime);
 		}
