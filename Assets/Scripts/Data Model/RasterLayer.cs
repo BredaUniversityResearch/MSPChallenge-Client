@@ -274,14 +274,21 @@ public class RasterLayer : Layer<RasterEntity>
 
 	private EntityType GetEntityTypeForRasterValue(float rasterValue)
 	{
-		EntityType result = entityTypesSortedByValue[0];
+		EntityType previousType = entityTypesSortedByValue[0];
+		EntityType result = previousType;
 		for (int i = 1; i < entityTypesSortedByValue.Count; ++i)
 		{
 			EntityType nextType = entityTypesSortedByValue[i];
 			if (nextType.value > rasterValue)
 			{
+				float lerp = Mathf.Clamp01((float)(rasterValue - previousType.value) / (float)(nextType.value - previousType.value));
+				if (lerp > 0.5f)
+				{
+					result = nextType;
+				}
 				break;
 			}
+			previousType = nextType;
 			result = nextType;
 		}
 		return result;
