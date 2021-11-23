@@ -26,24 +26,28 @@ namespace CradleImpactTool
 
 		public static SaveFile Load()
 		{
-			if (File.Exists(fileName))
-			{
-				string text = File.ReadAllText(fileName);
-				SaveFile file = JsonConvert.DeserializeObject<SaveFile>(text);
-				if (file != null)
-				{
-					file.Validate();
-					return file;
-				}
-			}
+			// note MH: disabled loading from file for now.
+
+			// if (File.Exists(fileName))
+			// {
+			// 	string text = File.ReadAllText(fileName);
+			// 	SaveFile file = JsonConvert.DeserializeObject<SaveFile>(text);
+			// 	if (file != null)
+			// 	{
+			// 		file.Validate();
+			// 		return file;
+			// 	}
+			// }
 
 			return new SaveFile();
 		}
 
 		public void Save()
 		{
-			string text = JsonConvert.SerializeObject(this);
-			File.WriteAllText(fileName, text);
+			// note MH: disabled saving to file for now.
+
+			// string text = JsonConvert.SerializeObject(this);
+			// File.WriteAllText(fileName, text);
 		}
 	}
 }
