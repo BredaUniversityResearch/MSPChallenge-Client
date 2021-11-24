@@ -10,7 +10,9 @@ public class TooltipManager : MonoBehaviour
 
     [SerializeField]
     private Tooltip tooltipPrefab = null;
-    private static Tooltip tooltipPrefabStatic;
+    
+    // note MH: made public for AddTooltip.createDropdownTooltip HACK
+    public static Tooltip tooltipPrefabStatic;
 
     private static GameObject tooltipContainer;
 
