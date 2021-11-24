@@ -71,12 +71,13 @@ public class AddTooltip : MonoBehaviour
 		var newTooltip = Instantiate(TooltipManager.tooltipPrefabStatic, dropdownListTransform);
         var tooltip = newTooltip.GetComponent<Tooltip>();
         var rectTransform = dropdownListTransform.gameObject.GetComponent<RectTransform>();
+        float scale = newTooltip.GetComponentInParent<Canvas>().scaleFactor;
         tooltip.Initialise(
 	        text, null,
 	        new Vector2(
 		        -dropdownListTransform.position.x,
 		        -dropdownListTransform.position.y
-		        ) - rectTransform.offsetMin
+		        ) - rectTransform.offsetMin * scale
 	        );
 		tooltip.ShowToolTip();
 	    tooltip.gameObject.transform.SetAsLastSibling();
