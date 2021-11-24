@@ -54,7 +54,7 @@ public class Tooltip : MonoBehaviour
 
 		float tooltipWidth = (tooltipText.preferredWidth + padding) * scale;
 		float tooltipHeight = (tooltipText.preferredHeight + padding) * scale;
-
+		
 		float newX = Input.mousePosition.x / scale;
 		float newY = Input.mousePosition.y / scale;
 		if (newY > (Screen.height - tooltipHeight) / scale)
@@ -63,12 +63,12 @@ public class Tooltip : MonoBehaviour
 			newY -= 16f / scale;
 		}
 		else
-			rect.pivot = Vector2.zero;
-
-		var offsetToUse = offset ?? new Vector2(0.0f, 0.0f);
+		 	rect.pivot = Vector2.zero;
+		
+		var offsetToUse = (offset ?? new Vector2(0.0f, 0.0f)) / scale;
 		rect.anchoredPosition = transform.position = new Vector2(
-			Mathf.Clamp(newX, 0f, (Screen.width - tooltipWidth) / scale) - offsetToUse.x,
-			Mathf.Max(newY, 0f) - offsetToUse.y);
+			Mathf.Clamp(newX, 0f, (Screen.width - tooltipWidth) / scale) + offsetToUse.x,
+			Mathf.Max(newY, 0f) + offsetToUse.y);
 		//TODO: set anchor min, max and position based on the quadrant of the screen the mouse is on
 	}
 

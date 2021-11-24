@@ -66,22 +66,19 @@ public class AddTooltip : MonoBehaviour
 		if (dropdownListTransform == null)
 		{
 			return null;
-		}	    
+		}
 
-        var newTooltip = Instantiate(TooltipManager.tooltipPrefabStatic, dropdownListTransform);
+		var newTooltip = Instantiate(TooltipManager.tooltipPrefabStatic, dropdownListTransform);
         var tooltip = newTooltip.GetComponent<Tooltip>();
-        
-		var dropdownPoint = Camera.main.WorldToViewportPoint(dropdownListTransform.transform.position);
-		float padding = TooltipManager.GetPadding();
-		tooltip.SetText(text);
-		float scale = tooltip.GetComponentInParent<Canvas>().scaleFactor;
-		float tooltipWidth = (tooltip.tooltipText.preferredWidth + padding) * scale;
-		float tooltipHeight = (tooltip.tooltipText.preferredHeight + padding) * scale;
-		var offsetX = dropdownPoint.normalized.x * Screen.width - tooltipWidth * 0.5f;
-		var offsetY = tooltipHeight * 0.5f;
-        
-        tooltip.Initialise(text, null, new Vector2(offsetX, offsetY));
-	    tooltip.ShowToolTip();
+        var rectTransform = dropdownListTransform.gameObject.GetComponent<RectTransform>();
+        tooltip.Initialise(
+	        text, null,
+	        new Vector2(
+		        -dropdownListTransform.position.x,
+		        -dropdownListTransform.position.y
+		        ) - rectTransform.offsetMin
+	        );
+		tooltip.ShowToolTip();
 	    tooltip.gameObject.transform.SetAsLastSibling();
 
 	    return tooltip;
