@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 using Object = UnityEngine.Object;
@@ -260,20 +261,38 @@ public class RasterLayer : Layer<RasterEntity>
 		return viewingRaster.GetPixelBilinear(u, v).r;
 	}
 
+	[CanBeNull]
 	public EntityType GetEntityTypeForRasterAt(Vector2 worldPosition)
 	{
 		float rasterValue = GetValueAt(worldPosition).r * rasterValueToEntityValueMultiplier;
+		// note MH: 0 is not a value that should be mapped to a entity type
+		if (rasterValue < Single.Epsilon)
+		{
+			return null;
+		}
 		return GetEntityTypeForRasterValue(rasterValue);
 	}
 
+	[CanBeNull]
 	public EntityType GetEntityTypeForRasterAt(int rasterSpaceX, int rasterSpaceY)
 	{
 		float rasterValue = viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r * rasterValueToEntityValueMultiplier;
+		// note MH: 0 is not a value that should be mapped to a entity type
+		if (rasterValue < Single.Epsilon)
+		{
+			return null;
+		}
 		return GetEntityTypeForRasterValue(rasterValue);
 	}
 
+	[CanBeNull]
 	private EntityType GetEntityTypeForRasterValue(float rasterValue)
 	{
+		// note MH: 0 is not a value that should be mapped to a entity type
+		if (rasterValue < Single.Epsilon)
+		{
+			return null;
+		}
 		EntityType previousType = entityTypesSortedByValue[0];
 		EntityType result = previousType;
 		for (int i = 1; i < entityTypesSortedByValue.Count; ++i)

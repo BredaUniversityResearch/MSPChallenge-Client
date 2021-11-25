@@ -81,9 +81,14 @@ public class PropertiesWindow : MonoBehaviour
         entityTypeParent.Initialise();
         List<EntityType> entityTypes;
 		RasterLayer rasterLayer = entity.Layer as RasterLayer;
+		EntityType entityType = null;
 		if (rasterLayer != null)
 		{
-			entityTypes = new List<EntityType>(1) {rasterLayer.GetEntityTypeForRasterAt(worldSamplePosition)};
+			entityType = rasterLayer.GetEntityTypeForRasterAt(worldSamplePosition);
+		}
+		if (entityType != null)
+		{
+			entityTypes = new List<EntityType>(1) {entityType};
 		}
 		else
 		{

@@ -193,7 +193,8 @@ public class RasterSubentity : SubEntity
 			};
 		}
 
-		for (int i = 0; i < GRADIENT_RESOLUTION; ++i)
+		// note MH: 0 is black, which should not map to a entity type value at all.
+		for (int i = 1; i < GRADIENT_RESOLUTION; ++i)
 		{
 			float value = (i / (float) (GRADIENT_RESOLUTION - 1)) * rasterValueToEntityValueMultiplier;
 			value = Mathf.Clamp(value, 0.0f, rasterValueToEntityValueMultiplier);
