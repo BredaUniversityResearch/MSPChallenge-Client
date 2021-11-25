@@ -27,34 +27,46 @@ public class AddTooltip : MonoBehaviour
 
 		tooltipTrigger.OnMouseEnterDelegate += () =>
 		{
-			// note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
+			// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
+			if (dropDownTooltip != null)
+			{
+				dropDownTooltip.ShowToolTip();
+				return;
+			}
 			var dropdown = gameObject.GetComponentInChildren<CustomDropdown>();
 			if (dropdown != null)
 			{
 				dropDownTooltip = createDropdownTooltip(dropdown);
 				return;
 			}
+			// END
 
 			TooltipManager.ResetAndShowTooltip(text, timeBeforeShowing);
 		};
 
 		tooltipTrigger.OnMouseExitDelegate += () =>
 		{
+			// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
 			if (dropDownTooltip != null)
 			{
 				dropDownTooltip.HideTooltip();
 				return;
 			}
+			// END
+			
 			TooltipManager.HideTooltip();
 		};
 
 		tooltipTrigger.OnMouseDownDelegate += () =>
 		{
+			// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
 			if (dropDownTooltip != null)
 			{
 				dropDownTooltip.HideTooltip();
 				return;
-			}			
+			}
+			// END
+
 			TooltipManager.HideTooltip();
 		};
 	}
