@@ -18,7 +18,7 @@ public static class ConstraintChecks
 
 	private static bool CheckPointOnRasterToEntityType(RasterLayer raster, Vector2 point, EntityType entityType)
 	{
-		EntityType type = raster.GetEntityTypeForRasterAt(point);
+		var type = raster.GetEntityTypeForRasterAt(point);
 		return type == entityType;
 	}
 
