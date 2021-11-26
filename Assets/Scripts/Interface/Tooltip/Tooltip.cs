@@ -65,7 +65,7 @@ public class Tooltip : MonoBehaviour
 		else
 		 	rect.pivot = Vector2.zero;
 		
-		var offsetToUse = (offset ?? new Vector2(0.0f, 0.0f)) / scale;
+		Vector2 offsetToUse = (offset ?? new Vector2(0.0f, 0.0f)) / scale;
 		rect.anchoredPosition = transform.position = new Vector2(
 			Mathf.Clamp(newX, 0f, (Screen.width - tooltipWidth) / scale) + offsetToUse.x,
 			Mathf.Max(newY, 0f) + offsetToUse.y);

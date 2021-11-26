@@ -28,19 +28,19 @@ public class AddTooltip : MonoBehaviour
 		tooltipTrigger.OnMouseEnterDelegate += () =>
 		{
 			// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
-			if (dropdownTooltip != null)
-			{
-				dropdownTooltip.ShowToolTip();
-				return;
-			}
-			var dropdown = gameObject.GetComponentInChildren<CustomDropdown>();
+			CustomDropdown dropdown = gameObject.GetComponentInChildren<CustomDropdown>();
 			if (dropdown != null)
 			{
-				dropdownTooltip = createDropdownTooltip(dropdown);
-				return;
+				dropdownTooltip ??= createDropdownTooltip(dropdown);
+				if (dropdownTooltip != null)
+				{
+					dropdownTooltip.ShowToolTip();
+					return;
+				}
 			}
+			dropdownTooltip = null;
 			// END
-
+			
 			TooltipManager.ResetAndShowTooltip(text, timeBeforeShowing);
 		};
 
@@ -74,16 +74,15 @@ public class AddTooltip : MonoBehaviour
     [CanBeNull]
     private Tooltip createDropdownTooltip(CustomDropdown dropdown)
     {
-		var dropdownListTransform = dropdown.gameObject.transform.Find("Dropdown List");
+		Transform dropdownListTransform = dropdown.gameObject.transform.Find("Dropdown List");
 		if (dropdownListTransform == null)
 		{
 			return null;
 		}
 
-		var newTooltip = Instantiate(TooltipManager.tooltipPrefabStatic, dropdownListTransform);
-        var tooltip = newTooltip.GetComponent<Tooltip>();
-        var rectTransform = dropdownListTransform.gameObject.GetComponent<RectTransform>();
-        float scale = newTooltip.GetComponentInParent<Canvas>().scaleFactor;
+		Tooltip tooltip = Instantiate(TooltipManager.tooltipPrefabStatic, dropdownListTransform);
+		RectTransform rectTransform = dropdownListTransform.gameObject.GetComponent<RectTransform>();
+        float scale = tooltip.GetComponentInParent<Canvas>().scaleFactor;
         tooltip.Initialise(
 	        text, null,
 	        new Vector2(
