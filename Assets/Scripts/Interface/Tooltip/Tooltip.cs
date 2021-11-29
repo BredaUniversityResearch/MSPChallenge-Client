@@ -15,15 +15,17 @@ public class Tooltip : MonoBehaviour
 	public delegate void OnShowTooltip();
 	public OnShowTooltip showTooltipCallback;
 
-
-    public void Initialise(string text, OnShowTooltip onShowTooltip)
+	private Vector2? offset = null;
+	
+    public void Initialise(string text, OnShowTooltip onShowTooltip, Vector2? offset = null)
     {
+	    this.offset = offset;
         tooltipContainer = this.GetComponent<Image>();
 
         // To offset the tooltips properly
         padding = TooltipManager.GetPadding();
 
-		showTooltipCallback = onShowTooltip;
+        showTooltipCallback = onShowTooltip;
 
         SetText(text);
         ShowToolTip();
@@ -41,8 +43,8 @@ public class Tooltip : MonoBehaviour
         return tooltipText.text;
     }
 
-    private void SetPosition()
-    {
+	private void SetPosition()
+	{
 		RectTransform rect = GetComponent<RectTransform>();
 		float scale = 1f;
 		if (InterfaceCanvas.Instance != null)
@@ -50,9 +52,9 @@ public class Tooltip : MonoBehaviour
 		else
 			scale = GetComponentInParent<Canvas>().scaleFactor;
 
-        float tooltipWidth = (tooltipText.preferredWidth + padding) * scale;
-        float tooltipHeight = (tooltipText.preferredHeight + padding) * scale;
-
+		float tooltipWidth = (tooltipText.preferredWidth + padding) * scale;
+		float tooltipHeight = (tooltipText.preferredHeight + padding) * scale;
+		
 		float newX = Input.mousePosition.x / scale;
 		float newY = Input.mousePosition.y / scale;
 		if (newY > (Screen.height - tooltipHeight) / scale)
@@ -61,13 +63,14 @@ public class Tooltip : MonoBehaviour
 			newY -= 16f / scale;
 		}
 		else
-			rect.pivot = Vector2.zero;
-
+		 	rect.pivot = Vector2.zero;
+		
+		Vector2 offsetToUse = (offset ?? new Vector2(0.0f, 0.0f)) / scale;
 		rect.anchoredPosition = transform.position = new Vector2(
-            Mathf.Clamp(newX, 0f, (Screen.width - tooltipWidth) / scale),
-            Mathf.Max(newY, 0f));
+			Mathf.Clamp(newX, 0f, (Screen.width - tooltipWidth) / scale) + offsetToUse.x,
+			Mathf.Max(newY, 0f) + offsetToUse.y);
 		//TODO: set anchor min, max and position based on the quadrant of the screen the mouse is on
-    }
+	}
 
     public void ShowToolTip()
     {
