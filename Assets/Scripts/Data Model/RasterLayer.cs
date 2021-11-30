@@ -261,10 +261,20 @@ public class RasterLayer : Layer<RasterEntity>
 		return viewingRaster.GetPixelBilinear(u, v).r;
 	}
 
+	public float GetRasterValueAt(Vector2 worldPosition)
+	{
+		return GetValueAt(worldPosition).r * rasterValueToEntityValueMultiplier;
+	}
+
+	public float GetRasterValueAt(int rasterSpaceX, int rasterSpaceY)
+	{
+		return viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r * rasterValueToEntityValueMultiplier;
+	}
+
 	[CanBeNull]
 	public EntityType GetEntityTypeForRasterAt(Vector2 worldPosition)
 	{
-		float rasterValue = GetValueAt(worldPosition).r * rasterValueToEntityValueMultiplier;
+		float rasterValue = GetRasterValueAt(worldPosition);
 		// note MH: 0 is not a value that should be mapped to a entity type
 		if (rasterValue < Single.Epsilon)
 		{
@@ -276,7 +286,7 @@ public class RasterLayer : Layer<RasterEntity>
 	[CanBeNull]
 	public EntityType GetEntityTypeForRasterAt(int rasterSpaceX, int rasterSpaceY)
 	{
-		float rasterValue = viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r * rasterValueToEntityValueMultiplier;
+		float rasterValue = GetRasterValueAt(rasterSpaceX, rasterSpaceY);
 		// note MH: 0 is not a value that should be mapped to a entity type
 		if (rasterValue < Single.Epsilon)
 		{
@@ -286,7 +296,7 @@ public class RasterLayer : Layer<RasterEntity>
 	}
 
 	[CanBeNull]
-	private EntityType GetEntityTypeForRasterValue(float rasterValue)
+	public EntityType GetEntityTypeForRasterValue(float rasterValue)
 	{
 		// note MH: 0 is not a value that should be mapped to a entity type
 		if (rasterValue < Single.Epsilon)

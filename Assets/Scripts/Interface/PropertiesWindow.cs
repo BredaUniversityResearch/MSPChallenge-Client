@@ -82,9 +82,11 @@ public class PropertiesWindow : MonoBehaviour
         List<EntityType> entityTypes;
 		RasterLayer rasterLayer = entity.Layer as RasterLayer;
 		EntityType entityType = null;
+		float rasterValue = 0;
 		if (rasterLayer != null)
 		{
-			entityType = rasterLayer.GetEntityTypeForRasterAt(worldSamplePosition);
+			rasterValue = rasterLayer.GetRasterValueAt(worldSamplePosition);
+			entityType = rasterLayer.GetEntityTypeForRasterValue(rasterValue);
 		}
 		if (entityType != null)
 		{
@@ -96,22 +98,28 @@ public class PropertiesWindow : MonoBehaviour
 		}
 		for (int i = 0; i < entityTypes.Count; i++)
 		{
+			string entryContent = Main.IsDeveloper ? entityTypes[i].value.ToString() : "";
 			//string URL = "http://www.google.com/search?q=" + entity.EntityTypes[i].Name.Replace(' ', '+');
 			if (!string.IsNullOrEmpty(entityTypes[i].media))
 			{
 				var iCopy = i;
-				AddEntry(entityTypeParent, entityTypes[i].Name, "", () => 
-				{
-					Vector3[] corners = new Vector3[4];
-					window.windowTransform.GetWorldCorners(corners);
+				AddEntry(
+					entityTypeParent,
+					entityTypes[i].Name,
+					entryContent,
+					() =>
+					{
+						Vector3[] corners = new Vector3[4];
+						window.windowTransform.GetWorldCorners(corners);
 
-					string mediaUrl = MediaUrl.Parse(entityTypes[iCopy].media);
-					InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl, new Vector3(corners[2].x, corners[2].y - Screen.height, 0));
-				});
+						string mediaUrl = MediaUrl.Parse(entityTypes[iCopy].media);
+						InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl, new Vector3(corners[2].x, corners[2].y - Screen.height, 0));
+					}
+				);
 			}
 			else
 			{
-				AddEntry(entityTypeParent, entityTypes[i].Name, "");
+				AddEntry(entityTypeParent, entityTypes[i].Name, entryContent);
 			}
 		}
 
@@ -146,6 +154,7 @@ public class PropertiesWindow : MonoBehaviour
             AddEntry(debugInfoParent, "MSP ID", subEntity.GetMspID().ToString());
 			AddEntry(debugInfoParent, "Persistent ID", subEntity.GetPersistentID().ToString());
 			AddEntry(debugInfoParent, "Database ID", subEntity.GetDatabaseID().ToString());
+			AddEntry(debugInfoParent, "Raster value", rasterValue.ToString());
 		}
 		else
 			debugInfoParent.gameObject.SetActive(false);
