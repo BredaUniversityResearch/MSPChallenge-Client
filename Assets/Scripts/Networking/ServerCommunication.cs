@@ -328,7 +328,7 @@ public static class ServerCommunication
 			tokenHandler.Update();
 		}
 
-		while (requestsQueue.Count > 0 && requests.Count < 50)
+		while (requestsQueue.Count > 0 && requests.Count < 5)
 		{
 			ARequest r = requestsQueue.Dequeue();
 
