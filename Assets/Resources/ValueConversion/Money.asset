@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8af88abefa3d75041896565d9d946454, type: 3}
+  m_Name: Money
+  m_EditorClassIdentifier: 
+  baseUnit: "\u20AC/MWh"
+  conversionUnits:
+  - unitPostfix: "\u20AC/MWh"
+    unitSize: 1
+  - unitPostfix: "K\u20AC/MWh"
+    unitSize: 1000
+  - unitPostfix: "M\u20AC/MWh"
+    unitSize: 1000000
+  - unitPostfix: "B\u20AC/MWh"
+    unitSize: 1e+9
+  - unitPostfix: "T\u20AC/MWh"
+    unitSize: 1e+12
+  decimalPlaces: 0

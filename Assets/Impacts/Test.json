@@ -1,0 +1,151 @@
+{
+	"categories": [
+		{
+			"id": 1,
+			"name": "Energy",
+			"items": [
+				{
+					"id": 1,
+					"name": "Cables / Pipelines",
+					"icon": "Energy"
+				},
+				{
+					"id": 2,
+					"name": "Wind Farm",
+					"icon": "Energy"
+				}
+			]
+		},
+		{
+			"id": 2,
+			"name": "Ecology",
+			"items": [
+				{
+					"id": 5,
+					"name": "Biomass 1",
+					"icon": "Ecology"
+				}
+			]
+		},
+		{
+			"id": 3,
+			"name": "Shipping",
+			"items": [
+				{
+					"id": 3,
+					"name": "Routes",
+					"icon": "Shipping"
+				},
+				{
+					"id": 4,
+					"name": "Intensity",
+					"icon": "Shipping"
+				}
+			]
+		},
+		{
+			"id": 4,
+			"name": "General"
+		}
+	],
+	"links": [
+		{
+			"fromId": 1,
+			"toId": 2,
+			"lines": [
+				{
+					"impactId": 1,
+					"thickness": 7,
+					"title": "Title of Impact",
+					"description": "REVERSE WHY DOES THIS IMPACT, MAX OF X CHARACTERS"
+				},
+				{
+					"impactId": 2,
+					"thickness": 3,
+					"title": "Title of Impact",
+					"description": "REVERSE WHY DOES THIS IMPACT, MAX OF X CHARACTERS"
+				}
+			]
+		},
+		{
+			"fromId": 2,
+			"toId": 1,
+			"lines": [
+				{
+					"impactId": 3,
+					"thickness": 5,
+					"title": "Title of Impact",
+					"description": "WHY DOES THIS IMPACT, MAX OF X CHARACTERSS"
+				}
+			]
+		},
+		{
+			"fromId": 3,
+			"toId": 4,
+			"lines": [
+				{
+					"impactId": 1,
+					"thickness": 2,
+					"title": "Title of Impact",
+					"description": "WHY DOES THIS IMPACT, MAX OF X CHARACTERS"
+				},
+				{
+					"impactId": 2,
+					"thickness": 2,
+					"title": "Title of Impact",
+					"description": "REVERSE WHY DOES THIS IMPACT, MAX OF X CHARACTERS"
+				}
+			]
+		},
+		{
+			"fromId": 2,
+			"toId": 3,
+			"lines": [
+				{
+					"impactId": 2,
+					"thickness": 2,
+					"title": "Title of Impact",
+					"description": "WHY DOES THIS IMPACT, MAX OF X CHARACTERS"
+				},
+				{
+					"impactId": 3,
+					"thickness": 2,
+					"title": "Title of Impact",
+					"description": "REVERSE WHY DOES THIS IMPACT, MAX OF X CHARACTERS"
+				}
+			]
+		},
+		{
+			"fromId": 5,
+			"toId": 4,
+			"lines": [
+				{
+					"impactId": 2,
+					"thickness": 2,
+					"title": "Title of Impact",
+					"description": "WHY DOES THIS IMPACT, MAX OF X CHARACTERS"
+				}
+			]
+		}
+	],
+	"impactTypes": [
+		{
+			"id": 1,
+			"type": "NEUTRAL",
+			"iconIndicator": "ARROW",
+			"iconAmount": 2
+		},
+		{
+			"id": 2,
+			"type": "POSITIVE",
+			"iconIndicator": "ARROW",
+			"iconAmount": 2
+		},
+		{
+			"id": 3,
+			"type": "NEGATIVE",
+			"iconIndicator": "ARROW",
+			"iconAmount": 2
+		}
+	]
+}
