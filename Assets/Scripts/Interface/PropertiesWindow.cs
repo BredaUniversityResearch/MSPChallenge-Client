@@ -82,11 +82,14 @@ public class PropertiesWindow : MonoBehaviour
         List<EntityType> entityTypes;
 		RasterLayer rasterLayer = entity.Layer as RasterLayer;
 		EntityType entityType = null;
-		float rasterValue = 0;
+		float? rasterValue = null;
 		if (rasterLayer != null)
 		{
 			rasterValue = rasterLayer.GetRasterValueAt(worldSamplePosition);
-			entityType = rasterLayer.GetEntityTypeForRasterValue(rasterValue);
+			if (rasterValue != null)
+			{
+				entityType = rasterLayer.GetEntityTypeForRasterValue(rasterValue.Value);
+			}
 		}
 		if (entityType != null)
 		{
@@ -154,7 +157,10 @@ public class PropertiesWindow : MonoBehaviour
             AddEntry(debugInfoParent, "MSP ID", subEntity.GetMspID().ToString());
 			AddEntry(debugInfoParent, "Persistent ID", subEntity.GetPersistentID().ToString());
 			AddEntry(debugInfoParent, "Database ID", subEntity.GetDatabaseID().ToString());
-			AddEntry(debugInfoParent, "Raster value", rasterValue.ToString());
+			if (rasterValue != null)
+			{
+				AddEntry(debugInfoParent, "Raster value", rasterValue.ToString());	
+			}
 		}
 		else
 			debugInfoParent.gameObject.SetActive(false);

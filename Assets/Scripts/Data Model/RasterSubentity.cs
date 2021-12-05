@@ -63,7 +63,8 @@ public class RasterSubentity : SubEntity
 				spriteRenderer.material,
 				sourceLayer.GetEntityTypesSortedByValue(),
 				sourceLayer.rasterObject.layer_raster_color_interpolation,
-				sourceLayer.rasterValueToEntityValueMultiplier
+				sourceLayer.rasterValueToEntityValueMultiplier,
+				sourceLayer.rasterObject.layer_raster_minimum_value_cutoff
 			);
 		}
 	   
@@ -182,7 +183,7 @@ public class RasterSubentity : SubEntity
 		}
 	}
 
-	private void SetupColorGradient(Material targetMaterial, List<EntityType> layerEntityTypesSortedByValue, ERasterColorInterpolationMode interpolationMode, float rasterValueToEntityValueMultiplier)
+	private void SetupColorGradient(Material targetMaterial, List<EntityType> layerEntityTypesSortedByValue, ERasterColorInterpolationMode interpolationMode, float rasterValueToEntityValueMultiplier, float rasterMinimumValueCutoff)
 	{
 		if (colorGradient == null)
 		{
@@ -192,12 +193,16 @@ public class RasterSubentity : SubEntity
 				wrapMode = TextureWrapMode.Clamp
 			};
 		}
-
-		// note MH: 0 is black, which should not map to a entity type value at all.
-		for (int i = 1; i < GRADIENT_RESOLUTION; ++i)
+		
+		for (int i = 0; i < GRADIENT_RESOLUTION; ++i)
 		{
 			float value = (i / (float) (GRADIENT_RESOLUTION - 1)) * rasterValueToEntityValueMultiplier;
 			value = Mathf.Clamp(value, 0.0f, rasterValueToEntityValueMultiplier);
+			// note MH: below cutoff value should not be mapped to a entity type
+			if (value < rasterMinimumValueCutoff)
+			{
+				continue;
+			}
 
 			EntityType lowBound = layerEntityTypesSortedByValue[0];
 			EntityType highBound = layerEntityTypesSortedByValue[0];

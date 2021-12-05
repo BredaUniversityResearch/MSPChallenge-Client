@@ -227,7 +227,6 @@ public class RasterLayer : Layer<RasterEntity>
 
 	private Vector2 GetTextureUVForWorldPosition(Vector2 screenPos)
 	{
-	
 		Vector2 texturePos = screenPos;
 		texturePos.x -= offset.x;
 		texturePos.y -= offset.y;
@@ -261,48 +260,53 @@ public class RasterLayer : Layer<RasterEntity>
 		return viewingRaster.GetPixelBilinear(u, v).r;
 	}
 
-	public float GetRasterValueAt(Vector2 worldPosition)
+	public float? GetRasterValueAt(Vector2 worldPosition)
 	{
-		return GetValueAt(worldPosition).r * rasterValueToEntityValueMultiplier;
+		float rasterValue = GetValueAt(worldPosition).r * rasterValueToEntityValueMultiplier;
+		// note MH: below cutoff value should not be mapped to a entity type
+		if (rasterValue < rasterObject.layer_raster_minimum_value_cutoff)
+		{
+			return null;
+		}
+		return rasterValue;
 	}
 
-	public float GetRasterValueAt(int rasterSpaceX, int rasterSpaceY)
+	public float? GetRasterValueAt(int rasterSpaceX, int rasterSpaceY)
 	{
-		return viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r * rasterValueToEntityValueMultiplier;
+		float rasterValue = viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r * rasterValueToEntityValueMultiplier;
+		// note MH: below cutoff value should not be mapped to a entity type
+		if (rasterValue < rasterObject.layer_raster_minimum_value_cutoff)
+		{
+			return null;
+		}
+		return rasterValue;
 	}
 
 	[CanBeNull]
 	public EntityType GetEntityTypeForRasterAt(Vector2 worldPosition)
 	{
-		float rasterValue = GetRasterValueAt(worldPosition);
-		// note MH: 0 is not a value that should be mapped to a entity type
-		if (rasterValue < Single.Epsilon)
+		float? rasterValue = GetRasterValueAt(worldPosition);
+		if (null == rasterValue)
 		{
 			return null;
 		}
-		return GetEntityTypeForRasterValue(rasterValue);
+		return GetEntityTypeForRasterValue(rasterValue.Value);
 	}
 
 	[CanBeNull]
 	public EntityType GetEntityTypeForRasterAt(int rasterSpaceX, int rasterSpaceY)
 	{
-		float rasterValue = GetRasterValueAt(rasterSpaceX, rasterSpaceY);
-		// note MH: 0 is not a value that should be mapped to a entity type
-		if (rasterValue < Single.Epsilon)
+		float? rasterValue = GetRasterValueAt(rasterSpaceX, rasterSpaceY);
+		if (null == rasterValue)
 		{
 			return null;
 		}
-		return GetEntityTypeForRasterValue(rasterValue);
+		return GetEntityTypeForRasterValue(rasterValue.Value);
 	}
 
 	[CanBeNull]
 	public EntityType GetEntityTypeForRasterValue(float rasterValue)
 	{
-		// note MH: 0 is not a value that should be mapped to a entity type
-		if (rasterValue < Single.Epsilon)
-		{
-			return null;
-		}
 		EntityType previousType = entityTypesSortedByValue[0];
 		EntityType result = previousType;
 		for (int i = 1; i < entityTypesSortedByValue.Count; ++i)
@@ -359,6 +363,11 @@ public class RasterLayer : Layer<RasterEntity>
 
 	public override Entity GetEntityAt(Vector2 position)
 	{
+		// note MH: no valid raster value, no entity
+		if (null == GetRasterValueAt(position))
+		{
+			return null;
+		}
 		if (Entities != null)
 		{
 			if (Entities[0] != null)
