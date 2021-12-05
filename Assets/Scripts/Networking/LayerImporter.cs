@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 public class LayerImporter
 {
-    public delegate void DoneImporting();
+	public delegate void DoneImporting();
     public static event DoneImporting OnDoneImporting;
 
 	static int importedLayers;
@@ -153,7 +153,7 @@ public class LayerImporter
 		
 		//stopWatch = new Stopwatch();
 		//stopWatch.Start();
-
+		selectedLayerIDs.Shuffle();
 		foreach (int selectedLayerID in selectedLayerIDs)
 		{
 			AbstractLayer layer = LayerManager.GetLayerByID(selectedLayerID);
