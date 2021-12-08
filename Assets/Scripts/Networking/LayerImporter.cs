@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 public class LayerImporter
 {
-	public delegate void DoneImporting();
+    public delegate void DoneImporting();
     public static event DoneImporting OnDoneImporting;
 
 	static int importedLayers;
@@ -145,6 +145,11 @@ public class LayerImporter
 
 	public static void ImportLayers(List<int> selectedLayerIDs)
 	{
+		// only allow a single request during loading of layers, to minimize the load on the server - think of multiple clients starting simultaneously
+		ServerCommunication.maxRequests = 1;
+		// to be restored to the default number of requests, once all layers have been loaded
+		OnDoneImporting += () => ServerCommunication.maxRequests = ServerCommunication.DEFAULT_MAX_REQUESTS;
+
 		IsCurrentlyImportingLayers = true;
 
         string layerName = LayerManager.GetLayerByID(selectedLayerIDs[0]).FileName;
@@ -153,7 +158,6 @@ public class LayerImporter
 		
 		//stopWatch = new Stopwatch();
 		//stopWatch.Start();
-		selectedLayerIDs.Shuffle();
 		foreach (int selectedLayerID in selectedLayerIDs)
 		{
 			AbstractLayer layer = LayerManager.GetLayerByID(selectedLayerID);

@@ -16,6 +16,9 @@ public static class ServerCommunication
 	public static readonly int[] REQUEST_TIMEOUT = { 1, 10, 30 };
 	public enum EWebRequestFailureResponse { Log, Error, Crash }
 
+	public const uint DEFAULT_MAX_REQUESTS = 5;
+	public static uint maxRequests = DEFAULT_MAX_REQUESTS;
+
 	public abstract class ARequest
 	{
 		public UnityWebRequest Www;
@@ -328,7 +331,7 @@ public static class ServerCommunication
 			tokenHandler.Update();
 		}
 
-		while (requestsQueue.Count > 0 && requests.Count < 5)
+		while (requestsQueue.Count > 0 && requests.Count < maxRequests)
 		{
 			ARequest r = requestsQueue.Dequeue();
 
