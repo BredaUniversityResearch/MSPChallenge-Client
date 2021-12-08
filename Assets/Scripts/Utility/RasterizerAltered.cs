@@ -96,20 +96,6 @@ class RasterizerAltered
         }
     }
 
-    public static void AddLayerToRaster(RasterLayer layer, ref float[,] raster)
-    {
-        //foreach(var kvp in layer.EntityTypes)
-        //if(kvp.Value.investmentCost == 0)
-        //    Debug.Log(layer.FileName);
-        for (int x = 0; x < 1024; x++)
-        for (int y = 0; y < 1024; y++)
-        {
-                EntityType type = layer.GetEntityTypeForRasterAt(x, y);
-                raster[x, y] *= type.investmentCost;
-                //raster[x, y] = layer.SampleIntensityAtTexturePosition(x,y);
-        }
-    }
-
     /// <summary>
     /// Gets the bounds of a polygon. Returned rect is non-rotated.
     /// </summary>

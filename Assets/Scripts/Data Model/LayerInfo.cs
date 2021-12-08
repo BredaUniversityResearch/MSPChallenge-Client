@@ -170,6 +170,7 @@ public class LayerMeta
 		layer_editing_type = "";
 		layer_special_entity_type = ELayerSpecialEntityType.Default;
 		layer_filecreationtime = -1;
+		layer_entity_value_max = null;
 	}
 
 	public int layer_id { get; set; }
@@ -202,6 +203,7 @@ public class LayerMeta
 	public ELayerSpecialEntityType layer_special_entity_type { get; set; }
 	public int layer_green { get; set; }
 	public int layer_filecreationtime { get; set; }
+	public float? layer_entity_value_max { get; set; }
 }
 
 public class LayerStateObject
