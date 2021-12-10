@@ -110,11 +110,6 @@ public static class Server
 		return "api/game/latest";
 	}
 
-	public static string Tick()
-	{
-		return "api/game/Tick";
-	}
-
 	public static string DeleteLayer()
 	{
 		return "api/layer/Delete";

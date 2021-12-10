@@ -83,6 +83,7 @@ public class Main : MonoBehaviour
 				NetworkForm form = new NetworkForm();
 				form.AddField("session_id", TeamManager.CurrentSessionID);
 				ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, CloseSessionSuccess, CloseSessionFail);
+				UpdateData.StopWsServerCommunication();
 				//StartCoroutine(QuitAtEndOfFrame());
 			}
             return !interceptQuit;

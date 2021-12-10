@@ -48,36 +48,37 @@ public static class ServerCommunication
 			this.successCallback = successCallback;
 		}
 
+		public T ToObject(JToken payload)
+		{
+			JsonSerializer serializer = new JsonSerializer();
+			serializer.Converters.Add(new JsonConverterBinaryBool());
+			return payload.ToObject<T>(serializer);
+		}
+
 		public override void ProcessPayload(JToken payload)
 		{
-			////If we expect a string, return the payload directly
-			//if(payload is T)
-			//{
-			//	if (successCallback != null)
-			//		successCallback.Invoke((T)Convert.ChangeType(payload, typeof(T)));
-			//	return;
-			//}
-			bool success = false;
 			T payloadContent = default(T);
 			try
 			{
 				//Parse payload to expected type
-				//T payloadContent = JsonConvert.DeserializeObject<T>(payload);
-
-				//T payloadContent = payload.ToObject<T>();
-
-				JsonSerializer serializer = new JsonSerializer();
-				serializer.Converters.Add(new JsonConverterBinaryBool());
-				payloadContent = payload.ToObject<T>(serializer);
-				success = true;
+				payloadContent = ToObject(payload);
 			}
 			catch (System.Exception e)
 			{
 				//Or invoke the failure callback if that fails
 				failureCallback.Invoke(this, $"Failed to deserialize results from {Url}: {payload.ToString()}\nMessage: {e.Message}");
+				return;
 			}
-			if (success && successCallback != null)
-				successCallback.Invoke(payloadContent);
+			ProcessPayload(payloadContent);
+		}
+
+		public void ProcessPayload(T payloadContent)
+		{
+			if (successCallback == null)
+			{
+				return;
+			}
+			successCallback.Invoke(payloadContent);
 		}
 	}
 

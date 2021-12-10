@@ -2,8 +2,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Networking;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
+using Websocket.Client;
 
 public static class UpdateData
 {
@@ -14,22 +16,33 @@ public static class UpdateData
 	public static double LastUpdateTimeStamp => lastUpdateTimestamp;
 	public static UpdateObject lastUpdate;
 	public static bool stopProcessingUpdates = false;
+	
+	private static WsServerCommunication m_Comm;
 
 	public static IEnumerator GetFirstUpdate()
 	{
 		canUpdate = false;
-		NetworkForm form = new NetworkForm();
-		form.AddField("team_id", TeamManager.CurrentUserTeamID);
-		form.AddField("last_update_time", lastUpdateTimestamp.ToString(Localisation.NumberFormatting));
-		form.AddField("user", TeamManager.CurrentSessionID.ToString());
-		ServerCommunication.DoRequest<UpdateObject>(Server.Update(), form, HandleUpdateSucessCallback, HandleUpdateFailCallback);
+		m_Comm = new WsServerCommunication(
+			Server.GameSessionId,
+			TeamManager.CurrentUserTeamID,
+			TeamManager.CurrentSessionID.ToString(),
+			HandleUpdateSuccessCallback
+		);
+		m_Comm.Start();
 
 		while (!canUpdate)
 		{
 			yield return null;
 		}
 
+		ProcessUpdates(lastUpdate);
+		HideDisconnectedDialogBox();
 		Main.FirstUpdateTickComplete();
+	}
+
+	public static void StopWsServerCommunication()
+	{
+		m_Comm.Stop();
 	}
 
 	public static IEnumerator GetUpdates()
@@ -37,40 +50,22 @@ public static class UpdateData
 		while (true)
 		{
 			canUpdate = false;
-			NetworkForm form = new NetworkForm();
-			form.AddField("team_id", TeamManager.CurrentUserTeamID);
-			form.AddField("last_update_time", lastUpdateTimestamp.ToString(Localisation.NumberFormatting));
-			form.AddField("user", TeamManager.CurrentSessionID.ToString());
-			ServerCommunication.DoRequest<UpdateObject>(Server.Update(), form, HandleUpdateSucessCallback, HandleUpdateFailCallback);
-
 			while (!canUpdate)
 			{
 				yield return null;
 			}
-
+			
+			ProcessUpdates(lastUpdate);
+			HideDisconnectedDialogBox();
+	
 			yield return new WaitForSeconds(updateSpeed);
 		}
 	}
-
-	public class TickResult
+	
+	private static void HandleUpdateSuccessCallback(UpdateObject updateData)
 	{
-		public bool success;
-		public string message;
-		public string payload;
-	}
-
-	private static void HandleUpdateSucessCallback(UpdateObject updateData)
-	{
-		ProcessUpdates(updateData);
-		HideDisconnectedDialogBox();
 		canUpdate = true;
-	}
-
-	private static void HandleUpdateFailCallback(ServerCommunication.ARequest request, string message)
-	{
-		ShowDisconnectedDialogBox();
-		Debug.LogError("Fetching update failed. Message: " + message);
-		canUpdate = true;
+		lastUpdate = updateData;
 	}
 
 	private static void ShowDisconnectedDialogBox()
@@ -482,6 +477,7 @@ public class UpdateObject
 	public WarningObject warning;
 	public List<ObjectiveObject> objectives;
 	public TimelineState tick;
+	public double prev_update_time;
 	public double update_time; //Timestamp received from the server at which this update was accurate.
 }
 
