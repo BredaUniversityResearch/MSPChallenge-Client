@@ -5,6 +5,12 @@ using System.Configuration;
 
 public static class Server
 {
+	public static Uri WsServerUri
+	{
+		get;
+		set;
+	}
+	
 	public static string Url
 	{
 		get;

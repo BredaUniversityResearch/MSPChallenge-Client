@@ -40,24 +40,21 @@ namespace Networking
             this.teamId = teamId;
             this.user = user;
             
-            var serverUri = new Uri(Server.Url);
             var factory = new Func<ClientWebSocket>(() =>
             {
                 var client = new ClientWebSocket {
                     Options = {
                         KeepAliveInterval = TimeSpan.FromSeconds(5),
-                        // Proxy = new WebProxy(serverUri.Host, 8888)
-                        // ClientCertificates = ...
+                        //Proxy = new WebProxy(Server.WsServerUri.Host, 8888)
+                        //ClientCertificates = ...
                     }
                 };
                 //client.Options.SetRequestHeader("Origin", "xxx");
                 return client;
             });
-
-            var scheme = serverUri.Scheme == "https" ? "wss" : "ws";
-            var url = new Uri(scheme + "://" + serverUri.Host + "/ws/");
-            m_client = new WebsocketClient(url, factory);
-            m_client.ErrorReconnectTimeout = TimeSpan.FromSeconds(30);
+            
+            m_client = new WebsocketClient(Server.WsServerUri, factory);
+            m_client.ErrorReconnectTimeout = TimeSpan.FromSeconds(5);
             m_client.ReconnectionHappened.Subscribe(reconnectionInfo =>
             {
                 if (!m_client.IsStarted)
@@ -90,7 +87,7 @@ namespace Networking
 				}
 				catch (System.Exception e)
 				{
-					Debug.LogError($"Error deserializing message from request to url: {url}\nError message: {e.Message}");
+					Debug.LogError($"Error deserializing message from request to url: {Server.WsServerUri.AbsoluteUri}\nError message: {e.Message}");
 				}
 				if (processPayload)
 				{
@@ -126,8 +123,7 @@ namespace Networking
 
         public void Start()
         {
-	        m_client.Start().Wait(); // this is blocking, todo
-            SendStartingData();
+	        m_client.Start();
         }
 
         private void SendStartingData()
