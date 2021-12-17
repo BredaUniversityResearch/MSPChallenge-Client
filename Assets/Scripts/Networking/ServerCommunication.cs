@@ -540,4 +540,9 @@ public static class ServerCommunication
 	{
 		tokenHandler.SetAccessToken(responseApiToken, recoveryApiToken);
 	}
+
+	public static string GetApiAccessToken()
+	{
+		return tokenHandler.GetAccessToken();
+	}
 }

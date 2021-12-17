@@ -29,7 +29,7 @@ namespace Assets.Networking
 			public DateTime valid_until = DateTime.MinValue;
 		};
 
-		private static readonly TimeSpan TokenCheckInterval = new TimeSpan(0, 0, 30);
+		private static readonly TimeSpan TokenCheckInterval = new TimeSpan(0, 0, 15);
 
 		private string currentAccessToken = "";
 		private string recoveryToken = "";

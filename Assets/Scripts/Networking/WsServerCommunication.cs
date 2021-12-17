@@ -12,8 +12,10 @@ namespace Networking
 {
     public class WsServerCommunication
     {
-	    private int gameSessionId;
-        private int teamId;
+	    public const string ApiTokenHeader = ServerCommunication.ApiTokenHeader;
+	    public const string GameSessionIdHeader = "GameSessionId";
+
+	    private int teamId;
         private string user;
         private double lastUpdateTimestamp = 0;
         private readonly IWebsocketClient m_client;
@@ -36,8 +38,7 @@ namespace Networking
         
         public WsServerCommunication(int gameSessionId, int teamId, string user, Action<UpdateObject> updateSuccessCallback)
         {
-	        this.gameSessionId = gameSessionId;
-            this.teamId = teamId;
+	        this.teamId = teamId;
             this.user = user;
             
             var factory = new Func<ClientWebSocket>(() =>
@@ -49,7 +50,8 @@ namespace Networking
                         //ClientCertificates = ...
                     }
                 };
-                //client.Options.SetRequestHeader("Origin", "xxx");
+                client.Options.SetRequestHeader(ApiTokenHeader, ServerCommunication.GetApiAccessToken());
+                client.Options.SetRequestHeader(GameSessionIdHeader, gameSessionId.ToString());
                 return client;
             });
             
@@ -129,7 +131,6 @@ namespace Networking
         private void SendStartingData()
         {
 			dynamic obj = new JObject();
-			obj.game_session_id = gameSessionId;
 			obj.team_id = teamId;
 			obj.user = user;
 			obj.last_update_time = lastUpdateTimestamp;
