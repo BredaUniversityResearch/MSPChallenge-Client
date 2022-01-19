@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.WebSockets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -45,9 +46,7 @@ namespace Networking
             {
                 var client = new ClientWebSocket {
                     Options = {
-                        KeepAliveInterval = TimeSpan.FromSeconds(5),
-                        //Proxy = new WebProxy(Server.WsServerUri.Host, 8888)
-                        //ClientCertificates = ...
+                        KeepAliveInterval = TimeSpan.FromSeconds(5)
                     }
                 };
                 client.Options.SetRequestHeader(ApiTokenHeader, ServerCommunication.GetApiAccessToken());
