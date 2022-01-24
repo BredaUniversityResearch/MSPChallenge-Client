@@ -200,7 +200,7 @@ public class KPICategoryPopulator: MonoBehaviour
 
 			if (bar != null)
 			{
-				bar.SetStartValue((float)value.GetKpiValueForMonth(0));
+				bar.SetStartValue((float)value.GetKpiValueForMonth(-1));
 				bar.SetActual((float)value.GetKpiValueForMonth(month), value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId);
 			}
 			else
