@@ -56,7 +56,11 @@ public class RasterSubentity : SubEntity
 			gameObject.transform.localPosition = offset;
 
 			spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-			spriteRenderer.material.SetFloat("_ValueCutoff", sourceLayer.rasterObject.layer_raster_minimum_value_cutoff);
+
+			spriteRenderer.material.SetFloat("_ValueCutoff",
+				sourceLayer.rasterObject.layer_raster_minimum_value_cutoff /
+				sourceLayer.rasterValueToEntityValueMultiplier
+			);
 			spriteRenderer.material.SetTexture("_Dither", MaterialManager.GetPatternOrDefault(sourceLayer.rasterObject.layer_raster_pattern));
 			SetRenderPatternOffset(materialPatternOffset);
 			SetupColorGradient(
