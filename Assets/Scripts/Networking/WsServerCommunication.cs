@@ -104,6 +104,7 @@ namespace Networking
 							return;
 						}
 						// last update time matches, update it to the new one given by the server, continue processing
+						Debug.Log("got update, prev: " + lastUpdateTimestamp + ", new: " + updateObject.update_time);
 						lastUpdateTimestamp = updateObject.update_time;
 					}
 					catch (System.Exception e)
