@@ -401,18 +401,20 @@ public class RasterLayer : Layer<RasterEntity>
 
 	public override SubEntity GetSubEntityAt(Vector2 position)
 	{
-		if (IsWithinRasterBounds(position))
+		if (!IsWithinRasterBounds(position))
 		{
-			if (GetValueAt(position).r >= rasterObject.layer_raster_minimum_value_cutoff)
-			{
-				if (Entities != null && Entities[0] != null)
-				{
-					if (Entities[0].rasterSubentity[0] != null)
-					{
-						return Entities[0].rasterSubentity[0];
-					}
-				}
-			}
+			return null;
+		}
+
+		float rasterValue = GetValueAt(position).r * rasterValueToEntityValueMultiplier;
+		if (rasterValue < rasterObject.layer_raster_minimum_value_cutoff)
+		{
+			return null;
+		}
+
+		if (Entities != null && Entities[0] != null && Entities[0].rasterSubentity[0] != null)
+		{
+			return Entities[0].rasterSubentity[0];
 		}
 
 		return null;

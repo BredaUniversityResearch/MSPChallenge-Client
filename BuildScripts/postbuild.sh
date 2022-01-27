@@ -1,0 +1,2 @@
+env
+jq . < build.json
