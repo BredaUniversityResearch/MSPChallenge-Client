@@ -30,8 +30,8 @@ public class Options : MonoBehaviour
 	// Other
 	public Toggle developerModeToggle;
     public TextMeshProUGUI buildDateText;
-	//public TextMeshProUGUI buildRevisionText;
-	public TextMeshProUGUI apiEndpointText;
+	public TextMeshProUGUI buildRevisionText;
+	//public TextMeshProUGUI apiEndpointText;
 
     public Button cancel, accept;
 
@@ -64,7 +64,7 @@ public class Options : MonoBehaviour
 		uiScale.m_onRelease.AddListener(OnUIScaleSliderUp);
 
 		SetBuildInformation();
-		SetAPIEndpointInfo();
+		//SetAPIEndpointInfo();
 		SetOptions();
 	}
 
@@ -106,14 +106,14 @@ public class Options : MonoBehaviour
 		if (identifier != null)
 		{
 			buildDateText.text = identifier.GetBuildTime();
-			//buildRevisionText.text = identifier.GetSvnRevisionNumber().ToString();
+			buildRevisionText.text = identifier.GetGitTag();
 		}
 	}
 
-	private void SetAPIEndpointInfo()
+	/*private void SetAPIEndpointInfo()
 	{
 		apiEndpointText.text = Server.Url;
-	}
+	}*/
 
 	private void SetOptions()
 	{
