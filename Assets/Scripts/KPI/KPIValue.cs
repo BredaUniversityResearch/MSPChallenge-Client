@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace KPI
@@ -16,7 +14,7 @@ namespace KPI
 		public readonly string unit;
 		public readonly Color graphColor;
 		public readonly int targetCountryId;
-		private readonly Dictionary<int, float> kpiValuesPerMonth;
+		private readonly float[] kpiValuesPerMonth;
 
 		public event Action<KPIValue> OnValueUpdated;
 
@@ -35,17 +33,13 @@ namespace KPI
 			graphColor = valueGraphColor;
 			this.targetCountryId = targetCountryId;
 			
-			kpiValuesPerMonth = new Dictionary<int, float>(numberOfKpiMonths);
-			for (int monthId = -1; monthId < numberOfKpiMonths-1; monthId++)
-			{
-				kpiValuesPerMonth[monthId] = 0;
-			}
-			MostRecentMonth = -1;
+			kpiValuesPerMonth = new float[numberOfKpiMonths];
+			MostRecentMonth = 0;
 		}
 
 		public void UpdateValue(int monthId, float value)
 		{
-			if (monthId >= -1 && monthId < kpiValuesPerMonth.Count-1)
+			if (monthId >= 0 && monthId < kpiValuesPerMonth.Length)
 			{
 				kpiValuesPerMonth[monthId] = value;
 				if (monthId > MostRecentMonth)
@@ -60,17 +54,17 @@ namespace KPI
 			}
 			else
 			{
-				Debug.LogWarning("Received KPI value (" + name + ") for month " + monthId + " which is out of bounds (-1, " + (kpiValuesPerMonth.Count-1) + ") and has been discarded");
+				Debug.LogWarning("Received KPI value (" + name + ") for month " + monthId + " which is out of bounds (0, " + kpiValuesPerMonth.Length + ") and has been discarded");
 			}
 		}
 
 		public float GetKpiValueForMonth(int monthId)
 		{
-			if (monthId >= -1 && monthId <= kpiValuesPerMonth.Count-1)
+			if (monthId >= 0 && monthId <= kpiValuesPerMonth.Length)
 			{
 				if (monthId > MostRecentMonth)
 				{
-					return kpiValuesPerMonth[monthId];
+					return kpiValuesPerMonth[MostRecentMonth];
 				}
 				return kpiValuesPerMonth[monthId];
 			}
