@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.WebSockets;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -11,61 +11,67 @@ using Websocket.Client;
 
 namespace Networking
 {
-    public class WsServerCommunication
-    {
-	    public const string ApiTokenHeader = ServerCommunication.ApiTokenHeader;
-	    public const string GameSessionIdHeader = "GameSessionId";
+	public class WsServerCommunication
+	{
+		private const string ApiTokenHeader = ServerCommunication.ApiTokenHeader;
+		private const string GameSessionIdHeader = "GameSessionId";
+		public bool? IsConnected = null;
 
-	    private int teamId;
-        private string user;
-        private double lastUpdateTimestamp = 0;
-        private readonly IWebsocketClient m_client;
+		private readonly int _teamId;
+		private readonly string _user;
+		private double _lastUpdateTimestamp = 0;
+		private readonly IWebsocketClient _client;
 
-        public class UpdateRequest : ServerCommunication.Request<UpdateObject>
-        {
-	        public UpdateRequest(string url, Action<UpdateObject> successCallback) :
-		        base(url, successCallback, HandleUpdateFailCallback, 1)
-	        {
-	        }
+		private class UpdateRequest : ServerCommunication.Request<UpdateObject>
+		{
+			public UpdateRequest(string url, Action<UpdateObject> successCallback) :
+				base(url, successCallback, HandleUpdateFailCallback, 1)
+			{
+			}
 
-	        public override void CreateRequest(Dictionary<string, string> defaultHeaders)
-	        {
-	        }
+			public override void CreateRequest(Dictionary<string, string> defaultHeaders)
+			{
+			}
 
-	        private static void HandleUpdateFailCallback(ServerCommunication.ARequest request, string message)
-	        {
-	        }
-        }
-        
-        public WsServerCommunication(int gameSessionId, int teamId, string user, Action<UpdateObject> updateSuccessCallback)
-        {
-	        this.teamId = teamId;
-            this.user = user;
-            
-            var factory = new Func<ClientWebSocket>(() =>
-            {
-                var client = new ClientWebSocket {
-                    Options = {
-                        KeepAliveInterval = TimeSpan.FromSeconds(5)
-                    }
-                };
-                client.Options.SetRequestHeader(ApiTokenHeader, ServerCommunication.GetApiAccessToken());
-                client.Options.SetRequestHeader(GameSessionIdHeader, gameSessionId.ToString());
-                return client;
-            });
-            
-            m_client = new WebsocketClient(Server.WsServerUri, factory);
-            m_client.ErrorReconnectTimeout = TimeSpan.FromSeconds(5);
-            m_client.ReconnectionHappened.Subscribe(reconnectionInfo =>
-            {
-                if (!m_client.IsStarted)
-                {
-                    return;
-                }
-                SendStartingData();
-            });
-            m_client.MessageReceived.Subscribe( responseMessage =>
-            {
+			private static void HandleUpdateFailCallback(ServerCommunication.ARequest request, string message)
+			{
+			}
+		}
+		
+		public WsServerCommunication(int gameSessionId, int teamId, string user, Action<UpdateObject> updateSuccessCallback)
+		{
+			this._teamId = teamId;
+			this._user = user;
+			
+			var factory = new Func<ClientWebSocket>(() =>
+			{
+				var client = new ClientWebSocket {
+					Options = {
+						KeepAliveInterval = TimeSpan.FromSeconds(5)
+					}
+				};
+				client.Options.SetRequestHeader(ApiTokenHeader, ServerCommunication.GetApiAccessToken());
+				client.Options.SetRequestHeader(GameSessionIdHeader, gameSessionId.ToString());
+				return client;
+			});
+			
+			_client = new WebsocketClient(Server.WsServerUri, factory);
+			_client.ErrorReconnectTimeout = TimeSpan.FromSeconds(5);
+			_client.DisconnectionHappened.Subscribe(x =>
+			{
+				IsConnected = false;
+			});
+			_client.ReconnectionHappened.Subscribe(reconnectionInfo =>
+			{
+				if (!_client.IsStarted)
+				{
+					return;
+				}
+				SendStartingData();
+				IsConnected = true;
+			});
+			_client.MessageReceived.Subscribe( responseMessage =>
+			{
 				MemoryTraceWriter traceWriter = new MemoryTraceWriter();
 				traceWriter.LevelFilter = System.Diagnostics.TraceLevel.Warning;
 				bool processPayload = false;
@@ -84,7 +90,10 @@ namespace Networking
 						},
 						Converters = new List<JsonConverter> { new JsonConverterBinaryBool() }
 					});
-					processPayload = result.success;
+					if (result != null)
+					{
+						processPayload = result.success;	
+					}
 				}
 				catch (System.Exception e)
 				{
@@ -98,14 +107,14 @@ namespace Networking
 						//Parse payload to expected type
 						UpdateObject updateObject = request.ToObject(result.payload);
 						// there is mismatch between the expected update time and given by the server
-						if (Math.Abs(updateObject.prev_update_time - lastUpdateTimestamp) > Double.Epsilon)
+						if (Math.Abs(updateObject.prev_update_time - _lastUpdateTimestamp) > Double.Epsilon)
 						{
 							SendStartingData(); // re-sync with server
 							return;
 						}
 						// last update time matches, update it to the new one given by the server, continue processing
-						Debug.Log("got update, prev: " + lastUpdateTimestamp + ", new: " + updateObject.update_time);
-						lastUpdateTimestamp = updateObject.update_time;
+						Debug.Log("got update, prev: " + _lastUpdateTimestamp + ", new: " + updateObject.update_time);
+						_lastUpdateTimestamp = updateObject.update_time;
 					}
 					catch (System.Exception e)
 					{
@@ -114,27 +123,27 @@ namespace Networking
 					}
 					request.ProcessPayload(result.payload);
 				}
-            });     
-        }
+			});     
+		}
 
-        public void Stop()
-        {
-	        m_client.Stop(WebSocketCloseStatus.NormalClosure, "Websocket connection closed");
-	        m_client.IsReconnectionEnabled = false;
-        }
+		public void Stop()
+		{
+			_client.Stop(WebSocketCloseStatus.NormalClosure, "Websocket connection closed");
+			_client.IsReconnectionEnabled = false;
+		}
 
-        public void Start()
-        {
-	        m_client.Start();
-        }
+		public void Start()
+		{
+			_client.Start();
+		}
 
-        private void SendStartingData()
-        {
+		private void SendStartingData()
+		{
 			dynamic obj = new JObject();
-			obj.team_id = teamId;
-			obj.user = user;
-			obj.last_update_time = lastUpdateTimestamp;
-			m_client.Send(obj.ToString());
-        }
-    }
+			obj.team_id = _teamId;
+			obj.user = _user;
+			obj.last_update_time = _lastUpdateTimestamp;
+			_client.Send(obj.ToString());
+		}
+	}
 }

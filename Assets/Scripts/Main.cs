@@ -1,13 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using ClipperLib;
-using GeoJSON.Net.Feature;
 using UnityEngine.Audio;
-using Newtonsoft.Json;
 using DotSpatial.Projections;
-using UnityEngine.Networking;
 
 public class Main : MonoBehaviour
 {

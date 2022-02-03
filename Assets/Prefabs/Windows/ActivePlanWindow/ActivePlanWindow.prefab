@@ -148,6 +148,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -196,6 +197,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 0
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -267,21 +269,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: Move the game view to view the plan
-  timeBeforeShowing: 0.5
-  passClickToParent: 1
---- !u!114 &3129097414976822021
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5024717642765570075}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  text: Only show geometry that was changed by the plan.
   timeBeforeShowing: 0.5
   passClickToParent: 1
 --- !u!1 &277237557
@@ -365,6 +352,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -440,6 +428,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -455,51 +444,6 @@ MonoBehaviour:
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
   colourAsset: {fileID: 11400000, guid: a4b951e863d8ad740bc98f7f693e1708, type: 2}
---- !u!114 &8172851595292730310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8728852309978233711}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_AllowSwitchOff: 1
---- !u!114 &7450775836519999172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6228180121847565646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  text: "The team that owns the selected geometry. \nThis is only visible and changeable
-    to admins."
-  timeBeforeShowing: 0.5
-  passClickToParent: 1
---- !u!114 &7997807055231749292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5024717642293355239}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  text: Shows the state state of the world right after the plan's implementatrion,
-    indicating any changes.
-  timeBeforeShowing: 0.5
-  passClickToParent: 1
 --- !u!1 &894597165
 GameObject:
   m_ObjectHideFlags: 0
@@ -560,6 +504,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -718,6 +663,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &1803543121
 GameObject:
   m_ObjectHideFlags: 0
@@ -779,6 +725,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0.6413793, b: 0, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -828,6 +775,10 @@ GameObject:
   - component: {fileID: 8060215621421758245}
   - component: {fileID: 8284208108098344673}
   - component: {fileID: 5399413594146347177}
+  - component: {fileID: 5555103196020299981}
+  - component: {fileID: 4417892983007040831}
+  - component: {fileID: 1184471476784440253}
+  - component: {fileID: 7532372643570559681}
   m_Layer: 5
   m_Name: EditPlanButton
   m_TagString: Untagged
@@ -878,6 +829,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -926,6 +878,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 0
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -999,6 +952,69 @@ MonoBehaviour:
   text: Edit the plan's layers.
   timeBeforeShowing: 0.5
   passClickToParent: 1
+--- !u!225 &5555103196020299981
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823725835635407520}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &4417892983007040831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823725835635407520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 461c23c276b14a0f8cd5c3134469a2e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  alphaFactorOnStart: 1
+  alphaFactorOnConnected: 1
+  alphaFactorOnDisconnected: 0.2
+  interactableOnStart: 1
+  interactableOnConnected: 1
+  interactableOnDisconnected: 0
+  blockRaycastsOnStart: 1
+  blockRaycastsOnConnected: 1
+  blockRaycastsOnDisconnected: 1
+--- !u!114 &1184471476784440253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823725835635407520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acc5f1d4700f4239816b341c2ac14d41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textOnStart: Edit the plan's layers.
+  textOnConnected: Edit the plan's layers.
+  textOnDisconnected: Server connection lost, connection required to edit  a plan
+--- !u!114 &7532372643570559681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823725835635407520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70d417fe6a574195a65729e40477db5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useHighlightColorOnStart: 1
+  useHighlightColorOnConnected: 1
+  useHighlightColorOnDisconnected: 0
 --- !u!1 &3189469586863680749
 GameObject:
   m_ObjectHideFlags: 0
@@ -1060,6 +1076,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.33333334, g: 0.33333334, b: 0.33333334, a: 0.7490196}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1155,6 +1172,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1170,169 +1188,6 @@ MonoBehaviour:
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
   colourAsset: {fileID: 11400000, guid: a4b951e863d8ad740bc98f7f693e1708, type: 2}
---- !u!114 &7449438402778714891
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1130452131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  text: Shows the state of the world before right before the plan, without any of
-    its changes.
-  timeBeforeShowing: 0.5
-  passClickToParent: 1
---- !u!223 &8034613701159084395
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2146405878566751889}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 2
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
---- !u!114 &3921859383615896790
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2146405878566751889}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 823
---- !u!114 &4490285192241103358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2146405878566751889}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eca2ab9eae279e34f83c9a7f3d8aee9c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  window: {fileID: 1041011255717171675}
-  startEditingButton: {fileID: 8060215621421758245}
-  countryBall: {fileID: 1803543124}
-  planNameAndDate: {fileID: 894597167}
-  zoomToPlanButton: {fileID: 106946817}
-  viewModeSection: {fileID: 1354612190612987124}
-  viewAllToggle: {fileID: 2982038446927389018}
-  viewPlanToggle: {fileID: 2982038446321472422}
-  viewBaseToggle: {fileID: 7843359841954551582}
-  layerSection: {fileID: 731215103}
-  layerParent: {fileID: 135501740}
-  layerPrefab: {fileID: 1223543135568774, guid: 486530cc4d1f50e43a804a73092d7ac5,
-    type: 3}
-  layerToggleGroup: {fileID: 731214849}
-  layerTypeSection: {fileID: 2580286556167361881}
-  layerTypeParent: {fileID: 2580286555588703754}
-  layerTypePrefabSingle: {fileID: 1200090673255596, guid: 43c18f2dbfb75f441a9b95f19111b49f,
-    type: 3}
-  layerTypePrefabMulti: {fileID: 1568098358297138, guid: bf579ba625b26e54f99fcd984da4355d,
-    type: 3}
-  layerTypeToggleGroup: {fileID: 2580286556167361959}
-  countrySection: {fileID: 8728852309978233711}
-  countryParent: {fileID: 8787366244998121441}
-  countryPrefab: {fileID: 1066243670478430, guid: f302b3d175ca03b46accd249297b042e,
-    type: 3}
-  countryPrefabMultiple: {fileID: 1179783134384690, guid: 41943e53fe2f7aa4cbca00177c79fe99,
-    type: 3}
-  countryToggleGroup: {fileID: 8172851595292730310}
-  parameterSection: {fileID: 4161353251543005195}
-  parameterParent: {fileID: 4161353252038105944}
-  parameterPrefab: {fileID: 1810987650828550, guid: c9ff820ba74dd804b917fbff5fca6e68,
-    type: 3}
---- !u!114 &4188038608954019052
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 300644659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  text: The layers in the current plan. Select layers to edit their geometry.
-  timeBeforeShowing: 0.5
-  passClickToParent: 1
---- !u!114 &277089435779601890
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4431929761557686997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  text: The selected View Mode determines what geometry is displayed on the map and
-    how.
-  timeBeforeShowing: 0.5
-  passClickToParent: 1
---- !u!114 &3255701525926111234
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2580286555737053333}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  text: "The types present on the selected layer. \nSelect the desired type(s) before
-    drawing new geometry. \nEdit the type of existing geometry by selecting the geometry
-    in edit mode and clicking the desired type."
-  timeBeforeShowing: 0.5
-  passClickToParent: 1
---- !u!114 &2498635670445305781
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4161353252452775367}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  text: "Special parameters available for the selected layer.\nSet the desired parameter
-    value before drawing new geometry. \nEdit the parameter value of existing geometry
-    by selecting the geometry in edit mode and changing the parameter."
-  timeBeforeShowing: 0.5
-  passClickToParent: 1
 --- !u!1001 &173098591
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2736,6 +2591,21 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 173098591}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3129097414976822021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5024717642765570075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: Only show geometry that was changed by the plan.
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &704631508
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3015,6 +2885,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1e78222f2c175c947a5c42aee3b00093, type: 3}
+--- !u!1 &8728852309978233711 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8728852309572217275, guid: 1e78222f2c175c947a5c42aee3b00093,
+    type: 3}
+  m_PrefabInstance: {fileID: 704631508}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &6228180121847565646 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6228180122220912538, guid: 1e78222f2c175c947a5c42aee3b00093,
@@ -3027,12 +2903,35 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 704631508}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &8728852309978233711 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8728852309572217275, guid: 1e78222f2c175c947a5c42aee3b00093,
-    type: 3}
-  m_PrefabInstance: {fileID: 704631508}
+--- !u!114 &8172851595292730310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8728852309978233711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AllowSwitchOff: 1
+--- !u!114 &7450775836519999172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6228180121847565646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: "The team that owns the selected geometry. \nThis is only visible and changeable
+    to admins."
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &779613347
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4441,6 +4340,22 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 779613347}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7997807055231749292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5024717642293355239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: Shows the state state of the world right after the plan's implementatrion,
+    indicating any changes.
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &5024717641808216807
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5795,6 +5710,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ca1579357a991df468a856b821f47379, type: 3}
+--- !u!1 &1130452131 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5024717642938668612, guid: ca1579357a991df468a856b821f47379,
+    type: 3}
+  m_PrefabInstance: {fileID: 5024717641808216807}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &7843359841954551582 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2982038446159025657, guid: ca1579357a991df468a856b821f47379,
@@ -5807,12 +5728,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eeaa0bb0be42908448050e0e12b1e3be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1130452131 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5024717642938668612, guid: ca1579357a991df468a856b821f47379,
-    type: 3}
-  m_PrefabInstance: {fileID: 5024717641808216807}
+--- !u!114 &7449438402778714891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130452131}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: Shows the state of the world before right before the plan, without any of
+    its changes.
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &5556979559763869866
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5853,7 +5784,7 @@ PrefabInstance:
     - target: {fileID: 3920311631457822994, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_RootOrder
-      value: 8
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4114593782919656793, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
@@ -6058,7 +5989,7 @@ PrefabInstance:
     - target: {fileID: 6971843287891775716, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_RootOrder
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7736977730879113837, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
@@ -6952,6 +6883,88 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 5556979559763869866}
   m_PrefabAsset: {fileID: 0}
+--- !u!223 &8034613701159084395
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2146405878566751889}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!114 &3921859383615896790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2146405878566751889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 823
+--- !u!114 &4490285192241103358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2146405878566751889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eca2ab9eae279e34f83c9a7f3d8aee9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  window: {fileID: 1041011255717171675}
+  startEditingButton: {fileID: 8060215621421758245}
+  countryBall: {fileID: 1803543124}
+  planNameAndDate: {fileID: 894597167}
+  zoomToPlanButton: {fileID: 106946817}
+  viewModeSection: {fileID: 1354612190612987124}
+  viewAllToggle: {fileID: 2982038446927389018}
+  viewPlanToggle: {fileID: 2982038446321472422}
+  viewBaseToggle: {fileID: 7843359841954551582}
+  layerSection: {fileID: 731215103}
+  layerParent: {fileID: 135501740}
+  layerPrefab: {fileID: 1223543135568774, guid: 486530cc4d1f50e43a804a73092d7ac5,
+    type: 3}
+  layerToggleGroup: {fileID: 731214849}
+  layerTypeSection: {fileID: 2580286556167361881}
+  layerTypeParent: {fileID: 2580286555588703754}
+  layerTypePrefabSingle: {fileID: 1200090673255596, guid: 43c18f2dbfb75f441a9b95f19111b49f,
+    type: 3}
+  layerTypePrefabMulti: {fileID: 1568098358297138, guid: bf579ba625b26e54f99fcd984da4355d,
+    type: 3}
+  layerTypeToggleGroup: {fileID: 2580286556167361959}
+  countrySection: {fileID: 8728852309978233711}
+  countryParent: {fileID: 8787366244998121441}
+  countryPrefab: {fileID: 1066243670478430, guid: f302b3d175ca03b46accd249297b042e,
+    type: 3}
+  countryPrefabMultiple: {fileID: 1179783134384690, guid: 41943e53fe2f7aa4cbca00177c79fe99,
+    type: 3}
+  countryToggleGroup: {fileID: 8172851595292730310}
+  parameterSection: {fileID: 4161353251543005195}
+  parameterParent: {fileID: 4161353252038105944}
+  parameterPrefab: {fileID: 1810987650828550, guid: c9ff820ba74dd804b917fbff5fca6e68,
+    type: 3}
 --- !u!1001 &5637647363676020314
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7221,6 +7234,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4188038608954019052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 300644659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: The layers in the current plan. Select layers to edit their geometry.
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &7777593899266143567
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7496,6 +7524,18 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 6649707907912998810, guid: 1e78222f2c175c947a5c42aee3b00093, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 1e78222f2c175c947a5c42aee3b00093, type: 3}
+--- !u!114 &4062388340872842806 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6021049770480171897, guid: 1e78222f2c175c947a5c42aee3b00093,
+    type: 3}
+  m_PrefabInstance: {fileID: 7777593899266143567}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &1305322042498752634 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8787366245421864245, guid: 1e78222f2c175c947a5c42aee3b00093,
@@ -7514,18 +7554,22 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 7777593899266143567}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4062388340872842806 stripped
+--- !u!114 &277089435779601890
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6021049770480171897, guid: 1e78222f2c175c947a5c42aee3b00093,
-    type: 3}
-  m_PrefabInstance: {fileID: 7777593899266143567}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 4431929761557686997}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  text: The selected View Mode determines what geometry is displayed on the map and
+    how.
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &7922947318885957628
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7800,6 +7844,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d36c0aeb030fd224bb334815f8c71e57, type: 3}
+--- !u!1 &2580286556167361881 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5637647363314477733, guid: d36c0aeb030fd224bb334815f8c71e57,
+    type: 3}
+  m_PrefabInstance: {fileID: 7922947318885957628}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &2580286556167361959 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5637647363314477659, guid: d36c0aeb030fd224bb334815f8c71e57,
@@ -7824,12 +7874,23 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 7922947318885957628}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &2580286556167361881 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5637647363314477733, guid: d36c0aeb030fd224bb334815f8c71e57,
-    type: 3}
-  m_PrefabInstance: {fileID: 7922947318885957628}
+--- !u!114 &3255701525926111234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2580286555737053333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: "The types present on the selected layer. \nSelect the desired type(s) before
+    drawing new geometry. \nEdit the type of existing geometry by selecting the geometry
+    in edit mode and clicking the desired type."
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1001 &8646043582180217518
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8122,3 +8183,20 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 8646043582180217518}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2498635670445305781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4161353252452775367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: "Special parameters available for the selected layer.\nSet the desired parameter
+    value before drawing new geometry. \nEdit the parameter value of existing geometry
+    by selecting the geometry in edit mode and changing the parameter."
+  timeBeforeShowing: 0.5
+  passClickToParent: 1

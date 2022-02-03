@@ -3,9 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Networking;
-using Newtonsoft.Json;
-using UnityEngine.Networking;
-using Websocket.Client;
+using Networking.WsServerConnectionChangeBehaviour;
+using Sirenix.Utilities;
 
 public static class UpdateData
 {
@@ -17,21 +16,23 @@ public static class UpdateData
 	public static UpdateObject lastUpdate;
 	public static bool stopProcessingUpdates = false;
 	
-	private static WsServerCommunication m_Comm;
+	private static bool? _wsServerConnected = null;
+	private static WsServerCommunication _wsServerCommunication;
 
 	public static IEnumerator GetFirstUpdate()
 	{
 		canUpdate = false;
-		m_Comm = new WsServerCommunication(
+		_wsServerCommunication = new WsServerCommunication(
 			Server.GameSessionId,
 			TeamManager.CurrentUserTeamID,
 			TeamManager.CurrentSessionID.ToString(),
 			HandleUpdateSuccessCallback
 		);
-		m_Comm.Start();
+		_wsServerCommunication.Start();
 
 		while (!canUpdate)
 		{
+			HandleWsServerConnectionChanges();
 			yield return null;
 		}
 
@@ -39,10 +40,10 @@ public static class UpdateData
 		HideDisconnectedDialogBox();
 		Main.FirstUpdateTickComplete();
 	}
-
+	
 	public static void StopWsServerCommunication()
 	{
-		m_Comm.Stop();
+		_wsServerCommunication.Stop();
 	}
 
 	public static IEnumerator GetUpdates()
@@ -52,6 +53,7 @@ public static class UpdateData
 			canUpdate = false;
 			while (!canUpdate)
 			{
+				HandleWsServerConnectionChanges();
 				yield return null;
 			}
 			
@@ -87,8 +89,26 @@ public static class UpdateData
 		}
 	}
 
+	private static void HandleWsServerConnectionChanges()
+	{
+		if (_wsServerConnected == _wsServerCommunication.IsConnected)
+		{
+			return;
+		}
+
+		_wsServerConnected = _wsServerCommunication.IsConnected;
+		if (_wsServerConnected == null) // no connection value yet
+		{
+			return;
+		}
+
+		GameObject.FindObjectsOfType<WsServerConnectionChangeBehaviour>().ForEach(item =>
+			item.NotifyConnection(_wsServerConnected.Value));
+	}
+
 	private static void ProcessUpdates(UpdateObject updates)
 	{
+		HandleWsServerConnectionChanges();
 		if (stopProcessingUpdates || updates.update_time <= lastUpdateTimestamp)
 			return;
 
