@@ -5,11 +5,15 @@ using UnityEngine;
 
 namespace Networking.WsServerConnectionChangeBehaviour
 {
+	[RequireComponent(typeof(CanvasGroup))]
 	public class CanvasGroupWsServerConnectionChangeBehaviour: WsServerConnectionChangeBehaviour
 	{
+		private WsServerPointer _pointer = null;
 		private readonly List<float> _originalAlphas = new List<float>();
 		public List<CanvasGroup> canvasGroups = new List<CanvasGroup>();
-		
+
+		[SerializeField] public bool enablePointer = true;
+		[SerializeField] public GameObject pointerTargetGameObject = null;
 		[SerializeField] public float alphaFactorOnStart = 1.0f;
 		[SerializeField] public float alphaFactorOnConnected = 1.0f;
 		[SerializeField] public float alphaFactorOnDisconnected = 1.0f;
@@ -22,14 +26,22 @@ namespace Networking.WsServerConnectionChangeBehaviour
 		[SerializeField] public bool blockRaycastsOnConnected = true;
 		[SerializeField] public bool blockRaycastsOnDisconnected = true;
 		
-		public void Start()
+		protected override void OnStart()
 		{
+			if (pointerTargetGameObject == null)
+			{
+				pointerTargetGameObject = gameObject;
+			}
+			if (enablePointer)
+			{
+				_pointer = new WsServerPointer(pointerTargetGameObject);
+			}
 			if (canvasGroups.Count == 0)
 			{
 				// auto-fill
 				canvasGroups.AddRange(gameObject.GetComponents<CanvasGroup>());
 			}
-			if (canvasGroups.Count == 0)
+			if (canvasGroups.Count == 0) // this should not happen because of "RequireComponent"
 			{
 				Debug.LogError("Missing component CanvasGroup for game object:" + gameObject.name);
 				return;
@@ -44,8 +56,17 @@ namespace Networking.WsServerConnectionChangeBehaviour
 			});
 		}
 
-		public override void NotifyConnection(bool connected)
+		protected override void OnNotifyConnection(bool connected)
 		{
+			if (connected)
+			{
+				_pointer?.Hide();
+			}
+			else
+			{
+				_pointer?.Show();
+			}
+
 			if (canvasGroups.Count == 0)
 			{
 				return;

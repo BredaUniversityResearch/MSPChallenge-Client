@@ -16,7 +16,7 @@ public static class UpdateData
 	public static UpdateObject lastUpdate;
 	public static bool stopProcessingUpdates = false;
 	
-	private static bool? _wsServerConnected = null;
+	public static bool? wsServerConnected = null;
 	private static WsServerCommunication _wsServerCommunication;
 
 	public static IEnumerator GetFirstUpdate()
@@ -91,19 +91,19 @@ public static class UpdateData
 
 	private static void HandleWsServerConnectionChanges()
 	{
-		if (_wsServerConnected == _wsServerCommunication.IsConnected)
+		if (wsServerConnected == _wsServerCommunication.IsConnected)
 		{
 			return;
 		}
 
-		_wsServerConnected = _wsServerCommunication.IsConnected;
-		if (_wsServerConnected == null) // no connection value yet
+		wsServerConnected = _wsServerCommunication.IsConnected;
+		if (wsServerConnected == null) // no connection value yet
 		{
 			return;
 		}
 
 		GameObject.FindObjectsOfType<WsServerConnectionChangeBehaviour>().ForEach(item =>
-			item.NotifyConnection(_wsServerConnected.Value));
+			item.NotifyConnection(wsServerConnected.Value));
 	}
 
 	private static void ProcessUpdates(UpdateObject updates)

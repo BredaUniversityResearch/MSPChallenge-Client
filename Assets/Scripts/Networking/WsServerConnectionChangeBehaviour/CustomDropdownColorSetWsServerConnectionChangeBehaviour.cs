@@ -4,6 +4,7 @@ using UnityEngine.Serialization;
 
 namespace Networking.WsServerConnectionChangeBehaviour
 {
+	[RequireComponent(typeof(CustomDropdownColorSet))]
 	public class CustomDropdownColorSetWsServerConnectionChangeBehaviour: WsServerConnectionChangeBehaviour
 	{
 		public List<CustomDropdownColorSet> customDropdownColorSets = new List<CustomDropdownColorSet>();
@@ -12,14 +13,14 @@ namespace Networking.WsServerConnectionChangeBehaviour
 		[SerializeField] public bool useHighlightColorOnConnected = true;
 		[SerializeField] public bool useHighlightColorOnDisconnected = false;
 		
-		private void Start()
+		protected override void OnStart()
 		{
 			if (customDropdownColorSets.Count == 0)
 			{
 				// auto-fill
 				customDropdownColorSets.AddRange(gameObject.GetComponents<CustomDropdownColorSet>());
 			}
-			if (customDropdownColorSets.Count == 0)
+			if (customDropdownColorSets.Count == 0) // this should not happen because of "RequireComponent"
 			{
 				Debug.LogError("Missing component CustomDropdownColorSet for game object:" + gameObject.name);
 				return;
@@ -31,7 +32,7 @@ namespace Networking.WsServerConnectionChangeBehaviour
 			});
 		}
 
-		public override void NotifyConnection(bool connected)
+		protected override void OnNotifyConnection(bool connected)
 		{
 			if (customDropdownColorSets.Count == 0)
 			{

@@ -1,9 +1,12 @@
 ﻿
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Networking.WsServerConnectionChangeBehaviour
 {
+	[RequireComponent(typeof(AddTooltip))]
 	public class AddTooltipWsServerConnectionChangeBehaviour: WsServerConnectionChangeBehaviour
 	{
 		public List<AddTooltip> addTooltips = new List<AddTooltip>();
@@ -15,26 +18,25 @@ namespace Networking.WsServerConnectionChangeBehaviour
 
 		[SerializeField, TextArea] public string textOnDisconnected = "";
 
-		private void Start()
+		protected override void OnStart()
 		{
 			if (addTooltips.Count == 0)
 			{
 				// auto-fill
 				addTooltips.AddRange(gameObject.GetComponents<AddTooltip>());
 			}
-			if (addTooltips.Count == 0)
+			if (addTooltips.Count == 0) // this should not happen because of "RequireComponent"
 			{
 				Debug.LogError("Missing component AddTooltip for game object:" + gameObject.name);
 				return;
 			}
-
 			addTooltips.ForEach(delegate(AddTooltip tooltip)
 			{
 				tooltip.text = textOnStart;
 			});
 		}
 
-		public override void NotifyConnection(bool connected)
+		protected override void OnNotifyConnection(bool connected)
 		{
 			if (addTooltips.Count == 0)
 			{
