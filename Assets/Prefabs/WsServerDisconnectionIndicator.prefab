@@ -191,7 +191,7 @@ GameObject:
   - component: {fileID: 7398680986898053433}
   - component: {fileID: 603141958685832096}
   - component: {fileID: 6158612272525305786}
-  - component: {fileID: 3624023494066011152}
+  - component: {fileID: 3833892820496634599}
   m_Layer: 5
   m_Name: WsServerDisconnectionIndicator
   m_TagString: Untagged
@@ -307,22 +307,15 @@ MonoBehaviour:
   blockRaycastsOnStart: 0
   blockRaycastsOnConnected: 0
   blockRaycastsOnDisconnected: 1
---- !u!95 &3624023494066011152
-Animator:
-  serializedVersion: 3
+--- !u!114 &3833892820496634599
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4889153061733871768}
   m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 4805262523aab0144aa3935b47bd851d, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eb35234601da8f4b9670f9ea18ae5b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
