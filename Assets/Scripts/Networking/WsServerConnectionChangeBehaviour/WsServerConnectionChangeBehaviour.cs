@@ -7,13 +7,23 @@ namespace Networking.WsServerConnectionChangeBehaviour
 {
 	public abstract class WsServerConnectionChangeBehaviour : MonoBehaviour
 	{
+		private void OnEnable()
+		{
+			if (UpdateData.wsServerConnected == null)
+			{
+				return;
+			}
+			NotifyConnection(UpdateData.wsServerConnected.Value);
+		}
+
 		private void Start()
 		{
 			OnStart();
-			if (UpdateData.wsServerConnected != null)
+			if (UpdateData.wsServerConnected == null)
 			{
-				NotifyConnection(UpdateData.wsServerConnected.Value);
+				return;
 			}
+			NotifyConnection(UpdateData.wsServerConnected.Value);
 		}
 
 		public void NotifyConnection(bool connected)

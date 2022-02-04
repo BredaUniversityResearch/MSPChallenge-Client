@@ -29,6 +29,7 @@ namespace Networking.WsServerConnectionChangeBehaviour
 			{
 				return;
 			}
+
 			RectTransform parentRectTrans = _parent.GetComponent<RectTransform>();
 			Vector3[] corners = new Vector3[4];
 			parentRectTrans.GetWorldCorners(corners);
