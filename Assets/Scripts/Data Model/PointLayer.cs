@@ -57,7 +57,7 @@ public class PointLayer : Layer<PointEntity>
 	            if (subEntity.planState != SubEntityPlanState.NotShown)
 	            {
 					float distanceSquared = (subEntity.GetPosition() - position).sqrMagnitude;
-	                if (distanceSquared < threshold && distanceSquared < closestDistanceSquared)
+                    if (distanceSquared < threshold && distanceSquared < closestDistanceSquared)
 	                {
 	                    closestSubEntity = subEntity;
 	                    closestDistanceSquared = distanceSquared;

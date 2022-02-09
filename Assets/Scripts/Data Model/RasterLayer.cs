@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 using Object = UnityEngine.Object;
@@ -15,7 +16,9 @@ public class RasterLayer : Layer<RasterEntity>
 		public float[][] displayed_bounds = null;
 	};
 
-	public const float RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER = 1000.0f; //Constant for converting from a raster value to the EntityType's Value field.
+	public const float DEFAULT_RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER = 1000.0f; //Constant for converting from a raster value to the EntityType's Value field.
+	public readonly float rasterValueToEntityValueMultiplier = DEFAULT_RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
+
 	private const float REFERENCE_PIXELS_PER_UNIT = 100.0f;
 
 	public RasterObject rasterObject { get; private set; }
@@ -54,8 +57,8 @@ public class RasterLayer : Layer<RasterEntity>
 	{
 		entityTypesSortedByValue = new List<EntityType>(EntityTypes.Values);
 		entityTypesSortedByValue.Sort(SortMethodEntityTypesByValue);
-
 		viewingRaster = rasterAtLatestTime;
+		rasterValueToEntityValueMultiplier = layerMeta.layer_entity_value_max ?? DEFAULT_RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
 
 		try
 		{
@@ -224,7 +227,6 @@ public class RasterLayer : Layer<RasterEntity>
 
 	private Vector2 GetTextureUVForWorldPosition(Vector2 screenPos)
 	{
-	
 		Vector2 texturePos = screenPos;
 		texturePos.x -= offset.x;
 		texturePos.y -= offset.y;
@@ -258,28 +260,68 @@ public class RasterLayer : Layer<RasterEntity>
 		return viewingRaster.GetPixelBilinear(u, v).r;
 	}
 
+	public float? GetRasterValueAt(Vector2 worldPosition)
+	{
+		float rasterValue = GetValueAt(worldPosition).r * rasterValueToEntityValueMultiplier;
+		// note MH: below cutoff value should not be mapped to a entity type
+		if (rasterValue < rasterObject.layer_raster_minimum_value_cutoff)
+		{
+			return null;
+		}
+		return rasterValue;
+	}
+
+	public float? GetRasterValueAt(int rasterSpaceX, int rasterSpaceY)
+	{
+		float rasterValue = viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r * rasterValueToEntityValueMultiplier;
+		// note MH: below cutoff value should not be mapped to a entity type
+		if (rasterValue < rasterObject.layer_raster_minimum_value_cutoff)
+		{
+			return null;
+		}
+		return rasterValue;
+	}
+
+	[CanBeNull]
 	public EntityType GetEntityTypeForRasterAt(Vector2 worldPosition)
 	{
-		float rasterValue = GetValueAt(worldPosition).r * RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
-		return GetEntityTypeForRasterValue(rasterValue);
+		float? rasterValue = GetRasterValueAt(worldPosition);
+		if (null == rasterValue)
+		{
+			return null;
+		}
+		return GetEntityTypeForRasterValue(rasterValue.Value);
 	}
 
+	[CanBeNull]
 	public EntityType GetEntityTypeForRasterAt(int rasterSpaceX, int rasterSpaceY)
 	{
-		float rasterValue = viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r * RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
-		return GetEntityTypeForRasterValue(rasterValue);
+		float? rasterValue = GetRasterValueAt(rasterSpaceX, rasterSpaceY);
+		if (null == rasterValue)
+		{
+			return null;
+		}
+		return GetEntityTypeForRasterValue(rasterValue.Value);
 	}
 
-	private EntityType GetEntityTypeForRasterValue(float rasterValue)
+	[CanBeNull]
+	public EntityType GetEntityTypeForRasterValue(float rasterValue)
 	{
-		EntityType result = entityTypesSortedByValue[0];
+		EntityType previousType = entityTypesSortedByValue[0];
+		EntityType result = previousType;
 		for (int i = 1; i < entityTypesSortedByValue.Count; ++i)
 		{
 			EntityType nextType = entityTypesSortedByValue[i];
 			if (nextType.value > rasterValue)
 			{
+				float lerp = Mathf.Clamp01((float)(rasterValue - previousType.value) / (float)(nextType.value - previousType.value));
+				if (lerp > 0.5f)
+				{
+					result = nextType;
+				}
 				break;
 			}
+			previousType = nextType;
 			result = nextType;
 		}
 		return result;
@@ -321,6 +363,11 @@ public class RasterLayer : Layer<RasterEntity>
 
 	public override Entity GetEntityAt(Vector2 position)
 	{
+		// note MH: no valid raster value, no entity
+		if (null == GetRasterValueAt(position))
+		{
+			return null;
+		}
 		if (Entities != null)
 		{
 			if (Entities[0] != null)
@@ -354,18 +401,20 @@ public class RasterLayer : Layer<RasterEntity>
 
 	public override SubEntity GetSubEntityAt(Vector2 position)
 	{
-		if (IsWithinRasterBounds(position))
+		if (!IsWithinRasterBounds(position))
 		{
-			if (GetValueAt(position).r >= rasterObject.layer_raster_minimum_value_cutoff)
-			{
-				if (Entities != null && Entities[0] != null)
-				{
-					if (Entities[0].rasterSubentity[0] != null)
-					{
-						return Entities[0].rasterSubentity[0];
-					}
-				}
-			}
+			return null;
+		}
+
+		float rasterValue = GetValueAt(position).r * rasterValueToEntityValueMultiplier;
+		if (rasterValue < rasterObject.layer_raster_minimum_value_cutoff)
+		{
+			return null;
+		}
+
+		if (Entities != null && Entities[0] != null && Entities[0].rasterSubentity[0] != null)
+		{
+			return Entities[0].rasterSubentity[0];
 		}
 
 		return null;

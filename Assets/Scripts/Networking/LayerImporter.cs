@@ -13,12 +13,14 @@ using System.Diagnostics;
 
 public class LayerImporter
 {
-	public delegate void DoneImporting();
+    public delegate void DoneImporting();
     public static event DoneImporting OnDoneImporting;
 
 	static int importedLayers;
 	static int expectedLayers;
 	static Stopwatch stopWatch;
+
+	private static bool loadAllLayers = false;
 
 	public static bool IsCurrentlyImportingLayers 
 	{ 
@@ -51,8 +53,7 @@ public class LayerImporter
 		}
 		else
 		{
-			GameObject layerImporterHelper = new GameObject("LayerImporterHelper");
-			ImportAllLayers();
+			loadAllLayers = true;
 			LayerPickerUI.HideUI();
 		}
 
@@ -60,12 +61,12 @@ public class LayerImporter
         {
             TeamManager.LoadTeams();
         }
-        else
-        {
-            TeamManager.TeamsLoaded();
-        }
+		else
+		{
+			TeamManager.TeamsLoaded();
+		}
 
-       //MEL config use requires layers to be loaded (for kpi creation)
+		//MEL config use requires layers to be loaded (for kpi creation)
 		NetworkForm form = new NetworkForm();
 		ServerCommunication.DoRequest<CELConfig>(Server.GetCELConfig(), form, handleCELConfigCallback);
 		ServerCommunication.DoRequest<JObject>(Server.GetMELConfig(), form, handleMELConfigCallback);
@@ -82,6 +83,11 @@ public class LayerImporter
     {
         KPIManager.CreateEcologyKPIs(melConfig);
         PlanManager.LoadFishingFleets(melConfig);
+
+		if (loadAllLayers)
+		{
+			ImportAllLayers();
+		}
     }
 
 	private static void handleCELConfigCallback(CELConfig config)
@@ -145,6 +151,11 @@ public class LayerImporter
 
 	public static void ImportLayers(List<int> selectedLayerIDs)
 	{
+		// only allow a single request during loading of layers, to minimize the load on the server - think of multiple clients starting simultaneously
+		ServerCommunication.maxRequests = 1;
+		// to be restored to the default number of requests, once all layers have been loaded
+		OnDoneImporting += () => ServerCommunication.maxRequests = ServerCommunication.DEFAULT_MAX_REQUESTS;
+
 		IsCurrentlyImportingLayers = true;
 
         string layerName = LayerManager.GetLayerByID(selectedLayerIDs[0]).FileName;
@@ -153,7 +164,6 @@ public class LayerImporter
 		
 		//stopWatch = new Stopwatch();
 		//stopWatch.Start();
-		selectedLayerIDs.Shuffle();
 		foreach (int selectedLayerID in selectedLayerIDs)
 		{
 			AbstractLayer layer = LayerManager.GetLayerByID(selectedLayerID);

@@ -56,10 +56,20 @@ public class RasterSubentity : SubEntity
 			gameObject.transform.localPosition = offset;
 
 			spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-			spriteRenderer.material.SetFloat("_ValueCutoff", sourceLayer.rasterObject.layer_raster_minimum_value_cutoff);
+
+			spriteRenderer.material.SetFloat("_ValueCutoff",
+				sourceLayer.rasterObject.layer_raster_minimum_value_cutoff /
+				sourceLayer.rasterValueToEntityValueMultiplier
+			);
 			spriteRenderer.material.SetTexture("_Dither", MaterialManager.GetPatternOrDefault(sourceLayer.rasterObject.layer_raster_pattern));
 			SetRenderPatternOffset(materialPatternOffset);
-			SetupColorGradient(spriteRenderer.material, sourceLayer.GetEntityTypesSortedByValue(), sourceLayer.rasterObject.layer_raster_color_interpolation);
+			SetupColorGradient(
+				spriteRenderer.material,
+				sourceLayer.GetEntityTypesSortedByValue(),
+				sourceLayer.rasterObject.layer_raster_color_interpolation,
+				sourceLayer.rasterValueToEntityValueMultiplier,
+				sourceLayer.rasterObject.layer_raster_minimum_value_cutoff
+			);
 		}
 	   
 		RedrawGameObject(drawMode, selectedPoints, hoverPoints);
@@ -177,7 +187,7 @@ public class RasterSubentity : SubEntity
 		}
 	}
 
-	private void SetupColorGradient(Material targetMaterial, List<EntityType> layerEntityTypesSortedByValue, ERasterColorInterpolationMode interpolationMode)
+	private void SetupColorGradient(Material targetMaterial, List<EntityType> layerEntityTypesSortedByValue, ERasterColorInterpolationMode interpolationMode, float rasterValueToEntityValueMultiplier, float rasterMinimumValueCutoff)
 	{
 		if (colorGradient == null)
 		{
@@ -187,11 +197,16 @@ public class RasterSubentity : SubEntity
 				wrapMode = TextureWrapMode.Clamp
 			};
 		}
-
+		
 		for (int i = 0; i < GRADIENT_RESOLUTION; ++i)
 		{
-			float value = (i / (float) (GRADIENT_RESOLUTION - 1)) * RasterLayer.RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
-			value = Mathf.Clamp(value, 0.0f, RasterLayer.RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER);
+			float value = (i / (float) (GRADIENT_RESOLUTION - 1)) * rasterValueToEntityValueMultiplier;
+			value = Mathf.Clamp(value, 0.0f, rasterValueToEntityValueMultiplier);
+			// note MH: below cutoff value should not be mapped to a entity type
+			if (value < rasterMinimumValueCutoff)
+			{
+				continue;
+			}
 
 			EntityType lowBound = layerEntityTypesSortedByValue[0];
 			EntityType highBound = layerEntityTypesSortedByValue[0];
