@@ -9,10 +9,10 @@ using Sirenix.Utilities;
 public static class UpdateData
 {
 	private static float updateSpeed = 1.0f;
-	private static bool canUpdate = true;
 	private static DialogBox disconnectDialogBox = null;
 	private static double lastUpdateTimestamp = -1;
 	public static double LastUpdateTimeStamp => lastUpdateTimestamp;
+	public static Queue<UpdateObject> nextUpdates = new Queue<UpdateObject>();
 	public static UpdateObject lastUpdate;
 	public static bool stopProcessingUpdates = false;
 	
@@ -21,7 +21,6 @@ public static class UpdateData
 
 	public static IEnumerator GetFirstUpdate()
 	{
-		canUpdate = false;
 		_wsServerCommunication = new WsServerCommunication(
 			Server.GameSessionId,
 			TeamManager.CurrentUserTeamID,
@@ -30,13 +29,13 @@ public static class UpdateData
 		);
 		_wsServerCommunication.Start();
 
-		while (!canUpdate)
+		while (nextUpdates.Count == 0)
 		{
 			HandleWsServerConnectionChanges();
 			yield return null;
 		}
 
-		ProcessUpdates(lastUpdate);
+		ProcessUpdates(nextUpdates);
 		HideDisconnectedDialogBox();
 		Main.FirstUpdateTickComplete();
 	}
@@ -50,14 +49,13 @@ public static class UpdateData
 	{
 		while (true)
 		{
-			canUpdate = false;
-			while (!canUpdate)
+			while (nextUpdates.Count == 0)
 			{
 				HandleWsServerConnectionChanges();
 				yield return null;
 			}
 			
-			ProcessUpdates(lastUpdate);
+			ProcessUpdates(nextUpdates);
 			HideDisconnectedDialogBox();
 	
 			yield return new WaitForSeconds(updateSpeed);
@@ -66,8 +64,7 @@ public static class UpdateData
 	
 	private static void HandleUpdateSuccessCallback(UpdateObject updateData)
 	{
-		canUpdate = true;
-		lastUpdate = updateData;
+		nextUpdates.Enqueue(updateData);
 	}
 
 	private static void ShowDisconnectedDialogBox()
@@ -106,30 +103,45 @@ public static class UpdateData
 			item.NotifyConnection(wsServerConnected.Value));
 	}
 
-	private static void ProcessUpdates(UpdateObject updates)
+	private static void ProcessUpdates(Queue<UpdateObject> updates)
+	{
+		if (updates.Count == 0)
+		{
+			return; // this should never happen...
+		}
+
+		// process next in queue. Note that is not a while loop since we only want to do a single update per client tick
+		//  This is because currently, multiple updates per tick cause skipping of essential plan unlocks..
+		ProcessUpdates(updates.Dequeue());
+	}
+
+	private static void ProcessUpdates(UpdateObject update)
 	{
 		HandleWsServerConnectionChanges();
-		if (stopProcessingUpdates || updates.update_time <= lastUpdateTimestamp)
+		if (stopProcessingUpdates || update.update_time <= lastUpdateTimestamp)
+		{
+			Debug.Log("stopProcessingUpdates: " + stopProcessingUpdates + ", update.update_time <= lastUpdateTimestamp: " + (update.update_time <= lastUpdateTimestamp));
 			return;
+		}
 
-		lastUpdateTimestamp = updates.update_time;
-		lastUpdate = updates;
+		lastUpdateTimestamp = update.update_time;
+		lastUpdate = update;
 
 		Dictionary<AbstractLayer, int> layerUpdateTimes = new Dictionary<AbstractLayer, int>();
 		List<Plan> plans = null;
 
-		if (updates.plan != null)
+		if (update.plan != null)
 		{
 			//Sort plans by time and ID so there are no issues with dependencies when loading them in
-			updates.plan.Sort();
-			plans = new List<Plan>(updates.plan.Count);
-			foreach (PlanObject plan in updates.plan)
+			update.plan.Sort();
+			plans = new List<Plan>(update.plan.Count);
+			foreach (PlanObject plan in update.plan)
 			{
 				plans.Add(PlanManager.ProcessReceivedPlan(plan, layerUpdateTimes));
 			}
 		}
 
-		foreach (RasterUpdateObject raster in updates.raster)
+		foreach (RasterUpdateObject raster in update.raster)
 		{
 			AbstractLayer layer = LayerManager.GetLayerByID(raster.id);
 
@@ -141,52 +153,52 @@ public static class UpdateData
 		}
 
 		//Run output update before KPI/Grid update. Source output is required for the KPIs and Capacity for grids.
-		foreach (EnergyOutputObject outputUpdate in updates.energy.output)
+		foreach (EnergyOutputObject outputUpdate in update.energy.output)
 		{
 			UpdateOutput(outputUpdate);
 		}
 
 		//Update grids
-		if (updates.plan != null)
+		if (update.plan != null)
 		{
 			for(int i = 0; i < plans.Count; i++)
 			{
-				plans[i].UpdateGrids(updates.plan[i].deleted_grids, updates.plan[i].grids);
+				plans[i].UpdateGrids(update.plan[i].deleted_grids, update.plan[i].grids);
 			}
 		}
 
 		//Run connection update before KPI update so cable networks are accurate in the KPIs
-		foreach (EnergyConnectionObject connection in updates.energy.connections)
+		foreach (EnergyConnectionObject connection in update.energy.connections)
 		{
 			UpdateConnection(connection);
 		}
 
-		GameState.UpdateTime(updates.tick);
+		GameState.UpdateTime(update.tick);
 
-		if (updates.kpi != null)
+		if (update.kpi != null)
 		{
-			if (updates.kpi.energy != null && updates.kpi.energy.Length > 0)
+			if (update.kpi.energy != null && update.kpi.energy.Length > 0)
 			{
-				KPIManager.ReceiveEnergyKPIUpdate(updates.kpi.energy);
+				KPIManager.ReceiveEnergyKPIUpdate(update.kpi.energy);
 			}
 
-			if (updates.kpi.ecology != null && updates.kpi.ecology.Length > 0)
+			if (update.kpi.ecology != null && update.kpi.ecology.Length > 0)
 			{
-				KPIManager.ReceiveEcologyKPIUpdate(updates.kpi.ecology);
+				KPIManager.ReceiveEcologyKPIUpdate(update.kpi.ecology);
 			}
 
-			if (updates.kpi.shipping != null && updates.kpi.shipping.Length > 0)
+			if (update.kpi.shipping != null && update.kpi.shipping.Length > 0)
 			{
-				KPIManager.ReceiveShippingKPIUpdate(updates.kpi.shipping);
+				KPIManager.ReceiveShippingKPIUpdate(update.kpi.shipping);
 			}
 		}
 
-		if (updates.objectives.Count > 0)
+		if (update.objectives.Count > 0)
 		{
-			InterfaceCanvas.Instance.objectivesMonitor.UpdateObjectivesFromServer(updates.objectives);
+			InterfaceCanvas.Instance.objectivesMonitor.UpdateObjectivesFromServer(update.objectives);
 		}
 
-		PlanDetails.AddFeedbackFromServer(updates.planmessages);
+		PlanDetails.AddFeedbackFromServer(update.planmessages);
 
 		if (PlanManager.planViewing != null && !Main.InEditMode && !Main.EditingPlanDetailsContent)
 		{
@@ -201,9 +213,9 @@ public static class UpdateData
 			}
 		}
 
-		if (updates.warning != null)
+		if (update.warning != null)
 		{
-			IssueManager.instance.OnIssuesReceived(updates.warning); //MSP-2358, ensure Warnings are processed after all the plan updates are done.
+			IssueManager.instance.OnIssuesReceived(update.warning); //MSP-2358, ensure Warnings are processed after all the plan updates are done.
 		}
 
 		PlanManager.CheckIfExpectedplanReceived();
