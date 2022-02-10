@@ -7,41 +7,44 @@ namespace Networking.WsServerConnectionChangeBehaviour
 	[RequireComponent(typeof(CustomDropdownColorSet))]
 	public class CustomDropdownColorSetWsServerConnectionChangeBehaviour: WsServerConnectionChangeBehaviour
 	{
-		public List<CustomDropdownColorSet> customDropdownColorSets = new List<CustomDropdownColorSet>();
-		
-		[SerializeField] public bool useHighlightColorOnStart = true;
-		[SerializeField] public bool useHighlightColorOnConnected = true;
-		[SerializeField] public bool useHighlightColorOnDisconnected = false;
+		[FormerlySerializedAs("customDropdownColorSets")]
+		[SerializeField] private List<CustomDropdownColorSet> m_CustomDropdownColorSets = new List<CustomDropdownColorSet>();
+		[FormerlySerializedAs("useHighlightColorOnStart")]
+		[SerializeField] private bool m_UseHighlightColorOnStart = true;
+		[FormerlySerializedAs("useHighlightColorOnConnected")]
+		[SerializeField] private bool m_UseHighlightColorOnConnected = true;
+		[FormerlySerializedAs("useHighlightColorOnDisconnected")]
+		[SerializeField] private bool m_UseHighlightColorOnDisconnected = false;
 		
 		protected override void OnStart()
 		{
-			if (customDropdownColorSets.Count == 0)
+			if (m_CustomDropdownColorSets.Count == 0)
 			{
 				// auto-fill
-				customDropdownColorSets.AddRange(gameObject.GetComponents<CustomDropdownColorSet>());
+				m_CustomDropdownColorSets.AddRange(gameObject.GetComponents<CustomDropdownColorSet>());
 			}
-			if (customDropdownColorSets.Count == 0) // this should not happen because of "RequireComponent"
+			if (m_CustomDropdownColorSets.Count == 0) // this should not happen because of "RequireComponent"
 			{
 				Debug.LogError("Missing component CustomDropdownColorSet for game object:" + gameObject.name);
 				return;
 			}
 			
-			customDropdownColorSets.ForEach(delegate(CustomDropdownColorSet set)
+			m_CustomDropdownColorSets.ForEach(delegate(CustomDropdownColorSet a_Set)
 			{
-				set.useHighlightColor = useHighlightColorOnStart;
+				a_Set.useHighlightColor = m_UseHighlightColorOnStart;
 			});
 		}
 
-		protected override void OnNotifyConnection(bool connected)
+		protected override void OnNotifyConnection(bool a_Connected)
 		{
-			if (customDropdownColorSets.Count == 0)
+			if (m_CustomDropdownColorSets.Count == 0)
 			{
 				return;
 			}
 			
-			customDropdownColorSets.ForEach(delegate(CustomDropdownColorSet set)
+			m_CustomDropdownColorSets.ForEach(delegate(CustomDropdownColorSet a_Set)
 			{
-				set.useHighlightColor = connected ? useHighlightColorOnConnected : useHighlightColorOnDisconnected;
+				a_Set.useHighlightColor = a_Connected ? m_UseHighlightColorOnConnected : m_UseHighlightColorOnDisconnected;
 			});
 		}
 	}

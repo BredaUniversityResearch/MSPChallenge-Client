@@ -65,7 +65,7 @@ class UncaughtExceptionReporter: MonoBehaviour
 			output.Append("Editing plan: ").Append(currentlyEditingPlan).AppendLine();
 			output.Append("Editing layer: ").Append(currentlyEditingLayer).AppendLine();
 			output.Append("Last update time: ").Append(lastUpdateTimeStamp).AppendLine();
-			output.Append("Last update: ").Append(JsonConvert.SerializeObject(UpdateData.lastUpdate)).AppendLine();
+			output.Append("Last update: ").Append(JsonConvert.SerializeObject(UpdateData.LastUpdate)).AppendLine();
 			output.Append("Visible Layers:").AppendLine();
 			foreach (string layer in visibleLayers)
 			{

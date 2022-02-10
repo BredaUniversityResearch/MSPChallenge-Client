@@ -1,7 +1,4 @@
-﻿using System;
-using JetBrains.Annotations;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 namespace Networking.WsServerConnectionChangeBehaviour
 {
@@ -9,29 +6,29 @@ namespace Networking.WsServerConnectionChangeBehaviour
 	{
 		private void OnEnable()
 		{
-			if (UpdateData.wsServerConnected == null)
+			if (UpdateData.WsServerConnected == null)
 			{
 				return;
 			}
-			NotifyConnection(UpdateData.wsServerConnected.Value);
+			NotifyConnection(UpdateData.WsServerConnected.Value);
 		}
 
 		private void Start()
 		{
 			OnStart();
-			if (UpdateData.wsServerConnected == null)
+			if (UpdateData.WsServerConnected == null)
 			{
 				return;
 			}
-			NotifyConnection(UpdateData.wsServerConnected.Value);
+			NotifyConnection(UpdateData.WsServerConnected.Value);
 		}
 
-		public void NotifyConnection(bool connected)
+		public void NotifyConnection(bool a_Connected)
 		{
-			OnNotifyConnection(connected);
+			OnNotifyConnection(a_Connected);
 		}
 
-		protected abstract void OnNotifyConnection(bool connected);
+		protected abstract void OnNotifyConnection(bool a_Connected);
 		protected abstract void OnStart();
 	}
 }

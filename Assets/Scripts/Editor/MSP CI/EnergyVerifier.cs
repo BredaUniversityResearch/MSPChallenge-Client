@@ -51,7 +51,7 @@ public class EnergyVerifierObj : MonoBehaviour
 		errors = 0;
 
 		//Stops the game from processing updates permanently
-		UpdateData.stopProcessingUpdates = true;
+		UpdateData.StopProcessingUpdates = true;
 
 		//Setup world state and variables for verification
 		if (Main.InEditMode)

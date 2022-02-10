@@ -17,10 +17,10 @@ namespace Networking
 		private const string GameSessionIdHeader = "GameSessionId";
 		public bool? IsConnected = null;
 
-		private readonly int _teamId;
-		private readonly string _user;
-		private double _lastUpdateTimestamp = 0;
-		private readonly IWebsocketClient _client;
+		private readonly int m_TeamId;
+		private readonly string m_User;
+		private double m_LastUpdateTimestamp = 0;
+		private readonly IWebsocketClient m_Client;
 
 		private class UpdateRequest : ServerCommunication.Request<UpdateObject>
 		{
@@ -40,8 +40,8 @@ namespace Networking
 		
 		public WsServerCommunication(int gameSessionId, int teamId, string user, Action<UpdateObject> updateSuccessCallback)
 		{
-			this._teamId = teamId;
-			this._user = user;
+			this.m_TeamId = teamId;
+			this.m_User = user;
 			
 			var factory = new Func<ClientWebSocket>(() =>
 			{
@@ -55,22 +55,22 @@ namespace Networking
 				return client;
 			});
 			
-			_client = new WebsocketClient(Server.WsServerUri, factory);
-			_client.ErrorReconnectTimeout = TimeSpan.FromSeconds(5);
-			_client.DisconnectionHappened.Subscribe(x =>
+			m_Client = new WebsocketClient(Server.WsServerUri, factory);
+			m_Client.ErrorReconnectTimeout = TimeSpan.FromSeconds(5);
+			m_Client.DisconnectionHappened.Subscribe(x =>
 			{
 				IsConnected = false;
 			});
-			_client.ReconnectionHappened.Subscribe(reconnectionInfo =>
+			m_Client.ReconnectionHappened.Subscribe(reconnectionInfo =>
 			{
-				if (!_client.IsStarted)
+				if (!m_Client.IsStarted)
 				{
 					return;
 				}
 				SendStartingData();
 				IsConnected = true;
 			});
-			_client.MessageReceived.Subscribe( responseMessage =>
+			m_Client.MessageReceived.Subscribe( responseMessage =>
 			{
 				MemoryTraceWriter traceWriter = new MemoryTraceWriter();
 				traceWriter.LevelFilter = System.Diagnostics.TraceLevel.Warning;
@@ -107,14 +107,14 @@ namespace Networking
 						//Parse payload to expected type
 						UpdateObject updateObject = request.ToObject(result.payload);
 						// there is mismatch between the expected update time and given by the server
-						if (Math.Abs(updateObject.prev_update_time - _lastUpdateTimestamp) > Double.Epsilon)
+						if (Math.Abs(updateObject.prev_update_time - m_LastUpdateTimestamp) > Double.Epsilon)
 						{
 							SendStartingData(); // re-sync with server
 							return;
 						}
 						// last update time matches, update it to the new one given by the server, continue processing
-						Debug.Log("got update, prev: " + _lastUpdateTimestamp + ", new: " + updateObject.update_time);
-						_lastUpdateTimestamp = updateObject.update_time;
+						Debug.Log("got update, prev: " + m_LastUpdateTimestamp + ", new: " + updateObject.update_time);
+						m_LastUpdateTimestamp = updateObject.update_time;
 					}
 					catch (System.Exception e)
 					{
@@ -128,22 +128,22 @@ namespace Networking
 
 		public void Stop()
 		{
-			_client.Stop(WebSocketCloseStatus.NormalClosure, "Websocket connection closed");
-			_client.IsReconnectionEnabled = false;
+			m_Client.Stop(WebSocketCloseStatus.NormalClosure, "Websocket connection closed");
+			m_Client.IsReconnectionEnabled = false;
 		}
 
 		public void Start()
 		{
-			_client.Start();
+			m_Client.Start();
 		}
 
 		private void SendStartingData()
 		{
 			dynamic obj = new JObject();
-			obj.team_id = _teamId;
-			obj.user = _user;
-			obj.last_update_time = _lastUpdateTimestamp;
-			_client.Send(obj.ToString());
+			obj.team_id = m_TeamId;
+			obj.user = m_User;
+			obj.last_update_time = m_LastUpdateTimestamp;
+			m_Client.Send(obj.ToString());
 		}
 	}
 }

@@ -1,83 +1,95 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Networking.WsServerConnectionChangeBehaviour
 {
 	[RequireComponent(typeof(CanvasGroup))]
 	public class CanvasGroupWsServerConnectionChangeBehaviour: WsServerConnectionChangeBehaviour
 	{
-		private WsServerPointer _pointer = null;
-		private readonly List<float> _originalAlphas = new List<float>();
-		public List<CanvasGroup> canvasGroups = new List<CanvasGroup>();
+		private WsServerPointer m_Pointer = null;
+		private readonly List<float> m_OriginalAlphas = new List<float>();
+		[FormerlySerializedAs("canvasGroups")]
+		[SerializeField] private List<CanvasGroup> m_CanvasGroups = new List<CanvasGroup>();
 
-		[SerializeField] public bool enablePointer = true;
-		[SerializeField] public GameObject pointerTargetGameObject = null;
-		[SerializeField] public float alphaFactorOnStart = 1.0f;
-		[SerializeField] public float alphaFactorOnConnected = 1.0f;
-		[SerializeField] public float alphaFactorOnDisconnected = 1.0f;
+		[FormerlySerializedAs("enablePointer")]
+		[SerializeField] private bool m_EnablePointer = true;
+		[FormerlySerializedAs("pointerTargetGameObject")]
+		[SerializeField] private GameObject m_PointerTargetGameObject = null;
+		[FormerlySerializedAs("alphaFactorOnStart")]
+		[SerializeField] private float m_AlphaFactorOnStart = 1.0f;
+		[FormerlySerializedAs("alphaFactorOnConnected")]
+		[SerializeField] private float m_AlphaFactorOnConnected = 1.0f;
+		[FormerlySerializedAs("alphaFactorOnDisconnected")]
+		[SerializeField] private float m_AlphaFactorOnDisconnected = 1.0f;
 
-		[SerializeField] public bool interactableOnStart = true;
-		[SerializeField] public bool interactableOnConnected = true;
-		[SerializeField] public bool interactableOnDisconnected = true;
+		[FormerlySerializedAs("interactableOnStart")]
+		[SerializeField] private bool m_InteractableOnStart = true;
+		[FormerlySerializedAs("interactableOnConnected")]
+		[SerializeField] private bool m_InteractableOnConnected = true;
+		[FormerlySerializedAs("interactableOnDisconnected")]
+		[SerializeField] private bool m_InteractableOnDisconnected = true;
 
-		[SerializeField] public bool blockRaycastsOnStart = true;
-		[SerializeField] public bool blockRaycastsOnConnected = true;
-		[SerializeField] public bool blockRaycastsOnDisconnected = true;
+		[FormerlySerializedAs("blockRaycastsOnStart")]
+		[SerializeField] private bool m_BlockRaycastsOnStart = true;
+		[FormerlySerializedAs("blockRaycastsOnConnected")]
+		[SerializeField] private bool m_BlockRaycastsOnConnected = true;
+		[FormerlySerializedAs("blockRaycastsOnDisconnected")]
+		[SerializeField] private bool m_BlockRaycastsOnDisconnected = true;
 		
 		protected override void OnStart()
 		{
-			if (pointerTargetGameObject == null)
+			if (m_PointerTargetGameObject == null)
 			{
-				pointerTargetGameObject = gameObject;
+				m_PointerTargetGameObject = gameObject;
 			}
-			if (enablePointer)
+			if (m_EnablePointer)
 			{
-				_pointer = new WsServerPointer(pointerTargetGameObject);
+				m_Pointer = new WsServerPointer(m_PointerTargetGameObject);
 			}
-			if (canvasGroups.Count == 0)
+			if (m_CanvasGroups.Count == 0)
 			{
 				// auto-fill
-				canvasGroups.AddRange(gameObject.GetComponents<CanvasGroup>());
+				m_CanvasGroups.AddRange(gameObject.GetComponents<CanvasGroup>());
 			}
-			if (canvasGroups.Count == 0) // this should not happen because of "RequireComponent"
+			if (m_CanvasGroups.Count == 0) // this should not happen because of "RequireComponent"
 			{
 				Debug.LogError("Missing component CanvasGroup for game object:" + gameObject.name);
 				return;
 			}
 
-			canvasGroups.ForEach(delegate(CanvasGroup group)
+			m_CanvasGroups.ForEach(delegate(CanvasGroup a_Group)
 			{
-				_originalAlphas.Add(group.alpha);
-				group.alpha *= alphaFactorOnStart;
-				group.interactable = interactableOnStart;
-				group.blocksRaycasts = blockRaycastsOnStart;
+				m_OriginalAlphas.Add(a_Group.alpha);
+				a_Group.alpha *= m_AlphaFactorOnStart;
+				a_Group.interactable = m_InteractableOnStart;
+				a_Group.blocksRaycasts = m_BlockRaycastsOnStart;
 			});
 		}
 
-		protected override void OnNotifyConnection(bool connected)
+		protected override void OnNotifyConnection(bool a_Connected)
 		{
-			if (connected)
+			if (a_Connected)
 			{
-				_pointer?.Hide();
+				m_Pointer?.Hide();
 			}
 			else
 			{
-				_pointer?.Show();
+				m_Pointer?.Show();
 			}
 
-			if (canvasGroups.Count == 0)
+			if (m_CanvasGroups.Count == 0)
 			{
 				return;
 			}
 
-			foreach (var (group, i) in canvasGroups.Select((group, i) => (group, i)))
+			foreach (var (group, i) in m_CanvasGroups.Select((a_Group, i) => (@group: a_Group, i)))
 			{
-				group.alpha = connected ? _originalAlphas[i] * alphaFactorOnConnected :
-					_originalAlphas[i] * alphaFactorOnDisconnected;
-				group.interactable = connected ? interactableOnConnected : interactableOnDisconnected;
-				group.blocksRaycasts = connected ? blockRaycastsOnConnected : blockRaycastsOnDisconnected;
+				group.alpha = a_Connected ? m_OriginalAlphas[i] * m_AlphaFactorOnConnected :
+					m_OriginalAlphas[i] * m_AlphaFactorOnDisconnected;
+				group.interactable = a_Connected ? m_InteractableOnConnected : m_InteractableOnDisconnected;
+				group.blocksRaycasts = a_Connected ? m_BlockRaycastsOnConnected : m_BlockRaycastsOnDisconnected;
 			}
 		}
 	}

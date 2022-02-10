@@ -48,37 +48,37 @@ public static class ServerCommunication
 			this.successCallback = successCallback;
 		}
 
-		public T ToObject(JToken payload)
+		public T ToObject(JToken a_Payload)
 		{
 			JsonSerializer serializer = new JsonSerializer();
 			serializer.Converters.Add(new JsonConverterBinaryBool());
-			return payload.ToObject<T>(serializer);
+			return a_Payload.ToObject<T>(serializer);
 		}
 
-		public override void ProcessPayload(JToken payload)
+		public override void ProcessPayload(JToken a_Payload)
 		{
 			T payloadContent = default(T);
 			try
 			{
 				//Parse payload to expected type
-				payloadContent = ToObject(payload);
+				payloadContent = ToObject(a_Payload);
 			}
 			catch (System.Exception e)
 			{
 				//Or invoke the failure callback if that fails
-				failureCallback.Invoke(this, $"Failed to deserialize results from {Url}: {payload.ToString()}\nMessage: {e.Message}");
+				failureCallback.Invoke(this, $"Failed to deserialize results from {Url}: {a_Payload.ToString()}\nMessage: {e.Message}");
 				return;
 			}
 			ProcessPayload(payloadContent);
 		}
 
-		public void ProcessPayload(T payloadContent)
+		public void ProcessPayload(T a_PayloadContent)
 		{
 			if (successCallback == null)
 			{
 				return;
 			}
-			successCallback.Invoke(payloadContent);
+			successCallback.Invoke(a_PayloadContent);
 		}
 	}
 
