@@ -19,9 +19,10 @@ public class ActivePlanLayer : MonoBehaviour
 		//Button callback
 		toggle.onValueChanged.AddListener((value) =>
 		{
-			if(value)
-				//PlanManager.StartEditingLayer(layer);
+			if(value) {
+				Main.FSM.AbortCurrentState();
 				InterfaceCanvas.Instance.activePlanWindow.ActivePlanLayerCallback(layer);
+			}
 		});
 	}
 
