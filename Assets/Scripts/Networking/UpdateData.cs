@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 public static class UpdateData
 {
-	private const float UpdateSpeed = 1.0f;
+	private const float UpdateSpeed = 0.1f;
 	private static DialogBox m_DisconnectDialogBox = null;
 	private static double m_LastUpdateTimestamp = -1;
 	public static double LastUpdateTimeStamp => m_LastUpdateTimestamp;
@@ -110,6 +110,8 @@ public static class UpdateData
 		{
 			return; // this should never happen...
 		}
+
+		Debug.Log("Updates to process: " + a_Updates.Count);
 
 		// process next in queue. Note that is not a while loop since we only want to do a single update per client tick
 		//  This is because currently, multiple updates per tick cause skipping of essential plan unlocks..

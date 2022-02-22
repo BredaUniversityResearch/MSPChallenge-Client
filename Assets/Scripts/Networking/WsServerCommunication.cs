@@ -121,6 +121,7 @@ namespace Networking
 						// do not update lastUpdateTimestamp and do not process payload
 						return;
 					}
+					Debug.Log(result.payload.ToString().Substring(0, 80));
 					request.ProcessPayload(result.payload);
 				}
 			});     

@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.Audio;
 using DotSpatial.Projections;
+using Networking;
 
 public class Main : MonoBehaviour
 {
@@ -110,6 +111,7 @@ public class Main : MonoBehaviour
 			NetworkForm form = new NetworkForm();
 			form.AddField("session_id", TeamManager.CurrentSessionID);
 			ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, instance.CloseSessionSuccess, instance.CloseSessionFail);
+			UpdateData.StopWsServerCommunication();
 		}
 		else
 		{
