@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -13,25 +13,52 @@ using UnityEditor;
 [CreateAssetMenu]
 public class ApplicationBuildIdentifier: ScriptableObject
 {
-	//Actual file reside in Assets/Utility/Resources/
-	private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
+	//Actual file reside in Assets/Resources/
+	//private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
 
 	[SerializeField] private string buildTime;
-	//[SerializeField] private int svnRevisionNumber;
+	[SerializeField] private string gitTag;
+
+    public ApplicationBuildIdentifier()
+    {
+        UpdateBuildTime();
+    }
 
 	public static ApplicationBuildIdentifier FindBuildIdentifier()
 	{
-		ApplicationBuildIdentifier identifier = Resources.Load<ApplicationBuildIdentifier>(BUILD_IDENTIFIER_ASSET_PATH);
+		ApplicationBuildIdentifier identifier = new ApplicationBuildIdentifier();
 		return identifier;
 	}
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_CLOUD_BUILD
 	public void UpdateBuildTime()
 	{
 		buildTime = System.DateTime.Now.ToString("u", CultureInfo.InvariantCulture);
+		gitTag = RunGitCommand();
+	}
 
-		//string svnInfo = GetSVNInfo();
-		//svnRevisionNumber = GetCurrentRevisionFromSvnInfo(svnInfo);
+	public string RunGitCommand()
+	{
+		string result = "";
+        var proc = new Process
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "git",
+				Arguments = $"git describe --tags `git rev-list --tags --max-count=1`",
+				UseShellExecute = false,
+				RedirectStandardOutput = true,
+				CreateNoWindow = true,
+			}
+		};
+
+        proc.Start();
+		while (!proc.StandardOutput.EndOfStream)
+		{
+			result += $"{proc.StandardOutput.ReadLine()},";
+		}
+		proc.WaitForExit();
+		return result;    
 	}
 
 	/// <summary>
@@ -44,49 +71,50 @@ public class ApplicationBuildIdentifier: ScriptableObject
 	/// Unversioned items found
 	/// </summary>
 	/// <returns></returns>
-	//private string GetSVNInfo()
-	//{
-	//	Process myProcess = new Process();
-	//	myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-	//	myProcess.StartInfo.CreateNoWindow = true;
-	//	myProcess.StartInfo.UseShellExecute = false;
-	//	myProcess.StartInfo.FileName = Application.dataPath + "/../SubWCRev.exe";
-	//	myProcess.StartInfo.Arguments = Application.dataPath;
-	//	myProcess.StartInfo.RedirectStandardOutput = true;
-	//	myProcess.EnableRaisingEvents = true;
-	//	myProcess.Start();
-	//	myProcess.WaitForExit();
+	
+	// private string GetSVNInfo()
+	// {
+	// 	Process myProcess = new Process();
+	// 	myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+	// 	myProcess.StartInfo.CreateNoWindow = true;
+	// 	myProcess.StartInfo.UseShellExecute = false;
+	// 	myProcess.StartInfo.FileName = Application.dataPath + "/../SubWCRev.exe";
+	// 	myProcess.StartInfo.Arguments = Application.dataPath;
+	// 	myProcess.StartInfo.RedirectStandardOutput = true;
+	// 	myProcess.EnableRaisingEvents = true;
+	// 	myProcess.Start();
+	// 	myProcess.WaitForExit();
 
-	//	string stdOut = myProcess.StandardOutput.ReadToEnd();
-	//	return stdOut;
-	//}
+	// 	string stdOut = myProcess.StandardOutput.ReadToEnd();
+	// 	return stdOut;
+	// }
 
-	//private int GetCurrentRevisionFromSvnInfo(string svnInfoOutput)
-	//{
-	//	int revisionNumber;
-	//	Regex regex = new Regex("Last committed at revision ([0-9]+)");
-	//	Match match = regex.Match(svnInfoOutput);
-	//	if (match.Success)
-	//	{
-	//		revisionNumber = int.Parse(match.Groups[1].Value);
-	//	}
-	//	else
-	//	{
-	//		revisionNumber = -1;
-	//		UnityEngine.Debug.LogError("Could not find revision number from SVN info string \n" + svnInfoOutput);
-	//	}
-	//	return revisionNumber;
-	//}
+	// private int GetCurrentRevisionFromSvnInfo(string svnInfoOutput)
+	// {
+	// 	int revisionNumber;
+	// 	Regex regex = new Regex("Last committed at revision ([0-9]+)");
+	// 	Match match = regex.Match(svnInfoOutput);
+	// 	if (match.Success)
+	// 	{
+	// 		revisionNumber = int.Parse(match.Groups[1].Value);
+	// 	}
+	// 	else
+	// 	{
+	// 		revisionNumber = -1;
+	// 		UnityEngine.Debug.LogError("Could not find revision number from SVN info string \n" + svnInfoOutput);
+	// 	}
+	// 	return revisionNumber;
+	// }
 
 #endif
 
-	public string GetBuildTime()
+    public string GetBuildTime()
 	{
 		return buildTime;
 	}
 
-	//public int GetSvnRevisionNumber()
-	//{
-	//	return svnRevisionNumber;
-	//}
+	public string GetGitTag()
+	{
+		return gitTag;
+	}
 }
