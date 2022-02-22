@@ -8,14 +8,14 @@ class ProjectBuilder
     [MenuItem("MSP 2050/CI/Build Win64")]
     public static void BuildWin64()
     {
-		PreBuild();
+        //PreBuild();
 
-		List<string> scenes = FindEnabledEditorScenes();
+        List<string> scenes = FindEnabledEditorScenes();
         GenericBuild(scenes.ToArray(), "Builds/Win64/MSP2050/MSP2050.exe", BuildTarget.StandaloneWindows64, BuildOptions.None);
 
-		scenes.Insert(0, "Assets/UnitTestScene.unity"); 
-		GenericBuild(scenes.ToArray(), "Builds/Win64/MSP2050_Test/MSP2050_Test.exe", BuildTarget.StandaloneWindows64, BuildOptions.AllowDebugging | BuildOptions.ForceEnableAssertions);
-	}
+        scenes.Insert(0, "Assets/UnitTestScene.unity");
+        GenericBuild(scenes.ToArray(), "Builds/Win64/MSP2050_Test/MSP2050_Test.exe", BuildTarget.StandaloneWindows64, BuildOptions.AllowDebugging | BuildOptions.ForceEnableAssertions);
+    }
 
     private static List<string> FindEnabledEditorScenes()
     {
@@ -28,7 +28,7 @@ class ProjectBuilder
         return editorScenes;
     }
 
-	private static void GenericBuild(string[] scenes, string target_dir, BuildTarget build_target, BuildOptions build_options)
+    private static void GenericBuild(string[] scenes, string target_dir, BuildTarget build_target, BuildOptions build_options)
     {
         EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, build_target);
         BuildReport res = BuildPipeline.BuildPlayer(scenes, target_dir, build_target, build_options);
@@ -38,33 +38,33 @@ class ProjectBuilder
         }
     }
 
-	[MenuItem("MSP 2050/Build project")]
-	public static void MyBuild()
-	{
-		PreBuild();
+    [MenuItem("MSP 2050/Build project")]
+    public static void MyBuild()
+    {
+        //PreBuild();
 
-		//Build a dev and non-dev player
-		string path = EditorUtility.SaveFolderPanel("Choose folder to build game", "", "");
-		if (path.Length != 0)
-		{
-			BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/Windows/msp.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.None);
-			BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/Windows_Dev/msp_dev.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.Development);
-		}
-	}
+        //Build a dev and non-dev player
+        string path = EditorUtility.SaveFolderPanel("Choose folder to build game", "", "");
+        if (path.Length != 0)
+        {
+            BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/Windows/msp.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.None);
+            BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/Windows_Dev/msp_dev.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.Development);
+        }
+    }
 
-	private static void PreBuild()
-	{
-		//Put build date into the game
-		ApplicationBuildIdentifier buildIdentifier = ApplicationBuildIdentifier.FindBuildIdentifier();
-		if (buildIdentifier != null)
-		{
-			buildIdentifier.UpdateBuildTime();
-			EditorUtility.SetDirty(buildIdentifier);
+    //private static void PreBuild()
+    //{
+    //    //Put build date into the game
+    //    ApplicationBuildIdentifier buildIdentifier = ApplicationBuildIdentifier.FindBuildIdentifier();
+    //    if (buildIdentifier != null)
+    //    {
+    //        buildIdentifier.UpdateBuildTime();
+    //        EditorUtility.SetDirty(buildIdentifier);
 
-			//Because the GLog namespace cannot be found from the editor folder, this has been disabled for now
-			//GLog.GLog.Instance.gameVersion = "Rev " + buildIdentifier.GetSvnRevisionNumber();
-			//EditorUtility.SetDirty(GLog.GLog.Instance);
-			AssetDatabase.SaveAssets();
-		}
-	}
+    //        //Because the GLog namespace cannot be found from the editor folder, this has been disabled for now
+    //        //GLog.GLog.Instance.gameVersion = "Rev " + buildIdentifier.GetSvnRevisionNumber();
+    //        //EditorUtility.SetDirty(GLog.GLog.Instance);
+    //        AssetDatabase.SaveAssets();
+    //    }
+    //}
 }
