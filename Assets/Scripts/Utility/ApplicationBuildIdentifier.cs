@@ -14,14 +14,19 @@ using UnityEditor;
 public class ApplicationBuildIdentifier: ScriptableObject
 {
 	//Actual file reside in Assets/Resources/
-	private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
+	//private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
 
 	[SerializeField] private string buildTime;
 	[SerializeField] private string gitTag;
 
+    public ApplicationBuildIdentifier()
+    {
+        UpdateBuildTime();
+    }
+
 	public static ApplicationBuildIdentifier FindBuildIdentifier()
 	{
-		ApplicationBuildIdentifier identifier = Resources.Load<ApplicationBuildIdentifier>(BUILD_IDENTIFIER_ASSET_PATH);
+		ApplicationBuildIdentifier identifier = new ApplicationBuildIdentifier();
 		return identifier;
 	}
 
@@ -35,23 +40,25 @@ public class ApplicationBuildIdentifier: ScriptableObject
 	public string RunGitCommand()
 	{
 		string result = "";
-		var proc = new Process
-		{
-			StartInfo = new ProcessStartInfo
-			{
-				Arguments = $"git describe --tags --abbrev=0",
+        var proc = new Process
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "git",
+				Arguments = $"git describe --tags `git rev-list --tags --max-count=1`",
 				UseShellExecute = false,
 				RedirectStandardOutput = true,
 				CreateNoWindow = true,
 			}
 		};
-			proc.Start();
-			while (!proc.StandardOutput.EndOfStream)
-			{
-				result += $"{proc.StandardOutput.ReadLine()},";
-			}
-			proc.WaitForExit();
-			return result;    
+
+        proc.Start();
+		while (!proc.StandardOutput.EndOfStream)
+		{
+			result += $"{proc.StandardOutput.ReadLine()},";
+		}
+		proc.WaitForExit();
+		return result;    
 	}
 
 	/// <summary>
