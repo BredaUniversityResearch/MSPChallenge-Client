@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -72,7 +72,6 @@ public class ApplicationBuildIdentifier : ScriptableObject
         proc.WaitForExit();
         return result;
     }
-
     /// <summary>
     /// Output should resemble the following format: 
     /// 

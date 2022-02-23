@@ -20,6 +20,8 @@ public class LayerImporter
 	static int expectedLayers;
 	static Stopwatch stopWatch;
 
+	private static bool loadAllLayers = false;
+
 	public static bool IsCurrentlyImportingLayers 
 	{ 
 		get; 
@@ -51,8 +53,7 @@ public class LayerImporter
 		}
 		else
 		{
-			GameObject layerImporterHelper = new GameObject("LayerImporterHelper");
-			ImportAllLayers();
+			loadAllLayers = true;
 			LayerPickerUI.HideUI();
 		}
 
@@ -60,12 +61,12 @@ public class LayerImporter
         {
             TeamManager.LoadTeams();
         }
-        else
-        {
-            TeamManager.TeamsLoaded();
-        }
+		else
+		{
+			TeamManager.TeamsLoaded();
+		}
 
-       //MEL config use requires layers to be loaded (for kpi creation)
+		//MEL config use requires layers to be loaded (for kpi creation)
 		NetworkForm form = new NetworkForm();
 		ServerCommunication.DoRequest<CELConfig>(Server.GetCELConfig(), form, handleCELConfigCallback);
 		ServerCommunication.DoRequest<JObject>(Server.GetMELConfig(), form, handleMELConfigCallback);
@@ -82,6 +83,11 @@ public class LayerImporter
     {
         KPIManager.CreateEcologyKPIs(melConfig);
         PlanManager.LoadFishingFleets(melConfig);
+
+		if (loadAllLayers)
+		{
+			ImportAllLayers();
+		}
     }
 
 	private static void handleCELConfigCallback(CELConfig config)
