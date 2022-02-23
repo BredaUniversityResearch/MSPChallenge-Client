@@ -118,7 +118,12 @@ namespace Assets.Networking
 				}
 				else
 				{
-					UnityEngine.Debug.LogError("Failed to renew api access token. Message: " + response.message + " Request error: " + currentTokenRequest.error);
+					string message = "Failed to renew api access token. Message: " + response.message;
+					if (currentTokenRequest != null)
+					{
+						message += ", Request error: " + currentTokenRequest.error;
+					}
+					UnityEngine.Debug.LogError(message);
 				}
 
 				renewTokenRequest = null;
