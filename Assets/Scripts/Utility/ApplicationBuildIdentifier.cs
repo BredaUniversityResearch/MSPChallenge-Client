@@ -11,110 +11,111 @@ using UnityEditor;
 /// Small scriptable object that acts as the build identifier. Contains information about the build date.
 /// </summary>
 [CreateAssetMenu]
-public class ApplicationBuildIdentifier: ScriptableObject
+public class ApplicationBuildIdentifier : ScriptableObject
 {
-	//Actual file reside in Assets/Resources/
-	//private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
 
-	[SerializeField] private string buildTime;
-	[SerializeField] private string gitTag;
+    //Actual file reside in Assets/Resources/
+    private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
 
-    public ApplicationBuildIdentifier()
+    [SerializeField] private string buildTime;
+    [SerializeField] private string gitTag;
+
+    public static void UpdateBuildInformation()
     {
-        UpdateBuildTime();
+        ApplicationBuildIdentifier identifier = Resources.Load<ApplicationBuildIdentifier>(BUILD_IDENTIFIER_ASSET_PATH);
+        identifier.UpdateBuildTime();
+        EditorUtility.SetDirty(identifier);
+        AssetDatabase.SaveAssets();
     }
 
-	public static ApplicationBuildIdentifier FindBuildIdentifier()
-	{
-		ApplicationBuildIdentifier identifier = new ApplicationBuildIdentifier();
-		return identifier;
-	}
+    public static ApplicationBuildIdentifier FindBuildIdentifier()
+    {
+        ApplicationBuildIdentifier identifier = Resources.Load<ApplicationBuildIdentifier>(BUILD_IDENTIFIER_ASSET_PATH);
+        return identifier;
+    }
 
-#if UNITY_EDITOR || UNITY_CLOUD_BUILD
-	public void UpdateBuildTime()
-	{
-		buildTime = System.DateTime.Now.ToString("u", CultureInfo.InvariantCulture);
-		gitTag = RunGitCommand();
-	}
+    public void UpdateBuildTime()
+    {
+        buildTime = System.DateTime.Now.ToString("u", CultureInfo.InvariantCulture);
+        gitTag = RunGitCommand();
+    }
 
-	public string RunGitCommand()
-	{
-		string result = "";
+    public string RunGitCommand()
+    {
+        string result = "";
         var proc = new Process
         {
             StartInfo = new ProcessStartInfo()
             {
                 FileName = "git",
-				Arguments = $"git describe --tags `git rev-list --tags --max-count=1`",
-				UseShellExecute = false,
-				RedirectStandardOutput = true,
-				CreateNoWindow = true,
-			}
-		};
+                Arguments = $"git describe --tags `git rev-list --tags --max-count=1`",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+            }
+        };
 
         proc.Start();
-		while (!proc.StandardOutput.EndOfStream)
-		{
-			result += $"{proc.StandardOutput.ReadLine()},";
-		}
-		proc.WaitForExit();
-		return result;    
-	}
+        while (!proc.StandardOutput.EndOfStream)
+        {
+            result += $"{proc.StandardOutput.ReadLine()},";
+        }
+        proc.WaitForExit();
+        return result;
+    }
 
-	/// <summary>
-	/// Output should resemble the following format: 
-	/// 
-	/// SubWCRev: 'D:\Projects\MSP\Unity\MSP2050\Assets'
-	/// Last committed at revision 3331
-	/// Mixed revision range 3317:3331
-	/// Local modifications found
-	/// Unversioned items found
-	/// </summary>
-	/// <returns></returns>
-	
-	// private string GetSVNInfo()
-	// {
-	// 	Process myProcess = new Process();
-	// 	myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-	// 	myProcess.StartInfo.CreateNoWindow = true;
-	// 	myProcess.StartInfo.UseShellExecute = false;
-	// 	myProcess.StartInfo.FileName = Application.dataPath + "/../SubWCRev.exe";
-	// 	myProcess.StartInfo.Arguments = Application.dataPath;
-	// 	myProcess.StartInfo.RedirectStandardOutput = true;
-	// 	myProcess.EnableRaisingEvents = true;
-	// 	myProcess.Start();
-	// 	myProcess.WaitForExit();
+    /// <summary>
+    /// Output should resemble the following format: 
+    /// 
+    /// SubWCRev: 'D:\Projects\MSP\Unity\MSP2050\Assets'
+    /// Last committed at revision 3331
+    /// Mixed revision range 3317:3331
+    /// Local modifications found
+    /// Unversioned items found
+    /// </summary>
+    /// <returns></returns>
 
-	// 	string stdOut = myProcess.StandardOutput.ReadToEnd();
-	// 	return stdOut;
-	// }
+    // private string GetSVNInfo()
+    // {
+    // 	Process myProcess = new Process();
+    // 	myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+    // 	myProcess.StartInfo.CreateNoWindow = true;
+    // 	myProcess.StartInfo.UseShellExecute = false;
+    // 	myProcess.StartInfo.FileName = Application.dataPath + "/../SubWCRev.exe";
+    // 	myProcess.StartInfo.Arguments = Application.dataPath;
+    // 	myProcess.StartInfo.RedirectStandardOutput = true;
+    // 	myProcess.EnableRaisingEvents = true;
+    // 	myProcess.Start();
+    // 	myProcess.WaitForExit();
 
-	// private int GetCurrentRevisionFromSvnInfo(string svnInfoOutput)
-	// {
-	// 	int revisionNumber;
-	// 	Regex regex = new Regex("Last committed at revision ([0-9]+)");
-	// 	Match match = regex.Match(svnInfoOutput);
-	// 	if (match.Success)
-	// 	{
-	// 		revisionNumber = int.Parse(match.Groups[1].Value);
-	// 	}
-	// 	else
-	// 	{
-	// 		revisionNumber = -1;
-	// 		UnityEngine.Debug.LogError("Could not find revision number from SVN info string \n" + svnInfoOutput);
-	// 	}
-	// 	return revisionNumber;
-	// }
+    // 	string stdOut = myProcess.StandardOutput.ReadToEnd();
+    // 	return stdOut;
+    // }
 
-#endif
+    // private int GetCurrentRevisionFromSvnInfo(string svnInfoOutput)
+    // {
+    // 	int revisionNumber;
+    // 	Regex regex = new Regex("Last committed at revision ([0-9]+)");
+    // 	Match match = regex.Match(svnInfoOutput);
+    // 	if (match.Success)
+    // 	{
+    // 		revisionNumber = int.Parse(match.Groups[1].Value);
+    // 	}
+    // 	else
+    // 	{
+    // 		revisionNumber = -1;
+    // 		UnityEngine.Debug.LogError("Could not find revision number from SVN info string \n" + svnInfoOutput);
+    // 	}
+    // 	return revisionNumber;
+    // }
 
     public string GetBuildTime()
-	{
-		return buildTime;
-	}
+    {
+        return buildTime;
+    }
 
-	public string GetGitTag()
-	{
-		return gitTag;
-	}
+    public string GetGitTag()
+    {
+        return gitTag;
+    }
 }
