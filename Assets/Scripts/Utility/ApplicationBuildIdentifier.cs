@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using Newtonsoft.Json;
-using System.IO;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -15,6 +13,7 @@ using UnityEditor;
 [CreateAssetMenu]
 public class ApplicationBuildIdentifier : ScriptableObject
 {
+
     //Actual file reside in Assets/Resources/
     private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
 
@@ -28,7 +27,6 @@ public class ApplicationBuildIdentifier : ScriptableObject
         EditorUtility.SetDirty(identifier);
         AssetDatabase.SaveAssets();
     }
-
 
     public static ApplicationBuildIdentifier FindBuildIdentifier()
     {
