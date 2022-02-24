@@ -9,7 +9,6 @@ using Object = UnityEngine.Object;
 
 public static class UpdateData
 {
-	private const float UpdateSpeed = 0.1f;
 	private static DialogBox m_DisconnectDialogBox = null;
 	private static double m_LastUpdateTimestamp = -1;
 	public static double LastUpdateTimeStamp => m_LastUpdateTimestamp;
@@ -59,7 +58,7 @@ public static class UpdateData
 			ProcessUpdates(m_NextUpdates);
 			HideDisconnectedDialogBox();
 	
-			yield return new WaitForSeconds(UpdateSpeed);
+			yield return null;
 		}
 	}
 	
