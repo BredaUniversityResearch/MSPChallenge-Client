@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class Options : MonoBehaviour
@@ -32,6 +33,7 @@ public class Options : MonoBehaviour
     public TextMeshProUGUI buildDateText;
 	//public TextMeshProUGUI buildRevisionText;
 	public TextMeshProUGUI apiEndpointText;
+	public TextMeshProUGUI apiEndpointContainer;
 
     public Button cancel, accept;
 
@@ -111,7 +113,12 @@ public class Options : MonoBehaviour
 	}
 
 	private void SetAPIEndpointInfo()
-	{
+	{		
+		if(SceneManager.GetActiveScene().name == "LoginScene")
+        {
+			apiEndpointContainer.enabled = false;
+			apiEndpointText.enabled = false;
+		}
 		apiEndpointText.text = Server.Url;
 	}
 
