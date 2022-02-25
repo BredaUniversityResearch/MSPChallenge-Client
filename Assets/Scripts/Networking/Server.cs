@@ -83,7 +83,7 @@ public static class Server
 	private static void UpdateUrl()
 	{
 		//Url = string.Format("{0}{1}/{2}/", protocol, host, endpoint);
-		Url = host + '/';
+		Url = host;
 		UrlWithoutSession = Url;
 		if (gameSessionId > 0)
 		{

@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -33,7 +33,7 @@ public class Options : MonoBehaviour
 	//public TextMeshProUGUI buildRevisionText;
 	public TextMeshProUGUI apiEndpointText;
 
-    public Button cancel, accept;
+	public Button cancel, accept;
 
 	protected void Awake()
 	{
