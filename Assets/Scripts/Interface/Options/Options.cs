@@ -33,9 +33,8 @@ public class Options : MonoBehaviour
     public TextMeshProUGUI buildDateText;
 	//public TextMeshProUGUI buildRevisionText;
 	public TextMeshProUGUI apiEndpointText;
-	public TextMeshProUGUI apiEndpointContainer;
 
-    public Button cancel, accept;
+	public Button cancel, accept;
 
 	protected void Awake()
 	{
@@ -113,12 +112,7 @@ public class Options : MonoBehaviour
 	}
 
 	private void SetAPIEndpointInfo()
-	{		
-		if(SceneManager.GetActiveScene().name == "LoginScene")
-        {
-			apiEndpointContainer.enabled = false;
-			apiEndpointText.enabled = false;
-		}
+	{
 		apiEndpointText.text = Server.Url;
 	}
 
