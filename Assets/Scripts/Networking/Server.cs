@@ -5,7 +5,7 @@ using System.Configuration;
 
 public static class Server
 {
-	public static Uri WsServerUri = new Uri("ws://localhost:8080");
+	public static Uri WsServerUri = new Uri("ws://localhost:45001");
 
 	public static string Url
 	{
