@@ -18,7 +18,7 @@ public abstract class SubEntity
 	public Entity Entity;
 	protected int databaseID;
 	protected int persistentID;
-	protected int mspID;
+	protected string mspID;
 
 	protected GameObject gameObject;
     protected SubEntityDrawSettings drawSettings;
@@ -43,7 +43,7 @@ public abstract class SubEntity
 	public delegate void SubEntityVisiblityChangedCallback(SubEntity entity, AbstractLayer layer, bool newVisibility);
 	public static event SubEntityVisiblityChangedCallback OnEntityVisibilityChanged;
 
-	public SubEntity(Entity entity, int databaseID = -1, int persistentID = -1, int mspID = -1)
+	public SubEntity(Entity entity, int databaseID = -1, int persistentID = -1, string mspID = null)
 	{
 		Entity = entity;
 		this.databaseID = databaseID;
@@ -148,7 +148,7 @@ public abstract class SubEntity
 		return persistentID;
 	}
 
-	public int GetMspID()
+	public string GetMspID()
 	{
 		return mspID;
 	}

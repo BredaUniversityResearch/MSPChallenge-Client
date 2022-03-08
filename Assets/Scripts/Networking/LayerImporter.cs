@@ -268,7 +268,7 @@ public class SubEntityObject
     public List<GeometryObject> subtractive { get; set; }
     public int active { get; set; }
     public int persistent { get; set; }
-    public int mspid { get; set; }
+    public string mspid { get; set; }
     public int country = -1;
     public string type { get; set; }
     public Dictionary<string, string> data { get; set; }
@@ -311,5 +311,5 @@ public class GeometryObject
     public List<GeometryObject> subtractive { get; set; }
     public int active { get; set; }
     public int persistent { get; set; }
-    public int mspid { get; set; }
+    public string mspid { get; set; }
 }
