@@ -154,7 +154,7 @@ public class PropertiesWindow : MonoBehaviour
 			debugInfoParent.gameObject.SetActive(true);
 			debugInfoParent.DestroyAllContent();
             debugInfoParent.Initialise();
-            AddEntry(debugInfoParent, "MSP ID", subEntity.GetMspID().ToString());
+            AddEntry(debugInfoParent, "MSP ID", subEntity.GetMspID());
 			AddEntry(debugInfoParent, "Persistent ID", subEntity.GetPersistentID().ToString());
 			AddEntry(debugInfoParent, "Database ID", subEntity.GetDatabaseID().ToString());
 			if (rasterValue != null)
