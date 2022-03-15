@@ -54,7 +54,8 @@ namespace Networking
 				client.Options.SetRequestHeader(GameSessionIdHeader, gameSessionId.ToString());
 				return client;
 			});
-			
+
+			Debug.Log(Server.WsServerUri);
 			m_Client = new WebsocketClient(Server.WsServerUri, factory);
 			m_Client.ErrorReconnectTimeout = TimeSpan.FromSeconds(5);
 			m_Client.DisconnectionHappened.Subscribe(x =>
