@@ -48,36 +48,37 @@ public static class ServerCommunication
 			this.successCallback = successCallback;
 		}
 
-		public override void ProcessPayload(JToken payload)
+		public T ToObject(JToken a_Payload)
 		{
-			////If we expect a string, return the payload directly
-			//if(payload is T)
-			//{
-			//	if (successCallback != null)
-			//		successCallback.Invoke((T)Convert.ChangeType(payload, typeof(T)));
-			//	return;
-			//}
-			bool success = false;
+			JsonSerializer serializer = new JsonSerializer();
+			serializer.Converters.Add(new JsonConverterBinaryBool());
+			return a_Payload.ToObject<T>(serializer);
+		}
+
+		public override void ProcessPayload(JToken a_Payload)
+		{
 			T payloadContent = default(T);
 			try
 			{
 				//Parse payload to expected type
-				//T payloadContent = JsonConvert.DeserializeObject<T>(payload);
-
-				//T payloadContent = payload.ToObject<T>();
-
-				JsonSerializer serializer = new JsonSerializer();
-				serializer.Converters.Add(new JsonConverterBinaryBool());
-				payloadContent = payload.ToObject<T>(serializer);
-				success = true;
+				payloadContent = ToObject(a_Payload);
 			}
 			catch (System.Exception e)
 			{
 				//Or invoke the failure callback if that fails
-				failureCallback.Invoke(this, $"Failed to deserialize results from {Url}: {payload.ToString()}\nMessage: {e.Message}");
+				failureCallback.Invoke(this, $"Failed to deserialize results from {Url}: {a_Payload.ToString()}\nMessage: {e.Message}");
+				return;
 			}
-			if (success && successCallback != null)
-				successCallback.Invoke(payloadContent);
+			ProcessPayload(payloadContent);
+		}
+
+		public void ProcessPayload(T a_PayloadContent)
+		{
+			if (successCallback == null)
+			{
+				return;
+			}
+			successCallback.Invoke(a_PayloadContent);
 		}
 	}
 
@@ -538,5 +539,10 @@ public static class ServerCommunication
 	public static void SetApiAccessToken(string responseApiToken, string recoveryApiToken)
 	{
 		tokenHandler.SetAccessToken(responseApiToken, recoveryApiToken);
+	}
+
+	public static string GetApiAccessToken()
+	{
+		return tokenHandler.GetAccessToken();
 	}
 }

@@ -431,6 +431,8 @@ public class LoginMenu : MonoBehaviour
 			Server.Host = selectedSession.game_server_address;
 			Server.Endpoint = selectedSession.endpoint ?? "";
 			Server.GameSessionId = selectedSession.id;
+			
+			Server.WsServerUri = new Uri(selectedSession.game_ws_server_address);
 			PlayerPrefs.SetString(LOGIN_SERVER_NAME, selectedSession.game_server_address);
 		}
 
@@ -659,6 +661,7 @@ public class GameSession
 	public int players_past_hour;
 	public string game_server_name;
 	public string game_server_address;
+	public string game_ws_server_address;
 	public string watchdog_name;
 	public string watchdog_address;
 	public int config_version_version;

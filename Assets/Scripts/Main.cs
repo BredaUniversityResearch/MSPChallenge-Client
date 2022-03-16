@@ -1,13 +1,9 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using ClipperLib;
-using GeoJSON.Net.Feature;
 using UnityEngine.Audio;
-using Newtonsoft.Json;
 using DotSpatial.Projections;
-using UnityEngine.Networking;
+using Networking;
 
 public class Main : MonoBehaviour
 {
@@ -83,6 +79,7 @@ public class Main : MonoBehaviour
 				NetworkForm form = new NetworkForm();
 				form.AddField("session_id", TeamManager.CurrentSessionID);
 				ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, CloseSessionSuccess, CloseSessionFail);
+				UpdateData.StopWsServerCommunication();
 				//StartCoroutine(QuitAtEndOfFrame());
 			}
             return !interceptQuit;
@@ -114,6 +111,7 @@ public class Main : MonoBehaviour
 			NetworkForm form = new NetworkForm();
 			form.AddField("session_id", TeamManager.CurrentSessionID);
 			ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, instance.CloseSessionSuccess, instance.CloseSessionFail);
+			UpdateData.StopWsServerCommunication();
 		}
 		else
 		{
