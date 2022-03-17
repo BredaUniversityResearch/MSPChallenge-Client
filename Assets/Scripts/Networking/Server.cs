@@ -5,8 +5,6 @@ using System.Configuration;
 
 public static class Server
 {
-	public static Uri WsServerUri = new Uri("ws://localhost:45001");
-
 	public static string Url
 	{
 		get;
@@ -110,6 +108,11 @@ public static class Server
 	public static string Update()
 	{
 		return "api/game/latest";
+	}
+
+	public static string Tick()
+	{
+		return "api/game/Tick";
 	}
 
 	public static string DeleteLayer()

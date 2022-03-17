@@ -6,7 +6,7 @@ using Sirenix.OdinInspector;
 using ColourPalette;
 
 [RequireComponent(typeof(CustomDropdown))]
-public class CustomDropdownColorSet : SerializedMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+class CustomDropdownColorSet : SerializedMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public List<Graphic> targetGraphics = null;
     public IColourContainer colorNormal = null;

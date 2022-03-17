@@ -29,7 +29,7 @@ namespace Assets.Networking
 			public DateTime valid_until = DateTime.MinValue;
 		};
 
-		private static readonly TimeSpan TokenCheckInterval = new TimeSpan(0, 0, 15);
+		private static readonly TimeSpan TokenCheckInterval = new TimeSpan(0, 0, 5);
 
 		private string currentAccessToken = "";
 		private string recoveryToken = "";
@@ -118,12 +118,7 @@ namespace Assets.Networking
 				}
 				else
 				{
-					string message = "Failed to renew api access token. Message: " + response.message;
-					if (currentTokenRequest != null)
-					{
-						message += ", Request error: " + currentTokenRequest.error;
-					}
-					UnityEngine.Debug.LogError(message);
+					UnityEngine.Debug.LogError("Failed to renew api access token. Message: " + response.message + " Request error: " + currentTokenRequest.error);
 				}
 
 				renewTokenRequest = null;

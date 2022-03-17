@@ -2,76 +2,82 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Networking;
-using Networking.WsServerConnectionChangeBehaviour;
-using Sirenix.Utilities;
-using Object = UnityEngine.Object;
+using Newtonsoft.Json;
+using UnityEngine.Networking;
 
 public static class UpdateData
 {
-	private static DialogBox m_DisconnectDialogBox = null;
-	private static double m_LastUpdateTimestamp = -1;
-	public static double LastUpdateTimeStamp => m_LastUpdateTimestamp;
-	public static UpdateObject LastUpdate;
-	public static bool StopProcessingUpdates = false;
-	
-	public static bool? WsServerConnected = null;
-	private static WsServerCommunication m_WsServerCommunication;
-	private static readonly Queue<UpdateObject> m_NextUpdates = new Queue<UpdateObject>();
+	private static float updateSpeed = 1.0f;
+	private static bool canUpdate = true;
+	private static DialogBox disconnectDialogBox = null;
+	private static double lastUpdateTimestamp = -1;
+	public static double LastUpdateTimeStamp => lastUpdateTimestamp;
+	public static UpdateObject lastUpdate;
+	public static bool stopProcessingUpdates = false;
 
 	public static IEnumerator GetFirstUpdate()
 	{
-		m_WsServerCommunication = new WsServerCommunication(
-			Server.GameSessionId,
-			TeamManager.CurrentUserTeamID,
-			TeamManager.CurrentSessionID.ToString(),
-			HandleUpdateSuccessCallback
-		);
-		m_WsServerCommunication.Start();
+		canUpdate = false;
+		NetworkForm form = new NetworkForm();
+		form.AddField("team_id", TeamManager.CurrentUserTeamID);
+		form.AddField("last_update_time", lastUpdateTimestamp.ToString(Localisation.NumberFormatting));
+		form.AddField("user", TeamManager.CurrentSessionID.ToString());
+		ServerCommunication.DoRequest<UpdateObject>(Server.Update(), form, HandleUpdateSucessCallback, HandleUpdateFailCallback);
 
-		while (m_NextUpdates.Count == 0)
+		while (!canUpdate)
 		{
-			HandleWsServerConnectionChanges();
 			yield return null;
 		}
 
-		ProcessUpdates(m_NextUpdates);
-		HideDisconnectedDialogBox();
 		Main.FirstUpdateTickComplete();
-	}
-	
-	public static void StopWsServerCommunication()
-	{
-		m_WsServerCommunication.Stop();
 	}
 
 	public static IEnumerator GetUpdates()
 	{
 		while (true)
 		{
-			while (m_NextUpdates.Count == 0)
+			canUpdate = false;
+			NetworkForm form = new NetworkForm();
+			form.AddField("team_id", TeamManager.CurrentUserTeamID);
+			form.AddField("last_update_time", lastUpdateTimestamp.ToString(Localisation.NumberFormatting));
+			form.AddField("user", TeamManager.CurrentSessionID.ToString());
+			ServerCommunication.DoRequest<UpdateObject>(Server.Update(), form, HandleUpdateSucessCallback, HandleUpdateFailCallback);
+
+			while (!canUpdate)
 			{
-				HandleWsServerConnectionChanges();
 				yield return null;
 			}
-			
-			ProcessUpdates(m_NextUpdates);
-			HideDisconnectedDialogBox();
-	
-			yield return null;
+
+			yield return new WaitForSeconds(updateSpeed);
 		}
 	}
-	
-	private static void HandleUpdateSuccessCallback(UpdateObject a_UpdateData)
+
+	public class TickResult
 	{
-		m_NextUpdates.Enqueue(a_UpdateData);
+		public bool success;
+		public string message;
+		public string payload;
+	}
+
+	private static void HandleUpdateSucessCallback(UpdateObject updateData)
+	{
+		ProcessUpdates(updateData);
+		HideDisconnectedDialogBox();
+		canUpdate = true;
+	}
+
+	private static void HandleUpdateFailCallback(ServerCommunication.ARequest request, string message)
+	{
+		ShowDisconnectedDialogBox();
+		Debug.LogError("Fetching update failed. Message: " + message);
+		canUpdate = true;
 	}
 
 	private static void ShowDisconnectedDialogBox()
 	{
-		if (m_DisconnectDialogBox == null)
+		if (disconnectDialogBox == null)
 		{
-			m_DisconnectDialogBox = DialogBoxManager.instance.NotificationWindow("Disconnected", "Your connection to the server has been interrupted.\n\nHold on while we are trying to re-establish the connection.",
+			disconnectDialogBox = DialogBoxManager.instance.NotificationWindow("Disconnected", "Your connection to the server has been interrupted.\n\nHold on while we are trying to re-establish the connection.",
 				() => {
                     Main.QuitGame();
                 }, "Close Game");
@@ -80,70 +86,35 @@ public static class UpdateData
 
 	private static void HideDisconnectedDialogBox()
 	{
-		if (m_DisconnectDialogBox != null)
+		if (disconnectDialogBox != null)
 		{
-			DialogBoxManager.instance.DestroyDialogBox(m_DisconnectDialogBox);
+			DialogBoxManager.instance.DestroyDialogBox(disconnectDialogBox);
 		}
 	}
 
-	private static void HandleWsServerConnectionChanges()
+	private static void ProcessUpdates(UpdateObject updates)
 	{
-		if (WsServerConnected == m_WsServerCommunication.IsConnected)
-		{
+		if (stopProcessingUpdates || updates.update_time <= lastUpdateTimestamp)
 			return;
-		}
 
-		WsServerConnected = m_WsServerCommunication.IsConnected;
-		if (WsServerConnected == null) // no connection value yet
-		{
-			return;
-		}
-
-		Object.FindObjectsOfType<WsServerConnectionChangeBehaviour>().ForEach(item =>
-			item.NotifyConnection(WsServerConnected.Value));
-	}
-
-	private static void ProcessUpdates(Queue<UpdateObject> a_Updates)
-	{
-		if (a_Updates.Count == 0)
-		{
-			return; // this should never happen...
-		}
-
-		Debug.Log("Updates to process: " + a_Updates.Count);
-
-		// process next in queue. Note that is not a while loop since we only want to do a single update per client tick
-		//  This is because currently, multiple updates per tick cause skipping of essential plan unlocks..
-		ProcessUpdates(a_Updates.Dequeue());
-	}
-
-	private static void ProcessUpdates(UpdateObject a_Update)
-	{
-		HandleWsServerConnectionChanges();
-		if (StopProcessingUpdates || a_Update.update_time <= m_LastUpdateTimestamp)
-		{
-			Debug.Log("stopProcessingUpdates: " + StopProcessingUpdates + ", update.update_time <= lastUpdateTimestamp: " + (a_Update.update_time <= m_LastUpdateTimestamp));
-			return;
-		}
-
-		m_LastUpdateTimestamp = a_Update.update_time;
-		LastUpdate = a_Update;
+		lastUpdateTimestamp = updates.update_time;
+		lastUpdate = updates;
 
 		Dictionary<AbstractLayer, int> layerUpdateTimes = new Dictionary<AbstractLayer, int>();
 		List<Plan> plans = null;
 
-		if (a_Update.plan != null)
+		if (updates.plan != null)
 		{
 			//Sort plans by time and ID so there are no issues with dependencies when loading them in
-			a_Update.plan.Sort();
-			plans = new List<Plan>(a_Update.plan.Count);
-			foreach (PlanObject plan in a_Update.plan)
+			updates.plan.Sort();
+			plans = new List<Plan>(updates.plan.Count);
+			foreach (PlanObject plan in updates.plan)
 			{
 				plans.Add(PlanManager.ProcessReceivedPlan(plan, layerUpdateTimes));
 			}
 		}
 
-		foreach (RasterUpdateObject raster in a_Update.raster)
+		foreach (RasterUpdateObject raster in updates.raster)
 		{
 			AbstractLayer layer = LayerManager.GetLayerByID(raster.id);
 
@@ -155,52 +126,52 @@ public static class UpdateData
 		}
 
 		//Run output update before KPI/Grid update. Source output is required for the KPIs and Capacity for grids.
-		foreach (EnergyOutputObject outputUpdate in a_Update.energy.output)
+		foreach (EnergyOutputObject outputUpdate in updates.energy.output)
 		{
 			UpdateOutput(outputUpdate);
 		}
 
 		//Update grids
-		if (a_Update.plan != null)
+		if (updates.plan != null)
 		{
 			for(int i = 0; i < plans.Count; i++)
 			{
-				plans[i].UpdateGrids(a_Update.plan[i].deleted_grids, a_Update.plan[i].grids);
+				plans[i].UpdateGrids(updates.plan[i].deleted_grids, updates.plan[i].grids);
 			}
 		}
 
 		//Run connection update before KPI update so cable networks are accurate in the KPIs
-		foreach (EnergyConnectionObject connection in a_Update.energy.connections)
+		foreach (EnergyConnectionObject connection in updates.energy.connections)
 		{
 			UpdateConnection(connection);
 		}
 
-		GameState.UpdateTime(a_Update.tick);
+		GameState.UpdateTime(updates.tick);
 
-		if (a_Update.kpi != null)
+		if (updates.kpi != null)
 		{
-			if (a_Update.kpi.energy != null && a_Update.kpi.energy.Length > 0)
+			if (updates.kpi.energy != null && updates.kpi.energy.Length > 0)
 			{
-				KPIManager.ReceiveEnergyKPIUpdate(a_Update.kpi.energy);
+				KPIManager.ReceiveEnergyKPIUpdate(updates.kpi.energy);
 			}
 
-			if (a_Update.kpi.ecology != null && a_Update.kpi.ecology.Length > 0)
+			if (updates.kpi.ecology != null && updates.kpi.ecology.Length > 0)
 			{
-				KPIManager.ReceiveEcologyKPIUpdate(a_Update.kpi.ecology);
+				KPIManager.ReceiveEcologyKPIUpdate(updates.kpi.ecology);
 			}
 
-			if (a_Update.kpi.shipping != null && a_Update.kpi.shipping.Length > 0)
+			if (updates.kpi.shipping != null && updates.kpi.shipping.Length > 0)
 			{
-				KPIManager.ReceiveShippingKPIUpdate(a_Update.kpi.shipping);
+				KPIManager.ReceiveShippingKPIUpdate(updates.kpi.shipping);
 			}
 		}
 
-		if (a_Update.objectives.Count > 0)
+		if (updates.objectives.Count > 0)
 		{
-			InterfaceCanvas.Instance.objectivesMonitor.UpdateObjectivesFromServer(a_Update.objectives);
+			InterfaceCanvas.Instance.objectivesMonitor.UpdateObjectivesFromServer(updates.objectives);
 		}
 
-		PlanDetails.AddFeedbackFromServer(a_Update.planmessages);
+		PlanDetails.AddFeedbackFromServer(updates.planmessages);
 
 		if (PlanManager.planViewing != null && !Main.InEditMode && !Main.EditingPlanDetailsContent)
 		{
@@ -215,9 +186,9 @@ public static class UpdateData
 			}
 		}
 
-		if (a_Update.warning != null)
+		if (updates.warning != null)
 		{
-			IssueManager.instance.OnIssuesReceived(a_Update.warning); //MSP-2358, ensure Warnings are processed after all the plan updates are done.
+			IssueManager.instance.OnIssuesReceived(updates.warning); //MSP-2358, ensure Warnings are processed after all the plan updates are done.
 		}
 
 		PlanManager.CheckIfExpectedplanReceived();
@@ -511,7 +482,6 @@ public class UpdateObject
 	public WarningObject warning;
 	public List<ObjectiveObject> objectives;
 	public TimelineState tick;
-	public double prev_update_time;
 	public double update_time; //Timestamp received from the server at which this update was accurate.
 }
 
