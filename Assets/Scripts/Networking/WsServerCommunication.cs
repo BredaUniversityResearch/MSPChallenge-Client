@@ -43,7 +43,7 @@ namespace Networking
 			this.m_TeamId = teamId;
 			this.m_User = user;
 			
-			var factory = new Func<ClientWebSocket>(() =>
+			var factory = new System.Func<ClientWebSocket>(() =>
 			{
 				var client = new ClientWebSocket {
 					Options = {

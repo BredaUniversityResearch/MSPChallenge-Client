@@ -23,12 +23,12 @@ public static class ServerCommunication
 	{
 		public UnityWebRequest Www;
 		public string Url;
-		public Action<ARequest, string> failureCallback;
+		public System.Action<ARequest, string> failureCallback;
 		public int retriesRemaining;
 		public bool expectMSPResultFormat = true;
 		public int timeoutLevel = 1;
 
-		public ARequest(string url, Action<ARequest, string> failureCallback, int retriesRemaining)
+		public ARequest(string url, System.Action<ARequest, string> failureCallback, int retriesRemaining)
 		{
 			Url = url;
 			this.failureCallback = failureCallback;
@@ -42,7 +42,7 @@ public static class ServerCommunication
 	{
 		public Action<T> successCallback;
 
-		public Request(string url, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesRemaining)
+		public Request(string url, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesRemaining)
 			: base(url, failureCallback, retriesRemaining)
 		{
 			this.successCallback = successCallback;
@@ -95,7 +95,7 @@ public static class ServerCommunication
 		private bool addDefaultHeaders;
 		private bool priority = false;
 
-		public FormRequest(string url, List<IMultipartFormSection> formData, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
+		public FormRequest(string url, List<IMultipartFormSection> formData, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
 			: base(url, successCallback, failureCallback, retriesRemaining)
         {
             this.formData = formData;
@@ -124,7 +124,7 @@ public static class ServerCommunication
 		private bool addDefaultHeaders;
 
 
-		public RawDataRequest(string url, string data, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
+		public RawDataRequest(string url, string data, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
 			: base(url, successCallback, failureCallback, retriesRemaining)
 		{
             Debug.Log("Created request with raw content: " + data);
@@ -208,7 +208,7 @@ public static class ServerCommunication
 		doingSomethingWindow.SetActive(false);
 	}
 
-	public static void DoPriorityRequest(string url, NetworkForm form, Action<string> successCallback, Action<ARequest, string> failureCallback)
+	public static void DoPriorityRequest(string url, NetworkForm form, Action<string> successCallback, System.Action<ARequest, string> failureCallback)
 	{
 		ARequest request = new FormRequest<string>(Server.Url + url, (form != null) ? form.Form : null, successCallback, failureCallback, 0);
 		request.timeoutLevel = 0;
@@ -221,7 +221,7 @@ public static class ServerCommunication
 	}
 	
 	//Note: specifying a custom failure callback avoids all default ones, including automatic retries.
-	public static void DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesOnFail = 3)
+	public static void DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 3)
 	{
 		ARequest request = new FormRequest<T>(Server.Url + url, (form != null) ? form.Form : null, successCallback, failureCallback, retriesOnFail);
 		requestsQueue.Enqueue(request);
@@ -254,7 +254,7 @@ public static class ServerCommunication
 	}
 
 	//Note: specifying a custom failure callback avoids all default ones, including automatic retries.
-	public static void DoRequest<T>(string url, string rawData, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesOnFail = 0)
+	public static void DoRequest<T>(string url, string rawData, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
     {
         ARequest request = new RawDataRequest<T>(Server.Url + url, rawData, successCallback, failureCallback, retriesOnFail);
         requestsQueue.Enqueue(request);
@@ -286,7 +286,7 @@ public static class ServerCommunication
 		DoRequest<string>(url, rawData, null, HandleRequestFailureError, retriesOnFail);
 	}
 
-	public static void DoExternalAPICall<T>(string url, Dictionary<int, SubEntity> subEntitiesToPass, Action<T> successCallback, Action<ARequest, string> failureCallback, int retriesOnFail = 0)
+	public static void DoExternalAPICall<T>(string url, Dictionary<int, SubEntity> subEntitiesToPass, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
 	{
 		List<Feature> features = new List<Feature>(subEntitiesToPass.Count);
 		foreach (var kvp in subEntitiesToPass)
