@@ -141,10 +141,10 @@ namespace Networking
 
 		private void SendStartingData()
 		{
-			dynamic obj = new JObject();
-			obj.team_id = m_TeamId;
-			obj.user = m_User;
-			obj.last_update_time = m_LastUpdateTimestamp;
+			JObject obj = new JObject();
+			obj.Add("team_id", m_TeamId);
+			obj.Add("user", m_User);
+			obj.Add("last_update_time", m_LastUpdateTimestamp);
 			m_Client.Send(obj.ToString());
 		}
 	}
