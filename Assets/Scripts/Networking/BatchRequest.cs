@@ -31,9 +31,10 @@ public class BatchRequest
 	public enum EBatchStatus { AwaitingBatchID, AwaitingExecutionIDs, AwaitingResults, Success, Failed }
 
 	EBatchStatus status = EBatchStatus.AwaitingBatchID;
-	int batchID;
-	int nextCallID = 1;
-	bool executeWhenReady;
+	private int m_BatchID;
+	private int m_NextCallID = 1;
+	private bool m_ExecuteWhenReady;
+	private bool m_Async;
 
 	Dictionary<int, ITypedCallback> callbacks; //callID to callback function
 	List<QueuedBatchCall> callQueue; //Calls that are awaiting a batchID to be sent
@@ -48,12 +49,14 @@ public class BatchRequest
 		callQueue = new List<QueuedBatchCall>();
 		outstandingCallRequests = new HashSet<int>();
 		NetworkForm form = new NetworkForm();
+		form.AddField("country_id", TeamManager.CurrentUserTeamID);
+		form.AddField("user_id", TeamManager.CurrentSessionID);
 		ServerCommunication.DoRequest<int>(Server.StartBatch(), form, HandleGetBatchIDSuccess, HandleGetBatchIDFailure);
 	}
 
 	private void HandleGetBatchIDSuccess(int newBatchID)
 	{
-		batchID = newBatchID;
+		m_BatchID = newBatchID;
 
 		status = EBatchStatus.AwaitingExecutionIDs;
 		foreach (QueuedBatchCall execution in callQueue)
@@ -73,17 +76,19 @@ public class BatchRequest
 		{
 			Debug.LogError($"Getting a batch ID failed. Error message: {message}");
 			status = EBatchStatus.Failed;
-			if (executeWhenReady)
-				ExecuteBatch();
+			if (m_ExecuteWhenReady)
+			{
+				ExecuteBatch(m_Async);
+			}
 		}
 	}
 
-	public int AddRequest(string endPoint, JObject data, int group)	
+	public int AddRequest(string endPoint, JObject data, int group)
 	{
 		if (status == EBatchStatus.Failed)
 			return -1;
 
-		int ID = nextCallID++;
+		int ID = m_NextCallID++;
 
 		//data.Add("user", TeamManager.CurrentSessionID);
 		if (status == EBatchStatus.AwaitingExecutionIDs)
@@ -102,7 +107,7 @@ public class BatchRequest
 		if (status == EBatchStatus.Failed)
 			return -1;
 
-		int ID = nextCallID++;
+		int ID = m_NextCallID++;
 		if (callback != null)
 			callbacks.Add(ID, new TypedCallback<T>(callback));
 
@@ -123,7 +128,7 @@ public class BatchRequest
 		outstandingCallRequests.Add(callID);
 
 		NetworkForm form = new NetworkForm();
-		form.AddField("batch_id", batchID);
+		form.AddField("batch_id", m_BatchID);
 		form.AddField("batch_group", group);
 		form.AddField("call_id", callID);
 		form.AddField("endpoint", endPoint);
@@ -135,8 +140,10 @@ public class BatchRequest
 	{
 		outstandingCallRequests.Remove(callID);
 
-		if (executeWhenReady && outstandingCallRequests.Count == 0)
-			ExecuteBatch();
+		if (m_ExecuteWhenReady && outstandingCallRequests.Count == 0)
+		{
+			ExecuteBatch(m_Async);
+		}
 	}
 
 	private void HandleAddRequestFailure(ServerCommunication.ARequest request, string message)
@@ -147,10 +154,12 @@ public class BatchRequest
 		}
 		else
 		{
-			Debug.LogError($"Adding request to batch with ID {batchID} failed. Error message: {message}");
+			Debug.LogError($"Adding request to batch with ID {m_BatchID} failed. Error message: {message}");
 			status = EBatchStatus.Failed;
-			if (executeWhenReady)
-				ExecuteBatch();
+			if (m_ExecuteWhenReady)
+			{
+				ExecuteBatch(m_Async);
+			}
 		}
 	}
 
@@ -161,29 +170,54 @@ public class BatchRequest
 		ExecuteBatch();
 	}
 
-	private void ExecuteBatch()
+	public void ExecuteBatchAsync(Action<BatchRequest> successCallback, Action<BatchRequest> failureCallback)
 	{
+		this.successCallback = successCallback;
+		this.failureCallback = failureCallback;
+		ExecuteBatch(true);
+	}
+
+	private void ExecuteBatch(bool async = false)
+	{
+		m_Async = async;
 		if(status == EBatchStatus.Failed)
 		{
-			//Something caused the batch to already fail, call the failure callback directly
-			executeWhenReady = false;
-			Debug.LogError($"Batch with ID {batchID} could not be executed because a call during its setup failed.");
-			if (failureCallback != null)
-				failureCallback.Invoke(this);
+			UpdateData.WsServerCommunication.UnregisterBatchRequestCallbacks(m_BatchID);
 
+			//Something caused the batch to already fail, call the failure callback directly
+			m_ExecuteWhenReady = false;
+			Debug.LogError($"Batch with ID {m_BatchID} could not be executed because a call during its setup failed.");
+			if (failureCallback != null)
+			{
+				failureCallback.Invoke(this);
+			}
 		}
 		else if (outstandingCallRequests.Count == 0 && status == EBatchStatus.AwaitingExecutionIDs)
 		{
 			//All add requests are in, execute the batch
-			executeWhenReady = false;
+			m_ExecuteWhenReady = false;
 			status = EBatchStatus.AwaitingResults;
 
 			NetworkForm form = new NetworkForm();
-			form.AddField("batch_id", batchID);
-			ServerCommunication.DoRequest<BatchExecutionResult>(Server.ExecuteBatch(), form, HandleBatchSuccess, HandleBatchFailure);
+			form.AddField("batch_id", m_BatchID);
+			form.AddField("async", m_Async.ToString());
+
+			if (m_Async)
+			{
+				UpdateData.WsServerCommunication.RegisterBatchRequestCallbacks(m_BatchID, HandleBatchSuccess);
+				ServerCommunication.DoRequest(Server.ExecuteBatch(), form);
+			}
+			else
+			{
+				ServerCommunication.DoRequest<BatchExecutionResult>(Server.ExecuteBatch(), form, HandleBatchSuccess, HandleBatchFailure);
+			}
+
+			m_Async = false; // reset to default, no async.
 		}
 		else
-			executeWhenReady = true;		
+		{
+			m_ExecuteWhenReady = true;
+		}
 	}
 
 	private void HandleBatchFailure(ServerCommunication.ARequest request, string message)
@@ -194,10 +228,13 @@ public class BatchRequest
 		}
 		else
 		{
-			Debug.LogError($"Batch with ID {batchID} failed. Error message: {message}");
+			UpdateData.WsServerCommunication.UnregisterBatchRequestCallbacks(m_BatchID);
+			Debug.LogError($"Batch with ID {m_BatchID} failed. Error message: {message}");
 			status = EBatchStatus.Failed;
 			if (failureCallback != null)
+			{
 				failureCallback.Invoke(this);
+			}
 		}
 	}
 
@@ -213,7 +250,11 @@ public class BatchRequest
 			}
 		}
 		if (successCallback != null)
+		{
 			successCallback.Invoke(this);
+		}
+
+		UpdateData.WsServerCommunication.UnregisterBatchRequestCallbacks(m_BatchID);
 	}
 
 	public static string FormatCallIDReference(int batchCallID, string field = null)
@@ -243,14 +284,14 @@ class QueuedBatchCall
 }
 
 [Serializable]
-class BatchExecutionResult
+public class BatchExecutionResult
 {
 	public int failed_call_id;
 	public List<BatchCallResult> results;
 }
 
 [Serializable]
-class BatchCallResult
+public class BatchCallResult
 {
 	public int call_id;
 	public string payload;

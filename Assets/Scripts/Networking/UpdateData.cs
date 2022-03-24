@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.Pipes;
 using Networking;
 using Networking.WsServerConnectionChangeBehaviour;
 using Sirenix.Utilities;
@@ -15,34 +16,31 @@ public static class UpdateData
 	public static UpdateObject LastUpdate;
 	public static bool StopProcessingUpdates = false;
 	
-	public static bool? WsServerConnected = null;
-	private static WsServerCommunication m_WsServerCommunication;
+	private static bool? m_WsServerConnected = null;
+	public static WsServerCommunication WsServerCommunication;
 	private static readonly Queue<UpdateObject> m_NextUpdates = new Queue<UpdateObject>();
 
 	public static IEnumerator GetFirstUpdate()
 	{
-		m_WsServerCommunication = new WsServerCommunication(
+		WsServerCommunication = new WsServerCommunication(
 			Server.GameSessionId,
 			TeamManager.CurrentUserTeamID,
-			TeamManager.CurrentSessionID.ToString(),
+			TeamManager.CurrentSessionID,
 			HandleUpdateSuccessCallback
 		);
-		m_WsServerCommunication.Start();
+		WsServerCommunication.Start();
 
 		while (m_NextUpdates.Count == 0)
 		{
+			ProcessBatchRequests();
 			HandleWsServerConnectionChanges();
 			yield return null;
 		}
 
+		ProcessBatchRequests();
 		ProcessUpdates(m_NextUpdates);
 		HideDisconnectedDialogBox();
 		Main.FirstUpdateTickComplete();
-	}
-	
-	public static void StopWsServerCommunication()
-	{
-		m_WsServerCommunication.Stop();
 	}
 
 	public static IEnumerator GetUpdates()
@@ -88,19 +86,28 @@ public static class UpdateData
 
 	private static void HandleWsServerConnectionChanges()
 	{
-		if (WsServerConnected == m_WsServerCommunication.IsConnected)
+		if (m_WsServerConnected == WsServerCommunication.IsConnected)
 		{
 			return;
 		}
 
-		WsServerConnected = m_WsServerCommunication.IsConnected;
-		if (WsServerConnected == null) // no connection value yet
+		m_WsServerConnected = WsServerCommunication.IsConnected;
+		if (m_WsServerConnected == null) // no connection value yet
 		{
 			return;
 		}
 
 		Object.FindObjectsOfType<WsServerConnectionChangeBehaviour>().ForEach(item =>
-			item.NotifyConnection(WsServerConnected.Value));
+			item.NotifyConnection(m_WsServerConnected.Value));
+	}
+
+	private static void ProcessBatchRequests()
+	{
+		while (WsServerCommunication.BatchRequestSuccessCallbackQueue.Count > 0)
+		{
+			var pair = WsServerCommunication.BatchRequestSuccessCallbackQueue.Dequeue();
+			pair.Key.Invoke(pair.Value);
+		}
 	}
 
 	private static void ProcessUpdates(Queue<UpdateObject> a_Updates)

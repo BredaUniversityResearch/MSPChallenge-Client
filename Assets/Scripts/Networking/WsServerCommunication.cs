@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -18,9 +17,13 @@ namespace Networking
 		public bool? IsConnected = null;
 
 		private readonly int m_TeamId;
-		private readonly string m_User;
+		private readonly int m_UserId;
 		private double m_LastUpdateTimestamp = 0;
 		private readonly IWebsocketClient m_Client;
+
+		private Dictionary<int, Action<BatchExecutionResult>> m_BatchRequestSuccessCallbacks = new Dictionary<int, Action<BatchExecutionResult>>();
+
+		public Queue<KeyValuePair<Action<BatchExecutionResult>, BatchExecutionResult>> BatchRequestSuccessCallbackQueue = new Queue<KeyValuePair<Action<BatchExecutionResult>, BatchExecutionResult>>();
 
 		private class UpdateRequest : ServerCommunication.Request<UpdateObject>
 		{
@@ -38,10 +41,10 @@ namespace Networking
 			}
 		}
 		
-		public WsServerCommunication(int gameSessionId, int teamId, string user, Action<UpdateObject> updateSuccessCallback)
+		public WsServerCommunication(int gameSessionId, int teamId, int userId, Action<UpdateObject> updateSuccessCallback)
 		{
 			this.m_TeamId = teamId;
-			this.m_User = user;
+			this.m_UserId = userId;
 			
 			var factory = new System.Func<ClientWebSocket>(() =>
 			{
@@ -102,30 +105,86 @@ namespace Networking
 				}
 				if (processPayload)
 				{
-					UpdateRequest request = new UpdateRequest(Server.Url, updateSuccessCallback);
-					try
-					{
-						//Parse payload to expected type
-						UpdateObject updateObject = request.ToObject(result.payload);
-						// there is mismatch between the expected update time and given by the server
-						if (Math.Abs(updateObject.prev_update_time - m_LastUpdateTimestamp) > Double.Epsilon)
-						{
-							SendStartingData(); // re-sync with server
-							return;
-						}
-						// last update time matches, update it to the new one given by the server, continue processing
-						Debug.Log("got update, prev: " + m_LastUpdateTimestamp + ", new: " + updateObject.update_time);
-						m_LastUpdateTimestamp = updateObject.update_time;
-					}
-					catch (System.Exception e)
-					{
-						// do not update lastUpdateTimestamp and do not process payload
-						return;
-					}
-					Debug.Log(result.payload.ToString().Substring(0, 80));
-					request.ProcessPayload(result.payload);
+					ProcessPayload(result, updateSuccessCallback);
 				}
-			});     
+			});
+		}
+
+		public void RegisterBatchRequestCallbacks(int batchId, Action<BatchExecutionResult> successCallback)
+		{
+			UnregisterBatchRequestCallbacks(batchId);
+			m_BatchRequestSuccessCallbacks.Add(batchId, successCallback);
+		}
+
+		public void UnregisterBatchRequestCallbacks(int batchId)
+		{
+			if (m_BatchRequestSuccessCallbacks.ContainsKey(batchId))
+			{
+				m_BatchRequestSuccessCallbacks.Remove(batchId);
+			}
+		}
+
+		private void ProcessPayload(ServerCommunication.RequestResult result, Action<UpdateObject> updateSuccessCallback)
+		{
+			switch (result.type)
+			{
+				case "Game/Latest":
+					ProcessGameLatestPayload(result, updateSuccessCallback);
+					break;
+				case "Batch/ExecuteBatch":
+					ProcessBatchExecuteBatchPayload(result);
+					break;
+				default:
+					throw new NotImplementedException();
+			}
+		}
+
+		private void ProcessBatchExecuteBatchPayload(ServerCommunication.RequestResult result)
+		{
+			foreach (JToken token in result.payload.Children())
+			{
+				int batchId = Int32.Parse(token.Path);
+				if (!m_BatchRequestSuccessCallbacks.ContainsKey(batchId))
+				{
+					continue;
+				}
+
+				JsonSerializer serializer = new JsonSerializer();
+				serializer.Converters.Add(new JsonConverterBinaryBool());
+				BatchExecutionResult batchExecutionResult = token.First.ToObject<BatchExecutionResult>(serializer);
+				//m_BatchRequestSuccessCallbacks[batchId].Invoke(batchExecutionResult);
+
+				KeyValuePair<Action<BatchExecutionResult>, BatchExecutionResult> pair = new KeyValuePair<Action<BatchExecutionResult>, BatchExecutionResult>(m_BatchRequestSuccessCallbacks[batchId], batchExecutionResult);
+				BatchRequestSuccessCallbackQueue.Enqueue(pair);
+
+				UnregisterBatchRequestCallbacks(batchId);
+			}
+		}
+
+		private void ProcessGameLatestPayload(ServerCommunication.RequestResult result, Action<UpdateObject> updateSuccessCallback)
+		{
+			UpdateRequest request = new UpdateRequest(Server.Url, updateSuccessCallback);
+			try
+			{
+				//Parse payload to expected type
+				UpdateObject updateObject = request.ToObject(result.payload);
+				// there is mismatch between the expected update time and given by the server
+				if (Math.Abs(updateObject.prev_update_time - m_LastUpdateTimestamp) > Double.Epsilon)
+				{
+					SendStartingData(); // re-sync with server
+					return;
+				}
+				// last update time matches, update it to the new one given by the server, continue processing
+				Debug.Log("got update, prev: " + m_LastUpdateTimestamp + ", new: " + updateObject.update_time);
+				m_LastUpdateTimestamp = updateObject.update_time;
+			}
+			catch (System.Exception e)
+			{
+				// do not update lastUpdateTimestamp and do not process payload
+				return;
+			}
+			Debug.Log(result.payload.ToString().Substring(0, 80));
+			request.ProcessPayload(result.payload);
 		}
 
 		public void Stop()
@@ -143,7 +202,7 @@ namespace Networking
 		{
 			JObject obj = new JObject();
 			obj.Add("team_id", m_TeamId);
-			obj.Add("user", m_User);
+			obj.Add("user", m_UserId);
 			obj.Add("last_update_time", m_LastUpdateTimestamp);
 			m_Client.Send(obj.ToString());
 		}

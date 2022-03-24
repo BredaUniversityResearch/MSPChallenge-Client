@@ -84,6 +84,7 @@ public static class ServerCommunication
 
 	public class RequestResult
 	{
+		public string type;
 		public bool success;
 		public string message;
 		public JToken payload; 

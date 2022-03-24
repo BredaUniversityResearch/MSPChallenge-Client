@@ -63,7 +63,7 @@ public class PlanDetailsTabDescription : LockablePlanDetailsTab
 
 		lockedPlan.AttemptUnlock(batch);
 		InterfaceCanvas.ShowNetworkingBlocker();
-		batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
+		batch.ExecuteBatchAsync(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
 	}
 
 	protected override void HandleChangesSubmissionSuccess(BatchRequest batch)
