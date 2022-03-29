@@ -84,7 +84,8 @@ public static class ServerCommunication
 
 	public class RequestResult
 	{
-		public string type;
+		public string header_type;
+		public JToken header_data;
 		public bool success;
 		public string message;
 		public JToken payload; 
@@ -222,7 +223,7 @@ public static class ServerCommunication
 	}
 	
 	//Note: specifying a custom failure callback avoids all default ones, including automatic retries.
-	public static void DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 3)
+	public static ARequest DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 3)
 	{
 		ARequest request = new FormRequest<T>(Server.Url + url, (form != null) ? form.Form : null, successCallback, failureCallback, retriesOnFail);
 		requestsQueue.Enqueue(request);
@@ -231,31 +232,30 @@ public static class ServerCommunication
 		{
 			OnRequestQueued(request);
 		}
+
+		return request;
 	}
 
-	public static void DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
+	public static ARequest DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
 	{
 		switch(responseType)
 		{
 			case EWebRequestFailureResponse.Error:
-				DoRequest<T>(url, form, successCallback, HandleRequestFailureError, retriesOnFail);
-				break;
+				return DoRequest<T>(url, form, successCallback, HandleRequestFailureError, retriesOnFail);
 			case EWebRequestFailureResponse.Crash:
-				DoRequest<T>(url, form, successCallback, HandleRequestFailureCrash, retriesOnFail);
-				break;
+				return DoRequest<T>(url, form, successCallback, HandleRequestFailureCrash, retriesOnFail);
 			default:
-				DoRequest<T>(url, form, successCallback, HandleRequestFailureLog, retriesOnFail);
-				break;
+				return DoRequest<T>(url, form, successCallback, HandleRequestFailureLog, retriesOnFail);
 		}
 	}
 
-	public static void DoRequest(string url, NetworkForm form, int retriesOnFail = 3)
+	public static ARequest DoRequest(string url, NetworkForm form, int retriesOnFail = 3)
 	{
-		DoRequest<string>(url, form, null, HandleRequestFailureError, retriesOnFail);
+		return DoRequest<string>(url, form, null, HandleRequestFailureError, retriesOnFail);
 	}
 
 	//Note: specifying a custom failure callback avoids all default ones, including automatic retries.
-	public static void DoRequest<T>(string url, string rawData, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
+	public static ARequest DoRequest<T>(string url, string rawData, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
     {
         ARequest request = new RawDataRequest<T>(Server.Url + url, rawData, successCallback, failureCallback, retriesOnFail);
         requestsQueue.Enqueue(request);
@@ -264,27 +264,26 @@ public static class ServerCommunication
         {
             OnRequestQueued(request);
         }
+
+        return request;
     }
 
-	public static void DoRequest<T>(string url, string rawData, Action<T> successCallback, EWebRequestFailureResponse responseType, int retriesOnFail = 0)
+	public static ARequest DoRequest<T>(string url, string rawData, Action<T> successCallback, EWebRequestFailureResponse responseType, int retriesOnFail = 0)
 	{
 		switch (responseType)
 		{
 			case EWebRequestFailureResponse.Error:
-				DoRequest<T>(url, rawData, successCallback, HandleRequestFailureError, retriesOnFail);
-				break;
+				return DoRequest<T>(url, rawData, successCallback, HandleRequestFailureError, retriesOnFail);
 			case EWebRequestFailureResponse.Crash:
-				DoRequest<T>(url, rawData, successCallback, HandleRequestFailureCrash, retriesOnFail);
-				break;
+				return DoRequest<T>(url, rawData, successCallback, HandleRequestFailureCrash, retriesOnFail);
 			default:
-				DoRequest<T>(url, rawData, successCallback, HandleRequestFailureLog, retriesOnFail);
-				break;
+				return DoRequest<T>(url, rawData, successCallback, HandleRequestFailureLog, retriesOnFail);
 		}
 	}
 
-	public static void DoRequest(string url, string rawData, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
+	public static ARequest DoRequest(string url, string rawData, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
 	{
-		DoRequest<string>(url, rawData, null, HandleRequestFailureError, retriesOnFail);
+		return DoRequest<string>(url, rawData, null, HandleRequestFailureError, retriesOnFail);
 	}
 
 	public static void DoExternalAPICall<T>(string url, Dictionary<int, SubEntity> subEntitiesToPass, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)

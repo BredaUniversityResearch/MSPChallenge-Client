@@ -302,7 +302,7 @@ public class PlanDetailsTabLayers : LockablePlanDetailsTab
 		}
 
 		lockedPlan.AttemptUnlock(batch);
-		batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
+		batch.ExecuteBatchAsync(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
 	}
 
 	protected override void HandleChangesSubmissionSuccess(BatchRequest batch)

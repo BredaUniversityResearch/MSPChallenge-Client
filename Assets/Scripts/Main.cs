@@ -79,7 +79,7 @@ public class Main : MonoBehaviour
 				NetworkForm form = new NetworkForm();
 				form.AddField("session_id", TeamManager.CurrentSessionID);
 				ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, CloseSessionSuccess, CloseSessionFail);
-				UpdateData.WsServerCommunication?.Stop();
+				UpdateData.WsServerCommunicationInteractor?.Stop();
 				//StartCoroutine(QuitAtEndOfFrame());
 			}
             return !interceptQuit;
@@ -111,7 +111,7 @@ public class Main : MonoBehaviour
 			NetworkForm form = new NetworkForm();
 			form.AddField("session_id", TeamManager.CurrentSessionID);
 			ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, instance.CloseSessionSuccess, instance.CloseSessionFail);
-			UpdateData.WsServerCommunication?.Stop();
+			UpdateData.WsServerCommunicationInteractor?.Stop();
 		}
 		else
 		{

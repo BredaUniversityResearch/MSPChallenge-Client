@@ -7,23 +7,42 @@ using Newtonsoft.Json.Serialization;
 using UnityEngine;
 using Utility.Serialization;
 using Websocket.Client;
+using BatchRequestSuccessCallbacks = System.Collections.Generic.Dictionary<int, System.Action<BatchExecutionResult>>;
+using BatchRequestFailureCallbacks = System.Collections.Generic.Dictionary<int, System.Action<string>>;
+using BatchRequestResultAndSuccessCallback =
+	System.Collections.Generic.KeyValuePair<BatchExecutionResult, System.Action<BatchExecutionResult>>;
+using BatchRequestResultAndFailureCallback = System.Collections.Generic.KeyValuePair<string, System.Action<string>>;
 
 namespace Networking
 {
-	public class WsServerCommunication
+	public interface IWsServerCommunicationInteractor
+	{
+		public void Start();
+		public void Stop();
+		public void RegisterBatchRequestCallbacks(int batchId, Action<BatchExecutionResult> successCallback,
+			System.Action<string> failureCallback);
+		public void UnregisterBatchRequestCallbacks(int batchId);
+		public bool? IsConnected();
+	}
+
+	public class WsServerCommunication : IWsServerCommunicationInteractor
 	{
 		private const string ApiTokenHeader = ServerCommunication.ApiTokenHeader;
 		private const string GameSessionIdHeader = "GameSessionId";
-		public bool? IsConnected = null;
+		private bool? m_IsConnected = null;
 
 		private readonly int m_TeamId;
 		private readonly int m_UserId;
 		private double m_LastUpdateTimestamp = 0;
 		private readonly IWebsocketClient m_Client;
 
-		private Dictionary<int, Action<BatchExecutionResult>> m_BatchRequestSuccessCallbacks = new Dictionary<int, Action<BatchExecutionResult>>();
+		private BatchRequestSuccessCallbacks m_BatchRequestSuccessCallbacks = new BatchRequestSuccessCallbacks();
+		private BatchRequestFailureCallbacks m_BatchRequestFailureCallbacks = new BatchRequestFailureCallbacks();
 
-		public Queue<KeyValuePair<Action<BatchExecutionResult>, BatchExecutionResult>> BatchRequestSuccessCallbackQueue = new Queue<KeyValuePair<Action<BatchExecutionResult>, BatchExecutionResult>>();
+		private Queue<BatchRequestResultAndSuccessCallback> m_BatchRequestResultAndSuccessCallbackQueue =
+			new Queue<BatchRequestResultAndSuccessCallback>();
+		private Queue<BatchRequestResultAndFailureCallback> m_BatchRequestResultAndFailureCallbackQueue =
+			new Queue<BatchRequestResultAndFailureCallback>();
 
 		private class UpdateRequest : ServerCommunication.Request<UpdateObject>
 		{
@@ -40,14 +59,19 @@ namespace Networking
 			{
 			}
 		}
-		
-		public WsServerCommunication(int gameSessionId, int teamId, int userId, Action<UpdateObject> updateSuccessCallback)
+
+		private class BatchRequestResultHeaderData
+		{
+			public int batch_id;
+		}
+
+		public WsServerCommunication(int gameSessionId, int teamId, int userId,
+			Action<UpdateObject> updateSuccessCallback)
 		{
 			this.m_TeamId = teamId;
 			this.m_UserId = userId;
-			
-			var factory = new System.Func<ClientWebSocket>(() =>
-			{
+
+			var factory = new System.Func<ClientWebSocket>(() => {
 				var client = new ClientWebSocket {
 					Options = {
 						KeepAliveInterval = TimeSpan.FromSeconds(5)
@@ -61,56 +85,71 @@ namespace Networking
 			Debug.Log(Server.WsServerUri);
 			m_Client = new WebsocketClient(Server.WsServerUri, factory);
 			m_Client.ErrorReconnectTimeout = TimeSpan.FromSeconds(5);
-			m_Client.DisconnectionHappened.Subscribe(x =>
-			{
-				IsConnected = false;
+			m_Client.DisconnectionHappened.Subscribe(x => {
+				m_IsConnected = false;
 			});
-			m_Client.ReconnectionHappened.Subscribe(reconnectionInfo =>
-			{
+			m_Client.ReconnectionHappened.Subscribe(reconnectionInfo => {
 				if (!m_Client.IsStarted)
 				{
 					return;
 				}
 				SendStartingData();
-				IsConnected = true;
+				m_IsConnected = true;
 			});
-			m_Client.MessageReceived.Subscribe( responseMessage =>
-			{
+			m_Client.MessageReceived.Subscribe(responseMessage => {
 				MemoryTraceWriter traceWriter = new MemoryTraceWriter();
 				traceWriter.LevelFilter = System.Diagnostics.TraceLevel.Warning;
 				bool processPayload = false;
 				ServerCommunication.RequestResult result = null;
 				try
 				{
-					result = JsonConvert.DeserializeObject<ServerCommunication.RequestResult>(responseMessage.ToString(), new JsonSerializerSettings
-					{
-						TraceWriter = traceWriter,
-						Error = (sender, errorArgs) =>
-						{
-							Debug.LogError("Unable to deserialize: '" + responseMessage.ToString() + "'");
-							Util.HandleDeserializationError(sender, errorArgs);
-							Debug.LogError("Deserialization error: " + errorArgs.ErrorContext.Error);
+					result = JsonConvert.DeserializeObject<ServerCommunication.RequestResult>(
+						responseMessage.ToString(), new JsonSerializerSettings {
+							TraceWriter = traceWriter,
+							Error = (sender, errorArgs) => {
+								Debug.LogError("Unable to deserialize: '" + responseMessage.ToString() + "'");
+								Util.HandleDeserializationError(sender, errorArgs);
+								Debug.LogError("Deserialization error: " + errorArgs.ErrorContext.Error);
 
-						},
-						Converters = new List<JsonConverter> { new JsonConverterBinaryBool() }
-					});
-					if (result != null)
-					{
-						processPayload = result.success;	
-					}
+							},
+							Converters = new List<JsonConverter> {new JsonConverterBinaryBool()}
+						});
 				}
 				catch (System.Exception e)
 				{
-					Debug.LogError($"Error deserializing message from request to url: {Server.WsServerUri.AbsoluteUri}\nError message: {e.Message}");
+					Debug.LogError(
+						$"Error deserializing message from request to url: {Server.WsServerUri.AbsoluteUri}\nError message: {e.Message}");
 				}
-				if (processPayload)
-				{
-					ProcessPayload(result, updateSuccessCallback);
-				}
+				ProcessPayload(result, updateSuccessCallback);
 			});
 		}
 
-		public void RegisterBatchRequestCallbacks(int batchId, Action<BatchExecutionResult> successCallback)
+		public bool? IsConnected()
+		{
+			return m_IsConnected;
+		}
+
+		public void Update()
+		{
+			ProcessBatchRequests();
+		}
+
+		private void ProcessBatchRequests()
+		{
+			while (m_BatchRequestResultAndSuccessCallbackQueue.Count > 0)
+			{
+				BatchRequestResultAndSuccessCallback pair = m_BatchRequestResultAndSuccessCallbackQueue.Dequeue();
+				pair.Value.Invoke(pair.Key);
+			}
+			while (m_BatchRequestResultAndFailureCallbackQueue.Count > 0)
+			{
+				BatchRequestResultAndFailureCallback pair = m_BatchRequestResultAndFailureCallbackQueue.Dequeue();
+				pair.Value.Invoke(pair.Key);
+			}
+		}
+
+		public void RegisterBatchRequestCallbacks(int batchId, Action<BatchExecutionResult> successCallback,
+			Action<string> failureCallback)
 		{
 			UnregisterBatchRequestCallbacks(batchId);
 			m_BatchRequestSuccessCallbacks.Add(batchId, successCallback);
@@ -124,9 +163,10 @@ namespace Networking
 			}
 		}
 
-		private void ProcessPayload(ServerCommunication.RequestResult result, Action<UpdateObject> updateSuccessCallback)
+		private void ProcessPayload(ServerCommunication.RequestResult result,
+			Action<UpdateObject> updateSuccessCallback)
 		{
-			switch (result.type)
+			switch (result.header_type)
 			{
 				case "Game/Latest":
 					ProcessGameLatestPayload(result, updateSuccessCallback);
@@ -141,28 +181,39 @@ namespace Networking
 
 		private void ProcessBatchExecuteBatchPayload(ServerCommunication.RequestResult result)
 		{
-			foreach (JToken token in result.payload.Children())
+			JsonSerializer serializer = new JsonSerializer();
+			serializer.Converters.Add(new JsonConverterBinaryBool());
+			BatchRequestResultHeaderData headerData =
+				result.header_data.ToObject<BatchRequestResultHeaderData>(serializer);
+			if (!result.success)
 			{
-				int batchId = Int32.Parse(token.Path);
-				if (!m_BatchRequestSuccessCallbacks.ContainsKey(batchId))
-				{
-					continue;
-				}
-
-				JsonSerializer serializer = new JsonSerializer();
-				serializer.Converters.Add(new JsonConverterBinaryBool());
-				BatchExecutionResult batchExecutionResult = token.First.ToObject<BatchExecutionResult>(serializer);
-				//m_BatchRequestSuccessCallbacks[batchId].Invoke(batchExecutionResult);
-
-				KeyValuePair<Action<BatchExecutionResult>, BatchExecutionResult> pair = new KeyValuePair<Action<BatchExecutionResult>, BatchExecutionResult>(m_BatchRequestSuccessCallbacks[batchId], batchExecutionResult);
-				BatchRequestSuccessCallbackQueue.Enqueue(pair);
-
-				UnregisterBatchRequestCallbacks(batchId);
+				BatchRequestResultAndFailureCallback pair =
+					new BatchRequestResultAndFailureCallback(result.message,
+						m_BatchRequestFailureCallbacks[headerData.batch_id]);
+				m_BatchRequestResultAndFailureCallbackQueue.Enqueue(pair);
+				return;
 			}
+
+			// new scope
+			{
+				BatchExecutionResult batchExecutionResult = result.payload.ToObject<BatchExecutionResult>(serializer);
+				BatchRequestResultAndSuccessCallback pair =
+					new BatchRequestResultAndSuccessCallback(batchExecutionResult,
+						m_BatchRequestSuccessCallbacks[headerData.batch_id]);
+				m_BatchRequestResultAndSuccessCallbackQueue.Enqueue(pair);
+			}
+
+			UnregisterBatchRequestCallbacks(headerData.batch_id);
 		}
 
-		private void ProcessGameLatestPayload(ServerCommunication.RequestResult result, Action<UpdateObject> updateSuccessCallback)
+		private void ProcessGameLatestPayload(ServerCommunication.RequestResult result,
+			Action<UpdateObject> updateSuccessCallback)
 		{
+			if (!result.success)
+			{
+				return;
+			}
+
 			UpdateRequest request = new UpdateRequest(Server.Url, updateSuccessCallback);
 			try
 			{

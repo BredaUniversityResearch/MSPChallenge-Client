@@ -1,11 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
-using Assets.Networking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using UnityEngine.Networking;
-
 
 public class BatchRequest
 {
@@ -180,9 +177,9 @@ public class BatchRequest
 	private void ExecuteBatch(bool async = false)
 	{
 		m_Async = async;
-		if(status == EBatchStatus.Failed)
+		if (status == EBatchStatus.Failed)
 		{
-			UpdateData.WsServerCommunication.UnregisterBatchRequestCallbacks(m_BatchID);
+			UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_BatchID);
 
 			//Something caused the batch to already fail, call the failure callback directly
 			m_ExecuteWhenReady = false;
@@ -204,12 +201,13 @@ public class BatchRequest
 
 			if (m_Async)
 			{
-				UpdateData.WsServerCommunication.RegisterBatchRequestCallbacks(m_BatchID, HandleBatchSuccess);
-				ServerCommunication.DoRequest(Server.ExecuteBatch(), form);
+				UpdateData.WsServerCommunicationInteractor?.RegisterBatchRequestCallbacks(m_BatchID, HandleBatchSuccess,
+					CreateHandleBatchFailureAction(ServerCommunication.DoRequest(Server.ExecuteBatch(), form)));
 			}
 			else
 			{
-				ServerCommunication.DoRequest<BatchExecutionResult>(Server.ExecuteBatch(), form, HandleBatchSuccess, HandleBatchFailure);
+				ServerCommunication.DoRequest<BatchExecutionResult>(Server.ExecuteBatch(), form, HandleBatchSuccess,
+					HandleBatchFailure);
 			}
 
 			m_Async = false; // reset to default, no async.
@@ -220,22 +218,29 @@ public class BatchRequest
 		}
 	}
 
+	private Action<string> CreateHandleBatchFailureAction(ServerCommunication.ARequest request)
+	{
+		return delegate(string message) {
+			if (request.retriesRemaining > 0)
+			{
+				ServerCommunication.RetryRequest(request);
+			}
+			else
+			{
+				UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_BatchID);
+				Debug.LogError($"Batch with ID {m_BatchID} failed. Error message: {message}");
+				status = EBatchStatus.Failed;
+				if (failureCallback != null)
+				{
+					failureCallback.Invoke(this);
+				}
+			}
+		};
+	}
+
 	private void HandleBatchFailure(ServerCommunication.ARequest request, string message)
 	{
-		if (request.retriesRemaining > 0)
-		{
-			ServerCommunication.RetryRequest(request);
-		}
-		else
-		{
-			UpdateData.WsServerCommunication.UnregisterBatchRequestCallbacks(m_BatchID);
-			Debug.LogError($"Batch with ID {m_BatchID} failed. Error message: {message}");
-			status = EBatchStatus.Failed;
-			if (failureCallback != null)
-			{
-				failureCallback.Invoke(this);
-			}
-		}
+		CreateHandleBatchFailureAction(request)(message);
 	}
 
 	private void HandleBatchSuccess(BatchExecutionResult batchResult)
@@ -254,12 +259,12 @@ public class BatchRequest
 			successCallback.Invoke(this);
 		}
 
-		UpdateData.WsServerCommunication.UnregisterBatchRequestCallbacks(m_BatchID);
+		UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_BatchID);
 	}
 
 	public static string FormatCallIDReference(int batchCallID, string field = null)
 	{
-		if(string.IsNullOrEmpty(field))
+		if (string.IsNullOrEmpty(field))
 			return $"!Ref:{batchCallID}";
 		else
 			return $"!Ref:{batchCallID}[{field}]";
@@ -320,8 +325,8 @@ class TypedCallback<T> : ITypedCallback
 		}
 		catch (System.Exception e)
 		{
-			Debug.LogError("Processing batch results failed. Value does not match expected format. Message: " + e.Message);
+			Debug.LogError("Processing batch results failed. Value does not match expected format. Message: " +
+				e.Message);
 		}
 	}
 }
-
