@@ -111,7 +111,7 @@ namespace KPI
                     result = "km";
                     break;
                 case LayerManager.GeoType.polygon:
-                    result = "km2";
+                    result = "km<sup>2</sup>";
                     break;
                 default:
                     UnityEngine.Debug.LogError($"Layer {layer.ShortName} cannot be used for KPI calculations. Please check this layer's geotype variable in the configuration file, and make sure the layer is not editable");

@@ -317,7 +317,27 @@ public class PlanWizard : MonoBehaviour
             if (energyLayersRemoved)
                 needsEnergyError = true;
 
-            bool typeChanged = false;
+			//If any layers are removed, issues need to be rechecked without these layers
+			if (layersToRemove != null && layersToRemove.Count > 0)
+			{
+				foreach (AbstractLayer layer in layersToRemove)
+				{
+					layer.RemovePlanLayer(editingPlan.GetPlanLayerForLayer(layer));
+				}
+
+				RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.CheckConstraints(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), true, layersToRemove);
+				if (issuesToSubmit != null)
+				{
+					issuesToSubmit.SubmitToServer(batch);
+				}
+				//TODO: if submission fails, restore old issues
+				foreach (AbstractLayer layer in layersToRemove)
+				{
+					layer.AddPlanLayer(editingPlan.GetPlanLayerForLayer(layer));
+				}
+			}
+
+			bool typeChanged = false;
             if (isEnergyPlan && !editingPlan.energyPlan)//Enabled
             {
                 needsEnergyError = true;
