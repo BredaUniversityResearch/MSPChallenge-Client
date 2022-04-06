@@ -25,26 +25,26 @@ public class BatchRequest
 
 	public const int BATCH_GROUP_UNLOCK = 100;
 
-	public enum EBatchStatus { AwaitingBatchID, AwaitingExecutionIDs, AwaitingResults, Success, Failed }
+	private enum EBatchStatus { AwaitingBatchID, AwaitingExecutionIDs, AwaitingResults, Success, Failed }
 
-	EBatchStatus status = EBatchStatus.AwaitingBatchID;
-	private int m_BatchID;
-	private int m_NextCallID = 1;
-	private bool m_ExecuteWhenReady;
-	private bool m_Async;
+	private EBatchStatus m_status = EBatchStatus.AwaitingBatchID;
+	private int m_batchID;
+	private int m_nextCallID = 1;
+	private bool m_executeWhenReady;
+	private bool m_async;
 
-	Dictionary<int, ITypedCallback> callbacks; //callID to callback function
-	List<QueuedBatchCall> callQueue; //Calls that are awaiting a batchID to be sent
-	HashSet<int> outstandingCallRequests; //Calls that have been sent but not confirmed
+	private Dictionary<int, ITypedCallback> m_callbacks; //callID to callback function
+	private List<QueuedBatchCall> m_callQueue; //Calls that are awaiting a batchID to be sent
+	private HashSet<int> m_outstandingCallRequests; //Calls that have been sent but not confirmed
 
-	Action<BatchRequest> failureCallback;
-	Action<BatchRequest> successCallback;
+	private Action<BatchRequest> m_failureCallback;
+	private Action<BatchRequest> m_successCallback;
 
 	public BatchRequest()
 	{
-		callbacks = new Dictionary<int, ITypedCallback>();
-		callQueue = new List<QueuedBatchCall>();
-		outstandingCallRequests = new HashSet<int>();
+		m_callbacks = new Dictionary<int, ITypedCallback>();
+		m_callQueue = new List<QueuedBatchCall>();
+		m_outstandingCallRequests = new HashSet<int>();
 		NetworkForm form = new NetworkForm();
 		form.AddField("country_id", TeamManager.CurrentUserTeamID);
 		form.AddField("user_id", TeamManager.CurrentSessionID);
@@ -53,14 +53,14 @@ public class BatchRequest
 
 	private void HandleGetBatchIDSuccess(int newBatchID)
 	{
-		m_BatchID = newBatchID;
+		m_batchID = newBatchID;
 
-		status = EBatchStatus.AwaitingExecutionIDs;
-		foreach (QueuedBatchCall execution in callQueue)
+		m_status = EBatchStatus.AwaitingExecutionIDs;
+		foreach (QueuedBatchCall execution in m_callQueue)
 		{
 			SendRequest(execution.callID, execution.endPoint, execution.data, execution.group);
 		}
-		callQueue.Clear();
+		m_callQueue.Clear();
 	}
 
 	private void HandleGetBatchIDFailure(ServerCommunication.ARequest request, string message)
@@ -72,60 +72,60 @@ public class BatchRequest
 		else
 		{
 			Debug.LogError($"Getting a batch ID failed. Error message: {message}");
-			status = EBatchStatus.Failed;
-			if (m_ExecuteWhenReady)
+			m_status = EBatchStatus.Failed;
+			if (m_executeWhenReady)
 			{
-				ExecuteBatch(m_Async);
+				ExecuteBatch(m_async);
 			}
 		}
 	}
 
 	public int AddRequest(string endPoint, JObject data, int group)
 	{
-		if (status == EBatchStatus.Failed)
+		if (m_status == EBatchStatus.Failed)
 			return -1;
 
-		int ID = m_NextCallID++;
+		int ID = m_nextCallID++;
 
 		//data.Add("user", TeamManager.CurrentSessionID);
-		if (status == EBatchStatus.AwaitingExecutionIDs)
+		if (m_status == EBatchStatus.AwaitingExecutionIDs)
 		{
 			SendRequest(ID, endPoint, data.ToString(), group);
 		}
 		else
 		{
-			callQueue.Add(new QueuedBatchCall(ID, endPoint, data.ToString(), group));
+			m_callQueue.Add(new QueuedBatchCall(ID, endPoint, data.ToString(), group));
 		}
 		return ID;
 	}
 
 	public int AddRequest<T>(string endPoint, JObject data, int group, Action<T> callback)
 	{
-		if (status == EBatchStatus.Failed)
+		if (m_status == EBatchStatus.Failed)
 			return -1;
 
-		int ID = m_NextCallID++;
+		int ID = m_nextCallID++;
 		if (callback != null)
-			callbacks.Add(ID, new TypedCallback<T>(callback));
+			m_callbacks.Add(ID, new TypedCallback<T>(callback));
 
 		//data.Add("user", TeamManager.CurrentSessionID);
-		if (status == EBatchStatus.AwaitingExecutionIDs)
+		if (m_status == EBatchStatus.AwaitingExecutionIDs)
 		{
 			SendRequest(ID, endPoint, data.ToString(), group);
 		}
 		else
 		{
-			callQueue.Add(new QueuedBatchCall(ID, endPoint, data.ToString(), group));
+			m_callQueue.Add(new QueuedBatchCall(ID, endPoint, data.ToString(), group));
 		}
 		return ID;
 	}
 
 	private void SendRequest(int callID, string endPoint, string data, int group)
 	{
-		outstandingCallRequests.Add(callID);
+		m_outstandingCallRequests.Add(callID);
 
 		NetworkForm form = new NetworkForm();
-		form.AddField("batch_id", m_BatchID);
+		form.AddField("batch_id", m_batchID);
 		form.AddField("batch_group", group);
 		form.AddField("call_id", callID);
 		form.AddField("endpoint", endPoint);
@@ -135,11 +135,11 @@ public class BatchRequest
 
 	private void HandleAddRequestSuccess(int callID)
 	{
-		outstandingCallRequests.Remove(callID);
+		m_outstandingCallRequests.Remove(callID);
 
-		if (m_ExecuteWhenReady && outstandingCallRequests.Count == 0)
+		if (m_executeWhenReady && m_outstandingCallRequests.Count == 0)
 		{
-			ExecuteBatch(m_Async);
+			ExecuteBatch(m_async);
 		}
 	}
 
@@ -151,58 +151,58 @@ public class BatchRequest
 		}
 		else
 		{
-			Debug.LogError($"Adding request to batch with ID {m_BatchID} failed. Error message: {message}");
-			status = EBatchStatus.Failed;
-			if (m_ExecuteWhenReady)
+			Debug.LogError($"Adding request to batch with ID {m_batchID} failed. Error message: {message}");
+			m_status = EBatchStatus.Failed;
+			if (m_executeWhenReady)
 			{
-				ExecuteBatch(m_Async);
+				ExecuteBatch(m_async);
 			}
 		}
 	}
 
 	public void ExecuteBatch(Action<BatchRequest> successCallback, Action<BatchRequest> failureCallback)
 	{
-		this.successCallback = successCallback;
-		this.failureCallback = failureCallback;
+		this.m_successCallback = successCallback;
+		this.m_failureCallback = failureCallback;
 		ExecuteBatch();
 	}
 
 	public void ExecuteBatchAsync(Action<BatchRequest> successCallback, Action<BatchRequest> failureCallback)
 	{
-		this.successCallback = successCallback;
-		this.failureCallback = failureCallback;
+		this.m_successCallback = successCallback;
+		this.m_failureCallback = failureCallback;
 		ExecuteBatch(true);
 	}
 
 	private void ExecuteBatch(bool async = false)
 	{
-		m_Async = async;
-		if (status == EBatchStatus.Failed)
+		m_async = async;
+		if (m_status == EBatchStatus.Failed)
 		{
-			UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_BatchID);
+			UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
 
 			//Something caused the batch to already fail, call the failure callback directly
-			m_ExecuteWhenReady = false;
-			Debug.LogError($"Batch with ID {m_BatchID} could not be executed because a call during its setup failed.");
-			if (failureCallback != null)
+			m_executeWhenReady = false;
+			Debug.LogError($"Batch with ID {m_batchID} could not be executed because a call during its setup failed.");
+			if (m_failureCallback != null)
 			{
-				failureCallback.Invoke(this);
+				m_failureCallback.Invoke(this);
 			}
 		}
-		else if (outstandingCallRequests.Count == 0 && status == EBatchStatus.AwaitingExecutionIDs)
+		else if (m_outstandingCallRequests.Count == 0 && m_status == EBatchStatus.AwaitingExecutionIDs)
 		{
 			//All add requests are in, execute the batch
-			m_ExecuteWhenReady = false;
-			status = EBatchStatus.AwaitingResults;
+			m_executeWhenReady = false;
+			m_status = EBatchStatus.AwaitingResults;
 
 			NetworkForm form = new NetworkForm();
-			form.AddField("batch_id", m_BatchID);
-			form.AddField("async", m_Async.ToString());
+			form.AddField("batch_id", m_batchID);
+			form.AddField("async", m_async.ToString());
 
-			if (m_Async)
+			if (m_async)
 			{
-				UpdateData.WsServerCommunicationInteractor?.RegisterBatchRequestCallbacks(m_BatchID, HandleBatchSuccess,
-					CreateHandleBatchFailureAction(ServerCommunication.DoRequest(Server.ExecuteBatch(), form)));
+				UpdateData.WsServerCommunicationInteractor?.RegisterBatchRequestCallbacks(m_batchID, HandleBatchSuccess,
+					CreateHandleBatchFailureAction(ServerCommunication.DoRequest(Server.ExecuteBatch(), form))); // todo : handle error of executebatch
 			}
 			else
 			{
@@ -210,11 +210,11 @@ public class BatchRequest
 					HandleBatchFailure);
 			}
 
-			m_Async = false; // reset to default, no async.
+			m_async = false; // reset to default, no async.
 		}
 		else
 		{
-			m_ExecuteWhenReady = true;
+			m_executeWhenReady = true;
 		}
 	}
 
@@ -227,12 +227,12 @@ public class BatchRequest
 			}
 			else
 			{
-				UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_BatchID);
-				Debug.LogError($"Batch with ID {m_BatchID} failed. Error message: {message}");
-				status = EBatchStatus.Failed;
-				if (failureCallback != null)
+				UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
+				Debug.LogError($"Batch with ID {m_batchID} failed. Error message: {message}");
+				m_status = EBatchStatus.Failed;
+				if (m_failureCallback != null)
 				{
-					failureCallback.Invoke(this);
+					m_failureCallback.Invoke(this);
 				}
 			}
 		};
@@ -245,21 +245,21 @@ public class BatchRequest
 
 	private void HandleBatchSuccess(BatchExecutionResult batchResult)
 	{
-		status = EBatchStatus.Success;
+		m_status = EBatchStatus.Success;
 
 		foreach (BatchCallResult callResult in batchResult.results)
 		{
-			if (callbacks.TryGetValue(callResult.call_id, out var callback))
+			if (m_callbacks.TryGetValue(callResult.call_id, out var callback))
 			{
 				callback.ProcessPayload(callResult.payload);
 			}
 		}
-		if (successCallback != null)
+		if (m_successCallback != null)
 		{
-			successCallback.Invoke(this);
+			m_successCallback.Invoke(this);
 		}
 
-		UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_BatchID);
+		UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
 	}
 
 	public static string FormatCallIDReference(int batchCallID, string field = null)
