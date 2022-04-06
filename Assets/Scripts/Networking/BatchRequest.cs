@@ -40,8 +40,9 @@ public class BatchRequest
 	private Action<BatchRequest> m_failureCallback;
 	private Action<BatchRequest> m_successCallback;
 
-	public BatchRequest()
+	public BatchRequest(bool async = false)
 	{
+		m_async = async;
 		m_callbacks = new Dictionary<int, ITypedCallback>();
 		m_callQueue = new List<QueuedBatchCall>();
 		m_outstandingCallRequests = new HashSet<int>();
@@ -75,7 +76,7 @@ public class BatchRequest
 			m_status = EBatchStatus.Failed;
 			if (m_executeWhenReady)
 			{
-				ExecuteBatch(m_async);
+				ExecuteBatch();
 			}
 		}
 	}
@@ -139,7 +140,7 @@ public class BatchRequest
 
 		if (m_executeWhenReady && m_outstandingCallRequests.Count == 0)
 		{
-			ExecuteBatch(m_async);
+			ExecuteBatch();
 		}
 	}
 
@@ -155,7 +156,7 @@ public class BatchRequest
 			m_status = EBatchStatus.Failed;
 			if (m_executeWhenReady)
 			{
-				ExecuteBatch(m_async);
+				ExecuteBatch();
 			}
 		}
 	}
@@ -167,16 +168,8 @@ public class BatchRequest
 		ExecuteBatch();
 	}
 
-	public void ExecuteBatchAsync(Action<BatchRequest> successCallback, Action<BatchRequest> failureCallback)
+	private void ExecuteBatch()
 	{
-		this.m_successCallback = successCallback;
-		this.m_failureCallback = failureCallback;
-		ExecuteBatch(true);
-	}
-
-	private void ExecuteBatch(bool async = false)
-	{
-		m_async = async;
 		if (m_status == EBatchStatus.Failed)
 		{
 			UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
@@ -209,8 +202,6 @@ public class BatchRequest
 				ServerCommunication.DoRequest<BatchExecutionResult>(Server.ExecuteBatch(), form, HandleBatchSuccess,
 					HandleBatchFailure);
 			}
-
-			m_async = false; // reset to default, no async.
 		}
 		else
 		{

@@ -57,13 +57,13 @@ public class PlanDetailsTabDescription : LockablePlanDetailsTab
 
 	protected override void SubmitChangesAndUnlock()
 	{
-		BatchRequest batch = new BatchRequest();
+		BatchRequest batch = new BatchRequest(true);
 
 		lockedPlan.SetDescription(descriptionInputField.text, batch);
 
 		lockedPlan.AttemptUnlock(batch);
 		InterfaceCanvas.ShowNetworkingBlocker();
-		batch.ExecuteBatchAsync(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
+		batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
 	}
 
 	protected override void HandleChangesSubmissionSuccess(BatchRequest batch)
