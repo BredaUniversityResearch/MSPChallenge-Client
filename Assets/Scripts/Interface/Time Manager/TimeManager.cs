@@ -36,7 +36,7 @@ public class TimeManager : MonoBehaviour
 		}
 
 		m_timeLeftElapsed += Time.deltaTime;
-		EraHUD.instance.TimeRemaining = TimeSpan.FromSeconds(timeLeft - (int)m_timeLeftElapsed);
+		EraHUD.instance.TimeRemaining = TimeSpan.FromSeconds(Math.Max(timeLeft - (int)m_timeLeftElapsed, 0));
 	}
 
 	public void UpdateUI(TimelineState timeState)
