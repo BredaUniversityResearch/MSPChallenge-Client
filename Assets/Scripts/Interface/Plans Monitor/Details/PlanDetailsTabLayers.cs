@@ -260,7 +260,7 @@ public class PlanDetailsTabLayers : LockablePlanDetailsTab
 
 	private void SubmitChanges()
 	{
-		BatchRequest batch = new BatchRequest();
+		BatchRequest batch = new BatchRequest(true);
 		if (lockedPlan.energyPlan)
 		{
 			// Commit new grids (not distributions/sockets/sources yet)

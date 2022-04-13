@@ -57,7 +57,7 @@ public class PlanDetailsTabDescription : LockablePlanDetailsTab
 
 	protected override void SubmitChangesAndUnlock()
 	{
-		BatchRequest batch = new BatchRequest();
+		BatchRequest batch = new BatchRequest(true);
 
 		lockedPlan.SetDescription(descriptionInputField.text, batch);
 

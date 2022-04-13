@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Networking;
 using Networking.WsServerConnectionChangeBehaviour;
 using Sirenix.Utilities;
@@ -9,13 +10,16 @@ using Object = UnityEngine.Object;
 
 public static class UpdateData
 {
-	private static DialogBox m_DisconnectDialogBox = null;
 	private static double m_LastUpdateTimestamp = -1;
 	public static double LastUpdateTimeStamp => m_LastUpdateTimestamp;
 	public static UpdateObject LastUpdate;
 	public static bool StopProcessingUpdates = false;
 	
-	public static bool? WsServerConnected = null;
+	private static bool? m_WsServerConnected;
+
+	[CanBeNull]
+	public static IWsServerCommunicationInteractor WsServerCommunicationInteractor => m_WsServerCommunication;
+
 	private static WsServerCommunication m_WsServerCommunication;
 	private static readonly Queue<UpdateObject> m_NextUpdates = new Queue<UpdateObject>();
 
@@ -24,40 +28,30 @@ public static class UpdateData
 		m_WsServerCommunication = new WsServerCommunication(
 			Server.GameSessionId,
 			TeamManager.CurrentUserTeamID,
-			TeamManager.CurrentSessionID.ToString(),
+			TeamManager.CurrentSessionID,
 			HandleUpdateSuccessCallback
 		);
 		m_WsServerCommunication.Start();
 
+		// wait for a first update(s) to arrive
 		while (m_NextUpdates.Count == 0)
 		{
 			HandleWsServerConnectionChanges();
 			yield return null;
 		}
 
+		// process the first update(s)
 		ProcessUpdates(m_NextUpdates);
-		HideDisconnectedDialogBox();
 		Main.FirstUpdateTickComplete();
-	}
-	
-	public static void StopWsServerCommunication()
-	{
-		m_WsServerCommunication.Stop();
 	}
 
 	public static IEnumerator GetUpdates()
 	{
 		while (true)
 		{
-			while (m_NextUpdates.Count == 0)
-			{
-				HandleWsServerConnectionChanges();
-				yield return null;
-			}
-			
+			HandleWsServerConnectionChanges();
+			m_WsServerCommunication.Update();
 			ProcessUpdates(m_NextUpdates);
-			HideDisconnectedDialogBox();
-	
 			yield return null;
 		}
 	}
@@ -67,47 +61,28 @@ public static class UpdateData
 		m_NextUpdates.Enqueue(a_UpdateData);
 	}
 
-	private static void ShowDisconnectedDialogBox()
-	{
-		if (m_DisconnectDialogBox == null)
-		{
-			m_DisconnectDialogBox = DialogBoxManager.instance.NotificationWindow("Disconnected", "Your connection to the server has been interrupted.\n\nHold on while we are trying to re-establish the connection.",
-				() => {
-                    Main.QuitGame();
-                }, "Close Game");
-		}
-	}
-
-	private static void HideDisconnectedDialogBox()
-	{
-		if (m_DisconnectDialogBox != null)
-		{
-			DialogBoxManager.instance.DestroyDialogBox(m_DisconnectDialogBox);
-		}
-	}
-
 	private static void HandleWsServerConnectionChanges()
 	{
-		if (WsServerConnected == m_WsServerCommunication.IsConnected)
+		if (m_WsServerConnected == m_WsServerCommunication.IsConnected())
 		{
 			return;
 		}
 
-		WsServerConnected = m_WsServerCommunication.IsConnected;
-		if (WsServerConnected == null) // no connection value yet
+		m_WsServerConnected = m_WsServerCommunication.IsConnected();
+		if (m_WsServerConnected == null) // no connection value yet
 		{
 			return;
 		}
 
 		Object.FindObjectsOfType<WsServerConnectionChangeBehaviour>().ForEach(item =>
-			item.NotifyConnection(WsServerConnected.Value));
+			item.NotifyConnection(m_WsServerConnected.Value));
 	}
 
 	private static void ProcessUpdates(Queue<UpdateObject> a_Updates)
 	{
 		if (a_Updates.Count == 0)
 		{
-			return; // this should never happen...
+			return;
 		}
 
 		Debug.Log("Updates to process: " + a_Updates.Count);

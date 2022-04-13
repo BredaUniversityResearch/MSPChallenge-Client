@@ -6,21 +6,23 @@ namespace Networking.WsServerConnectionChangeBehaviour
 	{
 		private void OnEnable()
 		{
-			if (UpdateData.WsServerConnected == null)
+			bool? connected = UpdateData.WsServerCommunicationInteractor?.IsConnected();
+			if (connected == null)
 			{
 				return;
 			}
-			NotifyConnection(UpdateData.WsServerConnected.Value);
+			NotifyConnection(connected.Value);
 		}
 
 		private void Start()
 		{
 			OnStart();
-			if (UpdateData.WsServerConnected == null)
+			bool? connected = UpdateData.WsServerCommunicationInteractor?.IsConnected();
+			if (connected == null)
 			{
 				return;
 			}
-			NotifyConnection(UpdateData.WsServerConnected.Value);
+			NotifyConnection(connected.Value);
 		}
 
 		public void NotifyConnection(bool a_Connected)

@@ -352,6 +352,11 @@ public static class PlanManager
 
 	public static EnergyGrid GetEnergyGrid(int ID)
 	{
+		if (!energyGrids.ContainsKey(ID))
+		{
+			Debug.LogError("Retrieving on non-existing key: " + ID);
+			Debug.LogError("Keys available: " + string.Join(", ", energyGrids.Keys));
+		}
 		return energyGrids[ID];
 	}
 
