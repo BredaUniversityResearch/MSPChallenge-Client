@@ -3,9 +3,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
-using GLog;
 
-class UncaughtExceptionReporter: MonoBehaviour
+class UncaughtExceptionReporter : MonoBehaviour
 {
 	private class AdditionalDebugInfo
 	{
@@ -131,7 +130,8 @@ class UncaughtExceptionReporter: MonoBehaviour
 			SubmitExceptionAnalytics(condition, stacktrace, "Error"); 
 		}
 	}
-
+	
+	//Test behavior of Quit button (Dev)
 	private void OnErrorDialogDismissed()
 	{
 		if (!Input.GetKey(KeyCode.RightShift))
