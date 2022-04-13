@@ -153,6 +153,7 @@ namespace Networking
 		{
 			UnregisterBatchRequestCallbacks(batchId);
 			m_BatchRequestSuccessCallbacks.Add(batchId, successCallback);
+			m_BatchRequestFailureCallbacks.Add(batchId, failureCallback);
 		}
 
 		public void UnregisterBatchRequestCallbacks(int batchId)
@@ -160,6 +161,10 @@ namespace Networking
 			if (m_BatchRequestSuccessCallbacks.ContainsKey(batchId))
 			{
 				m_BatchRequestSuccessCallbacks.Remove(batchId);
+			}
+			if (m_BatchRequestFailureCallbacks.ContainsKey(batchId))
+			{
+				m_BatchRequestFailureCallbacks.Remove(batchId);
 			}
 		}
 
@@ -231,6 +236,8 @@ namespace Networking
 			}
 			catch (System.Exception e)
 			{
+				Debug.LogError("Exception in ProcessGameLatestPayload: " + e.Message + "\n" + e.StackTrace);
+				Debug.LogError("update payload: " + result.payload);
 				// do not update lastUpdateTimestamp and do not process payload
 				return;
 			}
