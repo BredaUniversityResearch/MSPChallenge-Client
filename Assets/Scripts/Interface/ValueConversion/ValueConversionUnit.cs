@@ -29,6 +29,8 @@ public class ValueConversionUnit: ScriptableObject
 
 	[SerializeField]
 	private string baseUnit = "SOME_UNIT_TYPE";
+	[SerializeField]
+	private string baseUnitFormat = "SOME_UNIT_TYPE";
 
 	public string BaseUnit
 	{
@@ -50,7 +52,7 @@ public class ValueConversionUnit: ScriptableObject
 
 		if (value == 0)
 		{
-			return new ConvertedUnit(0.0f, baseUnit, 0);
+			return new ConvertedUnit(0.0f, baseUnitFormat, 0);
 		}
 
 		UnitEntry unitConversion = conversionUnits[0];

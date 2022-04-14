@@ -5,6 +5,7 @@ using UnityEngine;
 public class ValueConversionCollection: ScriptableObject
 {
 	public const string UNIT_WATT = "W";
+	public const string UNIT_KM2 = "km2";
 
 	[SerializeField]
 	private ValueConversionUnit[] availableConversionUnits = null;

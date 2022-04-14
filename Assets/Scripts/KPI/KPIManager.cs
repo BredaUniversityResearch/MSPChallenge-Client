@@ -81,7 +81,7 @@ public static class KPIManager
 			{
 				categoryColor = Color.blue,
 				categoryName = "Area",
-				unit = "KM2",
+				unit = "km<sup>2</sup>",
 				valueDefinitions = new KPIValueDefinition[EnergyKPI.allEnergyTypes.Length]
 			};
 
@@ -97,7 +97,7 @@ public static class KPIManager
 			{
 				EnergyKPI.EnergyType type = EnergyKPI.allEnergyTypes[i];
 
-				areaCategory.valueDefinitions[i] = new KPIValueDefinition { valueName = type + " area", valueColor = Color.blue, unit = "KM2" };
+				areaCategory.valueDefinitions[i] = new KPIValueDefinition { valueName = type + " area", valueColor = Color.blue, unit = "km<sup>2</sup>" };
 				investmentCategory.valueDefinitions[i] = new KPIValueDefinition { valueName = type + " investment", valueColor = Color.cyan, unit = "€/MWh" };
 			}
 

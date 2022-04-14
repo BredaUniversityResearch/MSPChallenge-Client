@@ -3,8 +3,9 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -12,15 +13,16 @@ MonoBehaviour:
   m_Name: TonnesPerSquareKilometer
   m_EditorClassIdentifier: 
   baseUnit: t/km2
+  baseUnitFormat: t/km<sup>2</sup>
   conversionUnits:
-  - unitPostfix: "g/km\xB2"
+  - unitPostfix: g/km<sup>2</sup>
     unitSize: 0.000001
-  - unitPostfix: "kg/km\xB2"
+  - unitPostfix: kg/km<sup>2</sup>
     unitSize: 0.001
-  - unitPostfix: "t/km\xB2"
+  - unitPostfix: t/km<sup>2</sup>
     unitSize: 1
-  - unitPostfix: "Mt/km\xB2"
+  - unitPostfix: Mt/km<sup>2</sup>
     unitSize: 1000
-  - unitPostfix: "Gt/km\xB2"
+  - unitPostfix: Gt/km<sup>2</sup>
     unitSize: 1000000
   decimalPlaces: 2

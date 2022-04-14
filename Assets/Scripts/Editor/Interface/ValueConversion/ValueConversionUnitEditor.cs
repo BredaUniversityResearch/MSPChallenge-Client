@@ -7,12 +7,14 @@ class ValueConversionUnitEditor: Editor
 	public override void OnInspectorGUI()
 	{
 		SerializedProperty baseUnitProperty = serializedObject.FindProperty("baseUnit");
+		SerializedProperty baseUnitFormatProperty = serializedObject.FindProperty("baseUnitFormat");
 		SerializedProperty decimalPlacesProperty = serializedObject.FindProperty("decimalPlaces");
 		SerializedProperty unitsProperty = serializedObject.FindProperty("conversionUnits");
 
 		EditorGUI.BeginChangeCheck();
 
 		baseUnitProperty.stringValue = EditorGUILayout.TextField("Base Unit", baseUnitProperty.stringValue);
+		baseUnitFormatProperty.stringValue = EditorGUILayout.TextField("Base Unit Format", baseUnitFormatProperty.stringValue);
 		decimalPlacesProperty.intValue = EditorGUILayout.IntField("Format Decimal Places", decimalPlacesProperty.intValue);
 
 		if (unitsProperty != null)

@@ -186,7 +186,7 @@ public static class ConstraintManager
 	/// <summary>
 	/// Check constraints against any future plans
 	/// </summary>
-	public static RestrictionIssueDeltaSet CheckConstraints(Plan plan, List<PlanIssueObject> existingIssues, bool notifyUserOfExternalIssues)
+	public static RestrictionIssueDeltaSet CheckConstraints(Plan plan, List<PlanIssueObject> existingIssues, bool notifyUserOfExternalIssues, List<AbstractLayer> layersToIgnore = null)
 	{
 		RestrictionQueryCache cache = new RestrictionQueryCache();
 		MultiLayerRestrictionIssueCollection issueCollection = new MultiLayerRestrictionIssueCollection();
@@ -203,6 +203,9 @@ public static class ConstraintManager
 		// check against all future plan layers and past baselayers
 		foreach (PlanLayer planLayer in plan.PlanLayers)
 		{
+			if (layersToIgnore != null && layersToIgnore.Contains(planLayer.BaseLayer))
+				continue; 
+
 			CheckRestrictionsForLayer(cache, plan, planLayer, true, issueCollection);
 
 			//For now don't check for future restrictions. This currently puts issues in plans that are in approved, which is undesired. Scheduled for a rework.
