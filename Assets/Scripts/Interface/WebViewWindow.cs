@@ -16,27 +16,40 @@ public class WebViewWindow : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-	public void CreateWebViewWindow(string URL, Vector3 position, float contentWidth, float contentHeight)
+	public void CreateWebViewWindow(string URL)
 	{
-		window.contentLayout.preferredWidth = contentWidth;
-		window.contentLayout.preferredHeight = contentHeight;
-		CreateWebViewWindow(URL, position);
-	}
-
-	public void CreateWebViewWindow(string URL, Vector3 position)
-	{
-        editing = false;
-        currentURL = URL;
-        bool reposition = !gameObject.activeInHierarchy;
+		float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
+		window.contentLayout.preferredWidth = (Screen.width - 200f) / scale;
+		window.contentLayout.preferredHeight = (Screen.height - 200f) / scale;
+		editing = false;
+		currentURL = URL;
 		gameObject.SetActive(true);
 		browser.Url = currentURL;
-        editButton.SetActive(Main.IsDeveloper);
-
-        if (reposition)
-		{
-			StartCoroutine(RepositionOnFrameEnd(position));
-		}
+		editButton.SetActive(Main.IsDeveloper);
+		StartCoroutine(RepositionOnFrameEnd(new Vector3(100f, -100f)));
 	}
+
+	//public void CreateWebViewWindow(string URL, Vector3 position, float contentWidth, float contentHeight)
+	//{
+	//	window.contentLayout.preferredWidth = contentWidth;
+	//	window.contentLayout.preferredHeight = contentHeight;
+	//	CreateWebViewWindow(URL, position);
+	//}
+
+	//public void CreateWebViewWindow(string URL, Vector3 position)
+	//{
+ //       editing = false;
+ //       currentURL = URL;
+ //       bool reposition = !gameObject.activeInHierarchy;
+	//	gameObject.SetActive(true);
+	//	browser.Url = currentURL;
+ //       editButton.SetActive(Main.IsDeveloper);
+
+ //       if (reposition)
+	//	{
+	//		StartCoroutine(RepositionOnFrameEnd(position));
+	//	}
+	//}
 
 	IEnumerator RepositionOnFrameEnd(Vector3 position)
 	{
