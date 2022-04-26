@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
-namespace AutomatedTest
+namespace MSP2050.Scripts
 {
 	[RequireComponent(typeof(TeamImporter))]
 	public class AutomatedTestGameRunner: MonoBehaviour

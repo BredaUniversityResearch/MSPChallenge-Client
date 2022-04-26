@@ -1,13 +1,16 @@
-﻿public static class EnergyGridReceivedEvent
+﻿namespace MSP2050.Scripts
 {
-	public delegate void CallbackType();
-	public static event CallbackType Event;
-
-	public static void Invoke()
+	public static class EnergyGridReceivedEvent
 	{
-		if (Event != null)
+		public delegate void CallbackType();
+		public static event CallbackType Event;
+
+		public static void Invoke()
 		{
-			Event();
+			if (Event != null)
+			{
+				Event();
+			}
 		}
 	}
 }

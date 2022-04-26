@@ -1,7 +1,9 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
 
-public class PlanLayer_Layer : PlanLayerBase
+namespace MSP2050.Scripts
 {
-    public Toggle toggle;
+	public class PlanLayer_Layer : PlanLayerBase
+	{
+		public Toggle toggle;
+	}
 }

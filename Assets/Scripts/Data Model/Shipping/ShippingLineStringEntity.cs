@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Data_Model.Shipping
+namespace MSP2050.Scripts
 {
 	class ShippingLineStringEntity : LineStringEntity
 	{

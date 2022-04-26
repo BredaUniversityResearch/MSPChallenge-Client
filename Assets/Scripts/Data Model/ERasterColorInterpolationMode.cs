@@ -1,5 +1,8 @@
-﻿public enum ERasterColorInterpolationMode
+﻿namespace MSP2050.Scripts
 {
-	Linear,
-	Point
+	public enum ERasterColorInterpolationMode
+	{
+		Linear,
+		Point
+	}
 }

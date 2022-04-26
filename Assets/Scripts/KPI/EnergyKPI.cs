@@ -1,15 +1,18 @@
-﻿public class EnergyKPI
+﻿namespace MSP2050.Scripts
 {
-	public enum EnergyType
+	public class EnergyKPI
 	{
-		Pipelines,
-		GreyProductionZones,
-		GreenProductionZones,
-		TransformerStations,
-		LandSockets,
-		Cables,
-		NoEnergy
-	};
+		public enum EnergyType
+		{
+			Pipelines,
+			GreyProductionZones,
+			GreenProductionZones,
+			TransformerStations,
+			LandSockets,
+			Cables,
+			NoEnergy
+		};
 
-	public static readonly EnergyType[] allEnergyTypes = { EnergyType.Pipelines, EnergyType.GreyProductionZones, EnergyType.GreenProductionZones, EnergyType.TransformerStations, EnergyType.LandSockets, EnergyType.Cables };
+		public static readonly EnergyType[] allEnergyTypes = { EnergyType.Pipelines, EnergyType.GreyProductionZones, EnergyType.GreenProductionZones, EnergyType.TransformerStations, EnergyType.LandSockets, EnergyType.Cables };
+	}
 }

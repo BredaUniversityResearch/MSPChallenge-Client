@@ -1,29 +1,32 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Sirenix.OdinInspector;
+using UnityEngine;
 
-[CreateAssetMenu(fileName = "RegionSettingsAsset", menuName = "MSP2050/RegionSettingsAsset")]
-public class RegionSettingsAsset : SerializedScriptableObject
+namespace MSP2050.Scripts
 {
-	[SerializeField]
-	private Dictionary<string, RegionInfo> regionInfo;
-	[SerializeField]
-	private RegionInfo defaultRegionInfo;
-
-	public RegionInfo GetRegionInfo(string region)
+	[CreateAssetMenu(fileName = "RegionSettingsAsset", menuName = "MSP2050/RegionSettingsAsset")]
+	public class RegionSettingsAsset : SerializedScriptableObject
 	{
-		if (regionInfo.TryGetValue(region, out var result))
-			return result;
-		return defaultRegionInfo;
-	}
-}
+		[SerializeField]
+		private Dictionary<string, RegionInfo> regionInfo;
+		[SerializeField]
+		private RegionInfo defaultRegionInfo;
 
-public class RegionInfo
-{
-	public string name;
-	public string editionPostFix;
-	public string letter;
-	public Sprite sprite;
-	public Color colour;
+		public RegionInfo GetRegionInfo(string region)
+		{
+			if (regionInfo.TryGetValue(region, out var result))
+				return result;
+			return defaultRegionInfo;
+		}
+	}
+
+	public class RegionInfo
+	{
+		public string name;
+		public string editionPostFix;
+		public string letter;
+		public Sprite sprite;
+		public Color colour;
+	}
 }

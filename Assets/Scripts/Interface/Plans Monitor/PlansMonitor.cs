@@ -1,122 +1,123 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
-public class PlansMonitor : MonoBehaviour
+namespace MSP2050.Scripts
 {
-	public static PlansMonitor instance;
-	public GenericWindow thisGenericWindow;
-	public PlansTimeline timeline;
-	public PlansList plansList;
-	public PlanDetails planDetails;
-	public PlansWindowMinMax plansMinMax;
-	public MenuBarToggle plansMonitorToggle;
-	public ToolbarCounter plansMonitorToolbarCounter;
-	public float fadedTransparency;
-	public float mouseFadeInDistance = 1f;
-
-	private static PlansList plansListStatic;
-	private CanvasGroup canvasGroup;
-	private bool faded;
-	private Vector3 mousePosOnFade;
-
-	void Awake()
+	public class PlansMonitor : MonoBehaviour
 	{
-		canvasGroup = GetComponent<CanvasGroup>();
-		instance = this;
-		if (thisGenericWindow == null)
-			thisGenericWindow = GetComponent<GenericWindow>();
+		public static PlansMonitor instance;
+		public GenericWindow thisGenericWindow;
+		public PlansTimeline timeline;
+		public PlansList plansList;
+		public PlanDetails planDetails;
+		public PlansWindowMinMax plansMinMax;
+		public MenuBarToggle plansMonitorToggle;
+		public ToolbarCounter plansMonitorToolbarCounter;
+		public float fadedTransparency;
+		public float mouseFadeInDistance = 1f;
 
-		plansListStatic = plansList;
-    }
+		private static PlansList plansListStatic;
+		private CanvasGroup canvasGroup;
+		private bool faded;
+		private Vector3 mousePosOnFade;
 
-	protected void Start()
-	{
-		instance = this;
-        plansMinMax.Minimize();
-		this.gameObject.SetActive(false);
-	}
-
-	void Update()
-	{
-		if (faded && Vector3.Distance(mousePosOnFade, Input.mousePosition) > mouseFadeInDistance)
+		void Awake()
 		{
-			faded = false;
-			canvasGroup.alpha = 1f;
-			HighlightManager.instance.RemoveHighlight();
+			canvasGroup = GetComponent<CanvasGroup>();
+			instance = this;
+			if (thisGenericWindow == null)
+				thisGenericWindow = GetComponent<GenericWindow>();
+
+			plansListStatic = plansList;
 		}
-	}
 
-    private void OnDisable()
-    {
-        if (InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn)
-        {
-            InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn = false;
-        }
-    }
+		protected void Start()
+		{
+			instance = this;
+			plansMinMax.Minimize();
+			this.gameObject.SetActive(false);
+		}
 
-    // move all these functions to UIManager
-    public static void AddPlan(Plan plan)
-	{
-		plansListStatic.AddPlanToList(plan);
-	}
+		void Update()
+		{
+			if (faded && Vector3.Distance(mousePosOnFade, Input.mousePosition) > mouseFadeInDistance)
+			{
+				faded = false;
+				canvasGroup.alpha = 1f;
+				HighlightManager.instance.RemoveHighlight();
+			}
+		}
 
-	public static void SetLockIcon(Plan plan, bool value)
-	{
-		plansListStatic.SetLockIcon(plan, value);
-	}
+		private void OnDisable()
+		{
+			if (InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn)
+			{
+				InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn = false;
+			}
+		}
 
-	public static void SetViewPlanFrameState(Plan plan, bool state)
-	{
-		plansListStatic.SetViewPlanFrameState(plan, state);
-	}
+		// move all these functions to UIManager
+		public static void AddPlan(Plan plan)
+		{
+			plansListStatic.AddPlanToList(plan);
+		}
 
-	public static void SetPlanBarToggleState(Plan plan, bool state)
-	{
-		plansListStatic.SetPlanBarToggleState(plan, state);
-	}
+		public static void SetLockIcon(Plan plan, bool value)
+		{
+			plansListStatic.SetLockIcon(plan, value);
+		}
 
-	public static void UpdatePlan(Plan plan, bool nameChanged, bool timeChanged, bool stateChanged)
-	{
-		plansListStatic.UpdatePlan(plan, nameChanged, timeChanged, stateChanged);
-	}
+		public static void SetViewPlanFrameState(Plan plan, bool state)
+		{
+			plansListStatic.SetViewPlanFrameState(plan, state);
+		}
 
-	public static void AddPlanLayer(Plan plan, PlanLayer planLayer)
-	{
-		plansListStatic.AddPlanLayer(plan, planLayer);
-	}
+		public static void SetPlanBarToggleState(Plan plan, bool state)
+		{
+			plansListStatic.SetPlanBarToggleState(plan, state);
+		}
 
-	public static void SetPlanUnseenChanges(Plan plan, bool unseenChanges)
-	{
-		plansListStatic.SetPlanUnseenChanges(plan, unseenChanges);	
+		public static void UpdatePlan(Plan plan, bool nameChanged, bool timeChanged, bool stateChanged)
+		{
+			plansListStatic.UpdatePlan(plan, nameChanged, timeChanged, stateChanged);
+		}
 
-	}
+		public static void AddPlanLayer(Plan plan, PlanLayer planLayer)
+		{
+			plansListStatic.AddPlanLayer(plan, planLayer);
+		}
 
-	public static void RemovePlanLayer(Plan plan, PlanLayer planLayer)
-	{
-		plansListStatic.RemovePlanLayer(plan, planLayer);
-	}
+		public static void SetPlanUnseenChanges(Plan plan, bool unseenChanges)
+		{
+			plansListStatic.SetPlanUnseenChanges(plan, unseenChanges);	
 
-	public static void SetAllPlanBarInteractable(bool value)
-	{
-		plansListStatic.SetAllButtonInteractable(value);
-	}
+		}
 
-	public static void RefreshPlanButtonInteractablity()
-	{
-		plansListStatic.RefreshPlanBarInteractablityForAllPlans();
-		PlanDetails.UpdateButtonInteractability();
-	}
+		public static void RemovePlanLayer(Plan plan, PlanLayer planLayer)
+		{
+			plansListStatic.RemovePlanLayer(plan, planLayer);
+		}
+
+		public static void SetAllPlanBarInteractable(bool value)
+		{
+			plansListStatic.SetAllButtonInteractable(value);
+		}
+
+		public static void RefreshPlanButtonInteractablity()
+		{
+			plansListStatic.RefreshPlanBarInteractablityForAllPlans();
+			PlanDetails.UpdateButtonInteractability();
+		}
 		
-	public void FadeAndHighlightUntilMouseMove()
-	{
-		faded = true;
-		canvasGroup.alpha = fadedTransparency;
-		mousePosOnFade = Input.mousePosition;
-	}
+		public void FadeAndHighlightUntilMouseMove()
+		{
+			faded = true;
+			canvasGroup.alpha = fadedTransparency;
+			mousePosOnFade = Input.mousePosition;
+		}
 
-	public static void SetUnseenChangesCounter(int value)
-	{
-		instance.plansMonitorToolbarCounter.SetValue(value);
+		public static void SetUnseenChangesCounter(int value)
+		{
+			instance.plansMonitorToolbarCounter.SetValue(value);
+		}
 	}
 }

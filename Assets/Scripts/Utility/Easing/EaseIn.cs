@@ -1,16 +1,19 @@
 ﻿using UnityEngine;
 
-public class EaseIn : IEasingFunction
+namespace MSP2050.Scripts
 {
-	private float exponent;
-
-	public EaseIn(float easeExponent)
+	public class EaseIn : IEasingFunction
 	{
-		exponent = easeExponent;
-	}
+		private float exponent;
 
-	public float Evaluate(float timeUnit)
-	{
-		return Mathf.Pow(timeUnit, exponent);
+		public EaseIn(float easeExponent)
+		{
+			exponent = easeExponent;
+		}
+
+		public float Evaluate(float timeUnit)
+		{
+			return Mathf.Pow(timeUnit, exponent);
+		}
 	}
 }

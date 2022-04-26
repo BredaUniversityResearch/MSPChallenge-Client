@@ -1,26 +1,29 @@
 ﻿using UnityEngine;
 
-public class WorldSpaceCanvas : MonoBehaviour
+namespace MSP2050.Scripts
 {
-	private Canvas canvas;
-
-	private static WorldSpaceCanvas instance;
-
-	protected void Start()
+	public class WorldSpaceCanvas : MonoBehaviour
 	{
-		canvas = this.GetComponent<Canvas>();
-		instance = this;
-	}
+		private Canvas canvas;
 
-	public void Resize(BoxCollider2D bounds)
-	{
-		//Make sure the canvas is in front of all other world elements by setting the Z to -100
-		canvas.transform.position = new Vector3(bounds.offset.x, bounds.offset.y, -100.0f);
-		canvas.GetComponent<RectTransform>().sizeDelta = bounds.size;
-	}
+		private static WorldSpaceCanvas instance;
 
-	public static void ResizeToPlayArea(BoxCollider2D bounds)
-	{
-		instance.Resize(bounds);
+		protected void Start()
+		{
+			canvas = this.GetComponent<Canvas>();
+			instance = this;
+		}
+
+		public void Resize(BoxCollider2D bounds)
+		{
+			//Make sure the canvas is in front of all other world elements by setting the Z to -100
+			canvas.transform.position = new Vector3(bounds.offset.x, bounds.offset.y, -100.0f);
+			canvas.GetComponent<RectTransform>().sizeDelta = bounds.size;
+		}
+
+		public static void ResizeToPlayArea(BoxCollider2D bounds)
+		{
+			instance.Resize(bounds);
+		}
 	}
 }

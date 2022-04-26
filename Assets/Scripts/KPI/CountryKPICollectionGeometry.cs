@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
-namespace KPI
+namespace MSP2050.Scripts
 {
     class CountryKPICollectionGeometry
     {

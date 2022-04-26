@@ -1,7 +1,10 @@
 ﻿
-public enum EPlanApprovalState
+namespace MSP2050.Scripts
 {
-	Maybe = -1,
-	Disapproved = 0,
-	Approved = 1,
-};
+	public enum EPlanApprovalState
+	{
+		Maybe = -1,
+		Disapproved = 0,
+		Approved = 1,
+	};
+}

@@ -2,29 +2,32 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-class NavigationOnTabInput: MonoBehaviour
+namespace MSP2050.Scripts
 {
-	private void Update()
+	class NavigationOnTabInput: MonoBehaviour
 	{
-		if (Input.GetKeyDown(KeyCode.Tab))
+		private void Update()
 		{
-			EventSystem system = EventSystem.current;
-			Selectable next = null;
-			if (system.currentSelectedGameObject != null)
+			if (Input.GetKeyDown(KeyCode.Tab))
 			{
-				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+				EventSystem system = EventSystem.current;
+				Selectable next = null;
+				if (system.currentSelectedGameObject != null)
 				{
-					next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnUp();
+					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+					{
+						next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnUp();
+					}
+					else
+					{
+						next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+					}
 				}
-				else
-				{
-					next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
-				}
-			}
 
-			if (next != null)
-			{
-				system.SetSelectedGameObject(next.gameObject);
+				if (next != null)
+				{
+					system.SetSelectedGameObject(next.gameObject);
+				}
 			}
 		}
 	}

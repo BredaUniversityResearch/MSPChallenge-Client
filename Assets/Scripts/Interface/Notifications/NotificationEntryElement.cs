@@ -1,8 +1,7 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
 
-namespace Interface.Notifications
+namespace MSP2050.Scripts
 {
 	public class NotificationEntryElement: MonoBehaviour
 	{

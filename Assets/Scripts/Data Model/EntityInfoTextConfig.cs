@@ -1,45 +1,48 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(menuName = "MSP2050/EntityInfoTextConfig")]
-public class EntityInfoTextConfig : ScriptableObject
+namespace MSP2050.Scripts
 {
-	[SerializeField]
-	private Vector2 backgroundExtrude = Vector2.zero;
-	public Vector2 BackgroundExtrude
+	[CreateAssetMenu(menuName = "MSP2050/EntityInfoTextConfig")]
+	public class EntityInfoTextConfig : ScriptableObject
 	{
-		get
+		[SerializeField]
+		private Vector2 backgroundExtrude = Vector2.zero;
+		public Vector2 BackgroundExtrude
 		{
-			return backgroundExtrude;
+			get
+			{
+				return backgroundExtrude;
+			}
 		}
-	}
 
-	[SerializeField]
-	private Sprite backgroundSprite = null;
-	public Sprite BackgroundSprite
-	{
-		get
+		[SerializeField]
+		private Sprite backgroundSprite = null;
+		public Sprite BackgroundSprite
 		{
-			return backgroundSprite;
+			get
+			{
+				return backgroundSprite;
+			}
 		}
-	}
 
-	[SerializeField]
-	private Font textFont = null;
-	public Font TextFont
-	{
-		get
+		[SerializeField]
+		private Font textFont = null;
+		public Font TextFont
 		{
-			return textFont;
-		} 
-	}
+			get
+			{
+				return textFont;
+			} 
+		}
 
-	[SerializeField]
-	private float backgroundScale = 2.0f;
-	public float BackgroundScale
-	{
-		get
+		[SerializeField]
+		private float backgroundScale = 2.0f;
+		public float BackgroundScale
 		{
-			return backgroundScale;
+			get
+			{
+				return backgroundScale;
+			}
 		}
 	}
 }

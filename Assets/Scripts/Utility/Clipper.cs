@@ -56,7 +56,7 @@ using System.Collections.Generic;
 //using System.IO;            //debugging with streamReader & StreamWriter
 //using System.Windows.Forms; //debugging to clipboard
 
-namespace SEL.RasterizerLib
+namespace MSP2050.Scripts
 {
 
 	//#if use_int32

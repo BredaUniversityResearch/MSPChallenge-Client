@@ -1,15 +1,17 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-public class ToolBox : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	public class ToolBox : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
+		// Use this for initialization
+		void Start () {
 	
-	}
+		}
 	
-	// Update is called once per frame
-	void Update () {
+		// Update is called once per frame
+		void Update () {
 	
+		}
 	}
 }

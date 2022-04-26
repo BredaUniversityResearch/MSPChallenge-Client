@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace KPI
+namespace MSP2050.Scripts
 {
 	public class KPICategory: KPIValue
 	{

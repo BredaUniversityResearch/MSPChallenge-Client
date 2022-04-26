@@ -1,4 +1,7 @@
-﻿public class PlanLayer_SubCategory : PlanLayerFoldable
+﻿namespace MSP2050.Scripts
 {
-    public UnityEngine.UI.Image icon;
+	public class PlanLayer_SubCategory : PlanLayerFoldable
+	{
+		public UnityEngine.UI.Image icon;
+	}
 }

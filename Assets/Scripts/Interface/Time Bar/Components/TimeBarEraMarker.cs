@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class TimeBarEraMarker : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	public class TimeBarEraMarker : MonoBehaviour {
 
-    public RectTransform thisRectTrans;
-    public Image eraSimMarker;
+		public RectTransform thisRectTrans;
+		public Image eraSimMarker;
+	}
 }

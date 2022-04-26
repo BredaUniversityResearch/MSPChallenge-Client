@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
 
-namespace Interface.Notifications
+namespace MSP2050.Scripts
 {
 	public class NotificationWindow : MonoBehaviour
 	{

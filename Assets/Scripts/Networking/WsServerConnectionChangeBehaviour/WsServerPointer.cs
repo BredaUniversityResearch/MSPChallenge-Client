@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-namespace Networking.WsServerConnectionChangeBehaviour
+namespace MSP2050.Scripts
 {
 	public class WsServerPointer
 	{

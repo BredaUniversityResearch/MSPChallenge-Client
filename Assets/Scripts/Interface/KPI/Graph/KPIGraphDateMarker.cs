@@ -2,79 +2,82 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-class KPIGraphDateMarker: MonoBehaviour, IOnResizeHandler
+namespace MSP2050.Scripts
 {
-	[SerializeField]
-	private RectTransform targetTransform = null;
-
-	[SerializeField]
-	private bool shouldFollowCurrentDate = true;
-
-	[SerializeField]
-	private RawImage rawImage= null;
-
-	[SerializeField]
-	private float imageRepetitions = 100f;
-
-	[SerializeField]
-	private GenericWindow matchingWindow;
-
-	private void Start()
+	class KPIGraphDateMarker: MonoBehaviour, IOnResizeHandler
 	{
-		if (shouldFollowCurrentDate)
+		[SerializeField]
+		private RectTransform targetTransform = null;
+
+		[SerializeField]
+		private bool shouldFollowCurrentDate = true;
+
+		[SerializeField]
+		private RawImage rawImage= null;
+
+		[SerializeField]
+		private float imageRepetitions = 100f;
+
+		[SerializeField]
+		private GenericWindow matchingWindow;
+
+		private void Start()
 		{
-			GameState.OnCurrentMonthChanged += OnMonthChanged;
+			if (shouldFollowCurrentDate)
+			{
+				GameState.OnCurrentMonthChanged += OnMonthChanged;
+			}
+			SetDate(GameState.GetCurrentMonth());
+
+			if(matchingWindow != null)
+				matchingWindow.RegisterResizeHandler(this);
 		}
-        SetDate(GameState.GetCurrentMonth());
 
-		if(matchingWindow != null)
-			matchingWindow.RegisterResizeHandler(this);
-	}
-
-	void OnEnable()
-	{
-		StartCoroutine(DelayedResize());
-	}
-
-	IEnumerator DelayedResize()
-	{
-		yield return new WaitForEndOfFrame();
-		yield return new WaitForEndOfFrame();
-		OnResize();
-	}
-
-	private void OnDestroy()
-	{
-		if (shouldFollowCurrentDate)
+		void OnEnable()
 		{
-			GameState.OnCurrentMonthChanged -= OnMonthChanged;
+			StartCoroutine(DelayedResize());
 		}
-		if (matchingWindow != null)
-			matchingWindow.UnRegisterResizeHandler(this);
-	}
 
-	private void OnMonthChanged(int oldCurrentMonth, int newCurrentMonth)
-	{
-		SetDate(newCurrentMonth);
-	}
-
-	//Also called via the UnityEditor
-	public void SetDate(int month)
-	{
-		if (Main.MspGlobalData != null)
+		IEnumerator DelayedResize()
 		{
-			float timePercentage = month / (float)Main.MspGlobalData.session_end_month;
-
-			targetTransform.anchorMin = new Vector2(timePercentage, 0f);
-			targetTransform.anchorMax = new Vector2(timePercentage, 1f);
+			yield return new WaitForEndOfFrame();
+			yield return new WaitForEndOfFrame();
+			OnResize();
 		}
-	}
 
-	public void OnResize()
-	{
-		Vector3[] corners = new Vector3[4];
-		targetTransform.GetWorldCorners(corners);
-		//rawImage.uvRect.height = (corners[1].y - corners[0].y) / imageRepetitions;
-		rawImage.uvRect = new Rect(0, 0, 1f, (corners[1].y - corners[0].y) / imageRepetitions);
+		private void OnDestroy()
+		{
+			if (shouldFollowCurrentDate)
+			{
+				GameState.OnCurrentMonthChanged -= OnMonthChanged;
+			}
+			if (matchingWindow != null)
+				matchingWindow.UnRegisterResizeHandler(this);
+		}
+
+		private void OnMonthChanged(int oldCurrentMonth, int newCurrentMonth)
+		{
+			SetDate(newCurrentMonth);
+		}
+
+		//Also called via the UnityEditor
+		public void SetDate(int month)
+		{
+			if (Main.MspGlobalData != null)
+			{
+				float timePercentage = month / (float)Main.MspGlobalData.session_end_month;
+
+				targetTransform.anchorMin = new Vector2(timePercentage, 0f);
+				targetTransform.anchorMax = new Vector2(timePercentage, 1f);
+			}
+		}
+
+		public void OnResize()
+		{
+			Vector3[] corners = new Vector3[4];
+			targetTransform.GetWorldCorners(corners);
+			//rawImage.uvRect.height = (corners[1].y - corners[0].y) / imageRepetitions;
+			rawImage.uvRect = new Rect(0, 0, 1f, (corners[1].y - corners[0].y) / imageRepetitions);
+		}
 	}
 }

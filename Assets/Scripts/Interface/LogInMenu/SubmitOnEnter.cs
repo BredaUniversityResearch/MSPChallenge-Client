@@ -1,18 +1,21 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-public class SubmitOnEnter: MonoBehaviour
+namespace MSP2050.Scripts
 {
-	[SerializeField]
-	private UnityEvent submitEvent = null;
-
-	private void Update()
+	public class SubmitOnEnter: MonoBehaviour
 	{
-		if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
+		[SerializeField]
+		private UnityEvent submitEvent = null;
+
+		private void Update()
 		{
-			if (submitEvent != null)
+			if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
 			{
-				submitEvent.Invoke();
+				if (submitEvent != null)
+				{
+					submitEvent.Invoke();
+				}
 			}
 		}
 	}

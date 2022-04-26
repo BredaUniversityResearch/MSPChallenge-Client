@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Data_Model.Shipping
+namespace MSP2050.Scripts
 {
 	public class ShippingLineStringLayer : LineStringLayer
 	{

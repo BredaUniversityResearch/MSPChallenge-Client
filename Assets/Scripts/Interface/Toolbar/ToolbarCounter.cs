@@ -1,38 +1,40 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using TMPro;
 
-public class ToolbarCounter : MonoBehaviour
+namespace MSP2050.Scripts
 {
-	public Image counterImage;
-	public TextMeshProUGUI counterText;
-
-	private int counter = 0;
-
-	public void AddValue()
+	public class ToolbarCounter : MonoBehaviour
 	{
-		UpdateCounter(counter + 1);
-	}
+		public Image counterImage;
+		public TextMeshProUGUI counterText;
 
-	public void SetValue(int value)
-	{
-		UpdateCounter(value);
-	}
+		private int counter = 0;
 
-	private void UpdateCounter(int i)
-	{
-		counter = i;
-		if (i <= 0)
+		public void AddValue()
 		{
-			counterImage.gameObject.SetActive(false);
-			counterText.text = i.ToString();
+			UpdateCounter(counter + 1);
 		}
-		else
+
+		public void SetValue(int value)
 		{
-			if (i > 9) i = 9;
-			counterImage.gameObject.SetActive(true);
-			counterText.text = i.ToString();
+			UpdateCounter(value);
+		}
+
+		private void UpdateCounter(int i)
+		{
+			counter = i;
+			if (i <= 0)
+			{
+				counterImage.gameObject.SetActive(false);
+				counterText.text = i.ToString();
+			}
+			else
+			{
+				if (i > 9) i = 9;
+				counterImage.gameObject.SetActive(true);
+				counterText.text = i.ToString();
+			}
 		}
 	}
 }

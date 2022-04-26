@@ -1,15 +1,18 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class OrderWindowOnClick : MonoBehaviour, IPointerDownHandler
+namespace MSP2050.Scripts
 {
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        transform.SetAsLastSibling();
-    }
+	public class OrderWindowOnClick : MonoBehaviour, IPointerDownHandler
+	{
+		public void OnPointerDown(PointerEventData eventData)
+		{
+			transform.SetAsLastSibling();
+		}
 
-    void OnEnable()
-    {
-        transform.SetAsLastSibling();
-    }
+		void OnEnable()
+		{
+			transform.SetAsLastSibling();
+		}
+	}
 }
