@@ -12,7 +12,7 @@ public class PolygonLayer : Layer<PolygonEntity>
         presetProperties.Add("Area", (subent) =>
         {
             PolygonSubEntity polygonEntity = (PolygonSubEntity)subent;
-            return polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km²";
+            return polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>";
         });
     }
 

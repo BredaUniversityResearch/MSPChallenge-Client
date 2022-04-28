@@ -56,7 +56,7 @@ public class PropertiesWindow : MonoBehaviour
 		if (entity.Layer.GetGeoType() == LayerManager.GeoType.polygon)
 		{
 			PolygonSubEntity polygonEntity = (PolygonSubEntity)subEntity;
-			AddEntry(baseDataParent, "Area", polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km²", areaIcon, Color.white);
+			AddEntry(baseDataParent, "Area", polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>", areaIcon, Color.white);
 			AddEntry(baseDataParent, "Points", polygonEntity.GetTotalPointCount().ToString(), pointsIcon, Color.white);
 		}
 		else if (entity.Layer.GetGeoType() == LayerManager.GeoType.line)
