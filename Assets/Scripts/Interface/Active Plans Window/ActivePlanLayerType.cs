@@ -32,7 +32,7 @@ public class ActivePlanLayerType : MonoBehaviour {
 			{
 				Vector3[] corners = new Vector3[4];
 				activePlanWindow.windowTransform.GetWorldCorners(corners);
-				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(MediaUrl.Parse(type.media)/*, new Vector3(corners[2].x, corners[2].y - Screen.height, 0)*/);
+				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(MediaUrl.Parse(type.media));
 			});
 		}
 		else

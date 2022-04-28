@@ -28,29 +28,7 @@ public class WebViewWindow : MonoBehaviour
 		editButton.SetActive(Main.IsDeveloper);
 		StartCoroutine(RepositionOnFrameEnd(new Vector3(100f, -100f)));
 	}
-
-	//public void CreateWebViewWindow(string URL, Vector3 position, float contentWidth, float contentHeight)
-	//{
-	//	window.contentLayout.preferredWidth = contentWidth;
-	//	window.contentLayout.preferredHeight = contentHeight;
-	//	CreateWebViewWindow(URL, position);
-	//}
-
-	//public void CreateWebViewWindow(string URL, Vector3 position)
-	//{
- //       editing = false;
- //       currentURL = URL;
- //       bool reposition = !gameObject.activeInHierarchy;
-	//	gameObject.SetActive(true);
-	//	browser.Url = currentURL;
- //       editButton.SetActive(Main.IsDeveloper);
-
- //       if (reposition)
-	//	{
-	//		StartCoroutine(RepositionOnFrameEnd(position));
-	//	}
-	//}
-
+	
 	IEnumerator RepositionOnFrameEnd(Vector3 position)
 	{
 		yield return new WaitForEndOfFrame();

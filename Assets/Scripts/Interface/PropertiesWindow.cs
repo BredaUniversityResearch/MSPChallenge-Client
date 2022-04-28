@@ -116,7 +116,7 @@ public class PropertiesWindow : MonoBehaviour
 						window.windowTransform.GetWorldCorners(corners);
 
 						string mediaUrl = MediaUrl.Parse(entityTypes[iCopy].media);
-						InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl/*, new Vector3(corners[2].x, corners[2].y - Screen.height, 0)*/);
+						InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl);
 					}
 				);
 			}

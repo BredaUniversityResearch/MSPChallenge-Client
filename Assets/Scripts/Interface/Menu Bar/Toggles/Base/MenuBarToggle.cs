@@ -83,7 +83,7 @@ public class MenuBarToggle : MonoBehaviour
 		toggle.onValueChanged.AddListener((b) =>
 		{
 			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-			InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(Main.MspGlobalData.region_base_url + '/' + TeamManager.CurrentTeam.name/*, new Vector3(100f, -100f), (Screen.width - 200f) / scale, (Screen.height - 200f) / scale*/);
+			InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(Main.MspGlobalData.region_base_url + '/' + TeamManager.CurrentTeam.name);
 		});
 	
 	}

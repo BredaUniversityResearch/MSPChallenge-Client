@@ -109,7 +109,7 @@ public class ActiveLayerWindow : MonoBehaviour
                 activeLayer.infoButton.onClick.AddListener(() =>
                 {
                     string mediaUrl = MediaUrl.Parse(activeLayer.layerRepresenting.Media);
-                    InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl/*, new Vector3(Screen.width/2f, Screen.height/2f, 0)*/);
+                    InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl);
                 });
             }
             else

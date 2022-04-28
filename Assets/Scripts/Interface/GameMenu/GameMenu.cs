@@ -26,14 +26,14 @@ public class GameMenu : MonoBehaviour
 		credits.onClick.AddListener(delegate () 
 		{
 			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-			InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow("https://community.mspchallenge.info/wiki/Credits"/*, new Vector3(100f, -100f), (Screen.width - 200f) / scale, (Screen.height - 200f) / scale*/);
+			InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow("https://community.mspchallenge.info/wiki/Credits");
 			thisGenericWindow.Hide();
 		});
         options.onClick.AddListener(delegate () { InterfaceCanvas.Instance.options.gameObject.SetActive(true); });
         tutorial.onClick.AddListener(() => 
         {
             gameObject.SetActive(false);
-            InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow("https://community.mspchallenge.info/wiki/Tutorial"/*, Vector3.zero*/);
+            InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow("https://community.mspchallenge.info/wiki/Tutorial");
         });
         exit.onClick.AddListener(() => 
         {
