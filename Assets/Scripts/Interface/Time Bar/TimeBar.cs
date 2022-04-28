@@ -158,16 +158,12 @@ public class TimeBar : MonoBehaviour
 		}
 
 		fill.fillAmount = (float)month / (float)Main.MspGlobalData.session_end_month;
-		collapsedDate.text = Util.MonthToText(month);
+		collapsedDate.text = simulationTimeText.text = Util.MonthToText(month);
+		UpdateIndicator(simulationTimeIndicatorTop, month);
 
 		if (isViewingPlan)
 		{
 			UpdatePlanViewing();
-		}
-		else
-		{
-			simulationTimeText.text = Util.MonthToText(month);
-			UpdateIndicator(simulationTimeIndicatorTop, month);
 		}
 	}
 
