@@ -22,7 +22,7 @@ public class WebViewWindow : MonoBehaviour
 		window.contentLayout.preferredWidth = (Screen.width - 200f) / scale;
 		window.contentLayout.preferredHeight = (Screen.height - 200f) / scale;
 		editing = false;
-		currentURL = URL;
+		currentURL = $"{URL}?region={Main.MspGlobalData.region}";
 		gameObject.SetActive(true);
 		browser.Url = currentURL;
 		editButton.SetActive(Main.IsDeveloper);
