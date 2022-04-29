@@ -7,8 +7,37 @@ using Newtonsoft.Json;
 /// </summary>
 public class RestrictionIssueDeltaSet
 {
-	private HashSet<PlanIssueObject> addedIssues = new HashSet<PlanIssueObject>(IssueObjectEqualityComparer.Instance);
-	private List<PlanIssueObject> removedIssues = new List<PlanIssueObject>();
+	private HashSet<PlanIssueObject> addedIssues;
+	private List<PlanIssueObject> removedIssues;
+
+	public RestrictionIssueDeltaSet()
+	{
+		addedIssues = new HashSet<PlanIssueObject>(IssueObjectEqualityComparer.Instance);
+		removedIssues = new List<PlanIssueObject>();
+}
+
+	public RestrictionIssueDeltaSet(List<PlanIssueObject> existingIssues, MultiLayerRestrictionIssueCollection newIssues)
+	{
+		addedIssues = new HashSet<PlanIssueObject>(IssueObjectEqualityComparer.Instance);
+		removedIssues = new List<PlanIssueObject>(existingIssues);
+		
+		foreach(var kvp in newIssues.GetIssues())
+		{
+			foreach (PlanIssueObject issue in kvp.Value)
+			{
+				//New issues and removed issues are different objects (and new ones dont have ids), so find them using the IssueObjectEqualityComparer
+				PlanIssueObject removedIssue = FindRemovedIssue(issue);
+				if (removedIssue != null)
+				{
+					removedIssues.Remove(removedIssue);
+				}
+				else
+				{
+					addedIssues.Add(issue);
+				}
+			}
+		}
+	}
 
 	public void IssueRemoved(PlanIssueObject removed)
 	{
@@ -57,9 +86,6 @@ public class RestrictionIssueDeltaSet
 	{
 		if (HasAnyChanges())
 		{
-			//form.AddField("added", GetAddedIssues());
-			//form.AddField("removed", GetRemovedIssues());
-
 			JObject dataObject = new JObject();
 			dataObject.Add("added", JToken.FromObject(GetAddedIssues()));
 			dataObject.Add("removed", JToken.FromObject(GetRemovedIssues()));

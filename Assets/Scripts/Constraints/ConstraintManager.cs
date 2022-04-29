@@ -226,8 +226,27 @@ public static class ConstraintManager
 		return deltaSet;
 	}
 
-	public static void CheckTypeUnavailableConstraints(Plan plan, int implementationDate, MultiLayerRestrictionIssueCollection issueCollection)
+	public static RestrictionIssueDeltaSet GetUpdatedIssueDelta(Plan plan, List<PlanIssueObject> existingIssues, List<AbstractLayer> layersToIgnore, int newPlanStartTime, out bool hasUnavailableTypes)
 	{
+		RestrictionQueryCache cache = new RestrictionQueryCache();
+		MultiLayerRestrictionIssueCollection newIssues = new MultiLayerRestrictionIssueCollection();
+
+		foreach (PlanLayer planLayer in plan.PlanLayers)
+		{
+			if (layersToIgnore != null && layersToIgnore.Contains(planLayer.BaseLayer))
+				continue;
+
+			CheckRestrictionsForLayer(cache, plan, planLayer, true, newIssues);
+		}
+
+		hasUnavailableTypes = CheckTypeUnavailableConstraints(plan, newPlanStartTime, newIssues);
+		
+		return new RestrictionIssueDeltaSet(existingIssues, newIssues);
+	}
+
+	public static bool CheckTypeUnavailableConstraints(Plan plan, int implementationDate, MultiLayerRestrictionIssueCollection issueCollection)
+	{
+		bool result = false;
 		foreach (PlanLayer layer in plan.PlanLayers)
 		{
 			bool checkEntityTypes = false;
@@ -253,12 +272,14 @@ public static class ConstraintManager
 							if (issueConstraint != null)
 							{
 								issueCollection.AddIssue(plan, layer, issueLocation, issueConstraint);
+								result = true;
 							}
 						}
 					}
 				}
 			}
 		}
+		return result;
 	}
 
 	private static void NotifyUserOfExternalIssues(Plan currentPlan, MultiLayerRestrictionIssueCollection issueCollection)

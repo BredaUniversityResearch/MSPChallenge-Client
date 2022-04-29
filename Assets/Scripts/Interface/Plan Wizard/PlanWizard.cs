@@ -114,8 +114,10 @@ public class PlanWizard : MonoBehaviour
 
 	public void OnEnable()
     {
-        transform.SetAsLastSibling();
-        editingPlan = null;
+		//transform.SetAsLastSibling();
+		transform.SetSiblingIndex(transform.parent.childCount - 4);
+
+		editingPlan = null;
         CheckForErrors();
         this.thisGenericWindow.CreateModalBackground();
     }
@@ -200,60 +202,17 @@ public class PlanWizard : MonoBehaviour
 	{
 		return startPlanToggle.isOn? -1 : finishTime;
 	}
-
-	private void OnEditPlanAcceptClicked()
-	{
-		string notificationText = null;
-		BatchRequest batch = new BatchRequest();
-		MultiLayerRestrictionIssueCollection resultIssues = new MultiLayerRestrictionIssueCollection();
-
-		bool timeMovedToPast = GetNewPlanStartDate() < editingPlan.StartTime;
-		if (timeMovedToPast)
-		{
-			ConstraintManager.CheckTypeUnavailableConstraints(editingPlan, GetNewPlanStartDate(), resultIssues);
-			//TODO: undo these issue changes if change submission fails
-
-			if (resultIssues.HasIssues())
-			{
-				notificationText = "This plan contains entity types that are not yet available at the new implementation time. Do you want to submit your changes?";
-			}
-		}
-
-		if (notificationText != null)
-		{
-			UnityAction onSubmitAction = () => {
-				ApplyAndSubmitPlanIssues(resultIssues, batch);
-				SubmitEditPlanChanges(batch);
-			};
-
-			DialogBoxManager.instance.ConfirmationWindow("Confirm", notificationText, null, onSubmitAction, "Cancel", "Submit");
-		}
-		else
-		{
-			SubmitEditPlanChanges(batch);
-		}
-	}
-
-	private void ApplyAndSubmitPlanIssues(MultiLayerRestrictionIssueCollection issues, BatchRequest batch)
-	{
-		RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
-		IssueManager.instance.ImportNewIssues(issues, deltaSet);
-		deltaSet.SubmitToServer(batch);
-	}
-
-	private void SubmitEditPlanChanges(BatchRequest batch)
+	
+	private void SubmitEditPlanChanges()
     {
+		BatchRequest batch = new BatchRequest();
 		bool needsEnergyError = false;
+		bool hasUnavailableTypes = false;
+		bool issueCheckDone = false;
+        bool timeChanged = GetNewPlanStartDate() != editingPlan.StartTime;
 
         //Rename Plan
         editingPlan.RenamePlan(planName.text, batch);
-
-        // Change date plan
-        bool timeChanged = GetNewPlanStartDate() != editingPlan.StartTime;
-		if (timeChanged)
-		{
-			editingPlan.ChangePlanDate(GetNewPlanStartDate(), batch);
-		}
 
 		//Only time change and renaming are allowed for DELETED plans
         if (editingPlan.State != Plan.PlanState.DELETED)
@@ -318,23 +277,24 @@ public class PlanWizard : MonoBehaviour
                 needsEnergyError = true;
 
 			//If any layers are removed, issues need to be rechecked without these layers
+
 			if (layersToRemove != null && layersToRemove.Count > 0)
 			{
 				foreach (AbstractLayer layer in layersToRemove)
 				{
 					layer.RemovePlanLayer(editingPlan.GetPlanLayerForLayer(layer));
 				}
-
-				RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.CheckConstraints(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), true, layersToRemove);
+				//Get updated issue delta (but don't apply them yet, that'll happen when the batch gets executed
+				RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), layersToRemove, GetNewPlanStartDate(), out hasUnavailableTypes);
 				if (issuesToSubmit != null)
 				{
 					issuesToSubmit.SubmitToServer(batch);
 				}
-				//TODO: if submission fails, restore old issues
 				foreach (AbstractLayer layer in layersToRemove)
 				{
 					layer.AddPlanLayer(editingPlan.GetPlanLayerForLayer(layer));
 				}
+				issueCheckDone = true;
 			}
 
 			bool typeChanged = false;
@@ -397,9 +357,50 @@ public class PlanWizard : MonoBehaviour
             editingPlan.SubmitEnergyError(true, true, batch);
         }
 
+		if (timeChanged)
+		{
+			editingPlan.ChangePlanDate(GetNewPlanStartDate(), batch);
+
+			if (!issueCheckDone)
+			{
+				if (GetNewPlanStartDate() < editingPlan.StartTime)
+				{
+					//Moving to the past will only ever add more issues, so no need to check for removal
+					MultiLayerRestrictionIssueCollection resultIssues = new MultiLayerRestrictionIssueCollection();
+					ConstraintManager.CheckTypeUnavailableConstraints(editingPlan, GetNewPlanStartDate(), resultIssues);
+					RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
+					IssueManager.instance.AddIssuesToDeltaIfNew(resultIssues, deltaSet);
+				}
+				else
+				{
+					//Moving the plan to the future requires a full recheck, as we can't filter existing issue for TypeUnavailable ones
+					RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
+					if (issuesToSubmit != null)
+					{
+						issuesToSubmit.SubmitToServer(batch);
+					}
+				}
+			}
+		}
+
 		editingPlan.AttemptUnlock(batch);
-		InterfaceCanvas.ShowNetworkingBlocker();
-		batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
+
+		if(hasUnavailableTypes)
+		{
+			UnityAction onSubmitAction = () => {
+				InterfaceCanvas.ShowNetworkingBlocker();
+				batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
+			};
+
+			DialogBoxManager.instance.ConfirmationWindow("Confirm",
+				"This plan contains entity types that are not yet available at the new implementation time. Do you want to submit your changes?",
+				null, onSubmitAction, "Cancel", "Submit");
+		}
+		else
+		{
+			InterfaceCanvas.ShowNetworkingBlocker();
+			batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
+		}
 	}
 
 	private void HandleChangesSubmissionSuccess(BatchRequest batch)
@@ -427,7 +428,7 @@ public class PlanWizard : MonoBehaviour
 			}
 			else
 			{
-				OnEditPlanAcceptClicked();
+				SubmitEditPlanChanges();
 			}
 		});
     }

@@ -417,6 +417,18 @@ public class IssueManager : MonoBehaviour
 		}
 	}
 
+	public void AddIssuesToDeltaIfNew(MultiLayerRestrictionIssueCollection issueCollection, RestrictionIssueDeltaSet deltaSet)
+	{
+		foreach (var issueLayer in issueCollection.GetIssues())
+		{
+			for (int i = 0; i < issueLayer.Value.Count; ++i)
+			{
+				if (FindIssueByData(issueLayer.Key, issueLayer.Value[i]) == null)
+					deltaSet.IssueAdded(issueLayer.Value[i]);
+			}
+		}
+	}
+
 	public void OnIssuesReceived(WarningObject warningUpdateData)
 	{
 		foreach (PlanIssueObject planIssue in warningUpdateData.plan_issues)

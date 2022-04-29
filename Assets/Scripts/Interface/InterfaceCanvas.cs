@@ -270,7 +270,8 @@ public class InterfaceCanvas : MonoBehaviour
 
 	public static void ShowNetworkingBlocker()
 	{
-		Instance.networkingBlocker.SetActive(true);
+		Instance.networkingBlocker.transform.SetAsLastSibling();
+        Instance.networkingBlocker.SetActive(true);
 	}
 
 	public static void HideNetworkingBlocker()

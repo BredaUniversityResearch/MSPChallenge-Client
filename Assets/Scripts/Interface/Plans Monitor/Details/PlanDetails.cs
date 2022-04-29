@@ -146,7 +146,8 @@ public class PlanDetails : SerializedMonoBehaviour
 
 	public static void ChangeDate(Plan plan)
 	{
-		ConstraintManager.CheckConstraints(plan, null, false);
+		//Constraints should never need to be rechecked locally, except before submission -Kevin 10/05/22
+		//ConstraintManager.CheckConstraints(plan, null, false);
 
 		if (instance == null || instance.selectedPlan == null) return; //This window cant even be open so no point in updating anyways
 		if (plan == instance.selectedPlan)

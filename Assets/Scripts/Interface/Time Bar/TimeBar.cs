@@ -251,15 +251,15 @@ public class TimeBar : MonoBehaviour
 				{
 					if (updateWorldView)
 					{
-						//TODO
+						//TODO: if difference view is added
 						UpdateWorldViewingDifference();
 					}
 				}
                 else
                 {
-                    //TODO
-                }
-                break;
+					//TODO: if difference view is added
+				}
+				break;
 			case WorldViewMode.Normal:
 				collapsedDate.gameObject.SetActive(active);
 				layoutGroup.spacing = active ? 0 : 20f;
@@ -380,7 +380,7 @@ public class TimeBar : MonoBehaviour
 			//Max selectable year selected, limit month selection
 			if (selectedMonth > maxSelectableMonth)
 			{
-				monthDropdown.value = maxSelectableMonth; //TODO: maybe block callback here?
+				monthDropdown.value = maxSelectableMonth;
 			}
 			SetMonthDropdownOptions(monthDropdown, maxSelectableMonth, selectedMonth);
 		}
@@ -412,13 +412,13 @@ public class TimeBar : MonoBehaviour
 		{
 			UpdateIndicator(viewDifferenceIndicatorTop, time0);
 			UpdateIndicator(viewDifferenceIndicatorBottom, time1);
-			//TODO: set world to state
+			//TODO: if difference view is added: set world to state
 		}
 		else
 		{
 			UpdateIndicator(viewDifferenceIndicatorTop, time1);
 			UpdateIndicator(viewDifferenceIndicatorBottom, time0);
-			//TODO: set world to state
+			//TODO: if difference view is added: set world to state
 		}
 	}
 
