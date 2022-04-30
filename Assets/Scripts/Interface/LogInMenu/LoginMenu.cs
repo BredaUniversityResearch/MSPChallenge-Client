@@ -23,13 +23,6 @@ public class LoginMenu : MonoBehaviour
 	private static LoginMenu instance;
 	public static LoginMenu Instance => instance;
 
-	private class RequestSessionResponse
-	{
-		public int session_id = 0;
-		public string api_access_token = "";
-		public string api_access_recovery_token = "";
-	}
-
 	public GameObject loginServer;
 	public GameObject loginConnecting;
 	public GameObject loginTeam;
@@ -490,24 +483,13 @@ public class LoginMenu : MonoBehaviour
 			PlayerPrefs.SetInt(LOGIN_EXPERTISE_INDEX_STR, -1);
 
 		int countryIndex = teamsIDByCountryName[countryName];
-
-		string buildTime = null;
-		ApplicationBuildIdentifier buildIdentifier = ApplicationBuildIdentifier.FindBuildIdentifier();
-		if (buildIdentifier != null)
-		{
-			buildTime = buildIdentifier.GetBuildTime();
-		}
-
-		NetworkForm form = new NetworkForm();
-		form.AddField("country_id", countryIndex);
-		form.AddField("user_name", nameInputField.text);
-		if (passwordContainer.activeInHierarchy)
-			form.AddField("country_password", passwordInputField.text);
-		form.AddField("build_timestamp", buildTime);
-		ServerCommunication.DoRequest<RequestSessionResponse>(Server.RequestSession(), form, (response) => RequestSessionSuccess(response, countryIndex), RequestSessionFailure);
+		ServerCommunication.RequestSession(
+			countryIndex, nameInputField.text, (response) => RequestSessionSuccess(response, countryIndex),
+			RequestSessionFailure, passwordContainer.activeInHierarchy ? passwordInputField.text : null
+		);
 	}
 
-	void RequestSessionSuccess(RequestSessionResponse response, int countryIndex)
+	void RequestSessionSuccess(ServerCommunication.RequestSessionResponse response, int countryIndex)
 	{
 		//Continue to game
 		loginConnecting.SetActive(true);

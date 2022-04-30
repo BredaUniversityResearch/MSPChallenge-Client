@@ -11,7 +11,7 @@ public static class TeamManager
 	private static Dictionary<string, Team> teamsByName = new Dictionary<string, Team>();
 
 	public static int TeamCount { get { return teamsByID.Count; } }
-	public static int CurrentSessionID { get; private set; }
+	public static int CurrentSessionID { get; set; }
 	public static int CurrentUserTeamID { get; private set; }
 	public static string CurrentUserName { get; private set; }
 
