@@ -36,9 +36,17 @@ namespace Assets.Networking
 		private DateTime lastTokenCheckTime = DateTime.MinValue;
 		private UnityWebRequest currentTokenRequest = null;
 		private UnityWebRequest renewTokenRequest = null;
+		private int requestSessionAttempts = 0;
+
+		private const int MAX_REQUEST_SESSION_ATTEMPTS = 10;
 
 		public void Update()
 		{
+			if (requestSessionAttempts > 0)
+			{
+				return;
+			}
+
 			if (renewTokenRequest != null)
 			{
 				HandleRenewTokenRequest();
@@ -106,6 +114,16 @@ namespace Assets.Networking
 			renewTokenRequest.SendWebRequest();
 		}
 
+		private void RequestSession()
+		{
+			requestSessionAttempts++;
+			int countryIndex = TeamManager.CurrentUserTeamID;
+			ServerCommunication.RequestSession(
+				countryIndex, TeamManager.CurrentUserName, RequestSessionSuccess, RequestSessionFailure,
+				TeamManager.Password
+			);
+		}
+
 		private void HandleRenewTokenRequest()
 		{
 			if (renewTokenRequest.isDone)
@@ -123,7 +141,15 @@ namespace Assets.Networking
 					{
 						message += ", Request error: " + currentTokenRequest.error;
 					}
-					UnityEngine.Debug.LogError(message);
+					// only log warning, since this is not a fatal error just yet.
+					UnityEngine.Debug.LogWarning(message);
+
+					// renewal of access token might fail if token is older than 35 min
+					//   (=see Server's Security::TOKEN_DELETE_AFTER_TIME)
+					// This means the token details has been deleted, and the server cannot retrieve them anymore,
+					//   incl. its scope
+					// So in this case, create a completely new one session and token using "RequestSession" call.
+					RequestSession();
 				}
 
 				renewTokenRequest = null;
@@ -139,6 +165,28 @@ namespace Assets.Networking
 		public string GetAccessToken()
 		{
 			return currentAccessToken;
+		}
+
+		void RequestSessionSuccess(ServerCommunication.RequestSessionResponse response)
+		{
+			requestSessionAttempts = 0; // yes, user can continue playing
+			ServerCommunication.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
+			TeamManager.CurrentSessionID = response.session_id;
+		}
+
+		void RequestSessionFailure(ServerCommunication.ARequest request, string message)
+		{
+			string msg = "Failed to request new session, request error: " + message;
+			if (requestSessionAttempts > MAX_REQUEST_SESSION_ATTEMPTS)
+			{
+				// fatal error, user has to quit the game
+				UnityEngine.Debug.LogError(msg);
+				throw new Exception(msg);
+			}
+
+			// only log warning, since this is not a fatal error just yet.
+			UnityEngine.Debug.LogWarning(msg);
+			RequestSession(); // try again
 		}
 	}
 }

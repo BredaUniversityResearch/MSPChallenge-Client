@@ -9,6 +9,7 @@ using Newtonsoft.Json.Serialization;
 using UnityEngine.Networking;
 using Utility.Serialization;
 using System.Text;
+using JetBrains.Annotations;
 
 public static class ServerCommunication
 {
@@ -18,6 +19,13 @@ public static class ServerCommunication
 
 	public const uint DEFAULT_MAX_REQUESTS = 5;
 	public static uint maxRequests = DEFAULT_MAX_REQUESTS;
+
+	public class RequestSessionResponse
+	{
+		public int session_id = 0;
+		public string api_access_token = "";
+		public string api_access_recovery_token = "";
+	}
 
 	public abstract class ARequest
 	{
@@ -544,5 +552,20 @@ public static class ServerCommunication
 	public static string GetApiAccessToken()
 	{
 		return tokenHandler.GetAccessToken();
+	}
+
+	public static void RequestSession(
+		int countryId, string userName, Action<RequestSessionResponse> successCallback,
+		System.Action<ARequest, string> failureCallback, [CanBeNull] string password = null)
+	{
+		NetworkForm form = new NetworkForm();
+		form.AddField("country_id", countryId);
+		form.AddField("user_name", userName);
+		if (password != null)
+		{
+			form.AddField("country_password", password);
+		}
+		form.AddField("build_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier()?.GetBuildTime());
+		DoRequest(Server.RequestSession(), form, successCallback, failureCallback);
 	}
 }
