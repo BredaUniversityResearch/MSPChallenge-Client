@@ -20,7 +20,7 @@ public class PlanDetailsTabEnergy : LockablePlanDetailsTab
 	protected override string ContentName => "energy distribution";
 	protected override PlanDetails.EPlanDetailsTab tabType => PlanDetails.EPlanDetailsTab.Energy;
 
-	protected override void Initialise()
+	public override void Initialise()
 	{
 		base.Initialise();
 		energyDistribution.SetInteractability(false);

@@ -15,16 +15,17 @@ public class PlanDetailsTab: MonoBehaviour
 	protected bool isActive { get; private set; }
 	protected virtual PlanDetails.EPlanDetailsTab tabType => PlanDetails.EPlanDetailsTab.Feedback;
 
-	private void Start()
-	{
-		Initialise();
-	}
+	//private void Start()
+	//{
+	//	Initialise();
+	//}
 
-	protected virtual void Initialise()
+	public virtual void Initialise()
 	{
 		tabToggle.onValueChanged.AddListener(SetTabActive);
 		isActive = tabToggle.isOn;
 		tabContainer.SetActive(isActive);
+		Debug.LogWarning(gameObject.name + " set to activity: " + tabToggle.isOn);
 	}
 
 	public virtual void UpdateTabAvailability()

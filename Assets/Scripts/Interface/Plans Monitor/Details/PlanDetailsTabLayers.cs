@@ -26,7 +26,7 @@ public class PlanDetailsTabLayers : LockablePlanDetailsTab
 	protected override string ContentName => "layers";
 	protected override PlanDetails.EPlanDetailsTab tabType => PlanDetails.EPlanDetailsTab.Layers;
 
-	protected override void Initialise()
+	public override void Initialise()
 	{
 		base.Initialise();
 	}

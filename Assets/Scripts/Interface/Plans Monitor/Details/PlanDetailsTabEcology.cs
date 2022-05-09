@@ -14,7 +14,7 @@ public class PlanDetailsTabEcology : LockablePlanDetailsTab
 	protected override string ContentName => "fishing distributions"; 
 	protected override PlanDetails.EPlanDetailsTab tabType => PlanDetails.EPlanDetailsTab.Ecology;
 
-	protected override void Initialise()
+	public override void Initialise()
 	{
 		base.Initialise();
 		ecologyDistribution.SetInteractability(false);
