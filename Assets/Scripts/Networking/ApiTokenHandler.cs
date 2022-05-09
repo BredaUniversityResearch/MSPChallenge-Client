@@ -119,8 +119,8 @@ namespace Assets.Networking
 			requestSessionAttempts++;
 			int countryIndex = TeamManager.CurrentUserTeamID;
 			ServerCommunication.RequestSession(
-				countryIndex, TeamManager.CurrentUserName, RequestSessionSuccess, RequestSessionFailure
-				// we cannot re-new the Admin user since we do not know the password anymore. todo ?
+				countryIndex, TeamManager.CurrentUserName, RequestSessionSuccess, RequestSessionFailure,
+				TeamManager.Password
 			);
 		}
 

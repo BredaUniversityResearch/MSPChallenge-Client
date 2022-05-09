@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 
 public static class TeamManager
@@ -14,6 +15,9 @@ public static class TeamManager
 	public static int CurrentSessionID { get; set; }
 	public static int CurrentUserTeamID { get; private set; }
 	public static string CurrentUserName { get; private set; }
+
+	[CanBeNull]
+	public static string Password { get; private set; }
 
 	public static bool AreWeGameMaster { get { return CurrentUserTeamID == GM_ID; } }
 	public static bool AreWeAreaManager { get { return CurrentUserTeamID == AM_ID; } }
@@ -95,12 +99,14 @@ public static class TeamManager
 		}
 	}
 
-	public static void InitializeUserValues(int userID, string userName, int sessionID, Dictionary<int, Team> aTeams)
+	public static void InitializeUserValues(int userID, string userName, int sessionID, Dictionary<int, Team> aTeams,
+		[CanBeNull] string password = null)
 	{
 		CurrentUserTeamID = userID;
 		CurrentUserName = userName;
 		CurrentSessionID = sessionID;
 		teamsByID = aTeams;
+		Password = password;
 	}
 
 	public static Team GetTeamByTeamID(int teamID)

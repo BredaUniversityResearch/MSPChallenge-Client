@@ -496,7 +496,8 @@ public class LoginMenu : MonoBehaviour
 		loginTeam.SetActive(false);
 
 		ServerCommunication.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
-		TeamManager.InitializeUserValues(countryIndex, nameInputField.text, response.session_id, teamImporter.teams);
+		TeamManager.InitializeUserValues(countryIndex, nameInputField.text, response.session_id,
+			teamImporter.teams, passwordContainer.activeInHierarchy ? passwordInputField.text : null);
 		Main.MspGlobalData = teamImporter.MspGlobalData;
 
 		SceneManager.LoadScene("MSP2050");
