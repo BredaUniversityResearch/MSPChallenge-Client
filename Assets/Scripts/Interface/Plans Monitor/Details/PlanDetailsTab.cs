@@ -15,11 +15,6 @@ public class PlanDetailsTab: MonoBehaviour
 	protected bool isActive { get; private set; }
 	protected virtual PlanDetails.EPlanDetailsTab tabType => PlanDetails.EPlanDetailsTab.Feedback;
 
-	//private void Start()
-	//{
-	//	Initialise();
-	//}
-
 	public virtual void Initialise()
 	{
 		tabToggle.onValueChanged.AddListener(SetTabActive);

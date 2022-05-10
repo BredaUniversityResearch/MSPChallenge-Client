@@ -104,7 +104,9 @@ public class PlanDetails : SerializedMonoBehaviour
 
 		tabToggleGroup.allowSwitchOff = true;
 		foreach (var kvp in tabs)
+		{
 			kvp.Value.Initialise();
+		}
 		tabToggleGroup.allowSwitchOff = false;
 
 		TabSelect(EPlanDetailsTab.Feedback);
