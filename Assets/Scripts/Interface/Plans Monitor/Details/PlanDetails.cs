@@ -50,6 +50,7 @@ public class PlanDetails : SerializedMonoBehaviour
 	private Dictionary<EPlanDetailsTab, PlanDetailsTab> tabs;
 	[SerializeField]
 	PlanDetailsTabLayers layersTab; //Specifically linked because it is referenced often
+	[SerializeField] ToggleGroup tabToggleGroup;
 	private PlanDetailsTab currentTab;
 
 	[Header("Cover")]
@@ -100,6 +101,13 @@ public class PlanDetails : SerializedMonoBehaviour
                 }
             });
 		}
+
+		tabToggleGroup.allowSwitchOff = true;
+		foreach (var kvp in tabs)
+		{
+			kvp.Value.Initialise();
+		}
+		tabToggleGroup.allowSwitchOff = false;
 
 		TabSelect(EPlanDetailsTab.Feedback);
 	}

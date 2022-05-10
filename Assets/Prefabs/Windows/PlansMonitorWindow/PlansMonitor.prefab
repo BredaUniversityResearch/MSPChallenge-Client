@@ -1987,7 +1987,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2064,7 +2064,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3225,7 +3225,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4175,7 +4175,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4801,9 +4801,9 @@ RectTransform:
   - {fileID: 2121235175466495378}
   - {fileID: 3797367922878766455}
   - {fileID: 9171501709150933502}
-  - {fileID: 8337490302975115573}
   - {fileID: 8617095030332345484}
   - {fileID: 7835604171985925378}
+  - {fileID: 8337490302975115573}
   m_Father: {fileID: 224029211093839273}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4870,7 +4870,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_AllowSwitchOff: 0
+  m_AllowSwitchOff: 1
 --- !u!1 &1431605585890281
 GameObject:
   m_ObjectHideFlags: 0
@@ -5741,18 +5741,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 461c23c276b14a0f8cd5c3134469a2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasGroups: []
-  enablePointer: 1
-  pointerTargetGameObject: {fileID: 1743745346063161}
-  alphaFactorOnStart: 1
-  alphaFactorOnConnected: 1
-  alphaFactorOnDisconnected: 0.2
-  interactableOnStart: 1
-  interactableOnConnected: 1
-  interactableOnDisconnected: 0
-  blockRaycastsOnStart: 1
-  blockRaycastsOnConnected: 1
-  blockRaycastsOnDisconnected: 1
+  m_CanvasGroups: []
+  m_EnablePointer: 1
+  m_PointerTargetGameObject: {fileID: 1743745346063161}
+  m_AlphaFactorOnStart: 1
+  m_AlphaFactorOnConnected: 1
+  m_AlphaFactorOnDisconnected: 0.2
+  m_InteractableOnStart: 1
+  m_InteractableOnConnected: 1
+  m_InteractableOnDisconnected: 0
+  m_BlockRaycastsOnStart: 1
+  m_BlockRaycastsOnConnected: 1
+  m_BlockRaycastsOnDisconnected: 1
 --- !u!114 &1246886681615499957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5765,12 +5765,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc5f1d4700f4239816b341c2ac14d41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  addTooltips: []
-  textOnStart: "The plan's current state. \nOnly a member of the plan's team or the
-    admin can change its state."
-  textOnConnected: "The plan's current state. \nOnly a member of the plan's team
+  m_AddTooltips: []
+  m_TextOnStart: "The plan's current state. \nOnly a member of the plan's team or
+    the admin can change its state."
+  m_TextOnConnected: "The plan's current state. \nOnly a member of the plan's team
     or the admin can change its state."
-  textOnDisconnected: Server connection lost, connection required to change plan
+  m_TextOnDisconnected: Server connection lost, connection required to change plan
     state.
 --- !u!1 &1524492428796585
 GameObject:
@@ -6812,18 +6812,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 461c23c276b14a0f8cd5c3134469a2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasGroups: []
-  enablePointer: 1
-  pointerTargetGameObject: {fileID: 0}
-  alphaFactorOnStart: 1
-  alphaFactorOnConnected: 1
-  alphaFactorOnDisconnected: 0.2
-  interactableOnStart: 1
-  interactableOnConnected: 1
-  interactableOnDisconnected: 0
-  blockRaycastsOnStart: 1
-  blockRaycastsOnConnected: 1
-  blockRaycastsOnDisconnected: 1
+  m_CanvasGroups: []
+  m_EnablePointer: 1
+  m_PointerTargetGameObject: {fileID: 0}
+  m_AlphaFactorOnStart: 1
+  m_AlphaFactorOnConnected: 1
+  m_AlphaFactorOnDisconnected: 0.2
+  m_InteractableOnStart: 1
+  m_InteractableOnConnected: 1
+  m_InteractableOnDisconnected: 0
+  m_BlockRaycastsOnStart: 1
+  m_BlockRaycastsOnConnected: 1
+  m_BlockRaycastsOnDisconnected: 1
 --- !u!114 &6715644530773047494
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6851,11 +6851,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc5f1d4700f4239816b341c2ac14d41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  addTooltips: []
-  textOnStart: 
-  textOnConnected: 
-  textOnDisconnected: Server connection lost, connection required to change the plan
-    description.
+  m_AddTooltips: []
+  m_TextOnStart: 
+  m_TextOnConnected: 
+  m_TextOnDisconnected: Server connection lost, connection required to change the
+    plan description.
 --- !u!114 &7004348404498121253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6868,10 +6868,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70d417fe6a574195a65729e40477db5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customButtonColorSets: []
-  useHighlightColorOnStart: 1
-  useHighlightColorOnConnected: 1
-  useHighlightColorOnDisconnected: 0
+  m_CustomButtonColorSets: []
+  m_UseHighlightColorOnStart: 1
+  m_UseHighlightColorOnConnected: 1
+  m_UseHighlightColorOnDisconnected: 0
 --- !u!1 &1645706161713969
 GameObject:
   m_ObjectHideFlags: 0
@@ -7159,7 +7159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -7420,11 +7420,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 948471673c8a415c95a5388b2be75d6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customDropdownColorSets:
+  m_CustomDropdownColorSets:
   - {fileID: 1679398630123258}
-  useHighlightColorOnStart: 1
-  useHighlightColorOnConnected: 1
-  useHighlightColorOnDisconnected: 0
+  m_UseHighlightColorOnStart: 1
+  m_UseHighlightColorOnConnected: 1
+  m_UseHighlightColorOnDisconnected: 0
 --- !u!1 &1687899899466673
 GameObject:
   m_ObjectHideFlags: 0
@@ -7726,6 +7726,7 @@ MonoBehaviour:
   changesConfirmButton: {fileID: 1642212411539339}
   changesCancelButton: {fileID: 1234889539381221}
   layersTab: {fileID: 2279017450318288186}
+  tabToggleGroup: {fileID: 8829118098012871140}
   detailsCover: {fileID: 1153109620830473}
 --- !u!114 &114725817046470851
 MonoBehaviour:
@@ -8280,18 +8281,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 461c23c276b14a0f8cd5c3134469a2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasGroups: []
-  enablePointer: 1
-  pointerTargetGameObject: {fileID: 0}
-  alphaFactorOnStart: 1
-  alphaFactorOnConnected: 1
-  alphaFactorOnDisconnected: 0.2
-  interactableOnStart: 1
-  interactableOnConnected: 1
-  interactableOnDisconnected: 0
-  blockRaycastsOnStart: 1
-  blockRaycastsOnConnected: 1
-  blockRaycastsOnDisconnected: 1
+  m_CanvasGroups: []
+  m_EnablePointer: 1
+  m_PointerTargetGameObject: {fileID: 0}
+  m_AlphaFactorOnStart: 1
+  m_AlphaFactorOnConnected: 1
+  m_AlphaFactorOnDisconnected: 0.2
+  m_InteractableOnStart: 1
+  m_InteractableOnConnected: 1
+  m_InteractableOnDisconnected: 0
+  m_BlockRaycastsOnStart: 1
+  m_BlockRaycastsOnConnected: 1
+  m_BlockRaycastsOnDisconnected: 1
 --- !u!114 &2100903236168587061
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8319,10 +8320,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc5f1d4700f4239816b341c2ac14d41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  addTooltips: []
-  textOnStart: 
-  textOnConnected: 
-  textOnDisconnected: Server connection lost, connection required to communicate.
+  m_AddTooltips: []
+  m_TextOnStart: 
+  m_TextOnConnected: 
+  m_TextOnDisconnected: Server connection lost, connection required to communicate.
 --- !u!114 &6230678318423067403
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8335,10 +8336,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70d417fe6a574195a65729e40477db5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customButtonColorSets: []
-  useHighlightColorOnStart: 1
-  useHighlightColorOnConnected: 1
-  useHighlightColorOnDisconnected: 0
+  m_CustomButtonColorSets: []
+  m_UseHighlightColorOnStart: 1
+  m_UseHighlightColorOnConnected: 1
+  m_UseHighlightColorOnDisconnected: 0
 --- !u!1 &1743745346063161
 GameObject:
   m_ObjectHideFlags: 0
@@ -10287,7 +10288,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -11731,7 +11732,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -15572,18 +15573,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 461c23c276b14a0f8cd5c3134469a2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasGroups: []
-  enablePointer: 1
-  pointerTargetGameObject: {fileID: 0}
-  alphaFactorOnStart: 1
-  alphaFactorOnConnected: 1
-  alphaFactorOnDisconnected: 0.2
-  interactableOnStart: 1
-  interactableOnConnected: 1
-  interactableOnDisconnected: 0
-  blockRaycastsOnStart: 1
-  blockRaycastsOnConnected: 1
-  blockRaycastsOnDisconnected: 1
+  m_CanvasGroups: []
+  m_EnablePointer: 1
+  m_PointerTargetGameObject: {fileID: 0}
+  m_AlphaFactorOnStart: 1
+  m_AlphaFactorOnConnected: 1
+  m_AlphaFactorOnDisconnected: 0.2
+  m_InteractableOnStart: 1
+  m_InteractableOnConnected: 1
+  m_InteractableOnDisconnected: 0
+  m_BlockRaycastsOnStart: 1
+  m_BlockRaycastsOnConnected: 1
+  m_BlockRaycastsOnDisconnected: 1
 --- !u!114 &8865675277059298580
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15596,10 +15597,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70d417fe6a574195a65729e40477db5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customButtonColorSets: []
-  useHighlightColorOnStart: 1
-  useHighlightColorOnConnected: 1
-  useHighlightColorOnDisconnected: 0
+  m_CustomButtonColorSets: []
+  m_UseHighlightColorOnStart: 1
+  m_UseHighlightColorOnConnected: 1
+  m_UseHighlightColorOnDisconnected: 0
 --- !u!114 &2526746385213923326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15627,10 +15628,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc5f1d4700f4239816b341c2ac14d41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  addTooltips: []
-  textOnStart: 
-  textOnConnected: 
-  textOnDisconnected: Server connection lost, connection required to edit a plan.
+  m_AddTooltips: []
+  m_TextOnStart: 
+  m_TextOnConnected: 
+  m_TextOnDisconnected: Server connection lost, connection required to edit a plan.
 --- !u!1 &4909909969645966006
 GameObject:
   m_ObjectHideFlags: 0
@@ -17293,7 +17294,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -18832,7 +18833,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
+  m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -21020,17 +21021,17 @@ PrefabInstance:
     - target: {fileID: 7736977730879113837, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.5058824
-      objectReference: {fileID: 0}
-    - target: {fileID: 7736977730879113837, guid: e6aa4a326cbdad14481853ad36944f8a,
-        type: 3}
-      propertyPath: m_Color.g
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7736977730879113837, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
-      propertyPath: m_Color.r
+      propertyPath: m_Color.g
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7736977730879113837, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
@@ -23697,7 +23698,7 @@ PrefabInstance:
     - target: {fileID: 3797367922169108128, guid: 19861f34f6dbf694d808e86e37fda8e5,
         type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3797367922169108128, guid: 19861f34f6dbf694d808e86e37fda8e5,
         type: 3}
@@ -24617,7 +24618,7 @@ PrefabInstance:
     - target: {fileID: 3797367922169108128, guid: 19861f34f6dbf694d808e86e37fda8e5,
         type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3797367922169108128, guid: 19861f34f6dbf694d808e86e37fda8e5,
         type: 3}
@@ -24753,12 +24754,6 @@ PrefabInstance:
       objectReference: {fileID: 8829118098012871140}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19861f34f6dbf694d808e86e37fda8e5, type: 3}
---- !u!1 &8119359077309112253 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4011444273656924200, guid: 19861f34f6dbf694d808e86e37fda8e5,
-    type: 3}
-  m_PrefabInstance: {fileID: 5117849770513323925}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &8337490302975115573 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3797367922169108128, guid: 19861f34f6dbf694d808e86e37fda8e5,
@@ -24777,6 +24772,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eeaa0bb0be42908448050e0e12b1e3be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &8119359077309112253 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4011444273656924200, guid: 19861f34f6dbf694d808e86e37fda8e5,
+    type: 3}
+  m_PrefabInstance: {fileID: 5117849770513323925}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &618262374669482401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26879,6 +26880,24 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 1489046369058147630, guid: 0087a564ff8fc50478b6e7c5c1e932c2, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 0087a564ff8fc50478b6e7c5c1e932c2, type: 3}
+--- !u!1 &2564331004313847611 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7702328536120331658, guid: 0087a564ff8fc50478b6e7c5c1e932c2,
+    type: 3}
+  m_PrefabInstance: {fileID: 5292432738306706097}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7392431823506828826 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3451250568763385003, guid: 0087a564ff8fc50478b6e7c5c1e932c2,
+    type: 3}
+  m_PrefabInstance: {fileID: 5292432738306706097}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2564176220056095007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ca76be1e29062546bf98f89550ce635, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &3031396149007652880 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7161797855856677537, guid: 0087a564ff8fc50478b6e7c5c1e932c2,
@@ -26897,27 +26916,9 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 5292432738306706097}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7392431823506828826 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3451250568763385003, guid: 0087a564ff8fc50478b6e7c5c1e932c2,
-    type: 3}
-  m_PrefabInstance: {fileID: 5292432738306706097}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2564176220056095007}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ca76be1e29062546bf98f89550ce635, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &2345750170392865859 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7638026709194729202, guid: 0087a564ff8fc50478b6e7c5c1e932c2,
-    type: 3}
-  m_PrefabInstance: {fileID: 5292432738306706097}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &2564331004313847611 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7702328536120331658, guid: 0087a564ff8fc50478b6e7c5c1e932c2,
     type: 3}
   m_PrefabInstance: {fileID: 5292432738306706097}
   m_PrefabAsset: {fileID: 0}
@@ -26965,18 +26966,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 461c23c276b14a0f8cd5c3134469a2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasGroups: []
-  enablePointer: 1
-  pointerTargetGameObject: {fileID: 2564331004313847611}
-  alphaFactorOnStart: 1
-  alphaFactorOnConnected: 1
-  alphaFactorOnDisconnected: 0.2
-  interactableOnStart: 1
-  interactableOnConnected: 1
-  interactableOnDisconnected: 0
-  blockRaycastsOnStart: 1
-  blockRaycastsOnConnected: 1
-  blockRaycastsOnDisconnected: 1
+  m_CanvasGroups: []
+  m_EnablePointer: 1
+  m_PointerTargetGameObject: {fileID: 2564331004313847611}
+  m_AlphaFactorOnStart: 1
+  m_AlphaFactorOnConnected: 1
+  m_AlphaFactorOnDisconnected: 0.2
+  m_InteractableOnStart: 1
+  m_InteractableOnConnected: 1
+  m_InteractableOnDisconnected: 0
+  m_BlockRaycastsOnStart: 1
+  m_BlockRaycastsOnConnected: 1
+  m_BlockRaycastsOnDisconnected: 1
 --- !u!114 &7283240985947298710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26989,11 +26990,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70d417fe6a574195a65729e40477db5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customButtonColorSets:
+  m_CustomButtonColorSets:
   - {fileID: 3031396149007652880}
-  useHighlightColorOnStart: 1
-  useHighlightColorOnConnected: 1
-  useHighlightColorOnDisconnected: 0
+  m_UseHighlightColorOnStart: 1
+  m_UseHighlightColorOnConnected: 1
+  m_UseHighlightColorOnDisconnected: 0
 --- !u!114 &7369547285891540939
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27006,20 +27007,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc5f1d4700f4239816b341c2ac14d41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  addTooltips: []
-  textOnStart: 'Change a plan''s details:
-
-    - Change name or implementation time
-
-    -
-    Add or remove layers or policies'
-  textOnConnected: 'Change a plan''s details:
+  m_AddTooltips: []
+  m_TextOnStart: 'Change a plan''s details:
 
     - Change name or implementation
     time
 
     - Add or remove layers or policies'
-  textOnDisconnected: Server connection lost, connection required to change plan
+  m_TextOnConnected: 'Change a plan''s details:
+
+    - Change name or implementation
+    time
+
+    - Add or remove layers or policies'
+  m_TextOnDisconnected: Server connection lost, connection required to change plan
     details.
 --- !u!1001 &5473366923298080606
 PrefabInstance:
@@ -27935,18 +27936,6 @@ PrefabInstance:
       objectReference: {fileID: 8829118098012871140}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19861f34f6dbf694d808e86e37fda8e5, type: 3}
---- !u!114 &1942591869001198097 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5836725815763463503, guid: 19861f34f6dbf694d808e86e37fda8e5,
-    type: 3}
-  m_PrefabInstance: {fileID: 5473366923298080606}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8961826152978485110}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eeaa0bb0be42908448050e0e12b1e3be, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8961826152978485110 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4011444273656924200, guid: 19861f34f6dbf694d808e86e37fda8e5,
@@ -27959,6 +27948,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 5473366923298080606}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1942591869001198097 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5836725815763463503, guid: 19861f34f6dbf694d808e86e37fda8e5,
+    type: 3}
+  m_PrefabInstance: {fileID: 5473366923298080606}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8961826152978485110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eeaa0bb0be42908448050e0e12b1e3be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1292979262744688313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30031,12 +30032,6 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 1489046369058147630, guid: 0087a564ff8fc50478b6e7c5c1e932c2, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 0087a564ff8fc50478b6e7c5c1e932c2, type: 3}
---- !u!1 &2819083009433688815 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7703327066671399854, guid: 0087a564ff8fc50478b6e7c5c1e932c2,
-    type: 3}
-  m_PrefabInstance: {fileID: 5618471607274805569}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &2596161333758328755 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7638026709194729202, guid: 0087a564ff8fc50478b6e7c5c1e932c2,
@@ -30055,6 +30050,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ca76be1e29062546bf98f89550ce635, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &2819083009433688815 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7703327066671399854, guid: 0087a564ff8fc50478b6e7c5c1e932c2,
+    type: 3}
+  m_PrefabInstance: {fileID: 5618471607274805569}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &2651527521104922658
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30814,7 +30815,7 @@ PrefabInstance:
     - target: {fileID: 3797367922169108128, guid: 19861f34f6dbf694d808e86e37fda8e5,
         type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3797367922169108128, guid: 19861f34f6dbf694d808e86e37fda8e5,
         type: 3}

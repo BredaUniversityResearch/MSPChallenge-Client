@@ -28,7 +28,7 @@ class PlanDetailsTabShipping: LockablePlanDetailsTab
 	protected override string ContentName => "safety zones"; 
 	protected override PlanDetails.EPlanDetailsTab tabType => PlanDetails.EPlanDetailsTab.Shipping;
 
-	protected override void Initialise()
+	public override void Initialise()
 	{
 		base.Initialise();
 		distributions.SetInteractability(false);

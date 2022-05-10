@@ -38,7 +38,7 @@ public class PlanDetailsTabFeedback : PlanDetailsTab
 	Plan lockedPlan;
 
 
-	protected override void Initialise()
+	public override void Initialise()
 	{
 		base.Initialise();
 
