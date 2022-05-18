@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Assets.Networking
+﻿namespace MSP2050.Scripts
 {
     public abstract class AbstractOperation
     {

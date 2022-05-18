@@ -1,12 +1,14 @@
-﻿using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
 
-public class MenuBarLogo : MenuBarToggle
-{ 
-    public TextMeshProUGUI text;
+namespace MSP2050.Scripts
+{
+	public class MenuBarLogo : MenuBarToggle
+	{ 
+		public TextMeshProUGUI text;
 
-    public void SetRegionLogo(RegionInfo region)
-    {
-		text.text = region.letter;
-    }
+		public void SetRegionLogo(RegionInfo region)
+		{
+			text.text = region.letter;
+		}
+	}
 }

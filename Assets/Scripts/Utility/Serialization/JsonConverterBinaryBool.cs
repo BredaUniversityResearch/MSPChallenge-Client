@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Utility.Serialization
+namespace MSP2050.Scripts
 {
 	public class JsonConverterBinaryBool : JsonConverter
 	{

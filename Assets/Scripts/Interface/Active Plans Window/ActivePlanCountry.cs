@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class ActivePlanCountry : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	public class ActivePlanCountry : MonoBehaviour {
 
-	public Toggle toggle;
-	public Image ballImage;
+		public Toggle toggle;
+		public Image ballImage;
+	}
 }

@@ -1,229 +1,231 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
+using UnityEngine;
 
-public abstract class Entity
+namespace MSP2050.Scripts
 {
-	public const int INVALID_COUNTRY_ID = -1;
-
-	public int creationBatchCallID; //ID of the PostGeometry call in the batch
-
-    public AbstractLayer Layer { get; set; }
-    public PlanLayer PlanLayer;
-    private int country;
-
-    public Dictionary<string, string> metaData;
-	public Vector2 patternRandomOffset;
-	public string name;
-
-	public List<EntityType> EntityTypes { get; set; }
-
-	public int Country
+	public abstract class Entity
 	{
-		get { return country; }
-		set
+		public const int INVALID_COUNTRY_ID = -1;
+
+		public int creationBatchCallID; //ID of the PostGeometry call in the batch
+
+		public AbstractLayer Layer { get; set; }
+		public PlanLayer PlanLayer;
+		private int country;
+
+		public Dictionary<string, string> metaData;
+		public Vector2 patternRandomOffset;
+		public string name;
+
+		public List<EntityType> EntityTypes { get; set; }
+
+		public int Country
 		{
-			country = value;
-			if (Layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+			get { return country; }
+			set
 			{
-				((EnergyPolygonSubEntity)GetSubEntity(0)).sourcePoint.Entity.Country = value;
+				country = value;
+				if (Layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+				{
+					((EnergyPolygonSubEntity)GetSubEntity(0)).sourcePoint.Entity.Country = value;
+				}
 			}
 		}
-	}
 
-	protected Entity(AbstractLayer layer, List<EntityType> entityTypes, int countryID = INVALID_COUNTRY_ID)
-    {
-        Layer = layer;
-        EntityTypes = entityTypes;
-
-        metaData = new Dictionary<string, string>();
-        country = countryID;
-
-		name = "Unnamed";
-		patternRandomOffset = new Vector2(Random.Range(0f, 1f), Random.Range(0f, 1f));
-    }
-
-	protected Entity(AbstractLayer layer, SubEntityObject entityObject) 
-		: this(layer, entityObject.GetEntityType(layer), entityObject.country)
-	{
-		if (entityObject.data != null && entityObject.data.ToString() != "[]")
+		protected Entity(AbstractLayer layer, List<EntityType> entityTypes, int countryID = INVALID_COUNTRY_ID)
 		{
-			metaData = entityObject.data;
-			List<string> tNames = new List<string>() { "Name", "NAME", "name", "SITE_NAME" };
+			Layer = layer;
+			EntityTypes = entityTypes;
 
-			foreach (string s in tNames)
-				if (TryGetMetaData(s, out name))
-					break;
+			metaData = new Dictionary<string, string>();
+			country = countryID;
+
+			name = "Unnamed";
+			patternRandomOffset = new Vector2(Random.Range(0f, 1f), Random.Range(0f, 1f));
 		}
-	}
 
-    public abstract void RemoveGameObjects();
-    public abstract void DrawGameObjects(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default);
-    public abstract void RedrawGameObjects(Camera targetCamera, SubEntityDrawMode drawMode = SubEntityDrawMode.Default, bool forceScaleUpdate = false);
-    public abstract SubEntity GetSubEntity(int index);
-    public abstract int GetSubEntityCount();
-    public abstract float GetRestrictionAreaSurface();
+		protected Entity(AbstractLayer layer, SubEntityObject entityObject) 
+			: this(layer, entityObject.GetEntityType(layer), entityObject.country)
+		{
+			if (entityObject.data != null && entityObject.data.ToString() != "[]")
+			{
+				metaData = entityObject.data;
+				List<string> tNames = new List<string>() { "Name", "NAME", "name", "SITE_NAME" };
 
-    public virtual float GetInvestmentCost()
-    {
-        string cost;
-        if (TryGetMetaData("levelized_cost_of_energy", out cost))
-        {
-            return float.Parse(cost, Localisation.NumberFormatting);
-        }
-        return 0;
-    }
+				foreach (string s in tNames)
+					if (TryGetMetaData(s, out name))
+						break;
+			}
+		}
 
-    public void ReplaceMetaData(Dictionary<string, string> newMetadata)
-    {
-        metaData = newMetadata;
-    }
+		public abstract void RemoveGameObjects();
+		public abstract void DrawGameObjects(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default);
+		public abstract void RedrawGameObjects(Camera targetCamera, SubEntityDrawMode drawMode = SubEntityDrawMode.Default, bool forceScaleUpdate = false);
+		public abstract SubEntity GetSubEntity(int index);
+		public abstract int GetSubEntityCount();
+		public abstract float GetRestrictionAreaSurface();
 
-    public List<int> GetEntityTypeKeys()
-    {
-        List<int> types = new List<int>();
+		public virtual float GetInvestmentCost()
+		{
+			string cost;
+			if (TryGetMetaData("levelized_cost_of_energy", out cost))
+			{
+				return float.Parse(cost, Localisation.NumberFormatting);
+			}
+			return 0;
+		}
 
-        foreach (EntityType type in EntityTypes)
-        {
-            types.Add(Layer.GetEntityTypeKey(type));
-        }
+		public void ReplaceMetaData(Dictionary<string, string> newMetadata)
+		{
+			metaData = newMetadata;
+		}
 
-        return types;
-    }
+		public List<int> GetEntityTypeKeys()
+		{
+			List<int> types = new List<int>();
 
-	public string GetMetaData(string key)
-	{
-		return  metaData[key];
-	}
+			foreach (EntityType type in EntityTypes)
+			{
+				types.Add(Layer.GetEntityTypeKey(type));
+			}
 
-	public bool TryGetMetaData(string key, out string value)
-    {
-        if (DoesPropertyExist(key))
-        {
-			value = metaData[key];
-            return true;
-        }
-		value = "";
-        return false;
-    }
+			return types;
+		}
 
-    public void SetMetaData(string key, string value)
-    {
-        if (DoesPropertyExist(key))
-        {
-            metaData[key] = value;
-        }
-        else
-        {
-            metaData.Add(key, value);
-        }
-    }
+		public string GetMetaData(string key)
+		{
+			return  metaData[key];
+		}
 
-    public bool DoesPropertyExist(string key)
-    {
-        return metaData.ContainsKey(key);
-    }
+		public bool TryGetMetaData(string key, out string value)
+		{
+			if (DoesPropertyExist(key))
+			{
+				value = metaData[key];
+				return true;
+			}
+			value = "";
+			return false;
+		}
 
-	public void SetPropertyMetaData(EntityPropertyMetaData property, string value)
-	{
-		SetMetaData(property.PropertyName, value);
-        if (property.UpateCalculation)
-            GetSubEntity(0).CalculationPropertyUpdated();
-        if(property.UpateText)
-            GetSubEntity(0).UpdateTextMeshText();
-		if (property.UpateVisuals)
-			RedrawGameObjects(CameraManager.Instance.gameCamera);
-    }
+		public void SetMetaData(string key, string value)
+		{
+			if (DoesPropertyExist(key))
+			{
+				metaData[key] = value;
+			}
+			else
+			{
+				metaData.Add(key, value);
+			}
+		}
 
-	public string GetPropertyMetaData(EntityPropertyMetaData property)
-	{
-		if (DoesPropertyExist(property.PropertyName))
-			return GetMetaData(property.PropertyName);
-		return property.DefaultValue;
-	}
+		public bool DoesPropertyExist(string key)
+		{
+			return metaData.ContainsKey(key);
+		}
 
-	public void SetPropertyName(string name)
-    {
-        SetMetaData("Name", name);
-    }
+		public void SetPropertyMetaData(EntityPropertyMetaData property, string value)
+		{
+			SetMetaData(property.PropertyName, value);
+			if (property.UpateCalculation)
+				GetSubEntity(0).CalculationPropertyUpdated();
+			if(property.UpateText)
+				GetSubEntity(0).UpdateTextMeshText();
+			if (property.UpateVisuals)
+				RedrawGameObjects(CameraManager.Instance.gameCamera);
+		}
 
-    public string MetaToJSON()
-    {
-		if (metaData.Count == 0)
-        {
-            return "{}";
-        }       
-        return JsonConvert.SerializeObject(metaData);
-    }
+		public string GetPropertyMetaData(EntityPropertyMetaData property)
+		{
+			if (DoesPropertyExist(property.PropertyName))
+				return GetMetaData(property.PropertyName);
+			return property.DefaultValue;
+		}
 
-    public Rect GetEntityBounds()
-    {
-        int subEntityCount = GetSubEntityCount();
+		public void SetPropertyName(string name)
+		{
+			SetMetaData("Name", name);
+		}
 
-        if (subEntityCount == 0) { return new Rect(); }
+		public string MetaToJSON()
+		{
+			if (metaData.Count == 0)
+			{
+				return "{}";
+			}       
+			return JsonConvert.SerializeObject(metaData);
+		}
 
-        Rect result = GetSubEntity(0).BoundingBox;
-        for (int i = 1; i < subEntityCount; ++i)
-        {
-            Vector2 min = Vector2.Min(result.min, GetSubEntity(i).BoundingBox.min);
-            Vector2 max = Vector2.Max(result.max, GetSubEntity(i).BoundingBox.max);
-            result = new Rect(min, max - min);
-        }
+		public Rect GetEntityBounds()
+		{
+			int subEntityCount = GetSubEntityCount();
 
-        return result;
-    }
+			if (subEntityCount == 0) { return new Rect(); }
 
-    public void MovedToLayer(AbstractLayer newLayer, int newEntityTypeKey)
-    {
-        Layer = newLayer;
+			Rect result = GetSubEntity(0).BoundingBox;
+			for (int i = 1; i < subEntityCount; ++i)
+			{
+				Vector2 min = Vector2.Min(result.min, GetSubEntity(i).BoundingBox.min);
+				Vector2 max = Vector2.Max(result.max, GetSubEntity(i).BoundingBox.max);
+				result = new Rect(min, max - min);
+			}
 
-        EntityTypes = new List<EntityType>() { Layer.GetEntityTypeByKey(newEntityTypeKey) };
+			return result;
+		}
 
-        for (int i = 0; i < GetSubEntityCount(); ++i)
-        {
-            GetSubEntity(i).RemoveGameObject();
-        }
-    }
+		public void MovedToLayer(AbstractLayer newLayer, int newEntityTypeKey)
+		{
+			Layer = newLayer;
 
-    public void UpdateGameObjectsForEveryLOD()
-    {
-        int count = GetSubEntityCount();
-        for (int i = 0; i < count; ++i)
-        {
-            GetSubEntity(i).UpdateGameObjectForEveryLOD();
-        }
-    }
+			EntityTypes = new List<EntityType>() { Layer.GetEntityTypeByKey(newEntityTypeKey) };
 
-    public bool GreenEnergy
-    {
-        get { return Layer.greenEnergy; }
-    }
+			for (int i = 0; i < GetSubEntityCount(); ++i)
+			{
+				GetSubEntity(i).RemoveGameObject();
+			}
+		}
 
-    public int DatabaseID
-    {
-        get { return GetSubEntity(0).GetDatabaseID(); }
-    }
-    public int PersistentID
-    {
-        get { return GetSubEntity(0).GetPersistentID(); }
-    }
+		public void UpdateGameObjectsForEveryLOD()
+		{
+			int count = GetSubEntityCount();
+			for (int i = 0; i < count; ++i)
+			{
+				GetSubEntity(i).UpdateGameObjectForEveryLOD();
+			}
+		}
 
-	//returns the restriction size of this entity for the respective owner country and the current time.
-	public float GetCurrentRestrictionSize()
-    {
-		return RestrictionAreaManager.instance.GetRestrictionAreaSizeAtPlanTime(PlanManager.planViewing, EntityTypes[0], country);
-    }
+		public bool GreenEnergy
+		{
+			get { return Layer.greenEnergy; }
+		}
 
-	/// <summary>
-	/// Callback which allows overriding of the current draw settings from a sub-entity on an entity level. 
-	/// When modifying draw settings in here make sure to not change the original draw settings but set it to a clone 
-	/// otherwise the draw settings will be saved as the default for that entity type.
-	/// </summary>
-	/// <param name="settings"></param>
-	/// <param name="drawMode">The current drawmode we need to override settings for.</param>
-	/// <param name="meshDirtyFromOverride">Set to true if you want to treat the mesh as dirty</param>
-	public virtual void OverrideDrawSettings(SubEntityDrawMode drawMode, ref SubEntityDrawSettings settings, ref bool meshDirtyFromOverride)
-	{
+		public int DatabaseID
+		{
+			get { return GetSubEntity(0).GetDatabaseID(); }
+		}
+		public int PersistentID
+		{
+			get { return GetSubEntity(0).GetPersistentID(); }
+		}
+
+		//returns the restriction size of this entity for the respective owner country and the current time.
+		public float GetCurrentRestrictionSize()
+		{
+			return RestrictionAreaManager.instance.GetRestrictionAreaSizeAtPlanTime(PlanManager.planViewing, EntityTypes[0], country);
+		}
+
+		/// <summary>
+		/// Callback which allows overriding of the current draw settings from a sub-entity on an entity level. 
+		/// When modifying draw settings in here make sure to not change the original draw settings but set it to a clone 
+		/// otherwise the draw settings will be saved as the default for that entity type.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="drawMode">The current drawmode we need to override settings for.</param>
+		/// <param name="meshDirtyFromOverride">Set to true if you want to treat the mesh as dirty</param>
+		public virtual void OverrideDrawSettings(SubEntityDrawMode drawMode, ref SubEntityDrawSettings settings, ref bool meshDirtyFromOverride)
+		{
+		}
 	}
 }

@@ -1,33 +1,35 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
 
-[RequireComponent(typeof(TextMeshProUGUI))]
-public class SetTextToYear : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	[RequireComponent(typeof(TextMeshProUGUI))]
+	public class SetTextToYear : MonoBehaviour {
 
-    public int era;
-    public int yearOffset;
+		public int era;
+		public int yearOffset;
 
-    private void Start()
-    {
-        if (Main.MspGlobalData != null)
-        {
-            SetYear();
-        }
-        else
-        {
-            Main.OnGlobalDataLoaded += GlobalDataLoaded;
-        }
-    }
+		private void Start()
+		{
+			if (Main.MspGlobalData != null)
+			{
+				SetYear();
+			}
+			else
+			{
+				Main.OnGlobalDataLoaded += GlobalDataLoaded;
+			}
+		}
 
-    void GlobalDataLoaded()
-    {
-        Main.OnGlobalDataLoaded -= GlobalDataLoaded;
-        SetYear();
-    }
+		void GlobalDataLoaded()
+		{
+			Main.OnGlobalDataLoaded -= GlobalDataLoaded;
+			SetYear();
+		}
 
-    void SetYear()
-    {
-        GetComponent<TextMeshProUGUI>().text = (Main.MspGlobalData.start + era * Main.MspGlobalData.YearsPerEra + yearOffset).ToString();
-    }
+		void SetYear()
+		{
+			GetComponent<TextMeshProUGUI>().text = (Main.MspGlobalData.start + era * Main.MspGlobalData.YearsPerEra + yearOffset).ToString();
+		}
+	}
 }

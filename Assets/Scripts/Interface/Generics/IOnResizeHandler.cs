@@ -1,7 +1,8 @@
-﻿using System;
-
-public interface IOnResizeHandler
+﻿namespace MSP2050.Scripts
 {
-	void OnResize();
+	public interface IOnResizeHandler
+	{
+		void OnResize();
+	}
 }
 

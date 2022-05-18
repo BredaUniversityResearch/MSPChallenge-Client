@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Networking.WsServerConnectionChangeBehaviour
+namespace MSP2050.Scripts
 {
 	public abstract class WsServerConnectionChangeBehaviour : MonoBehaviour
 	{

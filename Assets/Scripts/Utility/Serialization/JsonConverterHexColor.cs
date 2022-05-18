@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Utility.Serialization
+namespace MSP2050.Scripts
 {
 	public class JsonConverterHexColor : JsonConverter
 	{

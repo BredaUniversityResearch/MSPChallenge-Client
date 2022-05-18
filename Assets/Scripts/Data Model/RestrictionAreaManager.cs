@@ -1,192 +1,192 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 
-/// <summary>
-/// Manager for holding the restriction area configurations.
-/// </summary>
-public class RestrictionAreaManager
+namespace MSP2050.Scripts
 {
-	private static RestrictionAreaManager ms_RestrictionAreaManager = new RestrictionAreaManager();
-	public static RestrictionAreaManager instance
+	/// <summary>
+	/// Manager for holding the restriction area configurations.
+	/// </summary>
+	public class RestrictionAreaManager
 	{
-		get { return ms_RestrictionAreaManager; }
-	}
-
-	private class EntityTypeRestrictionSettings
-	{
-		private class PerPlanEntry
+		private static RestrictionAreaManager ms_RestrictionAreaManager = new RestrictionAreaManager();
+		public static RestrictionAreaManager instance
 		{
-			public Plan plan;
-			public List<RestrictionAreaSetting> settings = new List<RestrictionAreaSetting>();
-		};
-
-		private List<PerPlanEntry> perPlanSettings = new List<PerPlanEntry>();
-
-		public void AddPlanSettings(Plan referencePlan, IEnumerable<RestrictionAreaSetting> settings)
-		{
-			PerPlanEntry entry = FindSettingsForPlan(referencePlan);
-			if (entry == null)
-			{
-				entry = new PerPlanEntry {plan = referencePlan};
-				InsertNewPlanEntry(entry);
-			}
-
-			foreach (RestrictionAreaSetting setting in settings)
-			{
-				entry.settings.RemoveAll(obj => obj.teamId == setting.teamId);
-				entry.settings.Add(setting);
-			}
+			get { return ms_RestrictionAreaManager; }
 		}
 
-		public void FindSettingsForPlan(Plan referencePlan, List<RestrictionAreaSetting> result)
+		private class EntityTypeRestrictionSettings
 		{
-			PerPlanEntry entry = FindSettingsForPlan(referencePlan);
-			if (entry != null)
+			private class PerPlanEntry
 			{
-				result.AddRange(entry.settings);
-			}
-		}
+				public Plan plan;
+				public List<RestrictionAreaSetting> settings = new List<RestrictionAreaSetting>();
+			};
 
-		private PerPlanEntry FindSettingsForPlan(Plan referencePlan)
-		{
-			return perPlanSettings.Find(obj => obj.plan == referencePlan);
-		}
+			private List<PerPlanEntry> perPlanSettings = new List<PerPlanEntry>();
 
-		private void InsertNewPlanEntry(PerPlanEntry entry)
-		{
-			bool inserted = false;
-			for (int i = 0; i < perPlanSettings.Count; ++i)
+			public void AddPlanSettings(Plan referencePlan, IEnumerable<RestrictionAreaSetting> settings)
 			{
-				if (perPlanSettings[i].plan.StartTime > entry.plan.StartTime)
+				PerPlanEntry entry = FindSettingsForPlan(referencePlan);
+				if (entry == null)
 				{
-					perPlanSettings.Insert(i, entry);
-					inserted = true;
-					break;
+					entry = new PerPlanEntry {plan = referencePlan};
+					InsertNewPlanEntry(entry);
+				}
+
+				foreach (RestrictionAreaSetting setting in settings)
+				{
+					entry.settings.RemoveAll(obj => obj.teamId == setting.teamId);
+					entry.settings.Add(setting);
 				}
 			}
 
-			if (!inserted)
+			public void FindSettingsForPlan(Plan referencePlan, List<RestrictionAreaSetting> result)
 			{
-				perPlanSettings.Add(entry);
-			}
-		}
-
-		public float GetRestrictionAreaAtPlanTime(Plan referencePlan, int teamId)
-		{
-			float result = 0.0f;
-			for (int i = perPlanSettings.Count - 1; i >= 0; --i)
-			{
-				PerPlanEntry entry = perPlanSettings[i]; 
-				if ((entry.plan.InInfluencingState || referencePlan == entry.plan) && 
-					(referencePlan == null || entry.plan.StartTime <= referencePlan.StartTime))
+				PerPlanEntry entry = FindSettingsForPlan(referencePlan);
+				if (entry != null)
 				{
-					RestrictionAreaSetting setting = entry.settings.Find(obj => obj.teamId == teamId);
-					if (setting != null)
+					result.AddRange(entry.settings);
+				}
+			}
+
+			private PerPlanEntry FindSettingsForPlan(Plan referencePlan)
+			{
+				return perPlanSettings.Find(obj => obj.plan == referencePlan);
+			}
+
+			private void InsertNewPlanEntry(PerPlanEntry entry)
+			{
+				bool inserted = false;
+				for (int i = 0; i < perPlanSettings.Count; ++i)
+				{
+					if (perPlanSettings[i].plan.StartTime > entry.plan.StartTime)
 					{
-						result = setting.restrictionSize;
+						perPlanSettings.Insert(i, entry);
+						inserted = true;
 						break;
 					}
 				}
+
+				if (!inserted)
+				{
+					perPlanSettings.Add(entry);
+				}
+			}
+
+			public float GetRestrictionAreaAtPlanTime(Plan referencePlan, int teamId)
+			{
+				float result = 0.0f;
+				for (int i = perPlanSettings.Count - 1; i >= 0; --i)
+				{
+					PerPlanEntry entry = perPlanSettings[i]; 
+					if ((entry.plan.InInfluencingState || referencePlan == entry.plan) && 
+					    (referencePlan == null || entry.plan.StartTime <= referencePlan.StartTime))
+					{
+						RestrictionAreaSetting setting = entry.settings.Find(obj => obj.teamId == teamId);
+						if (setting != null)
+						{
+							result = setting.restrictionSize;
+							break;
+						}
+					}
+				}
+				return result;
+			}
+		}
+
+		private Dictionary<EntityType, EntityTypeRestrictionSettings> restrictionSettings = new Dictionary<EntityType, EntityTypeRestrictionSettings>();
+
+		public void SetRestrictionAreaSettings(Plan referencePlan, EntityType entityType, IEnumerable<RestrictionAreaSetting> settings)
+		{
+			EntityTypeRestrictionSettings entityTypeSettings;
+			if (!restrictionSettings.TryGetValue(entityType, out entityTypeSettings))
+			{
+				entityTypeSettings = new EntityTypeRestrictionSettings();
+				restrictionSettings.Add(entityType, entityTypeSettings);
+			}
+			entityTypeSettings.AddPlanSettings(referencePlan, settings);
+		}
+
+		public void SetRestrictionAreaSetting(Plan referencePlan, EntityType entityType, RestrictionAreaSetting setting)
+		{
+			//Thumbs-up
+			SetRestrictionAreaSettings(referencePlan, entityType, new RestrictionAreaSetting[] {setting});
+		}
+
+		public float GetRestrictionAreaSizeAtPlanTime(Plan referencePlan, EntityType entityType, int teamId)
+		{
+			float result = 0.0f;
+			EntityTypeRestrictionSettings settings;
+			if (restrictionSettings.TryGetValue(entityType, out settings))
+			{
+				result = settings.GetRestrictionAreaAtPlanTime(referencePlan, teamId);
 			}
 			return result;
 		}
-	}
 
-	private Dictionary<EntityType, EntityTypeRestrictionSettings> restrictionSettings = new Dictionary<EntityType, EntityTypeRestrictionSettings>();
-
-	public void SetRestrictionAreaSettings(Plan referencePlan, EntityType entityType, IEnumerable<RestrictionAreaSetting> settings)
-	{
-		EntityTypeRestrictionSettings entityTypeSettings;
-		if (!restrictionSettings.TryGetValue(entityType, out entityTypeSettings))
+		public void SubmitSettingsForPlan(Plan referencePlan, BatchRequest batch)
 		{
-			entityTypeSettings = new EntityTypeRestrictionSettings();
-			restrictionSettings.Add(entityType, entityTypeSettings);
+			List<RestrictionAreaObject> settingsToSubmit = GatherSettingsForPlan(referencePlan);
+			JObject dataObject = new JObject();
+
+			//form.AddField("settings", settingsToSubmit);
+
+			dataObject.Add("plan_id", referencePlan.ID);
+			dataObject.Add("settings", JToken.FromObject(settingsToSubmit));
+
+			batch.AddRequest(Server.SetPlanRestrictionAreas(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
-		entityTypeSettings.AddPlanSettings(referencePlan, settings);
-	}
-
-	public void SetRestrictionAreaSetting(Plan referencePlan, EntityType entityType, RestrictionAreaSetting setting)
-	{
-		//Thumbs-up
-		SetRestrictionAreaSettings(referencePlan, entityType, new RestrictionAreaSetting[] {setting});
-	}
-
-	public float GetRestrictionAreaSizeAtPlanTime(Plan referencePlan, EntityType entityType, int teamId)
-	{
-		float result = 0.0f;
-		EntityTypeRestrictionSettings settings;
-		if (restrictionSettings.TryGetValue(entityType, out settings))
-		{
-			result = settings.GetRestrictionAreaAtPlanTime(referencePlan, teamId);
-		}
-		return result;
-	}
-
-	public void SubmitSettingsForPlan(Plan referencePlan, BatchRequest batch)
-	{
-		List<RestrictionAreaObject> settingsToSubmit = GatherSettingsForPlan(referencePlan);
-		JObject dataObject = new JObject();
-
-		//form.AddField("settings", settingsToSubmit);
-
-		dataObject.Add("plan_id", referencePlan.ID);
-		dataObject.Add("settings", JToken.FromObject(settingsToSubmit));
-
-		batch.AddRequest(Server.SetPlanRestrictionAreas(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-	}
 	
-	private List<RestrictionAreaObject> GatherSettingsForPlan(Plan referencePlan)
-	{
-		List<RestrictionAreaObject> result = new List<RestrictionAreaObject>(64);
-
-		for (int layerId = 0; layerId < referencePlan.PlanLayers.Count; ++layerId)
+		private List<RestrictionAreaObject> GatherSettingsForPlan(Plan referencePlan)
 		{
-			AbstractLayer layer = referencePlan.PlanLayers[layerId].BaseLayer;
-			GatherSettingsForPlanLayer(referencePlan, layer, result);
+			List<RestrictionAreaObject> result = new List<RestrictionAreaObject>(64);
+
+			for (int layerId = 0; layerId < referencePlan.PlanLayers.Count; ++layerId)
+			{
+				AbstractLayer layer = referencePlan.PlanLayers[layerId].BaseLayer;
+				GatherSettingsForPlanLayer(referencePlan, layer, result);
+			}
+
+			return result;
 		}
 
-		return result;
-	}
-
-	private void GatherSettingsForPlanLayer(Plan referencePlan, AbstractLayer layer, List<RestrictionAreaObject> result)
-	{
-		List<RestrictionAreaSetting> settings = new List<RestrictionAreaSetting>(16);
-		foreach (var entityIdTypePair in layer.EntityTypes)
+		private void GatherSettingsForPlanLayer(Plan referencePlan, AbstractLayer layer, List<RestrictionAreaObject> result)
 		{
-			EntityTypeRestrictionSettings typeSettings;
-			if (restrictionSettings.TryGetValue(entityIdTypePair.Value, out typeSettings))
+			List<RestrictionAreaSetting> settings = new List<RestrictionAreaSetting>(16);
+			foreach (var entityIdTypePair in layer.EntityTypes)
 			{
-				typeSettings.FindSettingsForPlan(referencePlan, settings);
-
-				for (int settingId = 0; settingId < settings.Count; ++settingId)
+				EntityTypeRestrictionSettings typeSettings;
+				if (restrictionSettings.TryGetValue(entityIdTypePair.Value, out typeSettings))
 				{
-					RestrictionAreaSetting setting = settings[settingId];
-					RestrictionAreaObject serverData = new RestrictionAreaObject
-					{
-						layer_id = layer.ID,
-						entity_type_id = entityIdTypePair.Key,
-						team_id = setting.teamId,
-						restriction_size  = setting.restrictionSize
-					};
-					result.Add(serverData);
-				}
+					typeSettings.FindSettingsForPlan(referencePlan, settings);
 
-				settings.Clear();
+					for (int settingId = 0; settingId < settings.Count; ++settingId)
+					{
+						RestrictionAreaSetting setting = settings[settingId];
+						RestrictionAreaObject serverData = new RestrictionAreaObject
+						{
+							layer_id = layer.ID,
+							entity_type_id = entityIdTypePair.Key,
+							team_id = setting.teamId,
+							restriction_size  = setting.restrictionSize
+						};
+						result.Add(serverData);
+					}
+
+					settings.Clear();
+				}
 			}
 		}
-	}
 
-	public void ProcessReceivedRestrictions(Plan targetPlan, RestrictionAreaObject[] planObjectRestrictionSettings)
-	{
-		for (int i = 0; i < planObjectRestrictionSettings.Length; ++i)
+		public void ProcessReceivedRestrictions(Plan targetPlan, RestrictionAreaObject[] planObjectRestrictionSettings)
 		{
-			RestrictionAreaObject restrictionObj = planObjectRestrictionSettings[i];
-			AbstractLayer targetLayer = LayerManager.GetLayerByID(restrictionObj.layer_id);
-			EntityType targetType = targetLayer.GetEntityTypeByKey(restrictionObj.entity_type_id);
-			SetRestrictionAreaSetting(targetPlan, targetType, new RestrictionAreaSetting(restrictionObj.team_id, restrictionObj.restriction_size));
+			for (int i = 0; i < planObjectRestrictionSettings.Length; ++i)
+			{
+				RestrictionAreaObject restrictionObj = planObjectRestrictionSettings[i];
+				AbstractLayer targetLayer = LayerManager.GetLayerByID(restrictionObj.layer_id);
+				EntityType targetType = targetLayer.GetEntityTypeByKey(restrictionObj.entity_type_id);
+				SetRestrictionAreaSetting(targetPlan, targetType, new RestrictionAreaSetting(restrictionObj.team_id, restrictionObj.restriction_size));
+			}
 		}
 	}
 }

@@ -2,27 +2,30 @@
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class KPICountrySelection : MonoBehaviour
+namespace MSP2050.Scripts
 {
-	[SerializeField]
-	private Button button = null;
-	[SerializeField]
-	private Image image = null;
-	[SerializeField]
-	private Image selectedOverlay = null;
-
-    public void SetSelected(bool isSelected)
+	public class KPICountrySelection : MonoBehaviour
 	{
-		selectedOverlay.gameObject.SetActive(isSelected);
-	}
+		[SerializeField]
+		private Button button = null;
+		[SerializeField]
+		private Image image = null;
+		[SerializeField]
+		private Image selectedOverlay = null;
 
-	public void SetTeamColor(Color teamColor)
-	{
-		image.color = teamColor;
-	}
+		public void SetSelected(bool isSelected)
+		{
+			selectedOverlay.gameObject.SetActive(isSelected);
+		}
 
-	public void SetOnClickHandler(UnityAction callback)
-	{
-		button.onClick.AddListener(callback);
+		public void SetTeamColor(Color teamColor)
+		{
+			image.color = teamColor;
+		}
+
+		public void SetOnClickHandler(UnityAction callback)
+		{
+			button.onClick.AddListener(callback);
+		}
 	}
 }

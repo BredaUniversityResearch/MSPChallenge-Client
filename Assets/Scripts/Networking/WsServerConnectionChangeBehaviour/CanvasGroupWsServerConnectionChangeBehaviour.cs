@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Networking.WsServerConnectionChangeBehaviour
+namespace MSP2050.Scripts
 {
 	[RequireComponent(typeof(CanvasGroup))]
 	public class CanvasGroupWsServerConnectionChangeBehaviour: WsServerConnectionChangeBehaviour

@@ -5,15 +5,14 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using UnityEngine;
-using Utility.Serialization;
 using Websocket.Client;
-using BatchRequestSuccessCallbacks = System.Collections.Generic.Dictionary<int, System.Action<BatchExecutionResult>>;
+using BatchRequestSuccessCallbacks = System.Collections.Generic.Dictionary<int, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
 using BatchRequestFailureCallbacks = System.Collections.Generic.Dictionary<int, System.Action<string>>;
 using BatchRequestResultAndSuccessCallback =
-	System.Collections.Generic.KeyValuePair<BatchExecutionResult, System.Action<BatchExecutionResult>>;
+	System.Collections.Generic.KeyValuePair<MSP2050.Scripts.BatchExecutionResult, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
 using BatchRequestResultAndFailureCallback = System.Collections.Generic.KeyValuePair<string, System.Action<string>>;
 
-namespace Networking
+namespace MSP2050.Scripts
 {
 	public interface IWsServerCommunicationInteractor
 	{

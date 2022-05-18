@@ -1,34 +1,36 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
-public class ScreenBorderGradient : MonoBehaviour
+namespace MSP2050.Scripts
 {
-	private static ScreenBorderGradient singleton;
-
-	public static ScreenBorderGradient instance
+	public class ScreenBorderGradient : MonoBehaviour
 	{
-		get
+		private static ScreenBorderGradient singleton;
+
+		public static ScreenBorderGradient instance
 		{
-			if (singleton == null)
+			get
 			{
-				singleton = FindObjectOfType<ScreenBorderGradient>();
+				if (singleton == null)
+				{
+					singleton = FindObjectOfType<ScreenBorderGradient>();
+				}
+				return singleton;
 			}
-			return singleton;
 		}
-	}
 
-	[SerializeField]
-	private Image gradientImage = null;
+		[SerializeField]
+		private Image gradientImage = null;
 
-	private void Start()
-	{
-		singleton = this;
-		SetEnabled(false);
-	}
+		private void Start()
+		{
+			singleton = this;
+			SetEnabled(false);
+		}
 
-	public void SetEnabled(bool enabledState)
-	{
-		gradientImage.enabled = enabledState;
+		public void SetEnabled(bool enabledState)
+		{
+			gradientImage.enabled = enabledState;
+		}
 	}
 }

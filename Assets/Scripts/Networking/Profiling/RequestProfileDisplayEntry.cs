@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Networking.Profiling
+namespace MSP2050.Scripts
 {
 	//Entry representing a single request. This is what is shown in the ui.
 	class RequestProfileDisplayEntry: MonoBehaviour

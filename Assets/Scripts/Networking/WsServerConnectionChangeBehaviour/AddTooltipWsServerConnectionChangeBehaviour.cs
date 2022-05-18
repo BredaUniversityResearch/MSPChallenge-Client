@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 
-namespace Networking.WsServerConnectionChangeBehaviour
+namespace MSP2050.Scripts
 {
 	[RequireComponent(typeof(AddTooltip))]
 	public class AddTooltipWsServerConnectionChangeBehaviour: WsServerConnectionChangeBehaviour

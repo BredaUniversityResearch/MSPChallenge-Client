@@ -1,21 +1,24 @@
-﻿using UnityEngine.EventSystems;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class DragHandle : MonoBehaviour, IDragHandler
+namespace MSP2050.Scripts
 {
-	public delegate void OnHandleDragged(PointerEventData data, RectTransform handleRect);
-	public OnHandleDragged onHandleDragged;
-
-	RectTransform rect;
-
-	private void Start()
+	public class DragHandle : MonoBehaviour, IDragHandler
 	{
-		rect = GetComponent<RectTransform>();
-	}
+		public delegate void OnHandleDragged(PointerEventData data, RectTransform handleRect);
+		public OnHandleDragged onHandleDragged;
 
-	public void OnDrag(PointerEventData data)
-	{
-		if (onHandleDragged != null)
-			onHandleDragged(data, rect);
+		RectTransform rect;
+
+		private void Start()
+		{
+			rect = GetComponent<RectTransform>();
+		}
+
+		public void OnDrag(PointerEventData data)
+		{
+			if (onHandleDragged != null)
+				onHandleDragged(data, rect);
+		}
 	}
 }

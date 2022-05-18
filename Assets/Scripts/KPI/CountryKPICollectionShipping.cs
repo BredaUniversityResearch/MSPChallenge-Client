@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace KPI
+namespace MSP2050.Scripts
 {
 	class CountryKPICollectionShipping
 	{

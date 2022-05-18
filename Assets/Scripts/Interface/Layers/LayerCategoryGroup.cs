@@ -1,71 +1,73 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 
-public class LayerCategoryGroup : MonoBehaviour
+namespace MSP2050.Scripts
 {
-
-	public LayerPanel layerPanel;
-	public Transform buttonLocation;
-	public TextMeshProUGUI title;
-
-	[Header("Prefabs")]
-	public GameObject buttonPrefab;
-
-	[Header("Content")]
-	public Dictionary<string, LayerButton> layerButtons = new Dictionary<string, LayerButton>();
-
-	/// <summary>
-	/// Set window title
-	/// </summary>
-	public void SetTitle(string text)
+	public class LayerCategoryGroup : MonoBehaviour
 	{
-		title.text = text;
-	}
 
-	public LayerButton CreateLayerButton(string subCategory)
-	{
-		// Instantiate prefab
-		GameObject go = Instantiate(buttonPrefab, buttonLocation, false);
+		public LayerPanel layerPanel;
+		public Transform buttonLocation;
+		public TextMeshProUGUI title;
 
-		// Store component
-		LayerButton button = go.GetComponent<LayerButton>();
+		[Header("Prefabs")]
+		public GameObject buttonPrefab;
 
-		// Add to list
-		layerButtons.Add(subCategory, button);
-		
-		return button;
-	}
+		[Header("Content")]
+		public Dictionary<string, LayerButton> layerButtons = new Dictionary<string, LayerButton>();
 
-	/// <summary>
-	/// Destroy this
-	/// </summary>
-	public void Destroy()
-	{
-		for (int i = 0; i < layerPanel.layerGroup.Count; i++)
+		/// <summary>
+		/// Set window title
+		/// </summary>
+		public void SetTitle(string text)
 		{
-			if (layerPanel.layerGroup[i] == this)
+			title.text = text;
+		}
+
+		public LayerButton CreateLayerButton(string subCategory)
+		{
+			// Instantiate prefab
+			GameObject go = Instantiate(buttonPrefab, buttonLocation, false);
+
+			// Store component
+			LayerButton button = go.GetComponent<LayerButton>();
+
+			// Add to list
+			layerButtons.Add(subCategory, button);
+		
+			return button;
+		}
+
+		/// <summary>
+		/// Destroy this
+		/// </summary>
+		public void Destroy()
+		{
+			for (int i = 0; i < layerPanel.layerGroup.Count; i++)
 			{
-				layerPanel.DestroyLayerGroup(this);
+				if (layerPanel.layerGroup[i] == this)
+				{
+					layerPanel.DestroyLayerGroup(this);
+				}
 			}
 		}
-	}
 
-	/// <summary>
-	/// Properly destroys a layer button
-	/// </summary>
-	public void DestroyLayerButton(string subCategory, LayerButton button)
-	{
-		layerButtons.Remove(subCategory);
-		Destroy(button.gameObject);
-	}
+		/// <summary>
+		/// Properly destroys a layer button
+		/// </summary>
+		public void DestroyLayerButton(string subCategory, LayerButton button)
+		{
+			layerButtons.Remove(subCategory);
+			Destroy(button.gameObject);
+		}
 
-	/// <summary>
-	/// Hide the button
-	/// </summary>
-	public void Hide(bool toggle)
-	{
-		gameObject.SetActive(toggle);
+		/// <summary>
+		/// Hide the button
+		/// </summary>
+		public void Hide(bool toggle)
+		{
+			gameObject.SetActive(toggle);
+		}
 	}
 }

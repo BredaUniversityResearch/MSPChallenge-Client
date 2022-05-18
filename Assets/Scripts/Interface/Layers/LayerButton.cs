@@ -2,26 +2,29 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LayerButton : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	public class LayerButton : MonoBehaviour {
 
-    public DoubleClickButton button;
-    public CustomButtonColorSet outlineColourSet;
-    public ColourAsset accentColour;
-    public Image icon;
+		public DoubleClickButton button;
+		public CustomButtonColorSet outlineColourSet;
+		public ColourAsset accentColour;
+		public Image icon;
 	
-    /// <summary>
-    /// Hide the button
-    /// </summary>
-    public void SetVisibility(bool toggle)
-    {
-        gameObject.SetActive(toggle);
-    }
+		/// <summary>
+		/// Hide the button
+		/// </summary>
+		public void SetVisibility(bool toggle)
+		{
+			gameObject.SetActive(toggle);
+		}
 
-    public void SetSelectedVisuals(bool selected)
-    {
-		if(selected)
-			outlineColourSet.LockToColor(accentColour);
-		else
-			outlineColourSet.UnlockColor();
+		public void SetSelectedVisuals(bool selected)
+		{
+			if(selected)
+				outlineColourSet.LockToColor(accentColour);
+			else
+				outlineColourSet.UnlockColor();
+		}
 	}
 }

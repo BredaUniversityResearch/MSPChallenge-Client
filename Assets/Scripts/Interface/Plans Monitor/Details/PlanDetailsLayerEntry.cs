@@ -1,32 +1,33 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using ColourPalette;
+﻿using ColourPalette;
 using TMPro;
+using UnityEngine;
 
-public class PlanDetailsLayerEntry : MonoBehaviour
+namespace MSP2050.Scripts
 {
-	[SerializeField]
-	TextMeshProUGUI layerName, addedGeometry, alteredGeometry, removedGeometry;
-
-	[SerializeField]
-	ColourAsset normalColour, zeroColour;
-
-	public void SetLayer(PlanLayer layer)
+	public class PlanDetailsLayerEntry : MonoBehaviour
 	{
-		layerName.text = layer.BaseLayer.ShortName;
+		[SerializeField]
+		TextMeshProUGUI layerName, addedGeometry, alteredGeometry, removedGeometry;
 
-		int value = layer.GetAddedGeometryCount();
-		addedGeometry.text = value.ToString();
-		addedGeometry.color = value == 0 ? zeroColour.GetColour() : normalColour.GetColour();
+		[SerializeField]
+		ColourAsset normalColour, zeroColour;
 
-		value = layer.GetAlteredGeometryCount();
-		alteredGeometry.text = value.ToString();
-		alteredGeometry.color = value == 0 ? zeroColour.GetColour() : normalColour.GetColour();
+		public void SetLayer(PlanLayer layer)
+		{
+			layerName.text = layer.BaseLayer.ShortName;
 
-		value = layer.RemovedGeometry.Count;
-		removedGeometry.text = value.ToString();
-		removedGeometry.color = value == 0 ? zeroColour.GetColour() : normalColour.GetColour();
+			int value = layer.GetAddedGeometryCount();
+			addedGeometry.text = value.ToString();
+			addedGeometry.color = value == 0 ? zeroColour.GetColour() : normalColour.GetColour();
+
+			value = layer.GetAlteredGeometryCount();
+			alteredGeometry.text = value.ToString();
+			alteredGeometry.color = value == 0 ? zeroColour.GetColour() : normalColour.GetColour();
+
+			value = layer.RemovedGeometry.Count;
+			removedGeometry.text = value.ToString();
+			removedGeometry.color = value == 0 ? zeroColour.GetColour() : normalColour.GetColour();
+		}
 	}
 }
 

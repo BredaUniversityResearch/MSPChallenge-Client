@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Networking.WsServerConnectionChangeBehaviour
+namespace MSP2050.Scripts
 {
 	[RequireComponent(typeof(CustomButtonColorSet))]
 	public class CustomButtonColorSetWsServerConnectionChangeBehaviour: WsServerConnectionChangeBehaviour

@@ -1,7 +1,10 @@
-﻿using UnityEngine.UI;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
-public class MarkedYear : MonoBehaviour
+namespace MSP2050.Scripts
 {
-	public Text yearText;
+	public class MarkedYear : MonoBehaviour
+	{
+		public Text yearText;
+	}
 }

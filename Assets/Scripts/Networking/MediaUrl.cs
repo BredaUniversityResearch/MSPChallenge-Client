@@ -1,4 +1,4 @@
-﻿namespace Networking
+﻿namespace MSP2050.Scripts
 {
 	public static class MediaUrl
 	{

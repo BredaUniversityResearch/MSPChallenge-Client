@@ -1,59 +1,61 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
-public class ScrollingTextBand : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	public class ScrollingTextBand : MonoBehaviour {
 
-	public float scrollSpeed;
-	public RectTransform textParent;
-	bool scrolling;
-	float childSize;
-	[SerializeField] float currentOffset;
+		public float scrollSpeed;
+		public RectTransform textParent;
+		bool scrolling;
+		float childSize;
+		[SerializeField] float currentOffset;
 
-	private static ScrollingTextBand singleton;
-	public static ScrollingTextBand instance
-	{
-		get
+		private static ScrollingTextBand singleton;
+		public static ScrollingTextBand instance
 		{
-			if (singleton == null)
+			get
 			{
-				singleton = FindObjectOfType<ScrollingTextBand>();
+				if (singleton == null)
+				{
+					singleton = FindObjectOfType<ScrollingTextBand>();
+				}
+				return singleton;
 			}
-			return singleton;
 		}
-	}
 
-	void Start ()
-	{
-		singleton = this;
-		childSize = textParent.GetChild(0).GetComponent<LayoutElement>().minWidth;
-		SetEnabled(false);
-	}
-
-	void Update () {
-		if (scrolling)
+		void Start ()
 		{
-			currentOffset += scrollSpeed * Time.deltaTime;
-			if (currentOffset > childSize)
-				currentOffset -= childSize;
-			//group.padding.left += (int)currentOffset;
-			textParent.anchoredPosition = new Vector2(-currentOffset, textParent.anchoredPosition.y);
+			singleton = this;
+			childSize = textParent.GetChild(0).GetComponent<LayoutElement>().minWidth;
+			SetEnabled(false);
 		}
-	}
 
-	public bool Scrolling
-	{
-		set
+		void Update () {
+			if (scrolling)
+			{
+				currentOffset += scrollSpeed * Time.deltaTime;
+				if (currentOffset > childSize)
+					currentOffset -= childSize;
+				//group.padding.left += (int)currentOffset;
+				textParent.anchoredPosition = new Vector2(-currentOffset, textParent.anchoredPosition.y);
+			}
+		}
+
+		public bool Scrolling
 		{
-			currentOffset = 0;
-			scrolling = value;
+			set
+			{
+				currentOffset = 0;
+				scrolling = value;
+			}
+			get { return scrolling; }
 		}
-		get { return scrolling; }
-	}
 
-	public void SetEnabled(bool value)
-	{
-		gameObject.SetActive(value);
-		Scrolling = value;
+		public void SetEnabled(bool value)
+		{
+			gameObject.SetActive(value);
+			Scrolling = value;
+		}
 	}
 }

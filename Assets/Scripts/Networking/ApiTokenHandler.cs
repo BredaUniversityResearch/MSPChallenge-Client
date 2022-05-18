@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 
-namespace Assets.Networking
+namespace MSP2050.Scripts
 {
 	public class ApiTokenHandler
 	{

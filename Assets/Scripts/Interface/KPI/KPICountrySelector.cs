@@ -3,131 +3,134 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class KPICountrySelector: MonoBehaviour
+namespace MSP2050.Scripts
 {
-	[Serializable]
-	public class OnTeamSelectionChangedDelegate : UnityEvent<int>
+	public class KPICountrySelector: MonoBehaviour
 	{
-	}
-
-	[SerializeField]
-	private GameObject countryButtonPrefab = null;
-
-	[SerializeField]
-	private RectTransform targetContainer = null;
-
-	[SerializeField]
-	private bool allowMultipleSelected = false;
-
-    [SerializeField]
-    private bool addAllButton = false;
-
-    public OnTeamSelectionChangedDelegate onTeamSelectionChanged = null;
-
-	private Dictionary<int, KPICountrySelection> buttonsByTeam = new Dictionary<int, KPICountrySelection>(16);
-	private HashSet<int> currentSelectedTeam = new HashSet<int>();
-
-	private void Start()
-	{
-		if (TeamManager.TeamCount > 0)
+		[Serializable]
+		public class OnTeamSelectionChangedDelegate : UnityEvent<int>
 		{
-			InitializeButtons();
 		}
-		else
+
+		[SerializeField]
+		private GameObject countryButtonPrefab = null;
+
+		[SerializeField]
+		private RectTransform targetContainer = null;
+
+		[SerializeField]
+		private bool allowMultipleSelected = false;
+
+		[SerializeField]
+		private bool addAllButton = false;
+
+		public OnTeamSelectionChangedDelegate onTeamSelectionChanged = null;
+
+		private Dictionary<int, KPICountrySelection> buttonsByTeam = new Dictionary<int, KPICountrySelection>(16);
+		private HashSet<int> currentSelectedTeam = new HashSet<int>();
+
+		private void Start()
 		{
-			TeamManager.OnTeamsLoadComplete += OnTeamsLoaded;
-		}
-	}
-
-	private void OnTeamsLoaded()
-	{
-		TeamManager.OnTeamsLoadComplete -= OnTeamsLoaded;
-		InitializeButtons();
-	}
-
-	private void InitializeButtons()
-	{
-		Team currentTeam = TeamManager.CurrentTeam;
-
-		foreach (Team team in TeamManager.GetTeams())
-		{
-			if (team.IsManager)
-				continue;
-			KPICountrySelection button = Instantiate(countryButtonPrefab, targetContainer).GetComponent<KPICountrySelection>();
-			button.SetTeamColor(team.color);
-			int teamId = team.ID;
-			button.SetOnClickHandler(() => SelectTeam(teamId));
-
-			buttonsByTeam.Add(teamId, button);
-
-			if (/*allowMultipleSelected ||*/ 
-				(teamId == currentTeam.ID || (currentTeam.IsManager && currentSelectedTeam.Count == 0)))
+			if (TeamManager.TeamCount > 0)
 			{
-				SelectTeam(teamId);
+				InitializeButtons();
+			}
+			else
+			{
+				TeamManager.OnTeamsLoadComplete += OnTeamsLoaded;
 			}
 		}
-        if (addAllButton)
-        {
-            KPICountrySelection button = Instantiate(countryButtonPrefab, targetContainer).GetComponent<KPICountrySelection>();
-            button.SetTeamColor(Color.white);
-            button.SetOnClickHandler(() => SelectTeam(0));
-            buttonsByTeam.Add(0, button);
-        }
-	}
 
-	private void SelectTeam(int newTeamId)
-	{
-		if (!allowMultipleSelected)
+		private void OnTeamsLoaded()
 		{
-			DeselectAll();
-			Select(newTeamId);
-		}
-		else
-		{
-			ToggleSelection(newTeamId);
+			TeamManager.OnTeamsLoadComplete -= OnTeamsLoaded;
+			InitializeButtons();
 		}
 
-		if (onTeamSelectionChanged != null)
+		private void InitializeButtons()
 		{
-			onTeamSelectionChanged.Invoke(newTeamId);
-		}
-	}
+			Team currentTeam = TeamManager.CurrentTeam;
 
-	private void Select(int newTeamId)
-	{
-		if (!currentSelectedTeam.Contains(newTeamId))
+			foreach (Team team in TeamManager.GetTeams())
+			{
+				if (team.IsManager)
+					continue;
+				KPICountrySelection button = Instantiate(countryButtonPrefab, targetContainer).GetComponent<KPICountrySelection>();
+				button.SetTeamColor(team.color);
+				int teamId = team.ID;
+				button.SetOnClickHandler(() => SelectTeam(teamId));
+
+				buttonsByTeam.Add(teamId, button);
+
+				if (/*allowMultipleSelected ||*/ 
+				    (teamId == currentTeam.ID || (currentTeam.IsManager && currentSelectedTeam.Count == 0)))
+				{
+					SelectTeam(teamId);
+				}
+			}
+			if (addAllButton)
+			{
+				KPICountrySelection button = Instantiate(countryButtonPrefab, targetContainer).GetComponent<KPICountrySelection>();
+				button.SetTeamColor(Color.white);
+				button.SetOnClickHandler(() => SelectTeam(0));
+				buttonsByTeam.Add(0, button);
+			}
+		}
+
+		private void SelectTeam(int newTeamId)
 		{
-			currentSelectedTeam.Add(newTeamId);
-			buttonsByTeam[newTeamId].SetSelected(true);
-		}
-	}
+			if (!allowMultipleSelected)
+			{
+				DeselectAll();
+				Select(newTeamId);
+			}
+			else
+			{
+				ToggleSelection(newTeamId);
+			}
 
-	private void DeselectAll()
-	{
-		foreach (int selected in currentSelectedTeam)
+			if (onTeamSelectionChanged != null)
+			{
+				onTeamSelectionChanged.Invoke(newTeamId);
+			}
+		}
+
+		private void Select(int newTeamId)
 		{
-			buttonsByTeam[selected].SetSelected(false);
+			if (!currentSelectedTeam.Contains(newTeamId))
+			{
+				currentSelectedTeam.Add(newTeamId);
+				buttonsByTeam[newTeamId].SetSelected(true);
+			}
 		}
 
-		currentSelectedTeam.Clear();
-	}
-
-	private void ToggleSelection(int teamId)
-	{
-		if (currentSelectedTeam.Contains(teamId))
+		private void DeselectAll()
 		{
-			buttonsByTeam[teamId].SetSelected(false);
-			currentSelectedTeam.Remove(teamId);
-		}
-		else
-		{
-			buttonsByTeam[teamId].SetSelected(true);
-			currentSelectedTeam.Add(teamId);
-		}
-	}
+			foreach (int selected in currentSelectedTeam)
+			{
+				buttonsByTeam[selected].SetSelected(false);
+			}
 
-	public bool IsEnabled(int teamId)
-	{
-		return currentSelectedTeam.Contains(teamId) || (addAllButton && currentSelectedTeam.Contains(0));
+			currentSelectedTeam.Clear();
+		}
+
+		private void ToggleSelection(int teamId)
+		{
+			if (currentSelectedTeam.Contains(teamId))
+			{
+				buttonsByTeam[teamId].SetSelected(false);
+				currentSelectedTeam.Remove(teamId);
+			}
+			else
+			{
+				buttonsByTeam[teamId].SetSelected(true);
+				currentSelectedTeam.Add(teamId);
+			}
+		}
+
+		public bool IsEnabled(int teamId)
+		{
+			return currentSelectedTeam.Contains(teamId) || (addAllButton && currentSelectedTeam.Contains(0));
+		}
 	}
 }

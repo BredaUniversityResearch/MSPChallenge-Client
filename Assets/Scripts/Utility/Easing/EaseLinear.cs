@@ -1,9 +1,12 @@
 ﻿
 //THE best easing function out there
-class EaseLinear : IEasingFunction
+namespace MSP2050.Scripts
 {
-	public float Evaluate(float timeUnit)
+	class EaseLinear : IEasingFunction
 	{
-		return timeUnit;
+		public float Evaluate(float timeUnit)
+		{
+			return timeUnit;
+		}
 	}
 }

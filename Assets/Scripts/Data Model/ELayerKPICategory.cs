@@ -1,7 +1,10 @@
-﻿public enum ELayerKPICategory
+﻿namespace MSP2050.Scripts
 {
-	Energy,
-	Ecology,
-	Shipping,
-	Miscellaneous
+	public enum ELayerKPICategory
+	{
+		Energy,
+		Ecology,
+		Shipping,
+		Miscellaneous
+	}
 }

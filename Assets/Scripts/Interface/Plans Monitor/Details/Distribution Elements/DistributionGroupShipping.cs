@@ -1,43 +1,45 @@
-﻿using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
 
-public class DistributionGroupShipping: DistributionGroup<DistributionItem>
+namespace MSP2050.Scripts
 {
-	public TextMeshProUGUI layerType;
-
-    void Start()
-    {
-        Initialise();
-    }
-
-    public void SetTitle(string layerName, string entityTypeName)
+	public class DistributionGroupShipping: DistributionGroup<DistributionItem>
 	{
-		if (title != null)
+		public TextMeshProUGUI layerType;
+
+		void Start()
 		{
-			title.text = layerName;
+			Initialise();
 		}
 
-		if (layerType != null)
+		public void SetTitle(string layerName, string entityTypeName)
 		{
-			layerType.text = entityTypeName;
-		}
-	}
+			if (title != null)
+			{
+				title.text = layerName;
+			}
 
-	/// <summary>
-	/// Update the slider distribution for the given item
-	/// </summary>
-	public override void UpdateDistributionItem(DistributionItem updatedItem, float currentValue)
-	{
-		//U wot.
-		updatedItem.SetValue(currentValue);
-		updatedItem.ToText(updatedItem.GetDistributionValue(), PlanManager.shippingDisplayScale, true);
-
-		if (distributionFillBar != null)
-		{
-			distributionFillBar.SetFill(updatedItem.Country, updatedItem.GetDistributionValue());
+			if (layerType != null)
+			{
+				layerType.text = entityTypeName;
+			}
 		}
 
-		CheckIfChanged();
+		/// <summary>
+		/// Update the slider distribution for the given item
+		/// </summary>
+		public override void UpdateDistributionItem(DistributionItem updatedItem, float currentValue)
+		{
+			//U wot.
+			updatedItem.SetValue(currentValue);
+			updatedItem.ToText(updatedItem.GetDistributionValue(), PlanManager.shippingDisplayScale, true);
+
+			if (distributionFillBar != null)
+			{
+				distributionFillBar.SetFill(updatedItem.Country, updatedItem.GetDistributionValue());
+			}
+
+			CheckIfChanged();
+		}
 	}
 }
 

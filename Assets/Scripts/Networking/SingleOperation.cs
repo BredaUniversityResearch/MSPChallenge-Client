@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Assets.Networking
+namespace MSP2050.Scripts
 {
     public class SingleOperation : AbstractOperation
     {

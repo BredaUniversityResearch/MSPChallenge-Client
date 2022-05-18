@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 
-public class ApplyOptions: MonoBehaviour
+namespace MSP2050.Scripts
 {
-	public void Start()
+	public class ApplyOptions: MonoBehaviour
 	{
-		GameSettings.ApplyCurrentSettings(false);
+		public void Start()
+		{
+			GameSettings.ApplyCurrentSettings(false);
+		}
 	}
 }

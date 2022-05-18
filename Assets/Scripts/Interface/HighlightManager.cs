@@ -1,42 +1,45 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
-public class HighlightManager : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	public class HighlightManager : MonoBehaviour {
 
-	private static HighlightManager singleton;
-	public static HighlightManager instance
-	{
-		get
+		private static HighlightManager singleton;
+		public static HighlightManager instance
 		{
-			if (singleton == null)
+			get
 			{
-				singleton = FindObjectOfType<HighlightManager>();
+				if (singleton == null)
+				{
+					singleton = FindObjectOfType<HighlightManager>();
+				}
+				return singleton;
 			}
-			return singleton;
 		}
-	}
 
-	public Object highlightPrefab;
-	List<GameObject> highlightObjects = new List<GameObject>();
+		public Object highlightPrefab;
+		List<GameObject> highlightObjects = new List<GameObject>();
 
-	void Start()
-	{
-		singleton = this;
-	}
+		void Start()
+		{
+			singleton = this;
+		}
 
-	public void HighlightPointSubEntity(PointSubEntity subEnt)
-	{
-		GameObject temp = Instantiate(highlightPrefab) as GameObject;
-		temp.GetComponent<SpriteRenderer>().color = TeamManager.GetTeamByTeamID(subEnt.Entity.Country).color;
-		temp.transform.SetParent(subEnt.GetGameObject().transform);
-		temp.transform.localPosition = Vector3.zero;
-		highlightObjects.Add(temp);
-	}
+		public void HighlightPointSubEntity(PointSubEntity subEnt)
+		{
+			GameObject temp = Instantiate(highlightPrefab) as GameObject;
+			temp.GetComponent<SpriteRenderer>().color = TeamManager.GetTeamByTeamID(subEnt.Entity.Country).color;
+			temp.transform.SetParent(subEnt.GetGameObject().transform);
+			temp.transform.localPosition = Vector3.zero;
+			highlightObjects.Add(temp);
+		}
 
-	public void RemoveHighlight()
-	{
-		foreach (GameObject go in highlightObjects)
-			Destroy(go);
-		highlightObjects = new List<GameObject>();
+		public void RemoveHighlight()
+		{
+			foreach (GameObject go in highlightObjects)
+				Destroy(go);
+			highlightObjects = new List<GameObject>();
+		}
 	}
 }
