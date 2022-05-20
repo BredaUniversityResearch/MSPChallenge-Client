@@ -243,15 +243,45 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
-    SerializedBytes: 01010b00000063006f006c006f0072004e006f0072006d0061006c002f00000000012900000043006f006c006f0075007200500061006c0065007400740065002e0043006f006e007300740043006f006c006f00750072002c0020004d0053005000320030003500300050006c007500670069006e007300000000000301080000006d005f0063006f006c006f00750072002f01000000012900000055006e0069007400790045006e00670069006e0065002e0043006f006c006f0072002c00200055006e0069007400790045006e00670069006e0065002e0043006f00720065004d006f00640075006c006500200000803f200000803f200000803f200000000005050b010e00000063006f006c006f00720048006900670068006c006900670068007400000000002d010d00000063006f006c006f007200440069007300610062006c0065006400
+    SerializedFormat: 2
+    SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: a40e66438c6b1354191999c39071aa97, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 7
+      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
+    - Name: m_colour
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: colorHighlight
+      Entry: 10
+      Data: 0
+    - Name: colorDisabled
+      Entry: 6
+      Data: 
   targetGraphics:
   - {fileID: 106946819}
   useHighlightColor: 1
@@ -924,15 +954,45 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
-    SerializedBytes: 01010b00000063006f006c006f0072004e006f0072006d0061006c002f00000000012900000043006f006c006f0075007200500061006c0065007400740065002e0043006f006e007300740043006f006c006f00750072002c0020004d0053005000320030003500300050006c007500670069006e007300000000000301080000006d005f0063006f006c006f00750072002f01000000012900000055006e0069007400790045006e00670069006e0065002e0043006f006c006f0072002c00200055006e0069007400790045006e00670069006e0065002e0043006f00720065004d006f00640075006c006500200000803f200000803f200000803f200000000005050b010e00000063006f006c006f00720048006900670068006c006900670068007400000000002d010d00000063006f006c006f007200440069007300610062006c0065006400
+    SerializedFormat: 2
+    SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: a40e66438c6b1354191999c39071aa97, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 7
+      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
+    - Name: m_colour
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: colorHighlight
+      Entry: 10
+      Data: 0
+    - Name: colorDisabled
+      Entry: 6
+      Data: 
   targetGraphics:
   - {fileID: 2584476791698843566}
   useHighlightColor: 1
@@ -976,15 +1036,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 461c23c276b14a0f8cd5c3134469a2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alphaFactorOnStart: 1
-  alphaFactorOnConnected: 1
-  alphaFactorOnDisconnected: 0.2
-  interactableOnStart: 1
-  interactableOnConnected: 1
-  interactableOnDisconnected: 0
-  blockRaycastsOnStart: 1
-  blockRaycastsOnConnected: 1
-  blockRaycastsOnDisconnected: 1
+  m_CanvasGroups: []
+  m_EnablePointer: 1
+  m_PointerTargetGameObject: {fileID: 0}
+  m_AlphaFactorOnStart: 1
+  m_AlphaFactorOnConnected: 1
+  m_AlphaFactorOnDisconnected: 0.2
+  m_InteractableOnStart: 1
+  m_InteractableOnConnected: 1
+  m_InteractableOnDisconnected: 0
+  m_BlockRaycastsOnStart: 1
+  m_BlockRaycastsOnConnected: 1
+  m_BlockRaycastsOnDisconnected: 1
 --- !u!114 &1184471476784440253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -997,9 +1060,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc5f1d4700f4239816b341c2ac14d41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textOnStart: Edit the plan's layers.
-  textOnConnected: Edit the plan's layers.
-  textOnDisconnected: Server connection lost, connection required to edit  a plan
+  m_AddTooltips: []
+  m_TextOnStart: Edit the plan's layers.
+  m_TextOnConnected: Edit the plan's layers.
+  m_TextOnDisconnected: Server connection lost, connection required to edit  a plan
 --- !u!114 &7532372643570559681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1012,9 +1076,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70d417fe6a574195a65729e40477db5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useHighlightColorOnStart: 1
-  useHighlightColorOnConnected: 1
-  useHighlightColorOnDisconnected: 0
+  m_CustomButtonColorSets: []
+  m_UseHighlightColorOnStart: 1
+  m_UseHighlightColorOnConnected: 1
+  m_UseHighlightColorOnDisconnected: 0
 --- !u!1 &3189469586863680749
 GameObject:
   m_ObjectHideFlags: 0
@@ -1199,21 +1264,22 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
+        type: 3}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedFormat
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedBytes.Array.size
-      value: 366
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 0
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
@@ -2235,21 +2301,22 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
+        type: 3}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedFormat
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedBytes.Array.size
-      value: 134
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 0
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
@@ -2603,7 +2670,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: Only show geometry that was changed by the plan.
+  text: Only shows geometry that was changed by the plan.
   timeBeforeShowing: 0.5
   passClickToParent: 1
 --- !u!1001 &704631508
@@ -2943,21 +3010,22 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
+        type: 3}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedFormat
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedBytes.Array.size
-      value: 366
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 0
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
@@ -3984,21 +4052,22 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
+        type: 3}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedFormat
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedBytes.Array.size
-      value: 134
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 0
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
@@ -4352,8 +4421,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: Shows the state state of the world right after the plan's implementatrion,
-    indicating any changes.
+  text: Shows the state of the world right after the plan's implementatrion, indicating
+    any changes.
   timeBeforeShowing: 0.5
   passClickToParent: 1
 --- !u!1001 &5024717641808216807
@@ -4367,21 +4436,22 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
+        type: 3}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedFormat
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedBytes.Array.size
-      value: 366
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 0
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 1164764369937814001, guid: ca1579357a991df468a856b821f47379,
         type: 3}
@@ -5372,21 +5442,22 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
+        type: 3}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedFormat
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializedBytes.Array.size
-      value: 134
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 0
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5680174354153438788, guid: ca1579357a991df468a856b821f47379,
         type: 3}
@@ -5740,8 +5811,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: Shows the state of the world before right before the plan, without any of
-    its changes.
+  text: Shows the state of the world right before the plan, without any of its changes.
   timeBeforeShowing: 0.5
   passClickToParent: 1
 --- !u!1001 &5556979559763869866
@@ -6010,21 +6080,22 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: serializationData.SerializedFormat
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: serializationData.SerializedBytes.Array.size
-      value: 330
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 0
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
