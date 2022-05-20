@@ -82,8 +82,6 @@ namespace MSP2050.Scripts
 		public Plan GetSourcePlan()
 		{
 			//Maybe we should cache this...
-			//return PlanManager.GetPlanAtIndex(source_plan_id);
-			//This used to get the plan by index... while using an ID. Seemed incorrect. -Kevin 4/6/18
 			return PlanManager.GetPlanWithID(source_plan_id);
 		}
 	}

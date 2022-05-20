@@ -253,13 +253,13 @@ namespace MSP2050.Scripts
 					{
 						if (updateWorldView)
 						{
-							//TODO
+							//TODO: if difference view is added
 							UpdateWorldViewingDifference();
 						}
 					}
 					else
 					{
-						//TODO
+						//TODO: if difference view is added
 					}
 					break;
 				case WorldViewMode.Normal:
@@ -414,13 +414,13 @@ namespace MSP2050.Scripts
 			{
 				UpdateIndicator(viewDifferenceIndicatorTop, time0);
 				UpdateIndicator(viewDifferenceIndicatorBottom, time1);
-				//TODO: set world to state
+				//TODO: if difference view is added
 			}
 			else
 			{
 				UpdateIndicator(viewDifferenceIndicatorTop, time1);
 				UpdateIndicator(viewDifferenceIndicatorBottom, time0);
-				//TODO: set world to state
+				//TODO: if difference view is added
 			}
 		}
 
