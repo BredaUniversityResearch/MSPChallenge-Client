@@ -271,6 +271,7 @@ namespace MSP2050.Scripts
 
 		public static void ShowNetworkingBlocker()
 		{
+			Instance.networkingBlocker.transform.SetAsLastSibling();
 			Instance.networkingBlocker.SetActive(true);
 		}
 
