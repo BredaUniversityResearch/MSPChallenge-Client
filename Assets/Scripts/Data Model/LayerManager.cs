@@ -314,7 +314,8 @@ namespace MSP2050.Scripts
 			bool needsUpdateAndRedraw = false;
 			foreach (EntityType entityType in layer.EntityTypes.Values)
 			{
-				needsUpdateAndRedraw = needsUpdateAndRedraw || layer.SetEntityTypeVisibility(entityType, true);
+				bool newNeed = layer.SetEntityTypeVisibility(entityType, true);
+				needsUpdateAndRedraw = needsUpdateAndRedraw || newNeed;
 			}
 
 			if (!visibleLayers.Contains(layer))
