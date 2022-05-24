@@ -14,7 +14,7 @@ namespace HEBGraph
 	public class HEBGraphDataGroup
 	{
 		public string name;
-		public HEBGraphDataEntry[] entries;
+		public List<HEBGraphDataEntry> entries;
 	}
 
 	[Serializable]

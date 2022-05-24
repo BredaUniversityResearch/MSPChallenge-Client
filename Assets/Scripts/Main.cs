@@ -143,8 +143,8 @@ namespace MSP2050.Scripts
 			ParseAvailableSimulations(MspGlobalData.configured_simulations);
 			InterfaceCanvas.Instance.SetRegionWithName(MspGlobalData.region);
 
-			//TODO: Readd
-			//CradleImpactTool.CradleGraphManager.ForwardGraphInfo(MspGlobalData.dependencies);
+			if(MspGlobalData.dependencies != null)
+				InterfaceCanvas.Instance.ImpactToolGraph.Initialise(MspGlobalData.dependencies);
 
 			if (OnGlobalDataLoaded != null)
 			{

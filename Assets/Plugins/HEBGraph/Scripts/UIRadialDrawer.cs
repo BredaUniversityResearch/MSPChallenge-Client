@@ -105,10 +105,10 @@ namespace HEBGraph
 					{
 						//Close
 						indices.Add(lastInnerPointIndex);
-						indices.Add(verts.Count - 2);
+						indices.Add(verts.Count - 1);
 						indices.Add(0);
 
-						indices.Add(verts.Count - 2);
+						indices.Add(verts.Count - 1);
 						indices.Add(1);
 						indices.Add(0);
 						break; 
