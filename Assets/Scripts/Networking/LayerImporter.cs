@@ -1,11 +1,12 @@
-﻿#if UNITY_EDITOR
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using Newtonsoft.Json.Linq;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -313,4 +314,3 @@ namespace MSP2050.Scripts
 		public string mspid { get; set; }
 	}
 }
-#endif
