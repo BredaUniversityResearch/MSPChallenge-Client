@@ -1,35 +1,33 @@
 using System;
 using UnityEngine;
 
-namespace MSP2050.Scripts
+
+[Serializable]
+public class UnityCloudBuildManifest
 {
-	[Serializable]
-	public class UnityCloudBuildManifest
+	public string scmCommitId;
+	public string scmBranch;
+	public string buildNumber;
+	public string buildStartTime;
+	public string projectId;
+	public string bundleId;
+	public string unityVersion;
+	public string xcodeVersion;
+	public string cloudBuildTargetName;
+
+	public static UnityCloudBuildManifest Load()
 	{
-		public string scmCommitId;
-		public string scmBranch;
-		public string buildNumber;
-		public string buildStartTime;
-		public string projectId;
-		public string bundleId;
-		public string unityVersion;
-		public string xcodeVersion;
-		public string cloudBuildTargetName;
+		var manifest = (TextAsset)Resources.Load("UnityCloudBuildManifest.json");
+		return manifest == null ? null : JsonUtility.FromJson<UnityCloudBuildManifest>(manifest.text);
+	}
 
-		public static UnityCloudBuildManifest Load()
-		{
-			var manifest = (TextAsset)Resources.Load("UnityCloudBuildManifest.json");
-			return manifest == null ? null : JsonUtility.FromJson<UnityCloudBuildManifest>(manifest.text);
-		}
+	public string GetBuildTime()
+	{
+		return buildStartTime;
+	}
 
-		public string GetBuildTime()
-		{
-			return buildStartTime;
-		}
-
-		public string GetGitTag()
-		{
-			return buildNumber;
-		}
+	public string GetGitTag()
+	{
+		return buildNumber;
 	}
 }
