@@ -44,7 +44,8 @@ namespace MSP2050.Scripts
 		public LayerProbeWindow layerProbeWindow;
 		public WebViewWindow webViewWindow;
 		public GameObject networkingBlocker;
-		public GameObject impactTool;
+		public GameObject impactToolWindow;
+		public HEBGraph.HEBGraph ImpactToolGraph;
 
 		[Header("Game Menu")]
 		public GameMenu gameMenu;

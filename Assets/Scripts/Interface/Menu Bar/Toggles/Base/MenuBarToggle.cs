@@ -43,8 +43,8 @@ namespace MSP2050.Scripts
 					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.plansMonitor.gameObject.SetActive(toggle.isOn));
 					break;
 				case Selection.ImpactTool:
-					toggle.isOn = InterfaceCanvas.Instance.impactTool.activeSelf;
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.impactTool.SetActive(toggle.isOn));
+					toggle.isOn = InterfaceCanvas.Instance.impactToolWindow.activeSelf;
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.impactToolWindow.SetActive(toggle.isOn));
 					Main.OnGlobalDataLoaded += GlobalDataLoaded;
 					break;
 				case Selection.ActiveLayers:
@@ -74,8 +74,7 @@ namespace MSP2050.Scripts
 			}
 			else if (connectTo == Selection.ImpactTool)
 			{
-				//TODO: readd
-				//toggle.gameObject.SetActive(Main.MspGlobalData.dependencies != null); // Make sure this toggle is visible based on whether or not we have the data.
+				toggle.gameObject.SetActive(Main.MspGlobalData.dependencies != null); // Make sure this toggle is visible based on whether or not we have the data.
 			}
 		}
 
