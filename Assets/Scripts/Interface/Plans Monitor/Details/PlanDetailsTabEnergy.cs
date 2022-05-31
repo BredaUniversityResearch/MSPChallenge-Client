@@ -104,7 +104,7 @@ namespace MSP2050.Scripts
 
 		protected override void SubmitChangesAndUnlock()
 		{
-			BatchRequest batch = new BatchRequest();
+			BatchRequest batch = new BatchRequest(true);
 
 			energyDistribution.SetGridsToSliderValues(lockedPlan);
 
