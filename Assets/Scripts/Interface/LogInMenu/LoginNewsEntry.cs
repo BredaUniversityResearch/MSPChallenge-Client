@@ -54,6 +54,17 @@ namespace MSP2050.Scripts
 		{
 			Application.OpenURL(m_moreInfoLink);
 		}
+
+		public void FilterForSearch(string a_search)
+		{
+			if (string.IsNullOrEmpty(a_search))
+			{
+				gameObject.SetActive(true);
+				return;
+			}
+
+			gameObject.SetActive(m_titleText.text.Contains(a_search));
+		}
 	}
 
 	public class LoginNewsData

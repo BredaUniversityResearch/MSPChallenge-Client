@@ -30,7 +30,6 @@ namespace MSP2050.Scripts
 					height = canvasRect.sizeDelta.y;
 					width = height * bgAspect;
 					m_bgRect.sizeDelta = new Vector2(width, height);
-					//m_bgRect.sizeDelta = new Vector2((width - canvasRect.sizeDelta.x) / 2f, 0f);
 				}
 				else
 				{
@@ -38,7 +37,6 @@ namespace MSP2050.Scripts
 					width = canvasRect.sizeDelta.x;
 					height = width / bgAspect;
 					m_bgRect.sizeDelta = new Vector2(width, height);
-					//m_bgRect.sizeDelta = new Vector2(0f, (height - canvasRect.sizeDelta.y) / 2f);
 				}
 
 				m_maskedImage.sizeDelta = new Vector2(width, height);
