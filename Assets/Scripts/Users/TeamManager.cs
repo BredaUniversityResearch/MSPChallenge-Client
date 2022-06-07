@@ -77,8 +77,8 @@ namespace MSP2050.Scripts
 			}
 
 			//Load manager and admin from global data
-			teamsByID.Add(1, new Team(1, Util.HexToColor(Main.MspGlobalData.user_admin_color), Main.MspGlobalData.user_admin_name));
-			teamsByID.Add(2, new Team(2, Util.HexToColor(Main.MspGlobalData.user_region_manager_color), Main.MspGlobalData.user_region_manager_name));
+			teamsByID.Add(GM_ID, new Team(GM_ID, Util.HexToColor(Main.MspGlobalData.user_admin_color), Main.MspGlobalData.user_admin_name));
+			teamsByID.Add(AM_ID, new Team(AM_ID, Util.HexToColor(Main.MspGlobalData.user_region_manager_color), Main.MspGlobalData.user_region_manager_name));
 
 			TeamsLoaded();
 		}
