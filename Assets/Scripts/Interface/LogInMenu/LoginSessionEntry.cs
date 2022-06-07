@@ -21,17 +21,15 @@ namespace MSP2050.Scripts
 		[SerializeField] private float m_expandedHeight;
 
 		private GameSession m_session;
-		private Action<GameSession> m_connectCallback;
 
 		void Start()
 		{
-			m_barToggle.onValueChanged.AddListener(BarToggled);
+			m_barToggle.onValueChanged.AddListener(OnBarToggled);
 			m_connectButton.onClick.AddListener(ConnectPressed);
 		}
 
-		public void SetToSession(GameSession a_session, ToggleGroup a_toggleGroup, Action<GameSession> a_connectCallback)
+		public void SetToSession(GameSession a_session, ToggleGroup a_toggleGroup)
 		{
-			m_connectCallback = a_connectCallback;
 			m_barToggle.group = a_toggleGroup;
 			m_barToggle.isOn = false;
 			gameObject.SetActive(true);
@@ -50,15 +48,20 @@ namespace MSP2050.Scripts
 
 		void ConnectPressed()
 		{
-			m_connectCallback?.Invoke(m_session);
+			LoginManager.Instance.ConnectPressedForSession(m_session);
 		}
 
-		void BarToggled(bool a_isOn)
+		void OnBarToggled(bool a_isOn)
 		{
 			m_expandContent.SetActive(a_isOn);
 			m_connectButton.gameObject.SetActive(a_isOn);
 
 			GetComponent<LayoutElement>().preferredHeight = a_isOn ? m_expandedHeight : m_collapsedHeight;
+		}
+
+		public void SetSelected(bool a_selected)
+		{
+			m_barToggle.isOn = a_selected;
 		}
 	}
 }

@@ -54,5 +54,10 @@ namespace MSP2050.Scripts
 			m_bgMask.gameObject.SetActive(m_currentTab.m_showMask);
 			m_bgBlur.SetActive(m_currentTab.m_showBlur);
 		}
+
+		public void ConnectPressedForSession(GameSession a_session)
+		{
+
+		}
 	}
 }

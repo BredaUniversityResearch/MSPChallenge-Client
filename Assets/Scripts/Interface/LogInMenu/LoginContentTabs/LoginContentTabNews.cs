@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace MSP2050.Scripts
@@ -35,6 +33,7 @@ namespace MSP2050.Scripts
 			m_newsEntries = new List<LoginNewsEntry>();
 			m_searchBar.onValueChanged.AddListener(OnSearchtextChanged);
 			//TODO: get news entries from web
+			CreateEntries(null);
 		}
 
 		void CreateEntries(LoginNewsData[] a_data)
