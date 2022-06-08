@@ -15,6 +15,7 @@ namespace MSP2050.Scripts
 		public bool m_showBlur;
 		public bool m_showMask;
 		public bool m_showLeftBar;
+		public LoginManager.ELoginMenuTab Tab => m_tab;
 
 		[SerializeField] protected LoginManager.ELoginMenuTab m_tab;
 		[SerializeField] private GameObject m_tabContent;
@@ -29,15 +30,19 @@ namespace MSP2050.Scripts
 
 		protected virtual void Initialize()
 		{
-			m_tabToggle.onValueChanged.AddListener(OnToggleChanged);
+			if(m_tabToggle != null)
+				m_tabToggle.onValueChanged.AddListener(OnToggleChanged);
 		}
 
 		public virtual void SetTabActive(bool a_active)
 		{
 			m_tabContent.SetActive(a_active);
-			m_ignoreToggleCallback = true;
-			m_tabToggle.isOn = a_active;
-			m_ignoreToggleCallback = false;
+			if (m_tabToggle != null)
+			{
+				m_ignoreToggleCallback = true;
+				m_tabToggle.isOn = a_active;
+				m_ignoreToggleCallback = false;
+			}
 
 		}
 

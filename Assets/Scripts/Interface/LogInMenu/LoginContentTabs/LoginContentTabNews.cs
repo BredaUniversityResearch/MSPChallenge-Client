@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
 		[SerializeField] private Transform m_newsEntryParent;
 		[SerializeField] private GameObject m_newsEntryPrefab;
 		[SerializeField] private GameObject m_noNewsEntry;
-		[SerializeField] private InputField m_searchBar;
+		[SerializeField] private CustomInputField m_searchBar;
 
 		private List<LoginNewsEntry> m_newsEntries;
 

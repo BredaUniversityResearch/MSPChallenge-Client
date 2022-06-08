@@ -13,13 +13,7 @@ namespace MSP2050.Scripts
 {
 	public class LoginManager : SerializedMonoBehaviour
 	{
-		private const string LOGIN_COUNTRY_NAME_STR = "LoginScreenCountryName";
-		private const string LOGIN_COUNTRY_INDEX_STR = "LoginScreenCountryIndex";
-		public const string LOGIN_EXPERTISE_INDEX_STR = "LoginScreenExpertiseIndex";
-		private const string LOGIN_USER_NAME = "LoginScreenUserName";
 		private const string LOGIN_SERVER_NAME = "LoginScreenServerName";
-		private const string LOGIN_SERVER_ADRESS = "LoginScreenServerAdress";
-		private const string GAME_SERVER_MANAGER_HOSTNAME = "server.mspchallenge.info";
 
 		public enum ELoginMenuTab {Home, Intro, Sessions, News, Settings, Quit, Login}
 
@@ -30,12 +24,14 @@ namespace MSP2050.Scripts
 		[SerializeField] private GameObject m_leftBar;
 		[SerializeField] private LoginBGMask m_bgMask;
 		[SerializeField] private GameObject m_bgBlur;
-		[SerializeField] private Dictionary<ELoginMenuTab, LoginContentTab> m_tabs;
+		[SerializeField] private GameObject m_tabScriptObject;
 
 		[Header("Generic")]
 		public TeamImporter m_teamImporter;
 		[SerializeField] private GameObject m_loadingOverlay;
+		[SerializeField] private Button m_optionsButton;
 
+		private Dictionary<ELoginMenuTab, LoginContentTab> m_tabs;
 		private LoginContentTab m_currentTab;
 		private GameSession m_sessionConnectingTo;
 
@@ -46,7 +42,24 @@ namespace MSP2050.Scripts
 			if (SystemInfo.systemMemorySize < 8000)
 				DialogBoxManager.instance.NotificationWindow("Device not supported", "The current device does not satisfy MSP Challenge's minimum requirements. Effects may range from none to the program feeling unresponsive and/or crashing. Switching to another device is recommended.", null, "Confirm");
 
-			m_currentTab = m_tabs[ELoginMenuTab.Home];
+			m_tabs = new Dictionary<ELoginMenuTab, LoginContentTab>();
+			foreach (LoginContentTab tab in m_tabScriptObject.GetComponents<LoginContentTab>())
+			{
+				m_tabs[tab.Tab] = tab;
+			}
+			SetTabActive(ELoginMenuTab.Home);
+
+			m_optionsButton.onClick.AddListener(OnOptionsButtonClicked);
+		}
+
+		void Update()
+		{
+			ServerCommunication.Update(false);
+		}
+
+		void OnOptionsButtonClicked()
+		{
+			SetTabActive(ELoginMenuTab.Settings);
 		}
 
 		public void SetTabActive(ELoginMenuTab a_newTab)
@@ -55,8 +68,9 @@ namespace MSP2050.Scripts
 				m_currentTab.SetTabActive(false);
 			m_currentTab = m_tabs[a_newTab];
 			m_currentTab.SetTabActive(true);
+
 			m_leftBar.SetActive(m_currentTab.m_showLeftBar);
-			m_bgMask.gameObject.SetActive(m_currentTab.m_showMask);
+			m_bgMask.SetMaskActive(m_currentTab.m_showMask);
 			m_bgBlur.SetActive(m_currentTab.m_showBlur);
 		}
 
@@ -100,6 +114,11 @@ namespace MSP2050.Scripts
 			{
 				DialogBoxManager.instance.NotificationWindow("Connecting failed", "An error occurred when connecting to the session", null, "Continue");
 			}
+		}
+
+		public void SetLoadingOverlayActive(bool a_active)
+		{
+			m_loadingOverlay.SetActive(a_active);
 		}
 	}
 }

@@ -41,21 +41,22 @@ namespace MSP2050.Scripts
 
 			m_serverAddress.onEndEdit.AddListener(ServerAddressChanged);
 			m_resetAddressButton.onClick.AddListener(ResetServerAddress);
-			m_refreshSessionsButton.onClick.AddListener(RefreshSession);
+			m_refreshSessionsButton.onClick.AddListener(RefreshSessions);
+			RefreshSessions();
 		}
 
 		void ResetServerAddress()
 		{
 			m_serverAddress.text = GAME_SERVER_MANAGER_HOSTNAME;
-			RefreshSession();
+			RefreshSessions();
 		}
 
 		void ServerAddressChanged(string a_newAddress)
 		{
-			RefreshSession();
+			RefreshSessions();
 		}
 
-		void RefreshSession()
+		void RefreshSessions()
 		{
 			m_sessionsLoadingObj.SetActive(true);
 			foreach (LoginSessionEntry entry in m_sessionEntries)
@@ -73,31 +74,31 @@ namespace MSP2050.Scripts
 
 		IEnumerator GetServerList(int a_serverListID)
 		{
-			List<GameSession> sessions = new List<GameSession>();
 
-			WWWForm demoForm = new WWWForm();
-
-			//Demo sessions
-			demoForm.AddField("client_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier().GetBuildTime());
-			demoForm.AddField("visibility", "private");
-			demoForm.AddField("demo_servers", 1);
-			RetrieveSessionListHandler demoHandler = new RetrieveSessionListHandler(GAME_SERVER_MANAGER_HOSTNAME, demoForm);
-			yield return demoHandler.RetrieveListAsync();
-			if (demoHandler.Success)
-			{
-				sessions.AddRange(demoHandler.SessionList.sessionslist);
-			}
-
-			//Sessions from server address
-			WWWForm form = new WWWForm();
-			form.AddField("visibility", 0);
-			form.AddField("client_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier().GetBuildTime());
 			string host = "localhost";
 			if (!string.IsNullOrEmpty(m_serverAddress.text))
 			{
 				host = m_serverAddress.text.Trim(' ', '\r', '\n', '\t');
 				PlayerPrefs.SetString(LOGIN_SERVER_ADRESS, host);
 			}
+
+			RetrieveSessionListHandler demoHandler = null;
+
+			if (GAME_SERVER_MANAGER_HOSTNAME != host)
+			{
+				//Demo sessions
+				WWWForm demoForm = new WWWForm();
+				demoForm.AddField("client_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier().GetBuildTime());
+				demoForm.AddField("visibility", "private");
+				demoForm.AddField("demo_servers", 1);
+				demoHandler = new RetrieveSessionListHandler(GAME_SERVER_MANAGER_HOSTNAME, demoForm);
+				yield return demoHandler.RetrieveListAsync();
+			}
+
+			//Sessions from server address
+			WWWForm form = new WWWForm();
+			form.AddField("visibility", 0);
+			form.AddField("client_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier().GetBuildTime());
 			RetrieveSessionListHandler handler = new RetrieveSessionListHandler(host, form);
 			yield return handler.RetrieveListAsync();
 
@@ -126,7 +127,7 @@ namespace MSP2050.Scripts
 				}
 
 				//Create demo sessions
-				if (demoHandler.Success && demoHandler.SessionList?.sessionslist != null && demoHandler.SessionList.sessionslist.Length > 0)
+				if (demoHandler != null && demoHandler.Success && demoHandler.SessionList?.sessionslist != null && demoHandler.SessionList.sessionslist.Length > 0)
 				{
 					foreach (GameSession session in demoHandler.SessionList.sessionslist)
 						SetSessionEntry(session);
@@ -146,6 +147,8 @@ namespace MSP2050.Scripts
 				newEntry.SetToSession(a_session, m_sessionEntryToggleGroup);
 				m_sessionEntries.Add(newEntry);
 			}
+
+			m_nextEntryIndex++;
 		}
 	}
 }

@@ -17,10 +17,10 @@ namespace MSP2050.Scripts
 		private const string LOGIN_COUNTRY_INDEX_STR = "LoginScreenCountryIndex";
 		private const string LOGIN_EXPERTISE_INDEX_STR = "LoginScreenExpertiseIndex";
 
-		[SerializeField] private TMP_InputField m_usernameField;
-		[SerializeField] private TMP_InputField m_passwordField;
-		[SerializeField] private TMP_Dropdown m_countryDropdown;
-		[SerializeField] private TMP_Dropdown m_expertiseDropdown;
+		[SerializeField] private CustomInputField m_usernameField;
+		[SerializeField] private CustomInputField m_passwordField;
+		[SerializeField] private CustomDropdown m_countryDropdown;
+		[SerializeField] private CustomDropdown m_expertiseDropdown;
 		[SerializeField] private Button m_cancelButton;
 		[SerializeField] private Button m_acceptButton;
 		[SerializeField] private GameObject m_passwordContainer;
@@ -126,7 +126,7 @@ namespace MSP2050.Scripts
 		{
 			if (m_usernameField.text == "")
 			{
-				ShowErrorMessage("Please fill in a Username");
+				DialogBoxManager.instance.NotificationWindow("No username set", "Please fill in a username and try again", null, "Continue");
 				return;
 			}
 			else
@@ -136,28 +136,24 @@ namespace MSP2050.Scripts
 			}
 
 			//Store selected country on loginattempt in playerprefs
-			int countryDropdownIndex = m_countryDropdown.value;
-			string countryName = m_countryDropdown.options[countryDropdownIndex].text;
-			PlayerPrefs.SetInt(LOGIN_COUNTRY_INDEX_STR, countryDropdownIndex);
+			string countryName = m_countryDropdown.options[m_countryDropdown.value].text;
+			PlayerPrefs.SetInt(LOGIN_COUNTRY_INDEX_STR, m_countryDropdown.value);
 			PlayerPrefs.SetString(LOGIN_COUNTRY_NAME_STR, countryName);
 			if (m_expertiseContainer.gameObject.activeSelf)
 				PlayerPrefs.SetInt(LOGIN_EXPERTISE_INDEX_STR, m_expertiseDropdown.value);
 			else
 				PlayerPrefs.SetInt(LOGIN_EXPERTISE_INDEX_STR, -1);
 
-			int countryIndex = teamsIDByCountryName[countryName];
+			int countryID = m_countryDropdownIndexToID[m_countryDropdown.value];
+			LoginManager.Instance.SetLoadingOverlayActive(true);
 			ServerCommunication.RequestSession(
-				countryIndex, m_usernameField.text, (response) => RequestSessionSuccess(response, countryIndex),
+				countryID, m_usernameField.text, (response) => RequestSessionSuccess(response, countryID),
 				RequestSessionFailure, m_passwordContainer.activeInHierarchy ? m_passwordField.text : null
 			);
 		}
 
 		void RequestSessionSuccess(ServerCommunication.RequestSessionResponse response, int countryIndex)
 		{
-			//Continue to game
-			loginConnecting.SetActive(true);
-			loginTeam.SetActive(false);
-
 			ServerCommunication.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
 			TeamManager.InitializeUserValues(countryIndex, m_usernameField.text, response.session_id,
 				LoginManager.Instance.m_teamImporter.teams, m_passwordContainer.activeInHierarchy ? m_passwordField.text : null);
@@ -168,27 +164,9 @@ namespace MSP2050.Scripts
 
 		void RequestSessionFailure(ServerCommunication.ARequest request, string message)
 		{
-			ShowErrorMessage(message.Split('\n')[0]);
+			LoginManager.Instance.SetLoadingOverlayActive(false);
+			DialogBoxManager.instance.NotificationWindow("Connecting failed", message.Split('\n')[0], null, "Continue");
 			Debug.LogError(message);
-		}
-
-		private bool UserRequiresPassword(string userName)
-		{
-			bool requiresPassword = false;
-			MspGlobalData globalData = LoginManager.Instance.m_teamImporter.MspGlobalData;
-			if (globalData != null)
-			{
-				if (userName == globalData.user_admin_name || userName == globalData.user_region_manager_name)
-				{
-					requiresPassword = globalData.user_admin_has_password;
-				}
-				else
-				{
-					requiresPassword = globalData.user_common_has_password;
-				}
-			}
-
-			return requiresPassword;
 		}
 	}
 }
