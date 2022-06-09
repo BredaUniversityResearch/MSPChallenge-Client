@@ -10,13 +10,20 @@ namespace MSP2050.Scripts
 {
 	public class LoginContentTabSettings : LoginContentTab
 	{
+		[SerializeField] private Button m_acceptButton;
+		[SerializeField] private Button m_cancelButton;
 
 		protected override void Initialize()
 		{
 			base.Initialize();
 
-			//TODO
+			m_acceptButton.onClick.AddListener(ReturnToHome);
+			m_cancelButton.onClick.AddListener(ReturnToHome);
 		}
-
+		
+		void ReturnToHome()
+		{
+			LoginManager.Instance.SetTabActive(LoginManager.ELoginMenuTab.Home);
+		}
 	}
 }

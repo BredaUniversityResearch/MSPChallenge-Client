@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
 	public class Options : MonoBehaviour
 	{
-		public GenericWindow thisGenericWindow;
-
 		private float oldScale;
 		private int oldDisplayResolution;
 		private int oldGraphicsSettings;
@@ -21,8 +20,9 @@ namespace MSP2050.Scripts
 		// Graphics
 		public CustomSlider uiScale;
 		public CustomDropdown displayResolution;
-		public CustomDropdown qualitySettings;
+		//public CustomDropdown qualitySettings;
 		public Toggle fullscreenToggle;
+		public UnityEvent onDisplaySettingsChange;
 
 		// Audio
 		public Slider masterVolume;
@@ -31,19 +31,18 @@ namespace MSP2050.Scripts
 		// Other
 		public Toggle developerModeToggle;
 		public TextMeshProUGUI buildDateText;
-		//public TextMeshProUGUI buildRevisionText;
 		public TextMeshProUGUI apiEndpointText;
 
 		public Button cancel, accept;
+		public bool closeWindowOnCancelConfirm = true;
 
 		protected void Awake()
 		{
-			if (thisGenericWindow == null)
-				thisGenericWindow = GetComponent<GenericWindow>();
-
 			displayResolution.ClearOptions();
-			cancel.onClick.AddListener(OnCancel);
-			accept.onClick.AddListener(OnAccept);
+			if(cancel != null)
+				cancel.onClick.AddListener(OnCancel);
+			if(accept != null)
+				accept.onClick.AddListener(OnAccept);
 		}
 
 		protected void Start()
@@ -56,11 +55,9 @@ namespace MSP2050.Scripts
 				string name = "" + res.x + " x " + res.y;
 				resNames.Add(name);
 			}
-
 			displayResolution.AddOptions(resNames);
 
 			fullscreenToggle.isOn = GameSettings.Fullscreen;
-
 			developerModeToggle.isOn = Main.IsDeveloper;
 			uiScale.m_onRelease.AddListener(OnUIScaleSliderUp);
 
@@ -71,7 +68,8 @@ namespace MSP2050.Scripts
 
 		public void OnAccept()
 		{
-			this.gameObject.SetActive(false);
+			if(closeWindowOnCancelConfirm)
+				gameObject.SetActive(false);
 		}
 
 		// Only apply this on pointer up
@@ -79,7 +77,7 @@ namespace MSP2050.Scripts
 		{
 			GameSettings.SetUIScale(uiScale.value);
 			InterfaceCanvas.Instance?.propertiesWindow.Close();
-			UpdatePosition();
+			onDisplaySettingsChange.Invoke();
 		}
 
 		public void OnCancel()
@@ -90,14 +88,14 @@ namespace MSP2050.Scripts
 			GameSettings.SetMasterVolume(oldMasterVolume);
 			GameSettings.SetSFXVolume(oldSoundEffects);
 			GameSettings.SetFullscreen(oldFullscreen);
-			UpdatePosition();
 
-			this.gameObject.SetActive(false);
+			if(closeWindowOnCancelConfirm)
+				gameObject.SetActive(false);
+			onDisplaySettingsChange.Invoke();
 		}
 
 		protected void OnEnable()
 		{
-			StartCoroutine(LateUpdatePosition());
 			SetOptions();
 		}
 
@@ -132,13 +130,13 @@ namespace MSP2050.Scripts
 			uiScale.value = oldScale;
 			uiScale.maxValue = GameSettings.GetMaxUIScaleForWidth(Camera.main.pixelWidth);
 
-			qualitySettings.value = oldGraphicsSettings;
+			//qualitySettings.value = oldGraphicsSettings;
 			displayResolution.value = oldDisplayResolution;
 			masterVolume.value = oldMasterVolume;
 			soundEffects.value = oldSoundEffects;
 
 			uiScale.onValueChanged.RemoveAllListeners();
-			qualitySettings.onValueChanged.RemoveAllListeners();
+			//qualitySettings.onValueChanged.RemoveAllListeners();
 			displayResolution.onValueChanged.RemoveAllListeners();
 			masterVolume.onValueChanged.RemoveAllListeners();
 			soundEffects.onValueChanged.RemoveAllListeners();
@@ -146,7 +144,7 @@ namespace MSP2050.Scripts
 			masterVolume.onValueChanged.RemoveAllListeners();
 
 			//uiScale.slider.onValueChanged.AddListener((value) => { GameSettings.SetUIScale(value); });
-			qualitySettings.onValueChanged.AddListener((value) => { GameSettings.SetQualityLevel(value); });
+			//qualitySettings.onValueChanged.AddListener((value) => { GameSettings.SetQualityLevel(value); });
 			displayResolution.onValueChanged.AddListener(OnResolutionChanged);
 			fullscreenToggle.onValueChanged.AddListener(b => GameSettings.SetFullscreen(b));
 			developerModeToggle.onValueChanged.AddListener((value) => { Main.IsDeveloper = value; });
@@ -161,9 +159,9 @@ namespace MSP2050.Scripts
 			uiScale.maxValue = maxUIScale;
 			if (GameSettings.UIScale > maxUIScale)
 				GameSettings.SetUIScale(maxUIScale);
-			StartCoroutine(LateUpdatePosition());
 			if(InterfaceCanvas.Instance != null)
 				StartCoroutine(InterfaceCanvas.Instance.gameMenu.LateUpdatePosition());
+			onDisplaySettingsChange.Invoke();
 		}
 
 		private void playSoundEffect(string audioID)
@@ -173,20 +171,6 @@ namespace MSP2050.Scripts
 			{
 				audioSource.Play();
 			}
-		}
-
-		private IEnumerator LateUpdatePosition()
-		{
-			yield return new WaitForFixedUpdate();
-			UpdatePosition();
-		}
-
-		private void UpdatePosition()
-		{
-			//Canvas.ForceUpdateCanvases();
-			//thisGenericWindow.CenterWindow();
-			////thisGenericWindow.SetPosition(new Vector2(Screen.width/2f, Screen.height/2f));
-			//InterfaceCanvas.instance.gameMenu.thisGenericWindow.CenterWindow();
 		}
 	}
 }

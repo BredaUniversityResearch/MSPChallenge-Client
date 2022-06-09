@@ -33,7 +33,12 @@ namespace RoundingEditorUtility
 		}
 
 		[Button("Generate File")]
-		public void CreateTexture()
+		public void Generate()
+		{
+			CreateTexture(m_roundingSize, m_startAlpha, m_layers, m_slices, m_outputFilePath);
+		}
+
+		public static void CreateTexture(int m_roundingSize, float m_startAlpha, List<AlphaSettingLayer> m_layers, ESliceSection m_slices, string m_outputFilePath)
 		{
 			if (m_slices == 0)
 			{
@@ -253,8 +258,8 @@ namespace RoundingEditorUtility
 
 	public abstract class AlphaSettingLayer
 	{
-		[SerializeField] EAlphaBlendType m_blendType;
-		[SerializeField] ESectors m_sectors;
+		public EAlphaBlendType m_blendType;
+		public ESectors m_sectors;
 
 		public abstract void SetAlpha(ref float[,] a_alphaArray);
 
@@ -371,8 +376,8 @@ namespace RoundingEditorUtility
 
 	public class AlphaCircleLayer : AlphaSettingLayer
 	{
-		[SerializeField] float m_circleFadeEnd;
-		[SerializeField] float m_circleFadeStart;
+		public float m_circleFadeEnd;
+		public float m_circleFadeStart;
 
 		public override void SetAlpha(ref float[,] a_alphaArray)
 		{

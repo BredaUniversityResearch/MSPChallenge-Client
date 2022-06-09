@@ -27,11 +27,10 @@ namespace MSP2050.Scripts
 				m_mask.anchoredPosition = new Vector2(0f, localMousePos.y);
 				m_maskedImage.anchoredPosition = -m_mask.anchoredPosition;
 			}
-
-			//TODO: update size on resolution change
 		}
 
-		void UpdateImageSizes()
+		//This is also called when display options change, linked through the inspector callback
+		public void UpdateImageSizes()
 		{
 			m_canvas = GetComponentInParent<Canvas>();
 			Image bg = m_bgRect.GetComponent<Image>();
