@@ -128,7 +128,7 @@ namespace MSP2050.Scripts
 				oldDisplayResolution = GameSettings.DisplayResolution;
 
 			uiScale.value = oldScale;
-			uiScale.maxValue = GameSettings.GetMaxUIScaleForWidth(Camera.main.pixelWidth);
+			//uiScale.maxValue = GameSettings.GetMaxUIScaleForWidth(Camera.main.pixelWidth);//TODO: disabled for testing
 
 			//qualitySettings.value = oldGraphicsSettings;
 			displayResolution.value = oldDisplayResolution;
@@ -155,10 +155,10 @@ namespace MSP2050.Scripts
 		private void OnResolutionChanged(int resolutionIndex)
 		{
 			Vector2 newResolution = GameSettings.SetResolution(resolutionIndex);
-			float maxUIScale = GameSettings.GetMaxUIScaleForWidth(newResolution.x);
-			uiScale.maxValue = maxUIScale;
-			if (GameSettings.UIScale > maxUIScale)
-				GameSettings.SetUIScale(maxUIScale);
+			//float maxUIScale = GameSettings.GetMaxUIScaleForWidth(newResolution.x);
+			//uiScale.maxValue = maxUIScale;
+			//if (GameSettings.UIScale > maxUIScale)
+			//	GameSettings.SetUIScale(maxUIScale);
 			if(InterfaceCanvas.Instance != null)
 				StartCoroutine(InterfaceCanvas.Instance.gameMenu.LateUpdatePosition());
 			onDisplaySettingsChange.Invoke();

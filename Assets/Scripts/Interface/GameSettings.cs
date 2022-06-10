@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
@@ -166,7 +167,8 @@ namespace MSP2050.Scripts
 				{
 					Canvas currentCanvas = GameObject.FindObjectOfType<Canvas>();
 					if (currentCanvas != null)
-						currentCanvas.scaleFactor = scale;
+						currentCanvas.scaleFactor = (scale+1f)/4f;//TODO: changed for testing
+					RoundingManager.SetUIScale((int)scale);
 				}
 				if(save)
 					SavePlayerPrefs();

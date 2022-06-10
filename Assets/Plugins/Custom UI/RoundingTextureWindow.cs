@@ -38,12 +38,12 @@ namespace RoundingEditorUtility
 			CreateTexture(m_roundingSize, m_startAlpha, m_layers, m_slices, m_outputFilePath);
 		}
 
-		public static void CreateTexture(int m_roundingSize, float m_startAlpha, List<AlphaSettingLayer> m_layers, ESliceSection m_slices, string m_outputFilePath)
+		public static bool CreateTexture(int m_roundingSize, float m_startAlpha, List<AlphaSettingLayer> m_layers, ESliceSection m_slices, string m_outputFilePath)
 		{
 			if (m_slices == 0)
 			{
 				EditorUtility.DisplayDialog("No slice selected", "A sprite cannot be selected without any selected slices", "Confirm");
-				return;
+				return false;
 			}
 			bool overwriting = false;
 			if (File.Exists(m_outputFilePath))
@@ -53,7 +53,7 @@ namespace RoundingEditorUtility
 					overwriting = true;
 				}
 				else
-					return;
+					return false;
 			}
 
 			int totalSize = m_roundingSize * 2 + 1;
@@ -203,6 +203,7 @@ namespace RoundingEditorUtility
 
 			ti.spritesheet = newData.ToArray();
 			AssetDatabase.ImportAsset(m_outputFilePath, ImportAssetOptions.ForceUpdate);
+			return true;
 		}
 
 		[SerializeField, ReadOnly, PreviewField(300f, Sirenix.OdinInspector.ObjectFieldAlignment.Left)] Texture2D m_previewTexture;
