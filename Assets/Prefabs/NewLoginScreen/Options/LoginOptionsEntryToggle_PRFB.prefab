@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1292154760}
   - component: {fileID: 1292154764}
-  - component: {fileID: 1292154763}
   - component: {fileID: 1292154762}
   - component: {fileID: 1292154761}
+  - component: {fileID: 1804041512325529448}
   m_Layer: 5
   m_Name: Toggle
   m_TagString: Untagged
@@ -48,36 +48,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1292154759}
   m_CullTransparentMesh: 1
---- !u!114 &1292154763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1292154759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 42d7b029246699f49ae2df01cffc8748, type: 3}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!114 &1292154762
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118,7 +88,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 1292154763}
+  m_TargetGraphic: {fileID: 0}
   toggleTransition: 1
   graphic: {fileID: 1795984409}
   m_Group: {fileID: 0}
@@ -165,10 +135,33 @@ MonoBehaviour:
       Entry: 6
       Data: 
   targetGraphics:
-  - {fileID: 1292154763}
+  - {fileID: 1804041512325529448}
   highlightIfOn: 1
   useHighlightColor: 1
   useDisabledColor: 0
+--- !u!114 &1804041512325529448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1292154759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 941889c74250fc341ae9e200240219a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FillCenter: 1
+  m_slice: 0
+  m_rounding: 12
 --- !u!1 &1795984407
 GameObject:
   m_ObjectHideFlags: 0
@@ -255,7 +248,7 @@ PrefabInstance:
     - target: {fileID: 3525744507260560154, guid: 8865b2ae6d6531642adbbf85277553c4,
         type: 3}
       propertyPath: m_Name
-      value: LoginOptionsEntry_PRFB
+      value: LoginOptionsEntryToggle_PRFB
       objectReference: {fileID: 0}
     - target: {fileID: 3525744507260560155, guid: 8865b2ae6d6531642adbbf85277553c4,
         type: 3}

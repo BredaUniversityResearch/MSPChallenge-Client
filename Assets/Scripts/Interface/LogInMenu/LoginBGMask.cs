@@ -9,6 +9,7 @@ namespace MSP2050.Scripts
 		[SerializeField] private RectTransform m_bgRect;
 		[SerializeField] private RectTransform m_mask;
 		[SerializeField] private RectTransform m_maskedImage;
+		[SerializeField] private float m_maskFollowSpeed;
 		private Canvas m_canvas;
 		private bool m_initialized;
 		private bool m_active;
@@ -24,7 +25,7 @@ namespace MSP2050.Scripts
 			if (m_active)
 			{
 				RectTransformUtility.ScreenPointToLocalPointInRectangle(m_canvas.transform as RectTransform, Input.mousePosition, m_canvas.worldCamera, out var localMousePos);
-				m_mask.anchoredPosition = new Vector2(0f, localMousePos.y);
+				m_mask.anchoredPosition = new Vector2(0f, Mathf.MoveTowards(m_mask.anchoredPosition.y, localMousePos.y, m_maskFollowSpeed * Time.deltaTime));
 				m_maskedImage.anchoredPosition = -m_mask.anchoredPosition;
 			}
 		}

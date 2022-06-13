@@ -34,17 +34,26 @@ namespace UnityEngine.UI
 
 		private Vector4 m_borderDisplaySize;
 		private Sprite[] m_sprites;
-		private int m_uiScale = 3;
+
+		private Sprite CurrentSprite
+		{
+			get
+			{
+				if (m_sprites == null)
+					m_sprites = RoundingManager.RoundingAssetDatabase.GetSprites(m_rounding / 4 - 1, m_slice);
+
+				return m_sprites[RoundingManager.UIScale];
+			}
+		}
 
 		// Not serialized until we support read-enabled sprites better.
 		private float m_EventAlphaThreshold = 1;
 		public float eventAlphaThreshold { get { return m_EventAlphaThreshold; } set { m_EventAlphaThreshold = value; } }
 
-		void Start()
+		protected override void Start()
 		{
-			m_uiScale = RoundingManager.UIScale;
+			base.Start();
 			RoundingManager.RegisterUIScaleChangeReceiver(this);
-			m_sprites = RoundingManager.RoundingAssetDatabase.GetSprites(m_rounding / 4 - 1, m_slice);
 			switch (m_slice)
 			{
 				case RoundingAssetDatabase.ESliceSection.Full:
@@ -75,6 +84,7 @@ namespace UnityEngine.UI
 					m_borderDisplaySize = new Vector4(m_rounding, 0f, 0f, m_rounding);
 					break;
 			}
+			SetAllDirty();
 		}
 
 		protected RoundedImage()
@@ -82,30 +92,15 @@ namespace UnityEngine.UI
 			useLegacyMeshGeneration = false;
 		}
 
-		public override Texture mainTexture
-		{
-			get
-			{
-				if (m_sprites[m_uiScale] == null)
-				{
-					if (material != null && material.mainTexture != null)
-					{
-						return material.mainTexture;
-					}
-					return s_WhiteTexture;
-				}
-
-				return m_sprites[m_uiScale].texture;
-			}
-		}
+		public override Texture mainTexture => CurrentSprite.texture;
 
 		public float pixelsPerUnit
 		{
 			get
 			{
 				float spritePixelsPerUnit = 100;
-				if (m_sprites[m_uiScale])
-					spritePixelsPerUnit = m_sprites[m_uiScale].pixelsPerUnit;
+				if (CurrentSprite)
+					spritePixelsPerUnit = CurrentSprite.pixelsPerUnit;
 
 				float referencePixelsPerUnit = 100;
 				if (canvas)
@@ -118,8 +113,8 @@ namespace UnityEngine.UI
 		/// Image's dimensions used for drawing. X = left, Y = bottom, Z = right, W = top.
 		private Vector4 GetDrawingDimensions()
 		{
-			var padding = m_sprites[m_uiScale] == null ? Vector4.zero : Sprites.DataUtility.GetPadding(m_sprites[m_uiScale]);
-			var size = m_sprites[m_uiScale] == null ? Vector2.zero : new Vector2(m_sprites[m_uiScale].rect.width, m_sprites[m_uiScale].rect.height);
+			var padding = CurrentSprite == null ? Vector4.zero : Sprites.DataUtility.GetPadding(CurrentSprite);
+			var size = CurrentSprite == null ? Vector2.zero : new Vector2(CurrentSprite.rect.width, CurrentSprite.rect.height);
 
 			Rect r = GetPixelAdjustedRect();
 			// Debug.Log(string.Format("r:{2}, size:{0}, padding:{1}", size, padding, r));
@@ -145,52 +140,21 @@ namespace UnityEngine.UI
 
 		public override void SetNativeSize()
 		{
-			if (m_sprites[m_uiScale] != null)
-			{
-				float w = m_sprites[m_uiScale].rect.width / pixelsPerUnit;
-				float h = m_sprites[m_uiScale].rect.height / pixelsPerUnit;
-				rectTransform.anchorMax = rectTransform.anchorMin;
-				rectTransform.sizeDelta = new Vector2(w, h);
-				SetAllDirty();
-			}
+			float w = CurrentSprite.rect.width / pixelsPerUnit;
+			float h = CurrentSprite.rect.height / pixelsPerUnit;
+			rectTransform.anchorMax = rectTransform.anchorMin;
+			rectTransform.sizeDelta = new Vector2(w, h);
+			SetAllDirty();
 		}
-
-		/// <summary>
-		/// Update the UI renderer mesh.
-		/// </summary>
-		protected override void OnPopulateMesh(VertexHelper toFill)
-		{
-			if (m_sprites == null || m_sprites[m_uiScale] == null)
-			{
-				base.OnPopulateMesh(toFill);
-				return;
-			}
-
-			GenerateSlicedSprite(toFill);
-		}
-
 
 		static readonly Vector2[] s_VertScratch = new Vector2[4];
 		static readonly Vector2[] s_UVScratch = new Vector2[4];
-
-		private void GenerateSlicedSprite(VertexHelper toFill)
+		protected override void OnPopulateMesh(VertexHelper toFill)
 		{
-			Vector4 outer, inner, padding;
+			Vector4 outer = Sprites.DataUtility.GetOuterUV(CurrentSprite);
+			Vector4 inner = Sprites.DataUtility.GetInnerUV(CurrentSprite);
+			Vector4 padding = Sprites.DataUtility.GetPadding(CurrentSprite);
 
-			if (m_sprites[m_uiScale] != null)
-			{
-				outer = Sprites.DataUtility.GetOuterUV(m_sprites[m_uiScale]);
-				inner = Sprites.DataUtility.GetInnerUV(m_sprites[m_uiScale]);
-				padding = Sprites.DataUtility.GetPadding(m_sprites[m_uiScale]);
-				//border = sprite.border;
-			}
-			else
-			{
-				outer = Vector4.zero;
-				inner = Vector4.zero;
-				padding = Vector4.zero;
-				//border = Vector4.zero;
-			}
 
 			Rect rect = GetPixelAdjustedRect();
 			Vector4 border = GetAdjustedBorders(m_borderDisplaySize / pixelsPerUnit, rect);
@@ -237,7 +201,6 @@ namespace UnityEngine.UI
 				}
 			}
 		}
-		
 
 		static void AddQuad(VertexHelper vertexHelper, Vector3[] quadPositions, Color32 color, Vector3[] quadUVs)
 		{
@@ -289,9 +252,7 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				if (m_sprites[m_uiScale] == null)
-					return 0;
-				return Sprites.DataUtility.GetMinSize(m_sprites[m_uiScale]).x / pixelsPerUnit;
+				return Sprites.DataUtility.GetMinSize(CurrentSprite).x / pixelsPerUnit;
 			}
 		}
 
@@ -303,9 +264,7 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				if (m_sprites[m_uiScale] == null)
-					return 0;
-				return Sprites.DataUtility.GetMinSize(m_sprites[m_uiScale]).y / pixelsPerUnit;
+				return Sprites.DataUtility.GetMinSize(CurrentSprite).y / pixelsPerUnit;
 			}
 		}
 
@@ -318,7 +277,7 @@ namespace UnityEngine.UI
 			if (m_EventAlphaThreshold >= 1)
 				return true;
 
-			Sprite sprite = this.m_sprites[m_uiScale];
+			Sprite sprite = this.CurrentSprite;
 			if (sprite == null)
 				return true;
 
@@ -354,7 +313,7 @@ namespace UnityEngine.UI
 
 		private Vector2 MapCoordinate(Vector2 local, Rect rect)
 		{
-			Rect spriteRect = m_sprites[m_uiScale].rect;
+			Rect spriteRect = CurrentSprite.rect;
 
 			Vector4 adjustedBorder = GetAdjustedBorders(m_borderDisplaySize / pixelsPerUnit, rect);
 
@@ -378,7 +337,6 @@ namespace UnityEngine.UI
 
 		public void OnUIScaleChange(int a_newScale)
 		{
-			m_uiScale = a_newScale;
 			SetMaterialDirty();
 		}
 	}

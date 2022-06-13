@@ -304,7 +304,20 @@ namespace MSP2050.Scripts
 			FeatureCollection featureCollection = new FeatureCollection(features);
 			string content = JsonConvert.SerializeObject(featureCollection);
 
-			ARequest request = new RawDataRequest<T>(url, content, successCallback, failureCallback, retriesOnFail, false); //Needs to be seperate so the server URL is not added
+			ARequest request = new RawDataRequest<T>(url, content, successCallback, failureCallback, retriesOnFail, false); //Needs to be separate so the server URL is not added
+			request.timeoutLevel = 2;
+			request.expectMSPResultFormat = false;
+			requestsQueue.Enqueue(request);
+
+			if (OnRequestQueued != null)
+			{
+				OnRequestQueued(request);
+			}
+		}
+
+		public static void DoExternalAPICall<T>(string url, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
+		{
+			ARequest request = new RawDataRequest<T>(url, "", successCallback, failureCallback, retriesOnFail, false); //Needs to be separate so the server URL is not added
 			request.timeoutLevel = 2;
 			request.expectMSPResultFormat = false;
 			requestsQueue.Enqueue(request);

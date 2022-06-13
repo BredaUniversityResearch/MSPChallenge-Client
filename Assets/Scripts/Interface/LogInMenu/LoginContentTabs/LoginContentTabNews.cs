@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 {
 	public class LoginContentTabNews : LoginContentTab
 	{
+		private const string GetNewsURL = "https://community.mspchallenge.info/api.php?action=query&list=categorymembers&cmtitle=Category%3ANews&cmsort=timestamp&cmdir=desc&cmprop=title%7Ctimestamp%7Ctype&format=json";
 
 		[Header("Latest news")]
 		[SerializeField] private GameObject m_latestNewsBar;
@@ -32,8 +33,9 @@ namespace MSP2050.Scripts
 
 			m_newsEntries = new List<LoginNewsEntry>();
 			m_searchBar.onValueChanged.AddListener(OnSearchtextChanged);
-			//TODO: get news entries from web
 			CreateEntries(null);
+			//TODO: get news entries from web
+			//ServerCommunication.DoExternalAPICall<NewsRequestData>(GetNewsURL, OnNewsPageQuerySuccess, OnNewsPageQueryFail);
 		}
 
 		void CreateEntries(LoginNewsData[] a_data)
@@ -63,5 +65,43 @@ namespace MSP2050.Scripts
 			foreach(LoginNewsEntry entry in m_newsEntries)
 				entry.FilterForSearch(a_newText);
 		}
+
+		void OnNewsPageQuerySuccess(NewsRequestData a_data)
+		{
+			if (a_data != null && a_data.query != null && a_data.query.categorymembers != null)
+			{
+				foreach (NewsQueryEntry entry in a_data.query.categorymembers)
+				{
+
+				}
+			}
+		}
+
+		void OnNewsPageQueryFail(ServerCommunication.ARequest a_request, string a_message)
+		{ }
+
+		void GetContentForPage(string a_title)
+		{
+			string URL = $"https://community.mspchallenge.info/api.php?action=parse&page={a_title}&format=json&prop=wikitext|images|links|externallinks";
+		}
+	}
+
+	[Serializable]
+	public class NewsRequestData
+	{
+		public NewsQueryData query;
+	}
+
+	[Serializable]
+	public class NewsQueryData
+	{
+		public NewsQueryEntry[] categorymembers;
+	}
+
+	[Serializable]
+	public class NewsQueryEntry
+	{
+		public string title;
+		public string timestamp;
 	}
 }

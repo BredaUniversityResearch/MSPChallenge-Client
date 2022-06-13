@@ -19,10 +19,12 @@ namespace UnityEngine.UI
 			{
 				if (m_instance == null)
 				{
-					m_instance = new GameObject("RoundingManager").AddComponent<RoundingManager>();
-					m_instance.m_roundingAssetDatabase = Resources.Load<RoundingAssetDatabase>("RoundingAssetDatabase");
+					m_instance = GameObject.Find("RoundingManager")?.GetComponent<RoundingManager>();
+					if (m_instance == null)
+						m_instance = new GameObject("RoundingManager").AddComponent<RoundingManager>();
+					if(m_instance.m_roundingAssetDatabase == null)
+						m_instance.m_roundingAssetDatabase = Resources.Load<RoundingAssetDatabase>("RoundingAssetDatabase");
 				}
-
 				return m_instance;
 			}
 		}

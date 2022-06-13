@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		private static float sfxVolume;
 
 		//Graphics
-		public static float UIScale { get; private set; }
+		public static float UIScale { get; private set; } //has a range of 0 to 7
 		public static int DisplayResolution { get; private set; }
 		public static bool Fullscreen { get; private set; }
 		public static int GraphicsSettings { get; private set; }
@@ -65,7 +65,8 @@ namespace MSP2050.Scripts
 					}
 				}
 
-				UIScale = Mathf.Min(PlayerPrefs.GetFloat("UIScale", Screen.dpi / 100f), GetMaxUIScaleForWidth(Resolutions[DisplayResolution].x));
+				//UIScale = Mathf.Min(PlayerPrefs.GetFloat("UIScale", Screen.dpi / 100f), GetMaxUIScaleForWidth(Resolutions[DisplayResolution].x));
+				UIScale = PlayerPrefs.GetFloat("UIScale", 3f);
 			}
 		}
 
