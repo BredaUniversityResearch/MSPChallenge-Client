@@ -17,18 +17,6 @@ namespace UnityEngine.UI
 	[AddComponentMenu("UI/RoundedImage", 11)]
 	public class RoundedImage : MaskableGraphic, ILayoutElement, ICanvasRaycastFilter, IUIScaleChangeReceiver
 	{
-		//[SerializeField]
-		//private Sprite m_Sprite;
-		//public Sprite sprite 
-		//{
-		//	get { return m_Sprite; }
-		//	set
-		//	{
-		//		m_Sprite = value;
-		//		SetVerticesDirty();
-		//	}
-		//}
-
 		[SerializeField] private bool m_FillCenter = true;
 
 		public bool fillCenter
@@ -89,27 +77,11 @@ namespace UnityEngine.UI
 			}
 		}
 
-		//public enum ESliceSection
-		//{
-		//	Full = 0,
-		//	Left = 1,
-		//	Top = 2,
-		//	Right = 3,
-		//	Bottom = 4,
-		//	TopLeft = 5,
-		//	TopRight = 6,
-		//	BottomRight = 7,
-		//	BottomLeft = 8
-		//}
-
 		protected RoundedImage()
 		{
 			useLegacyMeshGeneration = false;
 		}
 
-		/// <summary>
-		/// Image's texture comes from the UnityEngine.Image.
-		/// </summary>
 		public override Texture mainTexture
 		{
 			get
