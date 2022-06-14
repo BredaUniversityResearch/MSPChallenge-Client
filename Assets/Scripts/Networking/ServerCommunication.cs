@@ -137,21 +137,12 @@ namespace MSP2050.Scripts
 			public RawDataRequest(string url, string data, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
 				: base(url, successCallback, failureCallback, retriesRemaining)
 			{
-				Debug.Log("Created request with raw content: " + data);
 				this.data = data;
 				this.addDefaultHeaders = addDefaultHeaders;
 			}
 
 			public override void CreateRequest(Dictionary<string, string> defaultHeaders)
 			{
-				//Www = UnityWebRequest.Post(Url, data);
-				//if (defaultHeaders != null && addDefaultHeaders)
-				//	AddHeaders(Www, defaultHeaders);
-				//Www.SetRequestHeader("Content-Type", "application/json");
-				////Www.uploadHandler.contentType = "application/json";
-				//Www.timeout = REQUEST_TIMEOUT;
-
-				//Kevin: updated the webrequest creation as the version above is appearantly broken for custom content types
 				Www = new UnityWebRequest(Url, "POST");
 				byte[] bodyRaw = Encoding.UTF8.GetBytes(data);
 				Www.uploadHandler = new UploadHandlerRaw(bodyRaw);
@@ -317,7 +308,7 @@ namespace MSP2050.Scripts
 
 		public static void DoExternalAPICall<T>(string url, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
 		{
-			ARequest request = new RawDataRequest<T>(url, "", successCallback, failureCallback, retriesOnFail, false); //Needs to be separate so the server URL is not added
+			ARequest request = new FormRequest<T>(url, null, successCallback, failureCallback, retriesOnFail, false); //Needs to be separate so the server URL is not added
 			request.timeoutLevel = 2;
 			request.expectMSPResultFormat = false;
 			requestsQueue.Enqueue(request);

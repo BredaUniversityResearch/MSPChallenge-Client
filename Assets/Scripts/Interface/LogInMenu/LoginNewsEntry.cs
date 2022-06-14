@@ -63,7 +63,8 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			gameObject.SetActive(m_titleText.text.Contains(a_search));
+			gameObject.SetActive(m_titleText.text.IndexOf(a_search, StringComparison.OrdinalIgnoreCase) >= 0
+			                     || m_contentText.text.IndexOf(a_search, StringComparison.OrdinalIgnoreCase) >= 0);
 		}
 	}
 
