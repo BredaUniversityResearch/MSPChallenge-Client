@@ -80,7 +80,7 @@ namespace MSP2050.Scripts
 							m_circleFadeEnd = newSize,
 							m_circleFadeStart = newSize - 1
 						};
-						bool success = RoundingTextureWindow.CreateTexture(newSize, 0f, layers, RoundingEditorUtility.ESliceSection.Corners | RoundingEditorUtility.ESliceSection.Full | RoundingEditorUtility.ESliceSection.Sides, $"Assets/Resources/Rounding/rounded_{newSize}px.png");
+						bool success = RoundingTextureWindow.CreateTexture(newSize, 0f, layers, RoundingEditorUtility.ESliceSection.Corners | RoundingEditorUtility.ESliceSection.Full | RoundingEditorUtility.ESliceSection.Sides, $"Assets/Resources/Rounding/rounded_{newSize}px.png", true);
 						if (!success)
 						{
 							Debug.LogError("Rounding sprite generation aborted");

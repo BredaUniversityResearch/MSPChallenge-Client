@@ -4,7 +4,7 @@ using UnityEditor.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UnityEngine.UI
+namespace MSP2050.Scripts
 {
 	public class DropdownLip : MonoBehaviour
 	{
