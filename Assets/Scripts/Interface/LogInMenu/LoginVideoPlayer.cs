@@ -31,6 +31,7 @@ namespace MSP2050.Scripts
 		[SerializeField] private float m_fsControlDisplayThreshold;
 		[SerializeField] private Button m_fsPlayButton;
 		[SerializeField] private Button m_fsPauseButton;
+		[SerializeField] private Button m_fsVideoButton;
 		[SerializeField] private Button m_fsMinimizeButton;
 		[SerializeField] private Slider m_fsTimeSlider;
 
@@ -49,6 +50,7 @@ namespace MSP2050.Scripts
 			m_pauseButton.onClick.AddListener(OnPause);
 			m_fsPlayButton.onClick.AddListener(OnPlay);
 			m_fsPauseButton.onClick.AddListener(OnPause);
+			m_fsVideoButton.onClick.AddListener(OnTogglePlay);
 			m_fullScreenButton.onClick.AddListener(OnMaximize);
 			m_fsMinimizeButton.onClick.AddListener(OnMinimize);
 			m_fsTimeSlider.onValueChanged.AddListener(OnTimeSliderChange);
@@ -114,6 +116,14 @@ namespace MSP2050.Scripts
 			m_leftImage.sprite = m_currentVideoIndex == 0 ? m_videoThumbnails[m_videoThumbnails.Length - 1] : m_videoThumbnails[m_currentVideoIndex - 1];
 			m_rightImage.sprite = m_currentVideoIndex == m_videoThumbnails.Length - 1 ? m_videoThumbnails[0] : m_videoThumbnails[m_currentVideoIndex + 1];
 			m_videoDisplayImage.texture = m_videoThumbnails[m_currentVideoIndex].texture;
+		}
+
+		void OnTogglePlay()
+		{
+			if(m_videoPlayer.isPlaying)
+				OnPause();
+			else
+				OnPlay();
 		}
 
 		void OnPlay()
