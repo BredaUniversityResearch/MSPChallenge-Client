@@ -44,11 +44,11 @@ namespace HEBGraph
 				m_TextComponent = gameObject.GetComponent<TMP_Text>();
 		}
 
-		//private void OnEnable()
-		//{
-		//	//every time the object gets enabled, we have to force a re-creation of the text mesh
-		//	SetDirty();
-		//}
+		private void OnEnable()
+		{
+			//every time the object gets enabled, we have to force a re-creation of the text mesh
+			SetDirty();
+		}
 
 		private void Update()
 		{
