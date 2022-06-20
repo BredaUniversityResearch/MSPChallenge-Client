@@ -30,25 +30,35 @@ namespace MSP2050.Scripts
 			m_moreInfoLink = a_data.more_info_link;
 			m_contentImage.gameObject.SetActive(false);
 			m_contentText.margin = new Vector4(m_contentText.margin.x, m_contentText.margin.y, m_noImageMarginRight, m_contentText.margin.w);
-			if (!string.IsNullOrEmpty(a_data.image_link))
-				StartCoroutine(DownloadImage(a_data.image_link));
+			//if (!string.IsNullOrEmpty(a_data.image_link))
+			//	StartCoroutine(DownloadImage(a_data.image_link));
 		}
 
-		IEnumerator DownloadImage(string a_url)
+		public void SetImage(Texture2D a_texture)
 		{
-			UnityWebRequest request = UnityWebRequestTexture.GetTexture(a_url);
-			yield return request.SendWebRequest();
-			if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-				Debug.LogWarning(request.error);
-			else
-			{
-				Texture2D texture = ((DownloadHandlerTexture) request.downloadHandler).texture;
-				m_contentImage.texture = texture;
-				m_contentImage.gameObject.SetActive(true);
-				m_contentImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)texture.width / (float)texture.height;
-				m_contentText.margin = new Vector4(m_contentText.margin.x, m_contentText.margin.y, m_imageMarginRight, m_contentText.margin.w);
-			}
+			if (a_texture == null)
+				return;
+			m_contentImage.texture = a_texture;
+			m_contentImage.gameObject.SetActive(true);
+			m_contentImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)a_texture.width / (float)a_texture.height;
+			m_contentText.margin = new Vector4(m_contentText.margin.x, m_contentText.margin.y, m_imageMarginRight, m_contentText.margin.w);
 		}
+
+		//public IEnumerator DownloadImage(string a_url)
+		//{
+		//	UnityWebRequest request = UnityWebRequestTexture.GetTexture(a_url);
+		//	yield return request.SendWebRequest();
+		//	if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+		//		Debug.LogWarning(request.error);
+		//	else
+		//	{
+		//		Texture2D texture = ((DownloadHandlerTexture) request.downloadHandler).texture;
+		//		m_contentImage.texture = texture;
+		//		m_contentImage.gameObject.SetActive(true);
+		//		m_contentImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)texture.width / (float)texture.height;
+		//		m_contentText.margin = new Vector4(m_contentText.margin.x, m_contentText.margin.y, m_imageMarginRight, m_contentText.margin.w);
+		//	}
+		//}
 
 		void ReadMorePressed()
 		{

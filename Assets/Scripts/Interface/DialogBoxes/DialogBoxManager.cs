@@ -77,7 +77,6 @@ namespace MSP2050.Scripts
 
 			dialogBox.rb.onClick.AddListener(() => DestroyDialogBox(dialogBox));
 
-			//dialogBox.modalBackground = CreateModalBackground(dialogBox.transform);
 			boxes.Add(dialogBox);
 			return dialogBox;
 		}

@@ -23,6 +23,7 @@ namespace MSP2050.Scripts
 		[SerializeField] private Button m_refreshSessionsButton;
 		[SerializeField] private GameObject m_sessionsLoadingObj;
 		[SerializeField] private GameObject m_noSessionsObj;
+		[SerializeField] private GameObject m_sessionTopLine;
 		[SerializeField] private TextMeshProUGUI m_sessionErrorObj;
 		[SerializeField] private Transform m_sessionEntryParent;
 		[SerializeField] private GameObject m_sessionEntryPrefab;
@@ -75,26 +76,14 @@ namespace MSP2050.Scripts
 		IEnumerator GetServerList(int a_serverListID)
 		{
 
+			m_sessionTopLine.SetActive(false);
 			string host = "localhost";
 			if (!string.IsNullOrEmpty(m_serverAddress.text))
 			{
 				host = m_serverAddress.text.Trim(' ', '\r', '\n', '\t');
 				PlayerPrefs.SetString(LOGIN_SERVER_ADRESS, host);
 			}
-
-			RetrieveSessionListHandler demoHandler = null;
-
-			if (GAME_SERVER_MANAGER_HOSTNAME != host)
-			{
-				//Demo sessions
-				WWWForm demoForm = new WWWForm();
-				demoForm.AddField("client_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier().GetBuildTime());
-				demoForm.AddField("visibility", "private");
-				demoForm.AddField("demo_servers", 1);
-				demoHandler = new RetrieveSessionListHandler(GAME_SERVER_MANAGER_HOSTNAME, demoForm);
-				yield return demoHandler.RetrieveListAsync();
-			}
-
+			
 			//Sessions from server address
 			WWWForm form = new WWWForm();
 			form.AddField("visibility", 0);
@@ -110,9 +99,15 @@ namespace MSP2050.Scripts
 				//Create custom sessions
 				if (handler.Success)
 				{
-					if (handler.SessionList?.sessionslist != null && handler.SessionList.sessionslist.Length > 0)
+					if (!handler.SessionList.success)
 					{
-						foreach(GameSession session in handler.SessionList.sessionslist)
+						m_sessionErrorObj.gameObject.SetActive(true);
+						m_sessionErrorObj.text = handler.SessionList.message;
+					}
+					else if (handler.SessionList.sessionslist != null && handler.SessionList.sessionslist.Length > 0)
+					{
+						m_sessionTopLine.SetActive(true);
+						foreach (GameSession session in handler.SessionList.sessionslist)
 							SetSessionEntry(session);
 					}
 					else
@@ -124,13 +119,6 @@ namespace MSP2050.Scripts
 				{
 					m_sessionErrorObj.gameObject.SetActive(true);
 					m_sessionErrorObj.text = "Failed to fetch session list from server address";
-				}
-
-				//Create demo sessions
-				if (demoHandler != null && demoHandler.Success && demoHandler.SessionList?.sessionslist != null && demoHandler.SessionList.sessionslist.Length > 0)
-				{
-					foreach (GameSession session in demoHandler.SessionList.sessionslist)
-						SetSessionEntry(session);
 				}
 			}
 		}

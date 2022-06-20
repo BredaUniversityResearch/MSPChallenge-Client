@@ -109,6 +109,11 @@ namespace MSP2050.Scripts
 		void SetVideoIndex(int a_newIndex)
 		{
 			m_currentVideoIndex = a_newIndex;
+			//m_rendertexture.Release();
+			RenderTexture rt = RenderTexture.active;
+			RenderTexture.active = m_rendertexture;
+			GL.Clear(true, true, Color.black);
+			RenderTexture.active = rt;
 
 			OnPause();
 			m_videoPlayer.Stop();

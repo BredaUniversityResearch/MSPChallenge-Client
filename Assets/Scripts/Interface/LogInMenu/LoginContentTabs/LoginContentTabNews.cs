@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -6,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace MSP2050.Scripts
@@ -66,6 +68,10 @@ namespace MSP2050.Scripts
 				{
 					LoginNewsEntry newEntry = Instantiate(m_newsEntryPrefab, m_newsEntryParent).GetComponent<LoginNewsEntry>();
 					newEntry.SetContent(entryData);
+					if (!string.IsNullOrEmpty(entryData.image_link))
+					{
+						StartCoroutine(DownloadImage(entryData.image_link, newEntry));
+					}
 					m_newsEntries.Add(newEntry);
 				}
 
@@ -78,6 +84,34 @@ namespace MSP2050.Scripts
 					newEntry.GetComponent<Button>().onClick.AddListener(OpenNewsTab);
 				}
 				m_latestNewsReadMoreButton.transform.SetAsLastSibling();
+			}
+		}
+
+		IEnumerator DownloadImage(string a_url, LoginNewsEntry a_entry)
+		{
+			Debug.Log(a_url);
+			//UnityWebRequest request = UnityWebRequestTexture.GetTexture(a_url);
+			//yield return request.SendWebRequest();
+			//if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+			//	Debug.LogWarning(request.error);
+			//else
+			//{
+			//	a_entry.SetImage(((DownloadHandlerTexture)request.downloadHandler).texture);
+			//}
+
+			using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(a_url))
+			//using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture("https://cdn.discordapp.com/attachments/358281323007311873/984766405813604352/Kevin.png"))
+			{
+				yield return uwr.SendWebRequest();
+
+				if (uwr.result != UnityWebRequest.Result.Success)
+				{
+					Debug.LogWarning(uwr.error);
+				}
+				else
+				{
+					a_entry.SetImage(DownloadHandlerTexture.GetContent(uwr));
+				}
 			}
 		}
 
@@ -113,6 +147,7 @@ namespace MSP2050.Scripts
 		void GetContentForPage(string a_title, string a_date)
 		{
 			string URL = $"https://community.mspchallenge.info/api.php?action=parse&page={a_title}&format=json&prop=text|images";
+			//string URL = $"https://community.mspchallenge.info/api.php?action=parse&page=How_to_add_geo-data_to_the_platform&format=json&prop=text|images";
 			ServerCommunication.DoExternalAPICall<WikiNewsEntryResult>(URL, (r) => OnNewsEntryQuerySuccess(r, a_date), OnNewsEntryQueryFail);
 		}
 
@@ -146,7 +181,12 @@ namespace MSP2050.Scripts
 			var stripFormattingRegex = new Regex(stripFormatting, RegexOptions.Multiline);
 
 			var text = html;
-			int debugInfoIndex = html.IndexOf("\n<!--");
+
+			int cutoffIndex = html.IndexOf("<u>");
+			if (cutoffIndex >= 0)
+				text = text.Substring(0, cutoffIndex);
+
+			int debugInfoIndex = text.IndexOf("\n<!--");
 			if (debugInfoIndex >= 0)
 				text = text.Substring(0, debugInfoIndex);
 

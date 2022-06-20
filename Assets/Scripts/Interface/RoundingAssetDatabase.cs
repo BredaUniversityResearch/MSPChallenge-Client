@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
+#if UNITY_EDITOR
 using RoundingEditorUtility;
+#endif //Unity_editor
 
 namespace MSP2050.Scripts
 {
@@ -38,7 +40,7 @@ namespace MSP2050.Scripts
 			}
 			return result;
 		}
-
+#if UNITY_EDITOR
 		[Button("Generate sprites")]
 		public void GenerateSprites()
 		{
@@ -110,5 +112,6 @@ namespace MSP2050.Scripts
 				m_roundingIndexList.Add(indices);
 			}
 		}
+#endif //Unity_editor
 	}
 }

@@ -122,11 +122,16 @@ namespace MSP2050.Scripts
 			LoginManager.Instance.SetTabActive(LoginManager.ELoginMenuTab.Sessions);
 		}
 
-		void OnAcceptClick()
+		public void OnAcceptClick()
 		{
 			if (m_usernameField.text == "")
 			{
 				DialogBoxManager.instance.NotificationWindow("No username set", "Please fill in a username and try again", null, "Continue");
+				return;
+			}
+			else if (m_passwordContainer.activeInHierarchy && string.IsNullOrEmpty(m_passwordField.text))
+			{
+				DialogBoxManager.instance.NotificationWindow("Incorrect password", "The provided password is incorrect, please try again", null, "Continue");
 				return;
 			}
 			else

@@ -52,9 +52,8 @@ namespace MSP2050.Scripts
 
 	public class GameSessionList
 	{
-		public string status;
+		public bool success;
 		public string message;
-		public int count;
 		public GameSession[] sessionslist;
 	}
 }
