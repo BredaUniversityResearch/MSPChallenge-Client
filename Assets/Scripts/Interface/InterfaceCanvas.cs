@@ -57,6 +57,7 @@ namespace MSP2050.Scripts
 		public MenuBarToggle menuBarPlanWizard;
 		public MenuBarToggle menuBarObjectivesMonitor;
 		public MenuBarToggle menuBarPlansMonitor;
+		public MenuBarToggle menuBarImpactTool;
 		public MenuBarToggle menuBarActiveLayers;
 		public MenuBarToggle menuBarGameMenu;
 
