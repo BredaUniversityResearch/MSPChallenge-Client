@@ -332,8 +332,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
-    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010d00000063006f006c006f007200530065006c0065006300740065006400000000000b010e00000063006f006c006f00720048006900670068006c006900670068007400010000000b010d00000063006f006c006f007200440069007300610062006c006500640000000000
+    SerializedFormat: 2
+    SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: a6ede42dae57b834bb43ce76254e7be7, type: 2}
     - {fileID: 11400000, guid: fb1816618fd5a9c4f926c1c8fa48294a, type: 2}
@@ -341,7 +341,19 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 10
+      Data: 0
+    - Name: colorSelected
+      Entry: 10
+      Data: 0
+    - Name: colorHighlight
+      Entry: 10
+      Data: 1
+    - Name: colorDisabled
+      Entry: 10
+      Data: 0
   targetGraphics:
   - {fileID: 6575515669250821410}
   highlightIfOn: 1
@@ -1044,7 +1056,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Current Value
   timeBeforeShowing: 0.5
-  passClickToParent: 1
+  passClickToParent: 0
 --- !u!1 &1840352508279257345
 GameObject:
   m_ObjectHideFlags: 0
@@ -1441,7 +1453,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: Starting Value
   timeBeforeShowing: 0.5
-  passClickToParent: 1
+  passClickToParent: 0
 --- !u!1 &6646917478693271992
 GameObject:
   m_ObjectHideFlags: 0
