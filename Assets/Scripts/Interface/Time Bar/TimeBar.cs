@@ -125,6 +125,23 @@ namespace MSP2050.Scripts
 
 			viewDifferenceMonthDropdown1.onValueChanged.AddListener((v) => DifferenceMonthDropdownChanged(v, 1));
 			viewDifferenceYearDropdown1.onValueChanged.AddListener((v) => DifferencedYearDropdownChanged(v, 1));
+
+			GameState.OnCurrentMonthChanged += OnMonthChanged;
+		}
+
+		void OnDestroy()
+		{
+			GameState.OnCurrentMonthChanged -= OnMonthChanged;
+		}
+
+		private void OnMonthChanged(int oldCurrentMonth, int newCurrentMonth)
+		{
+			if (viewMode != WorldViewMode.Normal)
+			{
+				ignoreActivityCallback = true;
+				UpdateDropdowns();
+				ignoreActivityCallback = false;
+			}
 		}
 
 		void GlobalDataLoaded()
