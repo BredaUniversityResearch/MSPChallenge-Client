@@ -1125,7 +1125,7 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public override List<EnergyGrid> DetermineGrids(Plan plan, List<EnergyGrid> gridsInPlanPreviously, List<EnergyGrid> gridsBeforePlan, HashSet<int> removedGridsBefore, out HashSet<int> removedGridsAfter)
 		{
-			removedGridsAfter = removedGridsBefore;
+			removedGridsAfter = new HashSet<int>(removedGridsBefore);
 			if (editingType != EditingType.Socket)
 			{
 				return null;
@@ -1152,11 +1152,6 @@ namespace MSP2050.Scripts
 					EnergyGrid newGrid = new EnergyGrid((EnergyPointSubEntity)entity.GetSubEntity(0), plan);
 					foreach (EnergyPointSubEntity socket in newGrid.sockets)
 						visitedSockets.Add(socket);
-
-					//if(newGrid.sockets.Count < 2 && newGrid.sources.Count == 0)
-					//{
-					//	continue;
-					//}
 
 					//Determine if the new grid is the same as one of the old ones, if so: take over distribution and persistentID
 					bool identicalGridFound = false;
