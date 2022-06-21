@@ -20,7 +20,6 @@ namespace MSP2050.Scripts
 		public GameObject trackPrefab;
 		public RectTransform trackLocation;
 		private List<TimelineTrack> tracks;
-		public Animator anim;
 		public TimeLineUtil timeLineUtil;
 
 		// Button Group Overlay
@@ -188,7 +187,7 @@ namespace MSP2050.Scripts
 				groupButtonLocation.transform.SetAsLastSibling();
 			}
 
-			anim.SetBool("Show", dir);
+			trackCover.gameObject.SetActive(dir);
 		}
 	}
 }

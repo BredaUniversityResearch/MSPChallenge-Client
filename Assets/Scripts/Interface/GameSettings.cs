@@ -158,9 +158,9 @@ namespace MSP2050.Scripts
 				if (InterfaceCanvas.Instance != null)
 				{
 					InterfaceCanvas.Instance.canvas.scaleFactor = scale;
-					//InterfaceCanvas.instance.activeLayers.HandleResolutionOrScaleChange();
 					InterfaceCanvas.Instance.plansMonitor.thisGenericWindow.HandleResolutionOrScaleChange(oldScale, true);
 					InterfaceCanvas.Instance.objectivesMonitor.thisGenericWindow.HandleResolutionOrScaleChange(oldScale, true);
+					InterfaceCanvas.Instance.impactToolWindow.HandleResolutionOrScaleChange(oldScale, true);
 				}
 				else
 				{

@@ -4900,22 +4900,32 @@ PrefabInstance:
     - target: {fileID: 6336532179708197428, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_MinWidth
-      value: 800
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 6336532179708197428, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_MinHeight
-      value: 600
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 6336532179708197428, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_PreferredWidth
-      value: 120
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 6336532179708197428, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_PreferredHeight
-      value: 10
+      value: 600
+      objectReference: {fileID: 0}
+    - target: {fileID: 7736977730879113837, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.46666667
+      objectReference: {fileID: 0}
+    - target: {fileID: 7736977730879113837, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.43137255
       objectReference: {fileID: 0}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
@@ -5783,18 +5793,56 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 4626374111307970823}
   m_PrefabAsset: {fileID: 0}
+--- !u!224 &1439927426504338006 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 6039196136444597073, guid: e6aa4a326cbdad14481853ad36944f8a,
+    type: 3}
+  m_PrefabInstance: {fileID: 4626374111307970823}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1217068179503712420 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5825348606316720547, guid: e6aa4a326cbdad14481853ad36944f8a,
     type: 3}
   m_PrefabInstance: {fileID: 4626374111307970823}
   m_PrefabAsset: {fileID: 0}
---- !u!224 &1439927427697330254 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 6039196137367204169, guid: e6aa4a326cbdad14481853ad36944f8a,
-    type: 3}
-  m_PrefabInstance: {fileID: 4626374111307970823}
+--- !u!223 &2709054289616454138
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217068179232012092}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!114 &5777750497897743836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1217068179232012092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 823
 --- !u!114 &8141912637573350297
 MonoBehaviour:
   m_ObjectHideFlags: 0
