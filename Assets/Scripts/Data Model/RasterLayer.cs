@@ -145,7 +145,7 @@ namespace MSP2050.Scripts
 
 		private void LoadRasterAtTime(int month)
 		{
-			if(month == -1 || month == GameState.GetCurrentMonth())
+			if(month == -1 || month == TimeManager.Instance.GetCurrentMonth())
 			{
 				if (viewingRasterTime == -1)
 					return;

@@ -64,7 +64,7 @@ namespace MSP2050.Scripts
 
 			targetZoom = maxZoom;
 			cameraComponent.orthographicSize = targetZoom;
-			UIManager.GetMapScale().SetScale(cameraComponent.orthographicSize);
+			InterfaceCanvas.Instance.mapScale.SetScale(cameraComponent.orthographicSize);
 		}
 
 		public void ForceUpdateBoundsNextFrame()
@@ -185,7 +185,7 @@ namespace MSP2050.Scripts
 		{
 			VisualizationUtil.UpdateDisplayScale(cameraComponent);
 			IssueManager.instance.RescaleIssues();
-			UIManager.GetMapScale().SetScale(cameraComponent.orthographicSize);
+			InterfaceCanvas.Instance.mapScale.SetScale(cameraComponent.orthographicSize);
 			FSM.CameraZoomChanged();
 		}
 

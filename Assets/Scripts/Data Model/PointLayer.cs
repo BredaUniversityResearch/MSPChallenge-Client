@@ -32,7 +32,7 @@ namespace MSP2050.Scripts
 		{
 			PointEntity pointEntity = new PointEntity(this, planLayer, point, entityType, null);
 			if (TeamManager.AreWeGameMaster)
-				pointEntity.Country = UIManager.GetCurrentTeamSelection();
+				pointEntity.Country = InterfaceCanvas.GetCurrentTeamSelection();
         
 			planLayer.AddNewGeometry(pointEntity);
 			return pointEntity;

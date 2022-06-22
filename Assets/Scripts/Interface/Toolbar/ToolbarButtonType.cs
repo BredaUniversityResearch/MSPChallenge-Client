@@ -9,10 +9,11 @@ namespace MSP2050.Scripts
 
 		protected void Start()
 		{
-			UIManager.ToolbarButtons.Add(this.GetComponent<Button>());
-			GetComponent<Button>().onClick.AddListener(() =>
+			Button b = GetComponent<Button>();
+			InterfaceCanvas.Instance.RegisterToolbarButton(b);
+			b.onClick.AddListener(() =>
 			{
-				UIManager.GetToolBar().PressButton(buttonType);
+				InterfaceCanvas.Instance.toolBar.PressButton(buttonType);
 			});
 		}
 	}

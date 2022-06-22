@@ -57,12 +57,12 @@ namespace MSP2050.Scripts
 		{
 			int secondsPerEra = 10;
 			Debug.Log(string.Format("Setting era time to {0} seconds for all eras", secondsPerEra));
-			TimeManager.instance.SetEraRealtimeValues(new[] {secondsPerEra, secondsPerEra, secondsPerEra, secondsPerEra});
+			TimeManager.Instance.SetEraRealtimeValues(new[] {secondsPerEra, secondsPerEra, secondsPerEra, secondsPerEra});
 			yield return new WaitForSeconds(3.0f);
 			
 			Debug.Log("Sending state PAUSE to end Setup phase");
-			GameState.SetGameState(GameState.PlanningStateToString(GameState.PlanningState.Pause));
-			while (GameState.CurrentState == GameState.PlanningState.Setup)
+			TimeManager.SetGameState(TimeManager.PlanningStateToString(TimeManager.PlanningState.Pause));
+			while (TimeManager.Instance.CurrentState == TimeManager.PlanningState.Setup)
 			{
 				yield return new WaitForSeconds(1.0f);
 			}
@@ -70,9 +70,9 @@ namespace MSP2050.Scripts
 			yield return new WaitForSeconds(3.0f);
 
 			Debug.Log("Sending state PLAY to start game");
-			GameState.SetGameState(GameState.PlanningStateToString(GameState.PlanningState.Play));
+			TimeManager.SetGameState(TimeManager.PlanningStateToString(TimeManager.PlanningState.Play));
 
-			while (GameState.CurrentState != GameState.PlanningState.End)
+			while (TimeManager.Instance.CurrentState != TimeManager.PlanningState.End)
 			{
 				yield return new WaitForSeconds(1.0f);
 			}

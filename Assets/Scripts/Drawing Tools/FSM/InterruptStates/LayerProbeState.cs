@@ -50,7 +50,7 @@ namespace MSP2050.Scripts
 			windowPosition.y -= Screen.height;
 
 			if(subEntities.Count > 0)
-				UIManager.CreateLayerProbeWindow(subEntities, position, windowPosition);
+				InterfaceCanvas.Instance.layerProbeWindow.ShowLayerProbeWindow(subEntities, position, windowPosition);
 			fsm.SetInterruptState(null);
 		}
 

@@ -5,36 +5,42 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public static class LayerManager
+	public class LayerManager : MonoBehaviour
 	{
 		public enum GeoType { polygon, line, point, raster }
 
-		private static List<AbstractLayer> layers = new List<AbstractLayer>();
-		private static HashSet<AbstractLayer> loadedLayers = new HashSet<AbstractLayer>();
-		private static HashSet<AbstractLayer> visibleLayers = new HashSet<AbstractLayer>();
-		private static List<PointLayer> energyPointLayers = new List<PointLayer>();
-		private static HashSet<AbstractLayer> nonReferenceLayers; //Layers that are drawn as normal during edit mode
-
-		public static LineStringLayer energyCableLayerGreen;
-		public static LineStringLayer energyCableLayerGrey;
-		public static PolygonLayer EEZLayer;
-		public static List<AbstractLayer> energyLayers = new List<AbstractLayer>(); //Does not include sourcepolygonpoints
-		public static List<AbstractLayer> protectedAreaLayers = new List<AbstractLayer>();
-		public static Dictionary<int, int> sourceCountries = new Dictionary<int, int>();
-
-		public static Dictionary<int, SubEntity> energySubEntities;
-
-		private static Dictionary<string, List<string>> categorySubcategories = new Dictionary<string, List<string>>();
-		private static bool finishedImporting = false;
-
-		public static AbstractLayer highLightedLayer;
-
-		static LayerManager()
+		private static LayerManager singleton;
+		public static LayerManager Instance
 		{
-			visibleLayers.Clear();
+			get
+			{
+				if (singleton == null)
+					singleton = FindObjectOfType<LayerManager>();
+				return singleton;
+			}
 		}
 
-		public static void AddLayer(AbstractLayer layer)
+		private List<AbstractLayer> layers = new List<AbstractLayer>();
+		private HashSet<AbstractLayer> loadedLayers = new HashSet<AbstractLayer>();
+		private HashSet<AbstractLayer> visibleLayers = new HashSet<AbstractLayer>();
+		private List<PointLayer> energyPointLayers = new List<PointLayer>();
+		private HashSet<AbstractLayer> nonReferenceLayers; //Layers that are drawn as normal during edit mode
+
+		public LineStringLayer energyCableLayerGreen;
+		public LineStringLayer energyCableLayerGrey;
+		public PolygonLayer EEZLayer;
+		public List<AbstractLayer> energyLayers = new List<AbstractLayer>(); //Does not include sourcepolygonpoints
+		public List<AbstractLayer> protectedAreaLayers = new List<AbstractLayer>();
+		public Dictionary<int, int> sourceCountries = new Dictionary<int, int>();
+
+		public Dictionary<int, SubEntity> energySubEntities;
+
+		private Dictionary<string, List<string>> categorySubcategories = new Dictionary<string, List<string>>();
+		private bool finishedImporting = false;
+
+		public AbstractLayer highLightedLayer;
+
+		public void AddLayer(AbstractLayer layer)
 		{
 			finishedImporting = false;
 			while (layer.ID >= layers.Count)
@@ -55,7 +61,7 @@ namespace MSP2050.Scripts
 				EEZLayer = layer as PolygonLayer;
 		}
 
-		public static void FinishedImportingLayers()
+		public void FinishedImportingLayers()
 		{
 			PopulateAllCountryIDs();
 			finishedImporting = true;
@@ -64,7 +70,7 @@ namespace MSP2050.Scripts
 
 
 		//Todo EEZLayers should be replaced by Teritorial waters, but this requires extra steps
-		public static void PopulateAllCountryIDs()
+		public void PopulateAllCountryIDs()
 		{
 			if (EEZLayer == null)
 				return;
@@ -135,18 +141,18 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static bool AllLayersImported()
+		public bool AllLayersImported()
 		{
 			PopulateAllCountryIDs();
 			return finishedImporting;
 		}
 
-		public static int GetLayerCount()
+		public int GetLayerCount()
 		{
 			return layers.Count;
 		}
 
-		public static int GetValidLayerCount()
+		public int GetValidLayerCount()
 		{
 			int result = 0;
 			foreach (AbstractLayer layer in layers)
@@ -159,12 +165,12 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static AbstractLayer GetLayerByID(int layerID)
+		public AbstractLayer GetLayerByID(int layerID)
 		{
 			return layers[layerID];
 		}
 
-		public static List<AbstractLayer> GetLoadedLayers(string category, string subcategory)
+		public List<AbstractLayer> GetLoadedLayers(string category, string subcategory)
 		{
 			List<AbstractLayer> result = new List<AbstractLayer>();
 			foreach (AbstractLayer layer in layers)
@@ -337,7 +343,7 @@ namespace MSP2050.Scripts
 				if (shownInUI && layer.Toggleable)
 				{
 					//Show in Layer Select and Active Layers
-					UIManager.OnShowLayer(layer);
+					InterfaceCanvas.Instance.layerInterface.OnShowLayer(layer);
 				}
 			}
 
@@ -374,7 +380,7 @@ namespace MSP2050.Scripts
 				layer.LayerHidden();
 
 				//hide in Layer Select and Active Layers
-				UIManager.OnHideLayer(layer);
+				InterfaceCanvas.Instance.layerInterface.OnHideLayer(layer);
 			}
 
 			UpdateVisibleLayerIndexForAllTypes();
@@ -629,42 +635,6 @@ namespace MSP2050.Scripts
 
 		public delegate void AddNewLayerCallback(AbstractLayer layer);
 
-		//public static void AddNewLayer(string name, GeoType type, AddNewLayerCallback addNewLayerCallback)
-		//{
-		//	NetworkForm form = new NetworkForm();
-
-		//	form.AddField("name", name);
-		//	form.AddField("geotype", type.ToString());
-
-		//	ServerCommunication.DoRequest(Server.NewLayer(), form, (www2) => { handleNewLayerCallback(www2, addNewLayerCallback); });
-		//}
-
-		//private static void handleNewLayerCallback(UnityWebRequest www, AddNewLayerCallback addNewLayerCallback)
-		//{
-		//	int layerID = Util.ParseToInt(www.downloadHandler.text);
-
-		//	GetNewLayerMeta(layerID, addNewLayerCallback);
-		//}
-
-		//private static void GetNewLayerMeta(int layerID, AddNewLayerCallback addNewLayerCallback)
-		//{
-		//	NetworkForm form = new NetworkForm();
-
-		//	ServerCommunication.DoRequest(Server.LayerMeta(layerID), form, (www2) => { handleGetNewLayerMetaCallback(www2, addNewLayerCallback); });
-		//}
-
-		//private static void handleGetNewLayerMetaCallback(UnityWebRequest www, AddNewLayerCallback addNewLayerCallback)
-		//{
-		//	List<LayerMeta> layerMeta = LayerInfo.Load(www);
-
-		//	int layerID = layerMeta[0].layer_id;
-
-		//	LoadLayer(layerID, new List<SubEntityObject>());
-
-		//	AbstractLayer layer = GetLayerByID(layerID);
-		//	addNewLayerCallback(layer);
-		//}
-
 		public static void ResetAll()
 		{
 			layers.Clear();
@@ -672,39 +642,6 @@ namespace MSP2050.Scripts
 			visibleLayers.Clear();
 			finishedImporting = false;
 		}
-
-		//public static void MergeAllVisibleLayers()
-		//{
-		//	List<AbstractLayer> mergeLayers = new List<AbstractLayer>(visibleLayers);
-		//	for (int i = mergeLayers.Count - 1; i >= 0; --i)
-		//	{
-		//		if (!mergeLayers[i].Selectable) { mergeLayers.RemoveAt(i); }
-		//	}
-
-		//	if (mergeLayers.Count < 2)
-		//	{
-		//		Debug.LogError("Unable to merge the visible layers: less than 2 layers selected");
-		//		return;
-		//	}
-
-		//	bool geoTypeDefined = false;
-		//	GeoType geoType = GeoType.polygon;
-		//	foreach (AbstractLayer layer in mergeLayers)
-		//	{
-		//		if (!geoTypeDefined) { geoType = layer.GetGeoType(); geoTypeDefined = true; }
-		//		else
-		//		{
-		//			if (geoType != layer.GetGeoType())
-		//			{
-		//				Debug.LogError("Unable to merge the visible layers: not all layers have the same type");
-		//				return;
-		//			}
-		//		}
-		//	}
-
-		//	Debug.Log("Merging visible layers");
-		//	AddNewLayer("Merged layer", geoType, (layer) => mergedLayerCreated(layer, mergeLayers));
-		//}
 
 		private static void AddToCategories(string category, string subcategory)
 		{
@@ -718,74 +655,6 @@ namespace MSP2050.Scripts
 				categorySubcategories[category].Add(subcategory);
 			}
 
-		}
-
-		private static void mergedLayerCreated(AbstractLayer newLayer, List<AbstractLayer> mergeLayers)
-		{
-			newLayer.EntityTypes = new Dictionary<int, EntityType>();//new List<EntityType>();
-			foreach (AbstractLayer l in mergeLayers)
-			{
-				int offset = newLayer.EntityTypes.Count;
-
-				string layerName = l.GetShortName();// l.ShortName != "" ? l.ShortName : l.FileName;
-				if (l.EntityTypes.Count == 1)
-				{
-					//newLayer.EntityTypes.Add(l.EntityTypes[0].GetClone(layerName));
-					foreach (var kvp in l.EntityTypes)
-					{
-						newLayer.EntityTypes.Add(kvp.Key + offset, kvp.Value.GetClone(layerName));
-					}
-				}
-				else
-				{
-					foreach (var kvp in l.EntityTypes)
-					{
-						newLayer.EntityTypes.Add(kvp.Key + offset, kvp.Value.GetClone(layerName + ": " + kvp.Value.Name));
-					}
-				}
-
-				// move geometry locally on client
-
-				//TODO: resupport this if required
-				//l.MoveAllGeometryTo(newLayer, offset);
-
-				// move geometry on server
-				moveGeometry(l, newLayer, offset);
-			}
-
-			HashSet<string> names = new HashSet<string>();
-			foreach (var kvp in newLayer.EntityTypes)
-			{
-				if (!names.Contains(kvp.Value.Name))
-				{
-					names.Add(kvp.Value.Name);
-				}
-				else
-				{
-					int number = 2;
-					while (names.Contains(kvp.Value.Name + " " + number))
-					{
-						number++;
-					}
-					kvp.Value.Name = kvp.Value.Name + " " + number;
-					names.Add(kvp.Value.Name);
-				}
-			}
-
-			newLayer.Category = mergeLayers[0].Category;
-			newLayer.SubCategory = mergeLayers[0].SubCategory;
-			newLayer.Depth = mergeLayers[0].Depth;
-
-			newLayer.SubmitMetaData();
-
-			newLayer.DrawGameObject();
-
-			//foreach (Layer l in mergeLayers)
-			//{
-			//    DeleteLayer(l);
-			//}
-
-			//ShowLayer(newLayer);
 		}
 
 		public static void AddEnergyPointLayer(PointLayer layer)

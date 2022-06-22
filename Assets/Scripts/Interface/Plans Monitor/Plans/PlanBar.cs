@@ -94,7 +94,7 @@ namespace MSP2050.Scripts
 		public void SetViewEditButtonInteractable(bool value)
 		{
 			//Don't allow the edit button to be interactable if we are in simulation and this is a plan that is still in design.
-			if (GameState.CurrentState == GameState.PlanningState.Simulation)
+			if (TimeManager.Instance.CurrentState == TimeManager.PlanningState.Simulation)
 			{
 				if (!planRepresenting.InInfluencingState)
 				{
@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			//Non GM players cant interact with plans during setup
-			else if(GameState.CurrentState == GameState.PlanningState.Setup && !TeamManager.AreWeGameMaster)
+			else if(TimeManager.Instance.CurrentState == TimeManager.PlanningState.Setup && !TeamManager.AreWeGameMaster)
 			{
 				value = false;
 			}

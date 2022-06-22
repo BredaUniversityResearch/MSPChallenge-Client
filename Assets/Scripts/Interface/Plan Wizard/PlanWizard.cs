@@ -465,7 +465,7 @@ namespace MSP2050.Scripts
                 }
 
                 UpdateMinAndSetTime(plan.StartTime);
-                if (TeamManager.AreWeGameMaster && !GameState.GameStarted)
+                if (TeamManager.AreWeGameMaster && !TimeManager.Instance.GameStarted)
                 {
                     startPlanArea.SetActive(true);
                     startPlanToggle.isOn = plan.StartTime < 0;
@@ -510,7 +510,7 @@ namespace MSP2050.Scripts
                 }
 
                 timeSelectArea.SetActive(true);
-                startPlanArea.SetActive(TeamManager.AreWeGameMaster && !GameState.GameStarted);
+                startPlanArea.SetActive(TeamManager.AreWeGameMaster && !TimeManager.Instance.GameStarted);
                 startPlanToggle.isOn = false;
 
                 if (cablePlanLayerGreenLeft != null)
@@ -908,7 +908,7 @@ namespace MSP2050.Scripts
 
         private UpdateReach updateMinSelectableTime()
         {
-            minTimeSelectable = GameState.GetCurrentMonth() + 1 + maxConstructionTime;
+            minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + maxConstructionTime;
             if (finishTime < minTimeSelectable)
                 finishTime = minTimeSelectable;
             UpdateReach reach = UpdateMinSelectableYear();
@@ -927,7 +927,7 @@ namespace MSP2050.Scripts
         /// </summary>
         private void UpdateMinAndSetTime(int time)
         {
-            minTimeSelectable = GameState.GetCurrentMonth() + 1 + maxConstructionTime;
+            minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + maxConstructionTime;
             if (finishTime < minTimeSelectable)
                 finishTime = minTimeSelectable;
             UpdateMinSelectableYear(false);

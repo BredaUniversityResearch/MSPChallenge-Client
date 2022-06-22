@@ -37,8 +37,8 @@ namespace MSP2050.Scripts
 
 				userName = TeamManager.CurrentUserName;
 				visibleLayers = GatherVisibleLayers();
-				gameState = GameState.CurrentState.ToString();
-				gameTime = GameState.GetCurrentMonth().ToString();
+				gameState = TimeManager.Instance.CurrentState.ToString();
+				gameTime = TimeManager.Instance.GetCurrentMonth().ToString();
 				currentlyEditingPlan = Main.CurrentlyEditingPlan != null ? Main.CurrentlyEditingPlan.ID.ToString() : "None";
 				//currentlyEditingLayer = Main.CurrentlyEditingPlanLayer != null ? Main.CurrentlyEditingPlanLayer.ID.ToString() : "None";
 				lastUpdateTimeStamp = UpdateData.LastUpdateTimeStamp.ToString();

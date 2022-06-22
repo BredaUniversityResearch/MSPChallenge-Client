@@ -87,15 +87,15 @@ namespace MSP2050.Scripts
 
 			if (currentlyEditingLayer != null)
 			{
-				UIManager.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
+				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
 				if (!calledByUndo)
 					Main.FSM.AddToUndoStack(new SwitchLayerOperation(currentlyEditingLayer, layer));
 			}
 
 			InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
-			UIManager.SetLayerVisibilityLock(layer.BaseLayer, true);
+			InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(layer.BaseLayer, true);
 			currentlyEditingLayer = layer;
-			UIManager.StartEditingLayer(layer.BaseLayer);
+			InterfaceCanvas.Instance.StartEditingLayer(layer.BaseLayer);
 			Main.FSM.StartEditingLayer(layer);
 			LayerManager.RedrawVisibleLayers();
 		}
@@ -336,13 +336,13 @@ namespace MSP2050.Scripts
 		{
 			if (currentlyEditingLayer != null)
 			{
-				UIManager.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
+				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
 				PlansMonitor.UpdatePlan(lockedPlan, false, false, false);
 			}
 
 			base.StopEditing();
 
-			UIManager.StopEditing();
+			InterfaceCanvas.Instance.StopEditing();
 			Main.FSM.StopEditing();
 
 			currentlyEditingLayer = null;

@@ -55,7 +55,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		// move all these functions to UIManager
+		// move all these functions to InterfaceCanvas
 		public static void AddPlan(Plan plan)
 		{
 			plansListStatic.AddPlanToList(plan);

@@ -35,10 +35,11 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
-		
-			UIManager.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Delete, FSM.ToolbarInput.Recall, FSM.ToolbarInput.Abort);
-			UIManager.SetActivePlanWindowInteractability(false);
+			InterfaceCanvas ic = InterfaceCanvas.Instance;
+
+			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete, FSM.ToolbarInput.Recall, FSM.ToolbarInput.Abort);
+			ic.SetActivePlanWindowInteractability(false);
 
 			PointSubEntity hover = baseLayer.GetPointAt(currentMousePosition);
 
@@ -70,6 +71,8 @@ namespace MSP2050.Scripts
 
 		protected void select(HashSet<PointSubEntity> newSelection, bool keepPreviousSelection)
 		{
+			InterfaceCanvas ic = InterfaceCanvas.Instance;
+
 			if (!keepPreviousSelection)
 			{
 				foreach (PointSubEntity pse in selection)
@@ -91,18 +94,18 @@ namespace MSP2050.Scripts
 				pse.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null);
 			}
 
-			UIManager.ToolbarEnable(selection.Count > 0, FSM.ToolbarInput.Delete, FSM.ToolbarInput.Abort);
-			UIManager.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
-			UIManager.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			ic.ToolbarEnable(selection.Count > 0, FSM.ToolbarInput.Delete, FSM.ToolbarInput.Abort);
+			ic.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
+			ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
 			//Points have no selecting state, so dropdown interactivity can change while in this state
 			if (selection.Count == 0)
 			{
-				UIManager.SetActivePlanWindowInteractability(false);
+				ic.SetActivePlanWindowInteractability(false);
 				return;
 			}
 			else
 			{
-				UIManager.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+				ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
 			}
 
 			UpdateActivePlanWindowToSelection();
@@ -505,7 +508,7 @@ namespace MSP2050.Scripts
 			IssueManager.instance.SetIssueInteractability(true);
 
 			// make sure the entity type dropdown shows a valid value
-			//UIManager.SetCurrentEntityTypeSelection(UIManager.GetCurrentEntityTypeSelection());
+			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());
 		}
 
 		private void UpdateActivePlanWindowToSelection()
@@ -530,7 +533,7 @@ namespace MSP2050.Scripts
 				selectedParams.Add(parameters);
 
 			}
-			UIManager.SetActiveplanWindowToSelection(
+			InterfaceCanvas.Instance.SetActiveplanWindowToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
 				selectedParams);

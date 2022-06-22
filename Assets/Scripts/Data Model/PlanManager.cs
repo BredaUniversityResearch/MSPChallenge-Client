@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 				return;
 
 			//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
-			UIManager.ignoreLayerToggleCallback = true;
+			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 			if (planViewing != null)
 			{
 				PlansMonitor.SetViewPlanFrameState(planViewing, false);
@@ -112,7 +112,7 @@ namespace MSP2050.Scripts
 			PlansMonitor.SetViewPlanFrameState(planViewing, true);
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
 			LayerManager.UpdateVisibleLayersToPlan(plan);
-			UIManager.ignoreLayerToggleCallback = false;
+			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(plan);
 		}
 
@@ -121,7 +121,7 @@ namespace MSP2050.Scripts
 			if (Main.InEditMode || Main.EditingPlanDetailsContent)
 				return;
 
-			UIManager.ignoreLayerToggleCallback = true;
+			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 			if (planViewing != null)
 			{
 				PlansMonitor.SetViewPlanFrameState(planViewing, false);
@@ -135,7 +135,7 @@ namespace MSP2050.Scripts
 
 			if(updateLayers)
 				LayerManager.UpdateVisibleLayersToBase();
-			UIManager.ignoreLayerToggleCallback = false;
+			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.CloseWindow();
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);
 		}

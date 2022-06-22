@@ -126,12 +126,12 @@ namespace MSP2050.Scripts
 			viewDifferenceMonthDropdown1.onValueChanged.AddListener((v) => DifferenceMonthDropdownChanged(v, 1));
 			viewDifferenceYearDropdown1.onValueChanged.AddListener((v) => DifferencedYearDropdownChanged(v, 1));
 
-			GameState.OnCurrentMonthChanged += OnMonthChanged;
+			TimeManager.Instance.OnCurrentMonthChanged += OnMonthChanged;
 		}
 
 		void OnDestroy()
 		{
-			GameState.OnCurrentMonthChanged -= OnMonthChanged;
+			TimeManager.Instance.OnCurrentMonthChanged -= OnMonthChanged;
 		}
 
 		private void OnMonthChanged(int oldCurrentMonth, int newCurrentMonth)
@@ -168,7 +168,7 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public void SetDate(int month)
 		{
-			if (GameState.GameStarted == false)
+			if (!TimeManager.Instance.GameStarted)
 			{
 				simulationTimeText.text =
 					planViewingText.text =
@@ -312,7 +312,7 @@ namespace MSP2050.Scripts
 		public void UpdateDropdowns()
 		{
 			//Update options in dropdowns
-			int currentMonth = GameState.GetCurrentMonth();
+			int currentMonth = TimeManager.Instance.GetCurrentMonth();
 			maxSelectableMonth = currentMonth % 12;
 			maxSelectableYear = (currentMonth - maxSelectableMonth) / 12;
 

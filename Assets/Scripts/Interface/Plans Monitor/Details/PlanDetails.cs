@@ -78,7 +78,7 @@ namespace MSP2050.Scripts
 				selectedPlan.AttemptLock((plan) =>
 				{
 					//If lock is succesful, open planwizard and set to selected plan
-					PlanWizard planWizard = UIManager.GetInterfaceCanvas().planWizard;
+					PlanWizard planWizard = InterfaceCanvas.Instance.planWizard;
 					planWizard.gameObject.SetActive(true);
 					planWizard.SetToPlan(plan);
 
@@ -353,7 +353,7 @@ namespace MSP2050.Scripts
 			UpdateTabAvailability();
 
 			//If simulation, disable all changeable UI elements
-			if (GameState.CurrentState == GameState.PlanningState.Simulation)
+			if (TimeManager.Instance.CurrentState == TimeManager.PlanningState.Simulation)
 			{
 				return;
 			} 

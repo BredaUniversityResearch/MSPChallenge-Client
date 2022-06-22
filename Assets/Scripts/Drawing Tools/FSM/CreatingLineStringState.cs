@@ -17,13 +17,14 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
+			InterfaceCanvas ic = InterfaceCanvas.Instance;
 
-			UIManager.SetToolbarMode(ToolBar.DrawingMode.Create);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			UIManager.ToolbarEnable(true, FSM.ToolbarInput.Abort);
-			UIManager.SetTeamAndTypeToBasicIfEmpty();
-			UIManager.SetActivePlanWindowInteractability(true);
+			ic.SetToolbarMode(ToolBar.DrawingMode.Create);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
+			ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			ic.SetTeamAndTypeToBasicIfEmpty();
+			ic.SetActivePlanWindowInteractability(true);
 
 			int pointCount = subEntity.GetPointCount();
 			subEntity.SetPointPosition(pointCount - 1, subEntity.GetPointPosition(pointCount - 2));
@@ -146,7 +147,7 @@ namespace MSP2050.Scripts
 		{
 			subEntity.RemovePoints(new HashSet<int>() { subEntity.GetPointCount() - 1 });
 
-			List<EntityType> selectedType = UIManager.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
 			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
 
 			subEntity.restrictionNeedsUpdate = true;

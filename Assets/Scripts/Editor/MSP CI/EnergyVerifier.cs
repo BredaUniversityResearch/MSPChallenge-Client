@@ -78,7 +78,7 @@ public class EnergyVerifierObj : MonoBehaviour
 		if (LayerManager.energyCableLayerGrey != null)
 			LayerManager.energyCableLayerGrey.ActivateCableLayerConnections();
 
-		List<EnergyGrid> currentGrids = PlanManager.GetEnergyGridsAtTime(GameState.GetCurrentMonth(), EnergyGrid.GridColor.Either);
+		List<EnergyGrid> currentGrids = PlanManager.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);
 
 		//CABLE CONNECTIONS =================================================================================================
 		Debug.Log("Beginning cable connection check.");

@@ -44,9 +44,6 @@ namespace MSP2050.Scripts
 		public static event Action OnFinishedLoadingLayers; //Called when we finished loading all layers and right before the first tick is requested.
 		public static event Action OnPostFinishedLoadingLayers;
 
-		[SerializeField]
-		private int debugTargetSessionId = 1;
-
 		protected void Start()
 		{
 			instance = this;
@@ -62,18 +59,7 @@ namespace MSP2050.Scripts
 			fsm = new FSM();
 			fsmActive = true;
 
-			//If we don't have global data yet we probably haven't gone  through the login screen. Load this now.
-			if (MspGlobalData == null)
-			{
-				Server.GameSessionId = debugTargetSessionId;
-				LoadGlobalData();
-			}
-			else
-			{
-				GlobalDataLoaded();
-			}
-
-			GameState.Initialise();
+			GlobalDataLoaded();
 			Application.wantsToQuit += () => 
 			{
 				if (interceptQuit)
@@ -160,12 +146,6 @@ namespace MSP2050.Scripts
 			{
 				OnGlobalDataLoaded();
 			}
-		}
-
-		public void StartSetOperations()
-		{
-			UIManager.StartSetOperations();
-			fsm.StartSetOperations();
 		}
 
 		public static void AllLayersImported()
