@@ -113,7 +113,7 @@ namespace MSP2050.Scripts
 			point.AddConnection(con);
 
 			//Set entitytype
-			List<EntityType> selectedType = UIManager.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
 			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
 
 			subEntity.restrictionNeedsUpdate = true;

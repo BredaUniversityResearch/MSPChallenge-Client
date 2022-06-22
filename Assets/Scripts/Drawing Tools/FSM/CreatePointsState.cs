@@ -19,13 +19,14 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
-		
-			UIManager.SetToolbarMode(ToolBar.DrawingMode.Create);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			UIManager.ToolbarEnable(true, FSM.ToolbarInput.Abort);
-			UIManager.SetTeamAndTypeToBasicIfEmpty();
-			UIManager.SetActivePlanWindowInteractability(true);
+			InterfaceCanvas ic = InterfaceCanvas.Instance;
+
+			ic.SetToolbarMode(ToolBar.DrawingMode.Create);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
+			ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			ic.SetTeamAndTypeToBasicIfEmpty();
+			ic.SetActivePlanWindowInteractability(true);
 
 			fsm.SetCursor(FSM.CursorType.Add);
 			fsm.SetSnappingEnabled(true);
@@ -48,7 +49,7 @@ namespace MSP2050.Scripts
 				fsm.SetCursor(FSM.CursorType.Add);
 				if (!showingToolTip)
 				{
-					List<EntityType> entityTypes = UIManager.GetCurrentEntityTypeSelection();
+					List<EntityType> entityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
 					StringBuilder sb = new StringBuilder("Creating: " + entityTypes[0].Name);
 					for (int i = 1; i < entityTypes.Count; i++)
 						sb.Append("\n& " + entityTypes[i].Name);
@@ -70,7 +71,7 @@ namespace MSP2050.Scripts
 		{
 			AudioMain.PlaySound(AudioMain.ITEM_PLACED);
 
-			List<EntityType> selectedType = UIManager.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
 
 			PointEntity entity = baseLayer.CreateNewPointEntity(finalPosition, selectedType != null ? selectedType : new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
 			baseLayer.activeEntities.Add(entity);

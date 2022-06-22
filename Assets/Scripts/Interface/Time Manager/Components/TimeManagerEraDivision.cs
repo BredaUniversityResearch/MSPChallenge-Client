@@ -95,7 +95,7 @@ namespace MSP2050.Scripts
 			simulationText.text = simulationNumber.ToString() + " year simulation";
 
 			if(sliderTriggersUpdate)
-				TimeManager.instance.EraGameTimeChanged(planningNumber * 12);
+				TimeManager.Instance.EraGameTimeChanged(planningNumber * 12);
 		}
 
 		public void SetSliderValue(int value)

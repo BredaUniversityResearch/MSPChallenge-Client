@@ -117,10 +117,10 @@ namespace MSP2050.Scripts
 
 				activeLayer.visibilityToggle.onValueChanged.AddListener((value) =>
 				{
-					if (UIManager.ignoreLayerToggleCallback)
+					if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
 						return;
 
-					UIManager.ignoreLayerToggleCallback = true;
+					InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 					if (value)
 					{
 						LayerManager.ShowLayer(activeLayer.layerRepresenting);
@@ -129,7 +129,7 @@ namespace MSP2050.Scripts
 					{
 						LayerManager.HideLayer(activeLayer.layerRepresenting);
 					}
-					UIManager.ignoreLayerToggleCallback = false;
+					InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 				});
 			}
 		}

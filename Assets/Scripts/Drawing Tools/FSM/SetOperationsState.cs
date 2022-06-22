@@ -21,7 +21,7 @@ namespace MSP2050.Scripts
 		{
 			base.EnterState(currentMousePosition);
 
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Difference, FSM.ToolbarInput.Intersect, FSM.ToolbarInput.Union);
+			InterfaceCanvas.Instance.ToolbarEnable(false, FSM.ToolbarInput.Difference, FSM.ToolbarInput.Intersect, FSM.ToolbarInput.Union);
 		}
 
 		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
@@ -252,8 +252,8 @@ namespace MSP2050.Scripts
 
 			clipEntities = newClipEntities;
 
-			UIManager.ToolbarEnable(subjectEntities.Count > 0 && clipEntities.Count > 0, FSM.ToolbarInput.Difference);
-			UIManager.ToolbarEnable(subjectEntities.Count == 1 && clipEntities.Count > 0, FSM.ToolbarInput.Intersect, FSM.ToolbarInput.Union);
+			InterfaceCanvas.Instance.ToolbarEnable(subjectEntities.Count > 0 && clipEntities.Count > 0, FSM.ToolbarInput.Difference);
+			InterfaceCanvas.Instance.ToolbarEnable(subjectEntities.Count == 1 && clipEntities.Count > 0, FSM.ToolbarInput.Intersect, FSM.ToolbarInput.Union);
 		}
 
 		public override void StartedDragging(Vector3 dragStartPosition, Vector3 currentPosition)

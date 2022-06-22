@@ -220,7 +220,7 @@ namespace MSP2050.Scripts
 		//	MovieTexture tMovieTex = new MovieTexture();
 		//	if (PropertyWindowVideoAssigner.instance.GetVideo(videoName, ref tMovieTex))
 		//	{
-		//		GenericWindow tVideoWindow = UIManager.GetInterfaceCanvas().CreateGenericWindow(windowName);
+		//		GenericWindow tVideoWindow = InterfaceCanvas.GetInterfaceCanvas().CreateGenericWindow(windowName);
 		//		if (tVideoWindow.gameObject.GetComponent<VerticalLayoutGroup>())
 		//		{
 		//			MonoBehaviour.DestroyImmediate(tVideoWindow.gameObject.GetComponent<VerticalLayoutGroup>());

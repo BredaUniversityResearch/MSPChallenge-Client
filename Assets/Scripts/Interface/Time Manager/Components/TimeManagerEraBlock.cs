@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 				}
 				duration = newDuration;
 				if(active)
-					TimeManager.instance.EraRealTimeChanged(era, duration);
+					TimeManager.Instance.EraRealTimeChanged(era, duration);
 			}
 		}
 

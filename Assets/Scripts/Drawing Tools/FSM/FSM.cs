@@ -152,14 +152,7 @@ namespace MSP2050.Scripts
 		{
 			SetCurrentState(new DefaultState(this));
 		}
-
-		public void StartSetOperations()
-		{
-			SetCurrentState(new SetOperationsState(this));
-
-			updateUndoRedoButtonEnabled();
-		}
-
+		
 		public static void ToolbarButtonClicked(ToolbarInput toolbarInput)
 		{
 			instance.toolbarButtonClicked(toolbarInput);
@@ -475,8 +468,8 @@ namespace MSP2050.Scripts
 
 		private void updateUndoRedoButtonEnabled()
 		{
-			UIManager.ToolbarEnable(undoStack.Count > 0, ToolbarInput.Undo);
-			UIManager.ToolbarEnable(redoStack.Count > 0, ToolbarInput.Redo);
+			InterfaceCanvas.Instance.ToolbarEnable(undoStack.Count > 0, ToolbarInput.Undo);
+			InterfaceCanvas.Instance.ToolbarEnable(redoStack.Count > 0, ToolbarInput.Redo);
 		}
 
 		public FSMState GetCurrentState()

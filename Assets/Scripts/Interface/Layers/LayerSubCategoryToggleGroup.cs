@@ -32,15 +32,15 @@ namespace MSP2050.Scripts
 			layerTab.toggle.isOn = LayerManager.LayerIsVisible(layer);
 			layerTab.toggle.onValueChanged.AddListener((toggleValue) =>
 			{
-				if (UIManager.ignoreLayerToggleCallback)
+				if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
 					return;
 
-				UIManager.ignoreLayerToggleCallback = true;
+				InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 				if (toggleValue)
 					LayerManager.ShowLayer(layer);
 				else
 					LayerManager.HideLayer(layer);
-				UIManager.ignoreLayerToggleCallback = false;
+				InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			});
 
 			AddTooltip tooltip = layerTab.toggle.gameObject.AddComponent<AddTooltip>();

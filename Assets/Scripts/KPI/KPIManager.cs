@@ -226,7 +226,7 @@ namespace MSP2050.Scripts
 			//Collection for all countries together
 			geometryKPIs.AddKPIForCountry(0);
 			geometryKPIs.SetupKPIValues(null, Main.MspGlobalData.session_end_month);
-			GameState.OnCurrentMonthChanged += UpdateGeometryKPI;
+			TimeManager.Instance.OnCurrentMonthChanged += UpdateGeometryKPI;
 		}
 
 		private static void UpdateGeometryKPI(int oldMonth, int newMonth)

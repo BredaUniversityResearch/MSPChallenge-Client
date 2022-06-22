@@ -29,7 +29,7 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			GameState.OnCurrentMonthChanged += OnCurrentMonthChanged;
+			TimeManager.Instance.OnCurrentMonthChanged += OnCurrentMonthChanged;
 
 			if (Main.MspGlobalData != null)
 			{
@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 
 		private void OnDestroy()
 		{
-			GameState.OnCurrentMonthChanged -= OnCurrentMonthChanged;
+			TimeManager.Instance.OnCurrentMonthChanged -= OnCurrentMonthChanged;
 		}
 
 		//Callback set in Unity Editor.
@@ -114,7 +114,7 @@ namespace MSP2050.Scripts
 				monthSelectorSlider.onValueChanged.AddListener(OnSliderValueChanged);
 			}
 
-			SetLatestAvailableMonth(GameState.GetCurrentMonth());
+			SetLatestAvailableMonth(TimeManager.Instance.GetCurrentMonth());
 		}
 
 		private RectTransform CreateYearLabel(string labelText)

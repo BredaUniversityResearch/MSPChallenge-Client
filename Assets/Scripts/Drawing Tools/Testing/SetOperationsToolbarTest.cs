@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 		public void EnableButtons()
 		{
 			visible = !visible;
-			UIManager.ToolbarVisibility(visible, FSM.ToolbarInput.Difference, FSM.ToolbarInput.Intersect, FSM.ToolbarInput.Union);
+			InterfaceCanvas.Instance.ToolbarVisibility(visible, FSM.ToolbarInput.Difference, FSM.ToolbarInput.Intersect, FSM.ToolbarInput.Union);
 		}
 
 		public void DoIntersection()

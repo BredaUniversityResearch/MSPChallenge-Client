@@ -25,9 +25,9 @@ namespace MSP2050.Scripts
 		{
 			if (shouldFollowCurrentDate)
 			{
-				GameState.OnCurrentMonthChanged += OnMonthChanged;
+				TimeManager.Instance.OnCurrentMonthChanged += OnMonthChanged;
 			}
-			SetDate(GameState.GetCurrentMonth());
+			SetDate(TimeManager.Instance.GetCurrentMonth());
 
 			if(matchingWindow != null)
 				matchingWindow.RegisterResizeHandler(this);
@@ -49,7 +49,7 @@ namespace MSP2050.Scripts
 		{
 			if (shouldFollowCurrentDate)
 			{
-				GameState.OnCurrentMonthChanged -= OnMonthChanged;
+				TimeManager.Instance.OnCurrentMonthChanged -= OnMonthChanged;
 			}
 			if (matchingWindow != null)
 				matchingWindow.UnRegisterResizeHandler(this);

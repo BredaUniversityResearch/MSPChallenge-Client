@@ -71,7 +71,7 @@ namespace MSP2050.Scripts
 			polygonEntity.AddSubEntity(subEntity);
 
 			if (TeamManager.AreWeGameMaster)
-				polygonEntity.Country = UIManager.GetCurrentTeamSelection();
+				polygonEntity.Country = InterfaceCanvas.GetCurrentTeamSelection();
 
 			subEntity.AddPoint(initialPoint);
 			subEntity.AddPoint(initialPoint);
@@ -282,7 +282,7 @@ namespace MSP2050.Scripts
 			//    return;
 			//}
 
-			//UIManager.CreateConfirmWindow("Create Inverted Layer", "Are you sure you want to create an inverted layer?", 200, () => { LayerManager.AddNewLayer(FileName + " (inverted)", LayerManager.GeoType.polygon, invertedLayerCreated); });
+			//InterfaceCanvas.CreateConfirmWindow("Create Inverted Layer", "Are you sure you want to create an inverted layer?", 200, () => { LayerManager.AddNewLayer(FileName + " (inverted)", LayerManager.GeoType.polygon, invertedLayerCreated); });
 
 
 		}

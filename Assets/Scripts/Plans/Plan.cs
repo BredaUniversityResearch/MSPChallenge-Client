@@ -822,7 +822,7 @@ namespace MSP2050.Scripts
 
 		public bool RequiresTimeChange
 		{
-			get { return State == PlanState.DELETED && ConstructionStartTime <= GameState.GetCurrentMonth(); }
+			get { return State == PlanState.DELETED && ConstructionStartTime <= TimeManager.Instance.GetCurrentMonth(); }
 		}
 
 		public static PlanState StringToPlanState(string state)

@@ -36,12 +36,12 @@ namespace MSP2050.Scripts
 
 		protected void Start()
 		{
-			panel = UIManager.GetLayerPanel();
-			layerSelect = UIManager.GetLayerSelect();
+			panel = InterfaceCanvas.Instance.layerPanel;
+			layerSelect = InterfaceCanvas.Instance.layerSelect;
 			categories = new Dictionary<string, LayerCategoryGroup>();
 			subCategories = new Dictionary<string, LayerSubCategoryToggleGroup>();
 
-			menuLayerToggle = UIManager.GetInterfaceCanvas().menuBarLayers;
+			menuLayerToggle = InterfaceCanvas.Instance.menuBarLayers;
 
 			// This is for the menu bar toggle so that it acts correctly
 			menuLayerToggle.GetComponent<Toggle>().isOn = true;

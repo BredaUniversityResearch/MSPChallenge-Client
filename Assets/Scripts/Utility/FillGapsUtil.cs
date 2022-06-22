@@ -58,7 +58,7 @@ namespace MSP2050.Scripts
 		////    newBathymetryLayer.DrawGameObjects();
 		////    submitNewBathymetry(newBathymetryLayer);
 
-		////    UIManager.CreateConfirmWindow("Done!", "Bathymetry fix complete.", 200, () => { });
+		////    InterfaceCanvas.CreateConfirmWindow("Done!", "Bathymetry fix complete.", 200, () => { });
 		//}
 
 		//private static void cloneBathymetry(PolygonLayer newBathymetryLayer, PolygonLayer oldBathymetryLayer)

@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
 			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(planLayer, entityType);
 			LineStringSubEntity subEntity = new LineStringSubEntity(lineStringEntity);
 			if (TeamManager.AreWeGameMaster)
-				lineStringEntity.Country = UIManager.GetCurrentTeamSelection();
+				lineStringEntity.Country = InterfaceCanvas.GetCurrentTeamSelection();
 			lineStringEntity.AddSubEntity(subEntity);
 			subEntity.AddPoint(initialPoint);
 			subEntity.AddPoint(initialPoint);
@@ -48,7 +48,7 @@ namespace MSP2050.Scripts
 			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(planLayer, entityType);
 			EnergyLineStringSubEntity subEntity = new EnergyLineStringSubEntity(lineStringEntity);
 			if (TeamManager.AreWeGameMaster)
-				lineStringEntity.Country = UIManager.GetCurrentTeamSelection();
+				lineStringEntity.Country = InterfaceCanvas.GetCurrentTeamSelection();
 			lineStringEntity.AddSubEntity(subEntity);
 			subEntity.AddPoint(initialPoint);
 

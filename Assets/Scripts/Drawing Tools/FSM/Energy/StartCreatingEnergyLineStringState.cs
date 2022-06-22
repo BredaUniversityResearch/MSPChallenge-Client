@@ -57,7 +57,7 @@ namespace MSP2050.Scripts
 					fsm.SetCursor(FSM.CursorType.Add);
 					if (!showingToolTip || !validPointTooltip)
 					{
-						List<EntityType> entityTypes = UIManager.GetCurrentEntityTypeSelection();
+						List<EntityType> entityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
 						StringBuilder sb = new StringBuilder("Creating: " + entityTypes[0].Name);
 						for (int i = 1; i < entityTypes.Count; i++)
 							sb.Append("\n& " + entityTypes[i].Name);
@@ -85,7 +85,7 @@ namespace MSP2050.Scripts
 
 			LineStringEntity entity = baseLayer.CreateNewEnergyLineStringEntity(point.GetPosition(), new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, point, planLayer);
 			baseLayer.activeEntities.Add(entity);
-			entity.EntityTypes = UIManager.GetCurrentEntityTypeSelection();
+			entity.EntityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
 			LineStringSubEntity subEntity = entity.GetSubEntity(0) as LineStringSubEntity;
 
 			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);

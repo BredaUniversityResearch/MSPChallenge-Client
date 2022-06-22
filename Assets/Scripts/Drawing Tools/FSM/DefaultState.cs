@@ -72,11 +72,11 @@ namespace MSP2050.Scripts
 					}
 				}
 				if (subEntities.Count > 0)
-					UIManager.CreateLayerProbeWindow(subEntities, worldPosition, windowPosition);
+					InterfaceCanvas.Instance.layerProbeWindow.ShowLayerProbeWindow(subEntities, worldPosition, windowPosition);
 			}
 			else if (currentHover != null)
 			{
-				UIManager.CreatePropertiesWindow(currentHover.GetSubEntity(0), worldPosition, windowPosition);
+				InterfaceCanvas.Instance.propertiesWindow.ShowPropertiesWindow(currentHover.GetSubEntity(0), worldPosition, windowPosition);
 			}
 		
 
@@ -99,11 +99,11 @@ namespace MSP2050.Scripts
 
 			//    if (entities.Count > 1)
 			//    {
-			//        UIManager.CreateLayerProbeWindow(entities, position + Vector3.one);
+			//        InterfaceCanvas.CreateLayerProbeWindow(entities, position + Vector3.one);
 			//    }
 			//    else
 			//    {
-			//        UIManager.CreatePropertiesWindow(currentHover, position + Vector3.one);
+			//        InterfaceCanvas.CreatePropertiesWindow(currentHover, position + Vector3.one);
 			//    }
 			//}
 		}

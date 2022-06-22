@@ -213,7 +213,7 @@ namespace MSP2050.Scripts
 		public static void CreateActivityWindow()
 		{
 			doingSomethingWindow = GameObject.Instantiate(Resources.Load<GameObject>("TransmittingDataWindow"));
-			doingSomethingWindow.transform.SetParent(UIManager.GetInterfaceCanvas().transform);
+			doingSomethingWindow.transform.SetParent(InterfaceCanvas.Instance.transform);
 			doingSomethingWindow.GetComponent<RectTransform>().localPosition = Vector3.zero;
 			doingSomethingWindow.SetActive(false);
 		}
