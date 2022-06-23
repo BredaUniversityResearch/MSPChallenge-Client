@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using DotSpatial.Projections;
+using HEBGraph;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -143,8 +144,17 @@ namespace MSP2050.Scripts
 			ParseAvailableSimulations(MspGlobalData.configured_simulations);
 			InterfaceCanvas.Instance.SetRegionWithName(MspGlobalData.region);
 
-			if(MspGlobalData.dependencies != null)
-				InterfaceCanvas.Instance.ImpactToolGraph.Initialise(MspGlobalData.dependencies);
+			if (MspGlobalData.dependencies != null)
+			{
+				HEBGraphData HEBData = MspGlobalData.dependencies.ToObject<HEBGraphData>();
+				if (HEBData?.groups == null || HEBData.links == null)
+				{
+					Debug.LogWarning("Impact tool data did not match expected format, it will be disabled.");
+					MspGlobalData.dependencies = null;
+				}
+				else
+					InterfaceCanvas.Instance.ImpactToolGraph.Initialise(HEBData);
+			}
 
 			if (OnGlobalDataLoaded != null)
 			{
