@@ -63,9 +63,9 @@ namespace MSP2050.Scripts
 		//Also called via the UnityEditor
 		public void SetDate(int month)
 		{
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
-				float timePercentage = month / (float)Main.MspGlobalData.session_end_month;
+				float timePercentage = month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
 
 				targetTransform.anchorMin = new Vector2(timePercentage, 0f);
 				targetTransform.anchorMax = new Vector2(timePercentage, 1f);

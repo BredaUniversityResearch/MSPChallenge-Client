@@ -17,7 +17,7 @@ namespace MSP2050.Scripts
 
 			switch (connectTo) {
 				case Selection.Logo:
-					if (Main.MspGlobalData != null)               
+					if (SessionManager.Instance.MspGlobalData != null)               
 						SetRegionButtonCallback();                
 					else               
 						Main.OnGlobalDataLoaded += GlobalDataLoaded;               
@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 			}
 			else if (connectTo == Selection.ImpactTool)
 			{
-				toggle.gameObject.SetActive(Main.MspGlobalData.dependencies != null); // Make sure this toggle is visible based on whether or not we have the data.
+				toggle.gameObject.SetActive(SessionManager.Instance.MspGlobalData.dependencies != null); // Make sure this toggle is visible based on whether or not we have the data.
 			}
 		}
 
@@ -83,7 +83,7 @@ namespace MSP2050.Scripts
 			toggle.onValueChanged.AddListener((b) =>
 			{
 				float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(Main.MspGlobalData.region_base_url + '/' + TeamManager.CurrentTeam.name);
+				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(SessionManager.Instance.MspGlobalData.region_base_url + '/' + SessionManager.Instance.CurrentTeam.name);
 			});
 	
 		}

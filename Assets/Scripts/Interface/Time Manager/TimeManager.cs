@@ -66,10 +66,10 @@ namespace MSP2050.Scripts
 
 			//Use month
 			int month = GetCurrentMonth();
-			TimeManagerWindow.instance.timeline.Progress = (float)month / (float)Main.MspGlobalData.session_end_month;
+			TimeManagerWindow.instance.timeline.Progress = (float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
 
 			//Era change
-			int newEra = Math.Min(Mathf.FloorToInt(month / (float)Main.MspGlobalData.era_total_months), ERA_COUNT - 1);
+			int newEra = Math.Min(Mathf.FloorToInt(month / (float)SessionManager.Instance.MspGlobalData.era_total_months), ERA_COUNT - 1);
 			if (newEra != era)
 			{
 				for (int i = era; i < newEra; i++)
@@ -113,7 +113,7 @@ namespace MSP2050.Scripts
 				int newGameTime = Util.ParseToInt(timeState.era_gametime);
 				if (eraGameTime != newGameTime)
 				{
-					float division = 1f - ((float)newGameTime / (float)Main.MspGlobalData.era_total_months);
+					float division = 1f - ((float)newGameTime / (float)SessionManager.Instance.MspGlobalData.era_total_months);
 					for (int i = 0; i < ERA_COUNT; i++)
 					{
 						TimeManagerWindow.instance.eraDivision.SetEraSimulationDivision(i, division);
@@ -242,7 +242,7 @@ namespace MSP2050.Scripts
 			if (eraChanged == era)
 			{
 				//Change remaining time
-				int monthsLeft = eraGameTime - (GetCurrentMonth() % Main.MspGlobalData.era_total_months);
+				int monthsLeft = eraGameTime - (GetCurrentMonth() % SessionManager.Instance.MspGlobalData.era_total_months);
 				if (monthsLeft == 0)
 					Debug.LogError("Era should have passed, but didn't. Causing divide by 0.");
 				else if(monthsLeft < 0)
@@ -314,7 +314,7 @@ namespace MSP2050.Scripts
 			if (month != prevMonth)
 			{
 				if (gameState != PlanningState.Setup)
-					PlanManager.MonthTick(month);
+					PlanManager.Instance.MonthTick(month);
 				PlanWizard.UpdateMinSelectableTime();
 
 				if (OnCurrentMonthChanged != null)
@@ -371,7 +371,7 @@ namespace MSP2050.Scripts
 
 		private void OnSetupPhaseStarted()
 		{
-			if (!TeamManager.AreWeGameMaster)
+			if (!SessionManager.Instance.AreWeGameMaster)
 				InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = false;
 		}
 
@@ -380,7 +380,7 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = true;
 			//Update plans once the setup state is left, so we don't have to wait for month 1 
 			TimeManagerWindow.instance.eraDivision.gameObject.SetActive(false);
-			PlanManager.MonthTick(month);
+			PlanManager.Instance.MonthTick(month);
 			PlansMonitor.RefreshPlanButtonInteractablity();
 			SetupStateExited();
 		}
@@ -412,7 +412,7 @@ namespace MSP2050.Scripts
 			form.AddField("state", state);
 			Debug.Log("Send State " + state.ToString());
 
-			ServerCommunication.DoRequest(Server.SetGameState(), form);
+			ServerCommunication.Instance.DoRequest(Server.SetGameState(), form);
 		}
 
 		public static PlanningState StringToPlanningState(string value)
@@ -431,7 +431,7 @@ namespace MSP2050.Scripts
 		{
 			NetworkForm form = new NetworkForm();
 			form.AddField("state", state.ToString());
-			ServerCommunication.DoRequest(Server.SetGameState(), form);
+			ServerCommunication.Instance.DoRequest(Server.SetGameState(), form);
 		}
 
 		private void ServerChangePlanningGameTime(int newMonths)
@@ -444,7 +444,7 @@ namespace MSP2050.Scripts
 
 			NetworkForm form = new NetworkForm();
 			form.AddField("months", newMonths);
-			ServerCommunication.DoRequest(Server.SetGamePlanningTime(), form);
+			ServerCommunication.Instance.DoRequest(Server.SetGamePlanningTime(), form);
 		}
 
 		private void ServerChangePlanningRealTime(int newSeconds)
@@ -453,7 +453,7 @@ namespace MSP2050.Scripts
 				newSeconds = 10;
 			NetworkForm form = new NetworkForm();
 			form.AddField("realtime", newSeconds);
-			ServerCommunication.DoRequest(Server.SetRealPlanningTime(), form);
+			ServerCommunication.Instance.DoRequest(Server.SetRealPlanningTime(), form);
 		}
 
 		private void ServerChangeAllPlanningRealTime()
@@ -465,7 +465,7 @@ namespace MSP2050.Scripts
 
 			NetworkForm form = new NetworkForm();
 			form.AddField("realtime", times);
-			ServerCommunication.DoRequest(Server.SetFuturePlanningTime(), form);
+			ServerCommunication.Instance.DoRequest(Server.SetFuturePlanningTime(), form);
 		}
 
 		private void ServerChangeRemainingTime(int newSeconds)
@@ -474,7 +474,7 @@ namespace MSP2050.Scripts
 				newSeconds = 10;
 			NetworkForm form = new NetworkForm();
 			form.AddField("time", newSeconds);
-			ServerCommunication.DoRequest(Server.SetPlanningTimeRemaining(), form);
+			ServerCommunication.Instance.DoRequest(Server.SetPlanningTimeRemaining(), form);
 		}
 		#endregion
 	}

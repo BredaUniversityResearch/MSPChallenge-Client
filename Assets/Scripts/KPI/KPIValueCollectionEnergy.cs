@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
                 layerStates.Add(newLayerState);
 			}
 
-			List<EnergyGrid> grids = PlanManager.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
+			List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
 			CalculateKPIValues(month, gridDataForMonth, grids, layerStates);
 		}
 

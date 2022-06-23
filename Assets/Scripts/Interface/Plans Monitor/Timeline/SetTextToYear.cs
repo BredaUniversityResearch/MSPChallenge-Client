@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
 				SetYear();
 			}
@@ -29,7 +29,7 @@ namespace MSP2050.Scripts
 
 		void SetYear()
 		{
-			GetComponent<TextMeshProUGUI>().text = (Main.MspGlobalData.start + era * Main.MspGlobalData.YearsPerEra + yearOffset).ToString();
+			GetComponent<TextMeshProUGUI>().text = (SessionManager.Instance.MspGlobalData.start + era * SessionManager.Instance.MspGlobalData.YearsPerEra + yearOffset).ToString();
 		}
 	}
 }

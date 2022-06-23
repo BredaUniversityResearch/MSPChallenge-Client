@@ -10348,7 +10348,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.16470589, b: 0.16470589, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -10384,14 +10384,19 @@ GameObject:
   m_Component:
   - component: {fileID: 1589480015}
   - component: {fileID: 1589480014}
-  - component: {fileID: 1589480016}
-  - component: {fileID: 1589480017}
   - component: {fileID: 1589480018}
   - component: {fileID: 1589480019}
   - component: {fileID: 1589480020}
+  - component: {fileID: 1589480016}
   - component: {fileID: 1589480021}
+  - component: {fileID: 1589480017}
   - component: {fileID: 1589480022}
   - component: {fileID: 1589480023}
+  - component: {fileID: 1589480024}
+  - component: {fileID: 1589480028}
+  - component: {fileID: 1589480027}
+  - component: {fileID: 1589480026}
+  - component: {fileID: 1589480025}
   m_Layer: 0
   m_Name: Main
   m_TagString: Untagged
@@ -10411,8 +10416,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60cc7c50faade6f44ab5f5f42fab24b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DataVisualizationSettings: {fileID: 11400000, guid: e139f3075ff07294f9d71ff1ae861b6c,
-    type: 2}
   AudioMixer: {fileID: 24100000, guid: cc5dc46a0726cb543b8b2029c4734781, type: 2}
   fsmActive: 0
 --- !u!4 &1589480015
@@ -10537,6 +10540,80 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d0f43bc03125734fa4b74f04e6e846a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1589480024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589480013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26517c7b7b2967f41b762a5da7cfa9fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StopProcessingUpdates: 0
+--- !u!114 &1589480025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589480013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84090dde462f7d6419c1203ca91a8bcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  VisualizationSettings: {fileID: 11400000, guid: e139f3075ff07294f9d71ff1ae861b6c,
+    type: 2}
+  SelectionColor: {r: 1, g: 0.5764706, b: 0.11764706, a: 1}
+  DisplayScale: 185
+  pointResolutionScale: 1
+  textResolutionScale: 1
+--- !u!114 &1589480026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589480013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d63e91c2e22eab4187308772c4b56b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1589480027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589480013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af383ab1a27da014781eddead3122b90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1589480028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589480013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e8bed0fd6aa7104daec538e76056345, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fishingFleets: []
+  initialFishingMapping: 0
+  fishingDisplayScale: 0
+  shippingDisplayScale: 10000
+  planViewState: 0
+  timeViewing: -1
+  inPlanUIChange: 0
 --- !u!114 &1593256612 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 114000011265829314, guid: b78f32ff828d1c84f93a587bb73b4725,
@@ -19290,12 +19367,12 @@ PrefabInstance:
     - target: {fileID: 4752142007391373287, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 274
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4752142007391373287, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4752843058682855977, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
@@ -19415,12 +19492,12 @@ PrefabInstance:
     - target: {fileID: 6022415168049706793, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 274
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6022415168049706793, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6022553778392752769, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
@@ -19705,12 +19782,12 @@ PrefabInstance:
     - target: {fileID: 6617775658513826179, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 274
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6617775658513826179, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8870374846002956466, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
@@ -19860,12 +19937,12 @@ PrefabInstance:
     - target: {fileID: 8871638826165690326, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 274
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8871638826165690326, guid: 8178f2b8a26d13c4d98c684f13d67ab5,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8178f2b8a26d13c4d98c684f13d67ab5, type: 3}

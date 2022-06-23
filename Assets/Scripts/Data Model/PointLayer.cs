@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 		public PointEntity CreateNewPointEntity(Vector3 point, List<EntityType> entityType, PlanLayer planLayer)
 		{
 			PointEntity pointEntity = new PointEntity(this, planLayer, point, entityType, null);
-			if (TeamManager.AreWeGameMaster)
+			if (SessionManager.Instance.AreWeGameMaster)
 				pointEntity.Country = InterfaceCanvas.GetCurrentTeamSelection();
         
 			planLayer.AddNewGeometry(pointEntity);
@@ -45,7 +45,7 @@ namespace MSP2050.Scripts
 
 		public PointSubEntity GetPointAt(Vector3 position)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			PointSubEntity closestSubEntity = null;
@@ -75,7 +75,7 @@ namespace MSP2050.Scripts
 		{
 			Vector3 pos = position;
 
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			List<SubEntity> closestSubEntities = new List<SubEntity>();

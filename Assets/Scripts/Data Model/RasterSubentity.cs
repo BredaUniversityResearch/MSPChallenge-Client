@@ -49,7 +49,7 @@ namespace MSP2050.Scripts
 			if (gameObject == null)
 			{
 				RasterLayer sourceLayer = (RasterLayer) Entity.Layer;
-				gameObject = VisualizationUtil.CreateRasterGameObject(sourceLayer.rasterObject.layer_raster_material);
+				gameObject = VisualizationUtil.Instance.CreateRasterGameObject(sourceLayer.rasterObject.layer_raster_material);
 				gameObject.transform.SetParent(parent);
 
 				gameObject.transform.localScale = scale;
@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 					sourceLayer.rasterObject.layer_raster_minimum_value_cutoff /
 					sourceLayer.rasterValueToEntityValueMultiplier
 				);
-				spriteRenderer.material.SetTexture("_Dither", MaterialManager.GetPatternOrDefault(sourceLayer.rasterObject.layer_raster_pattern));
+				spriteRenderer.material.SetTexture("_Dither", MaterialManager.Instance.GetPatternOrDefault(sourceLayer.rasterObject.layer_raster_pattern));
 				SetRenderPatternOffset(materialPatternOffset);
 				SetupColorGradient(
 					spriteRenderer.material,
@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 			SnappingToThisEnabled = false; // snapToDrawMode(drawMode);
 
 			drawSettings = Entity.EntityTypes[0].DrawSettings;
-			if (drawMode != SubEntityDrawMode.Default) { drawSettings = VisualizationUtil.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings); }
+			if (drawMode != SubEntityDrawMode.Default) { drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings); }
 
 			if (raster != null)
 			{

@@ -47,7 +47,7 @@ namespace MSP2050.Scripts
 			public PolygonLOD(List<Vector3> polygon, List<List<Vector3>> holes, Transform targetParent, LODSettings settings)
 			{
 
-				GameObject = VisualizationUtil.CreatePolygonGameObject();
+				GameObject = VisualizationUtil.Instance.CreatePolygonGameObject();
 				GameObject.transform.SetParent(targetParent, false);
 				GameObject.SetActive(false);
 				PointContainerObject = new GameObject("PointContainer");
@@ -173,7 +173,7 @@ namespace MSP2050.Scripts
 		{
 			lods.Clear();
 
-			List<LODSettings> lodSettingsList = VisualizationUtil.VisualizationSettings.LODs;
+			List<LODSettings> lodSettingsList = VisualizationUtil.Instance.VisualizationSettings.LODs;
 			for (int i = 0; i < lodSettingsList.Count; ++i)
 			{
 				lods.Add(new PolygonLOD(null, null, gameObject.transform, lodSettingsList[i]));
@@ -364,7 +364,7 @@ namespace MSP2050.Scripts
 
 		public int GetPointAt(Vector3 position, out float closestDistanceSquared, bool ignoreLastPoint = false)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			int closestPoint = -1;
@@ -402,7 +402,7 @@ namespace MSP2050.Scripts
 
 		public void GetLineAt(Vector3 position, out int lineA, out int lineB, out float closestDistanceSquared)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			lineA = -1;
@@ -779,7 +779,7 @@ namespace MSP2050.Scripts
 					hoverPoints = InvalidPoints;
 				}
 
-				VisualizationUtil.SelectionColor = VisualizationUtil.INVALID_SELECTION_COLOR;
+				VisualizationUtil.Instance.SelectionColor = VisualizationUtil.Instance.INVALID_SELECTION_COLOR;
 			}
 
 			SnappingToThisEnabled = IsSnapToDrawMode(drawMode);
@@ -788,7 +788,7 @@ namespace MSP2050.Scripts
 			drawSettings = Entity.EntityTypes[0].DrawSettings;
 			if (drawMode != SubEntityDrawMode.Default)
 			{
-				drawSettings = VisualizationUtil.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings);
+				drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings);
 			}
 
 			lodLockedAtZero = drawMode != SubEntityDrawMode.Default && drawMode != SubEntityDrawMode.Hover;
@@ -826,7 +826,7 @@ namespace MSP2050.Scripts
 
 			if (InvalidPoints != null)
 			{
-				VisualizationUtil.SelectionColor = VisualizationUtil.DEFAULT_SELECTION_COLOR;
+				VisualizationUtil.Instance.SelectionColor = VisualizationUtil.Instance.DEFAULT_SELECTION_COLOR;
 			}	
 		}
 
@@ -835,7 +835,7 @@ namespace MSP2050.Scripts
 			base.UpdateRestrictionArea(newRestrictionSize);
 			if (restrictionArea == null && newRestrictionSize > 0.0f && !restrictionHidden)
 			{
-				restrictionArea = VisualizationUtil.CreateRestrictionArea();
+				restrictionArea = VisualizationUtil.Instance.CreateRestrictionArea();
 				restrictionArea.SetParent(gameObject.transform);
 			}
 
@@ -861,10 +861,10 @@ namespace MSP2050.Scripts
 			int newLod = 0;
 			if (!lodLockedAtZero)
 			{
-				List<LODSettings> lodSettingsList = VisualizationUtil.VisualizationSettings.LODs;
+				List<LODSettings> lodSettingsList = VisualizationUtil.Instance.VisualizationSettings.LODs;
 				for (int i = 0; i < lodSettingsList.Count; ++i)
 				{
-					if (VisualizationUtil.DisplayScale >= lodSettingsList[i].MinScale)
+					if (VisualizationUtil.Instance.DisplayScale >= lodSettingsList[i].MinScale)
 					{
 						newLod = i;
 					}
@@ -1018,7 +1018,7 @@ namespace MSP2050.Scripts
 
 				try
 				{
-					filter.mesh = VisualizationUtil.CreatePolygon(targetLod.Polygon, targetLod.Holes, Entity.patternRandomOffset, drawSettings.InnerGlowEnabled, layer.InnerGlowBounds);
+					filter.mesh = VisualizationUtil.Instance.CreatePolygon(targetLod.Polygon, targetLod.Holes, Entity.patternRandomOffset, drawSettings.InnerGlowEnabled, layer.InnerGlowBounds);
 				}
 				catch (Exception ex)
 				{
@@ -1098,10 +1098,10 @@ namespace MSP2050.Scripts
 				int expectedChildCount = totalVertexCount;
 				if (targetLod.PointContainerObject.transform.childCount != expectedChildCount)
 				{
-					VisualizationUtil.DestroyChildren(targetLod.PointContainerObject);
+					VisualizationUtil.Instance.DestroyChildren(targetLod.PointContainerObject);
 					for (int i = 0; i < expectedChildCount; ++i)
 					{
-						GameObject point = VisualizationUtil.CreatePoint();
+						GameObject point = VisualizationUtil.Instance.CreatePoint();
 						point.transform.SetParent(targetLod.PointContainerObject.transform, false);
 					}
 				}
@@ -1114,12 +1114,12 @@ namespace MSP2050.Scripts
 					bool hover = hoverPoints != null && hoverPoints.Contains(i);
 					bool selected = selectedPoints != null && selectedPoints.Contains(i);
 
-					Color pointColor = hover ? VisualizationUtil.SelectionColor : targetDrawSettings.PointColor;
+					Color pointColor = hover ? VisualizationUtil.Instance.SelectionColor : targetDrawSettings.PointColor;
 					pointColor = selected ? Color.white : pointColor;
 
-					VisualizationUtil.PointRenderMode pointRenderMode = VisualizationUtil.GetPointRenderMode(targetDrawSettings, planState, selected);
+					VisualizationUtil.PointRenderMode pointRenderMode = VisualizationUtil.Instance.GetPointRenderMode(targetDrawSettings, planState, selected);
 				
-					VisualizationUtil.UpdatePoint(point, targetLod.GetPointPosition(i), pointColor, targetDrawSettings.PointSize, pointRenderMode);
+					VisualizationUtil.Instance.UpdatePoint(point, targetLod.GetPointPosition(i), pointColor, targetDrawSettings.PointSize, pointRenderMode);
 				}
 
 				UpdatePolygonPointScale(targetLod, targetDrawSettings);
@@ -1170,11 +1170,11 @@ namespace MSP2050.Scripts
 					PolygonLayer layer = (PolygonLayer)Entity.Layer;
 					if (targetDrawSettings.InnerGlowEnabled && layer.InnerGlowTexture != null)
 					{
-						renderer.material = MaterialManager.GetInnerGlowPolygonMaterial(layer.InnerGlowTexture, targetDrawSettings.PolygonPatternName, targetDrawSettings.PolygonColor);
+						renderer.material = MaterialManager.Instance.GetInnerGlowPolygonMaterial(layer.InnerGlowTexture, targetDrawSettings.PolygonPatternName, targetDrawSettings.PolygonColor);
 					}
 					else
 					{
-						renderer.material = MaterialManager.GetDefaultPolygonMaterial(targetDrawSettings.PolygonPatternName, targetDrawSettings.PolygonColor);
+						renderer.material = MaterialManager.Instance.GetDefaultPolygonMaterial(targetDrawSettings.PolygonPatternName, targetDrawSettings.PolygonColor);
 					}
 					renderer.enabled = !firstToLastInvalid;
 				}
@@ -1185,7 +1185,7 @@ namespace MSP2050.Scripts
 
 		private void UpdatePolygonPointScale(PolygonLOD targetLod, SubEntityDrawSettings targetDrawSettings)
 		{
-			float newPointScale = targetDrawSettings.PointSize * VisualizationUtil.DisplayScale * VisualizationUtil.pointResolutionScale;
+			float newPointScale = targetDrawSettings.PointSize * VisualizationUtil.Instance.DisplayScale * VisualizationUtil.Instance.pointResolutionScale;
 
 			Transform pointTransform = targetLod.PointContainerObject.transform;
 			for (int i = 0; i < pointTransform.childCount; ++i)
@@ -1199,7 +1199,7 @@ namespace MSP2050.Scripts
 			if (outline == null)
 				return;
 			LineRenderer lineRenderer = outline.GetComponent<LineRenderer>();
-			float lineWidth = (targetDrawSettings.LineWidth * VisualizationUtil.DisplayScale) / 50.0f;
+			float lineWidth = (targetDrawSettings.LineWidth * VisualizationUtil.Instance.DisplayScale) / 50.0f;
 			//float lineWidth = (targetDrawSettings.LineWidth * CameraManager.Instance.gameCamera.orthographicSize) / 200.0f;
 			lineRenderer.widthMultiplier = lineWidth;
 		}

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public static class ConstraintManager
+	public class ConstraintManager : MonoBehaviour
 	{
 		public enum EConstraintType { Exclusion, Inclusion, Type_Unavailable }
 
@@ -91,21 +91,45 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		private static ConstraintManager singleton;
+		public static ConstraintManager Instance
+		{
+			get
+			{
+				if (singleton == null)
+					singleton = FindObjectOfType<ConstraintManager>();
+				return singleton;
+			}
+		}
+
 		// used to store error messages with their IDs to avoid passing around long strings
-		private static Dictionary<int, string> restrictionIdToMessage = new Dictionary<int, string>();
+		private Dictionary<int, string> restrictionIdToMessage = new Dictionary<int, string>();
 
 		/// <summary>
 		/// Separate dictionary for inclusions and exclusions
 		/// </summary>
-		private static Dictionary<ConstraintSource, List<ConstraintTarget>> inclusions = new Dictionary<ConstraintSource, List<ConstraintTarget>>(ConstraintSourceEqualityComparer.instance);
-		private static Dictionary<ConstraintSource, List<ConstraintTarget>> exclusions = new Dictionary<ConstraintSource, List<ConstraintTarget>>(ConstraintSourceEqualityComparer.instance);
-		private static Dictionary<ConstraintSource, ConstraintTarget> typeUnavailableConstraint = new Dictionary<ConstraintSource, ConstraintTarget>();
-		private static Dictionary<int, KeyValuePair<ConstraintSource, ConstraintTarget>> restrictionIdToConstraint = new Dictionary<int, KeyValuePair<ConstraintSource, ConstraintTarget>>();
+		private Dictionary<ConstraintSource, List<ConstraintTarget>> inclusions = new Dictionary<ConstraintSource, List<ConstraintTarget>>(ConstraintSourceEqualityComparer.instance);
+		private Dictionary<ConstraintSource, List<ConstraintTarget>> exclusions = new Dictionary<ConstraintSource, List<ConstraintTarget>>(ConstraintSourceEqualityComparer.instance);
+		private Dictionary<ConstraintSource, ConstraintTarget> typeUnavailableConstraint = new Dictionary<ConstraintSource, ConstraintTarget>();
+		private Dictionary<int, KeyValuePair<ConstraintSource, ConstraintTarget>> restrictionIdToConstraint = new Dictionary<int, KeyValuePair<ConstraintSource, ConstraintTarget>>();
 
-		public static float ConstraintPointCollisionSize
+		public float ConstraintPointCollisionSize
 		{
 			get;
 			private set;
+		}
+
+		void Start()
+		{
+			if (singleton != null && singleton != this)
+				Destroy(this);
+			else
+				singleton = this;
+		}
+
+		void OnDestroy()
+		{
+			singleton = null;
 		}
 
 		/// <summary>
@@ -119,7 +143,7 @@ namespace MSP2050.Scripts
 		/// <param name="issueSeverity">restriction_type</param>
 		/// <param name="constraintType">restriction_sort</param>
 		/// <param name="value">restriction_value</param>
-		private static void AddConstraint(AbstractLayer layerA, EntityType typeA, AbstractLayer layerB, EntityType typeB, string message, ERestrictionIssueType issueSeverity, EConstraintType constraintType, float value, int restrictionId)
+		private void AddConstraint(AbstractLayer layerA, EntityType typeA, AbstractLayer layerB, EntityType typeB, string message, ERestrictionIssueType issueSeverity, EConstraintType constraintType, float value, int restrictionId)
 		{
 			ConstraintSource source = new ConstraintSource
 			{
@@ -151,7 +175,7 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Add an inclusion to the dictionary
 		/// </summary>
-		private static void AddInclusion(ConstraintSource source, ConstraintTarget target)
+		private void AddInclusion(ConstraintSource source, ConstraintTarget target)
 		{
 			if (inclusions.ContainsKey(source))
 				inclusions[source].Add(target);
@@ -162,7 +186,7 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Add an exclusion to the dictionary
 		/// </summary>
-		private static void AddExclusion(ConstraintSource source, ConstraintTarget target)
+		private void AddExclusion(ConstraintSource source, ConstraintTarget target)
 		{
 			if (exclusions.ContainsKey(source))
 				exclusions[source].Add(target);
@@ -170,12 +194,12 @@ namespace MSP2050.Scripts
 				exclusions.Add(source, new List<ConstraintTarget>() { target });
 		}
 
-		private static void AddTypeUnavailable(ConstraintSource source, ConstraintTarget target)
+		private void AddTypeUnavailable(ConstraintSource source, ConstraintTarget target)
 		{
 			typeUnavailableConstraint[source] = target;
 		}
 
-		private static ConstraintTarget FindTypeUnavailableConstraint(AbstractLayer targetLayer, EntityType targetEntityType)
+		private ConstraintTarget FindTypeUnavailableConstraint(AbstractLayer targetLayer, EntityType targetEntityType)
 		{
 			ConstraintSource source = new ConstraintSource {entityType = targetEntityType, layer = targetLayer};
 
@@ -187,7 +211,7 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Check constraints against any future plans
 		/// </summary>
-		public static RestrictionIssueDeltaSet CheckConstraints(Plan plan, List<PlanIssueObject> existingIssues, bool notifyUserOfExternalIssues, List<AbstractLayer> layersToIgnore = null)
+		public RestrictionIssueDeltaSet CheckConstraints(Plan plan, List<PlanIssueObject> existingIssues, bool notifyUserOfExternalIssues, List<AbstractLayer> layersToIgnore = null)
 		{
 			RestrictionQueryCache cache = new RestrictionQueryCache();
 			MultiLayerRestrictionIssueCollection issueCollection = new MultiLayerRestrictionIssueCollection();
@@ -227,7 +251,7 @@ namespace MSP2050.Scripts
 			return deltaSet;
 		}
 
-		public static RestrictionIssueDeltaSet GetUpdatedIssueDelta(Plan plan, List<PlanIssueObject> existingIssues, List<AbstractLayer> layersToIgnore, int newPlanStartTime, out bool hasUnavailableTypes)
+		public RestrictionIssueDeltaSet GetUpdatedIssueDelta(Plan plan, List<PlanIssueObject> existingIssues, List<AbstractLayer> layersToIgnore, int newPlanStartTime, out bool hasUnavailableTypes)
 		{
 			RestrictionQueryCache cache = new RestrictionQueryCache();
 			MultiLayerRestrictionIssueCollection newIssues = new MultiLayerRestrictionIssueCollection();
@@ -245,7 +269,7 @@ namespace MSP2050.Scripts
 			return new RestrictionIssueDeltaSet(existingIssues, newIssues);
 		}
 
-		public static bool CheckTypeUnavailableConstraints(Plan plan, int implementationDate, MultiLayerRestrictionIssueCollection issueCollection)
+		public bool CheckTypeUnavailableConstraints(Plan plan, int implementationDate, MultiLayerRestrictionIssueCollection issueCollection)
 		{
 			bool result = false;
 			foreach (PlanLayer layer in plan.PlanLayers)
@@ -283,7 +307,7 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		private static void NotifyUserOfExternalIssues(Plan currentPlan, MultiLayerRestrictionIssueCollection issueCollection)
+		private void NotifyUserOfExternalIssues(Plan currentPlan, MultiLayerRestrictionIssueCollection issueCollection)
 		{
 			List<Plan> externalPlans = new List<Plan>();
 			foreach (var kvp in issueCollection.GetIssues())
@@ -300,7 +324,7 @@ namespace MSP2050.Scripts
 				notificationText.Append("The accepted changes have created issues in the following plans:\n\n");
 				for (int i = 0; i < externalPlans.Count; ++i)
 				{
-					notificationText.Append("<color=#").Append(Util.ColorToHex(TeamManager.GetTeamByTeamID(externalPlans[i].Country).color)).Append(">");
+					notificationText.Append("<color=#").Append(Util.ColorToHex(SessionManager.Instance.GetTeamByTeamID(externalPlans[i].Country).color)).Append(">");
 					notificationText.Append(" - ").Append(externalPlans[i].Name).Append("\n");
 					notificationText.Append("</color>");
 				}
@@ -317,7 +341,7 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Check restrictions against future plans, including layers and types
 		/// </summary>
-		private static void CheckRestrictionsForFutureLayerAndType(RestrictionQueryCache cache, PlanLayer checkingThisPlanLayer, EntityType checkingThisEntityType, Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		private void CheckRestrictionsForFutureLayerAndType(RestrictionQueryCache cache, PlanLayer checkingThisPlanLayer, EntityType checkingThisEntityType, Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection)
 		{
 			//get all the future geometry of this plan and add it to the source subentities
 			List<FuturePlanEntityEntry> entityEntries = BuildFuturePlanEntityList(cache, checkingThisPlan, checkingThisPlanLayer, checkingThisEntityType);
@@ -330,14 +354,14 @@ namespace MSP2050.Scripts
 			CheckFutureConstraints(checkingThisPlan, resultIssueCollection, entityEntries, exclusionConstraintsToCheck, EConstraintType.Exclusion);
 		}
 
-		private static void CheckFutureConstraints(Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection, List<FuturePlanEntityEntry> entityEntries, List<KeyValuePair<ConstraintSource, ConstraintTarget>> constraintsToCheck, EConstraintType constraintType)
+		private void CheckFutureConstraints(Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection, List<FuturePlanEntityEntry> entityEntries, List<KeyValuePair<ConstraintSource, ConstraintTarget>> constraintsToCheck, EConstraintType constraintType)
 		{
 			for (int i = 0; i < constraintsToCheck.Count; i++)
 			{
 				KeyValuePair<ConstraintSource, ConstraintTarget> target = constraintsToCheck[i];
 
 				//Get all the plan layers for the constraint sources
-				List<PlanLayer> relevantFuturePlanLayers = PlanManager.GetPlanLayersForBaseLayerFrom(target.Key.layer, checkingThisPlan.StartTime, true);
+				List<PlanLayer> relevantFuturePlanLayers = PlanManager.Instance.GetPlanLayersForBaseLayerFrom(target.Key.layer, checkingThisPlan.StartTime, true);
 				if (relevantFuturePlanLayers.Count == 0)
 				{
 					continue;
@@ -369,7 +393,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static List<KeyValuePair<ConstraintSource, ConstraintTarget>> FindConstraintsForTarget(Dictionary<ConstraintSource, List<ConstraintTarget>> constraintCollection, AbstractLayer targetBaseLayer, EntityType targetEntityType)
+		private List<KeyValuePair<ConstraintSource, ConstraintTarget>> FindConstraintsForTarget(Dictionary<ConstraintSource, List<ConstraintTarget>> constraintCollection, AbstractLayer targetBaseLayer, EntityType targetEntityType)
 		{
 			List<KeyValuePair<ConstraintSource, ConstraintTarget>> result = new List<KeyValuePair<ConstraintSource, ConstraintTarget>>(32);
 			foreach (var kvp in constraintCollection)
@@ -383,7 +407,7 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		private static List<FuturePlanEntityEntry> BuildFuturePlanEntityList(RestrictionQueryCache cache, Plan plan, PlanLayer checkingThisPlanLayer, EntityType checkingThisEntityType)
+		private List<FuturePlanEntityEntry> BuildFuturePlanEntityList(RestrictionQueryCache cache, Plan plan, PlanLayer checkingThisPlanLayer, EntityType checkingThisEntityType)
 		{
 			List<SubEntity> sourceObjects = GetAllSubentitiesOfType(cache, checkingThisPlanLayer, checkingThisEntityType);
 
@@ -392,8 +416,8 @@ namespace MSP2050.Scripts
 			for (int subEntityId = 0; subEntityId < sourceObjects.Count; ++subEntityId)
 			{
 				SubEntity subEntity = sourceObjects[subEntityId];
-				int changeTime = Main.MspGlobalData.session_end_month;
-				Plan firstPlanChangingGeometry = PlanManager.FindFirstPlanChangingGeometry(plan.StartTime, subEntity.Entity.PersistentID, checkingThisPlanLayer.BaseLayer);
+				int changeTime = SessionManager.Instance.MspGlobalData.session_end_month;
+				Plan firstPlanChangingGeometry = PlanManager.Instance.FindFirstPlanChangingGeometry(plan.StartTime, subEntity.Entity.PersistentID, checkingThisPlanLayer.BaseLayer);
 				if (firstPlanChangingGeometry != null)
 				{
 					changeTime = firstPlanChangingGeometry.StartTime;
@@ -415,7 +439,7 @@ namespace MSP2050.Scripts
 		/// <param name="cache"></param>
 		/// <param name="checkingThisPlanLayer"></param>
 		/// <param name="plan"></param>
-		private static void CheckRestrictionsForFuture(RestrictionQueryCache cache, PlanLayer checkingThisPlanLayer, Plan plan, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		private void CheckRestrictionsForFuture(RestrictionQueryCache cache, PlanLayer checkingThisPlanLayer, Plan plan, MultiLayerRestrictionIssueCollection resultIssueCollection)
 		{
 			// check if the type is set to null (This will check all types)
 			CheckRestrictionsForFutureLayerAndType(cache, checkingThisPlanLayer, null, plan, resultIssueCollection);
@@ -426,7 +450,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void CheckRestrictionsForLayerAndType(RestrictionQueryCache cache, Plan checkingThisPlan, PlanLayer planLayer, EntityType checkingThisEntityType, bool checkOnlyPlanEntities, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		private void CheckRestrictionsForLayerAndType(RestrictionQueryCache cache, Plan checkingThisPlan, PlanLayer planLayer, EntityType checkingThisEntityType, bool checkOnlyPlanEntities, MultiLayerRestrictionIssueCollection resultIssueCollection)
 		{
 			ConstraintSource tmpSource = new ConstraintSource
 			{
@@ -464,7 +488,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void CheckRestrictionsForLayer(RestrictionQueryCache cache, Plan checkingThisPlan, PlanLayer planLayer, bool checkOnlyPlanEntities, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		private void CheckRestrictionsForLayer(RestrictionQueryCache cache, Plan checkingThisPlan, PlanLayer planLayer, bool checkOnlyPlanEntities, MultiLayerRestrictionIssueCollection resultIssueCollection)
 		{
 			CheckRestrictionsForLayerAndType(cache, checkingThisPlan, planLayer, null, checkOnlyPlanEntities, resultIssueCollection);
 			foreach (var kvp in planLayer.BaseLayer.EntityTypes)
@@ -473,7 +497,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void CheckConstraint(RestrictionQueryCache cache, List<SubEntity> sourceObjects, ConstraintTarget target, ConstraintChecks.DoCheck check, EConstraintSatisfyRule satisfactionRule, PlanLayer planLayer, Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		private void CheckConstraint(RestrictionQueryCache cache, List<SubEntity> sourceObjects, ConstraintTarget target, ConstraintChecks.DoCheck check, EConstraintSatisfyRule satisfactionRule, PlanLayer planLayer, Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection)
 		{
 			if (check == null)
 			{
@@ -515,7 +539,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void CheckFutureConstraintForPlanEntity(FuturePlanEntityEntry entityEntry, Plan checkingThisPlan, ConstraintTarget target, ConstraintChecks.DoCheck check, EConstraintSatisfyRule satisfyRule, IList<PlanLayer> relevantFutureLayers, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		private void CheckFutureConstraintForPlanEntity(FuturePlanEntityEntry entityEntry, Plan checkingThisPlan, ConstraintTarget target, ConstraintChecks.DoCheck check, EConstraintSatisfyRule satisfyRule, IList<PlanLayer> relevantFutureLayers, MultiLayerRestrictionIssueCollection resultIssueCollection)
 		{
 			for (int i = 0; i < relevantFutureLayers.Count; ++i)
 			{
@@ -560,7 +584,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static List<SubEntity> GetAllSubentitiesOfType(RestrictionQueryCache cache, PlanLayer planLayer, EntityType type)
+		private List<SubEntity> GetAllSubentitiesOfType(RestrictionQueryCache cache, PlanLayer planLayer, EntityType type)
 		{
 			HashCode cacheKey = cache.GetEntryHash(planLayer, type);
 			List<SubEntity> sourceObjects = cache.FindCachedEntry(cacheKey);
@@ -589,7 +613,7 @@ namespace MSP2050.Scripts
 			return sourceObjects;
 		}
 
-		private static List<SubEntity> GetAllSubentitiesOfType(RestrictionQueryCache cache, AbstractLayer layer, EntityType type, Plan planToCheckFor)
+		private List<SubEntity> GetAllSubentitiesOfType(RestrictionQueryCache cache, AbstractLayer layer, EntityType type, Plan planToCheckFor)
 		{
 			// If we already got all the entities of this layer-type then just return them
 			// make sure to clear this cached targets befre and/or after checking for constraints
@@ -616,7 +640,7 @@ namespace MSP2050.Scripts
 			return sourceObjects;
 		}
 
-		private static List<SubEntity> GetSubentitiesAtTime(AbstractLayer layer, EntityType type, int month, Plan planToCheckFor)
+		private List<SubEntity> GetSubentitiesAtTime(AbstractLayer layer, EntityType type, int month, Plan planToCheckFor)
 		{
 			LayerState state = layer.GetLayerStateAtTime(month, planToCheckFor);
 			List<SubEntity> result = new List<SubEntity>(state.baseGeometry.Capacity);
@@ -637,7 +661,7 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		private static List<SubEntity> GetSubentitiesAtTime(AbstractLayer layer, int month, Plan treatAsInfluencing = null)
+		private List<SubEntity> GetSubentitiesAtTime(AbstractLayer layer, int month, Plan treatAsInfluencing = null)
 		{
 			LayerState state = layer.GetLayerStateAtTime(month, treatAsInfluencing);
 			List<SubEntity> result = new List<SubEntity>(state.baseGeometry.Capacity);
@@ -654,13 +678,13 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static void LoadRestrictions()
+		public void LoadRestrictions()
 		{
 			NetworkForm form = new NetworkForm();
-			ServerCommunication.DoRequest<RestrictionConfigObject>(Server.GetRestrictions(), form, HandleLoadRestrictionsCallback);
+			ServerCommunication.Instance.DoRequest<RestrictionConfigObject>(Server.GetRestrictions(), form, HandleLoadRestrictionsCallback);
 		}
 
-		private static void HandleLoadRestrictionsCallback(RestrictionConfigObject restrictionConfig)
+		private void HandleLoadRestrictionsCallback(RestrictionConfigObject restrictionConfig)
 		{
 			restrictionIdToMessage.Clear();
 			ConstraintPointCollisionSize = restrictionConfig.restriction_point_size;
@@ -704,7 +728,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static string GetRestrictionMessage(int restrictionId)
+		public string GetRestrictionMessage(int restrictionId)
 		{
 			string text;
 			if (restrictionIdToMessage.ContainsKey(restrictionId))
@@ -718,7 +742,7 @@ namespace MSP2050.Scripts
 			return text;
 		}
 
-		public static KeyValuePair<AbstractLayer, AbstractLayer> GetRestrictionLayersForRestrictionId(int restrictionId)
+		public KeyValuePair<AbstractLayer, AbstractLayer> GetRestrictionLayersForRestrictionId(int restrictionId)
 		{
 			KeyValuePair<ConstraintSource, ConstraintTarget> constraint;
 			if (restrictionIdToConstraint.TryGetValue(restrictionId, out constraint))

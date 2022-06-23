@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	[RequireComponent(typeof(TeamImporter))]
+	[RequireComponent(typeof(SessionManager))]
 	public class AutomatedTestGameRunner: MonoBehaviour
 	{
 		private const int ADMIN_COUNTRY_ID = 1;
@@ -12,7 +12,7 @@ namespace MSP2050.Scripts
 		private GameObject persistentObject = null;
 
 		[SerializeField]
-		private TeamImporter teamImporter = null;
+		private SessionManager teamImporter = null;
 
 		private void Awake()
 		{
@@ -45,7 +45,7 @@ namespace MSP2050.Scripts
 			//If Successful load next scene
 			GameObject tObj = Instantiate(persistentObject);
 
-			tObj.GetComponent<PersistentDataLogIn>().Initialize(ADMIN_COUNTRY_ID, "AUTOMATED_TEST_USER", teamImporter.MspGlobalData, teamImporter.teams);
+			//tObj.GetComponent<PersistentDataLogIn>().Initialize(ADMIN_COUNTRY_ID, "AUTOMATED_TEST_USER", teamImporter.MspGlobalData, teamImporter.);
 		}
 
 		private void OnDoneImportingLayers()

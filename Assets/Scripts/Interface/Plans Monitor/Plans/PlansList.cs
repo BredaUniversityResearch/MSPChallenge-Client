@@ -91,7 +91,7 @@ namespace MSP2050.Scripts
 		public PlanBar AddPlanToList(Plan plan)
 		{
 			// Create the plan and put it in the correct group
-			PlanBar planBar = CreatePlanBar(TeamManager.GetTeamByTeamID(plan.Country).color, Util.MonthToText(plan.StartTime, true), plan);
+			PlanBar planBar = CreatePlanBar(SessionManager.Instance.GetTeamByTeamID(plan.Country).color, Util.MonthToText(plan.StartTime, true), plan);
 			stateGroup[plan.State].AddPlan(planBar);
 
 			if (PlanDetails.GetSelectedPlan() != plan)
@@ -121,7 +121,7 @@ namespace MSP2050.Scripts
 		public void AddPlanLayer(Plan plan, PlanLayer addedLayer, PlanBar planBar = null)
 		{
 			// Show the layerbar, they always start off
-			PlanLayerBar layerBar = CreatePlanLayer(TeamManager.GetTeamByTeamID(plan.Country).color, addedLayer, plan, addedLayer.BaseLayer.GetShortName());
+			PlanLayerBar layerBar = CreatePlanLayer(SessionManager.Instance.GetTeamByTeamID(plan.Country).color, addedLayer, plan, addedLayer.BaseLayer.GetShortName());
 			layerBar.SetIssue(ERestrictionIssueType.None);
 			if (planBar == null)
 				planToPlanBar[plan].AddLayer(layerBar);
@@ -142,9 +142,9 @@ namespace MSP2050.Scripts
 		public void SortByDate()
 		{
 			int uiPlanIndex = 0;
-			for (int planId = 0; planId < PlanManager.GetPlanCount(); ++planId)
+			for (int planId = 0; planId < PlanManager.Instance.GetPlanCount(); ++planId)
 			{
-				Plan planInstance = PlanManager.GetPlanAtIndex(planId);
+				Plan planInstance = PlanManager.Instance.GetPlanAtIndex(planId);
 				PlanBar planBar;
 				if (planToPlanBar.TryGetValue(planInstance, out planBar))
 				{
@@ -237,7 +237,7 @@ namespace MSP2050.Scripts
 
 				planBar.SetIssue(maximumSeverity);
 
-				if (plan.Country == TeamManager.CurrentUserTeamID)
+				if (plan.Country == SessionManager.Instance.CurrentUserTeamID)
 				{
 					if (maximumSeverity <= ERestrictionIssueType.Error)
 					{

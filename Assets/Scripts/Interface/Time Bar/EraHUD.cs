@@ -31,8 +31,8 @@ namespace MSP2050.Scripts
 		{
 			LayerImporter.OnDoneImporting += () =>
 			{
-				timeManagerButton.interactable = TeamManager.AreWeGameMaster;
-				background.SetActive(TeamManager.AreWeGameMaster); //Deactivate the gameobject so the info popup doesn't show up for players.
+				timeManagerButton.interactable = SessionManager.Instance.AreWeGameMaster;
+				background.SetActive(SessionManager.Instance.AreWeGameMaster); //Deactivate the gameobject so the info popup doesn't show up for players.
 
 			};
 		}

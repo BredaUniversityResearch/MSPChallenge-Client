@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 		public void UpdatePlanLayer(PlanLayerObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
 			// wait until all local sub entities have a database ID until processing the updated plan layer
-			//ServerCommunication.WaitForCondition(AllNewSubEntitiesHaveIDs, () => updatePlanLayer(updatedData, tracker));
+			//ServerCommunication.Instance.WaitForCondition(AllNewSubEntitiesHaveIDs, () => updatePlanLayer(updatedData, tracker));
 
 			updatePlanLayer(updatedData, layerUpdateTimes);
 		}

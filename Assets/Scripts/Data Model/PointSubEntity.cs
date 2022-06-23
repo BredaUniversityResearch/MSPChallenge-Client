@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			gameObject = VisualizationUtil.CreatePointGameObject();
+			gameObject = VisualizationUtil.Instance.CreatePointGameObject();
 			gameObject.transform.SetParent(parent);
 
 			if(Entity.Layer.textInfo != null)
@@ -75,7 +75,7 @@ namespace MSP2050.Scripts
 				Entity.Layer.textInfo.UseInverseScale = true;
 
 				CreateTextMesh(gameObject.transform, Entity.Layer.textInfo.textOffset);
-				ScaleTextMesh(VisualizationUtil.UpdatePointScale(gameObject, Entity.EntityTypes[0].DrawSettings));
+				ScaleTextMesh(VisualizationUtil.Instance.UpdatePointScale(gameObject, Entity.EntityTypes[0].DrawSettings));
 			}
 
 			RedrawGameObject(drawMode, selectedPoints, hoverPoints);
@@ -94,14 +94,14 @@ namespace MSP2050.Scripts
 			SnappingToThisEnabled = IsSnapToDrawMode(drawMode);
 		
 			drawSettings = Entity.EntityTypes[0].DrawSettings;
-			if (drawMode != SubEntityDrawMode.Default) { drawSettings = VisualizationUtil.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings); }
+			if (drawMode != SubEntityDrawMode.Default) { drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings); }
 
-			VisualizationUtil.UpdatePointSubEntity(gameObject, position, drawSettings, planState, selectedPoints != null, hoverPoints != null);
+			VisualizationUtil.Instance.UpdatePointSubEntity(gameObject, position, drawSettings, planState, selectedPoints != null, hoverPoints != null);
 		}
 
 		public override void UpdateGameObjectForEveryLOD()
 		{
-			VisualizationUtil.UpdatePointSubEntity(gameObject, position, drawSettings, planState, false, false);
+			VisualizationUtil.Instance.UpdatePointSubEntity(gameObject, position, drawSettings, planState, false, false);
 		}
 
 		public override void UpdateScale(Camera targetCamera)
@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 				//Debug.LogError("Trying to draw point without drawsettings. GO name: " + gameObject.name + ". Parent name: " + gameObject.transform.parent.name);
 			}
 
-			float pointScale = VisualizationUtil.UpdatePointScale(gameObject, drawSettings);
+			float pointScale = VisualizationUtil.Instance.UpdatePointScale(gameObject, drawSettings);
 			UpdateRestrictionArea(Entity.GetCurrentRestrictionSize());
 
 			ScaleTextMesh(pointScale);
@@ -180,7 +180,7 @@ namespace MSP2050.Scripts
 		private void CreateRestrictionAreaSprite()
 		{
 			float restrictionSize = Entity.GetCurrentRestrictionSize();
-			restrictionAreaSprite = VisualizationUtil.CreateRestrictionPoint();
+			restrictionAreaSprite = VisualizationUtil.Instance.CreateRestrictionPoint();
 			Transform transform = restrictionAreaSprite.transform;
 			transform.SetParent(gameObject.transform, false);
 			transform.localPosition = new Vector3(0, 0, 1f);

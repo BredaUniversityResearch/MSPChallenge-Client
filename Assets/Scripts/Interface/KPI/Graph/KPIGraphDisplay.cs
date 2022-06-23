@@ -123,7 +123,7 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
 				SetXScale();
 			}
@@ -141,7 +141,7 @@ namespace MSP2050.Scripts
 
 		void SetXScale()
 		{
-			targetGraph.xAxis.AxisMaxValue = Main.MspGlobalData.session_end_month;
+			targetGraph.xAxis.AxisMaxValue = SessionManager.Instance.MspGlobalData.session_end_month;
 		}
 
 		private string CreateTooltipTextLabel(WMG_Series aSeries, WMG_Node aNode)

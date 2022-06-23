@@ -90,14 +90,14 @@ namespace MSP2050.Scripts
 			IssueManager.instance.SubscribeToIssueChangedEvent(OnPlanLayerIssuesChanged);
 
 			forceUnlockButton.gameObject.SetActive(false);
-			if (TeamManager.AreWeGameMaster)
+			if (SessionManager.Instance.AreWeGameMaster)
 			{
 				forceUnlockButton.onClick.AddListener(() =>
 				{
 					if (selectedPlan != null)
 					{
 						UnityEngine.Events.UnityAction lb = () => { };
-						UnityEngine.Events.UnityAction rb = () => PlanManager.RequestForceUnlockPlan(selectedPlan);
+						UnityEngine.Events.UnityAction rb = () => { selectedPlan.AttemptUnlock(true); };
 						DialogBoxManager.instance.ConfirmationWindow("Force unlock plan", "Are you sure you want to force unlock this plan?", lb, rb);
 					}
 				});
@@ -149,14 +149,14 @@ namespace MSP2050.Scripts
 			{
 				instance.gameObject.SetActive(value);
 				if (value && instance.selectedPlan != null)
-					PlanManager.SetPlanUnseenChanges(instance.selectedPlan, false);
+					PlanManager.Instance.SetPlanUnseenChanges(instance.selectedPlan, false);
 			}
 		}
 
 		public static void ChangeDate(Plan plan)
 		{
 			//Constraints should never need to be rechecked locally, except before submission -Kevin 10/05/22
-			//ConstraintManager.CheckConstraints(plan, null, false);
+			//ConstraintManager.Instance.CheckConstraints(plan, null, false);
 
 			if (instance == null || instance.selectedPlan == null) return; //This window cant even be open so no point in updating anyways
 			if (plan == instance.selectedPlan)
@@ -203,7 +203,7 @@ namespace MSP2050.Scripts
 		{
 			if (instance.selectedPlan != null)
 			{
-				instance.changeDetailsButton.interactable = (instance.isOwner || TeamManager.AreWeManager) && !instance.selectedPlan.InInfluencingState && !Main.InEditMode && !Main.EditingPlanDetailsContent;
+				instance.changeDetailsButton.interactable = (instance.isOwner || SessionManager.Instance.AreWeManager) && !instance.selectedPlan.InInfluencingState && !Main.InEditMode && !Main.EditingPlanDetailsContent;
 				UpdateTabAvailability();
 			}
 		}
@@ -212,7 +212,7 @@ namespace MSP2050.Scripts
 		{
 			get
 			{
-				return (isOwner || TeamManager.AreWeManager) && selectedPlan.State == Plan.PlanState.DESIGN && !Main.InEditMode && !Main.EditingPlanDetailsContent;
+				return (isOwner || SessionManager.Instance.AreWeManager) && selectedPlan.State == Plan.PlanState.DESIGN && !Main.InEditMode && !Main.EditingPlanDetailsContent;
 			}
 		}
 
@@ -243,7 +243,7 @@ namespace MSP2050.Scripts
 			if (plan != null)
 			{
 				detailsCover.SetActive(false);
-				forceUnlockButton.gameObject.SetActive(TeamManager.AreWeGameMaster);	
+				forceUnlockButton.gameObject.SetActive(SessionManager.Instance.AreWeGameMaster);	
 				PlansMonitor.SetPlanBarToggleState(plan, true);
 			}
 			else
@@ -255,10 +255,10 @@ namespace MSP2050.Scripts
 
 
 			planTitle.text = plan.Name;
-			countryBall.color = TeamManager.GetTeamByTeamID(plan.Country).color;
+			countryBall.color = SessionManager.Instance.GetTeamByTeamID(plan.Country).color;
 			SetRealisationDate(plan.ConstructionStartTime, plan.StartTime);
 
-			isOwner = plan.Country == TeamManager.CurrentUserTeamID;
+			isOwner = plan.Country == SessionManager.Instance.CurrentUserTeamID;
 			StatusUpdate();
 
 			if (plan.IsLocked)
@@ -362,7 +362,7 @@ namespace MSP2050.Scripts
 			if (planState != Plan.PlanState.IMPLEMENTED)
 			{
 				//If owner/manager
-				if (isOwner || TeamManager.AreWeManager)
+				if (isOwner || SessionManager.Instance.AreWeManager)
 				{
 					statusDropdown.interactable = true;
 					SetStatusDropdownOptions();
@@ -386,7 +386,7 @@ namespace MSP2050.Scripts
 			if (selectedPlan.HasErrors() || selectedPlan.State == Plan.PlanState.DELETED)
 				availableStates = new List<Plan.PlanState>() { Plan.PlanState.DELETED, Plan.PlanState.DESIGN };        
 			else if (selectedPlan.NeedsApproval())
-				availableStates = TeamManager.AreWeManager ?
+				availableStates = SessionManager.Instance.AreWeManager ?
 					new List<Plan.PlanState>() { Plan.PlanState.DELETED, Plan.PlanState.DESIGN, Plan.PlanState.CONSULTATION, Plan.PlanState.APPROVAL, Plan.PlanState.APPROVED }
 					: new List<Plan.PlanState>() { Plan.PlanState.DELETED, Plan.PlanState.DESIGN, Plan.PlanState.CONSULTATION, Plan.PlanState.APPROVAL };
 			else
@@ -439,7 +439,7 @@ namespace MSP2050.Scripts
 						submitDelayed = true;
 						NetworkForm form = new NetworkForm();
 						form.AddField("plan_id", changedPlan.ID);
-						ServerCommunication.DoRequest<int[]>(Server.GetDependentEnergyPlans(), form, (planErrorsIDs) => CreatePlanChangeConfirmPopup(planErrorsIDs, changedPlan, newState, batch));
+						ServerCommunication.Instance.DoRequest<int[]>(Server.GetDependentEnergyPlans(), form, (planErrorsIDs) => CreatePlanChangeConfirmPopup(planErrorsIDs, changedPlan, newState, batch));
 
 					}
 					else if (!changedPlan.InInfluencingState && newState.IsInfluencingState())
@@ -460,14 +460,14 @@ namespace MSP2050.Scripts
 						Debug.Log("Request prev overlap for plan: " + changedPlan.ID);
 						NetworkForm form = new NetworkForm();
 						form.AddField("plan_id", changedPlan.ID);
-						ServerCommunication.DoRequest<int>(Server.OverlapsWithPreviousEnergyPlans(), form, (i) =>
+						ServerCommunication.Instance.DoRequest<int>(Server.OverlapsWithPreviousEnergyPlans(), form, (i) =>
 						{
 							if (i == 0)
 							{
 								//Check for later plans overlapping with this one
 								NetworkForm form2 = new NetworkForm();
 								form2.AddField("plan_id", changedPlan.ID);
-								ServerCommunication.DoRequest<int[]>(Server.GetOverlappingEnergyPlans(), form2, (planErrorsIDs2) => CreatePlanChangeConfirmPopup(planErrorsIDs2, changedPlan, newState, batch));
+								ServerCommunication.Instance.DoRequest<int[]>(Server.GetOverlappingEnergyPlans(), form2, (planErrorsIDs2) => CreatePlanChangeConfirmPopup(planErrorsIDs2, changedPlan, newState, batch));
 							}
 							else
 							{
@@ -504,15 +504,15 @@ namespace MSP2050.Scripts
 			else
 			{
 				//Will cause errors in other plans, ask for confirmation
-				Plan errorPlan = PlanManager.GetPlanWithID(planErrorsIDs[0]);
+				Plan errorPlan = PlanManager.Instance.GetPlanWithID(planErrorsIDs[0]);
 
 				//Create text for warning message, with names of affected plans
 				StringBuilder notificationText = new StringBuilder(256);
 				notificationText.Append("Changing this plan's state will cause errors for other plans, they will be moved to design and need to have their energy distribution confirmed.\n\nThe affected plans are:\n\n");
 				for (int i = 0; i < planErrorsIDs.Length && i < 4; i++)
 				{
-					errorPlan = PlanManager.GetPlanWithID(planErrorsIDs[i]);
-					notificationText.Append("<color=#").Append(Util.ColorToHex(TeamManager.GetTeamByTeamID(errorPlan.Country).color)).Append(">");
+					errorPlan = PlanManager.Instance.GetPlanWithID(planErrorsIDs[i]);
+					notificationText.Append("<color=#").Append(Util.ColorToHex(SessionManager.Instance.GetTeamByTeamID(errorPlan.Country).color)).Append(">");
 					notificationText.Append(" - ").Append(errorPlan.Name).Append("\n");
 					notificationText.Append("</color>");
 				}
@@ -540,18 +540,18 @@ namespace MSP2050.Scripts
 		{
 			NetworkForm form = new NetworkForm();
 			form.AddField("plan", planID);
-			form.AddField("team_id", TeamManager.CurrentUserTeamID);
-			form.AddField("user_name", TeamManager.CurrentUserName);
+			form.AddField("team_id", SessionManager.Instance.CurrentUserTeamID);
+			form.AddField("user_name", SessionManager.Instance.CurrentUserName);
 			form.AddField("text", text);
-			ServerCommunication.DoRequest(Server.PostPlanFeedback(), form);
+			ServerCommunication.Instance.DoRequest(Server.PostPlanFeedback(), form);
 		}
 
 		public void SendMessage(int planID, string text, BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("plan", planID);
-			dataObject.Add("team_id", TeamManager.CurrentUserTeamID);
-			dataObject.Add("user_name", TeamManager.CurrentUserName);
+			dataObject.Add("team_id", SessionManager.Instance.CurrentUserTeamID);
+			dataObject.Add("user_name", SessionManager.Instance.CurrentUserName);
 			dataObject.Add("text", text);
 			batch.AddRequest(Server.PostPlanFeedback(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}

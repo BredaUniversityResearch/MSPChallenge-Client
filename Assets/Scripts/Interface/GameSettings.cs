@@ -5,23 +5,44 @@ using UnityEngine.Audio;
 
 namespace MSP2050.Scripts
 {
-	public static class GameSettings
+	public class GameSettings : MonoBehaviour
 	{
+		private static GameSettings singleton;
+		public static GameSettings Instance
+		{
+			get
+			{
+				if (singleton == null)
+					singleton = FindObjectOfType<GameSettings>();
+				return singleton;
+			}
+		}
+
 		// Audio
-		private static AudioMixer audioMixer;
-		private static float masterVolume;
-		private static float sfxVolume;
+		private AudioMixer audioMixer;
+		private float masterVolume;
+		private float sfxVolume;
 
 		//Graphics
-		public static float UIScale { get; private set; }
-		public static int DisplayResolution { get; private set; }
-		public static bool Fullscreen { get; private set; }
-		public static int GraphicsSettings { get; private set; }
+		public float UIScale { get; private set; }
+		public int DisplayResolution { get; private set; }
+		public bool Fullscreen { get; private set; }
+		public int GraphicsSettings { get; private set; }
 
-		public static List<Vector2> Resolutions = new List<Vector2>();
+		[HideInInspector] public List<Vector2> Resolutions = new List<Vector2>();
 
-		static GameSettings()
+		void Awake()
 		{
+			if (singleton != null && singleton != this)
+			{
+				Destroy(this);
+				return;
+			}
+			else
+			{
+				singleton = this;
+				DontDestroyOnLoad(gameObject);
+			}
 			for (int i = 0; i < Screen.resolutions.Length; i++)
 			{
 				if (Resolutions.FindIndex(res => res.x == Screen.resolutions[i].width && res.y == Screen.resolutions[i].height) != -1)
@@ -40,8 +61,8 @@ namespace MSP2050.Scripts
 				Debug.LogError("No suitable resolutions found for the current screen.");
 			LoadAllSettings();
 		}
-
-		private static void LoadAllSettings()
+		
+		private void LoadAllSettings()
 		{
 			masterVolume = PlayerPrefs.GetFloat("MasterVolume", 0.8f);
 			sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 0.8f);
@@ -68,7 +89,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void ApplyCurrentSettings(bool save = true)
+		public void ApplyCurrentSettings(bool save = true)
 		{
 			SetQualityLevel(GraphicsSettings, false);
 			SetResolution(DisplayResolution, false, false);
@@ -80,7 +101,7 @@ namespace MSP2050.Scripts
 				SavePlayerPrefs();
 		}
 
-		public static void SavePlayerPrefs()
+		public void SavePlayerPrefs()
 		{
 			PlayerPrefs.SetFloat("MasterVolume", masterVolume);
 			PlayerPrefs.SetFloat("SFXVolume", sfxVolume);
@@ -91,19 +112,19 @@ namespace MSP2050.Scripts
 			PlayerPrefs.SetInt("Fullscreen", Fullscreen ? 1 : 0);
 		}
 
-		public static void SetAudioMixer(AudioMixer audioMixer)
+		public void SetAudioMixer(AudioMixer audioMixer)
 		{
-			GameSettings.audioMixer = audioMixer;
+			this.audioMixer = audioMixer;
 			ApplyMasterVolume();
 			ApplySFXVolume();
 		}
 
-		public static float GetMasterVolume()
+		public float GetMasterVolume()
 		{
 			return masterVolume;
 		}
 
-		public static void SetMasterVolume(float volume, bool save = true)
+		public void SetMasterVolume(float volume, bool save = true)
 		{
 			volume = Mathf.Clamp(volume, 0.001f, 1.0f);
 			masterVolume = volume;
@@ -112,7 +133,7 @@ namespace MSP2050.Scripts
 				SavePlayerPrefs();
 		}
 
-		public static void ApplyMasterVolume()
+		public void ApplyMasterVolume()
 		{
 			if (audioMixer != null)
 			{
@@ -120,12 +141,12 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static float GetSFXVolume()
+		public float GetSFXVolume()
 		{
 			return sfxVolume;
 		}
 
-		public static void SetSFXVolume(float volume, bool save = true)
+		public void SetSFXVolume(float volume, bool save = true)
 		{
 			volume = Mathf.Clamp(volume, 0.0f, 1.0f);
 			sfxVolume = volume;
@@ -134,7 +155,7 @@ namespace MSP2050.Scripts
 				SavePlayerPrefs();
 		}
 
-		public static void ApplySFXVolume()
+		public void ApplySFXVolume()
 		{
 			if (audioMixer != null)
 			{
@@ -142,13 +163,13 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static float SliderToVolume(float sliderValue)
+		private float SliderToVolume(float sliderValue)
 		{
 			//return sliderValue * 100 - 80;
 			return Mathf.Log(sliderValue) * 20f;
 		}
 
-		public static void SetUIScale(float scale, bool updateGameScale = true, bool save = true, bool force = false)
+		public void SetUIScale(float scale, bool updateGameScale = true, bool save = true, bool force = false)
 		{
 			if (scale != UIScale || force)
 			{
@@ -179,7 +200,7 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Returns the size of the new resolution
 		/// </summary>
-		public static Vector2 SetResolution(int level, bool updateGameScale = true, bool save = true)
+		public Vector2 SetResolution(int level, bool updateGameScale = true, bool save = true)
 		{
 			if (Resolutions.Count == 0)
 			{
@@ -220,7 +241,7 @@ namespace MSP2050.Scripts
 			return Resolutions[DisplayResolution];
 		}
 
-		private static void UpdateFullGameScale()
+		private void UpdateFullGameScale()
 		{
 			if(CameraManager.Instance != null)
 			{
@@ -229,7 +250,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void SetFullscreen(bool fullscreen, bool save = true)
+		public void SetFullscreen(bool fullscreen, bool save = true)
 		{
 			if (Resolutions.Count == 0)
 			{
@@ -250,7 +271,7 @@ namespace MSP2050.Scripts
 				SavePlayerPrefs();
 		}
 
-		public static void SetQualityLevel(int level, bool save = true)
+		public void SetQualityLevel(int level, bool save = true)
 		{
 			if (level < 0 || level > 3)
 			{

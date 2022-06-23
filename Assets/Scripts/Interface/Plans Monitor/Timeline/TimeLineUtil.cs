@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
 				CreateTimeLine();
 			}
@@ -33,7 +33,7 @@ namespace MSP2050.Scripts
 
 		public void CreateTimeLine()
 		{
-			int years = Main.MspGlobalData.session_num_years;
+			int years = SessionManager.Instance.MspGlobalData.session_num_years;
 			yearMarkers = new List<Transform>();
 			for (int i = 0; i < years; i++)
 			{

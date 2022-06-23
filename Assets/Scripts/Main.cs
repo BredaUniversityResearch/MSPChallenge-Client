@@ -17,7 +17,6 @@ namespace MSP2050.Scripts
     public static bool IsDeveloper = false;
 #endif
 
-		public DataVisualizationSettings DataVisualizationSettings;
 		public AudioMixer AudioMixer;
 
 		private static Main instance;
@@ -47,13 +46,12 @@ namespace MSP2050.Scripts
 		{
 			instance = this;
 			System.Threading.Thread.CurrentThread.CurrentCulture = Localisation.NumberFormatting;
-			VisualizationUtil.VisualizationSettings = DataVisualizationSettings;
         
 			//Setup projection parameters for later conversion
 			mspCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs");
 			geoJSONCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
 
-			GameSettings.SetAudioMixer(AudioMixer);
+			GameSettings.Instance.SetAudioMixer(AudioMixer);
 
 			fsm = new FSM();
 			fsmActive = true;
@@ -64,9 +62,9 @@ namespace MSP2050.Scripts
 				if (interceptQuit)
 				{
 					NetworkForm form = new NetworkForm();
-					form.AddField("session_id", TeamManager.CurrentSessionID);
-					ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, CloseSessionSuccess, CloseSessionFail);
-					UpdateData.WsServerCommunicationInteractor?.Stop();
+					form.AddField("session_id", SessionManager.Instance.CurrentSessionID);
+					ServerCommunication.Instance.DoPriorityRequest(Server.CloseSession(), form, CloseSessionSuccess, CloseSessionFail);
+					UpdateManager.Instance.WsServerCommunicationInteractor?.Stop();
 					//StartCoroutine(QuitAtEndOfFrame());
 				}
 				return !interceptQuit;
@@ -78,7 +76,7 @@ namespace MSP2050.Scripts
 			StartCoroutine(QuitAtEndOfFrame());
 		}
 
-		void CloseSessionFail(ServerCommunication.ARequest request, string result)
+		void CloseSessionFail(ARequest request, string result)
 		{
 			StartCoroutine(QuitAtEndOfFrame());
 		}
@@ -96,9 +94,9 @@ namespace MSP2050.Scripts
 			if (instance != null)
 			{
 				NetworkForm form = new NetworkForm();
-				form.AddField("session_id", TeamManager.CurrentSessionID);
-				ServerCommunication.DoPriorityRequest(Server.CloseSession(), form, instance.CloseSessionSuccess, instance.CloseSessionFail);
-				UpdateData.WsServerCommunicationInteractor?.Stop();
+				form.AddField("session_id", SessionManager.Instance.CurrentSessionID);
+				ServerCommunication.Instance.DoPriorityRequest(Server.CloseSession(), form, instance.CloseSessionSuccess, instance.CloseSessionFail);
+				UpdateManager.Instance.WsServerCommunicationInteractor?.Stop();
 			}
 			else
 			{
@@ -115,9 +113,9 @@ namespace MSP2050.Scripts
 			{
 				fsm.Update();
 			}
-			ServerCommunication.Update();
+			ServerCommunication.Instance.UpdateCommunication();
 
-			MaterialManager.Update();
+			MaterialManager.Instance.Update();
 		}
 
 		void GlobalDataLoaded()
@@ -152,28 +150,15 @@ namespace MSP2050.Scripts
 			//TeamManager.SetEEZs();
 			LayerInterface.SortLayerToggles();
 			InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("Existing plans");
-			instance.StartCoroutine(UpdateData.GetFirstUpdate());
-			instance.StartCoroutine(VisualizationUtil.UpdateScales());
+			instance.StartCoroutine(UpdateManager.Instance.GetFirstUpdate());
 
-			ConstraintManager.LoadRestrictions();
-		}
-
-		void LoadGlobalData()
-		{
-			NetworkForm form = new NetworkForm();
-			ServerCommunication.DoRequest<MspGlobalData>(Server.GetGlobalData(), form, handleLoadGlobalData);
-		}
-
-		private void handleLoadGlobalData(MspGlobalData newGlobalData)
-		{
-			MspGlobalData = newGlobalData;
-			GlobalDataLoaded();       
+			ConstraintManager.Instance.LoadRestrictions();
 		}
 
 		public static void FirstUpdateTickComplete()
 		{
 			InterfaceCanvas.Instance.loadingScreen.OnFinishedLoading();
-			instance.StartCoroutine(UpdateData.GetUpdates());
+			instance.StartCoroutine(UpdateManager.Instance.GetUpdates());
 		}
 
 		public void ImportLayers()
@@ -207,7 +192,7 @@ namespace MSP2050.Scripts
 		{
 			if (InEditMode)
 				return ETextState.Edit;
-			if (PlanManager.planViewing == null) //This currently shows current and past (through ViewAtTime)
+			if (PlanManager.Instance.planViewing == null) //This currently shows current and past (through ViewAtTime)
 				return ETextState.Current;
 			return ETextState.View;
 		}

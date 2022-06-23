@@ -39,8 +39,8 @@ namespace MSP2050.Scripts
 			}
 
 			NetworkForm form = new NetworkForm();
-			form.AddField("user", TeamManager.CurrentSessionID.ToString());
-			ServerCommunication.DoRequest<List<LayerMeta>>(Server.LayerMeta(), form, handleImportLayerMetaCallback);
+			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
+			ServerCommunication.Instance.DoRequest<List<LayerMeta>>(Server.LayerMeta(), form, handleImportLayerMetaCallback);
 		}
 
 		private static void handleImportLayerMetaCallback(List<LayerMeta> layerMeta)
@@ -57,32 +57,27 @@ namespace MSP2050.Scripts
 				LayerPickerUI.HideUI();
 			}
 
-			if (TeamManager.TeamCount == 0)
-			{
-				TeamManager.LoadTeams();
-			}
-			else
-			{
-				TeamManager.TeamsLoaded();
-			}
+			InterfaceCanvas.Instance.SetAccent(SessionManager.Instance.CurrentTeamColor);
+			InterfaceCanvas.Instance.activePlanWindow.OnCountriesLoaded();
+			KPIManager.Instance.CreateEnergyKPIs();
 
 			//MEL config use requires layers to be loaded (for kpi creation)
 			NetworkForm form = new NetworkForm();
-			ServerCommunication.DoRequest<CELConfig>(Server.GetCELConfig(), form, handleCELConfigCallback);
-			ServerCommunication.DoRequest<JObject>(Server.GetMELConfig(), form, handleMELConfigCallback);
-			ServerCommunication.DoRequest<SELGameClientConfig>(Server.GetShippingClientConfig(), form, HandleSELClientConfigCallback);
-			ServerCommunication.DoRequest<KPICategoryDefinition[]>(Server.ShippingKPIConfig(), form, handleShippingKPIConfig);
+			ServerCommunication.Instance.DoRequest<CELConfig>(Server.GetCELConfig(), form, handleCELConfigCallback);
+			ServerCommunication.Instance.DoRequest<JObject>(Server.GetMELConfig(), form, handleMELConfigCallback);
+			ServerCommunication.Instance.DoRequest<SELGameClientConfig>(Server.GetShippingClientConfig(), form, HandleSELClientConfigCallback);
+			ServerCommunication.Instance.DoRequest<KPICategoryDefinition[]>(Server.ShippingKPIConfig(), form, handleShippingKPIConfig);
 		}
 
 		private static void handleShippingKPIConfig(KPICategoryDefinition[] config)
 		{
-			KPIManager.CreateShippingKPIBars(config);
+			KPIManager.Instance.CreateShippingKPIBars(config);
 		}
 
 		private static void handleMELConfigCallback(JObject melConfig)
 		{
-			KPIManager.CreateEcologyKPIs(melConfig);
-			PlanManager.LoadFishingFleets(melConfig);
+			KPIManager.Instance.CreateEcologyKPIs(melConfig);
+			PlanManager.Instance.LoadFishingFleets(melConfig);
 
 			if (loadAllLayers)
 			{
@@ -118,8 +113,8 @@ namespace MSP2050.Scripts
 		public static void ReimportLayerTypeColors()
 		{
 			NetworkForm form = new NetworkForm();
-			form.AddField("user", TeamManager.CurrentSessionID.ToString());
-			ServerCommunication.DoRequest< List<LayerMeta>>(Server.LayerMeta(), form, handleReimportLayerTypeColorsCallback);
+			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
+			ServerCommunication.Instance.DoRequest< List<LayerMeta>>(Server.LayerMeta(), form, handleReimportLayerTypeColorsCallback);
 		}
 #endif
 
@@ -175,7 +170,7 @@ namespace MSP2050.Scripts
 				{
 					NetworkForm form = new NetworkForm();
 					form.AddField("layer_id", selectedLayerID);
-					ServerCommunication.DoRequest<List<SubEntityObject>>(Server.GetLayer(), form, (objs) => HandleVectorLayerImport(objs, layer));
+					ServerCommunication.Instance.DoRequest<List<SubEntityObject>>(Server.GetLayer(), form, (objs) => HandleVectorLayerImport(objs, layer));
 				}
 			}
 
@@ -195,7 +190,7 @@ namespace MSP2050.Scripts
 		//	{
 		//		NetworkForm form = new NetworkForm();
 		//		form.AddField("layer_id", selectedLayerIDList[importedLayers]);
-		//		ServerCommunication.DoRequest<List<SubEntityObject>>(Server.GetLayer(), form, (objs) => HandleVectorLayerImport(objs, layer));
+		//		ServerCommunication.Instance.DoRequest<List<SubEntityObject>>(Server.GetLayer(), form, (objs) => HandleVectorLayerImport(objs, layer));
 		//	}
 		//}
 

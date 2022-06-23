@@ -61,45 +61,14 @@ namespace MSP2050.Scripts
 				Fold();
 			}
 
-			if (TeamManager.TeamCount != 0)
-			{
-				CreateTracks();
-			}
-			else
-			{
-				TeamManager.OnTeamsLoadComplete += OnDelayedTeamLoad;
-			}
-		}
-
-		//protected void Start()
-		//{
-		//if (foldOnStart)
-		//{
-		//	gameObject.SetActive(false);
-		//	Fold();
-		//}
-
-		//if (TeamManager.teamCount != 0)
-		//{
-		//	CreateTracks();
-		//}
-		//else
-		//{
-		//	TeamManager.OnTeamsLoadComplete += OnDelayedTeamLoad;
-		//}
-
-		//}
-
-		private void OnDelayedTeamLoad()
-		{
 			CreateTracks();
-			TeamManager.OnTeamsLoadComplete -= OnDelayedTeamLoad;
 		}
+
 
 		private void CreateTracks()
 		{
 			// Create tracks
-			foreach (var kvp in TeamManager.GetTeamsByID())
+			foreach (var kvp in SessionManager.Instance.GetTeamsByID())
 			{
 				CreateTrack(kvp.Value.color);
 				teamTrackID.Add(kvp.Key, tracks.Count - 1);

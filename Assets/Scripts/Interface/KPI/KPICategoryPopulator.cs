@@ -68,10 +68,10 @@ namespace MSP2050.Scripts
 		{
 			if (targetTeamId == -1)
 			{
-				if (TeamManager.CurrentTeam.IsManager)
+				if (SessionManager.Instance.CurrentTeam.IsManager)
 				{
 					//Setup target country for first team.
-					foreach (Team team in TeamManager.GetTeams())
+					foreach (Team team in SessionManager.Instance.GetTeams())
 					{
 						targetTeamId = team.ID;
 						break;
@@ -79,11 +79,11 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					targetTeamId = TeamManager.CurrentTeam.ID;
+					targetTeamId = SessionManager.Instance.CurrentTeam.ID;
 				}
 			}
 
-			KPIValueCollection collection = KPIManager.GetKPIValuesForCategory(targetCategory, targetTeamId);
+			KPIValueCollection collection = KPIManager.Instance.GetKPIValuesForCategory(targetCategory, targetTeamId);
 			if (collection != null)
 			{
 				CreateValuesForCollection(collection);
@@ -129,7 +129,7 @@ namespace MSP2050.Scripts
 				}
 	
 				targetTeamId = teamId;
-				SetTargetCollection(KPIManager.GetKPIValuesForCategory(targetCategory, targetTeamId));
+				SetTargetCollection(KPIManager.Instance.GetKPIValuesForCategory(targetCategory, targetTeamId));
 
 				if (targetCollection != null)
 				{

@@ -12,17 +12,17 @@ namespace MSP2050.Scripts
 		[SerializeField, Tooltip("Prefab for the profiling window.")]
 		private GameObject windowPrefab = null;
 
-		private Dictionary<ServerCommunication.ARequest, RequestProfileEntry> requestEntries = new Dictionary<ServerCommunication.ARequest, RequestProfileEntry>(1024);
+		private Dictionary<ARequest, RequestProfileEntry> requestEntries = new Dictionary<ARequest, RequestProfileEntry>(1024);
 		private NetworkProfileDisplay windowInstance = null;
 
 		private void OnEnable()
 		{
 			if (Main.IsDeveloper)
 			{
-				ServerCommunication.OnRequestQueued += OnRequestQueued;
-				ServerCommunication.OnRequestStarted += OnRequestStarted;
-				ServerCommunication.OnRequestResponseReceived += OnRequestResponseReceived;
-				ServerCommunication.OnRequestResponseProcessed += OnRequestResponseProcessed;
+				ServerCommunication.Instance.OnRequestQueued += OnRequestQueued;
+				ServerCommunication.Instance.OnRequestStarted += OnRequestStarted;
+				ServerCommunication.Instance.OnRequestResponseReceived += OnRequestResponseReceived;
+				ServerCommunication.Instance.OnRequestResponseProcessed += OnRequestResponseProcessed;
 
 				CreateWindow();
 			}
@@ -32,10 +32,10 @@ namespace MSP2050.Scripts
 		{
 			if (Main.IsDeveloper)
 			{
-				ServerCommunication.OnRequestQueued -= OnRequestQueued;
-				ServerCommunication.OnRequestStarted -= OnRequestStarted;
-				ServerCommunication.OnRequestResponseReceived -= OnRequestResponseReceived;
-				ServerCommunication.OnRequestResponseProcessed -= OnRequestResponseProcessed;
+				ServerCommunication.Instance.OnRequestQueued -= OnRequestQueued;
+				ServerCommunication.Instance.OnRequestStarted -= OnRequestStarted;
+				ServerCommunication.Instance.OnRequestResponseReceived -= OnRequestResponseReceived;
+				ServerCommunication.Instance.OnRequestResponseProcessed -= OnRequestResponseProcessed;
 
 				DestroyWindow();
 			}
@@ -52,12 +52,12 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void OnRequestQueued(ServerCommunication.ARequest targetRequest)
+		private void OnRequestQueued(ARequest targetRequest)
 		{
 			requestEntries.Add(targetRequest, new RequestProfileEntry(targetRequest));
 		}
 
-		private void OnRequestStarted(ServerCommunication.ARequest targetRequest)
+		private void OnRequestStarted(ARequest targetRequest)
 		{
 			RequestProfileEntry entry;
 			if (requestEntries.TryGetValue(targetRequest, out entry))
@@ -71,7 +71,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void OnRequestResponseReceived(ServerCommunication.ARequest targetRequest)
+		private void OnRequestResponseReceived(ARequest targetRequest)
 		{
 			RequestProfileEntry entry;
 			if (requestEntries.TryGetValue(targetRequest, out entry))
@@ -85,7 +85,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void OnRequestResponseProcessed(ServerCommunication.ARequest targetRequest)
+		private void OnRequestResponseProcessed(ARequest targetRequest)
 		{
 			RequestProfileEntry entry;
 			if (requestEntries.TryGetValue(targetRequest, out entry))
