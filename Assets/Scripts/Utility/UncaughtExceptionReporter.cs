@@ -47,7 +47,7 @@ namespace MSP2050.Scripts
 			private string[] GatherVisibleLayers()
 			{
 				List<string> layers = new List<string>();
-				foreach (AbstractLayer layer in LayerManager.GetVisibleLayers())
+				foreach (AbstractLayer layer in LayerManager.Instance.GetVisibleLayers())
 				{
 					layers.Add(layer.FileName);
 				}

@@ -17,13 +17,13 @@ namespace MSP2050.Scripts
 		public void DoIntersection()
 		{
 			FSM.ToolbarButtonClicked(FSM.ToolbarInput.Intersect);
-			//if (LayerManager.SelectedLayers().Count < 2)
+			//if (LayerManager.Instance.SelectedLayers().Count < 2)
 			//{
 			//    Debug.Log("Not enough layers enabled!");
 			//    return;
 			//}
 
-			//List<Layer> layers = LayerManager.SelectedLayers();
+			//List<Layer> layers = LayerManager.Instance.SelectedLayers();
 
 			//List<List<Vector3>> polys = SetOperations.Boolean(layers[0] as PolygonLayer, layers[1] as PolygonLayer, ClipperLib.ClipType.ctIntersection);
 		}
@@ -31,13 +31,13 @@ namespace MSP2050.Scripts
 		public void DoUnion()
 		{
 			FSM.ToolbarButtonClicked(FSM.ToolbarInput.Union);
-			//if (LayerManager.SelectedLayers().Count < 2)
+			//if (LayerManager.Instance.SelectedLayers().Count < 2)
 			//{
 			//    Debug.Log("Not enough layers enabled!");
 			//    return;
 			//}
 
-			//List<Layer> layers = LayerManager.SelectedLayers();
+			//List<Layer> layers = LayerManager.Instance.SelectedLayers();
 
 			//List<List<Vector3>> polys = SetOperations.Boolean(layers[0] as PolygonLayer, layers[1] as PolygonLayer, ClipperLib.ClipType.ctUnion);
 		}
@@ -45,13 +45,13 @@ namespace MSP2050.Scripts
 		public void DoDifference()
 		{
 			FSM.ToolbarButtonClicked(FSM.ToolbarInput.Difference);
-			//if (LayerManager.SelectedLayers().Count < 2)
+			//if (LayerManager.Instance.SelectedLayers().Count < 2)
 			//{
 			//    Debug.Log("Not enough layers enabled!");
 			//    return;
 			//}
 
-			//List<Layer> layers = LayerManager.SelectedLayers();
+			//List<Layer> layers = LayerManager.Instance.SelectedLayers();
 
 			//List<List<Vector3>> polys = SetOperations.Boolean(layers[0] as PolygonLayer, layers[1] as PolygonLayer, ClipperLib.ClipType.ctDifference);
 		}

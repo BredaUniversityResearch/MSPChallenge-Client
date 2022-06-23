@@ -118,7 +118,7 @@ namespace MSP2050.Scripts
 
 		private void OnDoneImportingLayers()
 		{
-			AbstractLayer layer = LayerManager.FindFirstLayerContainingName("_PLAYAREA");
+			AbstractLayer layer = LayerManager.Instance.FindFirstLayerContainingName("_PLAYAREA");
 			if (layer == null)
 			{
 				throw new Exception("Could not find the play area layer.");

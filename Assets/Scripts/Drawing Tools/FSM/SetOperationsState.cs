@@ -28,7 +28,7 @@ namespace MSP2050.Scripts
 		{
 			if (!selectingBox)
 			{
-				List<AbstractLayer> visibleLayers = LayerManager.GetVisibleLayersSortedByDepth();
+				List<AbstractLayer> visibleLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth();
 
 				PolygonEntity hover = null;
 				if (!cursorIsOverUI)
@@ -106,7 +106,7 @@ namespace MSP2050.Scripts
 
 		private void selectNextSubject(Vector3 position)
 		{
-			List<AbstractLayer> visibleLayers = LayerManager.GetVisibleLayersSortedByDepth();
+			List<AbstractLayer> visibleLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth();
 
 			foreach (AbstractLayer layer in visibleLayers)
 			{
@@ -131,7 +131,7 @@ namespace MSP2050.Scripts
 
 		private void selectNextClipEntity(Vector3 position)
 		{
-			List<AbstractLayer> visibleLayers = LayerManager.GetVisibleLayersSortedByDepth();
+			List<AbstractLayer> visibleLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth();
 
 			foreach (AbstractLayer layer in visibleLayers)
 			{
@@ -275,7 +275,7 @@ namespace MSP2050.Scripts
 
 			HashSet<PolygonEntity> selectionsInBox = new HashSet<PolygonEntity>();
 
-			List<AbstractLayer> visibleLayers = LayerManager.GetVisibleLayersSortedByDepth();
+			List<AbstractLayer> visibleLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth();
 			foreach (AbstractLayer layer in visibleLayers)
 			{
 				if (layer is PolygonLayer)

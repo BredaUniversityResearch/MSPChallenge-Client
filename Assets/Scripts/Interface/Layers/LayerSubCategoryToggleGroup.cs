@@ -29,7 +29,7 @@ namespace MSP2050.Scripts
 			layerTab.SubCategory = subcategoryID;
 
 
-			layerTab.toggle.isOn = LayerManager.LayerIsVisible(layer);
+			layerTab.toggle.isOn = LayerManager.Instance.LayerIsVisible(layer);
 			layerTab.toggle.onValueChanged.AddListener((toggleValue) =>
 			{
 				if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
@@ -37,9 +37,9 @@ namespace MSP2050.Scripts
 
 				InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 				if (toggleValue)
-					LayerManager.ShowLayer(layer);
+					LayerManager.Instance.ShowLayer(layer);
 				else
-					LayerManager.HideLayer(layer);
+					LayerManager.Instance.HideLayer(layer);
 				InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			});
 
@@ -50,11 +50,11 @@ namespace MSP2050.Scripts
 			//{
 			//	if (layerTab.toggle.isOn)
 			//	{
-			//		LayerManager.HideLayer(layer);
+			//		LayerManager.Instance.HideLayer(layer);
 			//	}
 			//	else
 			//	{
-			//		LayerManager.ShowLayer(layer);
+			//		LayerManager.Instance.ShowLayer(layer);
 			//	}
 			//});
 

@@ -19,8 +19,8 @@ namespace MSP2050.Scripts
 
         public void SetupKPIValues(KPICategoryDefinition[] kpiDefinitions, int numberOfKpiMonths)
         {
-            List<KPICategoryDefinition> layerCategories = new List<KPICategoryDefinition>(LayerManager.GetLayerCount());
-            foreach (AbstractLayer layer in LayerManager.GetAllValidLayers())
+            List<KPICategoryDefinition> layerCategories = new List<KPICategoryDefinition>(LayerManager.Instance.GetLayerCount());
+            foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
             {
                 if (layer.Editable)
                 {
@@ -62,7 +62,7 @@ namespace MSP2050.Scripts
 
         public void CalculateKPIValues(int newMonth)
         {
-            foreach (AbstractLayer layer in LayerManager.GetAllValidLayers())
+            foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
             {
                 if (layer.Editable)
                 {

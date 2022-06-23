@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 
 		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
 		{
-			List<AbstractLayer> visibleLayers = LayerManager.GetVisibleLayersSortedByDepth();
+			List<AbstractLayer> visibleLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth();
 
 			Entity hover = null;
 			if (!cursorIsOverUI)
@@ -53,7 +53,7 @@ namespace MSP2050.Scripts
 
 		public override void LeftClick(Vector3 worldPosition)
 		{
-			List<AbstractLayer> loadedLayers = LayerManager.GetVisibleLayersSortedByDepth(); // change this back to loaded layers by depth, for the layerprobe
+			List<AbstractLayer> loadedLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth(); // change this back to loaded layers by depth, for the layerprobe
 			Vector3 windowPosition = Input.mousePosition;
 			windowPosition.y -= Screen.height;
 
@@ -84,7 +84,7 @@ namespace MSP2050.Scripts
 			//if (currentHover != null)
 			//{
 			//    List<Entity> entities = new List<Entity>();
-			//    List<Layer> loadedLayers = LayerManager.GetLoadedLayersSortedByDepth();
+			//    List<Layer> loadedLayers = LayerManager.Instance.GetLoadedLayersSortedByDepth();
 
 			//    foreach (Layer layer in loadedLayers)
 			//    {

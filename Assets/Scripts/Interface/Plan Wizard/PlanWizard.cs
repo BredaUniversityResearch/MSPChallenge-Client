@@ -126,7 +126,7 @@ namespace MSP2050.Scripts
 
         private void createCategories()
         {
-            foreach (var kvp in LayerManager.GetCategorySubcategories())
+            foreach (var kvp in LayerManager.Instance.GetCategorySubcategories())
             {
                 // Create category
                 string category = kvp.Key;
@@ -135,7 +135,7 @@ namespace MSP2050.Scripts
                 // Create subcategories
                 foreach (string subcategory in kvp.Value)
                 {
-                    var loadedLayers = LayerManager.GetLoadedLayers(category, subcategory);
+                    var loadedLayers = LayerManager.Instance.GetLoadedLayers(category, subcategory);
                     bool isSubCategoryCreated = false;
 
                     foreach (AbstractLayer layer in loadedLayers)
@@ -146,12 +146,12 @@ namespace MSP2050.Scripts
                             {
                                 isCategoryCreated = true;
                                 //CreateCategoryPlan(category);
-                                CreateCategoryPlan(LayerManager.MakeCategoryDisplayString(category));
+                                CreateCategoryPlan(LayerManager.Instance.MakeCategoryDisplayString(category));
                             }
                             if (!isSubCategoryCreated)
                             {
                                 isSubCategoryCreated = true;
-                                CreateSubCategoryPlan(LayerManager.MakeCategoryDisplayString(subcategory), LayerInterface.GetIconStatic(subcategory));
+                                CreateSubCategoryPlan(LayerManager.Instance.MakeCategoryDisplayString(subcategory), LayerInterface.GetIconStatic(subcategory));
                             }
 
                             CreateLayerPlan(layer);
@@ -244,13 +244,13 @@ namespace MSP2050.Scripts
                 // Removing of layers
                 List<AbstractLayer> layersToRemove = layersInThisPlan.Except(selectedLayers).ToList(); // all layers that are not selected but are in the plan
 
-                bool seperatelyRemoveGreenCables = LayerManager.energyCableLayerGreen != null && !layersToRemove.Contains(LayerManager.energyCableLayerGreen);
-                bool seperatelyRemoveGreyCables = LayerManager.energyCableLayerGrey != null && !layersToRemove.Contains(LayerManager.energyCableLayerGrey);
+                bool seperatelyRemoveGreenCables = LayerManager.Instance.energyCableLayerGreen != null && !layersToRemove.Contains(LayerManager.Instance.energyCableLayerGreen);
+                bool seperatelyRemoveGreyCables = LayerManager.Instance.energyCableLayerGrey != null && !layersToRemove.Contains(LayerManager.Instance.energyCableLayerGrey);
                 Dictionary<int, List<EnergyLineStringSubEntity>> network = null;
                 if (seperatelyRemoveGreenCables)
-                    network = LayerManager.energyCableLayerGreen.GetNodeConnectionsForPlan(editingPlan);
+                    network = LayerManager.Instance.energyCableLayerGreen.GetNodeConnectionsForPlan(editingPlan);
                 if (seperatelyRemoveGreyCables)
-                    network = LayerManager.energyCableLayerGrey.GetNodeConnectionsForPlan(editingPlan, network);
+                    network = LayerManager.Instance.energyCableLayerGrey.GetNodeConnectionsForPlan(editingPlan, network);
                 bool energyLayersRemoved = false;
                 foreach (AbstractLayer layer in layersToRemove)
                 {

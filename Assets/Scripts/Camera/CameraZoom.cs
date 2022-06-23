@@ -192,7 +192,7 @@ namespace MSP2050.Scripts
 		private void UpdateScaleNow(Camera targetCamera)
 		{
 			VisualizationUtil.UpdateDisplayScale(targetCamera);
-			LayerManager.UpdateLayerScales(targetCamera);
+			LayerManager.Instance.UpdateLayerScales(targetCamera);
 		}
 
 		private IEnumerator DelayedUpdateScale()

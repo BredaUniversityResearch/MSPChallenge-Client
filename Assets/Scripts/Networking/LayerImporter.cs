@@ -99,7 +99,7 @@ namespace MSP2050.Scripts
 				Color greenColor = Util.HexToColor(config.green_centerpoint_color);
 				Color greyColor = Util.HexToColor(config.grey_centerpoint_color);
 
-				foreach (PointLayer layer in LayerManager.GetCenterPointLayers())
+				foreach (PointLayer layer in LayerManager.Instance.GetCenterPointLayers())
 				{
 					layer.EntityTypes[0].DrawSettings.PointColor = layer.greenEnergy ? greenColor : greyColor;
 					layer.EntityTypes[0].DrawSettings.PointSprite = layer.greenEnergy ? greenSprite : greySprite;
@@ -125,7 +125,7 @@ namespace MSP2050.Scripts
 
 		private static void handleReimportLayerTypeColorsCallback(List<LayerMeta> layerMeta)
 		{
-			foreach (AbstractLayer layer in LayerManager.GetLoadedLayers())
+			foreach (AbstractLayer layer in LayerManager.Instance.GetLoadedLayers())
 			{
 				foreach (LayerMeta meta in layerMeta)
 					if (layer.ID == meta.layer_id)
@@ -140,7 +140,7 @@ namespace MSP2050.Scripts
 
 		public static void ImportAllLayers()
 		{
-			List<AbstractLayer> layerList = LayerManager.GetAllValidLayers();
+			List<AbstractLayer> layerList = LayerManager.Instance.GetAllValidLayers();
 			List<int> layersToLoad = new List<int>(layerList.Count);
 			foreach (AbstractLayer layerToLoad in layerList)
 			{
@@ -158,7 +158,7 @@ namespace MSP2050.Scripts
 
 			IsCurrentlyImportingLayers = true;
 
-			string layerName = LayerManager.GetLayerByID(selectedLayerIDs[0]).FileName;
+			string layerName = LayerManager.Instance.GetLayerByID(selectedLayerIDs[0]).FileName;
 			InterfaceCanvas.Instance.loadingScreen.CreateLoadingBar(selectedLayerIDs.Count + 2, "layers");
 			expectedLayers = selectedLayerIDs.Count;
 		
@@ -166,7 +166,7 @@ namespace MSP2050.Scripts
 			//stopWatch.Start();
 			foreach (int selectedLayerID in selectedLayerIDs)
 			{
-				AbstractLayer layer = LayerManager.GetLayerByID(selectedLayerID);
+				AbstractLayer layer = LayerManager.Instance.GetLayerByID(selectedLayerID);
 				if (layer.GetGeoType() == LayerManager.GeoType.raster)
 				{
 					ImportRasterLayer((layer as RasterLayer));
@@ -186,7 +186,7 @@ namespace MSP2050.Scripts
 		//static List<int> selectedLayerIDList;
 		//private static void LoadNextLayer()
 		//{
-		//	AbstractLayer layer = LayerManager.GetLayerByID(selectedLayerIDList[importedLayers]);
+		//	AbstractLayer layer = LayerManager.Instance.GetLayerByID(selectedLayerIDList[importedLayers]);
 		//	if (layer.GetGeoType() == LayerManager.GeoType.raster)
 		//	{
 		//		ImportRasterLayer((layer as RasterLayer));
@@ -223,7 +223,7 @@ namespace MSP2050.Scripts
 
 			entityObject.type = typeIdString.ToString();
 			objects.Add(entityObject); // add one empty object, it doesnt need this anyways
-			LayerManager.LoadLayer(layer, objects);
+			LayerManager.Instance.LoadLayer(layer, objects);
 			LayerImportComplete();
 		}
 
@@ -238,7 +238,7 @@ namespace MSP2050.Scripts
 				//UnityEngine.Debug.Log($"Importing layers took {stopWatch.ElapsedMilliseconds} ms");
 				Main.AllLayersImported();
 
-				LayerManager.ReorderLayers();
+				LayerManager.Instance.ReorderLayers();
 
 				CameraManager.Instance.GetNewPlayArea();
 
@@ -250,14 +250,14 @@ namespace MSP2050.Scripts
 			}
 			//else
 			//{
-			//	InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem(LayerManager.GetLayerByID(selectedLayerIDList[importedLayers]).ShortName);
+			//	InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem(LayerManager.Instance.GetLayerByID(selectedLayerIDList[importedLayers]).ShortName);
 			//	LoadNextLayer();
 			//}
 		}
 
 		private static void importLayer(List<SubEntityObject> objects, AbstractLayer layer)
 		{
-			LayerManager.LoadLayer(layer, objects);
+			LayerManager.Instance.LoadLayer(layer, objects);
 		}
 	}
 

@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 		{
 			distributions.SetInteractability(false);
 			if (PlanManager.planViewing == lockedPlan)
-				LayerManager.RedrawVisibleLayers();
+				LayerManager.Instance.RedrawVisibleLayers();
 			base.StopEditing();
 		}
 

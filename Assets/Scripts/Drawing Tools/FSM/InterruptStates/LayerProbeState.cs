@@ -33,7 +33,7 @@ namespace MSP2050.Scripts
 		public override void LeftMouseButtonDown(Vector3 position)
 		{
 			List<SubEntity> subEntities = new List<SubEntity>();
-			List<AbstractLayer> loadedLayers = LayerManager.GetVisibleLayersSortedByDepth(); // change this back to loaded layers by depth, for the layerprobe
+			List<AbstractLayer> loadedLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth(); // change this back to loaded layers by depth, for the layerprobe
 
 			foreach (AbstractLayer layer in loadedLayers)
 			{

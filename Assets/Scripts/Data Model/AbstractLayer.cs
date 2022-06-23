@@ -87,7 +87,7 @@ namespace MSP2050.Scripts
 			if (layerMeta.layer_editing_type == "protection")
 			{
 				MultiTypeSelect = true;
-				LayerManager.protectedAreaLayers.Add(this);
+				LayerManager.Instance.protectedAreaLayers.Add(this);
 			}
 			else
 			{
@@ -135,15 +135,15 @@ namespace MSP2050.Scripts
 					break;
 				case "transformer":
 					editingType = EditingType.Transformer;
-					LayerManager.AddEnergyPointLayer(this as PointLayer);
+					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "socket":
 					editingType = EditingType.Socket;
-					LayerManager.AddEnergyPointLayer(this as PointLayer);
+					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "sourcepoint":
 					editingType = EditingType.SourcePoint;
-					LayerManager.AddEnergyPointLayer(this as PointLayer);
+					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "sourcepolygon":
 					editingType = EditingType.SourcePolygon;

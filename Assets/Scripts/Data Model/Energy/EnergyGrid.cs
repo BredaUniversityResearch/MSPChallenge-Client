@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 			sourcePower = 0;
 			foreach (GeomIDObject source in gridObject.sources)
 			{
-				EnergyPointSubEntity subEnt = LayerManager.GetEnergySubEntityByID(source.geometry_id, true) as EnergyPointSubEntity;
+				EnergyPointSubEntity subEnt = LayerManager.Instance.GetEnergySubEntityByID(source.geometry_id, true) as EnergyPointSubEntity;
 				if (subEnt != null)
 				{
 					sources.Add(subEnt);
@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 			sockets = new List<EnergyPointSubEntity>();
 			foreach (GeomIDObject socket in gridObject.sockets)
 			{
-				EnergyPointSubEntity subEnt = LayerManager.GetEnergySubEntityByID(socket.geometry_id) as EnergyPointSubEntity;
+				EnergyPointSubEntity subEnt = LayerManager.Instance.GetEnergySubEntityByID(socket.geometry_id) as EnergyPointSubEntity;
 				if (subEnt != null)
 				{
 					sockets.Add(subEnt);
@@ -795,9 +795,9 @@ namespace MSP2050.Scripts
 		public void ShowGridOnMap()
 		{
 			bool green = IsGreen;
-			foreach (AbstractLayer layer in LayerManager.energyLayers)
+			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 				if (layer.greenEnergy == green)
-					LayerManager.ShowLayer(layer);
+					LayerManager.Instance.ShowLayer(layer);
         
 			CameraManager.Instance.ZoomToBounds(GetGridRect());
 		}

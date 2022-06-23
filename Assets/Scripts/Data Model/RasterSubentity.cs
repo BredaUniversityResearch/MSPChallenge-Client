@@ -85,7 +85,7 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.IsReferenceLayer(Entity.Layer))
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer))
 				drawMode = SubEntityDrawMode.PlanReference;
 
 			// PdG 2017-10-03: Disabled snapping entirely for Raster Subentities otherwise everything would snap to the bathymetry layer at the mouse position.

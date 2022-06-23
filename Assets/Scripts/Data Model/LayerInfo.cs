@@ -56,7 +56,7 @@ namespace MSP2050.Scripts
 					Debug.LogError("Layer has invalid geotype: " + layerMeta[i].layer_geotype + " in layer " + layer.FileName);
 				}
 				layer.versionNr = layerMeta[i].layer_filecreationtime;
-				LayerManager.AddLayer(layer);
+				LayerManager.Instance.AddLayer(layer);
 			}
 
 			return layerMeta;

@@ -77,14 +77,14 @@ namespace MSP2050.Scripts
 				if (value != 0) // If the dropdown is not on the first element ("All")
 				{
 					// Disable everything
-					foreach (AbstractLayer layer in LayerManager.GetAllValidLayers())
+					foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
 					{
 						buttons[layer].gameObject.SetActive(false);
 						buttons[layer].isOn = false;
 					}
 
 					// layers that match this type
-					foreach (AbstractLayer layer in LayerManager.GetAllValidLayers().Intersect(LayerManager.GetAllValidLayersOfGroup(tmpName)))
+					foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers().Intersect(LayerManager.Instance.GetAllValidLayersOfGroup(tmpName)))
 					{
 						buttons[layer].gameObject.SetActive(true);
 						buttons[layer].isOn = true;
@@ -93,7 +93,7 @@ namespace MSP2050.Scripts
 				else
 				{
 
-					foreach (AbstractLayer layer in LayerManager.GetAllValidLayers())
+					foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
 					{
 						buttons[layer].gameObject.SetActive(true);
 						buttons[layer].isOn = true;
@@ -131,7 +131,7 @@ namespace MSP2050.Scripts
 
 		private void createUI()
 		{
-			List<AbstractLayer> validLayers = LayerManager.GetAllValidLayers();
+			List<AbstractLayer> validLayers = LayerManager.Instance.GetAllValidLayers();
 
 			foreach (AbstractLayer layer in validLayers)
 			{

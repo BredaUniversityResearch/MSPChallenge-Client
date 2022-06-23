@@ -439,8 +439,8 @@ namespace MSP2050.Scripts
 		{ return null; }
 		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)
 		{ return null; }
-		public override LayerManager.GeoType GetGeoType()
-		{ return LayerManager.GeoType.line; }
+		public override  LayerManager.GeoType GetGeoType()
+		{ return  LayerManager.GeoType.line; }
 
 		//Called when the layer is shown by the layermanager
 		public override void LayerShown()
@@ -915,7 +915,7 @@ namespace MSP2050.Scripts
 				Entities.Add(entity);
 
 			lastImplementedPlanIndex = newPlanIndex;
-			if (LayerManager.LayerIsVisible(this) && PlanManager.planViewing == null && PlanManager.timeViewing < 0)
+			if (LayerManager.Instance.LayerIsVisible(this) && PlanManager.planViewing == null && PlanManager.timeViewing < 0)
 			{
 				SetEntitiesActiveUpToCurrentTime();
 				RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default, true);

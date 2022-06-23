@@ -165,9 +165,9 @@ namespace MSP2050.Scripts
 			return subEntities;
 		}
 
-		public override LayerManager.GeoType GetGeoType()
+		public override  LayerManager.GeoType GetGeoType()
 		{
-			return LayerManager.GeoType.point;
+			return  LayerManager.GeoType.point;
 		}
 
 		#region Legacy stuff

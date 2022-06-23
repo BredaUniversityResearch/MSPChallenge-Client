@@ -384,9 +384,9 @@ namespace MSP2050.Scripts
 			return Entities.Count;
 		}
 
-		public override LayerManager.GeoType GetGeoType()
+		public override  LayerManager.GeoType GetGeoType()
 		{
-			return LayerManager.GeoType.raster;
+			return  LayerManager.GeoType.raster;
 		}
 
 		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)

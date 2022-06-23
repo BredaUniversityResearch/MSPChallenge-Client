@@ -88,7 +88,7 @@ namespace MSP2050.Scripts
 		{
 			base.RedrawGameObject(drawMode, selectedPoints, hoverPoints, updatePlanState);
 
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.IsReferenceLayer(Entity.Layer))
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer))
 				drawMode = SubEntityDrawMode.PlanReference;
 
 			SnappingToThisEnabled = IsSnapToDrawMode(drawMode);

@@ -81,7 +81,7 @@ namespace MSP2050.Scripts
 			bool needsRedraw = redraw && (!ignoreRedrawOnViewStateChange && planViewState != state);
 			planViewState = state;
 			if (needsRedraw)
-				LayerManager.RedrawVisibleLayers();
+				LayerManager.Instance.RedrawVisibleLayers();
 		}
 
 		public static void ShowWorldAt(int time)
@@ -89,9 +89,9 @@ namespace MSP2050.Scripts
 			if (timeViewing == time || planViewing != null)
 				return;
 			if (time == -1)
-				LayerManager.UpdateVisibleLayersToBase();
+				LayerManager.Instance.UpdateVisibleLayersToBase();
 			else
-				LayerManager.UpdateVisibleLayersToTime(time);
+				LayerManager.Instance.UpdateVisibleLayersToTime(time);
 			timeViewing = time;
 		}
 
@@ -110,7 +110,7 @@ namespace MSP2050.Scripts
 			timeViewing = -1;
 			PlansMonitor.SetViewPlanFrameState(planViewing, true);
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
-			LayerManager.UpdateVisibleLayersToPlan(plan);
+			LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(plan);
 		}
@@ -133,7 +133,7 @@ namespace MSP2050.Scripts
 			ignoreRedrawOnViewStateChange = false;
 
 			if(updateLayers)
-				LayerManager.UpdateVisibleLayersToBase();
+				LayerManager.Instance.UpdateVisibleLayersToBase();
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.CloseWindow();
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);
@@ -229,14 +229,14 @@ namespace MSP2050.Scripts
 		public static void ViewPlanOnMap(Plan plan)
 		{
 			foreach (PlanLayer planLayer in plan.PlanLayers)
-				LayerManager.ShowLayer(planLayer.BaseLayer);
+				LayerManager.Instance.ShowLayer(planLayer.BaseLayer);
 
 			CameraManager.Instance.ZoomToBounds(plan.GetBounds());
 		}
 
 		public static void ViewPlanLayerOnMap(PlanLayer planLayer)
 		{
-			LayerManager.ShowLayer(planLayer.BaseLayer);
+			LayerManager.Instance.ShowLayer(planLayer.BaseLayer);
 			CameraManager.Instance.ZoomToBounds(planLayer.GetBounds());
 		}
 	
@@ -373,7 +373,7 @@ namespace MSP2050.Scripts
 		public static void MonthTick(int newMonth)
 		{
 			//Advance time on layers (merging approved ones) 
-			foreach (AbstractLayer layer in LayerManager.GetAllValidLayers())
+			foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
 				layer.AdvanceTimeTo(newMonth);
 		}
 
@@ -568,7 +568,7 @@ namespace MSP2050.Scripts
 				{
 					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();							
 					InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
-					LayerManager.UpdateVisibleLayersToPlan(plan);
+					LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
 				}
 			}
 			if (stateChanged || timeChanged || nameOrDescriptionChanged || forceMonitorUpdate)
@@ -641,7 +641,7 @@ namespace MSP2050.Scripts
 				PlansMonitor.AddPlanLayer(plan, addedLayer);
 
 			//Sets entities active and redraws if the layer is visible
-			//LayerManager.UpdateLayerToPlan(addedLayer.BaseLayer, plan, plan == planViewing);
+			//LayerManager.Instance.UpdateLayerToPlan(addedLayer.BaseLayer, plan, plan == planViewing);
 		}
 
 		public static void PlanLayerRemoved(Plan plan, PlanLayer removedLayer)

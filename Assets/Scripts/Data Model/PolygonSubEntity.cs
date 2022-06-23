@@ -755,7 +755,7 @@ namespace MSP2050.Scripts
 				return;
 
 			// Bathymetry and Countries/Councils are not selectable, and will not change drawmode
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.IsReferenceLayer(Entity.Layer) && Entity.Layer.Selectable)
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer) && Entity.Layer.Selectable)
 			{
 				drawMode = SubEntityDrawMode.PlanReference;			
 			}

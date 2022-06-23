@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			//All points are non-reference
-			foreach (AbstractLayer layer in LayerManager.energyLayers)
+			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 			{
 				if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy)
 				{
@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
 					{
 						//Get and add the centerpoint layer
 						EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;
-						LayerManager.AddNonReferenceLayer(polyLayer.centerPointLayer, false); //Redrawing a centerpoint layer doesn't work, so manually redraw active entities
+						LayerManager.Instance.AddNonReferenceLayer(polyLayer.centerPointLayer, false); //Redrawing a centerpoint layer doesn't work, so manually redraw active entities
 						foreach (Entity entity in polyLayer.centerPointLayer.activeEntities)
 							entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
 					}
@@ -30,7 +30,7 @@ namespace MSP2050.Scripts
 					         layer.editingType == AbstractLayer.EditingType.Socket ||
 					         layer.editingType == AbstractLayer.EditingType.Transformer)
 					{
-						LayerManager.AddNonReferenceLayer(layer, true);
+						LayerManager.Instance.AddNonReferenceLayer(layer, true);
 					}
 				}
 			}
@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 		{
 			if (!cursorIsOverUI)
 			{
-				EnergyPointSubEntity point = LayerManager.GetEnergyPointAtPosition(currentPosition);
+				EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(currentPosition);
 				if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
 				{
 					fsm.SetCursor(FSM.CursorType.Invalid);
@@ -79,7 +79,7 @@ namespace MSP2050.Scripts
 
 		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
 		{        
-			EnergyPointSubEntity point = LayerManager.GetEnergyPointAtPosition(finalPosition);
+			EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(finalPosition);
 			if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
 				return;
 
@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 
 		public override void ExitState(Vector3 currentMousePosition)
 		{
-			LayerManager.SetNonReferenceLayers(new HashSet<AbstractLayer>() { PlanDetails.LayersTab.CurrentlyEditingBaseLayer }, false, true);
+			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { PlanDetails.LayersTab.CurrentlyEditingBaseLayer }, false, true);
 			base.ExitState(currentMousePosition);
 		}
 

@@ -99,7 +99,7 @@ namespace MSP2050.Scripts
 				{
 					if (PlanManager.planViewing == null || !PlanManager.planViewing.IsLayerpartOfPlan(activeLayer.layerRepresenting))
 					{
-						LayerManager.HideLayer(activeLayer.layerRepresenting);
+						LayerManager.Instance.HideLayer(activeLayer.layerRepresenting);
 						RemoveLayer(activeLayer.layerRepresenting);
 					}
 				});
@@ -123,11 +123,11 @@ namespace MSP2050.Scripts
 					InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 					if (value)
 					{
-						LayerManager.ShowLayer(activeLayer.layerRepresenting);
+						LayerManager.Instance.ShowLayer(activeLayer.layerRepresenting);
 					}
 					else
 					{
-						LayerManager.HideLayer(activeLayer.layerRepresenting);
+						LayerManager.Instance.HideLayer(activeLayer.layerRepresenting);
 					}
 					InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 				});
@@ -168,7 +168,7 @@ namespace MSP2050.Scripts
 			{
 				if (layer.Toggleable && (currentPlan == null || !currentPlan.IsLayerpartOfPlan(layer)))
 				{
-					LayerManager.HideLayer(layer);
+					LayerManager.Instance.HideLayer(layer);
 					RemoveLayer(layer);
 					yield return 0;
 				}

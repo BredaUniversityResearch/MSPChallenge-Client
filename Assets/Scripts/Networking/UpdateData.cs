@@ -120,10 +120,10 @@ namespace MSP2050.Scripts
 
 			foreach (RasterUpdateObject raster in a_Update.raster)
 			{
-				AbstractLayer layer = LayerManager.GetLayerByID(raster.id);
+				AbstractLayer layer = LayerManager.Instance.GetLayerByID(raster.id);
 
 				RasterLayer rasterLayer = layer as RasterLayer;
-				if (rasterLayer != null && LayerManager.LayerIsVisible(rasterLayer))
+				if (rasterLayer != null && LayerManager.Instance.LayerIsVisible(rasterLayer))
 				{
 					rasterLayer.ReloadLatestRaster();
 				}
@@ -200,7 +200,7 @@ namespace MSP2050.Scripts
 
 		private static void UpdateOutput(EnergyOutputObject outputUpdate)
 		{
-			SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(outputUpdate.id);
+			SubEntity tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(outputUpdate.id);
 			if (tempSubEnt == null) return;
 			IEnergyDataHolder energyObj = (IEnergyDataHolder)tempSubEnt;
 			energyObj.UsedCapacity = outputUpdate.capacity;
@@ -221,19 +221,19 @@ namespace MSP2050.Scripts
 
 			EnergyPointSubEntity point1;
 			EnergyPointSubEntity point2;
-			SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(cableID);
+			SubEntity tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(cableID);
 			if (tempSubEnt == null) return;
 			EnergyLineStringSubEntity cable = tempSubEnt as EnergyLineStringSubEntity;
 
 			//Get the points, check if they reference to a polygon or point
-			tempSubEnt = LayerManager.GetEnergySubEntityByID(startID);
+			tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(startID);
 			if (tempSubEnt == null) return;
 			else if (tempSubEnt is EnergyPolygonSubEntity)
 				point1 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
 			else
 				point1 = tempSubEnt as EnergyPointSubEntity;
 
-			tempSubEnt = LayerManager.GetEnergySubEntityByID(endID);
+			tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(endID);
 			if (tempSubEnt == null) return;
 			else if (tempSubEnt is EnergyPolygonSubEntity)
 				point2 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;

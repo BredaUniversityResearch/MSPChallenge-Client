@@ -54,7 +54,7 @@ namespace MSP2050.Scripts
 
 		public void OptimizeLayers()
 		{
-			foreach (AbstractLayer layer in LayerManager.GetLoadedLayers())        
+			foreach (AbstractLayer layer in LayerManager.Instance.GetLoadedLayers())        
 				if (layer.Optimized && layer is PolygonLayer)
 					OptimizePolygonLayer(layer as PolygonLayer);
 		}

@@ -76,7 +76,7 @@ namespace MSP2050.Scripts
 			string category = layer.Category;
 			string subcategoryID = layer.SubCategory;
 
-			string categoryName = LayerManager.MakeCategoryDisplayString(category);
+			string categoryName = LayerManager.Instance.MakeCategoryDisplayString(category);
 
 			// Creating/Getting the group
 			LayerCategoryGroup categoryGroup = FindCategory(categoryName);
@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 
 		private LayerSubCategoryToggleGroup CreateSubCategory(LayerCategoryGroup categoryGroup, string subCategoryID)
 		{
-			string subCategoryName = LayerManager.MakeCategoryDisplayString(subCategoryID);
+			string subCategoryName = LayerManager.Instance.MakeCategoryDisplayString(subCategoryID);
 
 			LayerButton subcategoryToggleButton = categoryGroup.CreateLayerButton(subCategoryName);
 

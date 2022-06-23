@@ -188,7 +188,7 @@ namespace MSP2050.Scripts
 		}
 
 
-		public static List<AbstractLayer> GetLoadedLayers()
+		public List<AbstractLayer> GetLoadedLayers()
 		{
 			List<AbstractLayer> result = new List<AbstractLayer>();
 			foreach (AbstractLayer layer in layers)
@@ -202,7 +202,7 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static AbstractLayer FindFirstLayerContainingName(string name)
+		public AbstractLayer FindFirstLayerContainingName(string name)
 		{
 			foreach (AbstractLayer layer in loadedLayers)
 			{
@@ -214,7 +214,7 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public static AbstractLayer FindLayerByFilename(string name)
+		public AbstractLayer FindLayerByFilename(string name)
 		{
 			foreach (AbstractLayer layer in loadedLayers)
 			{
@@ -226,7 +226,7 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public static AbstractLayer GetLoadedLayer(int ID)
+		public AbstractLayer GetLoadedLayer(int ID)
 		{
 			AbstractLayer layer = GetLayerByID(ID);
 
@@ -238,7 +238,7 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public static List<AbstractLayer> GetAllValidLayers()
+		public List<AbstractLayer> GetAllValidLayers()
 		{
 			List<AbstractLayer> result = new List<AbstractLayer>();
 			foreach (AbstractLayer layer in layers)
@@ -252,7 +252,7 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static List<AbstractLayer> GetAllValidLayersOfGroup(string group)
+		public List<AbstractLayer> GetAllValidLayersOfGroup(string group)
 		{
 			if (group == string.Empty)
 			{
@@ -271,12 +271,12 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static Dictionary<string, List<string>> GetCategorySubcategories()
+		public Dictionary<string, List<string>> GetCategorySubcategories()
 		{
 			return categorySubcategories;
 		}
 
-		public static void LoadLayer(AbstractLayer layer, List<SubEntityObject> layerObjects)
+		public void LoadLayer(AbstractLayer layer, List<SubEntityObject> layerObjects)
 		{
 			layer.LoadLayerObjects(layerObjects);
 
@@ -307,7 +307,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void UpdateAllVisibleLayersTo(Plan plan)
+		public void UpdateAllVisibleLayersTo(Plan plan)
 		{
 			foreach (AbstractLayer layer in visibleLayers)
 			{
@@ -315,7 +315,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void ShowLayer(AbstractLayer layer, bool shownInUI = true, bool toggleValuePlanMonitor = true)
+		public void ShowLayer(AbstractLayer layer, bool shownInUI = true, bool toggleValuePlanMonitor = true)
 		{
 			bool needsUpdateAndRedraw = false;
 			foreach (EntityType entityType in layer.EntityTypes.Values)
@@ -353,7 +353,7 @@ namespace MSP2050.Scripts
 			UpdateVisibleLayerIndexForAllTypes();
 		}
 
-		public static void HideAllVisibleLayers()
+		public void HideAllVisibleLayers()
 		{
 			//We need a copy since we will be modifying the collection
 			List<AbstractLayer> list = new List<AbstractLayer>(visibleLayers);
@@ -367,7 +367,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void HideLayer(AbstractLayer layer)
+		public void HideLayer(AbstractLayer layer)
 		{
 			//Layer that is being edited cannot be hidden
 			if (Main.InEditMode && PlanDetails.LayersTab.CurrentlyEditingBaseLayer == layer)
@@ -386,7 +386,7 @@ namespace MSP2050.Scripts
 			UpdateVisibleLayerIndexForAllTypes();
 		}
 
-		private static void UpdateVisibleLayerIndexForAllTypes()
+		private void UpdateVisibleLayerIndexForAllTypes()
 		{
 			Dictionary<Type, int> visibleLayerIndexByType = new Dictionary<Type, int>();
 			foreach (AbstractLayer layer in visibleLayers)
@@ -401,7 +401,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static List<EnergyLineStringSubEntity> ForceEnergyLayersActiveUpTo(Plan plan)
+		public List<EnergyLineStringSubEntity> ForceEnergyLayersActiveUpTo(Plan plan)
 		{
 			//Call setactiveupto on all energy layers not yet active and clear connections
 			foreach (AbstractLayer energyLayer in energyLayers)
@@ -437,7 +437,7 @@ namespace MSP2050.Scripts
 			return cablesToRemove;
 		}
 
-		public static void RestoreRemovedCables(List<EnergyLineStringSubEntity> removedCables)
+		public void RestoreRemovedCables(List<EnergyLineStringSubEntity> removedCables)
 		{
 			if (energyCableLayerGreen != null)
 			{
@@ -453,7 +453,7 @@ namespace MSP2050.Scripts
 		/// Sets entities in visible layers active to plan and shows layers in the plan that were not visible.
 		/// </summary>
 		/// <param name="plan"></param>
-		public static void UpdateVisibleLayersToPlan(Plan plan)
+		public void UpdateVisibleLayersToPlan(Plan plan)
 		{
 			foreach (AbstractLayer layer in visibleLayers)
 			{
@@ -488,7 +488,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void UpdateVisibleLayersToBase()
+		public void UpdateVisibleLayersToBase()
 		{
 			foreach (AbstractLayer layer in visibleLayers)
 			{
@@ -503,7 +503,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void UpdateVisibleLayersToTime(int month)
+		public void UpdateVisibleLayersToTime(int month)
 		{
 			foreach (AbstractLayer layer in visibleLayers)
 			{
@@ -534,7 +534,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void UpdateLayerToPlan(AbstractLayer baseLayer, Plan plan, bool showIfHidden)
+		public void UpdateLayerToPlan(AbstractLayer baseLayer, Plan plan, bool showIfHidden)
 		{
 			if (visibleLayers.Contains(baseLayer))
 			{
@@ -545,7 +545,7 @@ namespace MSP2050.Scripts
 				ShowLayer(baseLayer);
 		}
 
-		public static void RedrawVisibleLayers()
+		public void RedrawVisibleLayers()
 		{
 			foreach (AbstractLayer layer in visibleLayers)
 			{
@@ -553,31 +553,31 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static bool LayerIsVisible(AbstractLayer layer)
+		public bool LayerIsVisible(AbstractLayer layer)
 		{
 			return visibleLayers.Contains(layer);
 		}
 
-		public static IEnumerable<AbstractLayer> GetVisibleLayers()
+		public IEnumerable<AbstractLayer> GetVisibleLayers()
 		{
 			return visibleLayers;
 		}
 
-		public static List<AbstractLayer> GetVisibleLayersSortedByDepth()
+		public List<AbstractLayer> GetVisibleLayersSortedByDepth()
 		{
 			List<AbstractLayer> result = new List<AbstractLayer>(visibleLayers);
 			result.Sort((x, y) => y.Depth.CompareTo(x.Depth));
 			return result;
 		}
 
-		public static List<AbstractLayer> GetLoadedLayersSortedByDepth()
+		public List<AbstractLayer> GetLoadedLayersSortedByDepth()
 		{
 			List<AbstractLayer> result = new List<AbstractLayer>(loadedLayers);
 			result.Sort((x, y) => y.Depth.CompareTo(x.Depth));
 			return result;
 		}
 
-		public static void UpdateLayerScales(Camera targetCamera)
+		public void UpdateLayerScales(Camera targetCamera)
 		{
 			foreach (AbstractLayer layer in visibleLayers)
 			{
@@ -588,7 +588,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static SubEntity GetSubEntity(AbstractLayer layer, int subEntityID)
+		public SubEntity GetSubEntity(AbstractLayer layer, int subEntityID)
 		{
 			for (int i = 0; i < layer.GetEntityCount(); i++)
 			{
@@ -610,7 +610,7 @@ namespace MSP2050.Scripts
 			return null; // This means it it doesnt exist
 		}
 
-		public static void ReorderLayers()
+		public void ReorderLayers()
 		{
 			List<AbstractLayer> layersInOrder = GetLoadedLayersSortedByDepth();
 			layersInOrder.Reverse();
@@ -622,7 +622,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void moveGeometry(AbstractLayer from, AbstractLayer to, int offset)
+		private void moveGeometry(AbstractLayer from, AbstractLayer to, int offset)
 		{
 			NetworkForm form = new NetworkForm();
 
@@ -635,7 +635,7 @@ namespace MSP2050.Scripts
 
 		public delegate void AddNewLayerCallback(AbstractLayer layer);
 
-		public static void ResetAll()
+		public void ResetAll()
 		{
 			layers.Clear();
 			loadedLayers.Clear();
@@ -643,7 +643,7 @@ namespace MSP2050.Scripts
 			finishedImporting = false;
 		}
 
-		private static void AddToCategories(string category, string subcategory)
+		private void AddToCategories(string category, string subcategory)
 		{
 			if (!categorySubcategories.ContainsKey(category))
 			{
@@ -657,12 +657,12 @@ namespace MSP2050.Scripts
 
 		}
 
-		public static void AddEnergyPointLayer(PointLayer layer)
+		public void AddEnergyPointLayer(PointLayer layer)
 		{
 			energyPointLayers.Add(layer);
 		}
 
-		public static EnergyPointSubEntity GetEnergyPointAtPosition(Vector3 pos)
+		public EnergyPointSubEntity GetEnergyPointAtPosition(Vector3 pos)
 		{
 			foreach (PointLayer p in energyPointLayers)
 				if (visibleLayers.Contains(p) || (p.sourcePolyLayer != null && visibleLayers.Contains(p.sourcePolyLayer)))
@@ -672,7 +672,7 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public static List<PointLayer> GetCenterPointLayers()
+		public List<PointLayer> GetCenterPointLayers()
 		{
 			List<PointLayer> result = new List<PointLayer>();
 			foreach (PointLayer layer in energyPointLayers)
@@ -681,14 +681,14 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static void RemoveEnergySubEntityReference(int ID)
+		public void RemoveEnergySubEntityReference(int ID)
 		{
 			if (ID == -1)
 				return;
 			if (energySubEntities != null)
 				energySubEntities.Remove(ID);
 		}
-		public static void AddEnergySubEntityReference(int ID, SubEntity subent)
+		public void AddEnergySubEntityReference(int ID, SubEntity subent)
 		{
 			if (ID == -1)
 				return;
@@ -697,7 +697,7 @@ namespace MSP2050.Scripts
 			if (!energySubEntities.ContainsKey(ID))
 				energySubEntities.Add(ID, subent);
 		}
-		public static SubEntity GetEnergySubEntityByID(int ID, bool getSourcePointIfPoly = false)
+		public SubEntity GetEnergySubEntityByID(int ID, bool getSourcePointIfPoly = false)
 		{
 			SubEntity result = null;
 			if (energySubEntities != null)
@@ -712,7 +712,7 @@ namespace MSP2050.Scripts
 		/// </summary>
 		/// <param name="persistentId"></param>
 		/// <returns></returns>
-		public static SubEntity FindSubEntityByPersistentID(int persistentId)
+		public SubEntity FindSubEntityByPersistentID(int persistentId)
 		{
 			SubEntity result = null;
 			for (int i = 0; i < layers.Count; ++i)
@@ -737,7 +737,7 @@ namespace MSP2050.Scripts
 		/// Doesn't run in edit mode.
 		/// </summary>
 		/// <param name="plan"></param>
-		public static void UpdateVisibleLayersFromPlan(Plan plan)
+		public void UpdateVisibleLayersFromPlan(Plan plan)
 		{
 			//Dont update layers while in edit mode, quickly causes errors
 			if (Main.InEditMode || Main.EditingPlanDetailsContent)
@@ -755,7 +755,7 @@ namespace MSP2050.Scripts
 					layer.BaseLayer.SetEntitiesActiveUpTo(PlanManager.planViewing);
 		}
 
-		public static void AddNonReferenceLayer(AbstractLayer layer, bool redrawLayer)
+		public void AddNonReferenceLayer(AbstractLayer layer, bool redrawLayer)
 		{
 			if (nonReferenceLayers == null)
 				nonReferenceLayers = new HashSet<AbstractLayer>() { layer };
@@ -765,7 +765,7 @@ namespace MSP2050.Scripts
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
 
-		public static void SetNonReferenceLayers(HashSet<AbstractLayer> layers, bool redrawNewLayers, bool redrawOldLayers)
+		public void SetNonReferenceLayers(HashSet<AbstractLayer> layers, bool redrawNewLayers, bool redrawOldLayers)
 		{
 			HashSet<AbstractLayer> oldLayers = nonReferenceLayers;
 			nonReferenceLayers = layers;
@@ -789,19 +789,19 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static bool IsReferenceLayer(AbstractLayer layer)
+		public bool IsReferenceLayer(AbstractLayer layer)
 		{
 			if (nonReferenceLayers == null)
 				return false;
 			return !nonReferenceLayers.Contains(layer);
 		}
 
-		public static void ClearNonReferenceLayers()
+		public void ClearNonReferenceLayers()
 		{
 			nonReferenceLayers = null;
 		}
 
-		public static string MakeCategoryDisplayString(string subcategory)
+		public string MakeCategoryDisplayString(string subcategory)
 		{
 			StringBuilder result = new StringBuilder(subcategory);
 			result.Replace('_', ' ');

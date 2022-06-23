@@ -326,7 +326,7 @@ namespace MSP2050.Scripts
 			if (gameObject == null)
 				return;
 
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.IsReferenceLayer(Entity.Layer))
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer))
 				drawMode = SubEntityDrawMode.PlanReference;
 
 			SnappingToThisEnabled = IsSnapToDrawMode(drawMode);

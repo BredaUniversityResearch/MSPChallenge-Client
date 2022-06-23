@@ -235,9 +235,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override LayerManager.GeoType GetGeoType()
+		public override  LayerManager.GeoType GetGeoType()
 		{
-			return LayerManager.GeoType.polygon;
+			return  LayerManager.GeoType.polygon;
 		}
 
 		#region Legacy Stuff
@@ -282,7 +282,7 @@ namespace MSP2050.Scripts
 			//    return;
 			//}
 
-			//InterfaceCanvas.CreateConfirmWindow("Create Inverted Layer", "Are you sure you want to create an inverted layer?", 200, () => { LayerManager.AddNewLayer(FileName + " (inverted)", LayerManager.GeoType.polygon, invertedLayerCreated); });
+			//InterfaceCanvas.CreateConfirmWindow("Create Inverted Layer", "Are you sure you want to create an inverted layer?", 200, () => { LayerManager.Instance.AddNewLayer(FileName + " (inverted)", LayerManager.GeoType.polygon, invertedLayerCreated); });
 
 
 		}

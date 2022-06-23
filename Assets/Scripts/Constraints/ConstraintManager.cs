@@ -668,13 +668,13 @@ namespace MSP2050.Scripts
 			foreach (RestrictionObject restriction in restrictionConfig.restrictions)
 			{
 				// start layer
-				AbstractLayer startLayer = LayerManager.GetLoadedLayer(restriction.start_layer);
+				AbstractLayer startLayer = LayerManager.Instance.GetLoadedLayer(restriction.start_layer);
 
 				// value (so far only used for raster layer)
 				float value = restriction.value;
 
 				// end layer
-				AbstractLayer endLayer = LayerManager.GetLoadedLayer(restriction.end_layer);
+				AbstractLayer endLayer = LayerManager.Instance.GetLoadedLayer(restriction.end_layer);
 
 				if (startLayer != null && endLayer != null)
 				{

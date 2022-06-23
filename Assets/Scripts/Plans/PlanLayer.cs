@@ -26,7 +26,7 @@ namespace MSP2050.Scripts
 		public PlanLayer(Plan plan, PlanLayerObject layerObject, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
 			Plan = plan;
-			BaseLayer = LayerManager.GetLayerByID(layerObject.original);
+			BaseLayer = LayerManager.Instance.GetLayerByID(layerObject.original);
 			State = layerObject.state;
 			ID = layerObject.layerid;
 
@@ -230,7 +230,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < count; i++)
 			{
 				SubEntity sub = existingNewEntity.GetSubEntity(i);
-				LayerManager.RemoveEnergySubEntityReference(sub.GetDatabaseID());
+				LayerManager.Instance.RemoveEnergySubEntityReference(sub.GetDatabaseID());
 				sub.RemoveGameObject();
 			}
 		}
