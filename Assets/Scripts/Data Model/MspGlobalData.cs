@@ -1,5 +1,6 @@
 ﻿using HEBGraph;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -28,7 +29,7 @@ namespace MSP2050.Scripts
 		public string wiki_base_url;
 		public ExpertiseDefinition[] expertise_definitions;
 		public string windfarm_data_api_url; // https://test-northsea-dot-hydro-engine.appspot.com/get_windfarm_data
-		public HEBGraphData dependencies;
+		public JObject dependencies;
 
 		public int session_num_years
 		{
