@@ -142,7 +142,7 @@ namespace MSP2050.Scripts
 
 		private void getLineAt(Vector3 position, HashSet<LineStringSubEntity> selectedSubEntities, out LineStringSubEntity subEntity, out int lineA, out int lineB)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			lineA = -1;
@@ -198,7 +198,7 @@ namespace MSP2050.Scripts
 
 		private Dictionary<LineStringSubEntity, HashSet<int>> getPointAt(Vector3 position, HashSet<LineStringSubEntity> selectedSubEntities)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			int closestPoint = -1;
@@ -354,7 +354,7 @@ namespace MSP2050.Scripts
 
 		protected LineStringSubEntity getSubEntityFromSelection(Vector2 position, HashSet<LineStringSubEntity> selection)
 		{
-			float maxDistance = VisualizationUtil.GetSelectMaxDistance();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 
 			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
@@ -628,7 +628,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			float maxDistance = VisualizationUtil.GetSelectMaxDistance();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 			if (closestPointSqrDistance < maxDistance * maxDistance)
 			{
 				return dragStartPosition - closestPoint;

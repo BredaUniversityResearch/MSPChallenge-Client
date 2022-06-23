@@ -30,7 +30,7 @@ namespace MSP2050.Scripts
 				targetKPICollection.OnKPIValuesUpdated -= OnTargetCollectionValuesUpdated;
 			}
 
-			targetKPICollection = KPIManager.GetKPIValuesForCategory(EKPICategory.Energy, targetTeamId);
+			targetKPICollection = KPIManager.Instance.GetKPIValuesForCategory(EKPICategory.Energy, targetTeamId);
 
 			if (targetKPICollection != null)
 			{
@@ -58,7 +58,7 @@ namespace MSP2050.Scripts
 
 		private void ShowGridsForCountry(int teamId)
 		{
-			List<EnergyGrid> grids = PlanManager.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);//Or should this be current month -1
+			List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);//Or should this be current month -1
 			kpiGroups.SetBarsToGrids(grids, teamId);
 		}
 	}

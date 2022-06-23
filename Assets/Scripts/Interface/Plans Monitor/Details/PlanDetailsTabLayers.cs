@@ -52,7 +52,7 @@ namespace MSP2050.Scripts
 		protected override void BeginEditing(Plan plan)
 		{
 			//Show the plan to be edited before edit mode is entered!
-			PlanManager.ShowPlan(plan);
+			PlanManager.Instance.ShowPlan(plan);
 
 			//Should not use base, as this is diverted into the usual geom editing flow
 			lockedPlan = plan;
@@ -63,7 +63,7 @@ namespace MSP2050.Scripts
 			if (plan.energyPlan)
 			{
 				removedInvalidCables = LayerManager.Instance.ForceEnergyLayersActiveUpTo(plan);
-				energyGridsBeforePlan = PlanManager.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
+				energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
 			}
 
 			//Enter edit mode in FSM
@@ -126,7 +126,7 @@ namespace MSP2050.Scripts
 		protected override void SubmitChangesAndUnlock()
 		{
 			InterfaceCanvas.ShowNetworkingBlocker();
-			if (lockedPlan.energyPlan && !string.IsNullOrEmpty(Main.MspGlobalData.windfarm_data_api_url))
+			if (lockedPlan.energyPlan && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
 			{
 				int nextTempID = -1;
 				Dictionary<int, SubEntity> energyEntities = new Dictionary<int, SubEntity>();
@@ -147,7 +147,7 @@ namespace MSP2050.Scripts
 					}
 				}
 				//Try getting external data before calculating the effects of editing
-				ServerCommunication.DoExternalAPICall<FeatureCollection>(Main.MspGlobalData.windfarm_data_api_url, energyEntities, (result) => ExternalEnergyEffectsReturned(result, energyEntities), ExternalEnergyEffectsFailed);
+				ServerCommunication.Instance.DoExternalAPICall<FeatureCollection>(SessionManager.Instance.MspGlobalData.windfarm_data_api_url, energyEntities, (result) => ExternalEnergyEffectsReturned(result, energyEntities), ExternalEnergyEffectsFailed);
 			}
 			else
 			{
@@ -177,12 +177,12 @@ namespace MSP2050.Scripts
 			CalculateEffectsOfEditing();
 		}
 
-		void ExternalEnergyEffectsFailed(ServerCommunication.ARequest request, string message)
+		void ExternalEnergyEffectsFailed(ARequest request, string message)
 		{
 			if (request.retriesRemaining > 0)
 			{
 				Debug.LogError($"External API call failed, message: {message}. Retrying {request.retriesRemaining} more times.");
-				ServerCommunication.RetryRequest(request);
+				ServerCommunication.Instance.RetryRequest(request);
 			}
 			else
 			{
@@ -222,7 +222,7 @@ namespace MSP2050.Scripts
 			}
 
 			//Check constraints and show them in the UI.
-			ConstraintManager.CheckConstraints(lockedPlan, issuesBackup, true);
+			ConstraintManager.Instance.CheckConstraints(lockedPlan, issuesBackup, true);
 
 			//Energy effects
 			if (lockedPlan.energyPlan)
@@ -277,7 +277,7 @@ namespace MSP2050.Scripts
 			lockedPlan.SubmitRequiredApproval(batch, newApproval);
 
 			//Check issues again and submit according to latest tests. To ensure that changes in other plans while editing this plan get detected as well.
-			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.CheckConstraints(lockedPlan, issuesBackup, true);
+			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.CheckConstraints(lockedPlan, issuesBackup, true);
 			if (issuesToSubmit != null)
 			{
 				issuesToSubmit.SubmitToServer(batch);

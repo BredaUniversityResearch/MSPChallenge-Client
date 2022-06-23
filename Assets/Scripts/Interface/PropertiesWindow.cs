@@ -48,7 +48,7 @@ namespace MSP2050.Scripts
 			baseDataParent.Initialise();
 			baseDataParent.DestroyAllContent();
 
-			Team team = TeamManager.FindTeamByID(entity.Country);
+			Team team = SessionManager.Instance.FindTeamByID(entity.Country);
 			AddEntry(baseDataParent, "Name", entity.name, countryIcon, team == null ? Color.white : team.color);
 			AddEntry(baseDataParent, "X", (subEntity.BoundingBox.center.x * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
 			AddEntry(baseDataParent, "Y", (subEntity.BoundingBox.center.y * 1000).FormatAsCoordinateText(), locationIcon, Color.white);

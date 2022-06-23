@@ -52,12 +52,12 @@ public class EnergyVerifierObj : MonoBehaviour
 		errors = 0;
 
 		//Stops the game from processing updates permanently
-		UpdateData.StopProcessingUpdates = true;
+		UpdateManager.Instance.StopProcessingUpdates = true;
 
 		//Setup world state and variables for verification
 		if (Main.InEditMode)
 			PlanDetails.LayersTab.ForceCancelChanges();
-		PlanManager.HideCurrentPlan(true);
+		PlanManager.Instance.HideCurrentPlan(true);
 
 		HashSet<int> socketIDs = new HashSet<int>(); //DB ids of all sockets active at the current time
 
@@ -78,7 +78,7 @@ public class EnergyVerifierObj : MonoBehaviour
 		if (LayerManager.Instance.energyCableLayerGrey != null)
 			LayerManager.Instance.energyCableLayerGrey.ActivateCableLayerConnections();
 
-		List<EnergyGrid> currentGrids = PlanManager.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);
+		List<EnergyGrid> currentGrids = PlanManager.Instance.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);
 
 		//CABLE CONNECTIONS =================================================================================================
 		Debug.Log("Beginning cable connection check.");
@@ -180,7 +180,7 @@ public class EnergyVerifierObj : MonoBehaviour
 			    form.AddField("source_ids", JToken.FromObject(originalSources));
             if(originalSockets.Count > 0)
 			    form.AddField("socket_ids", JToken.FromObject(originalSockets));
-			ServerCommunication.DoRequest<GridVerificationResult>(Server.VerifyEnergyGrid(), form, result => GridVerificationResultHandler(result, gridId));
+			ServerCommunication.Instance.DoRequest<GridVerificationResult>(Server.VerifyEnergyGrid(), form, result => GridVerificationResultHandler(result, gridId));
 		}
 		yield return awaitingGridReponses == 0;
 		Debug.Log($"Grid content check complete, {errors} errors found.");
@@ -217,7 +217,7 @@ public class EnergyVerifierObj : MonoBehaviour
 		}
 		NetworkForm form = new NetworkForm();
 		form.AddField("ids", JToken.FromObject(ids));
-		ServerCommunication.DoRequest<string>(Server.VerifyEnergyCapacity(), form, CapacityCheckResultHandler);
+		ServerCommunication.Instance.DoRequest<string>(Server.VerifyEnergyCapacity(), form, CapacityCheckResultHandler);
 	}
 
 	void CapacityCheckResultHandler(string result)

@@ -169,7 +169,7 @@ namespace MSP2050.Scripts
 			if (boundingBoxA.Overlaps(boundingBoxB))
 			{
 				List<Vector3> warningLocations;
-				if (SetOperations.Overlap(subEntityA, subEntityB, out warningLocations))
+				if (GeometryOperations.Overlap(subEntityA, subEntityB, out warningLocations))
 				{
 					issueLocation = warningLocations[0];
 					return true;
@@ -194,7 +194,7 @@ namespace MSP2050.Scripts
 			if (boundingBoxA.Overlaps(boundingBoxB))
 			{
 				List<Vector3> warningLocations;
-				if (SetOperations.OverlapPolygonLine(subEntityA, subEntityB, out warningLocations))
+				if (GeometryOperations.OverlapPolygonLine(subEntityA, subEntityB, out warningLocations))
 				{
 					issueLocation = warningLocations[0];
 					return true;
@@ -218,7 +218,7 @@ namespace MSP2050.Scripts
 
 			Vector3 pointCenter = pointSubEntity.BoundingBox.center;
 
-			if (Util.PointCollidesWithPolygon(pointCenter, polygonSubEntity.GetPoints(), polygonSubEntity.GetHoles(), ConstraintManager.ConstraintPointCollisionSize))
+			if (Util.PointCollidesWithPolygon(pointCenter, polygonSubEntity.GetPoints(), polygonSubEntity.GetHoles(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
 				issueLocation = pointCenter;
 				return true;
@@ -261,7 +261,7 @@ namespace MSP2050.Scripts
 
 			Rect boundingBoxB = subEntityB.BoundingBox;
 
-			if (Util.PointCollidesWithLineString(boundingBoxB.center, ((LineStringSubEntity)subEntityA).GetPoints(), ConstraintManager.ConstraintPointCollisionSize))
+			if (Util.PointCollidesWithLineString(boundingBoxB.center, ((LineStringSubEntity)subEntityA).GetPoints(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
 				issueLocation = boundingBoxB.center;
 				return true;
@@ -278,7 +278,7 @@ namespace MSP2050.Scripts
 			Rect boundingBoxA = subEntityA.BoundingBox;
 			Rect boundingBoxB = subEntityB.BoundingBox;
 
-			if (Util.PointCollidesWithPoint(boundingBoxA.center, boundingBoxB.center, ConstraintManager.ConstraintPointCollisionSize))
+			if (Util.PointCollidesWithPoint(boundingBoxA.center, boundingBoxB.center, ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
 				issueLocation = boundingBoxA.center;
 				return true;
@@ -335,7 +335,7 @@ namespace MSP2050.Scripts
 
 			issueLocation = boundingBoxA.center;
 
-			if (Util.PointCollidesWithPoint(boundingBoxA.center, boundingBoxB.center, ConstraintManager.ConstraintPointCollisionSize))//if (boundingBoxA.Overlaps(subEntityB.BoundingBox))
+			if (Util.PointCollidesWithPoint(boundingBoxA.center, boundingBoxB.center, ConstraintManager.Instance.ConstraintPointCollisionSize))//if (boundingBoxA.Overlaps(subEntityB.BoundingBox))
 			{
 				return false;
 			}
@@ -356,7 +356,7 @@ namespace MSP2050.Scripts
 
 			Vector3 pointCenter = pointSubEntity.BoundingBox.center;
 
-			if (!Util.PointCollidesWithPolygon(pointCenter, polygonSubEntity.GetPoints(), polygonSubEntity.GetHoles(), ConstraintManager.ConstraintPointCollisionSize))
+			if (!Util.PointCollidesWithPolygon(pointCenter, polygonSubEntity.GetPoints(), polygonSubEntity.GetHoles(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
 				issueLocation = pointCenter;
 				return true;

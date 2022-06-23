@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 			//    Debug.LogError(@"Assets\Interface\Sprites\Loading Screen\Resources\LoadingScreenImages does not contain any background images.");
 			//}
 
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
 				SetIcon();
 			}
@@ -55,13 +55,13 @@ namespace MSP2050.Scripts
 
 		void SetIcon()
 		{
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
-				RegionInfo region = InterfaceCanvas.Instance.regionSettings.GetRegionInfo(Main.MspGlobalData.region);
+				RegionInfo region = InterfaceCanvas.Instance.regionSettings.GetRegionInfo(SessionManager.Instance.MspGlobalData.region);
 				mspIcon.sprite = region.sprite;
 				editionText.text = region.editionPostFix;
 
-				//switch (Main.MspGlobalData.region)
+				//switch (SessionManager.Instance.MspGlobalData.region)
 				//         {
 				//             case "balticline":
 				//                 mspIcon.sprite = balticline;

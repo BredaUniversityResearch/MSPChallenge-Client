@@ -170,7 +170,7 @@ namespace MSP2050.Scripts
 
 		private PlanIssueInstance AddPlanIssue(PlanLayer targetPlanLayer, PlanIssueObject planIssueData, RestrictionIssueDeltaSet deltaSet = null)
 		{
-			string restrictionText = ConstraintManager.GetRestrictionMessage(planIssueData.restriction_id);
+			string restrictionText = ConstraintManager.Instance.GetRestrictionMessage(planIssueData.restriction_id);
 			PlanIssueInstance planIssueInstance = FindIssueByData(targetPlanLayer, planIssueData);
 			if (planIssueInstance == null)
 			{
@@ -232,7 +232,7 @@ namespace MSP2050.Scripts
 
 		private static float GetIssueLabelScale()
 		{
-			return VisualizationUtil.DisplayScale / 120.0f * InterfaceCanvas.Instance.canvas.scaleFactor;
+			return VisualizationUtil.Instance.DisplayScale / 120.0f * InterfaceCanvas.Instance.canvas.scaleFactor;
 		}
 
 		public void RescaleIssues()
@@ -446,7 +446,7 @@ namespace MSP2050.Scripts
 
 		private void OnPlanIssueReceivedFromServer(PlanIssueObject planIssue)
 		{
-			PlanLayer targetPlanLayer = PlanManager.GetPlanLayer(planIssue.plan_layer_id);
+			PlanLayer targetPlanLayer = PlanManager.Instance.GetPlanLayer(planIssue.plan_layer_id);
 			//This can happen if someone has an error on a plan layer and deletes that layer from their plan.
 			//The plan layer will only not exist on re-connect so this should be safe to ignore then.
 			if (targetPlanLayer != null)
@@ -484,15 +484,15 @@ namespace MSP2050.Scripts
 
 		public void ShowRelevantPlanLayersForIssue(PlanIssueInstance planIssueData)
 		{
-			KeyValuePair<AbstractLayer, AbstractLayer> layerData = ConstraintManager.GetRestrictionLayersForRestrictionId(planIssueData.PlanIssueData.restriction_id);
+			KeyValuePair<AbstractLayer, AbstractLayer> layerData = ConstraintManager.Instance.GetRestrictionLayersForRestrictionId(planIssueData.PlanIssueData.restriction_id);
 
 			if (layerData.Key != null)
 			{
-				ToggleRelevantPlanIssueLayer(PlanManager.planViewing, layerData.Key);
+				ToggleRelevantPlanIssueLayer(PlanManager.Instance.planViewing, layerData.Key);
 			}
 			if (layerData.Value != null)
 			{
-				ToggleRelevantPlanIssueLayer(PlanManager.planViewing, layerData.Value);
+				ToggleRelevantPlanIssueLayer(PlanManager.Instance.planViewing, layerData.Value);
 			}
 		}
 
@@ -571,7 +571,7 @@ namespace MSP2050.Scripts
 			RemoveIssuesForPlan(plan, null);
 			foreach (PlanIssueObject planIssue in issuesBackup)
 			{
-				PlanLayer layer = PlanManager.GetPlanLayer(planIssue.plan_layer_id);
+				PlanLayer layer = PlanManager.Instance.GetPlanLayer(planIssue.plan_layer_id);
 				AddPlanIssue(layer, planIssue);
 			}
 		}

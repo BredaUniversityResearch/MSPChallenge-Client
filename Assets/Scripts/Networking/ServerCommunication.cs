@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using GeoJSON.Net.Feature;
+using System;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -11,214 +12,71 @@ using UnityEngine.Networking;
 
 namespace MSP2050.Scripts
 {
-	public static class ServerCommunication
+	public class ServerCommunication : MonoBehaviour
 	{
+		//consts / enums
 		public const string ApiTokenHeader = "MSPAPIToken";
 		public static readonly int[] REQUEST_TIMEOUT = { 1, 10, 30 };
 		public enum EWebRequestFailureResponse { Log, Error, Crash }
-
 		public const uint DEFAULT_MAX_REQUESTS = 5;
 		public static uint maxRequests = DEFAULT_MAX_REQUESTS;
 
-		public class RequestSessionResponse
+		private static ServerCommunication singleton;
+		public static ServerCommunication Instance
 		{
-			public int session_id = 0;
-			public string api_access_token = "";
-			public string api_access_recovery_token = "";
-		}
-
-		public abstract class ARequest
-		{
-			public UnityWebRequest Www;
-			public string Url;
-			public System.Action<ARequest, string> failureCallback;
-			public int retriesRemaining;
-			public bool expectMSPResultFormat = true;
-			public int timeoutLevel = 1;
-
-			public ARequest(string url, System.Action<ARequest, string> failureCallback, int retriesRemaining)
+			get
 			{
-				Url = url;
-				this.failureCallback = failureCallback;
-				this.retriesRemaining = retriesRemaining;
-			}
-			public abstract void ProcessPayload(JToken payload);
-			public abstract void CreateRequest(Dictionary<string, string> defaultHeaders);
-		}
-
-		public abstract class Request<T> : ARequest
-		{
-			public Action<T> successCallback;
-
-			public Request(string url, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesRemaining)
-				: base(url, failureCallback, retriesRemaining)
-			{
-				this.successCallback = successCallback;
-			}
-
-			public T ToObject(JToken a_Payload)
-			{
-				JsonSerializer serializer = new JsonSerializer();
-				serializer.Converters.Add(new JsonConverterBinaryBool());
-				return a_Payload.ToObject<T>(serializer);
-			}
-
-			public override void ProcessPayload(JToken a_Payload)
-			{
-				T payloadContent = default(T);
-				try
-				{
-					//Parse payload to expected type
-					payloadContent = ToObject(a_Payload);
-				}
-				catch (System.Exception e)
-				{
-					//Or invoke the failure callback if that fails
-					failureCallback.Invoke(this, $"Failed to deserialize results from {Url}: {a_Payload.ToString()}\nMessage: {e.Message}");
-					return;
-				}
-				ProcessPayload(payloadContent);
-			}
-
-			public void ProcessPayload(T a_PayloadContent)
-			{
-				if (successCallback == null)
-				{
-					return;
-				}
-				successCallback.Invoke(a_PayloadContent);
+				if (singleton == null)
+					singleton = FindObjectOfType<ServerCommunication>();
+				return singleton;
 			}
 		}
 
-		public class RequestResult
-		{
-			public string header_type;
-			public JToken header_data;
-			public bool success;
-			public string message;
-			public JToken payload; 
-		}
+		private float lastTimeInactive;
 
-		public class FormRequest<T> : Request<T>
-		{
-			public List<IMultipartFormSection> formData;
-			private bool addDefaultHeaders;
-			private bool priority = false;
+		//Requires reset
+		private List<ARequest> requests = new List<ARequest>();
+		private Queue<ARequest> requestsQueue = new Queue<ARequest>();
+		private List<WaitForConditionData> conditions = new List<WaitForConditionData>();
+		private Dictionary<int, AbstractOperation> operations = new Dictionary<int, AbstractOperation>();
+		private int nextOperationIndex = 0;
 
-			public FormRequest(string url, List<IMultipartFormSection> formData, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
-				: base(url, successCallback, failureCallback, retriesRemaining)
-			{
-				this.formData = formData;
-				this.addDefaultHeaders = addDefaultHeaders;
-			}
-
-			public override void CreateRequest(Dictionary<string, string> defaultHeaders)
-			{
-				if (formData == null)
-				{
-					Www = UnityWebRequest.Get(Url);
-				}
-				else
-				{
-					Www = UnityWebRequest.Post(Url, formData);
-				}
-				if(defaultHeaders != null && addDefaultHeaders)
-					AddHeaders(Www, defaultHeaders);
-				Www.timeout = REQUEST_TIMEOUT[timeoutLevel];
-			}
-		}
-
-		public class RawDataRequest<T> : Request<T>
-		{
-			public string data;
-			private bool addDefaultHeaders;
-
-
-			public RawDataRequest(string url, string data, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesRemaining, bool addDefaultHeaders = true)
-				: base(url, successCallback, failureCallback, retriesRemaining)
-			{
-				Debug.Log("Created request with raw content: " + data);
-				this.data = data;
-				this.addDefaultHeaders = addDefaultHeaders;
-			}
-
-			public override void CreateRequest(Dictionary<string, string> defaultHeaders)
-			{
-				//Www = UnityWebRequest.Post(Url, data);
-				//if (defaultHeaders != null && addDefaultHeaders)
-				//	AddHeaders(Www, defaultHeaders);
-				//Www.SetRequestHeader("Content-Type", "application/json");
-				////Www.uploadHandler.contentType = "application/json";
-				//Www.timeout = REQUEST_TIMEOUT;
-
-				//Kevin: updated the webrequest creation as the version above is appearantly broken for custom content types
-				Www = new UnityWebRequest(Url, "POST");
-				byte[] bodyRaw = Encoding.UTF8.GetBytes(data);
-				Www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-				Www.downloadHandler = new DownloadHandlerBuffer();
-				Www.timeout = REQUEST_TIMEOUT[timeoutLevel];
-				Www.SetRequestHeader("Content-Type", "application/json");
-				if (defaultHeaders != null && addDefaultHeaders)
-					AddHeaders(Www, defaultHeaders);
-			}
-		}
-	
-		public class WaitForConditionData
-		{
-			public TestDelegate Condition;
-			public TestSuccessfulDelegate ConditionTrueDelegate;
-
-			public WaitForConditionData(TestDelegate condition, TestSuccessfulDelegate conditionTrueDelegate)
-			{
-				Condition = condition;
-				ConditionTrueDelegate = conditionTrueDelegate;
-			}
-
-			public virtual void ConditionCompleted()
-			{
-				ConditionTrueDelegate();
-			}
-		}
-
-		private static GameObject doingSomethingWindow;
-		private static float lastTimeInactive;
-
-		private static List<ARequest> requests = new List<ARequest>();
-
-		private static Queue<ARequest> requestsQueue = new Queue<ARequest>();
-
-		private static List<WaitForConditionData> conditions = new List<WaitForConditionData>();
-		private static Dictionary<int, AbstractOperation> operations = new Dictionary<int, AbstractOperation>();
-		private static int nextOperationIndex = 0;
-
+		//Profiler
 		public delegate bool TestDelegate();
-
 		public delegate void TestSuccessfulDelegate();
 		public delegate void TestSuccessfulConnectionDelegate(List<EnergyLineStringSubEntity> cables);
 		public delegate void TestSuccessfulGridDelegate(HashSet<int> deleted, List<GridObject> newGrids);
 
 		public delegate void ProfilerDelegate(ARequest targetRequest);
-		public static event ProfilerDelegate OnRequestQueued; //Queued by the DoRequest
-		public static event ProfilerDelegate OnRequestStarted;	//Removed from the queue and an actual WWW Request is done.
-		public static event ProfilerDelegate OnRequestResponseReceived; //WWW request is received but not processed
-		public static event ProfilerDelegate OnRequestResponseProcessed; //Request is processed by the game and is done.
+		public event ProfilerDelegate OnRequestQueued; //Queued by the DoRequest
+		public event ProfilerDelegate OnRequestStarted;	//Removed from the queue and an actual WWW Request is done.
+		public event ProfilerDelegate OnRequestResponseReceived; //WWW request is received but not processed
+		public event ProfilerDelegate OnRequestResponseProcessed; //Request is processed by the game and is done.
 
-		private static ApiTokenHandler tokenHandler = new ApiTokenHandler();
+		private ApiTokenHandler tokenHandler = new ApiTokenHandler();
 
-		static ServerCommunication()
+		void Awake()
 		{
 			lastTimeInactive = Time.time;
+			if (singleton != null && singleton != this)
+				Destroy(this);
+			else
+			{
+				singleton = this;
+				DontDestroyOnLoad(gameObject);
+			}
 		}
 
-		public static void CreateActivityWindow()
+		public void Reset()
 		{
-			doingSomethingWindow = GameObject.Instantiate(Resources.Load<GameObject>("TransmittingDataWindow"));
-			doingSomethingWindow.transform.SetParent(InterfaceCanvas.Instance.transform);
-			doingSomethingWindow.GetComponent<RectTransform>().localPosition = Vector3.zero;
-			doingSomethingWindow.SetActive(false);
+			requests = new List<ARequest>();
+			requestsQueue = new Queue<ARequest>();
+			conditions = new List<WaitForConditionData>();
+			operations = new Dictionary<int, AbstractOperation>();
+			nextOperationIndex = 0;
 		}
 
-		public static void DoPriorityRequest(string url, NetworkForm form, Action<string> successCallback, System.Action<ARequest, string> failureCallback)
+		public void DoPriorityRequest(string url, NetworkForm form, Action<string> successCallback, System.Action<ARequest, string> failureCallback)
 		{
 			ARequest request = new FormRequest<string>(Server.Url + url, (form != null) ? form.Form : null, successCallback, failureCallback, 0);
 			request.timeoutLevel = 0;
@@ -231,7 +89,7 @@ namespace MSP2050.Scripts
 		}
 	
 		//Note: specifying a custom failure callback avoids all default ones, including automatic retries.
-		public static ARequest DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 3)
+		public ARequest DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 3)
 		{
 			ARequest request = new FormRequest<T>(Server.Url + url, (form != null) ? form.Form : null, successCallback, failureCallback, retriesOnFail);
 			requestsQueue.Enqueue(request);
@@ -244,7 +102,7 @@ namespace MSP2050.Scripts
 			return request;
 		}
 
-		public static ARequest DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
+		public ARequest DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
 		{
 			switch(responseType)
 			{
@@ -257,13 +115,13 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static ARequest DoRequest(string url, NetworkForm form, int retriesOnFail = 3)
+		public ARequest DoRequest(string url, NetworkForm form, int retriesOnFail = 3)
 		{
 			return DoRequest<string>(url, form, null, HandleRequestFailureError, retriesOnFail);
 		}
 
 		//Note: specifying a custom failure callback avoids all default ones, including automatic retries.
-		public static ARequest DoRequest<T>(string url, string rawData, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
+		public ARequest DoRequest<T>(string url, string rawData, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
 		{
 			ARequest request = new RawDataRequest<T>(Server.Url + url, rawData, successCallback, failureCallback, retriesOnFail);
 			requestsQueue.Enqueue(request);
@@ -276,7 +134,7 @@ namespace MSP2050.Scripts
 			return request;
 		}
 
-		public static ARequest DoRequest<T>(string url, string rawData, Action<T> successCallback, EWebRequestFailureResponse responseType, int retriesOnFail = 0)
+		public ARequest DoRequest<T>(string url, string rawData, Action<T> successCallback, EWebRequestFailureResponse responseType, int retriesOnFail = 0)
 		{
 			switch (responseType)
 			{
@@ -289,12 +147,12 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static ARequest DoRequest(string url, string rawData, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
+		public ARequest DoRequest(string url, string rawData, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
 		{
 			return DoRequest<string>(url, rawData, null, HandleRequestFailureError, retriesOnFail);
 		}
 
-		public static void DoExternalAPICall<T>(string url, Dictionary<int, SubEntity> subEntitiesToPass, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
+		public void DoExternalAPICall<T>(string url, Dictionary<int, SubEntity> subEntitiesToPass, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
 		{
 			List<Feature> features = new List<Feature>(subEntitiesToPass.Count);
 			foreach (var kvp in subEntitiesToPass)
@@ -315,12 +173,12 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void WaitForCondition(TestDelegate condition, TestSuccessfulDelegate conditionTrueDelegate)
+		public void WaitForCondition(TestDelegate condition, TestSuccessfulDelegate conditionTrueDelegate)
 		{
 			conditions.Add(new WaitForConditionData(condition, conditionTrueDelegate));
 		}
 
-		public static void AddOperation(AbstractOperation operation)
+		public void AddOperation(AbstractOperation operation)
 		{
 			int currentIndex = nextOperationIndex;
 			operations.Add(currentIndex, operation);
@@ -328,12 +186,12 @@ namespace MSP2050.Scripts
 			nextOperationIndex++;
 		}
 
-		private static void CompleteOperation(int index)
+		private void CompleteOperation(int index)
 		{
 			operations.Remove(index);
 		}
 
-		public static void Update(bool updateToken = true)
+		public void UpdateCommunication(bool updateToken = true)
 		{
 			if (updateToken)
 			{
@@ -383,29 +241,6 @@ namespace MSP2050.Scripts
 					WaitForConditionData c = conditions[i];
 					conditions.RemoveAt(i);
 					c.ConditionCompleted();
-				}
-			}
-
-			if (Main.IsDeveloper == false)
-				return;
-
-			if (doingSomethingWindow != null)
-			{
-				if (requests.Count == 0)
-				{
-					lastTimeInactive = Time.time;
-
-					if (doingSomethingWindow.activeSelf)
-					{
-						doingSomethingWindow.SetActive(false);
-					}
-				}
-				else
-				{
-					if (!doingSomethingWindow.activeSelf && Time.time - lastTimeInactive > 0.33f)
-					{
-						doingSomethingWindow.SetActive(true);
-					}
 				}
 			}
 		}
@@ -481,7 +316,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void HandleRequestFailureLog(ARequest request, string message)
+		private void HandleRequestFailureLog(ARequest request, string message)
 		{
 			if(request.retriesRemaining > 0)
 			{
@@ -492,7 +327,7 @@ namespace MSP2050.Scripts
 				Debug.Log(message);
 		}
 
-		private static void HandleRequestFailureError(ARequest request, string message)
+		private void HandleRequestFailureError(ARequest request, string message)
 		{
 			if (request.retriesRemaining > 0)
 			{
@@ -503,7 +338,7 @@ namespace MSP2050.Scripts
 				Debug.LogError(message);
 		}
 
-		private static void HandleRequestFailureCrash(ARequest request, string message)
+		private void HandleRequestFailureCrash(ARequest request, string message)
 		{
 			if (request.retriesRemaining > 0)
 			{
@@ -514,7 +349,7 @@ namespace MSP2050.Scripts
 				throw new Exception("Webrequest failed with message: " + message);
 		}
 
-		public static void RetryRequest(ARequest request)
+		public void RetryRequest(ARequest request)
 		{
 			request.retriesRemaining--;
 			request.CreateRequest(GetAuthenticationHeaders());
@@ -526,12 +361,12 @@ namespace MSP2050.Scripts
 			}
 		}
 	
-		private static Dictionary<string, string> GetAuthenticationHeaders()
+		private Dictionary<string, string> GetAuthenticationHeaders()
 		{
 			return new Dictionary<string, string> {{ApiTokenHeader, tokenHandler.GetAccessToken() }};
 		}
 
-		public static void AddDefaultHeaders(UnityWebRequest request)
+		public void AddDefaultHeaders(UnityWebRequest request)
 		{
 			AddHeaders(request, GetAuthenticationHeaders());
 		}
@@ -544,17 +379,17 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void SetApiAccessToken(string responseApiToken, string recoveryApiToken)
+		public void SetApiAccessToken(string responseApiToken, string recoveryApiToken)
 		{
 			tokenHandler.SetAccessToken(responseApiToken, recoveryApiToken);
 		}
 
-		public static string GetApiAccessToken()
+		public string GetApiAccessToken()
 		{
 			return tokenHandler.GetAccessToken();
 		}
 
-		public static void RequestSession(
+		public void RequestSession(
 			int countryId, string userName, Action<RequestSessionResponse> successCallback,
 			System.Action<ARequest, string> failureCallback, [CanBeNull] string password = null)
 		{
@@ -568,5 +403,31 @@ namespace MSP2050.Scripts
 			form.AddField("build_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier()?.GetBuildTime());
 			DoRequest(Server.RequestSession(), form, successCallback, failureCallback);
 		}
+
+		public class RequestSessionResponse
+		{
+			public int session_id = 0;
+			public string api_access_token = "";
+			public string api_access_recovery_token = "";
+		}
+
+		public class WaitForConditionData
+		{
+			public TestDelegate Condition;
+			public TestSuccessfulDelegate ConditionTrueDelegate;
+
+			public WaitForConditionData(TestDelegate condition, TestSuccessfulDelegate conditionTrueDelegate)
+			{
+				Condition = condition;
+				ConditionTrueDelegate = conditionTrueDelegate;
+			}
+
+			public virtual void ConditionCompleted()
+			{
+				ConditionTrueDelegate();
+			}
+		}
 	}
+
+
 }

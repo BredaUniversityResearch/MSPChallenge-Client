@@ -18,13 +18,13 @@ namespace MSP2050.Scripts
 		}
 
 		public bool IsGameMaster
-		{ get { return ID == TeamManager.GM_ID; } }
+		{ get { return ID == SessionManager.GM_ID; } }
 
 		public bool IsAreaManager
-		{ get { return ID == TeamManager.AM_ID; } }
+		{ get { return ID == SessionManager.AM_ID; } }
 
 		public bool IsManager
-		{ get { return ID == TeamManager.AM_ID || ID == TeamManager.GM_ID; } }
+		{ get { return ID == SessionManager.AM_ID || ID == SessionManager.GM_ID; } }
 
 		//public bool AssignEEZ()
 		//{

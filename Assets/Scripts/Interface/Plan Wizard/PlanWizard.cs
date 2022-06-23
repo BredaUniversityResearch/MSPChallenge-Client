@@ -287,7 +287,7 @@ namespace MSP2050.Scripts
                         layer.RemovePlanLayer(editingPlan.GetPlanLayerForLayer(layer));
                     }
                     //Get updated issue delta (but don't apply them yet, that'll happen when the batch gets executed
-                    RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), layersToRemove, GetNewPlanStartDate(), out hasUnavailableTypes);
+                    RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), layersToRemove, GetNewPlanStartDate(), out hasUnavailableTypes);
                     if (issuesToSubmit != null)
                     {
                         issuesToSubmit.SubmitToServer(batch);
@@ -343,7 +343,7 @@ namespace MSP2050.Scripts
 
                 HashSet<int> countriesAffectedByRemovedGrids = new HashSet<int>();
                 if (isEnergyPlan && editingPlan.energyPlan)
-                    foreach (EnergyGrid grid in PlanManager.GetEnergyGridsBeforePlan(editingPlan, EnergyGrid.GridColor.Either))
+                    foreach (EnergyGrid grid in PlanManager.Instance.GetEnergyGridsBeforePlan(editingPlan, EnergyGrid.GridColor.Either))
                         if (editingPlan.removedGrids.Contains(grid.persistentID))
                             foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.energyDistribution.distribution)
                                 if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
@@ -369,14 +369,14 @@ namespace MSP2050.Scripts
                     {
                         //Moving to the past will only ever add more issues, so no need to check for removal
                         MultiLayerRestrictionIssueCollection resultIssues = new MultiLayerRestrictionIssueCollection();
-                        ConstraintManager.CheckTypeUnavailableConstraints(editingPlan, GetNewPlanStartDate(), resultIssues);
+                        ConstraintManager.Instance.CheckTypeUnavailableConstraints(editingPlan, GetNewPlanStartDate(), resultIssues);
                         RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
                         IssueManager.instance.AddIssuesToDeltaIfNew(resultIssues, deltaSet);
                     }
                     else
                     {
                         //Moving the plan to the future requires a full recheck, as we can't filter existing issue for TypeUnavailable ones
-                        RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
+                        RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
                         if (issuesToSubmit != null)
                         {
                             issuesToSubmit.SubmitToServer(batch);
@@ -465,7 +465,7 @@ namespace MSP2050.Scripts
                 }
 
                 UpdateMinAndSetTime(plan.StartTime);
-                if (TeamManager.AreWeGameMaster && !TimeManager.Instance.GameStarted)
+                if (SessionManager.Instance.AreWeGameMaster && !TimeManager.Instance.GameStarted)
                 {
                     startPlanArea.SetActive(true);
                     startPlanToggle.isOn = plan.StartTime < 0;
@@ -510,7 +510,7 @@ namespace MSP2050.Scripts
                 }
 
                 timeSelectArea.SetActive(true);
-                startPlanArea.SetActive(TeamManager.AreWeGameMaster && !TimeManager.Instance.GameStarted);
+                startPlanArea.SetActive(SessionManager.Instance.AreWeGameMaster && !TimeManager.Instance.GameStarted);
                 startPlanToggle.isOn = false;
 
                 if (cablePlanLayerGreenLeft != null)
@@ -815,7 +815,7 @@ namespace MSP2050.Scripts
             {
                 DisplayFeedback(ErrorCode.NoSelection);
             }
-            else if (minTimeSelectable >= Main.MspGlobalData.session_end_month)
+            else if (minTimeSelectable >= SessionManager.Instance.MspGlobalData.session_end_month)
             {
                 DisplayFeedback(ErrorCode.InvalidDate);
             }
@@ -987,8 +987,8 @@ namespace MSP2050.Scripts
             minYearSelectable = newMinimum;
             yearDropdown.ClearOptions();
             List<string> options = new List<string>();
-            for (int i = minYearSelectable; i < Main.MspGlobalData.session_num_years; i++)
-                options.Add((Main.MspGlobalData.start + i).ToString());
+            for (int i = minYearSelectable; i < SessionManager.Instance.MspGlobalData.session_num_years; i++)
+                options.Add((SessionManager.Instance.MspGlobalData.start + i).ToString());
             yearDropdown.AddOptions(options);
 
             //Checks if the set dropdown value needs to be updated

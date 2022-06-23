@@ -156,14 +156,14 @@ namespace MSP2050.Scripts
 			{
 				presetProperties.Add("MaxCapacity", (subent) => 
 				{
-					ValueConversionCollection valueConversions = VisualizationUtil.VisualizationSettings.ValueConversions;
+					ValueConversionCollection valueConversions = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 					IEnergyDataHolder data = (IEnergyDataHolder)subent;
 					//return data.Capacity.ToString();
 					return valueConversions.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString();
 				});
 				presetProperties.Add("UsedCapacity", (subent) =>
 				{
-					ValueConversionCollection valueConversions = VisualizationUtil.VisualizationSettings.ValueConversions;
+					ValueConversionCollection valueConversions = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 					IEnergyDataHolder data = (IEnergyDataHolder)subent;
 					//return data.UsedCapacity.ToString() + " / " + data.Capacity.ToString();
 					return valueConversions.ConvertUnit(data.UsedCapacity, ValueConversionCollection.UNIT_WATT).FormatAsString() + " / " + valueConversions.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString();
@@ -305,10 +305,10 @@ namespace MSP2050.Scripts
 
 		public void SetActiveToCurrentPlanAndRedraw()
 		{
-			if (PlanManager.planViewing != null || PlanManager.timeViewing < 0)
-				SetEntitiesActiveUpTo(PlanManager.planViewing);
+			if (PlanManager.Instance.planViewing != null || PlanManager.Instance.timeViewing < 0)
+				SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
 			else
-				SetEntitiesActiveUpToTime(PlanManager.timeViewing);
+				SetEntitiesActiveUpToTime(PlanManager.Instance.timeViewing);
 			RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
 

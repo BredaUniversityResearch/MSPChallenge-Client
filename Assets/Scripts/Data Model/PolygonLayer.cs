@@ -58,10 +58,10 @@ namespace MSP2050.Scripts
 
 			if (forceRecalculate)
 			{
-				MaterialManager.CalculateInnerGlowTextureData(this, innerGlowRadius, innerGlowIterations, innerGlowMultiplier, pixelSize);
+				MaterialManager.Instance.CalculateInnerGlowTextureData(this, innerGlowRadius, innerGlowIterations, innerGlowMultiplier, pixelSize);
 			}
-			InnerGlowTexture = MaterialManager.GetInnerGlowTexture(this, innerGlowRadius, innerGlowIterations, innerGlowMultiplier, pixelSize);
-			InnerGlowBounds = MaterialManager.GetInnerGlowTextureBounds(this, innerGlowRadius, innerGlowIterations, innerGlowMultiplier, pixelSize);
+			InnerGlowTexture = MaterialManager.Instance.GetInnerGlowTexture(this, innerGlowRadius, innerGlowIterations, innerGlowMultiplier, pixelSize);
+			InnerGlowBounds = MaterialManager.Instance.GetInnerGlowTextureBounds(this, innerGlowRadius, innerGlowIterations, innerGlowMultiplier, pixelSize);
 		}
 
 		public PolygonEntity CreateNewPolygonEntity(Vector3 initialPoint, List<EntityType> entityType, PlanLayer planLayer)
@@ -70,7 +70,7 @@ namespace MSP2050.Scripts
 			PolygonSubEntity subEntity = editingType == EditingType.SourcePolygon ? new EnergyPolygonSubEntity(polygonEntity) : new PolygonSubEntity(polygonEntity);
 			polygonEntity.AddSubEntity(subEntity);
 
-			if (TeamManager.AreWeGameMaster)
+			if (SessionManager.Instance.AreWeGameMaster)
 				polygonEntity.Country = InterfaceCanvas.GetCurrentTeamSelection();
 
 			subEntity.AddPoint(initialPoint);
@@ -146,7 +146,7 @@ namespace MSP2050.Scripts
 
 		public override SubEntity GetSubEntityAt(Vector2 position)
 		{
-			float maxDistance = VisualizationUtil.GetSelectMaxDistancePolygon();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistancePolygon();
 
 			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
@@ -179,7 +179,7 @@ namespace MSP2050.Scripts
 
 		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)
 		{
-			float maxDistance = VisualizationUtil.GetSelectMaxDistancePolygon();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistancePolygon();
 
 			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 

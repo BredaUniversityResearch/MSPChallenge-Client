@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 				activeLayers.Add(layer, activeLayer);
 				activeLayer.closeButton.onClick.AddListener(() => 
 				{
-					if (PlanManager.planViewing == null || !PlanManager.planViewing.IsLayerpartOfPlan(activeLayer.layerRepresenting))
+					if (PlanManager.Instance.planViewing == null || !PlanManager.Instance.planViewing.IsLayerpartOfPlan(activeLayer.layerRepresenting))
 					{
 						LayerManager.Instance.HideLayer(activeLayer.layerRepresenting);
 						RemoveLayer(activeLayer.layerRepresenting);
@@ -163,7 +163,7 @@ namespace MSP2050.Scripts
 		private IEnumerator CoroutineHideAllVisibleLayers()
 		{
 			List<AbstractLayer> layers = activeLayers.Keys.ToList();
-			Plan currentPlan = PlanManager.planViewing;
+			Plan currentPlan = PlanManager.Instance.planViewing;
 			foreach(AbstractLayer layer in layers)
 			{
 				if (layer.Toggleable && (currentPlan == null || !currentPlan.IsLayerpartOfPlan(layer)))

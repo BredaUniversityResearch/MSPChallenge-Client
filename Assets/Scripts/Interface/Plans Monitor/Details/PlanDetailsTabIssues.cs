@@ -116,7 +116,7 @@ namespace MSP2050.Scripts
 
 		private void OnViewOnMapClicked(PlanIssueInstance planIssueInstance)
 		{
-			PlanManager.ShowPlan(PlanDetails.GetSelectedPlan());
+			PlanManager.Instance.ShowPlan(PlanDetails.GetSelectedPlan());
 			IssueManager.instance.ShowRelevantPlanLayersForIssue(planIssueInstance);
 			PlansMonitor.instance.plansMinMax.Minimize();
 

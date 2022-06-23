@@ -85,7 +85,7 @@ namespace MSP2050.Scripts
 		{
 			if (groups == null || groups.Count == 0)
 			{
-				foreach (string fishingFleet in PlanManager.fishingFleets)
+				foreach (string fishingFleet in PlanManager.Instance.fishingFleets)
 				{
 					CreateGroup(fishingFleet);
 				}
@@ -93,9 +93,9 @@ namespace MSP2050.Scripts
 
 			if (fishingDistributionBeforePlan != null && planDeltaSet != null)
 			{
-				for (int i = 0; i < PlanManager.fishingFleets.Count; i++)
+				for (int i = 0; i < PlanManager.Instance.fishingFleets.Count; i++)
 				{
-					string fleetName = PlanManager.fishingFleets[i];
+					string fleetName = PlanManager.Instance.fishingFleets[i];
 					Dictionary<int, float> deltaValues = planDeltaSet.FindValuesForFleet(fleetName);
 					Dictionary<int, float> unchangedValues = fishingDistributionBeforePlan.FindValuesForFleet(fleetName);
 					if (unchangedValues != null)
@@ -162,7 +162,7 @@ namespace MSP2050.Scripts
 		public void SetFishingToSliderValues(Plan plan)
 		{
 			plan.fishingDistributionDelta.Clear();
-			for (int i = 0; i < PlanManager.fishingFleets.Count; i++)
+			for (int i = 0; i < PlanManager.Instance.fishingFleets.Count; i++)
 			{			
 				groups[i].ApplySliderValues(plan, i);
 			}

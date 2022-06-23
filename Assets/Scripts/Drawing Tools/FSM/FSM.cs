@@ -562,7 +562,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			float selectMaxDistance = VisualizationUtil.GetSelectMaxDistance();
+			float selectMaxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 			if (snappedPositionSqrDistance > selectMaxDistance * selectMaxDistance)
 			{
 				return mousePosition;
@@ -682,7 +682,7 @@ namespace MSP2050.Scripts
 
 				if (userMayBeClicking)
 				{
-					if (Time.time - previousClickTime < DOUBLE_CLICK_MAX_INTERVAL && (mousePosition - previousClickLocation).magnitude < VisualizationUtil.GetMouseMoveThreshold())
+					if (Time.time - previousClickTime < DOUBLE_CLICK_MAX_INTERVAL && (mousePosition - previousClickLocation).magnitude < VisualizationUtil.Instance.GetMouseMoveThreshold())
 					{
 						InputReceivingState.DoubleClick(mousePosition);
 					}
@@ -705,7 +705,7 @@ namespace MSP2050.Scripts
 
 			if (userMayBeClicking)
 			{
-				float threshold = VisualizationUtil.GetMouseMoveThreshold();
+				float threshold = VisualizationUtil.Instance.GetMouseMoveThreshold();
 				threshold *= threshold;
 
 				if ((mousePosition - leftMouseButtonDownStartPosition).sqrMagnitude > threshold)

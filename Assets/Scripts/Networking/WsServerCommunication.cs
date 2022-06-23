@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 		private Queue<BatchRequestResultAndFailureCallback> m_BatchRequestResultAndFailureCallbackQueue =
 			new Queue<BatchRequestResultAndFailureCallback>();
 
-		private class UpdateRequest : ServerCommunication.Request<UpdateObject>
+		private class UpdateRequest : Request<UpdateObject>
 		{
 			public UpdateRequest(string url, Action<UpdateObject> successCallback) :
 				base(url, successCallback, HandleUpdateFailCallback, 1)
@@ -54,7 +54,7 @@ namespace MSP2050.Scripts
 			{
 			}
 
-			private static void HandleUpdateFailCallback(ServerCommunication.ARequest request, string message)
+			private static void HandleUpdateFailCallback(ARequest request, string message)
 			{
 			}
 		}
@@ -76,7 +76,7 @@ namespace MSP2050.Scripts
 						KeepAliveInterval = TimeSpan.FromSeconds(5)
 					}
 				};
-				client.Options.SetRequestHeader(ApiTokenHeader, ServerCommunication.GetApiAccessToken());
+				client.Options.SetRequestHeader(ApiTokenHeader, ServerCommunication.Instance.GetApiAccessToken());
 				client.Options.SetRequestHeader(GameSessionIdHeader, gameSessionId.ToString());
 				return client;
 			});
@@ -99,10 +99,10 @@ namespace MSP2050.Scripts
 				MemoryTraceWriter traceWriter = new MemoryTraceWriter();
 				traceWriter.LevelFilter = System.Diagnostics.TraceLevel.Warning;
 				bool processPayload = false;
-				ServerCommunication.RequestResult result = null;
+				RequestResult result = null;
 				try
 				{
-					result = JsonConvert.DeserializeObject<ServerCommunication.RequestResult>(
+					result = JsonConvert.DeserializeObject<RequestResult>(
 						responseMessage.ToString(), new JsonSerializerSettings {
 							TraceWriter = traceWriter,
 							Error = (sender, errorArgs) => {
@@ -167,7 +167,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void ProcessPayload(ServerCommunication.RequestResult result,
+		private void ProcessPayload(RequestResult result,
 			Action<UpdateObject> updateSuccessCallback)
 		{
 			switch (result.header_type)
@@ -183,7 +183,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void ProcessBatchExecuteBatchPayload(ServerCommunication.RequestResult result)
+		private void ProcessBatchExecuteBatchPayload(RequestResult result)
 		{
 			JsonSerializer serializer = new JsonSerializer();
 			serializer.Converters.Add(new JsonConverterBinaryBool());
@@ -210,7 +210,7 @@ namespace MSP2050.Scripts
 			UnregisterBatchRequestCallbacks(headerData.batch_id);
 		}
 
-		private void ProcessGameLatestPayload(ServerCommunication.RequestResult result,
+		private void ProcessGameLatestPayload(RequestResult result,
 			Action<UpdateObject> updateSuccessCallback)
 		{
 			if (!result.success)

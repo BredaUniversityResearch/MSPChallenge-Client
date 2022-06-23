@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 			Dictionary<int, float> fleetValues;
 			if (!values.TryGetValue(fleetName, out fleetValues))
 			{
-				fleetValues = new Dictionary<int, float>(TeamManager.TeamCount);
+				fleetValues = new Dictionary<int, float>(SessionManager.Instance.TeamCount);
 				values.Add(fleetName, fleetValues);
 			}
 

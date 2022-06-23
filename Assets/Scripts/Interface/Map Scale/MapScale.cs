@@ -200,7 +200,7 @@ namespace MSP2050.Scripts
 			opening = true;
 			animationActive = true;
 			pointerOnObject = true;
-			expandButtonBorder.color = TeamManager.CurrentTeamColor;
+			expandButtonBorder.color = SessionManager.Instance.CurrentTeamColor;
 		}
 
 		public void OnPointerExit(PointerEventData eventData)

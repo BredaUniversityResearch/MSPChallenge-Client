@@ -107,7 +107,7 @@ namespace MSP2050.Scripts
 				//Debug.Log("Requesting " + FileName + " at " + imageURL);
 				NetworkForm form = new NetworkForm();
 				form.AddField("layer_name", FileName);
-				ServerCommunication.DoRequest<RasterRequestResponse>(imageURL, form, HandleImportLatestRasterCallback);
+				ServerCommunication.Instance.DoRequest<RasterRequestResponse>(imageURL, form, HandleImportLatestRasterCallback);
 			}
 		}
 
@@ -136,7 +136,7 @@ namespace MSP2050.Scripts
 
 			//else
 			//{
-			//	if (ServerCommunication.GetHTTPResponseCode(www) != 404)
+			//	if (ServerCommunication.Instance.GetHTTPResponseCode(www) != 404)
 			//	{
 			//		Debug.LogError("Error in request. URL: " + www.url + ". Error: " + www.downloadHandler.text);
 			//	}
@@ -162,7 +162,7 @@ namespace MSP2050.Scripts
 				NetworkForm form = new NetworkForm();
 				form.AddField("layer_name", FileName);
 				form.AddField("month", month);
-				ServerCommunication.DoRequest<RasterRequestResponse>(imageURL, form, response => HandleImportRasterAtTimeCallback(response, viewingRasterTime));
+				ServerCommunication.Instance.DoRequest<RasterRequestResponse>(imageURL, form, response => HandleImportRasterAtTimeCallback(response, viewingRasterTime));
 			}
 		}
 

@@ -53,7 +53,7 @@ namespace MSP2050.Scripts
 			//hoursText.onEndEdit.AddListener((s) => { Hours = Mathf.Clamp(Convert.ToInt16(s), 0, 23); TimeManager.instance.RemainingTimeChanged(TotalSeconds); });
 			//minutesText.onEndEdit.AddListener((s) => {Minutes = Mathf.Clamp(Convert.ToInt16(s), 0, 59); TimeManager.instance.RemainingTimeChanged(TotalSeconds); });
 
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
 				SetYearsPerEra();
 			}
@@ -71,7 +71,7 @@ namespace MSP2050.Scripts
 
 		void SetYearsPerEra()
 		{
-			int yearsPerEra = Main.MspGlobalData.YearsPerEra;
+			int yearsPerEra = SessionManager.Instance.MspGlobalData.YearsPerEra;
 			slider.maxValue = yearsPerEra;
 			for (int i = 0; i < yearsPerEra; i++)
 			{
@@ -89,7 +89,7 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			int simulationNumber = Main.MspGlobalData.YearsPerEra - (int)val;
+			int simulationNumber = SessionManager.Instance.MspGlobalData.YearsPerEra - (int)val;
 
 			planningText.text = planningNumber.ToString() + " year planning";
 			simulationText.text = simulationNumber.ToString() + " year simulation";
@@ -103,7 +103,7 @@ namespace MSP2050.Scripts
 			sliderTriggersUpdate = false;
 			slider.value = value;
 			planningText.text = value.ToString() + " year planning";
-			simulationText.text = (Main.MspGlobalData.YearsPerEra - value).ToString() + " year simulation";
+			simulationText.text = (SessionManager.Instance.MspGlobalData.YearsPerEra - value).ToString() + " year simulation";
 			sliderTriggersUpdate = true;
 		}
 

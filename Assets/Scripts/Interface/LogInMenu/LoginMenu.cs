@@ -87,10 +87,6 @@ namespace MSP2050.Scripts
 
 		private List<GameSessionDisplay> gameSessionDisplayPool;
 		private GameSession selectedSession;
-
-		private TeamImporter teamImporter;
-
-		private Dictionary<string, int> teamsIDByCountryName;
 		private int expectedServerListID = 0;
 
 		private void Awake()
@@ -103,8 +99,6 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			teamImporter = GetComponent<TeamImporter>();
-			teamsIDByCountryName = new Dictionary<string, int>();
 			if (!IsApiEndpointDropdownVisible())
 			{
 				serverEndPointDropdown.value = 0;
@@ -193,7 +187,7 @@ namespace MSP2050.Scripts
 					loginErrorContainer.gameObject.SetActive(false);
 				}
 			}
-			ServerCommunication.Update(false);
+			ServerCommunication.Instance.UpdateCommunication(false);
 		}
 
 		//bool ShowingServerList
@@ -379,7 +373,7 @@ namespace MSP2050.Scripts
 		private bool UserRequiresPassword(string userName)
 		{
 			bool requiresPassword = false;
-			MspGlobalData globalData = teamImporter.MspGlobalData;
+			MspGlobalData globalData = SessionManager.Instance.MspGlobalData;
 			if (globalData != null)
 			{
 				if (userName == globalData.user_admin_name || userName == globalData.user_region_manager_name)
@@ -431,13 +425,13 @@ namespace MSP2050.Scripts
 			}
 
 			//If Successful
-			teamImporter.OnImportComplete += OnTeamImportFinished;
-			teamImporter.ImportGlobalData();
+			SessionManager.Instance.OnImportComplete += OnTeamImportFinished;
+			SessionManager.Instance.ImportGlobalData();
 			loginServer.SetActive(false);
 			serverSelectErrorContainer.SetActive(false);
 			loginConnecting.SetActive(true);
 		}
-
+		
 		public void ReturnToLoginServer()
 		{
 			loginConnecting.SetActive(false);
@@ -483,8 +477,8 @@ namespace MSP2050.Scripts
 			else
 				PlayerPrefs.SetInt(LOGIN_EXPERTISE_INDEX_STR, -1);
 
-			int countryIndex = teamsIDByCountryName[countryName];
-			ServerCommunication.RequestSession(
+			int countryIndex = SessionManager.Instance.FindTeamByName(countryName).ID;
+			ServerCommunication.Instance.RequestSession(
 				countryIndex, nameInputField.text, (response) => RequestSessionSuccess(response, countryIndex),
 				RequestSessionFailure, passwordContainer.activeInHierarchy ? passwordInputField.text : null
 			);
@@ -496,15 +490,14 @@ namespace MSP2050.Scripts
 			loginConnecting.SetActive(true);
 			loginTeam.SetActive(false);
 
-			ServerCommunication.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
-			TeamManager.InitializeUserValues(countryIndex, nameInputField.text, response.session_id,
-				teamImporter.teams, passwordContainer.activeInHierarchy ? passwordInputField.text : null);
-			Main.MspGlobalData = teamImporter.MspGlobalData;
+			ServerCommunication.Instance.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
+			SessionManager.Instance.SetSession(countryIndex, passwordContainer.activeInHierarchy ? passwordInputField.text : null,
+				nameInputField.text, response.session_id);
 
 			SceneManager.LoadScene("MSP2050");
 		}
 
-		void RequestSessionFailure(ServerCommunication.ARequest request, string message)
+		void RequestSessionFailure(ARequest request, string message)
 		{
 			ShowErrorMessage(message.Split('\n')[0]);
 			Debug.LogError(message);
@@ -512,7 +505,7 @@ namespace MSP2050.Scripts
 
 		public void OnTeamImportFinished(bool success)
 		{
-			teamImporter.OnImportComplete -= OnTeamImportFinished;
+			SessionManager.Instance.OnImportComplete -= OnTeamImportFinished;
 
 			if (success)
 			{
@@ -521,13 +514,9 @@ namespace MSP2050.Scripts
 
 				//Populate the dropdown list with countries as soon as the team importer is finished
 				List<TMP_Dropdown.OptionData> tOptionList = new List<TMP_Dropdown.OptionData>();
-				foreach (KeyValuePair<int, Team> team in teamImporter.teams)
+				foreach (Team team in SessionManager.Instance.GetTeams())
 				{
-					tOptionList.Add(new TMP_Dropdown.OptionData(team.Value.name));
-					if (!teamsIDByCountryName.ContainsKey(team.Value.name))
-					{
-						teamsIDByCountryName[team.Value.name] = team.Key;
-					}
+					tOptionList.Add(new TMP_Dropdown.OptionData(team.name));
 				}
 				countryDropDown.ClearOptions();
 				countryDropDown.AddOptions(tOptionList);
@@ -554,7 +543,7 @@ namespace MSP2050.Scripts
 					countryDropDown.value = 0;
 
 				//Load expertise definitions and populate the dropdown
-				if (teamImporter.MspGlobalData.expertise_definitions == null || teamImporter.MspGlobalData.expertise_definitions.Length == 0)
+				if (SessionManager.Instance.MspGlobalData.expertise_definitions == null || SessionManager.Instance.MspGlobalData.expertise_definitions.Length == 0)
 				{
 					expertiseDropDownContainer.gameObject.SetActive(false);
 					PlayerPrefs.SetInt(LOGIN_EXPERTISE_INDEX_STR, -1);
@@ -562,8 +551,8 @@ namespace MSP2050.Scripts
 				else
 				{
 					expertiseDropDownContainer.gameObject.SetActive(true);
-					tOptionList = new List<TMP_Dropdown.OptionData>(teamImporter.MspGlobalData.expertise_definitions.Length);
-					foreach (var expertise in teamImporter.MspGlobalData.expertise_definitions)
+					tOptionList = new List<TMP_Dropdown.OptionData>(SessionManager.Instance.MspGlobalData.expertise_definitions.Length);
+					foreach (var expertise in SessionManager.Instance.MspGlobalData.expertise_definitions)
 					{
 						tOptionList.Add(new TMP_Dropdown.OptionData(expertise.name));
 					}

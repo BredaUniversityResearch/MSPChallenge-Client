@@ -5,7 +5,7 @@ namespace MSP2050.Scripts
 {
 	class RequestProfileEntry
 	{
-		public readonly ServerCommunication.ARequest targetRequest;
+		public readonly ARequest targetRequest;
 		private readonly Stopwatch timer = null;
 
 		public readonly float RequestStartTime; //Request start time in seconds since start.
@@ -28,7 +28,7 @@ namespace MSP2050.Scripts
 			private set;
 		}
 
-		public RequestProfileEntry(ServerCommunication.ARequest request)
+		public RequestProfileEntry(ARequest request)
 		{
 			targetRequest = request;
 			RequestStartTime = Time.realtimeSinceStartup;

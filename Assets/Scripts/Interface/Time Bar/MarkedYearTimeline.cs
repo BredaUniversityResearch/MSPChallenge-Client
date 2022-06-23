@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 		{
 			TimeManager.Instance.OnCurrentMonthChanged += OnCurrentMonthChanged;
 
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
 				SetupYearMarkers(yearSpacing);
 			}
@@ -70,7 +70,7 @@ namespace MSP2050.Scripts
 		{
 			if (availableSliderRangeFill != null)
 			{
-				availableSliderRangeFill.anchorMax = new Vector2((float)newCurrentMonth / (float)Main.MspGlobalData.session_end_month, availableSliderRangeFill.anchorMax.y);
+				availableSliderRangeFill.anchorMax = new Vector2((float)newCurrentMonth / (float)SessionManager.Instance.MspGlobalData.session_end_month, availableSliderRangeFill.anchorMax.y);
 			}
 		}
 
@@ -82,12 +82,12 @@ namespace MSP2050.Scripts
 
 		private void SetupYearMarkers(int labelSpacingInYears)
 		{
-			int numYears = Main.MspGlobalData.session_num_years;
+			int numYears = SessionManager.Instance.MspGlobalData.session_num_years;
 			float desiredSubdivisions = ((float)numYears / labelSpacingInYears);
 			int numLabels = Mathf.FloorToInt(desiredSubdivisions) + 1;
 			for (int i = 0; i < numLabels; ++i)
 			{
-				int year = Main.MspGlobalData.start + (labelSpacingInYears * i);
+				int year = SessionManager.Instance.MspGlobalData.start + (labelSpacingInYears * i);
 				RectTransform label = CreateYearLabel(year.ToString());
 
 				float percentage = (float)i / (desiredSubdivisions);

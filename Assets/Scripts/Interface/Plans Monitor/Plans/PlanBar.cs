@@ -31,13 +31,13 @@ namespace MSP2050.Scripts
 				{
 					//if (planRepresenting.State == Plan.PlanState.DESIGN)
 					//{
-					//	PlanManager.RequestPlanLockForEditing(planRepresenting);
+					//	PlanManager.Instance.RequestPlanLockForEditing(planRepresenting);
 					//	PlanDetails.SelectPlan(planRepresenting);
 
 					//}
 					//else if (planRepresenting.InInfluencingState)
 					//{
-					PlanManager.ShowPlan(planRepresenting);
+					PlanManager.Instance.ShowPlan(planRepresenting);
 					//}
 				}
 			});
@@ -47,7 +47,7 @@ namespace MSP2050.Scripts
 				if (!ignoreBarCallback)
 				{
 					if (PlanDetails.IsOpen)
-						PlanManager.SetPlanUnseenChanges(planRepresenting, false);
+						PlanManager.Instance.SetPlanUnseenChanges(planRepresenting, false);
 					if (b)
 						PlanDetails.SelectPlan(planRepresenting);
 					else
@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			//Non GM players cant interact with plans during setup
-			else if(TimeManager.Instance.CurrentState == TimeManager.PlanningState.Setup && !TeamManager.AreWeGameMaster)
+			else if(TimeManager.Instance.CurrentState == TimeManager.PlanningState.Setup && !SessionManager.Instance.AreWeGameMaster)
 			{
 				value = false;
 			}
@@ -129,7 +129,7 @@ namespace MSP2050.Scripts
 			if (planRepresenting.State == Plan.PlanState.APPROVAL)
 			{
 				EPlanApprovalState approvalState;
-				if (planRepresenting.countryApproval.TryGetValue(TeamManager.CurrentUserTeamID, out approvalState))
+				if (planRepresenting.countryApproval.TryGetValue(SessionManager.Instance.CurrentUserTeamID, out approvalState))
 				{
 					if (approvalState == EPlanApprovalState.Maybe)
 					{

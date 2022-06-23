@@ -3,58 +3,9 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public static class SetOperations
+	public static class GeometryOperations
 	{
 		public static float intConverstion = 100000000000000.0f;
-
-		public static List<List<Vector3>> Boolean(PolygonEntity subject, HashSet<PolygonEntity> clip, ClipperLib.ClipType type, out List<List<List<Vector3>>> holes)
-		{
-			List<List<ClipperLib.IntPoint>> A = new List<List<ClipperLib.IntPoint>>();
-			List<List<ClipperLib.IntPoint>> B = new List<List<ClipperLib.IntPoint>>();
-
-			for (int i = 0; i < subject.GetSubEntityCount(); i++)
-			{
-				PolygonSubEntity subEntity = subject.GetSubEntities()[i];
-
-				List<List<ClipperLib.IntPoint>> a0 = new List<List<ClipperLib.IntPoint>>();
-				a0.Add(VectorToIntPoint(subEntity.GetPoints()));
-
-				if (subEntity.GetHoleCount() > 0)
-				{
-					foreach (List<Vector3> hole in subEntity.GetHoles())
-					{
-						a0.Add(VectorToIntPoint(hole));
-					}
-				}
-
-				A = doUnion(A, a0);
-			}
-
-			foreach (PolygonEntity clipEntity in clip)
-			{
-				for (int i = 0; i < clipEntity.GetSubEntityCount(); i++)
-				{
-					PolygonSubEntity clipSubEntity = clipEntity.GetSubEntities()[i];
-
-					List<List<ClipperLib.IntPoint>> b0 = new List<List<ClipperLib.IntPoint>>();
-					b0.Add(VectorToIntPoint(clipSubEntity.GetPoints()));
-
-					if (clipSubEntity.GetHoleCount() > 0)
-					{
-						foreach (List<Vector3> hole in clipSubEntity.GetHoles())
-						{
-							b0.Add(VectorToIntPoint(hole));
-						}
-					}
-
-					B = doUnion(B, b0);
-				}
-			}
-
-			List<List<Vector3>> poly = doOperation(A, B, type, ClipperLib.PolyFillType.pftEvenOdd, out holes);
-
-			return poly;
-		}
 
 		public static bool LineIntersection(List<Vector3> source, List<Vector3> target, out List<Vector3> intersectionPoints)
 		{
@@ -112,20 +63,10 @@ namespace MSP2050.Scripts
 				}
 				return true;
 			}
-			//if (solution.Count > 0)
-			//{
-			//    intersectionCentre = new List<Vector3>();
-			//    foreach (List<IntPoint> point in solution)
-			//    {
-			//        intersectionCentre.Add(Util.GetCentroid(IntPointToVector(point)));
-			//    }
-			//    return true;
-			//}
 
 			intersectionCentre = null;
 			return false;
 		}
-
 
 		public static bool Overlap(SubEntity source, SubEntity target, out List<Vector3> intersectionCentre)
 		{
@@ -196,110 +137,6 @@ namespace MSP2050.Scripts
 
 			intersectionCentre = null;
 			return false;
-		}
-
-		public static PolygonEntity BooleanP(PolygonEntity subject, HashSet<PolygonEntity> clip, ClipperLib.ClipType type)
-		{
-			subject.ValidateWindingOrders();
-			foreach (PolygonEntity clipEntity in clip)
-			{
-				clipEntity.ValidateWindingOrders();
-			}
-
-			List<List<List<Vector3>>> holes;
-			List<List<Vector3>> polys = Boolean(subject, clip, type, out holes);
-
-			if (polys.Count == 0)
-			{
-				return null;
-			}
-
-			Debug.LogError("Set operations arent supposed to work");
-			return null;
-			//PolygonEntity entity = null;// layer.CreateNewPolygonEntity(subject.EntityTypes);
-
-			//for (int i = 0; i < polys.Count; i++)
-			//{
-			//	PolygonSubEntity subEntity = layer.editingType == AbstractLayer.EditingType.SourcePolygon ? new EnergyPolygonSubEntity(entity) : new PolygonSubEntity(entity);
-			//	subEntity.SetPolygon(polys[i]);
-
-			//	if (holes[i].Count > 0)
-			//	{
-			//		for (int j = 0; j < holes[i].Count; j++)
-			//		{
-			//			List<Vector3> holevertices = new List<Vector3>();
-
-			//			for (int k = 0; k < holes[i][j].Count; k++)
-			//			{
-			//				holevertices.Add(holes[i][j][k]);
-			//			}
-			//			subEntity.AddHole(holevertices);
-			//		}
-			//	}
-
-			//	entity.AddSubEntity(subEntity);
-			//}
-
-			//entity.ReplaceMetaData(subject.metaData);
-
-			//return entity;
-		}
-
-		private static List<List<Vector3>> doOperation(List<List<ClipperLib.IntPoint>> A, List<List<ClipperLib.IntPoint>> B, ClipperLib.ClipType clipType, ClipperLib.PolyFillType fillType, out List<List<List<Vector3>>> holes)
-		{
-			ClipperLib.Clipper clipper = new ClipperLib.Clipper();
-
-			clipper.AddPaths(A, ClipperLib.PolyType.ptSubject, true);
-			clipper.AddPaths(B, ClipperLib.PolyType.ptClip, true);
-
-			ClipperLib.PolyTree solution = new ClipperLib.PolyTree();
-
-			clipper.Execute(clipType, solution, fillType);
-
-			List<List<Vector3>> polygon = new List<List<Vector3>>();
-			holes = new List<List<List<Vector3>>>();
-
-			AddChildGeometry(solution.Childs, ref polygon, ref holes);
-
-			return polygon;
-		}
-
-		private static List<List<ClipperLib.IntPoint>> doUnion(List<List<ClipperLib.IntPoint>> a, List<List<ClipperLib.IntPoint>> b)
-		{
-			ClipperLib.Clipper clipper = new ClipperLib.Clipper();
-
-			clipper.AddPaths(a, ClipperLib.PolyType.ptSubject, true);
-			clipper.AddPaths(b, ClipperLib.PolyType.ptClip, true);
-
-			List<List<ClipperLib.IntPoint>> solution = new List<List<ClipperLib.IntPoint>>();
-
-			clipper.Execute(ClipperLib.ClipType.ctUnion, solution);
-
-			return solution;
-		}
-
-		private static void AddChildGeometry(List<ClipperLib.PolyNode> child, ref List<List<Vector3>> polygon, ref List<List<List<Vector3>>> holes, int parentIndex = -1)
-		{
-			for (int i = 0; i < child.Count; i++)
-			{
-				List<ClipperLib.IntPoint> shape = child[i].Contour;
-
-				if (!child[i].IsHole)
-				{
-					polygon.Add(IntPointToVector(shape));
-					holes.Add(new List<List<Vector3>>());
-					parentIndex = holes.Count - 1;
-				}
-				else
-				{
-					holes[parentIndex].Add(IntPointToVector(shape));
-				}
-
-				if (child[i].Childs.Count > 0)
-				{
-					AddChildGeometry(child[i].Childs, ref polygon, ref holes, parentIndex);
-				}
-			}
 		}
 
 		public static List<Vector3> IntPointToVector(List<ClipperLib.IntPoint> points)

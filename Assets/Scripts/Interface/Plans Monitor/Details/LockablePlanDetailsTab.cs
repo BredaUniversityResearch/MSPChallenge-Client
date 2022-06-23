@@ -20,7 +20,7 @@
 		protected virtual void BeginEditing(Plan plan)
 		{
 			lockedPlan = plan;
-			PlanManager.ShowPlan(plan);
+			PlanManager.Instance.ShowPlan(plan);
 			Main.EditingPlanDetailsContent = true;
 			SetAcceptChangesButtonEnabled(true);
 			PlansMonitor.RefreshPlanButtonInteractablity();

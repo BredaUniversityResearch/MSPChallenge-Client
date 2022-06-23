@@ -40,6 +40,19 @@ namespace MSP2050.Scripts
 
 		public AbstractLayer highLightedLayer;
 
+		void Start()
+		{
+			if (singleton != null && singleton != this)
+				Destroy(this);
+			else
+				singleton = this;
+		}
+
+		void OnDestroy()
+		{
+			singleton = null;
+		}
+
 		public void AddLayer(AbstractLayer layer)
 		{
 			finishedImporting = false;
@@ -57,7 +70,7 @@ namespace MSP2050.Scripts
 			}
 			if (layer.editingType != AbstractLayer.EditingType.Normal && layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
 				energyLayers.Add(layer);
-			if (layer.FileName == Main.MspGlobalData.countries)
+			if (layer.FileName == SessionManager.Instance.MspGlobalData.countries)
 				EEZLayer = layer as PolygonLayer;
 		}
 
@@ -329,10 +342,10 @@ namespace MSP2050.Scripts
 				//Performs a more elaborate update and redraw, so no other is needed
 				needsUpdateAndRedraw = false;
 
-				if (PlanManager.planViewing != null || PlanManager.timeViewing < 0)
-					layer.SetEntitiesActiveUpTo(PlanManager.planViewing);
+				if (PlanManager.Instance.planViewing != null || PlanManager.Instance.timeViewing < 0)
+					layer.SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
 				else
-					layer.SetEntitiesActiveUpToTime(PlanManager.timeViewing);
+					layer.SetEntitiesActiveUpToTime(PlanManager.Instance.timeViewing);
 
 				layer.LayerGameObject.SetActive(true);
 				visibleLayers.Add(layer);
@@ -470,7 +483,7 @@ namespace MSP2050.Scripts
 				foreach (AbstractLayer energyLayer in energyLayers)
 					energyLayer.ResetCurrentGrids();
 
-				List<EnergyGrid> grids = PlanManager.GetEnergyGridsAtTime(plan.StartTime, EnergyGrid.GridColor.Either);
+				List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(plan.StartTime, EnergyGrid.GridColor.Either);
 				if (energyCableLayerGreen != null)
 				{
 					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGreen.GetCableNetworkForPlan(plan);
@@ -516,7 +529,7 @@ namespace MSP2050.Scripts
 				foreach (AbstractLayer energyLayer in energyLayers)
 					energyLayer.ResetCurrentGrids();
 
-				List<EnergyGrid> grids = PlanManager.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
+				List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
 				if (energyCableLayerGreen != null)
 				{
 					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGreen.GetCableNetworkAtTime(month);
@@ -630,7 +643,7 @@ namespace MSP2050.Scripts
 			form.AddField("new", to.ID);
 			form.AddField("offset", offset);
 
-			ServerCommunication.DoRequest(Server.MergeLayer(), form);
+			ServerCommunication.Instance.DoRequest(Server.MergeLayer(), form);
 		}
 
 		public delegate void AddNewLayerCallback(AbstractLayer layer);
@@ -744,15 +757,15 @@ namespace MSP2050.Scripts
 				return;
 
 			//Only update if we are viewing the plan or one further in the future
-			if (PlanManager.planViewing == null ||
-			    (PlanManager.planViewing.StartTime < plan.StartTime ||
-			     (PlanManager.planViewing.StartTime == plan.StartTime && PlanManager.planViewing.ID < plan.ID)))
+			if (PlanManager.Instance.planViewing == null ||
+			    (PlanManager.Instance.planViewing.StartTime < plan.StartTime ||
+			     (PlanManager.Instance.planViewing.StartTime == plan.StartTime && PlanManager.Instance.planViewing.ID < plan.ID)))
 				return;
 
 			//Only update if already visible
 			foreach (PlanLayer layer in plan.PlanLayers)		
 				if (visibleLayers.Contains(layer.BaseLayer))
-					layer.BaseLayer.SetEntitiesActiveUpTo(PlanManager.planViewing);
+					layer.BaseLayer.SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
 		}
 
 		public void AddNonReferenceLayer(AbstractLayer layer, bool redrawLayer)

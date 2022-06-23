@@ -41,7 +41,7 @@ namespace MSP2050.Scripts
 		{
 			if (!isActiveAndEnabled || lockedPlan != null)
 				return;
-			energyDistribution.SetSliderValuesToEnergyDistribution(planDetails.SelectedPlan, PlanManager.GetEnergyGridsBeforePlan(planDetails.SelectedPlan, EnergyGrid.GridColor.Either, true, true));
+			energyDistribution.SetSliderValuesToEnergyDistribution(planDetails.SelectedPlan, PlanManager.Instance.GetEnergyGridsBeforePlan(planDetails.SelectedPlan, EnergyGrid.GridColor.Either, true, true));
 			emptyContentOverlay.SetActive(energyDistribution.NumberGroups == 0);
 		}
 
@@ -54,7 +54,7 @@ namespace MSP2050.Scripts
 
 			energyGridBackup = lockedPlan.energyGrids;
 			energyGridRemovedBackup = lockedPlan.removedGrids;
-			energyGridsBeforePlan = PlanManager.GetEnergyGridsBeforePlan(lockedPlan, EnergyGrid.GridColor.Either);
+			energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(lockedPlan, EnergyGrid.GridColor.Either);
 
 			//Reset plan's grids
 			List<EnergyGrid> oldGrids = lockedPlan.energyGrids; 
@@ -82,7 +82,7 @@ namespace MSP2050.Scripts
 						if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
 							countriesAffectedByRemovedGrids.Add(countryAmount.Key);
 
-			energyDistribution.SetSliderValuesToEnergyDistribution(planDetails.SelectedPlan, PlanManager.GetEnergyGridsBeforePlan(planDetails.SelectedPlan, EnergyGrid.GridColor.Either, true, true));
+			energyDistribution.SetSliderValuesToEnergyDistribution(planDetails.SelectedPlan, PlanManager.Instance.GetEnergyGridsBeforePlan(planDetails.SelectedPlan, EnergyGrid.GridColor.Either, true, true));
 			energyDistribution.SetInteractability(true);
 			contentInfo.SetActive(false);
 		}

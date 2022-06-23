@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
 				PopulateOptions();
 			}
@@ -60,7 +60,7 @@ namespace MSP2050.Scripts
 			int numEras = MspGlobalData.num_eras;
 			for (int i = 0; i < numEras; ++i)
 			{
-				int deadlineMonth = (Main.MspGlobalData.era_total_months * (i + 1));
+				int deadlineMonth = (SessionManager.Instance.MspGlobalData.era_total_months * (i + 1));
 				CreateDropdownEntry(Util.MonthToYearText(deadlineMonth), deadlineMonth); 
 			}
 

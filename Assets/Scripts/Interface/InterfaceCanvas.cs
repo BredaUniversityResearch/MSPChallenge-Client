@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 
 		void Start()
 		{
-			canvas.scaleFactor = GameSettings.UIScale;
+			canvas.scaleFactor = GameSettings.Instance.UIScale;
 			menuBarActiveLayers.toggle.isOn = true;
 			for (int i = 0; i < lineMaterials.Length; i++)
 			{
@@ -412,7 +412,7 @@ namespace MSP2050.Scripts
 		{
 			activePlanWindow.SetSelectedEntityTypes(entityTypes);
 			activePlanWindow.SetSelectedParameters(selectedParams);
-			if (TeamManager.AreWeGameMaster)
+			if (SessionManager.Instance.AreWeGameMaster)
 			{
 				activePlanWindow.SelectedTeam = team;
 			}
@@ -421,7 +421,7 @@ namespace MSP2050.Scripts
 		public void SetTeamAndTypeToBasicIfEmpty()
 		{
 			activePlanWindow.SetEntityTypeToBasicIfEmpty();
-			if (TeamManager.AreWeGameMaster)
+			if (SessionManager.Instance.AreWeGameMaster)
 				activePlanWindow.SetTeamToBasicIfEmpty();
 		}
 
@@ -431,7 +431,7 @@ namespace MSP2050.Scripts
 			if (!value)
 			{
 				activePlanWindow.DeselectAllEntityTypes();
-				if (TeamManager.AreWeGameMaster)
+				if (SessionManager.Instance.AreWeGameMaster)
 					activePlanWindow.SelectedTeam = -2;
 			}
 		}
