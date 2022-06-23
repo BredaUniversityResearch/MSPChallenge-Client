@@ -62,7 +62,7 @@ namespace MSP2050.Scripts
 
 			if (plan.energyPlan)
 			{
-				removedInvalidCables = LayerManager.ForceEnergyLayersActiveUpTo(plan);
+				removedInvalidCables = LayerManager.Instance.ForceEnergyLayersActiveUpTo(plan);
 				energyGridsBeforePlan = PlanManager.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
 			}
 
@@ -79,8 +79,8 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public void StartEditingLayer(PlanLayer layer, bool calledByUndo = false)
 		{
-			LayerManager.SetNonReferenceLayers(new HashSet<AbstractLayer>() { layer.BaseLayer }, false, true);
-			LayerManager.ShowLayer(layer.BaseLayer);
+			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { layer.BaseLayer }, false, true);
+			LayerManager.Instance.ShowLayer(layer.BaseLayer);
 
 			if (!calledByUndo)
 				Main.FSM.SetInterruptState(null);
@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 			currentlyEditingLayer = layer;
 			InterfaceCanvas.Instance.StartEditingLayer(layer.BaseLayer);
 			Main.FSM.StartEditingLayer(layer);
-			LayerManager.RedrawVisibleLayers();
+			LayerManager.Instance.RedrawVisibleLayers();
 		}
 
 		public void ForceCancelChanges()
@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 			}
 			if (removedInvalidCables != null)
 			{
-				LayerManager.RestoreRemovedCables(removedInvalidCables);
+				LayerManager.Instance.RestoreRemovedCables(removedInvalidCables);
 			}
 			lockedPlan.AttemptUnlock();
 			StopEditing();
@@ -235,7 +235,7 @@ namespace MSP2050.Scripts
 				foreach (EnergyGrid grid in energyGridsBeforePlan)
 					lockedPlan.removedGrids.Add(grid.persistentID);
 
-				foreach (AbstractLayer layer in LayerManager.energyLayers)
+				foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 				{
 					if (layer.editingType == AbstractLayer.EditingType.Socket)
 					{
@@ -357,8 +357,8 @@ namespace MSP2050.Scripts
 			PlansMonitor.instance.plansMinMax.Maximize();
 			PlanDetails.UpdateTabAvailability();
 
-			LayerManager.ClearNonReferenceLayers();
-			LayerManager.RedrawVisibleLayers();
+			LayerManager.Instance.ClearNonReferenceLayers();
+			LayerManager.Instance.RedrawVisibleLayers();
 			InterfaceCanvas.Instance.activePlanWindow.CloseEditingUI();
 			PlansMonitor.RefreshPlanButtonInteractablity();
 

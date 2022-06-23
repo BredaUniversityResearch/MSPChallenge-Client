@@ -66,11 +66,11 @@ namespace MSP2050.Scripts
 
 		public static void LoadTeams()
 		{
-			if (LayerManager.EEZLayer == null)
+			if (LayerManager.Instance.EEZLayer == null)
 				Debug.LogError("No EEZ layer loaded. Teams cannot be determined.");
 			else
 			{
-				foreach (KeyValuePair<int, EntityType> kvp in LayerManager.EEZLayer.EntityTypes)
+				foreach (KeyValuePair<int, EntityType> kvp in LayerManager.Instance.EEZLayer.EntityTypes)
 				{
 					teamsByID.Add(kvp.Value.value, new Team(kvp.Value.value, kvp.Value.DrawSettings.PolygonColor, kvp.Value.Name));
 				}

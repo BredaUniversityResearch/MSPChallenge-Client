@@ -42,7 +42,7 @@ public class EnergyVerifierObj : MonoBehaviour
 
 	public void VerifyEnergy()
 	{
-		if (LayerManager.energySubEntities == null || LayerManager.energySubEntities.Count == 0)
+		if (LayerManager.Instance.energySubEntities == null || LayerManager.Instance.energySubEntities.Count == 0)
 		{
 			Debug.Log("No energy objects found");
 			Destroy(gameObject);
@@ -61,9 +61,9 @@ public class EnergyVerifierObj : MonoBehaviour
 
 		HashSet<int> socketIDs = new HashSet<int>(); //DB ids of all sockets active at the current time
 
-		foreach (AbstractLayer layer in LayerManager.energyLayers)
+		foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 		{
-			LayerManager.ShowLayer(layer);
+			LayerManager.Instance.ShowLayer(layer);
 			layer.ResetEnergyConnections();
 			if (layer.editingType == AbstractLayer.EditingType.Socket)
 			{
@@ -73,23 +73,23 @@ public class EnergyVerifierObj : MonoBehaviour
 		}
 
 		//Have the cable layer activate all connections that are present in the current state, required for later grid checks
-		if (LayerManager.energyCableLayerGreen != null)
-			LayerManager.energyCableLayerGreen.ActivateCableLayerConnections();
-		if (LayerManager.energyCableLayerGrey != null)
-			LayerManager.energyCableLayerGrey.ActivateCableLayerConnections();
+		if (LayerManager.Instance.energyCableLayerGreen != null)
+			LayerManager.Instance.energyCableLayerGreen.ActivateCableLayerConnections();
+		if (LayerManager.Instance.energyCableLayerGrey != null)
+			LayerManager.Instance.energyCableLayerGrey.ActivateCableLayerConnections();
 
 		List<EnergyGrid> currentGrids = PlanManager.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);
 
 		//CABLE CONNECTIONS =================================================================================================
 		Debug.Log("Beginning cable connection check.");
 		//Check if all cables have 2 connections
-		if (LayerManager.energyCableLayerGreen != null)
+		if (LayerManager.Instance.energyCableLayerGreen != null)
 		{
-			errors += CheckCables(LayerManager.energyCableLayerGreen);
+			errors += CheckCables(LayerManager.Instance.energyCableLayerGreen);
 		}
-		if (LayerManager.energyCableLayerGrey != null)
+		if (LayerManager.Instance.energyCableLayerGrey != null)
 		{
-			errors += CheckCables(LayerManager.energyCableLayerGrey);
+			errors += CheckCables(LayerManager.Instance.energyCableLayerGrey);
 		}
 		Debug.Log($"Cable connection check complete, {errors} errors found.");
 		errors = 0;
@@ -202,12 +202,12 @@ public class EnergyVerifierObj : MonoBehaviour
 		Debug.Log("Beginning capacity check.");
 		//Check of all energy subentities have their capacity stored on the server
 		List<int> ids = new List<int>();
-		foreach (AbstractLayer layer in LayerManager.energyLayers)
+		foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 		{
 			foreach (SubEntity sub in layer.GetActiveSubEntities())
 			{
 				int id = sub.GetDatabaseID();
-				if (LayerManager.GetEnergySubEntityByID(id) == null)
+				if (LayerManager.Instance.GetEnergySubEntityByID(id) == null)
 				{
 					Debug.LogError($"Energy subentity with id: {id} was not found in LayerManager's energy subentities.");
 					errors++;

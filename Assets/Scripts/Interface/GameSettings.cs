@@ -225,7 +225,7 @@ namespace MSP2050.Scripts
 			if(CameraManager.Instance != null)
 			{
 				CameraManager.Instance.cameraZoom.UpdateUIScale();
-				LayerManager.UpdateLayerScales(CameraManager.Instance.gameCamera);
+				LayerManager.Instance.UpdateLayerScales(CameraManager.Instance.gameCamera);
 			}
 		}
 

@@ -82,7 +82,7 @@ namespace MSP2050.Scripts
 
 		public void GetNewPlayArea()
 		{
-			AbstractLayer layer = LayerManager.FindFirstLayerContainingName("_PLAYAREA");
+			AbstractLayer layer = LayerManager.Instance.FindFirstLayerContainingName("_PLAYAREA");
 
 			if (layer == null)
 			{

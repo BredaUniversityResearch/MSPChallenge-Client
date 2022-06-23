@@ -435,7 +435,7 @@ namespace MSP2050.Scripts
 			}
 			//ServerCommunication.WaitForCondition(planLayerUpdateTracker.CompletedPlanLayerUpdates, () => planUpdateTracker.CompletedUpdate());
 
-			LayerManager.UpdateVisibleLayersFromPlan(this);
+			LayerManager.Instance.UpdateVisibleLayersFromPlan(this);
 			PlanManager.UpdatePlanInUI(this, nameOrDescriptionChanged, timeChanged, stateChanged, layersChanged, typeChanged, forceMonitorUpdate, oldStartTime, oldState, inTimelineBefore);
 		}
 
@@ -696,9 +696,9 @@ namespace MSP2050.Scripts
 				return newCountryApproval;
 			}
 
-			if (requiredApprovalLevel > 0 && LayerManager.EEZLayer != null)
+			if (requiredApprovalLevel > 0 && LayerManager.Instance.EEZLayer != null)
 			{
-				List<PolygonEntity> EEZs = LayerManager.EEZLayer.Entities;
+				List<PolygonEntity> EEZs = LayerManager.Instance.EEZLayer.Entities;
 				int userCountry = TeamManager.CurrentUserTeamID;
 				for (int i = 0; i < PlanLayers.Count; i++)
 				{
@@ -901,7 +901,7 @@ namespace MSP2050.Scripts
 				{
 					//Create layer states for energy layers of a marching color, ignoring the cable layer
 					Dictionary<AbstractLayer, LayerState> energyLayerStates = new Dictionary<AbstractLayer, LayerState>();
-					foreach (AbstractLayer energyLayer in LayerManager.energyLayers)
+					foreach (AbstractLayer energyLayer in LayerManager.Instance.energyLayers)
 						if (energyLayer.greenEnergy == planLayer.BaseLayer.greenEnergy && energyLayer.ID != planLayer.BaseLayer.ID)
 							energyLayerStates.Add(energyLayer, energyLayer.GetLayerStateAtPlan(this));
 

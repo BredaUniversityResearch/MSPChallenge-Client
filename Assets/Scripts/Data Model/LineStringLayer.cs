@@ -222,9 +222,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override LayerManager.GeoType GetGeoType()
+		public override  LayerManager.GeoType GetGeoType()
 		{
-			return LayerManager.GeoType.line;
+			return  LayerManager.GeoType.line;
 		}
 
 		#region Legacy Stuff

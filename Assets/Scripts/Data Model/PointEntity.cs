@@ -13,10 +13,10 @@ namespace MSP2050.Scripts
 			if (layer.IsEnergyPointLayer())
 			{
 				pointSubEntities = new List<PointSubEntity>() { new EnergyPointSubEntity(this, point, sourcepoly) };
-				//if (layer.editingType == AbstractLayer.EditingType.Socket && LayerManager.EEZLayer != null)
+				//if (layer.editingType == AbstractLayer.EditingType.Socket && LayerManager.Instance.EEZLayer != null)
 				//{
 				//    //Determine country based on the EEZ we were placed in
-				//    List<Entity> eez = LayerManager.EEZLayer.GetEntitiesAt(point);
+				//    List<Entity> eez = LayerManager.Instance.EEZLayer.GetEntitiesAt(point);
 				//    if (eez != null && eez.Count > 0)
 				//    {
 				//        country = eez[0].country;

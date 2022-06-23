@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 	{
 		//public static void FillGaps()
 		//{
-		//    //List<Layer> layers = LayerManager.GetLoadedLayers();
+		//    //List<Layer> layers = LayerManager.Instance.GetLoadedLayers();
 
 		//    //if (layers.Count != 3) { displayRequirements(); return; }
 
@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 
 		//    //if (playAreaLayer == null || countriesLayer == null || bathymetryLayer == null) { displayRequirements(); return; }
 
-		//    //LayerManager.AddNewLayer("NEW_BATHYMETRY", LayerManager.GeoType.polygon, (layer) => fillGaps(layer, playAreaLayer, countriesLayer, bathymetryLayer));
+		//    //LayerManager.Instance.AddNewLayer("NEW_BATHYMETRY", LayerManager.GeoType.polygon, (layer) => fillGaps(layer, playAreaLayer, countriesLayer, bathymetryLayer));
 		//}
 
 		//private static void displayRequirements()

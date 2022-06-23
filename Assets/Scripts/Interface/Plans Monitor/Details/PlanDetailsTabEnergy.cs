@@ -49,7 +49,7 @@ namespace MSP2050.Scripts
 		{
 			base.BeginEditing(plan);
 
-			removedCables = LayerManager.ForceEnergyLayersActiveUpTo(plan);
+			removedCables = LayerManager.Instance.ForceEnergyLayersActiveUpTo(plan);
 			emptyContentOverlay.SetActive(false);
 
 			energyGridBackup = lockedPlan.energyGrids;
@@ -64,7 +64,7 @@ namespace MSP2050.Scripts
 			foreach (EnergyGrid grid in energyGridsBeforePlan)
 				lockedPlan.removedGrids.Add(grid.persistentID);
 
-			foreach (AbstractLayer layer in LayerManager.energyLayers)
+			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 			{
 				if (layer.editingType == AbstractLayer.EditingType.Socket)
 				{
@@ -145,7 +145,7 @@ namespace MSP2050.Scripts
 
 			lockedPlan.energyGrids = energyGridBackup;
 			lockedPlan.removedGrids = energyGridRemovedBackup;
-			LayerManager.RestoreRemovedCables(removedCables);
+			LayerManager.Instance.RestoreRemovedCables(removedCables);
 
 			lockedPlan.AttemptUnlock();
 			StopEditing();

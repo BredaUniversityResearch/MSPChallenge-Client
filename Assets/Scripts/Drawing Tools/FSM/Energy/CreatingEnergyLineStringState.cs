@@ -15,18 +15,18 @@ namespace MSP2050.Scripts
 			if (cable.connections[0].point.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 			{
 				//All points except sourcepoints are non-reference
-				foreach (AbstractLayer layer in LayerManager.energyLayers)
+				foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 				{
 					if (layer.greenEnergy == cable.Entity.Layer.greenEnergy &&
 					    (layer.editingType == AbstractLayer.EditingType.Socket ||
 					     layer.editingType == AbstractLayer.EditingType.Transformer))
-						LayerManager.AddNonReferenceLayer(layer, true);
+						LayerManager.Instance.AddNonReferenceLayer(layer, true);
 				}
 			}
 			else
 			{
 				//All points are non-reference
-				foreach (AbstractLayer layer in LayerManager.energyLayers)
+				foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 				{
 					if (layer.greenEnergy == cable.Entity.Layer.greenEnergy)
 					{
@@ -34,13 +34,13 @@ namespace MSP2050.Scripts
 						{
 							//Get and add the centerpoint layer
 							EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;   
-							LayerManager.AddNonReferenceLayer(polyLayer.centerPointLayer, true);
+							LayerManager.Instance.AddNonReferenceLayer(polyLayer.centerPointLayer, true);
 						}
 						else if (layer.editingType == AbstractLayer.EditingType.SourcePoint ||
 						         layer.editingType == AbstractLayer.EditingType.Socket ||
 						         layer.editingType == AbstractLayer.EditingType.Transformer)
 						{
-							LayerManager.AddNonReferenceLayer(layer, true);
+							LayerManager.Instance.AddNonReferenceLayer(layer, true);
 						}
 					}
 				}
@@ -52,7 +52,7 @@ namespace MSP2050.Scripts
 		protected override bool ClickingWouldFinishDrawing(Vector3 position, out Vector3 snappingPoint, out bool drawAsInvalid)
 		{
 			EnergyLineStringSubEntity cable = subEntity as EnergyLineStringSubEntity;
-			EnergyPointSubEntity point = LayerManager.GetEnergyPointAtPosition(position);
+			EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(position);
 			if (point != null)
 			{
 				snappingPoint = point.GetPosition();
@@ -77,7 +77,7 @@ namespace MSP2050.Scripts
 			AudioMain.PlaySound(AudioMain.ITEM_PLACED);
 
 			EnergyLineStringSubEntity cable = subEntity as EnergyLineStringSubEntity;
-			EnergyPointSubEntity point = LayerManager.GetEnergyPointAtPosition(finalPosition);
+			EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(finalPosition);
 			if (point != null)
 			{
 				if (point.CanConnectToEnergySubEntity(cable.connections.First().point))
@@ -141,7 +141,7 @@ namespace MSP2050.Scripts
 
 		public override void ExitState(Vector3 currentMousePosition)
 		{
-			LayerManager.SetNonReferenceLayers(new HashSet<AbstractLayer>() { PlanDetails.LayersTab.CurrentlyEditingBaseLayer }, false, true);
+			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { PlanDetails.LayersTab.CurrentlyEditingBaseLayer }, false, true);
 			base.ExitState(currentMousePosition);
 		}
 	}

@@ -530,7 +530,7 @@ namespace MSP2050.Scripts
 		protected Vector3 getSnappedMousePosition(Vector3 mousePosition)
 		{
 			List<SubEntity> subEntities = new List<SubEntity>();
-			List<AbstractLayer> visibleLayers = LayerManager.GetVisibleLayersSortedByDepth();
+			List<AbstractLayer> visibleLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth();
 
 			foreach (AbstractLayer layer in visibleLayers)
 			{

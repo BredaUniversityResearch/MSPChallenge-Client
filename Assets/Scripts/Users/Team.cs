@@ -29,7 +29,7 @@ namespace MSP2050.Scripts
 		//public bool AssignEEZ()
 		//{
 		//    EEZ = new List<Entity>();
-		//    PolygonLayer eezLayer = LayerManager.EEZLayer;
+		//    PolygonLayer eezLayer = LayerManager.Instance.EEZLayer;
 
 		//    if (eezLayer == null)
 		//    {

@@ -150,7 +150,7 @@ namespace MSP2050.Scripts
 
 		public static void AllLayersImported()
 		{
-			LayerManager.FinishedImportingLayers();
+			LayerManager.Instance.FinishedImportingLayers();
 			if (OnFinishedLoadingLayers != null)
 			{
 				OnFinishedLoadingLayers();

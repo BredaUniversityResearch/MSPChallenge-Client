@@ -498,9 +498,9 @@ namespace MSP2050.Scripts
 
 		private void ToggleRelevantPlanIssueLayer(Plan currentPlan, AbstractLayer layer)
 		{
-			if (!LayerManager.LayerIsVisible(layer))
+			if (!LayerManager.Instance.LayerIsVisible(layer))
 			{
-				LayerManager.ShowLayer(layer);
+				LayerManager.Instance.ShowLayer(layer);
 			}
 			else
 			{
@@ -509,7 +509,7 @@ namespace MSP2050.Scripts
 					//Only toggle layers off if they aren't in the current plan.
 					if (currentPlan.PlanLayers.Find(obj => obj.BaseLayer == layer) == null)
 					{
-						LayerManager.HideLayer(layer);
+						LayerManager.Instance.HideLayer(layer);
 					}
 				}
 			}
