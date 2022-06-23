@@ -86,6 +86,11 @@ namespace MSP2050.Scripts
 				DialogBoxManager.instance.NotificationWindow("Connecting failed", "Session has been archived or initialization failed.", null, "Continue");
 				return;
 			}
+			else if (string.IsNullOrEmpty(a_session.game_ws_server_address))
+			{
+				DialogBoxManager.instance.NotificationWindow("Connecting failed", "The selected session is not compatible with the current client version", null, "Continue");
+				return;
+			}
 
 			//Set server settings to session
 			Server.Host = a_session.game_server_address;
