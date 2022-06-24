@@ -168,7 +168,7 @@ namespace MSP2050.Scripts
 
 		private void playSoundEffect(string audioID)
 		{
-			AudioSource audioSource = AudioMain.GetAudioSource(audioID);
+			AudioSource audioSource = AudioMain.Instance.GetAudioSource(audioID);
 			if (audioSource != null && !audioSource.isPlaying)
 			{
 				audioSource.Play();

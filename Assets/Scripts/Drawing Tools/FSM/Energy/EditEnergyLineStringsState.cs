@@ -143,7 +143,7 @@ namespace MSP2050.Scripts
 		{
 			if (draggingSelection)
 			{
-				AudioMain.PlaySound(AudioMain.ITEM_MOVED);
+				AudioMain.Instance.PlaySound(AudioMain.ITEM_MOVED);
 				draggingSelection = false;
 
 				//Handle start and endpoint movement if those were selected

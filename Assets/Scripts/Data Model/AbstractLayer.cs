@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 			Selectable = layerMeta.layer_selectable;
 			Editable = layerMeta.layer_editable;
 			Toggleable = layerMeta.layer_toggleable;
-			ActiveOnStart = layerMeta.layer_active_on_start || Main.LayerVisibleForCurrentExpertise(layerMeta.layer_name);
+			ActiveOnStart = layerMeta.layer_active_on_start || Main.Instance.LayerVisibleForCurrentExpertise(layerMeta.layer_name);
 			greenEnergy = layerMeta.layer_green == 1;
 			Optimized = !Selectable && !Editable && !Toggleable && ActiveOnStart;
 
@@ -169,7 +169,7 @@ namespace MSP2050.Scripts
 					return valueConversions.ConvertUnit(data.UsedCapacity, ValueConversionCollection.UNIT_WATT).FormatAsString() + " / " + valueConversions.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString();
 				});
 			}
-			//if (Main.LayerSelectedForCurrentExpertise(layerMeta.layer_name))
+			//if (Main.Instance.LayerSelectedForCurrentExpertise(layerMeta.layer_name))
 			//    InterfaceCanvas.instance.activeLayers.AddLayer(this);
 		}
 

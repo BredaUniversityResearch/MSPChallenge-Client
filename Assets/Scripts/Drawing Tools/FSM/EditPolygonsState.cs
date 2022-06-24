@@ -277,7 +277,7 @@ namespace MSP2050.Scripts
 				// case 2: clicked on a line + shift isn't pressed: add a point on the line and select the new point
 				if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
 				{
-					AudioMain.PlaySound(AudioMain.ITEM_PLACED);
+					AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
 					int lineA, lineB;
 					PolygonSubEntity subEntity;
@@ -746,7 +746,7 @@ namespace MSP2050.Scripts
 		{
 			if (draggingSelection)
 			{
-				AudioMain.PlaySound(AudioMain.ITEM_MOVED);
+				AudioMain.Instance.PlaySound(AudioMain.ITEM_MOVED);
 
 				//TODO: Update restriction polygon
 				updateSelectionDragPositions(dragFinalPosition - dragStartPosition, true);

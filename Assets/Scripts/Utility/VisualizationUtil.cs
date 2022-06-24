@@ -45,7 +45,17 @@ namespace MSP2050.Scripts
 		[HideInInspector] public float DisplayScale = 185f;
 		[HideInInspector] public float pointResolutionScale = 1f;
 		[HideInInspector] public float textResolutionScale = 1f;
-		private Camera camera = Camera.main;
+
+		private Camera camera;
+		private Camera Camera
+		{
+			get
+			{
+				if (camera == null)
+					camera = Camera.main;
+				return camera;
+			}
+		}
 
 		void Awake()
 		{
@@ -82,7 +92,7 @@ namespace MSP2050.Scripts
 
 		public float GetSelectMaxDistance()
 		{
-			return SELECT_MAX_DISTANCE * camera.orthographicSize * 2 / Screen.height;
+			return SELECT_MAX_DISTANCE * Camera.orthographicSize * 2 / Screen.height;
 		}
 
 		public float GetSelectMaxDistancePolygon()
@@ -92,12 +102,12 @@ namespace MSP2050.Scripts
 
 		public float GetMouseMoveThreshold()
 		{
-			return MOUSE_MOVE_THRESHOLD * camera.orthographicSize * 2 / Screen.height;
+			return MOUSE_MOVE_THRESHOLD * Camera.orthographicSize * 2 / Screen.height;
 		}
 
 		public void UpdateDisplayScale()
 		{
-			DisplayScale = camera.orthographicSize * 2.0f / Screen.height * 100.0f;
+			DisplayScale = Camera.orthographicSize * 2.0f / Screen.height * 100.0f;
 			pointResolutionScale = Screen.height / 1080f;
 			textResolutionScale = Screen.height / (1080f * 20f);
 			InterfaceCanvas.SetLineMaterialTiling(1f / (DisplayScale / 5f));

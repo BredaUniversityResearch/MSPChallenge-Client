@@ -47,10 +47,10 @@ namespace MSP2050.Scripts
 
 		private void OnDestroy()
 		{
-			if (shouldFollowCurrentDate)
-			{
-				TimeManager.Instance.OnCurrentMonthChanged -= OnMonthChanged;
-			}
+			//if (shouldFollowCurrentDate)
+			//{
+			//	TimeManager.Instance.OnCurrentMonthChanged -= OnMonthChanged;
+			//}
 			if (matchingWindow != null)
 				matchingWindow.UnRegisterResizeHandler(this);
 		}

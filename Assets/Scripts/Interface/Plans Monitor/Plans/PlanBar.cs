@@ -27,7 +27,7 @@ namespace MSP2050.Scripts
 			this.planRepresenting = planRepresenting;
 			viewButton.onClick.AddListener(() =>
 			{
-				if (!Main.InEditMode && !Main.EditingPlanDetailsContent)
+				if (!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
 				{
 					//if (planRepresenting.State == Plan.PlanState.DESIGN)
 					//{

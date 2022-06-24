@@ -760,7 +760,7 @@ namespace MSP2050.Scripts
 				drawMode = SubEntityDrawMode.PlanReference;			
 			}
 
-			if (InvalidPoints != null /*&& Main.InEditMode && Main.CurrentlyEditingBaseLayer == Entity.Layer*/)
+			if (InvalidPoints != null /*&& Main.InEditMode && Main.Instance.CurrentlyEditingBaseLayer == Entity.Layer*/)
 			{
 				if (drawMode == SubEntityDrawMode.BeingCreated)
 				{
@@ -1243,14 +1243,14 @@ namespace MSP2050.Scripts
 			if (!HasClockwiseWindingOrder())
 			{
 				for (int i = 0; i < polygon.Count; i++)
-					polygonPoints[0][i] = Main.ConvertToGeoJSONCoordinate(new double[] {(double) polygon[i].x * 1000, (double) polygon[i].y * 1000});
+					polygonPoints[0][i] = Main.Instance.ConvertToGeoJSONCoordinate(new double[] {(double) polygon[i].x * 1000, (double) polygon[i].y * 1000});
 			}
 			else
 			{
 				int j = 0;
 				for (int i = polygon.Count - 1; i >= 0; i--)
 				{
-					polygonPoints[0][j] = Main.ConvertToGeoJSONCoordinate(new double[] {(double) polygon[i].x * 1000, (double) polygon[i].y * 1000});
+					polygonPoints[0][j] = Main.Instance.ConvertToGeoJSONCoordinate(new double[] {(double) polygon[i].x * 1000, (double) polygon[i].y * 1000});
 					j++;
 				}
 			}

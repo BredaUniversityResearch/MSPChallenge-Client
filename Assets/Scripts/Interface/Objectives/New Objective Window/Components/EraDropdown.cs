@@ -31,20 +31,6 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			if (SessionManager.Instance.MspGlobalData != null)
-			{
-				PopulateOptions();
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += OnGlobalDataLoaded;
-			}
-
-		}
-
-		private void OnGlobalDataLoaded()
-		{
-			Main.OnGlobalDataLoaded -= OnGlobalDataLoaded;
 			PopulateOptions();
 		}
 

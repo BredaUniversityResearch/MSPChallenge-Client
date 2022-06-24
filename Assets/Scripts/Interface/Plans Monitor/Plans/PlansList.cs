@@ -348,8 +348,8 @@ namespace MSP2050.Scripts
 				//planBar.SetViewEditButtonState(!planRepresenting.InInfluencingState);
 				planBar.SetViewEditButtonState(false);
 			}
-			planBar.SetViewEditButtonInteractable(!Main.InEditMode && !Main.EditingPlanDetailsContent && !Main.PreventPlanAndTabChange);
-			planBar.SetPlanBarToggleInteractability(!Main.InEditMode && !Main.EditingPlanDetailsContent && !Main.PreventPlanAndTabChange);
+			planBar.SetViewEditButtonInteractable(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent && !Main.Instance.PreventPlanAndTabChange);
+			planBar.SetPlanBarToggleInteractability(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent && !Main.Instance.PreventPlanAndTabChange);
 		}
 	}
 }

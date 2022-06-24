@@ -45,20 +45,8 @@ namespace MSP2050.Scripts
 
 			AddTooltip tooltip = layerTab.toggle.gameObject.AddComponent<AddTooltip>();
 			tooltip.text = layer.Tooltip;
-
-			//layerTab.barButton.onClick.AddListener(() =>
-			//{
-			//	if (layerTab.toggle.isOn)
-			//	{
-			//		LayerManager.Instance.HideLayer(layer);
-			//	}
-			//	else
-			//	{
-			//		LayerManager.Instance.ShowLayer(layer);
-			//	}
-			//});
-
-			if (layer.Toggleable == false && Main.IsDeveloper == false)
+			
+			if (!layer.Toggleable && !Main.IsDeveloper)
 			{
 				layerTab.gameObject.SetActive(false);
 			}

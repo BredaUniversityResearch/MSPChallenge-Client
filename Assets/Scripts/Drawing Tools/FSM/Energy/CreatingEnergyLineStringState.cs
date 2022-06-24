@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 
 		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
 		{
-			AudioMain.PlaySound(AudioMain.ITEM_PLACED);
+			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
 			EnergyLineStringSubEntity cable = subEntity as EnergyLineStringSubEntity;
 			EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(finalPosition);

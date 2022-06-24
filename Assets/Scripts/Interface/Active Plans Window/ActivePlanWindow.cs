@@ -48,7 +48,7 @@ namespace MSP2050.Scripts
 		private Dictionary<EntityType, ActivePlanLayerType> layerTypes;
 		private ActivePlanLayerType multipleTypesEntry;
 		private bool multiType;
-		private bool ignoreLayerTypeCallback;//Used to ignore callbacks from above (Main.StartEditingLayer) and below (ActivePlanLayer.toggle)
+		private bool ignoreLayerTypeCallback;//Used to ignore callbacks from above (Main.Instance.StartEditingLayer) and below (ActivePlanLayer.toggle)
 
 		[Header("Country")]
 		public GameObject countrySection;
@@ -118,7 +118,7 @@ namespace MSP2050.Scripts
 
 		private bool OnAttemptHideWindow()
 		{
-			if (Main.InEditMode || Main.EditingPlanDetailsContent)
+			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 			{
 				if (cancelChangesConfirmationWindow == null || !cancelChangesConfirmationWindow.isActiveAndEnabled)
 				{
@@ -173,7 +173,7 @@ namespace MSP2050.Scripts
 
 		public void UpdateEditButtonActivity()
 		{
-			startEditingButton.gameObject.SetActive(!Main.InEditMode && !Main.EditingPlanDetailsContent
+			startEditingButton.gameObject.SetActive(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent
 			                                                         && selectedPlan != null 
 			                                                         && selectedPlan.State == Plan.PlanState.DESIGN
 			                                                         && (SessionManager.Instance.AreWeManager || selectedPlan.Country == SessionManager.Instance.CurrentUserTeamID)
@@ -270,7 +270,7 @@ namespace MSP2050.Scripts
 			if (ignoreLayerCallback)
 				return;
 
-			//Ignore callback from Main.StartEditingLayer
+			//Ignore callback from Main.Instance.StartEditingLayer
 			ignoreLayerCallback = true;
 			PlanDetails.LayersTab.StartEditingLayer(planLayer);
 			ignoreLayerCallback = false;

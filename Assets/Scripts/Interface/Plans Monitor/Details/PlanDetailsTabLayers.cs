@@ -83,20 +83,20 @@ namespace MSP2050.Scripts
 			LayerManager.Instance.ShowLayer(layer.BaseLayer);
 
 			if (!calledByUndo)
-				Main.FSM.SetInterruptState(null);
+				Main.Instance.fsm.SetInterruptState(null);
 
 			if (currentlyEditingLayer != null)
 			{
 				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
 				if (!calledByUndo)
-					Main.FSM.AddToUndoStack(new SwitchLayerOperation(currentlyEditingLayer, layer));
+					Main.Instance.fsm.AddToUndoStack(new SwitchLayerOperation(currentlyEditingLayer, layer));
 			}
 
 			InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
 			InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(layer.BaseLayer, true);
 			currentlyEditingLayer = layer;
 			InterfaceCanvas.Instance.StartEditingLayer(layer.BaseLayer);
-			Main.FSM.StartEditingLayer(layer);
+			Main.Instance.fsm.StartEditingLayer(layer);
 			LayerManager.Instance.RedrawVisibleLayers();
 		}
 
@@ -108,7 +108,7 @@ namespace MSP2050.Scripts
 		public override void CancelChangesAndUnlock()
 		{
 			//This already unlocks and calls StoppedEditingSuccessfully if succesful
-			Main.FSM.UndoAllAndClearStacks();
+			Main.Instance.fsm.UndoAllAndClearStacks();
 			lockedPlan.energyGrids = energyGridBackup;
 			lockedPlan.removedGrids = energyGridRemovedBackup;
 			if (issuesBackup != null)
@@ -199,7 +199,7 @@ namespace MSP2050.Scripts
 		private void CalculateEffectsOfEditing()
 		{
 			//Aborts any geometry being created
-			Main.FSM.AbortCurrentState();
+			Main.Instance.fsm.AbortCurrentState();
 
 			//Check invalid geometry
 			SubEntity invalid = lockedPlan.CheckForInvalidGeometry();
@@ -286,7 +286,7 @@ namespace MSP2050.Scripts
 
 			//Submit all geometry changes 
 			//Automatically submits corresponding energy_output and connection for geom. 
-			Main.FSM.SubmitAllChanges(batch);
+			Main.Instance.fsm.SubmitAllChanges(batch);
 
 			//If energy plan, submit grid content after geometry has at least a batch id
 			if (lockedPlan.energyPlan && lockedPlan.energyGrids.Count > 0)
@@ -307,7 +307,7 @@ namespace MSP2050.Scripts
 		protected override void HandleChangesSubmissionSuccess(BatchRequest batch)
 		{
 			countriesAffectedByRemovedGrids = null;
-			Main.FSM.ClearUndoRedoAndFinishEditing();
+			Main.Instance.fsm.ClearUndoRedoAndFinishEditing();
 			base.HandleChangesSubmissionSuccess(batch);
 		}
 
@@ -343,7 +343,7 @@ namespace MSP2050.Scripts
 			base.StopEditing();
 
 			InterfaceCanvas.Instance.StopEditing();
-			Main.FSM.StopEditing();
+			Main.Instance.fsm.StopEditing();
 
 			currentlyEditingLayer = null;
 			energyGridBackup = null;

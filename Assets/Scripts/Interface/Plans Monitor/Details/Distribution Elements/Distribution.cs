@@ -129,7 +129,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < energyDistribution.Count; i++)
 			{
 				EnergyGrid.GridPlanState state = energyDistribution[i].GetGridPlanStateAtPlan(plan);
-				if (state == EnergyGrid.GridPlanState.Hidden || (!Main.EditingPlanDetailsContent && state == EnergyGrid.GridPlanState.Normal))
+				if (state == EnergyGrid.GridPlanState.Hidden || (!Main.Instance.EditingPlanDetailsContent && state == EnergyGrid.GridPlanState.Normal))
 					continue;
 
 				if (j < groups.Count)

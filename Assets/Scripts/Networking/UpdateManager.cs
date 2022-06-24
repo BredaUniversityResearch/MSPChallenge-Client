@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 
 			// process the first update(s)
 			ProcessUpdates(m_NextUpdates);
-			Main.FirstUpdateTickComplete();
+			Main.Instance.FirstUpdateTickComplete();
 		}
 
 		public IEnumerator GetUpdates()
@@ -201,7 +201,7 @@ namespace MSP2050.Scripts
 
 			PlanDetails.AddFeedbackFromServer(a_Update.planmessages);
 
-			if (PlanManager.Instance.planViewing != null && !Main.InEditMode && !Main.EditingPlanDetailsContent)
+			if (PlanManager.Instance.planViewing != null && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
 			{
 				int viewingTime = PlanManager.Instance.planViewing.StartTime;
 				foreach (KeyValuePair<AbstractLayer, int> kvp in layerUpdateTimes)

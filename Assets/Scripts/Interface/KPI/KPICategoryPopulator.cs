@@ -55,12 +55,11 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			Main.OnPostFinishedLoadingLayers += OnGameFinishedLoading;	
+			Main.Instance.OnPostFinishedLoadingLayers += OnGameFinishedLoading;	
 		}
 
 		private void OnGameFinishedLoading()
 		{
-			Main.OnPostFinishedLoadingLayers -= OnGameFinishedLoading;
 			Initialise();
 		}
 

@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 
 		public void Start()
 		{
-			LayerImporter.OnDoneImporting += OptimizeLayers;
+			Main.Instance.OnFinishedLoadingLayers += OptimizeLayers;
 		}
 
 		public void Update()

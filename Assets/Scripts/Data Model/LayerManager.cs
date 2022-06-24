@@ -307,7 +307,7 @@ namespace MSP2050.Scripts
 				{
 					ShowLayer(layer);
 				}
-				else if (Main.LayerSelectedForCurrentExpertise(layer.FileName))
+				else if (Main.Instance.LayerSelectedForCurrentExpertise(layer.FileName))
 				{
 					InterfaceCanvas.Instance.activeLayers.AddLayer(layer, false);
 				}
@@ -753,7 +753,7 @@ namespace MSP2050.Scripts
 		public void UpdateVisibleLayersFromPlan(Plan plan)
 		{
 			//Dont update layers while in edit mode, quickly causes errors
-			if (Main.InEditMode || Main.EditingPlanDetailsContent)
+			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 				return;
 
 			//Only update if we are viewing the plan or one further in the future

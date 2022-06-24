@@ -89,7 +89,7 @@ namespace MSP2050.Scripts
 			if (planObject.type != null)
 			{
 				string[] types = planObject.type.Split(',');
-				energyPlan = types[0] == "1" && Main.IsSimulationConfigured(ESimulationType.CEL); //MSP-1856, Energy plans only valid when CEL is configured.
+				energyPlan = types[0] == "1" && Main.Instance.IsSimulationConfigured(ESimulationType.CEL); //MSP-1856, Energy plans only valid when CEL is configured.
 				ecologyPlan = types[1] == "1";
 				shippingPlan = types[2] == "1";
 			}
@@ -245,7 +245,7 @@ namespace MSP2050.Scripts
 				if (State != PlanState.DESIGN)
 				{
 					bool editingLayers = Main.CurrentlyEditingPlan != null && Main.CurrentlyEditingPlan.ID == updatedData.id;
-					bool editingContent = Main.EditingPlanDetailsContent && PlanDetails.GetSelectedPlan().ID == updatedData.id;
+					bool editingContent = Main.Instance.EditingPlanDetailsContent && PlanDetails.GetSelectedPlan().ID == updatedData.id;
 					//Cancel editing if we were editing it before
 					if (editingLayers || editingContent)
 					{

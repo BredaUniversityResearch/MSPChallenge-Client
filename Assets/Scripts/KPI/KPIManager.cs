@@ -28,7 +28,7 @@ namespace MSP2050.Scripts
 				Destroy(this);
 			else
 				singleton = this;
-			Main.OnFinishedLoadingLayers += CreateGeometryKPI;
+			Main.Instance.OnFinishedLoadingLayers += CreateGeometryKPI;
 		}
 
 		void OnDestroy()
@@ -38,7 +38,7 @@ namespace MSP2050.Scripts
 
 		public void CreateEnergyKPIs()
 		{
-			if (Main.IsSimulationConfigured(ESimulationType.CEL))
+			if (Main.Instance.IsSimulationConfigured(ESimulationType.CEL))
 			{
 				//Initialise KPIs
 				foreach (Team team in SessionManager.Instance.GetTeams())
@@ -128,7 +128,7 @@ namespace MSP2050.Scripts
 
 		public void CreateEcologyKPIs(JObject melConfig)
 		{
-			if (Main.IsSimulationConfigured(ESimulationType.MEL))
+			if (Main.Instance.IsSimulationConfigured(ESimulationType.MEL))
 			{
 				KPICategoryDefinition[] categoryDefinitions = melConfig["ecologyCategories"].ToObject<KPICategoryDefinition[]>();
 				ecologyKPI = new KPIValueCollection();
@@ -139,7 +139,7 @@ namespace MSP2050.Scripts
 
 		internal void CreateShippingKPIBars(KPICategoryDefinition[] categories)
 		{
-			if (Main.IsSimulationConfigured(ESimulationType.SEL))
+			if (Main.Instance.IsSimulationConfigured(ESimulationType.SEL))
 			{
 				shippingKPI = new CountryKPICollectionShipping();
 				shippingKPI.SetupKPIValues(categories, SessionManager.Instance.MspGlobalData.session_end_month);
@@ -148,7 +148,7 @@ namespace MSP2050.Scripts
 
 		public void ReceiveEcologyKPIUpdate(EcologyKPIObject[] objects)
 		{
-			if (Main.IsSimulationConfigured(ESimulationType.MEL))
+			if (Main.Instance.IsSimulationConfigured(ESimulationType.MEL))
 			{
 				ecologyKPI.ProcessReceivedKPIData(objects);
 			}

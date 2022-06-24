@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 		private void Start()
 		{
 			dropdown.onValueChanged.AddListener(OnDropDownValueChanged);
-			LayerImporter.OnDoneImporting += () =>
+			Main.Instance.OnFinishedLoadingLayers += () =>
 			{
 				if (!SessionManager.Instance.AreWeGameMaster)
 					gameObject.SetActive(false);

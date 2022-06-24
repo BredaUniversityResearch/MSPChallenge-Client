@@ -99,6 +99,7 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
+			ServerCommunication.Instance.Reset();
 			if (!IsApiEndpointDropdownVisible())
 			{
 				serverEndPointDropdown.value = 0;
