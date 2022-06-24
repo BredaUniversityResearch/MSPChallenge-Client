@@ -86,7 +86,7 @@ namespace MSP2050.Scripts
 
 			if (subEntity.InvalidPoints == null)
 			{
-				AudioMain.PlaySound(AudioMain.ITEM_PLACED);
+				AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 				if (finishing)
 				{
 					fsm.AddToUndoStack(new FinalizePolygonOperation(subEntity, planLayer));

@@ -195,7 +195,7 @@ namespace MSP2050.Scripts
 		public override Feature GetGeoJSONFeature(int idToUse)
 		{
 			double[] coordinates = new double[] {(double) position.x * 1000, (double) position.y * 1000};
-			Main.ConvertToGeoJSONCoordinate(coordinates);
+			Main.Instance.ConvertToGeoJSONCoordinate(coordinates);
 			return new Feature(new Point(new Position(coordinates[0], coordinates[1])), GetGeoJSONProperties(), idToUse.ToString());
 		}
 

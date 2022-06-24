@@ -37,16 +37,9 @@ namespace MSP2050.Scripts
 		protected void Start()
 		{
 			UpdateBounds();
-
 			autoZoom = false;
-			if (SessionManager.Instance.MspGlobalData != null)
-			{
-				maximumZoomLevel = float.Parse(SessionManager.Instance.MspGlobalData.maxzoom, Localisation.NumberFormatting);
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += () => { maximumZoomLevel = float.Parse(SessionManager.Instance.MspGlobalData.maxzoom, Localisation.NumberFormatting); };
-			}
+			maximumZoomLevel = float.Parse(SessionManager.Instance.MspGlobalData.maxzoom, Localisation.NumberFormatting);
+
 		}
 
 		public void SetNewArea(BoxCollider2D collider)

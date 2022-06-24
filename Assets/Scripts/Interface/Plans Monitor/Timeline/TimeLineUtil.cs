@@ -15,19 +15,6 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			if (SessionManager.Instance.MspGlobalData != null)
-			{
-				CreateTimeLine();
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += GlobalDataLoaded;
-			}
-		}
-
-		void GlobalDataLoaded()
-		{
-			Main.OnGlobalDataLoaded -= GlobalDataLoaded;
 			CreateTimeLine();
 		}
 

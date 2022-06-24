@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
 		public const int AM_ID = 2;
 
 		private Dictionary<int, Team> teamsByID;
-		private Dictionary<string, Team> teamsByName = new Dictionary<string, Team>();
+		private Dictionary<string, Team> teamsByName;
 
 		public int TeamCount { get { return teamsByID.Count; } }
 		public int CurrentSessionID { get; set; }
@@ -113,14 +113,11 @@ namespace MSP2050.Scripts
 		public void LoadTeams(LayerMeta eezMeta)
 		{
 			teamsByID = new Dictionary<int, Team>();
-			if (LayerManager.Instance.EEZLayer == null)
-				Debug.LogError("No EEZ layer loaded. Teams cannot be determined.");
-			else
+			teamsByName = new Dictionary<string, Team>();
+
+			foreach (KeyValuePair<int, EntityTypeValues> kvp in eezMeta.layer_type)
 			{
-				foreach (KeyValuePair<int, EntityTypeValues> kvp in eezMeta.layer_type)
-				{
-					teamsByID.Add(kvp.Value.value, new Team(kvp.Value.value, Util.HexToColor(kvp.Value.polygonColor), kvp.Value.displayName));
-				}
+				teamsByID.Add(kvp.Value.value, new Team(kvp.Value.value, Util.HexToColor(kvp.Value.polygonColor), kvp.Value.displayName));
 			}
 
 			//Load manager and admin from global data

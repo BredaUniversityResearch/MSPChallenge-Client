@@ -123,24 +123,6 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			if (SessionManager.Instance.MspGlobalData != null)
-			{
-				SetXScale();
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += GlobalDataLoaded;
-			}
-		}
-
-		void GlobalDataLoaded()
-		{
-			Main.OnGlobalDataLoaded -= GlobalDataLoaded;
-			SetXScale();
-		}
-
-		void SetXScale()
-		{
 			targetGraph.xAxis.AxisMaxValue = SessionManager.Instance.MspGlobalData.session_end_month;
 		}
 

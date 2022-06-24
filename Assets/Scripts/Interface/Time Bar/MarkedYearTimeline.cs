@@ -30,20 +30,7 @@ namespace MSP2050.Scripts
 		private void Start()
 		{
 			TimeManager.Instance.OnCurrentMonthChanged += OnCurrentMonthChanged;
-
-			if (SessionManager.Instance.MspGlobalData != null)
-			{
-				SetupYearMarkers(yearSpacing);
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += OnMspGlobalDataLoaded;
-			}
-		}
-
-		private void OnDestroy()
-		{
-			TimeManager.Instance.OnCurrentMonthChanged -= OnCurrentMonthChanged;
+			SetupYearMarkers(yearSpacing);
 		}
 
 		//Callback set in Unity Editor.
@@ -72,12 +59,6 @@ namespace MSP2050.Scripts
 			{
 				availableSliderRangeFill.anchorMax = new Vector2((float)newCurrentMonth / (float)SessionManager.Instance.MspGlobalData.session_end_month, availableSliderRangeFill.anchorMax.y);
 			}
-		}
-
-		private void OnMspGlobalDataLoaded()
-		{
-			Main.OnGlobalDataLoaded -= OnMspGlobalDataLoaded;
-			SetupYearMarkers(yearSpacing);
 		}
 
 		private void SetupYearMarkers(int labelSpacingInYears)

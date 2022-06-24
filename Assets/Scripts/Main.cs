@@ -17,58 +17,84 @@ namespace MSP2050.Scripts
     public static bool IsDeveloper = false;
 #endif
 
-		public AudioMixer AudioMixer;
+		private static Main singleton;
+		public static Main Instance
+		{
+			get
+			{
+				if (singleton == null)
+					singleton = FindObjectOfType<Main>();
+				return singleton;
+			}
+		}
 
-		private static Main instance;
+		public AudioMixer audioMixer;
+		public LayerImporter layerImporter;
+		public LayerPickerUI layerPickerUI;
 
-		private FSM fsm;
-		public bool fsmActive;
-		public static FSM FSM => instance.fsm;
+		[HideInInspector] public FSM fsm;
+		[HideInInspector] public bool fsmActive;
 
-		private static bool interceptQuit = true;
-		private static bool editingPlanDetailsContent = false;
-		private static bool preventPlanAndTabChange = false;
+		private bool interceptQuit = true;
+		private bool editingPlanDetailsContent = false;
+		private bool preventPlanAndTabChange = false;
 
-		private static ProjectionInfo mspCoordinateProjection;
-		private static ProjectionInfo geoJSONCoordinateProjection;
-		public static int currentExpertiseIndex;
-		public static MspGlobalData MspGlobalData { get; set; }
-		public static SELGameClientConfig SelConfig{ get; set; }
+		private ProjectionInfo mspCoordinateProjection;
+		private ProjectionInfo geoJSONCoordinateProjection;
+		[HideInInspector] public int currentExpertiseIndex;
+		[HideInInspector] public SELGameClientConfig SelConfig{ get; set; }
 
 		private ESimulationType availableSimulations;
 
-		public delegate void GlobalDataLoadedDelegate();
-		public static event GlobalDataLoadedDelegate OnGlobalDataLoaded;
-		public static event Action OnFinishedLoadingLayers; //Called when we finished loading all layers and right before the first tick is requested.
-		public static event Action OnPostFinishedLoadingLayers;
+		[HideInInspector] public event Action OnFinishedLoadingLayers; //Called when we finished loading all layers and right before the first tick is requested.
+		[HideInInspector] public event Action OnPostFinishedLoadingLayers;
 
-		protected void Start()
+		protected void Awake()
 		{
-			instance = this;
+			if (singleton != null && singleton != this)
+				Destroy(this);
+			else
+				singleton = this;
+
 			System.Threading.Thread.CurrentThread.CurrentCulture = Localisation.NumberFormatting;
         
 			//Setup projection parameters for later conversion
 			mspCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs");
 			geoJSONCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
 
-			GameSettings.Instance.SetAudioMixer(AudioMixer);
+			GameSettings.Instance.SetAudioMixer(audioMixer);
 
 			fsm = new FSM();
 			fsmActive = true;
+			Application.wantsToQuit += OnApplicationQuit;
 
-			GlobalDataLoaded();
-			Application.wantsToQuit += () => 
+			currentExpertiseIndex = PlayerPrefs.GetInt(LoginMenu.LOGIN_EXPERTISE_INDEX_STR, -1);
+			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
+			if (SessionManager.Instance.MspGlobalData.expertise_definitions != null)
+				InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = true;
+			ParseAvailableSimulations(SessionManager.Instance.MspGlobalData.configured_simulations);
+			InterfaceCanvas.Instance.SetRegionWithName(SessionManager.Instance.MspGlobalData.region);
+
+			if (SessionManager.Instance.MspGlobalData.dependencies != null)
+				InterfaceCanvas.Instance.ImpactToolGraph.Initialise(SessionManager.Instance.MspGlobalData.dependencies);
+		}
+
+		void OnDestroy()
+		{
+			Application.wantsToQuit -= OnApplicationQuit;
+		}
+
+		bool OnApplicationQuit()
+		{
+			if (interceptQuit)
 			{
-				if (interceptQuit)
-				{
-					NetworkForm form = new NetworkForm();
-					form.AddField("session_id", SessionManager.Instance.CurrentSessionID);
-					ServerCommunication.Instance.DoPriorityRequest(Server.CloseSession(), form, CloseSessionSuccess, CloseSessionFail);
-					UpdateManager.Instance.WsServerCommunicationInteractor?.Stop();
-					//StartCoroutine(QuitAtEndOfFrame());
-				}
-				return !interceptQuit;
-			};
+				NetworkForm form = new NetworkForm();
+				form.AddField("session_id", SessionManager.Instance.CurrentSessionID);
+				ServerCommunication.Instance.DoPriorityRequest(Server.CloseSession(), form, CloseSessionSuccess, CloseSessionFail);
+				UpdateManager.Instance?.WsServerCommunicationInteractor?.Stop();
+				//StartCoroutine(QuitAtEndOfFrame());
+			}
+			return !interceptQuit;
 		}
 
 		void CloseSessionSuccess(string result)
@@ -91,18 +117,15 @@ namespace MSP2050.Scripts
 
 		public static void QuitGame()
 		{       
-			if (instance != null)
+			if (Instance != null)
 			{
 				NetworkForm form = new NetworkForm();
 				form.AddField("session_id", SessionManager.Instance.CurrentSessionID);
-				ServerCommunication.Instance.DoPriorityRequest(Server.CloseSession(), form, instance.CloseSessionSuccess, instance.CloseSessionFail);
+				ServerCommunication.Instance.DoPriorityRequest(Server.CloseSession(), form, Instance.CloseSessionSuccess, Instance.CloseSessionFail);
 				UpdateManager.Instance.WsServerCommunicationInteractor?.Stop();
 			}
 			else
 			{
-				interceptQuit = false;
-				if (InterfaceCanvas.Instance != null)
-					InterfaceCanvas.Instance.unLoadingScreen.Activate();
 				Application.Quit();
 			}
 		}
@@ -118,52 +141,33 @@ namespace MSP2050.Scripts
 			MaterialManager.Instance.Update();
 		}
 
-		void GlobalDataLoaded()
+		public void AllLayersImported()
 		{
-			currentExpertiseIndex = PlayerPrefs.GetInt(LoginMenu.LOGIN_EXPERTISE_INDEX_STR, -1);
-			ImportLayers();
-			if (MspGlobalData.expertise_definitions != null)
-				InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = true;
-			ParseAvailableSimulations(MspGlobalData.configured_simulations);
-			InterfaceCanvas.Instance.SetRegionWithName(MspGlobalData.region);
-
-			if(MspGlobalData.dependencies != null)
-				InterfaceCanvas.Instance.ImpactToolGraph.Initialise(MspGlobalData.dependencies);
-
-			if (OnGlobalDataLoaded != null)
-			{
-				OnGlobalDataLoaded();
-			}
-		}
-
-		public static void AllLayersImported()
-		{
+			layerPickerUI = null;
 			LayerManager.Instance.FinishedImportingLayers();
 			if (OnFinishedLoadingLayers != null)
 			{
 				OnFinishedLoadingLayers();
+				OnFinishedLoadingLayers = null;
 			}
 
 			if (OnPostFinishedLoadingLayers != null)
+			{
 				OnPostFinishedLoadingLayers();
+				OnPostFinishedLoadingLayers = null;
+			}
 
-			//TeamManager.SetEEZs();
 			LayerInterface.SortLayerToggles();
 			InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("Existing plans");
-			instance.StartCoroutine(UpdateManager.Instance.GetFirstUpdate());
+			StartCoroutine(UpdateManager.Instance.GetFirstUpdate());
 
 			ConstraintManager.Instance.LoadRestrictions();
 		}
 
-		public static void FirstUpdateTickComplete()
+		public void FirstUpdateTickComplete()
 		{
 			InterfaceCanvas.Instance.loadingScreen.OnFinishedLoading();
-			instance.StartCoroutine(UpdateManager.Instance.GetUpdates());
-		}
-
-		public void ImportLayers()
-		{
-			LayerImporter.ImportLayerMetaData();
+			StartCoroutine(UpdateManager.Instance.GetUpdates());
 		}
 
 		public static Plan CurrentlyEditingPlan
@@ -176,13 +180,13 @@ namespace MSP2050.Scripts
 			get { return CurrentlyEditingPlan != null; }
 		}
 
-		public static bool EditingPlanDetailsContent
+		public bool EditingPlanDetailsContent
 		{
 			get { return editingPlanDetailsContent; }
 			set { editingPlanDetailsContent = value; }
 		}
 
-		public static bool PreventPlanAndTabChange
+		public bool PreventPlanAndTabChange
 		{
 			get { return preventPlanAndTabChange; }
 			set { preventPlanAndTabChange = value; }
@@ -209,14 +213,14 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static bool IsSimulationConfigured(ESimulationType simulationType)
+		public bool IsSimulationConfigured(ESimulationType simulationType)
 		{
-			return (instance.availableSimulations & simulationType) == simulationType;
+			return (availableSimulations & simulationType) == simulationType;
 		}
 
-		public static void GetRealWorldMousePosition(out double x, out double y)
+		public void GetRealWorldMousePosition(out double x, out double y)
 		{
-			GetRealWorldPosition(instance.fsm.GetWorldMousePosition(), out x, out y);
+			GetRealWorldPosition(fsm.GetWorldMousePosition(), out x, out y);
 		}
 
 		public static void GetRealWorldPosition(Vector3 position, out double x, out double y)
@@ -225,49 +229,49 @@ namespace MSP2050.Scripts
 			y = (double)position.y * SCALE_DOUBLE;
 		}
     
-		public static FSM.CursorType CursorType
+		public FSM.CursorType CursorType
 		{
-			get { return instance.fsm.CurrentCursorType; }
-			set { instance.fsm.SetCursor(value); }
+			get { return fsm.CurrentCursorType; }
+			set { fsm.SetCursor(value); }
 		}
 
-		public static void InterruptFSMState(Func<FSM, FSMState> creationFunction)
+		public void InterruptFSMState(Func<FSM, FSMState> creationFunction)
 		{
-			instance.fsm.SetInterruptState(creationFunction.Invoke(instance.fsm));
+			fsm.SetInterruptState(creationFunction.Invoke(fsm));
 		}
 
-		public static void CancelFSMInterruptState()
+		public void CancelFSMInterruptState()
 		{
-			instance.fsm.SetInterruptState(null);
+			fsm.SetInterruptState(null);
 		}
 
-		public static bool LayerVisibleForCurrentExpertise(string layerName)
+		public bool LayerVisibleForCurrentExpertise(string layerName)
 		{
 			if (currentExpertiseIndex == -1)
 				return false;
-			foreach(var layer in MspGlobalData.expertise_definitions[currentExpertiseIndex].visible_layers)
+			foreach(var layer in SessionManager.Instance.MspGlobalData.expertise_definitions[currentExpertiseIndex].visible_layers)
 				if (layer == layerName)
 					return true;
 			return false;
 		}
 
-		public static bool LayerSelectedForCurrentExpertise(string layerName)
+		public bool LayerSelectedForCurrentExpertise(string layerName)
 		{
 			if (currentExpertiseIndex == -1)
 				return false;
-			foreach (var layer in MspGlobalData.expertise_definitions[currentExpertiseIndex].selected_layers)
+			foreach (var layer in SessionManager.Instance.MspGlobalData.expertise_definitions[currentExpertiseIndex].selected_layers)
 				if (layer == layerName)
 					return true;
 			return false;
 		}
 
-		public static double[] ConvertToGeoJSONCoordinate(double[] mspCoordinate)
+		public double[] ConvertToGeoJSONCoordinate(double[] mspCoordinate)
 		{
 			Reproject.ReprojectPoints(mspCoordinate, new double[] { 1 }, mspCoordinateProjection, geoJSONCoordinateProjection, 0, 1);
 			return mspCoordinate;
 		}
 
-		public static double[] ConvertToMSPCoordinate(double[] geoJSONCoordinate)
+		public double[] ConvertToMSPCoordinate(double[] geoJSONCoordinate)
 		{
 			Reproject.ReprojectPoints(geoJSONCoordinate, new double[] { 1 }, geoJSONCoordinateProjection, mspCoordinateProjection, 0, 1);
 			return geoJSONCoordinate;

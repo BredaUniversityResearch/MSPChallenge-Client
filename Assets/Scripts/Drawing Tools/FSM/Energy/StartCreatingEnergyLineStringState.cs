@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 			fsm.SetCurrentState(new CreatingEnergyLineStringState(fsm, planLayer, subEntity));
 			fsm.AddToUndoStack(new CreateEnergyLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Create));
  
-			AudioMain.PlaySound(AudioMain.ITEM_PLACED);
+			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 		}
 
 		public override void ExitState(Vector3 currentMousePosition)

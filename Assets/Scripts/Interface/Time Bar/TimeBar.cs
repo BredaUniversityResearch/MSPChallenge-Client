@@ -93,15 +93,7 @@ namespace MSP2050.Scripts
 
 		public void Start()
 		{
-			if (SessionManager.Instance.MspGlobalData != null)
-			{
-				CreateEraMarkers();
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += GlobalDataLoaded;
-			}
-
+			CreateEraMarkers();
 			viewTimeToggle.onValueChanged.AddListener((b) =>
 			{
 				if(b)
@@ -128,12 +120,7 @@ namespace MSP2050.Scripts
 
 			TimeManager.Instance.OnCurrentMonthChanged += OnMonthChanged;
 		}
-
-		void OnDestroy()
-		{
-			TimeManager.Instance.OnCurrentMonthChanged -= OnMonthChanged;
-		}
-
+		
 		private void OnMonthChanged(int oldCurrentMonth, int newCurrentMonth)
 		{
 			if (viewMode != WorldViewMode.Normal)
@@ -144,22 +131,12 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		void GlobalDataLoaded()
-		{
-			Main.OnGlobalDataLoaded -= GlobalDataLoaded;
-			CreateEraMarkers();
-		}
-
 		void CreateEraMarkers()
 		{
 			for (int i = 0; i < MspGlobalData.num_eras; i++)
 			{
 				TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerLocation, false);
 				markers.Add(marker);
-
-				// Set position based on month
-				//float posX = ((month + 120) / (float)GameState.EndMonth) * eraMarkerLocation.rect.width;
-				//marker.thisRectTrans.anchoredPosition = new Vector2(posX, marker.thisRectTrans.anchoredPosition.y);
 			}
 		}
 
@@ -204,7 +181,7 @@ namespace MSP2050.Scripts
 
 			if (openingViewMode)
 			{
-				if(Main.InEditMode || Main.EditingPlanDetailsContent)
+				if(Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 				{
 					DialogBoxManager.instance.NotificationWindow("Editing plan content", "View settings are unavailable while editing a plan's content. Please confirm or cancel your changes before trying again.", null);
 					ignoreActivityCallback = true;

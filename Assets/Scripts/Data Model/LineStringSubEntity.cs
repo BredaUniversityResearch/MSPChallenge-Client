@@ -643,7 +643,7 @@ namespace MSP2050.Scripts
 			//Convert line
 			double[][] linePoints = new double[m_points.Count][];
 			for (int i = 0; i < m_points.Count; i++)
-				linePoints[i] = Main.ConvertToGeoJSONCoordinate(new double[] { (double)m_points[i].x * 1000, (double)m_points[i].y * 1000 });
+				linePoints[i] = Main.Instance.ConvertToGeoJSONCoordinate(new double[] { (double)m_points[i].x * 1000, (double)m_points[i].y * 1000 });
 
 			return new Feature(new LineString(linePoints), GetGeoJSONProperties(), idToUse.ToString());
 		}

@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
+	//Non functional
 	[RequireComponent(typeof(SessionManager))]
 	public class AutomatedTestGameRunner: MonoBehaviour
 	{
@@ -24,7 +25,7 @@ namespace MSP2050.Scripts
 			Server.Endpoint = "stable";
 			teamImporter.ImportGlobalData();
 			teamImporter.OnImportComplete += OnGlobalDataImportComplete;
-			LayerImporter.OnDoneImporting += OnDoneImportingLayers;
+			//LayerImporter.OnDoneImporting += OnDoneImportingLayers; //currently disabled because unused
 		}
 
 		private void OnGlobalDataImportComplete(bool success)

@@ -7,19 +7,9 @@ namespace MSP2050.Scripts
 		[SerializeField]
 		private ESimulationType simulationType = ESimulationType.None;
 
-		private void Awake()
+		private void Start()
 		{
-			Main.OnGlobalDataLoaded += OnGlobalDataLoaded;
-		}
-
-		private void OnDestroy()
-		{
-			Main.OnGlobalDataLoaded -= OnGlobalDataLoaded;
-		}
-
-		private void OnGlobalDataLoaded()
-		{
-			gameObject.SetActive(Main.IsSimulationConfigured(simulationType));
+			gameObject.SetActive(Main.Instance.IsSimulationConfigured(simulationType));
 		}
 	}
 }

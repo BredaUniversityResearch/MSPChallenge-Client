@@ -1062,9 +1062,9 @@ namespace MSP2050.Scripts
 
         private void SetupActivityToggles()
         {
-            SetupActivityToggle(Main.IsSimulationConfigured(ESimulationType.SEL), shippingToggle);
-            SetupActivityToggle(Main.IsSimulationConfigured(ESimulationType.CEL), energyToggle);
-            SetupActivityToggle(Main.IsSimulationConfigured(ESimulationType.MEL), ecologyToggle);
+            SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.SEL), shippingToggle);
+            SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.CEL), energyToggle);
+            SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.MEL), ecologyToggle);
         }
 
         private void SetupActivityToggle(bool available, Toggle toggle)

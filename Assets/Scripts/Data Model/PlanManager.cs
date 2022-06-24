@@ -26,6 +26,12 @@ namespace MSP2050.Scripts
 		private Dictionary<int, EnergyGrid> energyGrids = new Dictionary<int, EnergyGrid>();
 		private HashSet<Plan> unseenPlanChanges = new HashSet<Plan>();
 
+		public delegate void PlansEventDelegate(Plan plan);
+		public delegate void PlansUpdateEventDelegate(Plan plan, int oldTime);
+		public event PlansEventDelegate OnPlanVisibleInUIEvent;
+		public event PlansUpdateEventDelegate OnPlanUpdateInUIEvent;
+		public event PlansUpdateEventDelegate OnPlanHideInUIEvent;
+
 		//Fishing
 		[HideInInspector] public List<string> fishingFleets;
 		[HideInInspector] public float initialFishingMapping;
@@ -121,7 +127,7 @@ namespace MSP2050.Scripts
 
 		public void ShowPlan(Plan plan)
 		{
-			if (Main.InEditMode || Main.EditingPlanDetailsContent)
+			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 				return;
 
 			//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
@@ -141,7 +147,7 @@ namespace MSP2050.Scripts
 
 		public void HideCurrentPlan(bool updateLayers = true)
 		{
-			if (Main.InEditMode || Main.EditingPlanDetailsContent)
+			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 				return;
 
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
@@ -541,7 +547,7 @@ namespace MSP2050.Scripts
 				if (plan.ShouldBeVisibleInTimeline)
 				{
 					SetPlanUnseenChanges(plan, true);
-					PlansTimeline.AddNewPlan(plan);
+					OnPlanVisibleInUIEvent(plan);
 				}
 			}
 		}
@@ -554,7 +560,7 @@ namespace MSP2050.Scripts
 			if (nameOrDescriptionChanged)
 			{
 				PlanDetails.UpdateNameAndDescription(plan);
-				if (planViewing == plan && !Main.InEditMode && !Main.EditingPlanDetailsContent)
+				if (planViewing == plan && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
 					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();			
 			}
 			if (stateChanged)
@@ -562,13 +568,13 @@ namespace MSP2050.Scripts
 				//Didn't see icon before, should see now
 				if (!inTimelineBefore && inTimelineNow)
 				{
-					PlansTimeline.AddNewPlan(plan);
+					OnPlanVisibleInUIEvent(plan);
 					timeLineUpdated = true;
 				}
 				//Saw plan before, shouldn't see now
 				else if (inTimelineBefore && !inTimelineNow)
 				{
-					PlansTimeline.RemoveExistingPlan(plan, oldTime);
+					OnPlanHideInUIEvent(plan, oldTime);
 					timeLineUpdated = true;
 				}
 			}
@@ -581,9 +587,9 @@ namespace MSP2050.Scripts
 			{
 				//Plan didnt change influencing state and should be visible to this client: update
 				if (!timeLineUpdated && inTimelineNow)
-					PlansTimeline.UpdatePlan(plan, oldTime);
+					OnPlanUpdateInUIEvent(plan, oldTime);
 				PlanDetails.ChangeDate(plan);
-				if (planViewing == plan && !Main.InEditMode && !Main.EditingPlanDetailsContent)
+				if (planViewing == plan && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
 				{
 					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();							
 					InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
@@ -615,7 +621,7 @@ namespace MSP2050.Scripts
 		public void PlanLockUpdated(Plan plan)
 		{
 			PlansMonitor.SetLockIcon(plan, plan.IsLocked);
-			if((Main.InEditMode && Main.CurrentlyEditingPlan == plan) || (Main.EditingPlanDetailsContent && PlanDetails.GetSelectedPlan() == plan))
+			if((Main.InEditMode && Main.CurrentlyEditingPlan == plan) || (Main.Instance.EditingPlanDetailsContent && PlanDetails.GetSelectedPlan() == plan))
 			{
 				PlanDetails.instance.CancelEditingContent();
 				DialogBoxManager.instance.NotificationWindow("Plan Unexpectedly Unlocked", "Plan has been unlocked by an external party. All changes have been discarded.", null);
