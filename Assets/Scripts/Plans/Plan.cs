@@ -98,7 +98,7 @@ namespace MSP2050.Scripts
 			{
 				if (planObject.fishing == null)
 				{
-					fishingDistributionDelta = new FishingDistributionDelta(); //If null, it cant pick the right contructor automatically
+					fishingDistributionDelta = new FishingDistributionDelta(); //If null, it cant pick the right constructor automatically
 				}
 				else
 				{

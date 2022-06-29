@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace MSP2050.Scripts
 {
@@ -465,8 +463,32 @@ namespace MSP2050.Scripts
 			return GetEnergyGridsBeforePlan(plans[plans.Count - 1], color, true);
 		}
 
+		private static void FixMissingInitialFishingValues()
+		{
+			foreach (Plan plan in plans)
+			{
+				if (plan.fishingDistributionDelta == null)
+				{
+					continue;
+				}
+				foreach (KeyValuePair<string, Dictionary<int, float>> values in plan.fishingDistributionDelta.GetValuesByFleet())
+				{
+					var fleetName = values.Key;
+					if (initialFishingValues.HasFinishingValue(fleetName))
+					{
+						continue; // already there, not need to fix any missing initial values
+					}
+					foreach (var item in values.Value)
+					{
+						initialFishingValues.SetFishingValue(fleetName, item.Key, item.Value); // add it the initial value
+					}
+				}
+			}
+		}
+
 		public static FishingDistributionSet GetFishingDistributionForPreviousPlan(Plan referencePlan)
 		{
+			FixMissingInitialFishingValues();
 			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
 			foreach(Plan plan in plans)
 			{
@@ -488,6 +510,7 @@ namespace MSP2050.Scripts
 
 		public static FishingDistributionSet GetFishingDistributionAtTime(int timeMonth)
 		{
+			FixMissingInitialFishingValues();
 			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
 			foreach (Plan plan in plans)
 			{
