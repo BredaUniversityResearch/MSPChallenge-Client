@@ -472,7 +472,6 @@ namespace MSP2050.Scripts
 			{
 				return; // already set.
 			}
-			initialFishingValues = new FishingDistributionDelta();
 			foreach (Plan plan in plans)
 			{
 				if (plan.fishingDistributionDelta == null)
@@ -482,9 +481,14 @@ namespace MSP2050.Scripts
 				foreach (KeyValuePair<string, Dictionary<int, float>> values in plan.fishingDistributionDelta.GetValuesByFleet())
 				{
 					var fleetName = values.Key;
-					if (initialFishingValues.HasFinishingValue(fleetName))
+					if (initialFishingValues != null && initialFishingValues.HasFinishingValue(fleetName))
 					{
 						continue; // already there, skip it
+					}
+					// gonna set fishing values, make sure initialFishingValues is initialised. Assuming a fleet always has values
+					if (initialFishingValues == null)
+					{
+						initialFishingValues = new FishingDistributionDelta();
 					}
 					foreach (var item in values.Value)
 					{
