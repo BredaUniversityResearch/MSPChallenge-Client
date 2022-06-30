@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace MSP2050.Scripts
 {
@@ -20,7 +19,9 @@ namespace MSP2050.Scripts
 		public static float initialFishingMapping;
 		public static float fishingDisplayScale;
 		public static float shippingDisplayScale = 10000; // = 10km
-		public static FishingDistributionDelta initialFishingValues { get; private set; }
+
+		[CanBeNull]
+		public static FishingDistributionDelta initialFishingValues;
 
 		//Viewing & Viewstates
 		public static PlanViewState planViewState = PlanViewState.All;
@@ -465,8 +466,41 @@ namespace MSP2050.Scripts
 			return GetEnergyGridsBeforePlan(plans[plans.Count - 1], color, true);
 		}
 
+		private static void SetInitialFishingValuesFromPlans()
+		{
+			if (initialFishingValues != null)
+			{
+				return; // already set.
+			}
+			foreach (Plan plan in plans)
+			{
+				if (plan.fishingDistributionDelta == null)
+				{
+					continue;
+				}
+				foreach (KeyValuePair<string, Dictionary<int, float>> values in plan.fishingDistributionDelta.GetValuesByFleet())
+				{
+					var fleetName = values.Key;
+					if (initialFishingValues != null && initialFishingValues.HasFinishingValue(fleetName))
+					{
+						continue; // already there, skip it
+					}
+					// gonna set fishing values, make sure initialFishingValues is initialised. Assuming a fleet always has values
+					if (initialFishingValues == null)
+					{
+						initialFishingValues = new FishingDistributionDelta();
+					}
+					foreach (var item in values.Value)
+					{
+						initialFishingValues.SetFishingValue(fleetName, item.Key, item.Value); // add it the initial value
+					}
+				}
+			}
+		}
+
 		public static FishingDistributionSet GetFishingDistributionForPreviousPlan(Plan referencePlan)
 		{
+			SetInitialFishingValuesFromPlans();
 			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
 			foreach(Plan plan in plans)
 			{
@@ -488,6 +522,7 @@ namespace MSP2050.Scripts
 
 		public static FishingDistributionSet GetFishingDistributionAtTime(int timeMonth)
 		{
+			SetInitialFishingValuesFromPlans();
 			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
 			foreach (Plan plan in plans)
 			{
@@ -667,20 +702,8 @@ namespace MSP2050.Scripts
 			{
 				Debug.Log("Fishing fleets json does not match expected format.");
 			}
-		
-			//We can only start loading the fishing values when the fleets have been loaded.
-			LoadInitialFishingValues();
-		}
 
-		private static void LoadInitialFishingValues()
-		{
-			NetworkForm form = new NetworkForm();
-			ServerCommunication.DoRequest<List<FishingObject>>(Server.GetInitialFishingValues(), form, LoadInitialFishingValuesCallback);
-		}
-
-		private static void LoadInitialFishingValuesCallback(List<FishingObject> fishing)
-		{
-			initialFishingValues = new FishingDistributionDelta(fishing);
+			initialFishingValues = null;
 		}
 
 		public static void ViewPlanWithIDWhenReceived(int targetPlanID)
