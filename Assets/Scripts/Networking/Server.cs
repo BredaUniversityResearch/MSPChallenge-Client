@@ -479,11 +479,6 @@ namespace MSP2050.Scripts
 			return "api/game/Config";
 		}
 
-		public static string GetInitialFishingValues()
-		{
-			return "api/plan/GetInitialFishingValues";
-		}
-
 		public static string SetEnergyError()
 		{
 			return "api/plan/SetEnergyError";
