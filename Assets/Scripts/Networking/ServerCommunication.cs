@@ -563,7 +563,7 @@ namespace MSP2050.Scripts
 			form.AddField("user_name", userName);
 			if (password != null)
 			{
-				form.AddField("country_password", password);
+				form.AddField("country_password", BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt(12)));
 			}
 			form.AddField("build_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier()?.GetBuildTime());
 			DoRequest(Server.RequestSession(), form, successCallback, failureCallback);
