@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -31,7 +32,7 @@ namespace MSP2050.Scripts
             Dictionary<int, Dictionary<int, GridActualAndWasted>> parsedUpdateData = new Dictionary<int, Dictionary<int, GridActualAndWasted>>();
 
             //Parse data into a more convenient format.
-            foreach (EnergyKPIObject data in updateData)
+             foreach (EnergyKPIObject data in updateData)
             {
                 Dictionary<int, GridActualAndWasted> monthData;
                 if (parsedUpdateData.TryGetValue(data.month, out monthData))
@@ -94,8 +95,15 @@ namespace MSP2050.Scripts
                 //Make socket power negative if it has been sent
                 foreach (KeyValuePair<int, CountryEnergyAmount> kvp in associatedGrid.energyDistribution.distribution)
                 {
+                    if (!gridData.Value.socketActual.ContainsKey(kvp.Key))
+                    {
+                        continue;
+                    }
                     if (kvp.Value.expected < 0)
+                    {
                         gridData.Value.socketActual[kvp.Key] = -gridData.Value.socketActual[kvp.Key];
+
+                    }
                 }
 
                 //Determine the actual sourcepower that was used
