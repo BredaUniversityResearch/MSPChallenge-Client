@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace KPI
+namespace MSP2050.Scripts
 {
 	public class KPIValue
 	{
@@ -14,7 +14,7 @@ namespace KPI
 		public readonly string unit;
 		public readonly Color graphColor;
 		public readonly int targetCountryId;
-		private readonly float[] kpiValuesPerMonth;
+		private readonly float?[] kpiValuesPerMonth;
 
 		public event Action<KPIValue> OnValueUpdated;
 
@@ -33,45 +33,59 @@ namespace KPI
 			graphColor = valueGraphColor;
 			this.targetCountryId = targetCountryId;
 			
-			kpiValuesPerMonth = new float[numberOfKpiMonths];
+			kpiValuesPerMonth = new float?[numberOfKpiMonths];
 			MostRecentMonth = 0;
+		}
+
+		private void FillUpPrevNullValues(int monthId, float value)
+		{
+			float prevValue = value;
+			for (int m = 0; m < monthId; ++m)
+			{
+				if (kpiValuesPerMonth[m] == null)
+				{
+					kpiValuesPerMonth[m] = prevValue;
+				}
+				prevValue = kpiValuesPerMonth[m].Value;
+			}
 		}
 
 		public void UpdateValue(int monthId, float value)
 		{
-			if (monthId >= 0 && monthId < kpiValuesPerMonth.Length)
+			if (monthId < 0 || monthId >= kpiValuesPerMonth.Length)
 			{
-				kpiValuesPerMonth[monthId] = value;
-				if (monthId > MostRecentMonth)
-				{
-					MostRecentMonth = monthId;
-				}
-
-				if (OnValueUpdated != null)
-				{
-					OnValueUpdated(this);
-				}
+				Debug.LogWarning("Received KPI value (" + name + ") for month " + monthId +
+					" which is out of bounds (0, " + kpiValuesPerMonth.Length + ") and has been discarded");
+				return;
 			}
-			else
+			FillUpPrevNullValues(monthId, value);
+			kpiValuesPerMonth[monthId] = value;
+			if (monthId > MostRecentMonth)
 			{
-				Debug.LogWarning("Received KPI value (" + name + ") for month " + monthId + " which is out of bounds (0, " + kpiValuesPerMonth.Length + ") and has been discarded");
+				MostRecentMonth = monthId;
+			}
+			if (OnValueUpdated != null)
+			{
+				OnValueUpdated(this);
 			}
 		}
 
 		public float GetKpiValueForMonth(int monthId)
 		{
-			if (monthId >= 0 && monthId <= kpiValuesPerMonth.Length)
-			{
-				if (monthId > MostRecentMonth)
-				{
-					return kpiValuesPerMonth[MostRecentMonth];
-				}
-				return kpiValuesPerMonth[monthId];
-			}
-			else
+			if (monthId < 0 || monthId > kpiValuesPerMonth.Length)
 			{
 				return -1.0f;
 			}
+			if (monthId > MostRecentMonth) {
+				monthId = MostRecentMonth;
+			}
+			if (null == kpiValuesPerMonth[monthId])
+			{
+				// default values were zero before...
+				//   so if no value is set, return 0, later should be corrected to the actual value
+				return 0.0f;
+			}
+			return kpiValuesPerMonth[monthId].Value;
 		}
 
 		public float GetKpiValueForMostRecentMonth()

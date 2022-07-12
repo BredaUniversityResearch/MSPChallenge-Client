@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class ToggleOnDisable : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	public class ToggleOnDisable : MonoBehaviour {
 
-    public Toggle toggle;
-    public bool dir;
+		public Toggle toggle;
+		public bool dir;
 
-    void OnDisable()
-    {
-        toggle.isOn = dir;
-    }
+		void OnDisable()
+		{
+			toggle.isOn = dir;
+		}
+	}
 }

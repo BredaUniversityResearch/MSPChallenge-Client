@@ -1,43 +1,46 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
-public class PlanWizardToggles : MonoBehaviour
+namespace MSP2050.Scripts
 {
-
-	public int selected;
-	public GameObject[] contents;
-	public Image[] accents;
-
-	void Start()
+	public class PlanWizardToggles : MonoBehaviour
 	{
-		StartCoroutine("CenterWindow");
-	}
 
-	public void SetAccent(Color col)
-	{
-		for (int i = 0; i < accents.Length; i++)
+		public int selected;
+		public GameObject[] contents;
+		public Image[] accents;
+
+		void Start()
 		{
-			accents[i].color = col;
+			StartCoroutine("CenterWindow");
 		}
-	}
 
-	// Deprecated after moving distributions to the plan details
-	public void Select(int choice)
-	{
-		selected = choice;
+		public void SetAccent(Color col)
+		{
+			for (int i = 0; i < accents.Length; i++)
+			{
+				accents[i].color = col;
+			}
+		}
 
-		StartCoroutine("CenterWindow");
-	}
+		// Deprecated after moving distributions to the plan details
+		public void Select(int choice)
+		{
+			selected = choice;
 
-	// Resizes the window
-	IEnumerator CenterWindow()
-	{
-		Canvas.ForceUpdateCanvases();
-		InterfaceCanvas.Instance.planWizard.thisGenericWindow.CenterWindow();
+			StartCoroutine("CenterWindow");
+		}
 
-		yield return new WaitForEndOfFrame();
+		// Resizes the window
+		IEnumerator CenterWindow()
+		{
+			Canvas.ForceUpdateCanvases();
+			InterfaceCanvas.Instance.planWizard.thisGenericWindow.CenterWindow();
 
-		Canvas.ForceUpdateCanvases();
+			yield return new WaitForEndOfFrame();
+
+			Canvas.ForceUpdateCanvases();
+		}
 	}
 }

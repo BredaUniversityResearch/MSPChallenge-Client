@@ -1,8 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using UnityEngine;
 
-namespace Networking.Profiling
+namespace MSP2050.Scripts
 {
 	class RequestProfileEntry
 	{

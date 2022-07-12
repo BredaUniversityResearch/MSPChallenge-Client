@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace KPI
+namespace MSP2050.Scripts
 {
 	[CreateAssetMenu(menuName = "MSP2050/KPI Value Procedural Color Scheme")]
 	class KPIValueProceduralColorScheme: ScriptableObject

@@ -1,5 +1,8 @@
-﻿public enum ELayerSpecialEntityType
+﻿namespace MSP2050.Scripts
 {
-	Default,
-	ShippingLine,
-};
+	public enum ELayerSpecialEntityType
+	{
+		Default,
+		ShippingLine,
+	};
+}

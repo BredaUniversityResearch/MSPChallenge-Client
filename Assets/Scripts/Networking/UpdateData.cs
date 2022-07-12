@@ -1,255 +1,259 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using UnityEngine.Networking;
+using JetBrains.Annotations;
+using Sirenix.Utilities;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
-public static class UpdateData
+namespace MSP2050.Scripts
 {
-	private static float updateSpeed = 1.0f;
-	private static bool canUpdate = true;
-	private static DialogBox disconnectDialogBox = null;
-	private static double lastUpdateTimestamp = -1;
-	public static double LastUpdateTimeStamp => lastUpdateTimestamp;
-	public static UpdateObject lastUpdate;
-	public static bool stopProcessingUpdates = false;
-
-	public static IEnumerator GetFirstUpdate()
+	public static class UpdateData
 	{
-		canUpdate = false;
-		NetworkForm form = new NetworkForm();
-		form.AddField("team_id", TeamManager.CurrentUserTeamID);
-		form.AddField("last_update_time", lastUpdateTimestamp.ToString(Localisation.NumberFormatting));
-		form.AddField("user", TeamManager.CurrentSessionID.ToString());
-		ServerCommunication.DoRequest<UpdateObject>(Server.Update(), form, HandleUpdateSucessCallback, HandleUpdateFailCallback);
+		private static double m_LastUpdateTimestamp = -1;
+		public static double LastUpdateTimeStamp => m_LastUpdateTimestamp;
+		public static UpdateObject LastUpdate;
+		public static bool StopProcessingUpdates = false;
+	
+		private static bool? m_WsServerConnected;
 
-		while (!canUpdate)
+		[CanBeNull]
+		public static IWsServerCommunicationInteractor WsServerCommunicationInteractor => m_WsServerCommunication;
+
+		private static WsServerCommunication m_WsServerCommunication;
+		private static readonly Queue<UpdateObject> m_NextUpdates = new Queue<UpdateObject>();
+
+		public static IEnumerator GetFirstUpdate()
 		{
-			yield return null;
-		}
+			m_WsServerCommunication = new WsServerCommunication(
+				Server.GameSessionId,
+				TeamManager.CurrentUserTeamID,
+				TeamManager.CurrentSessionID,
+				HandleUpdateSuccessCallback
+			);
+			m_WsServerCommunication.Start();
 
-		Main.FirstUpdateTickComplete();
-	}
-
-	public static IEnumerator GetUpdates()
-	{
-		while (true)
-		{
-			canUpdate = false;
-			NetworkForm form = new NetworkForm();
-			form.AddField("team_id", TeamManager.CurrentUserTeamID);
-			form.AddField("last_update_time", lastUpdateTimestamp.ToString(Localisation.NumberFormatting));
-			form.AddField("user", TeamManager.CurrentSessionID.ToString());
-			ServerCommunication.DoRequest<UpdateObject>(Server.Update(), form, HandleUpdateSucessCallback, HandleUpdateFailCallback);
-
-			while (!canUpdate)
+			// wait for a first update(s) to arrive
+			while (m_NextUpdates.Count == 0)
 			{
+				HandleWsServerConnectionChanges();
 				yield return null;
 			}
 
-			yield return new WaitForSeconds(updateSpeed);
+			// process the first update(s)
+			ProcessUpdates(m_NextUpdates);
+			Main.FirstUpdateTickComplete();
 		}
-	}
 
-	public class TickResult
-	{
-		public bool success;
-		public string message;
-		public string payload;
-	}
-
-	private static void HandleUpdateSucessCallback(UpdateObject updateData)
-	{
-		ProcessUpdates(updateData);
-		HideDisconnectedDialogBox();
-		canUpdate = true;
-	}
-
-	private static void HandleUpdateFailCallback(ServerCommunication.ARequest request, string message)
-	{
-		ShowDisconnectedDialogBox();
-		Debug.LogError("Fetching update failed. Message: " + message);
-		canUpdate = true;
-	}
-
-	private static void ShowDisconnectedDialogBox()
-	{
-		if (disconnectDialogBox == null)
+		public static IEnumerator GetUpdates()
 		{
-			disconnectDialogBox = DialogBoxManager.instance.NotificationWindow("Disconnected", "Your connection to the server has been interrupted.\n\nHold on while we are trying to re-establish the connection.",
-				() => {
-                    Main.QuitGame();
-                }, "Close Game");
-		}
-	}
-
-	private static void HideDisconnectedDialogBox()
-	{
-		if (disconnectDialogBox != null)
-		{
-			DialogBoxManager.instance.DestroyDialogBox(disconnectDialogBox);
-		}
-	}
-
-	private static void ProcessUpdates(UpdateObject updates)
-	{
-		if (stopProcessingUpdates || updates.update_time <= lastUpdateTimestamp)
-			return;
-
-		lastUpdateTimestamp = updates.update_time;
-		lastUpdate = updates;
-
-		Dictionary<AbstractLayer, int> layerUpdateTimes = new Dictionary<AbstractLayer, int>();
-		List<Plan> plans = null;
-
-		if (updates.plan != null)
-		{
-			//Sort plans by time and ID so there are no issues with dependencies when loading them in
-			updates.plan.Sort();
-			plans = new List<Plan>(updates.plan.Count);
-			foreach (PlanObject plan in updates.plan)
+			while (true)
 			{
-				plans.Add(PlanManager.ProcessReceivedPlan(plan, layerUpdateTimes));
+				HandleWsServerConnectionChanges();
+				m_WsServerCommunication.Update();
+				ProcessUpdates(m_NextUpdates);
+				yield return null;
 			}
 		}
-
-		foreach (RasterUpdateObject raster in updates.raster)
+	
+		private static void HandleUpdateSuccessCallback(UpdateObject a_UpdateData)
 		{
-			AbstractLayer layer = LayerManager.GetLayerByID(raster.id);
+			m_NextUpdates.Enqueue(a_UpdateData);
+		}
 
-			RasterLayer rasterLayer = layer as RasterLayer;
-			if (rasterLayer != null && LayerManager.LayerIsVisible(rasterLayer))
+		private static void HandleWsServerConnectionChanges()
+		{
+			if (m_WsServerConnected == m_WsServerCommunication.IsConnected())
 			{
-				rasterLayer.ReloadLatestRaster();
-			}
-		}
-
-		//Run output update before KPI/Grid update. Source output is required for the KPIs and Capacity for grids.
-		foreach (EnergyOutputObject outputUpdate in updates.energy.output)
-		{
-			UpdateOutput(outputUpdate);
-		}
-
-		//Update grids
-		if (updates.plan != null)
-		{
-			for(int i = 0; i < plans.Count; i++)
-			{
-				plans[i].UpdateGrids(updates.plan[i].deleted_grids, updates.plan[i].grids);
-			}
-		}
-
-		//Run connection update before KPI update so cable networks are accurate in the KPIs
-		foreach (EnergyConnectionObject connection in updates.energy.connections)
-		{
-			UpdateConnection(connection);
-		}
-
-		GameState.UpdateTime(updates.tick);
-
-		if (updates.kpi != null)
-		{
-			if (updates.kpi.energy != null && updates.kpi.energy.Length > 0)
-			{
-				KPIManager.ReceiveEnergyKPIUpdate(updates.kpi.energy);
+				return;
 			}
 
-			if (updates.kpi.ecology != null && updates.kpi.ecology.Length > 0)
+			m_WsServerConnected = m_WsServerCommunication.IsConnected();
+			if (m_WsServerConnected == null) // no connection value yet
 			{
-				KPIManager.ReceiveEcologyKPIUpdate(updates.kpi.ecology);
+				return;
 			}
 
-			if (updates.kpi.shipping != null && updates.kpi.shipping.Length > 0)
+			Object.FindObjectsOfType<WsServerConnectionChangeBehaviour>().ForEach(item =>
+				item.NotifyConnection(m_WsServerConnected.Value));
+		}
+
+		private static void ProcessUpdates(Queue<UpdateObject> a_Updates)
+		{
+			if (a_Updates.Count == 0)
 			{
-				KPIManager.ReceiveShippingKPIUpdate(updates.kpi.shipping);
+				return;
 			}
+
+			Debug.Log("Updates to process: " + a_Updates.Count);
+
+			// process next in queue. Note that is not a while loop since we only want to do a single update per client tick
+			//  This is because currently, multiple updates per tick cause skipping of essential plan unlocks..
+			ProcessUpdates(a_Updates.Dequeue());
 		}
 
-		if (updates.objectives.Count > 0)
+		private static void ProcessUpdates(UpdateObject a_Update)
 		{
-			InterfaceCanvas.Instance.objectivesMonitor.UpdateObjectivesFromServer(updates.objectives);
-		}
-
-		PlanDetails.AddFeedbackFromServer(updates.planmessages);
-
-		if (PlanManager.planViewing != null && !Main.InEditMode && !Main.EditingPlanDetailsContent)
-		{
-			int viewingTime = PlanManager.planViewing.StartTime;
-			foreach (KeyValuePair<AbstractLayer, int> kvp in layerUpdateTimes)
+			HandleWsServerConnectionChanges();
+			if (StopProcessingUpdates || a_Update.update_time <= m_LastUpdateTimestamp)
 			{
-				if (kvp.Value <= viewingTime)
+				Debug.Log("stopProcessingUpdates: " + StopProcessingUpdates + ", update.update_time <= lastUpdateTimestamp: " + (a_Update.update_time <= m_LastUpdateTimestamp));
+				return;
+			}
+
+			m_LastUpdateTimestamp = a_Update.update_time;
+			LastUpdate = a_Update;
+
+			Dictionary<AbstractLayer, int> layerUpdateTimes = new Dictionary<AbstractLayer, int>();
+			List<Plan> plans = null;
+
+			if (a_Update.plan != null)
+			{
+				//Sort plans by time and ID so there are no issues with dependencies when loading them in
+				a_Update.plan.Sort();
+				plans = new List<Plan>(a_Update.plan.Count);
+				foreach (PlanObject plan in a_Update.plan)
 				{
-					kvp.Key.SetEntitiesActiveUpTo(PlanManager.planViewing);
-					kvp.Key.RedrawGameObjects(CameraManager.Instance.gameCamera);
+					plans.Add(PlanManager.ProcessReceivedPlan(plan, layerUpdateTimes));
 				}
 			}
+
+			foreach (RasterUpdateObject raster in a_Update.raster)
+			{
+				AbstractLayer layer = LayerManager.GetLayerByID(raster.id);
+
+				RasterLayer rasterLayer = layer as RasterLayer;
+				if (rasterLayer != null && LayerManager.LayerIsVisible(rasterLayer))
+				{
+					rasterLayer.ReloadLatestRaster();
+				}
+			}
+
+			//Run output update before KPI/Grid update. Source output is required for the KPIs and Capacity for grids.
+			foreach (EnergyOutputObject outputUpdate in a_Update.energy.output)
+			{
+				UpdateOutput(outputUpdate);
+			}
+
+			//Update grids
+			if (a_Update.plan != null)
+			{
+				for(int i = 0; i < plans.Count; i++)
+				{
+					plans[i].UpdateGrids(a_Update.plan[i].deleted_grids, a_Update.plan[i].grids);
+				}
+			}
+
+			//Run connection update before KPI update so cable networks are accurate in the KPIs
+			foreach (EnergyConnectionObject connection in a_Update.energy.connections)
+			{
+				UpdateConnection(connection);
+			}
+
+			GameState.UpdateTime(a_Update.tick);
+
+			if (a_Update.kpi != null)
+			{
+				if (a_Update.kpi.energy != null && a_Update.kpi.energy.Length > 0)
+				{
+					KPIManager.ReceiveEnergyKPIUpdate(a_Update.kpi.energy);
+				}
+
+				if (a_Update.kpi.ecology != null && a_Update.kpi.ecology.Length > 0)
+				{
+					KPIManager.ReceiveEcologyKPIUpdate(a_Update.kpi.ecology);
+				}
+
+				if (a_Update.kpi.shipping != null && a_Update.kpi.shipping.Length > 0)
+				{
+					KPIManager.ReceiveShippingKPIUpdate(a_Update.kpi.shipping);
+				}
+			}
+
+			if (a_Update.objectives.Count > 0)
+			{
+				InterfaceCanvas.Instance.objectivesMonitor.UpdateObjectivesFromServer(a_Update.objectives);
+			}
+
+			PlanDetails.AddFeedbackFromServer(a_Update.planmessages);
+
+			if (PlanManager.planViewing != null && !Main.InEditMode && !Main.EditingPlanDetailsContent)
+			{
+				int viewingTime = PlanManager.planViewing.StartTime;
+				foreach (KeyValuePair<AbstractLayer, int> kvp in layerUpdateTimes)
+				{
+					if (kvp.Value <= viewingTime)
+					{
+						kvp.Key.SetEntitiesActiveUpTo(PlanManager.planViewing);
+						kvp.Key.RedrawGameObjects(CameraManager.Instance.gameCamera);
+					}
+				}
+			}
+
+			if (a_Update.warning != null)
+			{
+				IssueManager.instance.OnIssuesReceived(a_Update.warning); //MSP-2358, ensure Warnings are processed after all the plan updates are done.
+			}
+
+			PlanManager.CheckIfExpectedplanReceived();
 		}
 
-		if (updates.warning != null)
+		private static void UpdateOutput(EnergyOutputObject outputUpdate)
 		{
-			IssueManager.instance.OnIssuesReceived(updates.warning); //MSP-2358, ensure Warnings are processed after all the plan updates are done.
+			SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(outputUpdate.id);
+			if (tempSubEnt == null) return;
+			IEnergyDataHolder energyObj = (IEnergyDataHolder)tempSubEnt;
+			energyObj.UsedCapacity = outputUpdate.capacity;
+			energyObj.Capacity = outputUpdate.maxcapacity;
+			tempSubEnt.UpdateTextMeshText();
 		}
 
-		PlanManager.CheckIfExpectedplanReceived();
+		private static void UpdateConnection(EnergyConnectionObject connection)
+		{
+			if (connection.active == "0")
+				return;
+
+			int startID = Util.ParseToInt(connection.start);
+			int endID = Util.ParseToInt(connection.end);
+			int cableID = Util.ParseToInt(connection.cable);
+			string[] temp = connection.coords.Split(',');
+			Vector3 firstCoord = new Vector2(Util.ParseToFloat(temp[0].Substring(1)), Util.ParseToFloat(temp[1].Substring(0, temp[1].Length - 1)));
+
+			EnergyPointSubEntity point1;
+			EnergyPointSubEntity point2;
+			SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(cableID);
+			if (tempSubEnt == null) return;
+			EnergyLineStringSubEntity cable = tempSubEnt as EnergyLineStringSubEntity;
+
+			//Get the points, check if they reference to a polygon or point
+			tempSubEnt = LayerManager.GetEnergySubEntityByID(startID);
+			if (tempSubEnt == null) return;
+			else if (tempSubEnt is EnergyPolygonSubEntity)
+				point1 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
+			else
+				point1 = tempSubEnt as EnergyPointSubEntity;
+
+			tempSubEnt = LayerManager.GetEnergySubEntityByID(endID);
+			if (tempSubEnt == null) return;
+			else if (tempSubEnt is EnergyPolygonSubEntity)
+				point2 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
+			else
+				point2 = tempSubEnt as EnergyPointSubEntity;
+
+			Connection conn1 = new Connection(cable, point1, true);
+			Connection conn2 = new Connection(cable, point2, false);
+
+			//Cables store connections and attach them to points when editing starts
+			cable.AddConnection(conn1);
+			cable.AddConnection(conn2);
+			cable.SetEndPointsToConnections();
+		}
 	}
 
-	private static void UpdateOutput(EnergyOutputObject outputUpdate)
-	{
-		SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(outputUpdate.id);
-		if (tempSubEnt == null) return;
-		IEnergyDataHolder energyObj = (IEnergyDataHolder)tempSubEnt;
-		energyObj.UsedCapacity = outputUpdate.capacity;
-		energyObj.Capacity = outputUpdate.maxcapacity;
-		tempSubEnt.UpdateTextMeshText();
-	}
-
-	private static void UpdateConnection(EnergyConnectionObject connection)
-	{
-		if (connection.active == "0")
-			return;
-
-		int startID = Util.ParseToInt(connection.start);
-		int endID = Util.ParseToInt(connection.end);
-		int cableID = Util.ParseToInt(connection.cable);
-		string[] temp = connection.coords.Split(',');
-		Vector3 firstCoord = new Vector2(Util.ParseToFloat(temp[0].Substring(1)), Util.ParseToFloat(temp[1].Substring(0, temp[1].Length - 1)));
-
-		EnergyPointSubEntity point1;
-		EnergyPointSubEntity point2;
-		SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(cableID);
-		if (tempSubEnt == null) return;
-		EnergyLineStringSubEntity cable = tempSubEnt as EnergyLineStringSubEntity;
-
-		//Get the points, check if they reference to a polygon or point
-		tempSubEnt = LayerManager.GetEnergySubEntityByID(startID);
-		if (tempSubEnt == null) return;
-		else if (tempSubEnt is EnergyPolygonSubEntity)
-			point1 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
-		else
-			point1 = tempSubEnt as EnergyPointSubEntity;
-
-		tempSubEnt = LayerManager.GetEnergySubEntityByID(endID);
-		if (tempSubEnt == null) return;
-		else if (tempSubEnt is EnergyPolygonSubEntity)
-			point2 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
-		else
-			point2 = tempSubEnt as EnergyPointSubEntity;
-
-		Connection conn1 = new Connection(cable, point1, true);
-		Connection conn2 = new Connection(cable, point2, false);
-
-		//Cables store connections and attach them to points when editing starts
-		cable.AddConnection(conn1);
-		cable.AddConnection(conn2);
-		cable.SetEndPointsToConnections();
-	}
-}
-
-/// <summary>
-/// Keeps track of the update state of all plans in the update.
-/// When geometry updates are completed CompletedPlanUpdates will return true and ExecutePostPlanUpdates can be called
-/// </summary>
+	/// <summary>
+	/// Keeps track of the update state of all plans in the update.
+	/// When geometry updates are completed CompletedPlanUpdates will return true and ExecutePostPlanUpdates can be called
+	/// </summary>
 //public class PlanUpdateTracker
 //{
 //	private int totalPlans;
@@ -392,197 +396,199 @@ public static class UpdateData
 //    }
 //}
 
-public class PlanLayerObject
-{
-	public int layerid;     //plan layer id
-	public int original;    //base layer id
-	public string state;
-	public List<SubEntityObject> geometry;
-	public List<int> deleted;
-}
-
-public class ObjectiveObject
-{
-	public int objective_id;
-	public int country_id;
-	public string title;
-	public string description;
-	public int deadline;
-	public bool active;
-	public bool complete;
-}
-
-public class TaskObject
-{
-	public string sector;
-	public string category;
-	public string subcategory;
-	public string function;
-	public float value;
-	public string description;
-}
-
-public class PlanObject : IComparable<PlanObject>
-{
-	public int id;
-	public string name;
-	public string description;
-	public int startdate;
-	public string state;
-	public string previousstate;
-	public int country;
-	public double lastupdate;
-	public string locked;
-	public string active;
-	public string type; // energy,fishing,shipping : ex 1,0,1
-    public bool alters_energy_distribution;
-	public List<PlanLayerObject> layers;
-	public List<GridObject> grids;
-	public List<FishingObject> fishing;
-	public HashSet<int> deleted_grids;
-	public string energy_error;
-	public List<ApprovalObject> votes;
-	public RestrictionAreaObject[] restriction_settings;
-
-	public int CompareTo(PlanObject other)
+	public class PlanLayerObject
 	{
-		if (other == null)
-			return 1;
-		if (other.startdate != startdate)
-			return startdate.CompareTo(other.startdate);
-		else
-			return id.CompareTo(other.id);
+		public int layerid;     //plan layer id
+		public int original;    //base layer id
+		public string state;
+		public List<SubEntityObject> geometry;
+		public List<int> deleted;
 	}
-}
 
-public class PlanMessageObject
-{
-	public int message_id;
-	public int plan_id;
-	public int team_id;
+	public class ObjectiveObject
+	{
+		public int objective_id;
+		public int country_id;
+		public string title;
+		public string description;
+		public int deadline;
+		public bool active;
+		public bool complete;
+	}
 
-	public string user_name;
-	public string message;
-	public string time;
-}
+	public class TaskObject
+	{
+		public string sector;
+		public string category;
+		public string subcategory;
+		public string function;
+		public float value;
+		public string description;
+	}
 
-public class RasterUpdateObject
-{
-	public string raster;
-	public int id;
-}
+	public class PlanObject : IComparable<PlanObject>
+	{
+		public int id;
+		public string name;
+		public string description;
+		public int startdate;
+		public string state;
+		public string previousstate;
+		public int country;
+		public double lastupdate;
+		public string locked;
+		public string active;
+		public string type; // energy,fishing,shipping : ex 1,0,1
+		public bool alters_energy_distribution;
+		public List<PlanLayerObject> layers;
+		public List<GridObject> grids;
+		public List<FishingObject> fishing;
+		public HashSet<int> deleted_grids;
+		public string energy_error;
+		public List<ApprovalObject> votes;
+		public RestrictionAreaObject[] restriction_settings;
 
-public class UpdateObject
-{
-	public List<PlanObject> plan;
-	public List<PlanMessageObject> planmessages;
-	public List<RasterUpdateObject> raster;
-	public KPIObject kpi;
-	public EnergyObject energy;
-	public WarningObject warning;
-	public List<ObjectiveObject> objectives;
-	public TimelineState tick;
-	public double update_time; //Timestamp received from the server at which this update was accurate.
-}
+		public int CompareTo(PlanObject other)
+		{
+			if (other == null)
+				return 1;
+			if (other.startdate != startdate)
+				return startdate.CompareTo(other.startdate);
+			else
+				return id.CompareTo(other.id);
+		}
+	}
 
-public class EnergyObject
-{
-	public List<EnergyConnectionObject> connections;
-	public List<EnergyOutputObject> output;
-}
+	public class PlanMessageObject
+	{
+		public int message_id;
+		public int plan_id;
+		public int team_id;
 
-public class EnergyOutputObject
-{
-	public int id;
-	public long capacity;
-	public long maxcapacity;
-	public int active;
-}
+		public string user_name;
+		public string message;
+		public string time;
+	}
 
-public class EnergyConnectionObject
-{
-	public string start;
-	public string end;
-	public string cable;
-	public string coords;
-	public string active;
-}
+	public class RasterUpdateObject
+	{
+		public string raster;
+		public int id;
+	}
 
-public class KPIObject
-{
-	public EcologyKPIObject[] ecology;
-	public EnergyKPIObject[] energy;
-	public EcologyKPIObject[] shipping; //Because code re-use
-}
+	public class UpdateObject
+	{
+		public List<PlanObject> plan;
+		public List<PlanMessageObject> planmessages;
+		public List<RasterUpdateObject> raster;
+		public KPIObject kpi;
+		public EnergyObject energy;
+		public WarningObject warning;
+		public List<ObjectiveObject> objectives;
+		public TimelineState tick;
+		public double prev_update_time;
+		public double update_time; //Timestamp received from the server at which this update was accurate.
+	}
 
-public class EcologyKPIObject
-{
-	public string name;
-	public float value;
-	public int month;
-	public string type;
-	public double lastupdate;
-}
+	public class EnergyObject
+	{
+		public List<EnergyConnectionObject> connections;
+		public List<EnergyOutputObject> output;
+	}
 
-public class EnergyKPIObject
-{
-	public int grid;
-	public int month;
-	public int country;
-	public long actual;
-}
+	public class EnergyOutputObject
+	{
+		public int id;
+		public long capacity;
+		public long maxcapacity;
+		public int active;
+	}
 
-public class GridObject
-{
-	public int id;
-	public int persistent;
-	public string name;
-	public int active;
-	public bool distribution_only;
-	public List<GeomIDObject> sources;
-	public List<GeomIDObject> sockets;
-	public List<CountryExpectedObject> energy;
-}
+	public class EnergyConnectionObject
+	{
+		public string start;
+		public string end;
+		public string cable;
+		public string coords;
+		public string active;
+	}
 
-public class GeomIDObject
-{
-	public int geometry_id;
-}
+	public class KPIObject
+	{
+		public EcologyKPIObject[] ecology;
+		public EnergyKPIObject[] energy;
+		public EcologyKPIObject[] shipping; //Because code re-use
+	}
 
-public class CountryExpectedObject
-{
-	public int country_id;
-	public long expected; //Expected WHAT? Cows? Apples? 
-}
+	public class EcologyKPIObject
+	{
+		public string name;
+		public float value;
+		public int month;
+		public string type;
+		public double lastupdate;
+	}
 
-public class FishingObject
-{
-	public int country_id;
-	public string type;
-	public float amount;
-}
+	public class EnergyKPIObject
+	{
+		public int grid;
+		public int month;
+		public int country;
+		public long actual;
+	}
 
-public class ApprovalObject
-{
-	public int country;
-	public EPlanApprovalState vote;
-}
+	public class GridObject
+	{
+		public int id;
+		public int persistent;
+		public string name;
+		public int active;
+		public bool distribution_only;
+		public List<GeomIDObject> sources;
+		public List<GeomIDObject> sockets;
+		public List<CountryExpectedObject> energy;
+	}
 
-public class TimelineState
-{
-	public string state { get; set; }
-	public string month { get; set; }
+	public class GeomIDObject
+	{
+		public int geometry_id;
+	}
 
-	public string era_gametime { get; set; }
-	public string era_realtime { get; set; }
-	public string planning_era_realtime { get; set; }
-	public string era_timeleft { get; set; }
-	public string era_monthsdone { get; set; }
-	public string era_time { get; set; }
-}
+	public class CountryExpectedObject
+	{
+		public int country_id;
+		public long expected; //Expected WHAT? Cows? Apples? 
+	}
 
-public class WarningObject
-{
-	public List<PlanIssueObject> plan_issues;
-	public List<ShippingIssueObject> shipping_issues;
+	public class FishingObject
+	{
+		public int country_id;
+		public string type;
+		public float amount;
+	}
+
+	public class ApprovalObject
+	{
+		public int country;
+		public EPlanApprovalState vote;
+	}
+
+	public class TimelineState
+	{
+		public string state { get; set; }
+		public string month { get; set; }
+
+		public string era_gametime { get; set; }
+		public string era_realtime { get; set; }
+		public string planning_era_realtime { get; set; }
+		public string era_timeleft { get; set; }
+		public string era_monthsdone { get; set; }
+		public string era_time { get; set; }
+	}
+
+	public class WarningObject
+	{
+		public List<PlanIssueObject> plan_issues;
+		public List<ShippingIssueObject> shipping_issues;
+	}
 }

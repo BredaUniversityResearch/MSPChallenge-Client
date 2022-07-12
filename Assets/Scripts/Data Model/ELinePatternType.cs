@@ -1,6 +1,9 @@
-﻿public enum ELinePatternType
+﻿namespace MSP2050.Scripts
 {
-	Solid,
-	ShortDash,
-	LongDash
+	public enum ELinePatternType
+	{
+		Solid,
+		ShortDash,
+		LongDash
+	}
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Networking
+namespace MSP2050.Scripts
 {
     public class SerialOperation : AbstractOperation
     {

@@ -1,33 +1,34 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
-public class ActivePlanLayer : MonoBehaviour
+namespace MSP2050.Scripts
 {
-	public Toggle toggle;
-	public Image layerIcon, editingIcon;
-	public TextMeshProUGUI layerNameText;
-
-	public void SetToLayer(PlanLayer layer)
+	public class ActivePlanLayer : MonoBehaviour
 	{
-		//Set visuals
-		layerNameText.text = layer.BaseLayer.ShortName;
-		layerIcon.sprite = LayerInterface.GetIconStatic(layer.BaseLayer.SubCategory);
+		public Toggle toggle;
+		public Image layerIcon, editingIcon;
+		public TextMeshProUGUI layerNameText;
 
-		//Button callback
-		toggle.onValueChanged.AddListener((value) =>
+		public void SetToLayer(PlanLayer layer)
 		{
-			if(value) {
-				Main.FSM.AbortCurrentState();
-				InterfaceCanvas.Instance.activePlanWindow.ActivePlanLayerCallback(layer);
-			}
-		});
-	}
+			//Set visuals
+			layerNameText.text = layer.BaseLayer.ShortName;
+			layerIcon.sprite = LayerInterface.GetIconStatic(layer.BaseLayer.SubCategory);
 
-	public void SetSelected(bool value)
-	{
-		editingIcon.gameObject.SetActive(value);
+			//Button callback
+			toggle.onValueChanged.AddListener((value) =>
+			{
+				if(value) {
+					Main.FSM.AbortCurrentState();
+					InterfaceCanvas.Instance.activePlanWindow.ActivePlanLayerCallback(layer);
+				}
+			});
+		}
+
+		public void SetSelected(bool value)
+		{
+			editingIcon.gameObject.SetActive(value);
+		}
 	}
 }

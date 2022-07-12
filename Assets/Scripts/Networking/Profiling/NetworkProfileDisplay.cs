@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Networking.Profiling
+namespace MSP2050.Scripts
 {
 	//Class responsible for displaying all the requests. 
 	class NetworkProfileDisplay: MonoBehaviour

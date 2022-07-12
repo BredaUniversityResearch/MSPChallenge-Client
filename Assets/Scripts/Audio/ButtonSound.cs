@@ -1,40 +1,42 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-[RequireComponent(typeof(Button))]
-public class ButtonSound : MonoBehaviour, IPointerEnterHandler
+namespace MSP2050.Scripts
 {
-    public AudioSource OnClickSound;
-    public AudioSource MouseEnterSound;
-    public AudioSource MouseClickSound;
+	[RequireComponent(typeof(Button))]
+	public class ButtonSound : MonoBehaviour, IPointerEnterHandler
+	{
+		public AudioSource OnClickSound;
+		public AudioSource MouseEnterSound;
+		public AudioSource MouseClickSound;
 
-    void Start()
-    {
-        if (OnClickSound != null)
-        {
-            Button button = GetComponent<Button>();
-            if (button != null)
-            {
-                button.onClick.AddListener(() => OnClickSound.Play());
-            }
-        }
-    }
+		void Start()
+		{
+			if (OnClickSound != null)
+			{
+				Button button = GetComponent<Button>();
+				if (button != null)
+				{
+					button.onClick.AddListener(() => OnClickSound.Play());
+				}
+			}
+		}
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if (MouseEnterSound != null && GetComponent<Button>().IsInteractable())
-        {
-            MouseEnterSound.Play();
-        }
-    }
+		public void OnPointerEnter(PointerEventData eventData)
+		{
+			if (MouseEnterSound != null && GetComponent<Button>().IsInteractable())
+			{
+				MouseEnterSound.Play();
+			}
+		}
 
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (MouseClickSound != null && GetComponent<Toggle>().IsInteractable())
-        {
-            MouseClickSound.Play();
-        }
-    }
+		public void OnPointerClick(PointerEventData eventData)
+		{
+			if (MouseClickSound != null && GetComponent<Toggle>().IsInteractable())
+			{
+				MouseClickSound.Play();
+			}
+		}
+	}
 }

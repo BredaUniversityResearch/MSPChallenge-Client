@@ -1,8 +1,7 @@
 ﻿using Newtonsoft.Json;
 using UnityEngine;
-using Utility.Serialization;
 
-namespace KPI
+namespace MSP2050.Scripts
 {
 	public class KPIValueDefinition
 	{

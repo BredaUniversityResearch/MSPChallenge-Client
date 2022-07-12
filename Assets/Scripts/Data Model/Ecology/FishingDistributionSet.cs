@@ -3,45 +3,47 @@
 
 using System.Collections.Generic;
 
-public class FishingDistributionSet
+namespace MSP2050.Scripts
 {
-	private Dictionary<string, Dictionary<int, float>> fishingValues;
-
-	public FishingDistributionSet(FishingDistributionDelta initialValues)
+	public class FishingDistributionSet
 	{
-		fishingValues = new Dictionary<string, Dictionary<int, float>>(initialValues.FleetCount);
-		foreach (KeyValuePair<string, Dictionary<int, float>> fleetValues in initialValues.GetValuesByFleet())
-		{
-			Dictionary<int, float> distributionValues = new Dictionary<int, float>(fleetValues.Value);
-			fishingValues.Add(fleetValues.Key, distributionValues);
-		}
-	}
+		private Dictionary<string, Dictionary<int, float>> fishingValues;
 
-	public void ApplyValues(FishingDistributionDelta deltaSet)
-	{
-		foreach (KeyValuePair<string, Dictionary<int, float>> values in deltaSet.GetValuesByFleet())
+		public FishingDistributionSet(FishingDistributionDelta initialValues)
 		{
-			Dictionary<int, float> target = fishingValues[values.Key];
-			foreach (KeyValuePair<int, float> value in values.Value)
+			fishingValues = new Dictionary<string, Dictionary<int, float>>(initialValues.FleetCount);
+			foreach (KeyValuePair<string, Dictionary<int, float>> fleetValues in initialValues.GetValuesByFleet())
 			{
-				target[value.Key] = value.Value;
+				Dictionary<int, float> distributionValues = new Dictionary<int, float>(fleetValues.Value);
+				fishingValues.Add(fleetValues.Key, distributionValues);
 			}
 		}
-	}
 
-	public IEnumerable<KeyValuePair<string, Dictionary<int, float>>> GetValues()
-	{
-		return fishingValues;
-	}
+		public void ApplyValues(FishingDistributionDelta deltaSet)
+		{
+			foreach (KeyValuePair<string, Dictionary<int, float>> values in deltaSet.GetValuesByFleet())
+			{
+				Dictionary<int, float> target = fishingValues[values.Key];
+				foreach (KeyValuePair<int, float> value in values.Value)
+				{
+					target[value.Key] = value.Value;
+				}
+			}
+		}
 
-	public Dictionary<int, float> FindValuesForFleet(string fleetName)
-	{
-		Dictionary<int, float> result;
-		fishingValues.TryGetValue(fleetName, out result);
-		return result;
-	}
+		public IEnumerable<KeyValuePair<string, Dictionary<int, float>>> GetValues()
+		{
+			return fishingValues;
+		}
 
-	/*public void NormalizeValues()
+		public Dictionary<int, float> FindValuesForFleet(string fleetName)
+		{
+			Dictionary<int, float> result;
+			fishingValues.TryGetValue(fleetName, out result);
+			return result;
+		}
+
+		/*public void NormalizeValues()
 	{
 		foreach (KeyValuePair<string, Dictionary<int, float>> valuesByFleet in fishingValues)
 		{
@@ -66,4 +68,5 @@ public class FishingDistributionSet
 			}
 		}
 	}*/
+	}
 }

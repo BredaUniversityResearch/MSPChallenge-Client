@@ -1,98 +1,106 @@
-﻿using UnityEngine;
-using System.Collections;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using UnityEngine;
 
-/// <summary>
-/// AddTooltip
-/// </summary>
-public class AddTooltip : MonoBehaviour 
+namespace MSP2050.Scripts
 {
-    [SerializeField, TextArea]
-    public string text;
-	public float timeBeforeShowing = 0.5f;
-	[SerializeField]
-	bool passClickToParent = true;
-
-	// note MH: dropdown specific tooltip hack to make sure the tooltip is rendered on top of the drop down
-	[CanBeNull]
-	private static Tooltip dropdownTooltip = null;
-
-    protected void Start () 
+	/// <summary>
+	/// AddTooltip
+	/// </summary>
+	public class AddTooltip : MonoBehaviour 
 	{
-        //TooltipManager.CreateToolTipForUI(this.gameObject, text, timeBeforeShowing);
+		[SerializeField, TextArea]
+		public string text;
+		public float timeBeforeShowing = 0.5f;
+		[SerializeField]
+		bool passClickToParent = true;
 
-		TriggerDelegates tooltipTrigger = gameObject.AddComponent<TriggerDelegates>();
-		tooltipTrigger.consumeDownEvent = !passClickToParent;
-		tooltipTrigger.consumeUpEvent = !passClickToParent;
+		// note MH: dropdown specific tooltip hack to make sure the tooltip is rendered on top of the drop down
+		[CanBeNull]
+		private static Tooltip dropdownTooltip = null;
 
-		tooltipTrigger.OnMouseEnterDelegate += () =>
+		protected void Start () 
 		{
-			// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
-			CustomDropdown dropdown = gameObject.GetComponentInChildren<CustomDropdown>();
-			if (dropdown != null)
+			//TooltipManager.CreateToolTipForUI(this.gameObject, text, timeBeforeShowing);
+
+			TriggerDelegates tooltipTrigger = gameObject.AddComponent<TriggerDelegates>();
+			tooltipTrigger.consumeDownEvent = !passClickToParent;
+			tooltipTrigger.consumeUpEvent = !passClickToParent;
+
+			tooltipTrigger.OnMouseEnterDelegate += () =>
 			{
-				dropdownTooltip ??= createDropdownTooltip(dropdown);
+				// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
+				CustomDropdown dropdown = gameObject.GetComponentInChildren<CustomDropdown>();
+				if (dropdown != null)
+				{
+					dropdownTooltip ??= createDropdownTooltip(dropdown);
+					if (dropdownTooltip != null)
+					{
+						dropdownTooltip.ShowToolTip();
+						return;
+					}
+				}
+				dropdownTooltip = null;
+				// END
+			
+				TooltipManager.ResetAndShowTooltip(text, timeBeforeShowing);
+			};
+
+			tooltipTrigger.OnMouseExitDelegate += () =>
+			{
+				// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
 				if (dropdownTooltip != null)
 				{
-					dropdownTooltip.ShowToolTip();
+					dropdownTooltip.HideTooltip();
 					return;
 				}
-			}
-			dropdownTooltip = null;
-			// END
+				// END
 			
-			TooltipManager.ResetAndShowTooltip(text, timeBeforeShowing);
-		};
+				TooltipManager.HideTooltip();
+			};
 
-		tooltipTrigger.OnMouseExitDelegate += () =>
-		{
-			// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
-			if (dropdownTooltip != null)
+			tooltipTrigger.OnMouseDownDelegate += () =>
 			{
-				dropdownTooltip.HideTooltip();
-				return;
-			}
-			// END
-			
-			TooltipManager.HideTooltip();
-		};
+				// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
+				if (dropdownTooltip != null)
+				{
+					dropdownTooltip.HideTooltip();
+					return;
+				}
+				// END
 
-		tooltipTrigger.OnMouseDownDelegate += () =>
-		{
-			// BEGIN note MH: dropdown specific hack to make sure the tooltip is rendered on top of the drop down
-			if (dropdownTooltip != null)
-			{
-				dropdownTooltip.HideTooltip();
-				return;
-			}
-			// END
-
-			TooltipManager.HideTooltip();
-		};
-	}
-
-    [CanBeNull]
-    private Tooltip createDropdownTooltip(CustomDropdown dropdown)
-    {
-		Transform dropdownListTransform = dropdown.gameObject.transform.Find("Dropdown List");
-		if (dropdownListTransform == null)
-		{
-			return null;
+				TooltipManager.HideTooltip();
+			};
 		}
 
-		Tooltip tooltip = Instantiate(TooltipManager.tooltipPrefabStatic, dropdownListTransform);
-		RectTransform rectTransform = dropdownListTransform.gameObject.GetComponent<RectTransform>();
-        float scale = tooltip.GetComponentInParent<Canvas>().scaleFactor;
-        tooltip.Initialise(
-	        text, null,
-	        new Vector2(
-		        -dropdownListTransform.position.x,
-		        -dropdownListTransform.position.y
-		        ) - rectTransform.offsetMin * scale
-	        );
-		tooltip.ShowToolTip();
-	    tooltip.gameObject.transform.SetAsLastSibling();
+		[CanBeNull]
+		private Tooltip createDropdownTooltip(CustomDropdown dropdown)
+		{
+			Transform dropdownListTransform = dropdown.gameObject.transform.Find("Dropdown List");
+			if (dropdownListTransform == null)
+			{
+				return null;
+			}
 
-	    return tooltip;
-    }
+			Tooltip tooltip = Instantiate(TooltipManager.tooltipPrefabStatic, dropdownListTransform);
+			RectTransform rectTransform = dropdownListTransform.gameObject.GetComponent<RectTransform>();
+			float scale = tooltip.GetComponentInParent<Canvas>().scaleFactor;
+			tooltip.Initialise(
+				text, null,
+				new Vector2(
+					-dropdownListTransform.position.x,
+					-dropdownListTransform.position.y
+				) - rectTransform.offsetMin * scale
+			);
+			tooltip.ShowToolTip();
+			tooltip.gameObject.transform.SetAsLastSibling();
+
+			return tooltip;
+		}
+
+		public void SetText(string a_newText)
+		{
+			TooltipManager.HideTooltip();
+			text = a_newText;
+		}
+	}
 }

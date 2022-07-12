@@ -1,4 +1,4 @@
-﻿namespace Networking.Profiling
+﻿namespace MSP2050.Scripts
 {
 	class ProfilerTimeSpan
 	{

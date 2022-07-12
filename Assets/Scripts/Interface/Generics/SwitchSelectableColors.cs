@@ -1,33 +1,36 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof (Selectable))]
-public class SwitchSelectableColors : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	[RequireComponent(typeof (Selectable))]
+	public class SwitchSelectableColors : MonoBehaviour {
 
-    public Selectable selectable;
-    public Color normal;
-    public Color highlighted;
+		public Selectable selectable;
+		public Color normal;
+		public Color highlighted;
 
-    void Reset()
-    {
-        selectable = GetComponent<Selectable>();
-    }
+		void Reset()
+		{
+			selectable = GetComponent<Selectable>();
+		}
 
-    void Start()
-    {
-        ColorBlock colBlock = selectable.colors;
+		void Start()
+		{
+			ColorBlock colBlock = selectable.colors;
 
-        normal = colBlock.normalColor;
-        highlighted = colBlock.highlightedColor;
-    }
+			normal = colBlock.normalColor;
+			highlighted = colBlock.highlightedColor;
+		}
 
-    public void SwitchColors(bool dir)
-    {
-        ColorBlock colBlock = selectable.colors;
+		public void SwitchColors(bool dir)
+		{
+			ColorBlock colBlock = selectable.colors;
 
-        colBlock.normalColor = (dir) ? highlighted : normal;
-        colBlock.highlightedColor = (dir) ? normal : highlighted;
+			colBlock.normalColor = (dir) ? highlighted : normal;
+			colBlock.highlightedColor = (dir) ? normal : highlighted;
 
-        selectable.colors = colBlock;
-    }
+			selectable.colors = colBlock;
+		}
+	}
 }

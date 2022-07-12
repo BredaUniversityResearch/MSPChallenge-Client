@@ -1,66 +1,64 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class PlanDetailsTab: MonoBehaviour
+namespace MSP2050.Scripts
 {
-	[SerializeField]
-	protected Toggle tabToggle;
-	[SerializeField]
-	private GameObject tabContainer = null;
-	[SerializeField]
-	protected PlanDetails planDetails;
-	[SerializeField]
-	protected GameObject emptyContentOverlay;
-
-	protected bool isActive { get; private set; }
-	protected virtual PlanDetails.EPlanDetailsTab tabType => PlanDetails.EPlanDetailsTab.Feedback;
-
-	private void Start()
+	public class PlanDetailsTab: MonoBehaviour
 	{
-		Initialise();
-	}
+		[SerializeField]
+		protected Toggle tabToggle;
+		[SerializeField]
+		private GameObject tabContainer = null;
+		[SerializeField]
+		protected PlanDetails planDetails;
+		[SerializeField]
+		protected GameObject emptyContentOverlay;
 
-	protected virtual void Initialise()
-	{
-		tabToggle.onValueChanged.AddListener(SetTabActive);
-		isActive = tabToggle.isOn;
-		tabContainer.SetActive(isActive);
-	}
+		protected bool isActive { get; private set; }
+		protected virtual PlanDetails.EPlanDetailsTab tabType => PlanDetails.EPlanDetailsTab.Feedback;
 
-	public virtual void UpdateTabAvailability()
-	{
-		tabToggle.interactable = isActive || (!Main.EditingPlanDetailsContent && !Main.InEditMode && !Main.PreventPlanAndTabChange);
-	}
-
-	public virtual void UpdateTabContent()
-	{ }
-
-	public void SetTabActive(bool active)
-	{
-		if (isActive != active)
+		public virtual void Initialise()
 		{
-			tabContainer.SetActive(active);
-			isActive = active;
-			tabToggle.isOn = active;
-			if (active)
+			tabToggle.onValueChanged.AddListener(SetTabActive);
+			isActive = tabToggle.isOn;
+			tabContainer.SetActive(isActive);
+		}
+
+		public virtual void UpdateTabAvailability()
+		{
+			tabToggle.interactable = isActive || (!Main.EditingPlanDetailsContent && !Main.InEditMode && !Main.PreventPlanAndTabChange);
+		}
+
+		public virtual void UpdateTabContent()
+		{ }
+
+		public void SetTabActive(bool active)
+		{
+			if (isActive != active)
 			{
-				planDetails.TabSelect(tabType);
-				OnTabActivate();
-			}
-			else
-			{
-				OnTabDeactivate();
+				tabContainer.SetActive(active);
+				isActive = active;
+				tabToggle.isOn = active;
+				if (active)
+				{
+					planDetails.TabSelect(tabType);
+					OnTabActivate();
+				}
+				else
+				{
+					OnTabDeactivate();
+				}
 			}
 		}
-	}
 
-	protected virtual void OnTabActivate()
-	{
-		UpdateTabContent();
-		UpdateTabAvailability();
-	}
+		protected virtual void OnTabActivate()
+		{
+			UpdateTabContent();
+			UpdateTabAvailability();
+		}
 
-	protected virtual void OnTabDeactivate()
-	{
+		protected virtual void OnTabDeactivate()
+		{
+		}
 	}
 }

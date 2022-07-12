@@ -1,8 +1,10 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
 
-public class PlanLayerBase : MonoBehaviour
+namespace MSP2050.Scripts
 {
-    public TextMeshProUGUI title;
+	public class PlanLayerBase : MonoBehaviour
+	{
+		public TextMeshProUGUI title;
+	}
 }

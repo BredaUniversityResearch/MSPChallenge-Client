@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
+using MSP2050.Scripts;
 
 [CustomEditor(typeof(DataVisualizationSettings))]
 public class DataVisualizationSettingsEditor : Editor

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Networking.Profiling
+namespace MSP2050.Scripts
 {
 	class NetworkProfileManager: MonoBehaviour
 	{

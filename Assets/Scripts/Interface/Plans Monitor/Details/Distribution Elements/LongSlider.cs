@@ -1,8 +1,10 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-namespace UnityEngine.UI
+namespace MSP2050.Scripts
 {
     [AddComponentMenu("UI/LongSlider", 33)]
     [RequireComponent(typeof(RectTransform))]

@@ -1,22 +1,25 @@
 ﻿using UnityEngine;
 
-class DisableIfSimulationUnavailable: MonoBehaviour
+namespace MSP2050.Scripts
 {
-	[SerializeField]
-	private ESimulationType simulationType = ESimulationType.None;
-
-	private void Awake()
+	class DisableIfSimulationUnavailable: MonoBehaviour
 	{
-		Main.OnGlobalDataLoaded += OnGlobalDataLoaded;
-	}
+		[SerializeField]
+		private ESimulationType simulationType = ESimulationType.None;
 
-	private void OnDestroy()
-	{
-		Main.OnGlobalDataLoaded -= OnGlobalDataLoaded;
-	}
+		private void Awake()
+		{
+			Main.OnGlobalDataLoaded += OnGlobalDataLoaded;
+		}
 
-	private void OnGlobalDataLoaded()
-	{
-		gameObject.SetActive(Main.IsSimulationConfigured(simulationType));
+		private void OnDestroy()
+		{
+			Main.OnGlobalDataLoaded -= OnGlobalDataLoaded;
+		}
+
+		private void OnGlobalDataLoaded()
+		{
+			gameObject.SetActive(Main.IsSimulationConfigured(simulationType));
+		}
 	}
 }

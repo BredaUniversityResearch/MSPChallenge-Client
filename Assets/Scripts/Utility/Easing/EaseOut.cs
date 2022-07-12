@@ -1,7 +1,10 @@
-﻿public class EaseOut : EaseIn
+﻿namespace MSP2050.Scripts
 {
-	public EaseOut(float easeExponent)
-		: base(1.0f / easeExponent)
+	public class EaseOut : EaseIn
 	{
+		public EaseOut(float easeExponent)
+			: base(1.0f / easeExponent)
+		{
+		}
 	}
 }

@@ -1,23 +1,26 @@
 ﻿using UnityEngine;
 
-public class PrefabObjectPoolTracker : MonoBehaviour
+namespace MSP2050.Scripts
 {
-	public PrefabObjectPool OwningPool
+	public class PrefabObjectPoolTracker : MonoBehaviour
 	{
-		get;
-		private set;
-	}
-
-	public void SetOwningPool(PrefabObjectPool owningPool)
-	{
-		OwningPool = owningPool;
-	}
-
-	private void OnDestroy()
-	{
-		if (OwningPool != null)
+		public PrefabObjectPool OwningPool
 		{
-			Debug.LogError("Unintended destruction of object pool entity?");
+			get;
+			private set;
+		}
+
+		public void SetOwningPool(PrefabObjectPool owningPool)
+		{
+			OwningPool = owningPool;
+		}
+
+		private void OnDestroy()
+		{
+			if (OwningPool != null)
+			{
+				Debug.LogError("Unintended destruction of object pool entity?");
+			}
 		}
 	}
 }

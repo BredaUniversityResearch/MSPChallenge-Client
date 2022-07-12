@@ -1,119 +1,123 @@
 ﻿using System;
-using System.Globalization;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "MSP2050/ValueConversion/Unit", fileName = "NewConversionUnit")]
-public class ValueConversionUnit: ScriptableObject
+namespace MSP2050.Scripts
 {
-	private static UnitEntry[] defaultMetricUnits = new UnitEntry[]
+	[CreateAssetMenu(menuName = "MSP2050/ValueConversion/Unit", fileName = "NewConversionUnit")]
+	public class ValueConversionUnit: ScriptableObject
 	{
-		new UnitEntry { unitPostfix = "k", unitSize = 1000 },
-		new UnitEntry { unitPostfix = "M", unitSize = 1000000 },
-		new UnitEntry { unitPostfix = "G", unitSize = 1000000000 }
-	};
-
-	[Flags]
-	private enum EPostfixMatchMode
-	{
-		MatchExact = 1 << 0,
-		StartsWith = 1 << 1,
-		IgnoreCase = 1 << 2
-	}
-
-	[Serializable]
-	private class UnitEntry
-	{
-		public string unitPostfix = "";
-		public float unitSize = 1;
-	}
-
-	[SerializeField]
-	private string baseUnit = "SOME_UNIT_TYPE";
-
-	public string BaseUnit
-	{
-		get
+		private static UnitEntry[] defaultMetricUnits = new UnitEntry[]
 		{
-			return baseUnit;
-		}
-	}
+			new UnitEntry { unitPostfix = "k", unitSize = 1000 },
+			new UnitEntry { unitPostfix = "M", unitSize = 1000000 },
+			new UnitEntry { unitPostfix = "G", unitSize = 1000000000 }
+		};
 
-	[SerializeField]
-	private UnitEntry[] conversionUnits = new UnitEntry[0];
-
-	[SerializeField]
-	private int decimalPlaces = 2;
-
-	public ConvertedUnit ConvertUnit(float value)
-	{
-        float absValue = Mathf.Abs(value);
-
-		if (value == 0)
+		[Flags]
+		private enum EPostfixMatchMode
 		{
-			return new ConvertedUnit(0.0f, baseUnit, 0);
+			MatchExact = 1 << 0,
+			StartsWith = 1 << 1,
+			IgnoreCase = 1 << 2
 		}
 
-		UnitEntry unitConversion = conversionUnits[0];
-		for (int i = conversionUnits.Length - 1; i >= 0 ; --i)
+		[Serializable]
+		private class UnitEntry
 		{
-			if (absValue >= conversionUnits[i].unitSize)
+			public string unitPostfix = "";
+			public float unitSize = 1;
+		}
+
+		[SerializeField]
+		private string baseUnit = "SOME_UNIT_TYPE";
+		[SerializeField]
+		private string baseUnitFormat = "SOME_UNIT_TYPE";
+
+		public string BaseUnit
+		{
+			get
 			{
-				unitConversion = conversionUnits[i];
-				break;
+				return baseUnit;
 			}
 		}
 
-		return new ConvertedUnit(value / unitConversion.unitSize, unitConversion.unitPostfix, decimalPlaces);
-	}
+		[SerializeField]
+		private UnitEntry[] conversionUnits = new UnitEntry[0];
 
-	public void ParseUnit(string input, out float amount)
-	{
-		int separatorIndex = input.LastIndexOfAny("0123456789".ToCharArray());
+		[SerializeField]
+		private int decimalPlaces = 2;
 
-		string numberString = input.Substring(0, separatorIndex + 1).Trim();
-		string unitString = input.Substring(separatorIndex + 1).Trim();
-
-		if (float.TryParse(numberString, Localisation.FloatNumberStyle, Localisation.NumberFormatting, out amount))
+		public ConvertedUnit ConvertUnit(float value)
 		{
-			UnitEntry unit = FindUnitEntryForPostfix(unitString, conversionUnits, EPostfixMatchMode.MatchExact | EPostfixMatchMode.IgnoreCase);
-			if (unit != null)
+			float absValue = Mathf.Abs(value);
+
+			if (value == 0)
 			{
-				amount *= unit.unitSize;
+				return new ConvertedUnit(0.0f, baseUnitFormat, 0);
 			}
-			else
+
+			UnitEntry unitConversion = conversionUnits[0];
+			for (int i = conversionUnits.Length - 1; i >= 0 ; --i)
 			{
-				unit = FindUnitEntryForPostfix(unitString, defaultMetricUnits, EPostfixMatchMode.StartsWith | EPostfixMatchMode.IgnoreCase);
+				if (absValue >= conversionUnits[i].unitSize)
+				{
+					unitConversion = conversionUnits[i];
+					break;
+				}
+			}
+
+			return new ConvertedUnit(value / unitConversion.unitSize, unitConversion.unitPostfix, decimalPlaces);
+		}
+
+		public void ParseUnit(string input, out float amount)
+		{
+			int separatorIndex = input.LastIndexOfAny("0123456789".ToCharArray());
+
+			string numberString = input.Substring(0, separatorIndex + 1).Trim();
+			string unitString = input.Substring(separatorIndex + 1).Trim();
+
+			if (float.TryParse(numberString, Localisation.FloatNumberStyle, Localisation.NumberFormatting, out amount))
+			{
+				UnitEntry unit = FindUnitEntryForPostfix(unitString, conversionUnits, EPostfixMatchMode.MatchExact | EPostfixMatchMode.IgnoreCase);
 				if (unit != null)
 				{
 					amount *= unit.unitSize;
 				}
+				else
+				{
+					unit = FindUnitEntryForPostfix(unitString, defaultMetricUnits, EPostfixMatchMode.StartsWith | EPostfixMatchMode.IgnoreCase);
+					if (unit != null)
+					{
+						amount *= unit.unitSize;
+					}
+				}
 			}
 		}
-	}
 
-	private UnitEntry FindUnitEntryForPostfix(string inputPostfix, UnitEntry[] entries, EPostfixMatchMode matchMode)
-	{
-		StringComparison comparison;
-		if ((matchMode & EPostfixMatchMode.IgnoreCase) == EPostfixMatchMode.IgnoreCase)
+		private UnitEntry FindUnitEntryForPostfix(string inputPostfix, UnitEntry[] entries, EPostfixMatchMode matchMode)
 		{
-			comparison = StringComparison.InvariantCultureIgnoreCase;
-		}
-		else
-		{
-			comparison = StringComparison.InvariantCulture;
-		}
-
-		UnitEntry result = null;
-		foreach (UnitEntry unit in entries)
-		{
-			if ((((matchMode & EPostfixMatchMode.MatchExact) == EPostfixMatchMode.MatchExact) && string.Compare(inputPostfix, unit.unitPostfix, comparison) == 0) ||
-				(((matchMode & EPostfixMatchMode.StartsWith) == EPostfixMatchMode.StartsWith) && inputPostfix.StartsWith(unit.unitPostfix, comparison)))
+			StringComparison comparison;
+			if ((matchMode & EPostfixMatchMode.IgnoreCase) == EPostfixMatchMode.IgnoreCase)
 			{
-				result = unit;
-				break;
+				comparison = StringComparison.InvariantCultureIgnoreCase;
 			}
-		}
+			else
+			{
+				comparison = StringComparison.InvariantCulture;
+			}
 
-		return result;
+			UnitEntry result = null;
+			foreach (UnitEntry unit in entries)
+			{
+				if ((((matchMode & EPostfixMatchMode.MatchExact) == EPostfixMatchMode.MatchExact) && string.Compare(inputPostfix, unit.unitPostfix, comparison) == 0) ||
+				    (((matchMode & EPostfixMatchMode.StartsWith) == EPostfixMatchMode.StartsWith) && inputPostfix.StartsWith(unit.unitPostfix, comparison)))
+				{
+					result = unit;
+					break;
+				}
+			}
+
+			return result;
+		}
 	}
 }

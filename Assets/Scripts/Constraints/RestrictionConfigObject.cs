@@ -1,5 +1,8 @@
-﻿public class RestrictionConfigObject
+﻿namespace MSP2050.Scripts
 {
-	public float restriction_point_size = 1.0f;
-	public RestrictionObject[] restrictions = null;
+	public class RestrictionConfigObject
+	{
+		public float restriction_point_size = 1.0f;
+		public RestrictionObject[] restrictions = null;
+	}
 }

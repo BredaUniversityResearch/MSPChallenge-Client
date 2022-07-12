@@ -1,28 +1,31 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class CategoryDropdownItem : MonoBehaviour
+namespace MSP2050.Scripts
 {
-    public GameObject header;
-    public GameObject option;
+	public class CategoryDropdownItem : MonoBehaviour
+	{
+		public GameObject header;
+		public GameObject option;
 
-    public Text headerLabel;
-    public Text optionLabel;
+		public Text headerLabel;
+		public Text optionLabel;
 
-    public Toggle rootToggle;
-    public Toggle optionToggle;
+		public Toggle rootToggle;
+		public Toggle optionToggle;
 
-    public void Start()
-    {
-        bool isHeader = optionLabel.text.Contains("-");
+		public void Start()
+		{
+			bool isHeader = optionLabel.text.Contains("-");
 
-        header.SetActive(isHeader);
-        option.SetActive(!isHeader);
+			header.SetActive(isHeader);
+			option.SetActive(!isHeader);
 
-        headerLabel.text = optionLabel.text.TrimStart('-');
+			headerLabel.text = optionLabel.text.TrimStart('-');
 
-        if (rootToggle.isOn == true) {
-            optionToggle.Select();
-        }
-    }
+			if (rootToggle.isOn == true) {
+				optionToggle.Select();
+			}
+		}
+	}
 }

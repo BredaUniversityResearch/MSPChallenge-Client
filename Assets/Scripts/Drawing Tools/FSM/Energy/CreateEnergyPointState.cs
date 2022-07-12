@@ -1,24 +1,26 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
-class CreateEnergyPointState : CreatePointsState
+namespace MSP2050.Scripts
 {
-    public CreateEnergyPointState(FSM fsm, PlanLayer planLayer) : base(fsm, planLayer)
-    {
-    }
+	class CreateEnergyPointState : CreatePointsState
+	{
+		public CreateEnergyPointState(FSM fsm, PlanLayer planLayer) : base(fsm, planLayer)
+		{
+		}
 
-    public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
-    {
-        AudioMain.PlaySound(AudioMain.ITEM_PLACED);
+		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
+		{
+			AudioMain.PlaySound(AudioMain.ITEM_PLACED);
 
-        List<EntityType> selectedType = UIManager.GetCurrentEntityTypeSelection();
-        PointEntity entity = baseLayer.CreateNewPointEntity(finalPosition, selectedType != null ? selectedType : new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
-        baseLayer.activeEntities.Add(entity);
-        PointSubEntity subEntity = entity.GetSubEntity(0) as PointSubEntity;
-        subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
+			List<EntityType> selectedType = UIManager.GetCurrentEntityTypeSelection();
+			PointEntity entity = baseLayer.CreateNewPointEntity(finalPosition, selectedType != null ? selectedType : new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
+			baseLayer.activeEntities.Add(entity);
+			PointSubEntity subEntity = entity.GetSubEntity(0) as PointSubEntity;
+			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 
-        fsm.AddToUndoStack(new CreateEnergyPointOperation(subEntity, planLayer));
-    }
+			fsm.AddToUndoStack(new CreateEnergyPointOperation(subEntity, planLayer));
+		}
+	}
 }
 

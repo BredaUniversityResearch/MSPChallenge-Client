@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace KPI
+namespace MSP2050.Scripts
 {
     class CountryKPICollectionEnergy
     {

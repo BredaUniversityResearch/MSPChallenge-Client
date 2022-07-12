@@ -1,26 +1,29 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using TMPro;
 
-class PlanIssuesEntry: MonoBehaviour
+namespace MSP2050.Scripts
 {
-	[SerializeField] private TextMeshProUGUI issueText = null;
-	[SerializeField] private Button viewIssueButton = null;
-
-	public void SetText(string text)
+	class PlanIssuesEntry: MonoBehaviour
 	{
-		issueText.text = text;
-	}
+		[SerializeField] private TextMeshProUGUI issueText = null;
+		[SerializeField] private Button viewIssueButton = null;
 
-	public void DisableViewOnMapButton()
-	{
-		viewIssueButton.gameObject.SetActive(false);
-	}
+		public void SetText(string text)
+		{
+			issueText.text = text;
+		}
 
-	public void SetViewOnMapClickedAction(UnityAction callbackAction)
-	{
-		viewIssueButton.onClick.AddListener(callbackAction);
+		public void DisableViewOnMapButton()
+		{
+			viewIssueButton.gameObject.SetActive(false);
+		}
+
+		public void SetViewOnMapClickedAction(UnityAction callbackAction)
+		{
+			viewIssueButton.onClick.AddListener(callbackAction);
+		}
 	}
 }
 

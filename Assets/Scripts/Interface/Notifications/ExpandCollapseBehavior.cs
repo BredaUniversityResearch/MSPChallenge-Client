@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Interface.Notifications
+namespace MSP2050.Scripts
 {
 	public class ExpandCollapseBehavior : MonoBehaviour
 	{

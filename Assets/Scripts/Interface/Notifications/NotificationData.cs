@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Events;
 
-namespace Interface.Notifications
+namespace MSP2050.Scripts
 {
 	public class NotificationData
 	{

@@ -1,37 +1,39 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
 
-public class Objective : MonoBehaviour
+namespace MSP2050.Scripts
 {
-    [Header("Info")]
-	[SerializeField]
-	protected TextMeshProUGUI title;
-	[SerializeField]
-    protected TextMeshProUGUI summary;
-	public int TeamId
+	public class Objective : MonoBehaviour
 	{
-		get;
-		private set;
-	}
+		[Header("Info")]
+		[SerializeField]
+		protected TextMeshProUGUI title;
+		[SerializeField]
+		protected TextMeshProUGUI summary;
+		public int TeamId
+		{
+			get;
+			private set;
+		}
 
-	public void CopyObjectiveDataFrom(Objective other)
-	{
-		if (title != null && other.title != null)
+		public void CopyObjectiveDataFrom(Objective other)
 		{
-			title.text = other.title.text;
+			if (title != null && other.title != null)
+			{
+				title.text = other.title.text;
+			}
+			if (summary != null && other.summary != null)
+			{
+				summary.text = other.summary.text;
+			}
+			TeamId = other.TeamId;
 		}
-		if (summary != null && other.summary != null)
-		{
-			summary.text = other.summary.text;
-		}
-		TeamId = other.TeamId;
-	}
 	
-	public virtual void SetObjectiveDetails(ObjectiveDetails details)
-	{
-		title.text = details.title;
-		summary.text = details.description;
-		TeamId = details.appliesToCountry;
+		public virtual void SetObjectiveDetails(ObjectiveDetails details)
+		{
+			title.text = details.title;
+			summary.text = details.description;
+			TeamId = details.appliesToCountry;
+		}
 	}
 }

@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class PlanDetailIcon : MonoBehaviour {
+namespace MSP2050.Scripts
+{
+	public class PlanDetailIcon : MonoBehaviour {
 
-    public Image icon;
-    public AddTooltip tooltip;
+		public Image icon;
+		public AddTooltip tooltip;
+	}
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace KPI
+namespace MSP2050.Scripts
 {
 	public class KPIValueCollectionGeometry: KPIValueCollection
 	{
