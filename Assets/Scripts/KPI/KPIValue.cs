@@ -43,12 +43,8 @@ namespace MSP2050.Scripts
 			{
 				return;
 			}
-			if (null == kpiValuesPerMonth[0])
-			{
-				kpiValuesPerMonth[0] = value;
-			}
-			float prevValue = kpiValuesPerMonth[0].Value;
-			for (int m = 1; m < monthId; ++m)
+			float prevValue = value;
+			for (int m = 0; m < monthId; ++m)
 			{
 				if (kpiValuesPerMonth[m] == null)
 				{
