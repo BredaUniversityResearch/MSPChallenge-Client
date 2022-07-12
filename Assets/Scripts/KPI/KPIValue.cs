@@ -39,10 +39,6 @@ namespace MSP2050.Scripts
 
 		private void FillUpPrevNullValues(int monthId, float value)
 		{
-			if (monthId <= 0)
-			{
-				return;
-			}
 			float prevValue = value;
 			for (int m = 0; m < monthId; ++m)
 			{
