@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 		// Other
 		public Toggle developerModeToggle;
 		public TextMeshProUGUI buildDateText;
-		public TextMeshProUGUI buildRevisionText;
+		//public TextMeshProUGUI buildRevisionText;
 		public TextMeshProUGUI apiEndpointText;
 
 		public Button cancel, accept;
@@ -107,7 +107,7 @@ namespace MSP2050.Scripts
 			if (identifier != null)
 			{
 				buildDateText.text = identifier.GetBuildTime();
-                buildRevisionText.text = identifier.GetGitTag();
+				//buildRevisionText.text = identifier.GetSvnRevisionNumber().ToString();
 			}
 		}
 
