@@ -68,9 +68,6 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 			result += $"{proc.StandardOutput.ReadLine()},";
 		}
 		proc.WaitForExit();
-		///////////////////////
-		UnityEngine.Debug.Log("the result is: " + result);
-		//////////////////////
 		return result;
 	}
 
@@ -83,13 +80,4 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 	{
 		return gitTag;
 	}
-
-	void Update()
-    {
-		if(Input.GetKeyDown(KeyCode.Space))
-        {
-			UnityEngine.Debug.Log("Testing if pressing space works!");
-			RunGitCommand();
-        }
-    }
 }
