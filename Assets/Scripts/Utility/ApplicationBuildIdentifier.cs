@@ -9,7 +9,7 @@ using UnityEditor;
 	/// Small scriptable object that acts as the build identifier. Contains information about the build date.
 	/// </summary>
 	[CreateAssetMenu]
-public class ApplicationBuildIdentifier : ScriptableObject
+public class ApplicationBuildIdentifier : MonoBehaviour
 {
 	//Actual file reside in Assets/Resources/
 	private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
@@ -68,6 +68,9 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 			result += $"{proc.StandardOutput.ReadLine()},";
 		}
 		proc.WaitForExit();
+		///////////////////////
+		UnityEngine.Debug.Log("the result is: " + result);
+		//////////////////////
 		return result;
 	}
 
@@ -80,4 +83,13 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 	{
 		return gitTag;
 	}
+
+	void Update()
+    {
+		if(Input.GetKeyDown(KeyCode.Space))
+        {
+			UnityEngine.Debug.Log("Testing if pressing space works!");
+			RunGitCommand();
+        }
+    }
 }
