@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 		//State meta
 		public virtual void EnterState(Vector3 currentMousePosition)
 		{
-			UIManager.ToolbarVisibility(false, FSM.ToolbarInput.ChangeDirection);
+			InterfaceCanvas.Instance.ToolbarVisibility(false, FSM.ToolbarInput.ChangeDirection);
 		}
 		public virtual void ExitState(Vector3 currentMousePosition) { }
 

@@ -111,7 +111,7 @@ namespace MSP2050.Scripts
 					Vector3 newPosition = selectionDragStart[kvp.Key][kvp.Value.First()] + offset;
 					EnergyLineStringSubEntity energySubEntity = kvp.Key as EnergyLineStringSubEntity;
 					bool first = kvp.Value.First() == 0;
-					EnergyPointSubEntity point = LayerManager.GetEnergyPointAtPosition(newPosition);
+					EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(newPosition);
 					if (point != null)
 					{
 						//Snap to point
@@ -143,7 +143,7 @@ namespace MSP2050.Scripts
 		{
 			if (draggingSelection)
 			{
-				AudioMain.PlaySound(AudioMain.ITEM_MOVED);
+				AudioMain.Instance.PlaySound(AudioMain.ITEM_MOVED);
 				draggingSelection = false;
 
 				//Handle start and endpoint movement if those were selected
@@ -152,7 +152,7 @@ namespace MSP2050.Scripts
 					{
 						EnergyLineStringSubEntity energySubEntity = kvp.Key as EnergyLineStringSubEntity;
 						bool first = kvp.Value.First() == 0;
-						EnergyPointSubEntity point = LayerManager.GetEnergyPointAtPosition(dragFinalPosition);
+						EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(dragFinalPosition);
 						if (point == null || !point.CanConnectToEnergySubEntity(energySubEntity.GetConnection(!first).point))
 						{
 							//Snap back to original position

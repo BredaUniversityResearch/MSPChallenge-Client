@@ -14,10 +14,10 @@ namespace MSP2050.Scripts
 
 		public void Start()
 		{
-			play.onClick.AddListener(TimeManager.instance.Play);
-			pause.onClick.AddListener(TimeManager.instance.Pause);
-			forward.onClick.AddListener(TimeManager.instance.Forward);  
-			finishSetup.onClick.AddListener(TimeManager.instance.FinishSetup);  
+			play.onClick.AddListener(TimeManager.Instance.Play);
+			pause.onClick.AddListener(TimeManager.Instance.Pause);
+			forward.onClick.AddListener(TimeManager.Instance.Forward);  
+			finishSetup.onClick.AddListener(TimeManager.Instance.FinishSetup);  
 		      
 		}
 

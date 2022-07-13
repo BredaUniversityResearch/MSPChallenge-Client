@@ -72,7 +72,7 @@ namespace MSP2050.Scripts
 			if (currentTokenRequest.isDone)
 			{
 				string jsonResponse = currentTokenRequest.downloadHandler.text;
-				ServerCommunication.RequestResult response = JsonConvert.DeserializeObject<ServerCommunication.RequestResult>(jsonResponse);
+				RequestResult response = JsonConvert.DeserializeObject<RequestResult>(jsonResponse);
 				if (response != null && response.success == true)
 				{
 					ApiTokenCheckAccessResponse payload = response.payload.ToObject<ApiTokenCheckAccessResponse>();
@@ -117,10 +117,10 @@ namespace MSP2050.Scripts
 		private void RequestSession()
 		{
 			requestSessionAttempts++;
-			int countryIndex = TeamManager.CurrentUserTeamID;
-			ServerCommunication.RequestSession(
-				countryIndex, TeamManager.CurrentUserName, RequestSessionSuccess, RequestSessionFailure,
-				TeamManager.Password
+			int countryIndex = SessionManager.Instance.CurrentUserTeamID;
+			ServerCommunication.Instance.RequestSession(
+				countryIndex, SessionManager.Instance.CurrentUserName, RequestSessionSuccess, RequestSessionFailure,
+				SessionManager.Instance.Password
 			);
 		}
 
@@ -129,7 +129,7 @@ namespace MSP2050.Scripts
 			if (renewTokenRequest.isDone)
 			{
 				string responseText = renewTokenRequest.downloadHandler.text;
-				ServerCommunication.RequestResult response = JsonConvert.DeserializeObject<ServerCommunication.RequestResult>(responseText);
+				RequestResult response = JsonConvert.DeserializeObject<RequestResult>(responseText);
 				if (response.success)
 				{
 					currentAccessToken = response.payload.ToObject<ApiTokenResponse>().token;
@@ -170,11 +170,11 @@ namespace MSP2050.Scripts
 		void RequestSessionSuccess(ServerCommunication.RequestSessionResponse response)
 		{
 			requestSessionAttempts = 0; // yes, user can continue playing
-			ServerCommunication.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
-			TeamManager.CurrentSessionID = response.session_id;
+			ServerCommunication.Instance.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
+			SessionManager.Instance.CurrentSessionID = response.session_id;
 		}
 
-		void RequestSessionFailure(ServerCommunication.ARequest request, string message)
+		void RequestSessionFailure(ARequest request, string message)
 		{
 			string msg = "Failed to request new session, request error: " + message;
 			if (requestSessionAttempts > MAX_REQUEST_SESSION_ATTEMPTS)

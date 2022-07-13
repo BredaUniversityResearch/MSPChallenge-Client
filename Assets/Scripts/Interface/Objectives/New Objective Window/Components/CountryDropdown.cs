@@ -24,8 +24,8 @@ namespace MSP2050.Scripts
 		private void CreateOptions()
 		{
 			// Country dropdown
-			List<TMP_Dropdown.OptionData> countryOptions = new List<TMP_Dropdown.OptionData>(TeamManager.TeamCount);
-			foreach (KeyValuePair<int, Team> team in TeamManager.GetTeamsByID())
+			List<TMP_Dropdown.OptionData> countryOptions = new List<TMP_Dropdown.OptionData>(SessionManager.Instance.TeamCount);
+			foreach (KeyValuePair<int, Team> team in SessionManager.Instance.GetTeamsByID())
 			{
 				if (!team.Value.IsManager)
 				{
@@ -41,7 +41,7 @@ namespace MSP2050.Scripts
 
 			if(dropdown.options.Count != 0)
 			{
-				Team team = TeamManager.FindTeamByName(dropdown.options[dropdown.value].text);
+				Team team = SessionManager.Instance.FindTeamByName(dropdown.options[dropdown.value].text);
 				if (team != null)
 				{
 					countrySelect.color = team.color;
@@ -54,13 +54,13 @@ namespace MSP2050.Scripts
 		/// </summary>
 		private void SelectCountry(int optionId)
 		{
-			Team selectedTeam = TeamManager.FindTeamByName(dropdown.options[optionId].text);
+			Team selectedTeam = SessionManager.Instance.FindTeamByName(dropdown.options[optionId].text);
 			OnSelectedTeamChanged(selectedTeam);
 		}
 
 		public void SetSelectedCountryId(int countryId)
 		{
-			Team targetTeam = TeamManager.FindTeamByID(countryId);
+			Team targetTeam = SessionManager.Instance.FindTeamByID(countryId);
 			int index = dropdown.options.FindIndex(obj => obj.text == targetTeam.name);
 			dropdown.value = index;
 			OnSelectedTeamChanged(targetTeam);
@@ -84,7 +84,7 @@ namespace MSP2050.Scripts
 			int countryId = -1; //Assume all countries
 			if (dropdown.options.Count > 0)
 			{
-				Team selectedTeam = TeamManager.FindTeamByName(dropdown.options[dropdown.value].text);
+				Team selectedTeam = SessionManager.Instance.FindTeamByName(dropdown.options[dropdown.value].text);
 				if (selectedTeam != null)
 				{
 					countryId = selectedTeam.ID;

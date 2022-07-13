@@ -6,7 +6,7 @@ namespace MSP2050.Scripts
 	{
 		private void OnEnable()
 		{
-			bool? connected = UpdateData.WsServerCommunicationInteractor?.IsConnected();
+			bool? connected = UpdateManager.Instance.WsServerCommunicationInteractor?.IsConnected();
 			if (connected == null)
 			{
 				return;
@@ -17,7 +17,7 @@ namespace MSP2050.Scripts
 		private void Start()
 		{
 			OnStart();
-			bool? connected = UpdateData.WsServerCommunicationInteractor?.IsConnected();
+			bool? connected = UpdateManager.Instance.WsServerCommunicationInteractor?.IsConnected();
 			if (connected == null)
 			{
 				return;

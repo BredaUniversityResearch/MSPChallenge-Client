@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 {
 	public abstract class UndoOperation
 	{
-		public enum EditMode { Create, Modify, SetOperation }
+		public enum EditMode { Create, Modify }
 
 		public abstract void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false);
 	}
@@ -126,18 +126,12 @@ namespace MSP2050.Scripts
 				if(!totalUndo)
 					fsm.SetCurrentState(new CreatingPolygonState(fsm, SubEntity, PlanLayer));
 			}
-			else if (editMode == EditMode.Modify)
+			else
 			{
 				SubEntity.restrictionNeedsUpdate = true;
 				SubEntity.Entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default); // redraw entire entity in case of entity type change
 				if (!totalUndo)
 					fsm.SetCurrentState(new SelectPolygonsState(fsm, PlanLayer));
-			}
-			else if (editMode == EditMode.SetOperation)
-			{
-				SubEntity.RedrawGameObject(SubEntityDrawMode.Default);
-				if (!totalUndo)
-					fsm.SetCurrentState(new SetOperationsState(fsm));
 			}
 		}
 	}
@@ -274,13 +268,9 @@ namespace MSP2050.Scripts
 				{
 					fsm.SetCurrentState(new StartCreatingPolygonState(fsm, PlanLayer));
 				}
-				else if (editMode == EditMode.Modify)
+				else
 				{
 					fsm.SetCurrentState(new SelectPolygonsState(fsm, PlanLayer));
-				}
-				else if (editMode == EditMode.SetOperation)
-				{
-					fsm.SetCurrentState(new SetOperationsState(fsm));
 				}
 			}
 		}
@@ -426,15 +416,10 @@ namespace MSP2050.Scripts
 					SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 					fsm.SetCurrentState(new CreatingPolygonState(fsm, SubEntity, PlanLayer));
 				}
-				else if (editMode == EditMode.Modify)
+				else
 				{
 					SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 					fsm.SetCurrentState(new SelectPolygonsState(fsm, PlanLayer));
-				}
-				else if (editMode == EditMode.SetOperation)
-				{
-					SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
-					fsm.SetCurrentState(new SetOperationsState(fsm));
 				}
 			}
 			else

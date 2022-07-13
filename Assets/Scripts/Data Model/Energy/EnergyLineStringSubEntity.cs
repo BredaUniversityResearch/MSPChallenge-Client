@@ -22,15 +22,15 @@ namespace MSP2050.Scripts
 		public EnergyLineStringSubEntity(Entity entity, SubEntityObject geometry, int databaseID) : base(entity, geometry, databaseID)
 		{
 			connections = new List<Connection>();
-			LayerManager.AddEnergySubEntityReference(databaseID, this);
+			LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
 			CalculationPropertyUpdated();
 		}
 
 		public override void SetDatabaseID(int databaseID)
 		{
-			LayerManager.RemoveEnergySubEntityReference(databaseID);
+			LayerManager.Instance.RemoveEnergySubEntityReference(databaseID);
 			this.databaseID = databaseID;
-			LayerManager.AddEnergySubEntityReference(databaseID, this);
+			LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
 		}
 
 		public override void SubmitNew(BatchRequest batch)
@@ -117,14 +117,14 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public override void RemoveDependencies()
 		{
-			//LayerManager.RemoveEnergySubEntityReference(databaseID);
+			//LayerManager.Instance.RemoveEnergySubEntityReference(databaseID);
 			foreach (Connection con in connections)
 				con.point.RemoveConnection(con);
 		}
 
 		public override void RestoreDependencies()
 		{
-			LayerManager.AddEnergySubEntityReference(databaseID, this);
+			LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
 			foreach (Connection con in connections)
 				con.point.AddConnection(con);
 		}

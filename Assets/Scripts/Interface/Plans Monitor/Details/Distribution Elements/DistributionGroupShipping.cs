@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 		{
 			//U wot.
 			updatedItem.SetValue(currentValue);
-			updatedItem.ToText(updatedItem.GetDistributionValue(), PlanManager.shippingDisplayScale, true);
+			updatedItem.ToText(updatedItem.GetDistributionValue(), PlanManager.Instance.shippingDisplayScale, true);
 
 			if (distributionFillBar != null)
 			{

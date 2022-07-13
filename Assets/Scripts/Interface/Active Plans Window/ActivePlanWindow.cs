@@ -48,7 +48,7 @@ namespace MSP2050.Scripts
 		private Dictionary<EntityType, ActivePlanLayerType> layerTypes;
 		private ActivePlanLayerType multipleTypesEntry;
 		private bool multiType;
-		private bool ignoreLayerTypeCallback;//Used to ignore callbacks from above (Main.StartEditingLayer) and below (ActivePlanLayer.toggle)
+		private bool ignoreLayerTypeCallback;//Used to ignore callbacks from above (Main.Instance.StartEditingLayer) and below (ActivePlanLayer.toggle)
 
 		[Header("Country")]
 		public GameObject countrySection;
@@ -86,26 +86,26 @@ namespace MSP2050.Scripts
 					PlanDetails.SelectPlan(selectedPlan);
 					PlanDetails.instance.TabSelect(PlanDetails.EPlanDetailsTab.Layers);
 					PlanDetails.instance.editTabContentButton.onClick.Invoke();
-					//PlanManager.RequestPlanLockForEditing(selectedPlan);
+					//PlanManager.Instance.RequestPlanLockForEditing(selectedPlan);
 				}
 			});
 
 			viewAllToggle.onValueChanged.AddListener((value) =>
 			{
 				if (value)
-					PlanManager.SetPlanViewState(PlanManager.PlanViewState.All);
+					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.All);
 			});
 
 			viewPlanToggle.onValueChanged.AddListener((value) =>
 			{
 				if (value)
-					PlanManager.SetPlanViewState(PlanManager.PlanViewState.Changes);
+					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Changes);
 			});
 
 			viewBaseToggle.onValueChanged.AddListener((value) =>
 			{
 				if (value)
-					PlanManager.SetPlanViewState(PlanManager.PlanViewState.Base);
+					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Base);
 			});
 
 			zoomToPlanButton.onClick.AddListener(() =>
@@ -118,7 +118,7 @@ namespace MSP2050.Scripts
 
 		private bool OnAttemptHideWindow()
 		{
-			if (Main.InEditMode || Main.EditingPlanDetailsContent)
+			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 			{
 				if (cancelChangesConfirmationWindow == null || !cancelChangesConfirmationWindow.isActiveAndEnabled)
 				{
@@ -130,7 +130,7 @@ namespace MSP2050.Scripts
 						else
 							PlanDetails.instance.CancelEditingContent();
 
-						PlanManager.HideCurrentPlan();
+						PlanManager.Instance.HideCurrentPlan();
 						gameObject.SetActive(false);
 					};
 					cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "All changes made to the plan will be lost. Are you sure you want to cancel?", lb, rb);
@@ -140,7 +140,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				PlanManager.HideCurrentPlan();
+				PlanManager.Instance.HideCurrentPlan();
 				return true;
 			}
 		}
@@ -148,7 +148,7 @@ namespace MSP2050.Scripts
 		public void OnCountriesLoaded()
 		{
 			countryToggles = new Dictionary<int, Toggle>();
-			foreach (Team team in TeamManager.GetTeams())
+			foreach (Team team in SessionManager.Instance.GetTeams())
 				if(!team.IsAreaManager)
 					CreateCountryToggle(team);
 
@@ -160,7 +160,7 @@ namespace MSP2050.Scripts
 		{
 			gameObject.SetActive(true);
 			selectedPlan = plan;
-			countryBall.color = TeamManager.FindTeamByID(plan.Country).color;
+			countryBall.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
 			UpdateNameAndDate();
 			UpdateEditButtonActivity();
 		}
@@ -173,10 +173,10 @@ namespace MSP2050.Scripts
 
 		public void UpdateEditButtonActivity()
 		{
-			startEditingButton.gameObject.SetActive(!Main.InEditMode && !Main.EditingPlanDetailsContent
+			startEditingButton.gameObject.SetActive(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent
 			                                                         && selectedPlan != null 
 			                                                         && selectedPlan.State == Plan.PlanState.DESIGN
-			                                                         && (TeamManager.AreWeManager || selectedPlan.Country == TeamManager.CurrentUserTeamID)
+			                                                         && (SessionManager.Instance.AreWeManager || selectedPlan.Country == SessionManager.Instance.CurrentUserTeamID)
 			                                                         && selectedPlan.PlanLayers.Count > 0);
 		}
 
@@ -210,7 +210,7 @@ namespace MSP2050.Scripts
 				//Activate editing sections
 				layerTypeSection.SetActive(true);
 				layerSection.SetActive(true);
-				countrySection.SetActive(TeamManager.AreWeManager);
+				countrySection.SetActive(SessionManager.Instance.AreWeManager);
 
 				//Clear and create new layers
 				ClearLayers();
@@ -260,7 +260,7 @@ namespace MSP2050.Scripts
 			}
 
 			//Set admin country option available/unavailable
-			if (TeamManager.AreWeGameMaster)
+			if (SessionManager.Instance.AreWeGameMaster)
 				GMSelectable = !layer.BaseLayer.IsEnergyLayer();
 		}
 
@@ -270,7 +270,7 @@ namespace MSP2050.Scripts
 			if (ignoreLayerCallback)
 				return;
 
-			//Ignore callback from Main.StartEditingLayer
+			//Ignore callback from Main.Instance.StartEditingLayer
 			ignoreLayerCallback = true;
 			PlanDetails.LayersTab.StartEditingLayer(planLayer);
 			ignoreLayerCallback = false;

@@ -23,31 +23,31 @@ namespace MSP2050.Scripts
 
 			public AdditionalDebugInfo()
 			{
-				if (Main.MspGlobalData != null)
+				if (SessionManager.Instance.MspGlobalData != null)
 				{
-					region = Main.MspGlobalData.region;
+					region = SessionManager.Instance.MspGlobalData.region;
 				}
 
 				serverEndpoint = Server.Url;
 
-				if (TeamManager.CurrentTeam != null)
+				if (SessionManager.Instance.CurrentTeam != null)
 				{
-					country = TeamManager.CurrentTeam.name;
+					country = SessionManager.Instance.CurrentTeam.name;
 				}
 
-				userName = TeamManager.CurrentUserName;
+				userName = SessionManager.Instance.CurrentUserName;
 				visibleLayers = GatherVisibleLayers();
-				gameState = GameState.CurrentState.ToString();
-				gameTime = GameState.GetCurrentMonth().ToString();
+				gameState = TimeManager.Instance.CurrentState.ToString();
+				gameTime = TimeManager.Instance.GetCurrentMonth().ToString();
 				currentlyEditingPlan = Main.CurrentlyEditingPlan != null ? Main.CurrentlyEditingPlan.ID.ToString() : "None";
 				//currentlyEditingLayer = Main.CurrentlyEditingPlanLayer != null ? Main.CurrentlyEditingPlanLayer.ID.ToString() : "None";
-				lastUpdateTimeStamp = UpdateData.LastUpdateTimeStamp.ToString();
+				lastUpdateTimeStamp = UpdateManager.Instance.LastUpdateTimeStamp.ToString();
 			}
 
 			private string[] GatherVisibleLayers()
 			{
 				List<string> layers = new List<string>();
-				foreach (AbstractLayer layer in LayerManager.GetVisibleLayers())
+				foreach (AbstractLayer layer in LayerManager.Instance.GetVisibleLayers())
 				{
 					layers.Add(layer.FileName);
 				}
@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 				output.Append("Editing plan: ").Append(currentlyEditingPlan).AppendLine();
 				output.Append("Editing layer: ").Append(currentlyEditingLayer).AppendLine();
 				output.Append("Last update time: ").Append(lastUpdateTimeStamp).AppendLine();
-				output.Append("Last update: ").Append(JsonConvert.SerializeObject(UpdateData.LastUpdate)).AppendLine();
+				output.Append("Last update: ").Append(JsonConvert.SerializeObject(UpdateManager.Instance.LastUpdate)).AppendLine();
 				output.Append("Visible Layers:").AppendLine();
 				foreach (string layer in visibleLayers)
 				{
@@ -157,7 +157,7 @@ namespace MSP2050.Scripts
 				errorEventData.AddField("message", dataMessage);
 				errorEventData.AddField("stack_trace", stackTrace);
 				UnityWebRequest serverReport = UnityWebRequest.Post(Server.Url + Server.SubmitErrorEvent(), errorEventData);
-				ServerCommunication.AddDefaultHeaders(serverReport);
+				ServerCommunication.Instance.AddDefaultHeaders(serverReport);
 				serverReport.SendWebRequest();
 				while (!serverReport.isDone)
 				{

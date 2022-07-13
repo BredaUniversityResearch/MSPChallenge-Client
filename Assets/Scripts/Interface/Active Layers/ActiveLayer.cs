@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 		
 			foreach (EntityType entityType in layerRepresenting.GetEntityTypesSortedByKey())
 			{
-				Texture2D pattern = MaterialManager.GetPatternOrDefault(entityType.DrawSettings.PolygonPatternName);
+				Texture2D pattern = MaterialManager.Instance.GetPatternOrDefault(entityType.DrawSettings.PolygonPatternName);
 
 				Color color = entityType.DrawSettings.PolygonColor;
 
@@ -80,7 +80,7 @@ namespace MSP2050.Scripts
 				} 
 				else if (layerRepresenting.GetGeoType() == LayerManager.GeoType.raster)
 				{
-					pattern = MaterialManager.GetPatternOrDefault(((RasterLayer)layerRepresenting).rasterObject.layer_raster_pattern);
+					pattern = MaterialManager.Instance.GetPatternOrDefault(((RasterLayer)layerRepresenting).rasterObject.layer_raster_pattern);
 				}
 
 				CreateMapKey(entityType, color, pattern, visibilityToggle);
@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 			int key = layerRepresenting.GetEntityTypeKey(type);
 
 			string mapKeyName = type.Name;
-			if (TeamManager.AreWeGameMaster)
+			if (SessionManager.Instance.AreWeGameMaster)
 				mapKeyName += " (" + key + ")";		
 		
 			// Instantiate prefab

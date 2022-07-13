@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 			if (teamID < 0)
 				col = Color.white;
 			else
-				col = TeamManager.GetTeamByTeamID(teamID).color;
+				col = SessionManager.Instance.GetTeamByTeamID(teamID).color;
 
 			// Generate item
 			GameObject go = Instantiate(itemPrefab);
@@ -109,7 +109,7 @@ namespace MSP2050.Scripts
 			go.transform.SetParent(childContainer.transform, false);
 
 			// Set values
-			item.teamGraphic.color = TeamManager.GetTeamByTeamID(teamID).color;
+			item.teamGraphic.color = SessionManager.Instance.GetTeamByTeamID(teamID).color;
 			item.numbers.text = valueText;
 			item.title.gameObject.SetActive(false);
 
@@ -140,7 +140,7 @@ namespace MSP2050.Scripts
 
 			// Set item to values
 			KPIGroupBarItem item = items[index];
-			item.teamGraphic.color = TeamManager.GetTeamByTeamID(teamID).color;
+			item.teamGraphic.color = SessionManager.Instance.GetTeamByTeamID(teamID).color;
 			item.numbers.text = valueText;
 			item.title.gameObject.SetActive(false);
 			item.teamGraphic.gameObject.SetActive(true);
@@ -184,7 +184,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < items.Count; i++)
 			{
 				int siblingIndex = 0;
-				foreach (Team team in TeamManager.GetTeams())
+				foreach (Team team in SessionManager.Instance.GetTeams())
 				{
 					if (items[i].teamGraphic.color == team.color)
 					{
@@ -245,7 +245,7 @@ namespace MSP2050.Scripts
 			occulusButton.onClick.RemoveAllListeners();
 			occulusButton.onClick.AddListener(() => grid.ShowGridOnMap());
 			GameObject dots = contentLocation.GetChild(0).gameObject;
-			groupCountryImage.color = TeamManager.GetTeamByTeamID(country).color;
+			groupCountryImage.color = SessionManager.Instance.GetTeamByTeamID(country).color;
 			int numberCountryIcons = 0;
 			float totalUsedPower = 0;
 			int nextItemIndex = 0;
@@ -297,7 +297,7 @@ namespace MSP2050.Scripts
 					if (numberCountryIcons < 3)
 					{
 						Image temp = Instantiate(countryIconPrefab).GetComponent<Image>();
-						temp.color = TeamManager.GetTeamByTeamID(kvp.Key).color;
+						temp.color = SessionManager.Instance.GetTeamByTeamID(kvp.Key).color;
 						temp.transform.SetParent(contentLocation);
 					}
 					numberCountryIcons++;

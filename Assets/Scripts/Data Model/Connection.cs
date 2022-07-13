@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 		//    form.AddField("cable", "" + cableID);
 		//    form.AddField("coords", "[" + startCoords.x + "," + startCoords.y + "]");
 
-		//    ServerCommunication.DoRequest(Server.CreateEnergyConection(), form, null);
+		//    ServerCommunication.Instance.DoRequest(Server.CreateEnergyConection(), form, null);
 		//}
 
 		public static string GetSubmissionString(string startID, string endID, string cableID, Vector3 startCoords)

@@ -11,26 +11,8 @@ namespace MSP2050.Scripts
 		[Header("Closed before children, start at 0")]
 		public GenericWindow[] fixedPriorityWindowsHigh;
 
-		//PdG: I'm so sorry for this but I don't want to add large portions of code just to get the KPI windows closing.
 		public ToggleGroup m_kpiToggleGroup = null;
-
-		//private static ShowHideManager realInstance;
-		//public static ShowHideManager instance
-		//{
-		//    get
-		//    {
-		//        if (realInstance != null)
-		//        {
-		//            return realInstance;
-		//        }
-		//        else
-		//        {
-		//            realInstance = GameObject.FindObjectOfType<ShowHideManager>();
-		//            return realInstance;
-		//        }
-		//    }
-		//}
-    
+		
 		void Update()
 		{
 			if(Input.GetKeyDown(keyCode))       

@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 				string.Format("Plan {0} requires an approval decision from your team", targetPlan.Name));
 			data.buttonText = "Open Plan Monitor";
 			data.onButtonPress = () => {
-				if (Main.InEditMode || Main.EditingPlanDetailsContent)
+				if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 				{
 					DialogBoxManager.instance.NotificationWindow("Editing plan content", "Other plans cannot be viewed while editing a plan's content.", () => { }, "Dismiss");
 				}
@@ -71,7 +71,7 @@ namespace MSP2050.Scripts
 			{
 				buttonText = "View Plan",
 				onButtonPress = () => {
-					if (Main.InEditMode || Main.EditingPlanDetailsContent)
+					if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 					{
 						DialogBoxManager.instance.NotificationWindow("Editing plan content", "Other plans cannot be viewed while editing a plan's content.", () => { }, "Dismiss");
 					}

@@ -49,7 +49,7 @@ namespace MSP2050.Scripts
 			if (gameObject == null)
 			{
 				RasterLayer sourceLayer = (RasterLayer) Entity.Layer;
-				gameObject = VisualizationUtil.CreateRasterGameObject(sourceLayer.rasterObject.layer_raster_material);
+				gameObject = VisualizationUtil.Instance.CreateRasterGameObject(sourceLayer.rasterObject.layer_raster_material);
 				gameObject.transform.SetParent(parent);
 
 				gameObject.transform.localScale = scale;
@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 					sourceLayer.rasterObject.layer_raster_minimum_value_cutoff /
 					sourceLayer.rasterValueToEntityValueMultiplier
 				);
-				spriteRenderer.material.SetTexture("_Dither", MaterialManager.GetPatternOrDefault(sourceLayer.rasterObject.layer_raster_pattern));
+				spriteRenderer.material.SetTexture("_Dither", MaterialManager.Instance.GetPatternOrDefault(sourceLayer.rasterObject.layer_raster_pattern));
 				SetRenderPatternOffset(materialPatternOffset);
 				SetupColorGradient(
 					spriteRenderer.material,
@@ -85,14 +85,14 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.IsReferenceLayer(Entity.Layer))
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer))
 				drawMode = SubEntityDrawMode.PlanReference;
 
 			// PdG 2017-10-03: Disabled snapping entirely for Raster Subentities otherwise everything would snap to the bathymetry layer at the mouse position.
 			SnappingToThisEnabled = false; // snapToDrawMode(drawMode);
 
 			drawSettings = Entity.EntityTypes[0].DrawSettings;
-			if (drawMode != SubEntityDrawMode.Default) { drawSettings = VisualizationUtil.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings); }
+			if (drawMode != SubEntityDrawMode.Default) { drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings); }
 
 			if (raster != null)
 			{

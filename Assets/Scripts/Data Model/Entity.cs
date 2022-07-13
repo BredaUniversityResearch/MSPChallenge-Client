@@ -213,7 +213,7 @@ namespace MSP2050.Scripts
 		//returns the restriction size of this entity for the respective owner country and the current time.
 		public float GetCurrentRestrictionSize()
 		{
-			return RestrictionAreaManager.instance.GetRestrictionAreaSizeAtPlanTime(PlanManager.planViewing, EntityTypes[0], country);
+			return RestrictionAreaManager.instance.GetRestrictionAreaSizeAtPlanTime(PlanManager.Instance.planViewing, EntityTypes[0], country);
 		}
 
 		/// <summary>

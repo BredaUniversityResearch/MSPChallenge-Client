@@ -20,8 +20,8 @@
 		protected virtual void BeginEditing(Plan plan)
 		{
 			lockedPlan = plan;
-			PlanManager.ShowPlan(plan);
-			Main.EditingPlanDetailsContent = true;
+			PlanManager.Instance.ShowPlan(plan);
+			Main.Instance.EditingPlanDetailsContent = true;
 			SetAcceptChangesButtonEnabled(true);
 			PlansMonitor.RefreshPlanButtonInteractablity();
 			InterfaceCanvas.Instance.activePlanWindow.UpdateEditButtonActivity();
@@ -34,7 +34,7 @@
 		{
 			lockedPlan = null;
 			SetAcceptChangesButtonEnabled(false);
-			Main.EditingPlanDetailsContent = false;
+			Main.Instance.EditingPlanDetailsContent = false;
 			PlansMonitor.RefreshPlanButtonInteractablity();
 			PlanDetails.UpdateTabContent();
 			InterfaceCanvas.Instance.activePlanWindow.UpdateEditButtonActivity();
@@ -106,17 +106,17 @@
 					if (planDetails.SelectedPlan == null)
 						return;
 
-					Main.PreventPlanAndTabChange = true;
+					Main.Instance.PreventPlanAndTabChange = true;
 					PlansMonitor.RefreshPlanButtonInteractablity();
 
 					planDetails.SelectedPlan.AttemptLock(
 						(plan) =>
 						{
-							Main.PreventPlanAndTabChange = false;
+							Main.Instance.PreventPlanAndTabChange = false;
 							BeginEditing(plan);
 						},
 						(plan) => {
-							Main.PreventPlanAndTabChange = false;
+							Main.Instance.PreventPlanAndTabChange = false;
 							PlansMonitor.RefreshPlanButtonInteractablity();
 						});
 				});

@@ -26,7 +26,7 @@ namespace MSP2050.Scripts
 		public PlanLayer(Plan plan, PlanLayerObject layerObject, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
 			Plan = plan;
-			BaseLayer = LayerManager.GetLayerByID(layerObject.original);
+			BaseLayer = LayerManager.Instance.GetLayerByID(layerObject.original);
 			State = layerObject.state;
 			ID = layerObject.layerid;
 
@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 		public void UpdatePlanLayer(PlanLayerObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
 			// wait until all local sub entities have a database ID until processing the updated plan layer
-			//ServerCommunication.WaitForCondition(AllNewSubEntitiesHaveIDs, () => updatePlanLayer(updatedData, tracker));
+			//ServerCommunication.Instance.WaitForCondition(AllNewSubEntitiesHaveIDs, () => updatePlanLayer(updatedData, tracker));
 
 			updatePlanLayer(updatedData, layerUpdateTimes);
 		}
@@ -230,7 +230,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < count; i++)
 			{
 				SubEntity sub = existingNewEntity.GetSubEntity(i);
-				LayerManager.RemoveEnergySubEntityReference(sub.GetDatabaseID());
+				LayerManager.Instance.RemoveEnergySubEntityReference(sub.GetDatabaseID());
 				sub.RemoveGameObject();
 			}
 		}

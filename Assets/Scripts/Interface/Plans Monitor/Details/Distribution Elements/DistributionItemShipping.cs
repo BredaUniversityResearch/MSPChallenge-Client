@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
 		{
 			float newValue;
 			unitConversion.ParseUnit(newValueText, out newValue);
-			newValue = Mathf.Clamp(newValue / PlanManager.shippingDisplayScale, 0.0f, 1.0f);
+			newValue = Mathf.Clamp(newValue / PlanManager.Instance.shippingDisplayScale, 0.0f, 1.0f);
 			slider.Value = newValue;
 		}
 	}

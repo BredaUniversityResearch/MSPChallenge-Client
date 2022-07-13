@@ -31,27 +31,14 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			if (TeamManager.TeamCount > 0)
-			{
-				InitializeButtons();
-			}
-			else
-			{
-				TeamManager.OnTeamsLoadComplete += OnTeamsLoaded;
-			}
-		}
-
-		private void OnTeamsLoaded()
-		{
-			TeamManager.OnTeamsLoadComplete -= OnTeamsLoaded;
 			InitializeButtons();
 		}
 
 		private void InitializeButtons()
 		{
-			Team currentTeam = TeamManager.CurrentTeam;
+			Team currentTeam = SessionManager.Instance.CurrentTeam;
 
-			foreach (Team team in TeamManager.GetTeams())
+			foreach (Team team in SessionManager.Instance.GetTeams())
 			{
 				if (team.IsManager)
 					continue;

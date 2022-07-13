@@ -88,7 +88,7 @@ namespace MSP2050.Scripts
         {
             foreach (KeyValuePair<int, GridActualAndWasted> gridData in gridDataForMonth)
             {
-                EnergyGrid associatedGrid = PlanManager.GetEnergyGrid(gridData.Key);
+                EnergyGrid associatedGrid = PlanManager.Instance.GetEnergyGrid(gridData.Key);
                 gridData.Value.wasted = associatedGrid.AvailablePower - gridData.Value.totalReceived;
 
                 //Make socket power negative if it has been sent

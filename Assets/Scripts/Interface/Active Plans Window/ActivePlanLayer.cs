@@ -20,7 +20,7 @@ namespace MSP2050.Scripts
 			toggle.onValueChanged.AddListener((value) =>
 			{
 				if(value) {
-					Main.FSM.AbortCurrentState();
+					Main.Instance.fsm.AbortCurrentState();
 					InterfaceCanvas.Instance.activePlanWindow.ActivePlanLayerCallback(layer);
 				}
 			});

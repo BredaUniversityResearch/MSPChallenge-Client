@@ -29,16 +29,12 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			LayerImporter.OnDoneImporting += () =>
-			{
-				timeManagerButton.interactable = TeamManager.AreWeGameMaster;
-				background.SetActive(TeamManager.AreWeGameMaster); //Deactivate the gameobject so the info popup doesn't show up for players.
-
-			};
+			timeManagerButton.interactable = SessionManager.Instance.AreWeGameMaster;
+			background.SetActive(SessionManager.Instance.AreWeGameMaster); //Deactivate the gameobject so the info popup doesn't show up for players.
 		}
     
-		private GameState.PlanningState planningState;
-		public GameState.PlanningState State
+		private TimeManager.PlanningState planningState;
+		public TimeManager.PlanningState State
 		{
 			get
 			{
@@ -47,36 +43,36 @@ namespace MSP2050.Scripts
 			set
 			{
 				switch (value) {
-					case GameState.PlanningState.Setup:
+					case TimeManager.PlanningState.Setup:
 						stateText.text = "Setup";
 						stateText.alignment = TextAlignmentOptions.MidlineGeoAligned;
 						stateText.color = highlightTextColour.GetColour();
 						timeText.gameObject.SetActive(false);
 						break;
-					case GameState.PlanningState.Play:
+					case TimeManager.PlanningState.Play:
 						stateText.text = "Planning";
 						stateText.alignment = TextAlignmentOptions.BottomGeoAligned;
 						stateText.color = planAndPauseTextColour.GetColour();
 						timeText.gameObject.SetActive(true);
 						break;
-					case GameState.PlanningState.FastForward:
+					case TimeManager.PlanningState.FastForward:
 						stateText.text = "Fast Forward";
 						stateText.alignment = TextAlignmentOptions.MidlineGeoAligned;
 						stateText.color = highlightTextColour.GetColour();
 						timeText.gameObject.SetActive(false);
 						break;
-					case GameState.PlanningState.Simulation:
+					case TimeManager.PlanningState.Simulation:
 						stateText.text = "Simulating";
 						stateText.alignment = TextAlignmentOptions.MidlineGeoAligned;
 						stateText.color = highlightTextColour.GetColour();
 						timeText.gameObject.SetActive(false);
 						break;
-					case GameState.PlanningState.Pause:
+					case TimeManager.PlanningState.Pause:
 						stateText.text = "Paused";
 						stateText.alignment = TextAlignmentOptions.MidlineGeoAligned;
 						stateText.color = planAndPauseTextColour.GetColour();
 						break;
-					case GameState.PlanningState.End:
+					case TimeManager.PlanningState.End:
 						stateText.text = "End";
 						stateText.alignment = TextAlignmentOptions.MidlineGeoAligned;
 						stateText.color = highlightTextColour.GetColour();
@@ -96,7 +92,7 @@ namespace MSP2050.Scripts
 				if (catchingUp != value)
 				{
                 
-					if (value && planningState == GameState.PlanningState.Play)
+					if (value && planningState == TimeManager.PlanningState.Play)
 					{
 						catchingUp = true;
 						stateText.text = "Calculating";

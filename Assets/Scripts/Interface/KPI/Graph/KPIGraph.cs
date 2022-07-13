@@ -142,7 +142,7 @@ namespace MSP2050.Scripts
 			float min = graphEntry.graphPoints.Bounds.min;
 			float max = graphEntry.graphPoints.Bounds.max;
 
-			int year = Main.MspGlobalData.start + (month / 12);
+			int year = SessionManager.Instance.MspGlobalData.start + (month / 12);
 
 			return string.Format("{0} in {1}: {2}\nGraph range: ({3},{4})", 
 				aSeries.seriesName, year, point.value.ToString("N2"), min.ToString("N2"), max.ToString("N2"));
@@ -164,7 +164,7 @@ namespace MSP2050.Scripts
 		public void SetDateMarker(int month)
 		{
 			float year = (float) month / 12.0f;
-			float timePercentage = Mathf.Floor(year) / (float)Main.MspGlobalData.session_num_years;
+			float timePercentage = Mathf.Floor(year) / (float)SessionManager.Instance.MspGlobalData.session_num_years;
 
 			dateMarker.rectTransform.anchorMin = new Vector2(timePercentage, 0f);
 			dateMarker.rectTransform.anchorMax = new Vector2(timePercentage, 1f);
@@ -236,8 +236,8 @@ namespace MSP2050.Scripts
 				Image marker = go.GetComponent<Image>();
 				go.transform.SetParent(planMarkerLocation, false);
 				planMarkers.Add(month, marker);
-				marker.rectTransform.anchoredPosition = new Vector2(Mathf.Clamp((float)month, 0f, (float)Main.MspGlobalData.session_end_month), 0f);
-				marker.color = TeamManager.CurrentTeamColor;
+				marker.rectTransform.anchoredPosition = new Vector2(Mathf.Clamp((float)month, 0f, (float)SessionManager.Instance.MspGlobalData.session_end_month), 0f);
+				marker.color = SessionManager.Instance.CurrentTeamColor;
 				marker.gameObject.GetComponent<AddTooltip>().text = "Month: " + month.ToString();
 			}
 		}

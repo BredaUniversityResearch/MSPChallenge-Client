@@ -11,9 +11,9 @@ namespace MSP2050.Scripts
 
 		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
 		{
-			AudioMain.PlaySound(AudioMain.ITEM_PLACED);
+			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
-			List<EntityType> selectedType = UIManager.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
 			PointEntity entity = baseLayer.CreateNewPointEntity(finalPosition, selectedType != null ? selectedType : new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
 			baseLayer.activeEntities.Add(entity);
 			PointSubEntity subEntity = entity.GetSubEntity(0) as PointSubEntity;

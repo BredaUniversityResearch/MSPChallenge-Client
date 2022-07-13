@@ -7,7 +7,7 @@
 			string result;
 			if (url.StartsWith("wiki://"))
 			{
-				result = url.Replace("wiki://", Main.MspGlobalData.wiki_base_url);
+				result = url.Replace("wiki://", SessionManager.Instance.MspGlobalData.wiki_base_url);
 			}
 			else
 			{

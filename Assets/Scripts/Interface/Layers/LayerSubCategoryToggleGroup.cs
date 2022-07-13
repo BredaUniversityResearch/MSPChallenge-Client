@@ -29,36 +29,24 @@ namespace MSP2050.Scripts
 			layerTab.SubCategory = subcategoryID;
 
 
-			layerTab.toggle.isOn = LayerManager.LayerIsVisible(layer);
+			layerTab.toggle.isOn = LayerManager.Instance.LayerIsVisible(layer);
 			layerTab.toggle.onValueChanged.AddListener((toggleValue) =>
 			{
-				if (UIManager.ignoreLayerToggleCallback)
+				if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
 					return;
 
-				UIManager.ignoreLayerToggleCallback = true;
+				InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 				if (toggleValue)
-					LayerManager.ShowLayer(layer);
+					LayerManager.Instance.ShowLayer(layer);
 				else
-					LayerManager.HideLayer(layer);
-				UIManager.ignoreLayerToggleCallback = false;
+					LayerManager.Instance.HideLayer(layer);
+				InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			});
 
 			AddTooltip tooltip = layerTab.toggle.gameObject.AddComponent<AddTooltip>();
 			tooltip.text = layer.Tooltip;
-
-			//layerTab.barButton.onClick.AddListener(() =>
-			//{
-			//	if (layerTab.toggle.isOn)
-			//	{
-			//		LayerManager.HideLayer(layer);
-			//	}
-			//	else
-			//	{
-			//		LayerManager.ShowLayer(layer);
-			//	}
-			//});
-
-			if (layer.Toggleable == false && Main.IsDeveloper == false)
+			
+			if (!layer.Toggleable && !Main.IsDeveloper)
 			{
 				layerTab.gameObject.SetActive(false);
 			}

@@ -17,7 +17,7 @@ namespace MSP2050.Scripts
 		protected override RectTransform GetTargetContainerForCategory(KPICategory category)
 		{
 			RectTransform result = null;
-			AbstractLayer layer = LayerManager.FindLayerByFilename(category.name);
+			AbstractLayer layer = LayerManager.Instance.FindLayerByFilename(category.name);
 			if (layer != null)
 			{
 				switch (layer.LayerKPICategory)

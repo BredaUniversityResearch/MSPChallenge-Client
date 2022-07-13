@@ -8,27 +8,51 @@ using Object = UnityEngine.Object;
 
 namespace MSP2050.Scripts
 {
-	public static class UpdateData
+	public class UpdateManager : MonoBehaviour
 	{
-		private static double m_LastUpdateTimestamp = -1;
-		public static double LastUpdateTimeStamp => m_LastUpdateTimestamp;
-		public static UpdateObject LastUpdate;
-		public static bool StopProcessingUpdates = false;
+		private static UpdateManager singleton;
+		public static UpdateManager Instance
+		{
+			get
+			{
+				if (singleton == null)
+					singleton = FindObjectOfType<UpdateManager>();
+				return singleton;
+			}
+		}
+
+		private double m_LastUpdateTimestamp = -1;
+		public double LastUpdateTimeStamp => m_LastUpdateTimestamp;
+		public UpdateObject LastUpdate;
+		public bool StopProcessingUpdates = false;
 	
-		private static bool? m_WsServerConnected;
+		private bool? m_WsServerConnected;
 
 		[CanBeNull]
-		public static IWsServerCommunicationInteractor WsServerCommunicationInteractor => m_WsServerCommunication;
+		public IWsServerCommunicationInteractor WsServerCommunicationInteractor => m_WsServerCommunication;
 
-		private static WsServerCommunication m_WsServerCommunication;
-		private static readonly Queue<UpdateObject> m_NextUpdates = new Queue<UpdateObject>();
+		private WsServerCommunication m_WsServerCommunication;
+		private readonly Queue<UpdateObject> m_NextUpdates = new Queue<UpdateObject>();
 
-		public static IEnumerator GetFirstUpdate()
+		void Start()
+		{
+			if (singleton != null && singleton != this)
+				Destroy(this);
+			else
+				singleton = this;
+		}
+
+		void OnDestroy()
+		{
+			singleton = null;
+		}
+
+		public IEnumerator GetFirstUpdate()
 		{
 			m_WsServerCommunication = new WsServerCommunication(
 				Server.GameSessionId,
-				TeamManager.CurrentUserTeamID,
-				TeamManager.CurrentSessionID,
+				SessionManager.Instance.CurrentUserTeamID,
+				SessionManager.Instance.CurrentSessionID,
 				HandleUpdateSuccessCallback
 			);
 			m_WsServerCommunication.Start();
@@ -42,10 +66,10 @@ namespace MSP2050.Scripts
 
 			// process the first update(s)
 			ProcessUpdates(m_NextUpdates);
-			Main.FirstUpdateTickComplete();
+			Main.Instance.FirstUpdateTickComplete();
 		}
 
-		public static IEnumerator GetUpdates()
+		public IEnumerator GetUpdates()
 		{
 			while (true)
 			{
@@ -56,12 +80,12 @@ namespace MSP2050.Scripts
 			}
 		}
 	
-		private static void HandleUpdateSuccessCallback(UpdateObject a_UpdateData)
+		private void HandleUpdateSuccessCallback(UpdateObject a_UpdateData)
 		{
 			m_NextUpdates.Enqueue(a_UpdateData);
 		}
 
-		private static void HandleWsServerConnectionChanges()
+		private void HandleWsServerConnectionChanges()
 		{
 			if (m_WsServerConnected == m_WsServerCommunication.IsConnected())
 			{
@@ -78,7 +102,7 @@ namespace MSP2050.Scripts
 				item.NotifyConnection(m_WsServerConnected.Value));
 		}
 
-		private static void ProcessUpdates(Queue<UpdateObject> a_Updates)
+		private void ProcessUpdates(Queue<UpdateObject> a_Updates)
 		{
 			if (a_Updates.Count == 0)
 			{
@@ -92,7 +116,7 @@ namespace MSP2050.Scripts
 			ProcessUpdates(a_Updates.Dequeue());
 		}
 
-		private static void ProcessUpdates(UpdateObject a_Update)
+		private void ProcessUpdates(UpdateObject a_Update)
 		{
 			HandleWsServerConnectionChanges();
 			if (StopProcessingUpdates || a_Update.update_time <= m_LastUpdateTimestamp)
@@ -114,16 +138,16 @@ namespace MSP2050.Scripts
 				plans = new List<Plan>(a_Update.plan.Count);
 				foreach (PlanObject plan in a_Update.plan)
 				{
-					plans.Add(PlanManager.ProcessReceivedPlan(plan, layerUpdateTimes));
+					plans.Add(PlanManager.Instance.ProcessReceivedPlan(plan, layerUpdateTimes));
 				}
 			}
 
 			foreach (RasterUpdateObject raster in a_Update.raster)
 			{
-				AbstractLayer layer = LayerManager.GetLayerByID(raster.id);
+				AbstractLayer layer = LayerManager.Instance.GetLayerByID(raster.id);
 
 				RasterLayer rasterLayer = layer as RasterLayer;
-				if (rasterLayer != null && LayerManager.LayerIsVisible(rasterLayer))
+				if (rasterLayer != null && LayerManager.Instance.LayerIsVisible(rasterLayer))
 				{
 					rasterLayer.ReloadLatestRaster();
 				}
@@ -150,23 +174,23 @@ namespace MSP2050.Scripts
 				UpdateConnection(connection);
 			}
 
-			GameState.UpdateTime(a_Update.tick);
+			TimeManager.Instance.UpdateTime(a_Update.tick);
 
 			if (a_Update.kpi != null)
 			{
 				if (a_Update.kpi.energy != null && a_Update.kpi.energy.Length > 0)
 				{
-					KPIManager.ReceiveEnergyKPIUpdate(a_Update.kpi.energy);
+					KPIManager.Instance.ReceiveEnergyKPIUpdate(a_Update.kpi.energy);
 				}
 
 				if (a_Update.kpi.ecology != null && a_Update.kpi.ecology.Length > 0)
 				{
-					KPIManager.ReceiveEcologyKPIUpdate(a_Update.kpi.ecology);
+					KPIManager.Instance.ReceiveEcologyKPIUpdate(a_Update.kpi.ecology);
 				}
 
 				if (a_Update.kpi.shipping != null && a_Update.kpi.shipping.Length > 0)
 				{
-					KPIManager.ReceiveShippingKPIUpdate(a_Update.kpi.shipping);
+					KPIManager.Instance.ReceiveShippingKPIUpdate(a_Update.kpi.shipping);
 				}
 			}
 
@@ -177,14 +201,14 @@ namespace MSP2050.Scripts
 
 			PlanDetails.AddFeedbackFromServer(a_Update.planmessages);
 
-			if (PlanManager.planViewing != null && !Main.InEditMode && !Main.EditingPlanDetailsContent)
+			if (PlanManager.Instance.planViewing != null && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
 			{
-				int viewingTime = PlanManager.planViewing.StartTime;
+				int viewingTime = PlanManager.Instance.planViewing.StartTime;
 				foreach (KeyValuePair<AbstractLayer, int> kvp in layerUpdateTimes)
 				{
 					if (kvp.Value <= viewingTime)
 					{
-						kvp.Key.SetEntitiesActiveUpTo(PlanManager.planViewing);
+						kvp.Key.SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
 						kvp.Key.RedrawGameObjects(CameraManager.Instance.gameCamera);
 					}
 				}
@@ -195,12 +219,12 @@ namespace MSP2050.Scripts
 				IssueManager.instance.OnIssuesReceived(a_Update.warning); //MSP-2358, ensure Warnings are processed after all the plan updates are done.
 			}
 
-			PlanManager.CheckIfExpectedplanReceived();
+			PlanManager.Instance.CheckIfExpectedplanReceived();
 		}
 
-		private static void UpdateOutput(EnergyOutputObject outputUpdate)
+		private void UpdateOutput(EnergyOutputObject outputUpdate)
 		{
-			SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(outputUpdate.id);
+			SubEntity tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(outputUpdate.id);
 			if (tempSubEnt == null) return;
 			IEnergyDataHolder energyObj = (IEnergyDataHolder)tempSubEnt;
 			energyObj.UsedCapacity = outputUpdate.capacity;
@@ -208,7 +232,7 @@ namespace MSP2050.Scripts
 			tempSubEnt.UpdateTextMeshText();
 		}
 
-		private static void UpdateConnection(EnergyConnectionObject connection)
+		private void UpdateConnection(EnergyConnectionObject connection)
 		{
 			if (connection.active == "0")
 				return;
@@ -221,19 +245,19 @@ namespace MSP2050.Scripts
 
 			EnergyPointSubEntity point1;
 			EnergyPointSubEntity point2;
-			SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(cableID);
+			SubEntity tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(cableID);
 			if (tempSubEnt == null) return;
 			EnergyLineStringSubEntity cable = tempSubEnt as EnergyLineStringSubEntity;
 
 			//Get the points, check if they reference to a polygon or point
-			tempSubEnt = LayerManager.GetEnergySubEntityByID(startID);
+			tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(startID);
 			if (tempSubEnt == null) return;
 			else if (tempSubEnt is EnergyPolygonSubEntity)
 				point1 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
 			else
 				point1 = tempSubEnt as EnergyPointSubEntity;
 
-			tempSubEnt = LayerManager.GetEnergySubEntityByID(endID);
+			tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(endID);
 			if (tempSubEnt == null) return;
 			else if (tempSubEnt is EnergyPolygonSubEntity)
 				point2 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
@@ -249,153 +273,7 @@ namespace MSP2050.Scripts
 			cable.SetEndPointsToConnections();
 		}
 	}
-
-	/// <summary>
-	/// Keeps track of the update state of all plans in the update.
-	/// When geometry updates are completed CompletedPlanUpdates will return true and ExecutePostPlanUpdates can be called
-	/// </summary>
-//public class PlanUpdateTracker
-//{
-//	private int totalPlans;
-//	private int completedPlans;
-//	private Dictionary<Plan, KeyValuePair<HashSet<int>, List<GridObject>>> tasks;
-//    private Dictionary<AbstractLayer, int> layerUpdateTimes;
-
-//    private EnergyKPIObject[] energyKpiUpdates;
-//	private EnergyObject energyUpdate;
-
-//	private WarningObject warningUpdate;
-
-//	public PlanUpdateTracker(EnergyKPIObject[] energyKpiUpdates, EnergyObject energyUpdate, WarningObject warningUpdate)
-//	{
-//		this.energyKpiUpdates = energyKpiUpdates;
-//		this.energyUpdate = energyUpdate;
-//		this.warningUpdate = warningUpdate;
-//		tasks = new Dictionary<Plan, KeyValuePair<HashSet<int>, List<GridObject>>>();
-//        layerUpdateTimes = new Dictionary<AbstractLayer, int>();
-//	}
-
-//	public void StartedUpdate()
-//	{
-//		totalPlans++;
-//	}
-
-//	public void CompletedUpdate()
-//	{
-//		completedPlans++;
-//	}
-
-//	public void AddCompletionTask(Plan plan, HashSet<int> deleted, List<GridObject> newGrids)
-//	{
-//		tasks.Add(plan, new KeyValuePair<HashSet<int>, List<GridObject>>(deleted, newGrids));
-//	}
-
-//    public void AddLayerChange(AbstractLayer layer, int time)
-//    {
-//        int existingUpdate = 0;
-//        if (layerUpdateTimes.TryGetValue(layer, out existingUpdate))
-//        {
-//            if (time < existingUpdate)
-//                layerUpdateTimes[layer] = existingUpdate;
-//        }
-//        else
-//            layerUpdateTimes.Add(layer, time);
-//    }
-
-//	public bool CompletedPlanUpdates()
-//	{
-//		return totalPlans <= completedPlans;
-//	}
-
-//	public void ExecutePostUpdate()
-//	{
-//		//Run output update before KPI/Grid update. Source output is required for the KPIs and Capacity for grids.
-//		foreach (EnergyOutputObject outputUpdate in energyUpdate.output)
-//		{
-//			SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(outputUpdate.id);
-//			if (tempSubEnt == null) continue;
-//            IEnergyDataHolder energyObj = (IEnergyDataHolder)tempSubEnt;
-//            energyObj.UsedCapacity = outputUpdate.capacity;
-//            energyObj.Capacity = outputUpdate.maxcapacity;
-//            tempSubEnt.UpdateTextMeshText();
-//		}
-
-//        //Update grids
-//		if (tasks.Count > 0)
-//		{
-//			foreach (KeyValuePair<Plan, KeyValuePair<HashSet<int>, List<GridObject>>> task in tasks)
-//				task.Key.UpdateGrids(task.Value.Key, task.Value.Value);
-
-//			EnergyGridReceivedEvent.Invoke();
-//		}
-
-//		//Run connection update before KPI update so cable networks are accurate in the KPIs
-//		foreach (EnergyConnectionObject connection in energyUpdate.connections)
-//		{
-//			if (connection.active == "0")
-//				continue;
-
-//			int startID = Util.ParseToInt(connection.start);
-//			int endID = Util.ParseToInt(connection.end);
-//			int cableID = Util.ParseToInt(connection.cable);
-//			string[] temp = connection.coords.Split(',');
-//			Vector3 firstCoord = new Vector2(Util.ParseToFloat(temp[0].Substring(1)), Util.ParseToFloat(temp[1].Substring(0, temp[1].Length - 1)));
-
-//			EnergyPointSubEntity point1;
-//			EnergyPointSubEntity point2;
-//			SubEntity tempSubEnt = LayerManager.GetEnergySubEntityByID(cableID);
-//			if (tempSubEnt == null) continue;
-//			EnergyLineStringSubEntity cable = tempSubEnt as EnergyLineStringSubEntity;
-
-//			//Get the points, check if they reference to a polygon or point
-//			tempSubEnt = LayerManager.GetEnergySubEntityByID(startID);
-//			if (tempSubEnt == null) continue;
-//			else if (tempSubEnt is EnergyPolygonSubEntity)
-//				point1 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
-//			else
-//				point1 = tempSubEnt as EnergyPointSubEntity;
-
-//			tempSubEnt = LayerManager.GetEnergySubEntityByID(endID);
-//			if (tempSubEnt == null) continue;
-//			else if (tempSubEnt is EnergyPolygonSubEntity)
-//				point2 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
-//			else
-//				point2 = tempSubEnt as EnergyPointSubEntity;
-			
-//            Connection conn1 = new Connection(cable, point1, true);
-//			Connection conn2 = new Connection(cable, point2, false);
-
-//			//Cables store connections and attach them to points when editing starts
-//			cable.AddConnection(conn1);
-//			cable.AddConnection(conn2);
-//            cable.SetEndPointsToConnections();
-//        }
-
-//		if (energyKpiUpdates != null && energyKpiUpdates.Length > 0)
-//			KPIManager.ReceiveEnergyKPIUpdate(energyKpiUpdates);
-
-//        if (PlanManager.planViewing != null && !Main.InEditMode && !Main.EditingPlanDetailsContent)
-//        {
-//            int viewingTime = PlanManager.planViewing.StartTime;
-//            foreach (KeyValuePair<AbstractLayer, int> kvp in layerUpdateTimes)
-//            {
-//                if (kvp.Value <= viewingTime)
-//                {
-//                    kvp.Key.SetEntitiesActiveUpTo(PlanManager.planViewing);
-//                    kvp.Key.RedrawGameObjects(CameraManager.Instance.gameCamera);
-//                }
-//            }
-//        }
-
-//		if (warningUpdate != null)
-//		{
-//			IssueManager.instance.OnIssuesReceived(warningUpdate); //MSP-2358, ensure Warnings are processed after all the plan updates are done.
-//		}
-
-//        PlanManager.CheckIfExpectedplanReceived();
-//    }
-//}
-
+	
 	public class PlanLayerObject
 	{
 		public int layerid;     //plan layer id

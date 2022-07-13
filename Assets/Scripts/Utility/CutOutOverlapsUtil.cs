@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 
 		public static void CutOutOverlaps(CompareType compareType = CompareType.Area, bool keepClip = false)
 		{
-			List<AbstractLayer> layers = LayerManager.GetVisibleLayersSortedByDepth();
+			List<AbstractLayer> layers = LayerManager.Instance.GetVisibleLayersSortedByDepth();
 			if (layers.Count != 1 || !(layers[0] is PolygonLayer))
 			{
 				Debug.Log("Please have a single polygon layer visible to perform overlap cutting");

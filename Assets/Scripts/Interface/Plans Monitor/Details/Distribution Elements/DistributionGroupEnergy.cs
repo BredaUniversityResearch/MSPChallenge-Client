@@ -107,7 +107,7 @@ namespace MSP2050.Scripts
 				if (i < items.Count)
 				{
 					item = (DistributionItemEnergy)items[i];
-					item.graphic.color = TeamManager.GetTeamByTeamID(kvp.Key).color;
+					item.graphic.color = SessionManager.Instance.GetTeamByTeamID(kvp.Key).color;
 					item.Country = kvp.Key;
 				}
 				else
@@ -319,7 +319,7 @@ namespace MSP2050.Scripts
 				if (!exists)
 				{
 					GameObject temp = Instantiate(productionIconPrefab);
-					temp.GetComponent<Image>().color = TeamManager.GetTeamByTeamID(country).color;
+					temp.GetComponent<Image>().color = SessionManager.Instance.GetTeamByTeamID(country).color;
 					temp.transform.SetParent(productionIconParent);
 					productionIcons.Add(country, temp);
 				}

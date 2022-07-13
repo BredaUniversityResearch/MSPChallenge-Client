@@ -77,7 +77,7 @@ namespace MSP2050.Scripts
 				if (countryId == 0)
 					teamColour.color = Color.white;
 				else
-					teamColour.color = TeamManager.GetTeamByTeamID(countryId).color;
+					teamColour.color = SessionManager.Instance.GetTeamByTeamID(countryId).color;
 			}
 		}
 

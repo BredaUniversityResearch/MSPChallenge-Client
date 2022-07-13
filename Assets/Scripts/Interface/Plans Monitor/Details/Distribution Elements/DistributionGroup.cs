@@ -83,7 +83,7 @@ namespace MSP2050.Scripts
 		public T CreateItem(int country)
 		{
 			// Generate item
-			Color col = TeamManager.GetTeamByTeamID(country).color;
+			Color col = SessionManager.Instance.GetTeamByTeamID(country).color;
 			GameObject go = Instantiate(itemPrefab);
 			T item = go.GetComponent<T>();
 			items.Add(item);
@@ -107,7 +107,7 @@ namespace MSP2050.Scripts
 		{
 			//U wot.
 			updatedItem.SetValue(currentValue);
-			updatedItem.ToText(updatedItem.GetDistributionValue(), PlanManager.fishingDisplayScale, true);
+			updatedItem.ToText(updatedItem.GetDistributionValue(), PlanManager.Instance.fishingDisplayScale, true);
 
 			if ( distributionFillBar != null)
 			{

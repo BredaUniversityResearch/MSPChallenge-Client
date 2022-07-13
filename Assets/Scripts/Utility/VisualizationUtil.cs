@@ -4,43 +4,66 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public static class VisualizationUtil
+	public class VisualizationUtil : MonoBehaviour
 	{
-		public static DataVisualizationSettings VisualizationSettings;
+		private static VisualizationUtil singleton;
+		public static VisualizationUtil Instance
+		{
+			get
+			{
+				if (singleton == null)
+					singleton = FindObjectOfType<VisualizationUtil>();
+				return singleton;
+			}
+		}
+
+		public DataVisualizationSettings VisualizationSettings;
 
 		private const float SELECT_MAX_DISTANCE = 10f;
 		private const float MOUSE_MOVE_THRESHOLD = 2f;
 
-		private static GameObject pointPrefab;
-		private static GameObject pointRestrictionPrefab;
-		private static GameObject areaRestrictionPrefab;
-		private static GameObject linePrefab;
-		private static GameObject lineIconPrefab;
-		private static GameObject textPrefab;
-		private static GameObject polygonPrefab;
-		//private static GameObject rasterBathymetryPrefab;
-		//private static GameObject rasterMELPrefab;
-		private static Dictionary<string, GameObject> rasterPrefabs;
+		private GameObject pointPrefab;
+		private GameObject pointRestrictionPrefab;
+		private GameObject areaRestrictionPrefab;
+		private GameObject linePrefab;
+		private GameObject lineIconPrefab;
+		private GameObject textPrefab;
+		private GameObject polygonPrefab;
+		private Dictionary<string, GameObject> rasterPrefabs;
 
 		public enum PointRenderMode { Default, Outline, AddWithPoint, AddWithoutPoint, RemoveWithPoint, RemoveWithoutPoint, MoveWithPoint, MoveWithoutPoint };
-		private static Sprite pointOutline;
-		private static Sprite pointAdd;
-		private static Sprite pointRemove;
-		private static Sprite pointMove;
+		private Sprite pointOutline;
+		private Sprite pointAdd;
+		private Sprite pointRemove;
+		private Sprite pointMove;
 
-		public static readonly Color DEFAULT_SELECTION_COLOR = new Color(255 / 255f, 147 / 255f, 30 / 255f); // orange
-		public static readonly Color INVALID_SELECTION_COLOR = new Color(255 / 255f, 255 / 255f, 00 / 255f); // yellow
-		public static Color SelectionColor = DEFAULT_SELECTION_COLOR;
-		private static Color editColor = Color.white;
+		[HideInInspector] public readonly Color DEFAULT_SELECTION_COLOR = new Color(255 / 255f, 147 / 255f, 30 / 255f); // orange
+		[HideInInspector] public readonly Color INVALID_SELECTION_COLOR = new Color(255 / 255f, 255 / 255f, 00 / 255f); // yellow
+		[HideInInspector] public Color SelectionColor = new Color(255 / 255f, 147 / 255f, 30 / 255f);
+		private Color editColor = Color.white;
 
-		public static float DisplayScale = 185f;
-		public static float pointResolutionScale = 1f;
-		public static float textResolutionScale = 1f;
+		[HideInInspector] public float DisplayScale = 185f;
+		[HideInInspector] public float pointResolutionScale = 1f;
+		[HideInInspector] public float textResolutionScale = 1f;
 
-		//private const float pointTextSize = 0.08f;
-
-		static VisualizationUtil()
+		private Camera camera;
+		private Camera Camera
 		{
+			get
+			{
+				if (camera == null)
+					camera = Camera.main;
+				return camera;
+			}
+		}
+
+		void Awake()
+		{
+			if (singleton != null && singleton != this)
+				Destroy(this);
+			else
+				singleton = this;
+
 			pointPrefab = Resources.Load<GameObject>("Point");
 			pointRestrictionPrefab = Resources.Load<GameObject>("PointRestriction");
 			linePrefab = Resources.Load<GameObject>("Line");
@@ -48,10 +71,6 @@ namespace MSP2050.Scripts
 			textPrefab = Resources.Load<GameObject>("Text");
 			polygonPrefab = Resources.Load<GameObject>("Polygon");
 			areaRestrictionPrefab = (GameObject)Resources.Load("RestrictionPolygon");
-			//areaRestrictionPrefab = Resources.Load<GameObject>("RestrictionPolygon");
-
-			//rasterBathymetryPrefab = Resources.Load<GameObject>("RasterBathymetry");
-			//rasterMELPrefab = Resources.Load<GameObject>("RasterMEL_ECO");
 
 			rasterPrefabs = new Dictionary<string, GameObject>();
 			Object[] rasterObjects = Resources.LoadAll("RasterPrefabs", typeof(GameObject));
@@ -63,73 +82,53 @@ namespace MSP2050.Scripts
 			pointRemove = Resources.Load<Sprite>("Point Remove");
 			pointMove = Resources.Load<Sprite>("Point Move");
 
-			UpdateDisplayScale(Camera.main);
+			UpdateDisplayScale();
 		}
 
-		public static float GetSelectMaxDistance()
+		void OnDestroy()
 		{
-			return SELECT_MAX_DISTANCE * Camera.main.orthographicSize * 2 / Screen.height;
+			singleton = null;
 		}
 
-		public static float GetSelectMaxDistancePolygon()
+		public float GetSelectMaxDistance()
+		{
+			return SELECT_MAX_DISTANCE * Camera.orthographicSize * 2 / Screen.height;
+		}
+
+		public float GetSelectMaxDistancePolygon()
 		{
 			return 0;
 		}
 
-		public static float GetMouseMoveThreshold()
+		public float GetMouseMoveThreshold()
 		{
-			return MOUSE_MOVE_THRESHOLD * Camera.main.orthographicSize * 2 / Screen.height;
+			return MOUSE_MOVE_THRESHOLD * Camera.orthographicSize * 2 / Screen.height;
 		}
 
-		public static void UpdateDisplayScale(Camera targetCamera)
+		public void UpdateDisplayScale()
 		{
-			DisplayScale = targetCamera.orthographicSize * 2.0f / Screen.height * 100.0f;
+			DisplayScale = Camera.orthographicSize * 2.0f / Screen.height * 100.0f;
 			pointResolutionScale = Screen.height / 1080f;
 			textResolutionScale = Screen.height / (1080f * 20f);
 			InterfaceCanvas.SetLineMaterialTiling(1f / (DisplayScale / 5f));
 		}
 
-		public static GameObject CreateText()
+		public GameObject CreateText()
 		{
 			return GameObject.Instantiate<GameObject>(textPrefab);
 		}
 
-		//public static GameObject UpdateText(GameObject go, string text, Vector3 point, Color color, float size, float pointSize)
-		//{
-		//	TextMesh textMesh = go.GetComponent<TextMesh>();
-
-		//	TextMesh[] outline = go.GetComponentsInChildren<TextMesh>();
-
-		//	int fontSize = Mathf.Max(3, (int)size) + 20;
-		//	textMesh.text = text;
-		//	textMesh.color = color;
-		//	textMesh.fontSize = fontSize;
-
-		//	for (int i = 0; i < outline.Length; i++)
-		//	{
-		//		outline[i].text = text;
-		//		outline[i].fontSize = fontSize;
-		//	}
-
-		//	point.z = -45;
-		//	point.y += 0.1f * (go.transform.parent.localScale.y / pointSize);
-
-		//	go.transform.localScale = (Vector3.one / pointSize) * pointTextSize;
-
-		//	return go;
-		//}
-
-		public static GameObject CreateRasterGameObject(string prefabName)
+		public GameObject CreateRasterGameObject(string prefabName)
 		{
 			return createRaster(prefabName);
 		}
 
-		public static GameObject CreatePointGameObject()
+		public GameObject CreatePointGameObject()
 		{
 			return CreatePoint();
 		}
 
-		public static void UpdatePointSubEntity(GameObject go, Vector3 position, SubEntityDrawSettings drawSettings, SubEntityPlanState planState, bool selected, bool hover)
+		public void UpdatePointSubEntity(GameObject go, Vector3 position, SubEntityDrawSettings drawSettings, SubEntityPlanState planState, bool selected, bool hover)
 		{
 			if (go == null)
 				return;
@@ -153,29 +152,29 @@ namespace MSP2050.Scripts
 			UpdatePointScale(go.transform.gameObject, drawSettings);
 		}
 
-		public static float UpdatePointScale(GameObject go, SubEntityDrawSettings drawSettings)
+		public float UpdatePointScale(GameObject go, SubEntityDrawSettings drawSettings)
 		{
 			float newScale = drawSettings.PointSize * DisplayScale * pointResolutionScale;
 			go.transform.localScale = new Vector3(newScale, newScale, 1f);
 			return newScale;
 		}
 
-		public static GameObject CreatePoint()
+		public GameObject CreatePoint()
 		{
 			return GameObject.Instantiate<GameObject>(pointPrefab);
 		}
 
-		public static GameObject CreateRestrictionPoint()
+		public GameObject CreateRestrictionPoint()
 		{
 			return GameObject.Instantiate<GameObject>(pointRestrictionPrefab);
 		}
 
-		public static RestrictionArea CreateRestrictionArea()
+		public RestrictionArea CreateRestrictionArea()
 		{
 			return GameObject.Instantiate<GameObject>(areaRestrictionPrefab).GetComponent<RestrictionArea>();
 		}
 
-		private static GameObject createRaster(string prefabName)
+		private GameObject createRaster(string prefabName)
 		{
 			GameObject prefab;
 			if (rasterPrefabs.TryGetValue(prefabName, out prefab))
@@ -185,7 +184,7 @@ namespace MSP2050.Scripts
 			return GameObject.Instantiate<GameObject>(rasterPrefabs.GetFirstValue());
 		}
 
-		public static void UpdatePoint(GameObject go, Vector3 position, Color color, float scale, PointRenderMode renderMode, Sprite pointSprite = null)
+		public void UpdatePoint(GameObject go, Vector3 position, Color color, float scale, PointRenderMode renderMode, Sprite pointSprite = null)
 		{
 			go.transform.gameObject.GetComponent<SpriteRenderer>().color = color;
 			go.transform.localPosition = position + new Vector3(0, 0, -0.02f);
@@ -251,12 +250,12 @@ namespace MSP2050.Scripts
 		
 		}
 
-		public static GameObject CreateLineStringGameObject()
+		public GameObject CreateLineStringGameObject()
 		{
 			return Object.Instantiate(linePrefab);
 		}
 
-		public static GameObject CreateLineStringIconObject(string iconName, Color iconColor)
+		public GameObject CreateLineStringIconObject(string iconName, Color iconColor)
 		{
 			GameObject go = Object.Instantiate(lineIconPrefab);
 			SpriteRenderer renderer = go.GetComponent<SpriteRenderer>();
@@ -268,73 +267,14 @@ namespace MSP2050.Scripts
 			}
 			return go;
 		}
-
-		//public static void UpdateLineStringSubEntityScale(GameObject go, SubEntityDrawSettings drawSettings)
-		//{
-		//    int childCount = go.transform.childCount;
-
-		//    for (int i = 0; i < childCount; ++i)
-		//    {
-		//        Transform child = go.transform.GetChild(i);
-		//        if (child.tag == POINT_TAG) // point
-		//        {
-		//            float newScale = drawSettings.PointSize * DisplayScale;
-		//            child.localScale = new Vector3(newScale, newScale, 1);
-		//        }
-		//        else // line segment
-		//        {
-		//            Vector3 localScale = child.localScale;
-		//            child.localScale = new Vector3(localScale.x, DisplayScale, localScale.z);
-		//            //linesToScale.Enqueue(child);
-		//        }
-		//    }
-		//}
-
-		//public static void updateLineStringPositionsAndColors(GameObject go, List<Vector3> positions, SubEntityDrawSettings drawSettings,
-		//                                                       SubEntityPlanState planState, HashSet<int> selectedPoints, HashSet<int> hoverPoints)
-		//{
-		//    bool hasPointGameObjects = drawSettings.DisplayPoints || planState != SubEntityPlanState.NotInPlan;
-
-		//    for (int i = 0; i < positions.Count; ++i)
-		//    {
-		//        bool hover = hoverPoints != null && hoverPoints.Contains(i);
-		//        bool selected = selectedPoints != null && selectedPoints.Contains(i);
-
-		//        if (hasPointGameObjects)
-		//        {
-		//            Color pointColor = hover ? SelectionColor : drawSettings.PointColor;
-		//            pointColor = selected ? Color.white : pointColor;
-
-		//            PointRenderMode pointRenderMode = PointRenderMode.Default;
-		//            if (selected) { pointRenderMode = PointRenderMode.Outline; }
-		//            else if (drawSettings.DisplayPoints && planState == SubEntityPlanState.Added) { pointRenderMode = PointRenderMode.AddWithPoint; }
-		//            else if (planState == SubEntityPlanState.Added) { pointRenderMode = PointRenderMode.AddWithoutPoint; }
-		//            else if (drawSettings.DisplayPoints && planState == SubEntityPlanState.Removed) { pointRenderMode = PointRenderMode.RemoveWithPoint; }
-		//            else if (planState == SubEntityPlanState.Removed) { pointRenderMode = PointRenderMode.RemoveWithoutPoint; }
-		//            else if (drawSettings.DisplayPoints && planState == SubEntityPlanState.Moved) { pointRenderMode = PointRenderMode.MoveWithPoint; }
-		//            else if (planState == SubEntityPlanState.Moved) { pointRenderMode = PointRenderMode.MoveWithoutPoint; }
-
-		//            int childIndex = i * 2;
-		//            updatePoint(go.transform.GetChild(childIndex).gameObject, positions[i], pointColor, drawSettings.PointSize, pointRenderMode);
-		//        }
-
-		//        if (i < positions.Count - 1)
-		//        {
-		//            Color lineColor = (hover && hoverPoints.Contains(i + 1)) ? SelectionColor : drawSettings.LineColor;
-		//            lineColor = (selected && selectedPoints.Contains(i + 1)) ? SelectionColor : lineColor;
-		//            int childIndex = hasPointGameObjects ? i * 2 + 1 : i;
-		//            updateLineSegment(go.transform.GetChild(childIndex).gameObject, positions[i], positions[i + 1], lineColor);
-		//        }
-		//    }
-		//}
-
-		public static GameObject CreateLineSegment()
+		
+		public GameObject CreateLineSegment()
 		{
 			GameObject go = GameObject.Instantiate<GameObject>(linePrefab);
 			return go;
 		}
 
-		public static void updateLineSegment(GameObject go, Vector3 a, Vector3 b, Color color)
+		public void updateLineSegment(GameObject go, Vector3 a, Vector3 b, Color color)
 		{
 			go.GetComponent<SpriteRenderer>().color = color;
 			go.transform.position = (a + b) * 0.5f;
@@ -345,35 +285,11 @@ namespace MSP2050.Scripts
 			go.transform.Rotate(Vector3.forward, angle, Space.Self);
 		}
 
-		public static GameObject CreatePolygonGameObject()
+		public GameObject CreatePolygonGameObject()
 		{
 			return GameObject.Instantiate<GameObject>(polygonPrefab);
 		}
-
-		public static IEnumerator UpdateScales()
-		{
-			//while (true)
-			//{
-			//    int lineCount = linesToScale.Count;
-			//    if (lineCount > 0)
-			//    {
-			//        int max = (int)Mathf.Min(3000, lineCount );
-
-			//        for (int i = 0; i < max; i++)
-			//        {
-			//            Transform trans = linesToScale.Dequeue();
-			//            if (trans != null)
-			//            {
-			//                Vector3 localScale = trans.localScale;
-			//                trans.localScale = new Vector3(localScale.x, DisplayScale, localScale.z);
-			//            }
-			//        }
-			//    }
-			//    yield return null;
-			//}
-			yield return null;
-		}
-
+		
 		public class TriangulationException : System.Exception
 		{
 			public TriangulationException()
@@ -391,12 +307,10 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static Mesh CreatePolygon(List<Vector3> vertices, List<List<Vector3>> holes, Vector2 patternRandomOffset, bool innerGlow, Rect innerGlowTextureBounds)
+		public Mesh CreatePolygon(List<Vector3> vertices, List<List<Vector3>> holes, Vector2 patternRandomOffset, bool innerGlow, Rect innerGlowTextureBounds)
 		{
 			if (vertices.Count < 3) { return null; }
-
-			//vertices = Optimization.DouglasPeuckerReduction(vertices, 0.01f);
-
+			
 			Poly2Mesh.Polygon poly = new Poly2Mesh.Polygon();
 
 			poly.outside = vertices;
@@ -443,7 +357,7 @@ namespace MSP2050.Scripts
 			return mesh;
 		}
 
-		public static PointRenderMode GetPointRenderMode(SubEntityDrawSettings drawSettings, SubEntityPlanState planState, bool selected)
+		public PointRenderMode GetPointRenderMode(SubEntityDrawSettings drawSettings, SubEntityPlanState planState, bool selected)
 		{
 			PointRenderMode pointRenderMode = PointRenderMode.Default;
 			if (selected)
@@ -477,7 +391,7 @@ namespace MSP2050.Scripts
 			return pointRenderMode;
 		}
 
-		public static void DestroyChildren(GameObject subject)
+		public void DestroyChildren(GameObject subject)
 		{
 			foreach (Transform child in subject.transform)
 			{

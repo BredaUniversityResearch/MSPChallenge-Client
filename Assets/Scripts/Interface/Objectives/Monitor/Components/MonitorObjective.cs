@@ -37,7 +37,7 @@ namespace MSP2050.Scripts
 		{
 			parentRect = (RectTransform)transform.parent.transform;
 
-			bool isManager = TeamManager.CurrentTeam.IsManager;
+			bool isManager = SessionManager.Instance.CurrentTeam.IsManager;
 			if (isManager)
 			{
 				completedToggle.onValueChanged.AddListener(OnCompletedChanged);
@@ -59,7 +59,7 @@ namespace MSP2050.Scripts
 			completedLabel.text = details.completed ? "Completed" : "In progress";
 
 			date.text = Util.MonthToYearText(details.deadlineMonth);
-			Team team = TeamManager.FindTeamByID(details.appliesToCountry);
+			Team team = SessionManager.Instance.FindTeamByID(details.appliesToCountry);
 			country.color = (team != null)? team.color : Color.white;
 		}
 
@@ -71,7 +71,7 @@ namespace MSP2050.Scripts
 				NetworkForm form = new NetworkForm();
 				form.AddField("objective_id", objectiveDetails.objectiveId);
 				form.AddField("completed", newCompletedState ? 1 : 0);
-				ServerCommunication.DoRequest(Server.SetObjectiveCompleted(), form);
+				ServerCommunication.Instance.DoRequest(Server.SetObjectiveCompleted(), form);
 			}
 
 			owningMonitor.OnObjectiveUIStateChanged();
@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 		{
 			NetworkForm form = new NetworkForm();
 			form.AddField("id", objectiveId);
-			ServerCommunication.DoRequest(Server.DeleteObjective(), form);
+			ServerCommunication.Instance.DoRequest(Server.DeleteObjective(), form);
 
 			//Remove the objective from the UI immediately.
 			owningMonitor.RemoveObjectiveFromUI(this);

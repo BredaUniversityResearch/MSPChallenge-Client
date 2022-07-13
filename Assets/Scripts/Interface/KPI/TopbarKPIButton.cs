@@ -11,7 +11,6 @@ namespace MSP2050.Scripts
     
 		void Start()
 		{
-			//m_windowHandle.transform.position = new Vector3(transform.position.x, m_windowHandle.transform.position.y, m_windowHandle.transform.position.z);
 			StartCoroutine(SetHandlePosition());
 			m_toggle.onValueChanged.AddListener(SetWindowOpen);
 		}

@@ -183,7 +183,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < planObjectRestrictionSettings.Length; ++i)
 			{
 				RestrictionAreaObject restrictionObj = planObjectRestrictionSettings[i];
-				AbstractLayer targetLayer = LayerManager.GetLayerByID(restrictionObj.layer_id);
+				AbstractLayer targetLayer = LayerManager.Instance.GetLayerByID(restrictionObj.layer_id);
 				EntityType targetType = targetLayer.GetEntityTypeByKey(restrictionObj.entity_type_id);
 				SetRestrictionAreaSetting(targetPlan, targetType, new RestrictionAreaSetting(restrictionObj.team_id, restrictionObj.restriction_size));
 			}

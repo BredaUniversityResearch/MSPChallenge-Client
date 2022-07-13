@@ -103,8 +103,7 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public void UpdateTextMeshScale(bool inverseScaleTextMesh, float parentScale)
 		{
-			//textMesh.characterSize = scaleWithDisplay ? DisplayScale * textResolutionScale : textResolutionScale;
-			float baseScale = VisualizationUtil.DisplayScale * VisualizationUtil.textResolutionScale;
+			float baseScale = VisualizationUtil.Instance.DisplayScale * VisualizationUtil.Instance.textResolutionScale;
 			float scale = baseScale;
 			if (inverseScaleTextMesh)
 			{

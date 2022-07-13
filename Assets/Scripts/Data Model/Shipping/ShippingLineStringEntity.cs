@@ -91,7 +91,7 @@ namespace MSP2050.Scripts
 					Debug.Log("Could associate direction " + directionMetaData + " with a valid icon");
 				}
 
-				settings.LineIconColor = Main.SelConfig.directionality_icon_color;
+				settings.LineIconColor = Main.Instance.SelConfig.directionality_icon_color;
 			}
 			else
 			{

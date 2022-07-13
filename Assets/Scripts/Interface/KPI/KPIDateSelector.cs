@@ -41,7 +41,7 @@ namespace MSP2050.Scripts
 		{
 			if (isUsingLatestMonth)
 			{
-				int currentGameMonth = GameState.GetCurrentMonth();
+				int currentGameMonth = TimeManager.Instance.GetCurrentMonth();
 				if (currentGameMonth != displayingMonth)
 				{
 					ChangeDisplayTime(currentGameMonth - displayingMonth);
@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 
 		public void ChangeDisplayTime(int relativeMonths)
 		{
-			int latestMonth = GameState.GetCurrentMonth();
+			int latestMonth = TimeManager.Instance.GetCurrentMonth();
 			if (displayingMonth + relativeMonths >= latestMonth)
 			{
 				displayingMonth = latestMonth;
@@ -91,7 +91,7 @@ namespace MSP2050.Scripts
 
 		private void OnDisplayedTimeChanged()
 		{
-			int latestMonth = GameState.GetCurrentMonth();
+			int latestMonth = TimeManager.Instance.GetCurrentMonth();
 			nextMonthButton.interactable = displayingMonth < latestMonth;
 			previousMonthButton.interactable = displayingMonth > 0;
 

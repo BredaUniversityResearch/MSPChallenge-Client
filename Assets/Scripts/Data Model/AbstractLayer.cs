@@ -87,7 +87,7 @@ namespace MSP2050.Scripts
 			if (layerMeta.layer_editing_type == "protection")
 			{
 				MultiTypeSelect = true;
-				LayerManager.protectedAreaLayers.Add(this);
+				LayerManager.Instance.protectedAreaLayers.Add(this);
 			}
 			else
 			{
@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 			Selectable = layerMeta.layer_selectable;
 			Editable = layerMeta.layer_editable;
 			Toggleable = layerMeta.layer_toggleable;
-			ActiveOnStart = layerMeta.layer_active_on_start || Main.LayerVisibleForCurrentExpertise(layerMeta.layer_name);
+			ActiveOnStart = layerMeta.layer_active_on_start || Main.Instance.LayerVisibleForCurrentExpertise(layerMeta.layer_name);
 			greenEnergy = layerMeta.layer_green == 1;
 			Optimized = !Selectable && !Editable && !Toggleable && ActiveOnStart;
 
@@ -135,15 +135,15 @@ namespace MSP2050.Scripts
 					break;
 				case "transformer":
 					editingType = EditingType.Transformer;
-					LayerManager.AddEnergyPointLayer(this as PointLayer);
+					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "socket":
 					editingType = EditingType.Socket;
-					LayerManager.AddEnergyPointLayer(this as PointLayer);
+					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "sourcepoint":
 					editingType = EditingType.SourcePoint;
-					LayerManager.AddEnergyPointLayer(this as PointLayer);
+					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "sourcepolygon":
 					editingType = EditingType.SourcePolygon;
@@ -156,20 +156,20 @@ namespace MSP2050.Scripts
 			{
 				presetProperties.Add("MaxCapacity", (subent) => 
 				{
-					ValueConversionCollection valueConversions = VisualizationUtil.VisualizationSettings.ValueConversions;
+					ValueConversionCollection valueConversions = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 					IEnergyDataHolder data = (IEnergyDataHolder)subent;
 					//return data.Capacity.ToString();
 					return valueConversions.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString();
 				});
 				presetProperties.Add("UsedCapacity", (subent) =>
 				{
-					ValueConversionCollection valueConversions = VisualizationUtil.VisualizationSettings.ValueConversions;
+					ValueConversionCollection valueConversions = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 					IEnergyDataHolder data = (IEnergyDataHolder)subent;
 					//return data.UsedCapacity.ToString() + " / " + data.Capacity.ToString();
 					return valueConversions.ConvertUnit(data.UsedCapacity, ValueConversionCollection.UNIT_WATT).FormatAsString() + " / " + valueConversions.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString();
 				});
 			}
-			//if (Main.LayerSelectedForCurrentExpertise(layerMeta.layer_name))
+			//if (Main.Instance.LayerSelectedForCurrentExpertise(layerMeta.layer_name))
 			//    InterfaceCanvas.instance.activeLayers.AddLayer(this);
 		}
 
@@ -305,10 +305,10 @@ namespace MSP2050.Scripts
 
 		public void SetActiveToCurrentPlanAndRedraw()
 		{
-			if (PlanManager.planViewing != null || PlanManager.timeViewing < 0)
-				SetEntitiesActiveUpTo(PlanManager.planViewing);
+			if (PlanManager.Instance.planViewing != null || PlanManager.Instance.timeViewing < 0)
+				SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
 			else
-				SetEntitiesActiveUpToTime(PlanManager.timeViewing);
+				SetEntitiesActiveUpToTime(PlanManager.Instance.timeViewing);
 			RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
 

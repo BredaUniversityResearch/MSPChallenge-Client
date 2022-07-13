@@ -37,16 +37,9 @@ namespace MSP2050.Scripts
 		protected void Start()
 		{
 			UpdateBounds();
-
 			autoZoom = false;
-			if (Main.MspGlobalData != null)
-			{
-				maximumZoomLevel = float.Parse(Main.MspGlobalData.maxzoom, Localisation.NumberFormatting);
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += () => { maximumZoomLevel = float.Parse(Main.MspGlobalData.maxzoom, Localisation.NumberFormatting); };
-			}
+			maximumZoomLevel = float.Parse(SessionManager.Instance.MspGlobalData.maxzoom, Localisation.NumberFormatting);
+
 		}
 
 		public void SetNewArea(BoxCollider2D collider)
@@ -64,7 +57,7 @@ namespace MSP2050.Scripts
 
 			targetZoom = maxZoom;
 			cameraComponent.orthographicSize = targetZoom;
-			UIManager.GetMapScale().SetScale(cameraComponent.orthographicSize);
+			InterfaceCanvas.Instance.mapScale.SetScale(cameraComponent.orthographicSize);
 		}
 
 		public void ForceUpdateBoundsNextFrame()
@@ -143,7 +136,7 @@ namespace MSP2050.Scripts
 					time = 1;
 					EndAutoZoom();
 				}
-				VisualizationUtil.UpdateDisplayScale(cameraComponent);
+				VisualizationUtil.Instance.UpdateDisplayScale();
 				//Don't start the DelayedUpdateScale coroutine as this will never be triggered...
 				UpdateUIScale();
 
@@ -173,7 +166,7 @@ namespace MSP2050.Scripts
 
 			Clamp();
 
-			//VisualizationUtil.UpdateDisplayScale();
+			//VisualizationUtil.Instance.UpdateDisplayScale();
 			if (rescaleCoroutine == null)
 			{
 				rescaleCoroutine = StartCoroutine(DelayedUpdateScale());
@@ -183,16 +176,16 @@ namespace MSP2050.Scripts
 
 		public void UpdateUIScale()
 		{
-			VisualizationUtil.UpdateDisplayScale(cameraComponent);
+			VisualizationUtil.Instance.UpdateDisplayScale();
 			IssueManager.instance.RescaleIssues();
-			UIManager.GetMapScale().SetScale(cameraComponent.orthographicSize);
+			InterfaceCanvas.Instance.mapScale.SetScale(cameraComponent.orthographicSize);
 			FSM.CameraZoomChanged();
 		}
 
 		private void UpdateScaleNow(Camera targetCamera)
 		{
-			VisualizationUtil.UpdateDisplayScale(targetCamera);
-			LayerManager.UpdateLayerScales(targetCamera);
+			VisualizationUtil.Instance.UpdateDisplayScale();
+			LayerManager.Instance.UpdateLayerScales(targetCamera);
 		}
 
 		private IEnumerator DelayedUpdateScale()

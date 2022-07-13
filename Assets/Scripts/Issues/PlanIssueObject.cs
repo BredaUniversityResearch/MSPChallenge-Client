@@ -82,7 +82,7 @@ namespace MSP2050.Scripts
 		public Plan GetSourcePlan()
 		{
 			//Maybe we should cache this...
-			return PlanManager.GetPlanWithID(source_plan_id);
+			return PlanManager.Instance.GetPlanWithID(source_plan_id);
 		}
 	}
 

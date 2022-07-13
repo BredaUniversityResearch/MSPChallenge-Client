@@ -81,7 +81,6 @@ namespace MSP2050.Scripts
 
 		private static void UpdateUrl()
 		{
-			//Url = string.Format("{0}{1}/{2}/", protocol, host, endpoint);
 			Url = host;
 			UrlWithoutSession = Url;
 			if (gameSessionId > 0)
@@ -151,30 +150,15 @@ namespace MSP2050.Scripts
 			return "api/geometry/Post";
 		}
 
-		//public static string PostGeometrySub() //Updated to new name below
-		//{
-		//	return "api/geometry/AdminSubtractive";
-		//}
-
 		public static string PostGeometrySub()
 		{
 			return "api/geometry/PostSubtractive";
 		}
 
-		//public static string UpdateGeometry() //Updated to new name below
-		//{
-		//	return "api/geometry/AdminUpdate";
-		//}
-
 		public static string UpdateGeometry()
 		{
 			return "api/geometry/Update";
 		}
-
-		//public static string DeleteGeometry() //Updated to new name below
-		//{
-		//	return "api/geometry/AdminDelete";
-		//}
 
 		public static string DeleteGeometry()
 		{
@@ -235,12 +219,7 @@ namespace MSP2050.Scripts
 		{
 			return "api/user/CloseSession";
 		}
-
-		public static string SetEndAndStartDate()
-		{
-			return "api/game/SetStartEndDate";
-		}
-
+		
 		public static string IsServerOnline()
 		{
 			return "api/game/isOnline";

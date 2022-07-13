@@ -89,7 +89,7 @@ namespace MSP2050.Scripts
 			float newValue;
 			if (float.TryParse(newValueText, Localisation.FloatNumberStyle, Localisation.NumberFormatting, out newValue))
 			{
-				newValue = Mathf.Clamp(newValue / PlanManager.fishingDisplayScale, 0.0f, 1.0f);
+				newValue = Mathf.Clamp(newValue / PlanManager.Instance.fishingDisplayScale, 0.0f, 1.0f);
 				slider.Value = newValue;
 			}
 		}

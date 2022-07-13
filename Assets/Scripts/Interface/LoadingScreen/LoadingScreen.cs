@@ -19,10 +19,6 @@ namespace MSP2050.Scripts
 
 		public Image mspIcon;
 
-		//public Sprite balticline;
-		//public Sprite simcelt;
-		//public Sprite northsee;
-
 		private float progress = 0; // 0 - 100
 		private float increment = 0;
 		private bool doneLoading = false;
@@ -34,49 +30,18 @@ namespace MSP2050.Scripts
 		{
 			loadingNameText.gameObject.SetActive(Main.IsDeveloper);
 			loadingBarRect = loadingBar.GetComponent<RectTransform>();
-
-			//Give Loading screen random texture from resources
-			//Sprite[] tList = Resources.LoadAll<Sprite>(@"LoadingScreenImages");
-			//if (tList.Length > 0)
-			//{
-			//	Sprite tRandSprite = tList[Random.Range(0, tList.Length)];
-			//	loadingScreenImage.sprite = tRandSprite;
-			//}
-			//else
-			//{
-			//	Debug.LogError(@"Assets\Interface\Sprites\Loading Screen\Resources\LoadingScreenImages does not contain any background images.");
-			//}
-
 			SetLoadingBarPercentage(0.0f);
 		}
 
 		protected void Start()
 		{
-			ServerCommunication.CreateActivityWindow();
-
 			//IMPORTANT NOTE to self, this is only true when project is run through LoginScene
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
 				//MSP Icon Swap
-				RegionInfo region = InterfaceCanvas.Instance.regionSettings.GetRegionInfo(Main.MspGlobalData.region);
+				RegionInfo region = InterfaceCanvas.Instance.regionSettings.GetRegionInfo(SessionManager.Instance.MspGlobalData.region);
 				mspIcon.sprite = region.sprite;
 				editionText.text = region.editionPostFix;
-
-				//switch (Main.MspGlobalData.region)
-				//{
-				//case "balticline":
-				//	mspIcon.sprite = balticline;
-				//	editionText.text = "Baltic Sea Edition";
-				//	break;
-				//case "simcelt":
-				//	mspIcon.sprite = simcelt;
-				//	editionText.text = "Clyde Edition";
-				//	break;
-				//case "northsee":
-				//	mspIcon.sprite = northsee;
-				//	editionText.text = "North Sea Edition";
-				//	break;
-				//}
 			}
 		}
 

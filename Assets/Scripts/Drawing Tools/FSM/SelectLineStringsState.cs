@@ -23,12 +23,13 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
+			InterfaceCanvas ic = InterfaceCanvas.Instance;
 
-			UIManager.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Abort);
-			UIManager.SetActivePlanWindowInteractability(false);
+			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
+			ic.SetActivePlanWindowInteractability(false);
 
 			LineStringSubEntity hover = baseLayer.GetSubEntityAt(currentMousePosition) as LineStringSubEntity;
 			//if (hover == null && baseLayer != null) { hover = baseLayer.GetSubEntityAt(currentMousePosition) as LineStringSubEntity; }

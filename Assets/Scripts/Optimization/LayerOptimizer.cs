@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 
 		public void Start()
 		{
-			LayerImporter.OnDoneImporting += OptimizeLayers;
+			Main.Instance.OnFinishedLoadingLayers += OptimizeLayers;
 		}
 
 		public void Update()
@@ -54,7 +54,7 @@ namespace MSP2050.Scripts
 
 		public void OptimizeLayers()
 		{
-			foreach (AbstractLayer layer in LayerManager.GetLoadedLayers())        
+			foreach (AbstractLayer layer in LayerManager.Instance.GetLoadedLayers())        
 				if (layer.Optimized && layer is PolygonLayer)
 					OptimizePolygonLayer(layer as PolygonLayer);
 		}
@@ -81,10 +81,10 @@ namespace MSP2050.Scripts
 			{
 				if (mat == null)
 				{
-					mat = MaterialManager.GetDefaultPolygonMaterial(sub.DrawSettings.PolygonPatternName, sub.DrawSettings.PolygonColor);
+					mat = MaterialManager.Instance.GetDefaultPolygonMaterial(sub.DrawSettings.PolygonPatternName, sub.DrawSettings.PolygonColor);
 				}
 
-				Mesh mesh = VisualizationUtil.CreatePolygon(sub.GetPoints(), sub.GetHoles(), sub.Entity.patternRandomOffset, sub.DrawSettings.InnerGlowEnabled, target.InnerGlowBounds);
+				Mesh mesh = VisualizationUtil.Instance.CreatePolygon(sub.GetPoints(), sub.GetHoles(), sub.Entity.patternRandomOffset, sub.DrawSettings.InnerGlowEnabled, target.InnerGlowBounds);
 
 				//Add mesh to combined one
 				combine[i].mesh = mesh;

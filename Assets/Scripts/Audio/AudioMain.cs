@@ -6,7 +6,6 @@ namespace MSP2050.Scripts
 	public class AudioMain : MonoBehaviour
 	{
 		// Audio IDs are stored as strings so references don't break if sounds are removed or new sounds are added
-
 		// NOTE: New sounds should be added to the AudioIDs list below before they can be used!
 		public const string VOLUME_TEST = "Volume Test";
 		public const string MESSAGE_RECEIVED = "Message Received";
@@ -14,7 +13,18 @@ namespace MSP2050.Scripts
 		public const string ITEM_PLACED = "Item Placed";
 		public const string ITEM_MOVED = "Item Moved";
 
-		public static List<string> AudioIDs = new List<string>()
+		private static AudioMain singleton;
+		public static AudioMain Instance
+		{
+			get
+			{
+				if (singleton == null)
+					singleton = FindObjectOfType<AudioMain>();
+				return singleton;
+			}
+		}
+
+		public List<string> AudioIDs = new List<string>()
 		{
 			VOLUME_TEST,
 			MESSAGE_RECEIVED,
@@ -23,37 +33,13 @@ namespace MSP2050.Scripts
 			ITEM_MOVED
 		};
 
-		private static Dictionary<string, AudioSource> audioSources;
-
-		public static void PlaySound(AudioSource audioSource)
-		{
-			if (audioSource != null)
-			{
-				audioSource.Play();
-			}
-		}
-
-		public static void PlaySound(string audioID)
-		{
-			AudioSource audioSource = GetAudioSource(audioID);
-			audioSource.Play();
-		}
-
-		public static AudioSource GetAudioSource(string audioID)
-		{
-			if (audioSources != null && !audioSources.ContainsKey(audioID))
-			{
-				Debug.LogError("Unknown Audio ID: '" + audioID + "'");
-				return null;
-			}
-			else
-			{
-				return audioSources[audioID];
-			}
-		}
-
 		void Start()
 		{
+			if (singleton != null && singleton != this)
+				Destroy(this);
+			else
+				singleton = this;
+
 			audioSources = new Dictionary<string, AudioSource>();
 			foreach (string audioID in AudioIDs)
 			{
@@ -71,7 +57,36 @@ namespace MSP2050.Scripts
 					continue;
 				}
 
-				audioSources[audioID] =  audioSource;
+				audioSources[audioID] = audioSource;
+			}
+		}
+
+		private Dictionary<string, AudioSource> audioSources;
+		
+		public void PlaySound(AudioSource audioSource)
+		{
+			if (audioSource != null)
+			{
+				audioSource.Play();
+			}
+		}
+
+		public void PlaySound(string audioID)
+		{
+			AudioSource audioSource = GetAudioSource(audioID);
+			audioSource.Play();
+		}
+
+		public AudioSource GetAudioSource(string audioID)
+		{
+			if (audioSources != null && !audioSources.ContainsKey(audioID))
+			{
+				Debug.LogError("Unknown Audio ID: '" + audioID + "'");
+				return null;
+			}
+			else
+			{
+				return audioSources[audioID];
 			}
 		}
 	}

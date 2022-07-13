@@ -13,8 +13,8 @@ namespace MSP2050.Scripts
 			sourceLabel = IssueManager.instance.CreateWarningLabelInstance();
 			destinationLabel = IssueManager.instance.CreateWarningLabelInstance();
 
-			SubEntity sourceEntity = LayerManager.FindSubEntityByPersistentID(issueData.source_geometry_persistent_id);
-			SubEntity destinationEntity = LayerManager.FindSubEntityByPersistentID(issueData.destination_geometry_persistent_id);
+			SubEntity sourceEntity = LayerManager.Instance.FindSubEntityByPersistentID(issueData.source_geometry_persistent_id);
+			SubEntity destinationEntity = LayerManager.Instance.FindSubEntityByPersistentID(issueData.destination_geometry_persistent_id);
 
 			SetupIssueLabel(sourceLabel, sourceEntity, issueData.message, CreateZoomToEntityCallback(destinationEntity, sourceLabel, destinationLabel));
 			SetupIssueLabel(destinationLabel, destinationEntity, issueData.message, CreateZoomToEntityCallback(sourceEntity, destinationLabel, sourceLabel));

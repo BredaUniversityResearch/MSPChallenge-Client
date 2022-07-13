@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
 				entry.transform.SetParent(contentLocation, false);
 				entry.barButton.onClick.AddListener(() =>
 				{
-					UIManager.CreatePropertiesWindow(tmpSubentity, worldSamplePosition, windowPosition);
+					InterfaceCanvas.Instance.propertiesWindow.ShowPropertiesWindow(tmpSubentity, worldSamplePosition, windowPosition);
 				});
 			}
 

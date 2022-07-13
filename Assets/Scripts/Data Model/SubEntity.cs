@@ -414,7 +414,7 @@ namespace MSP2050.Scripts
 		protected virtual void UpdatePlanState()
 		{
 			previousPlanState = planState;
-			planState = PlanManager.GetSubEntityPlanState(this);
+			planState = PlanManager.Instance.GetSubEntityPlanState(this);
 
 			if (gameObject != null)
 			{

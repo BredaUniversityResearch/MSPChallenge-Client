@@ -15,25 +15,12 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			if (Main.MspGlobalData != null)
-			{
-				CreateTimeLine();
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += GlobalDataLoaded;
-			}
-		}
-
-		void GlobalDataLoaded()
-		{
-			Main.OnGlobalDataLoaded -= GlobalDataLoaded;
 			CreateTimeLine();
 		}
 
 		public void CreateTimeLine()
 		{
-			int years = Main.MspGlobalData.session_num_years;
+			int years = SessionManager.Instance.MspGlobalData.session_num_years;
 			yearMarkers = new List<Transform>();
 			for (int i = 0; i < years; i++)
 			{

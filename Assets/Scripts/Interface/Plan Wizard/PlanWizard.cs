@@ -126,7 +126,7 @@ namespace MSP2050.Scripts
 
         private void createCategories()
         {
-            foreach (var kvp in LayerManager.GetCategorySubcategories())
+            foreach (var kvp in LayerManager.Instance.GetCategorySubcategories())
             {
                 // Create category
                 string category = kvp.Key;
@@ -135,7 +135,7 @@ namespace MSP2050.Scripts
                 // Create subcategories
                 foreach (string subcategory in kvp.Value)
                 {
-                    var loadedLayers = LayerManager.GetLoadedLayers(category, subcategory);
+                    var loadedLayers = LayerManager.Instance.GetLoadedLayers(category, subcategory);
                     bool isSubCategoryCreated = false;
 
                     foreach (AbstractLayer layer in loadedLayers)
@@ -146,12 +146,12 @@ namespace MSP2050.Scripts
                             {
                                 isCategoryCreated = true;
                                 //CreateCategoryPlan(category);
-                                CreateCategoryPlan(LayerManager.MakeCategoryDisplayString(category));
+                                CreateCategoryPlan(LayerManager.Instance.MakeCategoryDisplayString(category));
                             }
                             if (!isSubCategoryCreated)
                             {
                                 isSubCategoryCreated = true;
-                                CreateSubCategoryPlan(LayerManager.MakeCategoryDisplayString(subcategory), LayerInterface.GetIconStatic(subcategory));
+                                CreateSubCategoryPlan(LayerManager.Instance.MakeCategoryDisplayString(subcategory), LayerInterface.GetIconStatic(subcategory));
                             }
 
                             CreateLayerPlan(layer);
@@ -244,13 +244,13 @@ namespace MSP2050.Scripts
                 // Removing of layers
                 List<AbstractLayer> layersToRemove = layersInThisPlan.Except(selectedLayers).ToList(); // all layers that are not selected but are in the plan
 
-                bool seperatelyRemoveGreenCables = LayerManager.energyCableLayerGreen != null && !layersToRemove.Contains(LayerManager.energyCableLayerGreen);
-                bool seperatelyRemoveGreyCables = LayerManager.energyCableLayerGrey != null && !layersToRemove.Contains(LayerManager.energyCableLayerGrey);
+                bool seperatelyRemoveGreenCables = LayerManager.Instance.energyCableLayerGreen != null && !layersToRemove.Contains(LayerManager.Instance.energyCableLayerGreen);
+                bool seperatelyRemoveGreyCables = LayerManager.Instance.energyCableLayerGrey != null && !layersToRemove.Contains(LayerManager.Instance.energyCableLayerGrey);
                 Dictionary<int, List<EnergyLineStringSubEntity>> network = null;
                 if (seperatelyRemoveGreenCables)
-                    network = LayerManager.energyCableLayerGreen.GetNodeConnectionsForPlan(editingPlan);
+                    network = LayerManager.Instance.energyCableLayerGreen.GetNodeConnectionsForPlan(editingPlan);
                 if (seperatelyRemoveGreyCables)
-                    network = LayerManager.energyCableLayerGrey.GetNodeConnectionsForPlan(editingPlan, network);
+                    network = LayerManager.Instance.energyCableLayerGrey.GetNodeConnectionsForPlan(editingPlan, network);
                 bool energyLayersRemoved = false;
                 foreach (AbstractLayer layer in layersToRemove)
                 {
@@ -287,7 +287,7 @@ namespace MSP2050.Scripts
                         layer.RemovePlanLayer(editingPlan.GetPlanLayerForLayer(layer));
                     }
                     //Get updated issue delta (but don't apply them yet, that'll happen when the batch gets executed
-                    RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), layersToRemove, GetNewPlanStartDate(), out hasUnavailableTypes);
+                    RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), layersToRemove, GetNewPlanStartDate(), out hasUnavailableTypes);
                     if (issuesToSubmit != null)
                     {
                         issuesToSubmit.SubmitToServer(batch);
@@ -343,7 +343,7 @@ namespace MSP2050.Scripts
 
                 HashSet<int> countriesAffectedByRemovedGrids = new HashSet<int>();
                 if (isEnergyPlan && editingPlan.energyPlan)
-                    foreach (EnergyGrid grid in PlanManager.GetEnergyGridsBeforePlan(editingPlan, EnergyGrid.GridColor.Either))
+                    foreach (EnergyGrid grid in PlanManager.Instance.GetEnergyGridsBeforePlan(editingPlan, EnergyGrid.GridColor.Either))
                         if (editingPlan.removedGrids.Contains(grid.persistentID))
                             foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.energyDistribution.distribution)
                                 if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
@@ -369,14 +369,14 @@ namespace MSP2050.Scripts
                     {
                         //Moving to the past will only ever add more issues, so no need to check for removal
                         MultiLayerRestrictionIssueCollection resultIssues = new MultiLayerRestrictionIssueCollection();
-                        ConstraintManager.CheckTypeUnavailableConstraints(editingPlan, GetNewPlanStartDate(), resultIssues);
+                        ConstraintManager.Instance.CheckTypeUnavailableConstraints(editingPlan, GetNewPlanStartDate(), resultIssues);
                         RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
                         IssueManager.instance.AddIssuesToDeltaIfNew(resultIssues, deltaSet);
                     }
                     else
                     {
                         //Moving the plan to the future requires a full recheck, as we can't filter existing issue for TypeUnavailable ones
-                        RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
+                        RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
                         if (issuesToSubmit != null)
                         {
                             issuesToSubmit.SubmitToServer(batch);
@@ -465,7 +465,7 @@ namespace MSP2050.Scripts
                 }
 
                 UpdateMinAndSetTime(plan.StartTime);
-                if (TeamManager.AreWeGameMaster && !GameState.GameStarted)
+                if (SessionManager.Instance.AreWeGameMaster && !TimeManager.Instance.GameStarted)
                 {
                     startPlanArea.SetActive(true);
                     startPlanToggle.isOn = plan.StartTime < 0;
@@ -510,7 +510,7 @@ namespace MSP2050.Scripts
                 }
 
                 timeSelectArea.SetActive(true);
-                startPlanArea.SetActive(TeamManager.AreWeGameMaster && !GameState.GameStarted);
+                startPlanArea.SetActive(SessionManager.Instance.AreWeGameMaster && !TimeManager.Instance.GameStarted);
                 startPlanToggle.isOn = false;
 
                 if (cablePlanLayerGreenLeft != null)
@@ -815,7 +815,7 @@ namespace MSP2050.Scripts
             {
                 DisplayFeedback(ErrorCode.NoSelection);
             }
-            else if (minTimeSelectable >= Main.MspGlobalData.session_end_month)
+            else if (minTimeSelectable >= SessionManager.Instance.MspGlobalData.session_end_month)
             {
                 DisplayFeedback(ErrorCode.InvalidDate);
             }
@@ -908,7 +908,7 @@ namespace MSP2050.Scripts
 
         private UpdateReach updateMinSelectableTime()
         {
-            minTimeSelectable = GameState.GetCurrentMonth() + 1 + maxConstructionTime;
+            minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + maxConstructionTime;
             if (finishTime < minTimeSelectable)
                 finishTime = minTimeSelectable;
             UpdateReach reach = UpdateMinSelectableYear();
@@ -927,7 +927,7 @@ namespace MSP2050.Scripts
         /// </summary>
         private void UpdateMinAndSetTime(int time)
         {
-            minTimeSelectable = GameState.GetCurrentMonth() + 1 + maxConstructionTime;
+            minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + maxConstructionTime;
             if (finishTime < minTimeSelectable)
                 finishTime = minTimeSelectable;
             UpdateMinSelectableYear(false);
@@ -987,8 +987,8 @@ namespace MSP2050.Scripts
             minYearSelectable = newMinimum;
             yearDropdown.ClearOptions();
             List<string> options = new List<string>();
-            for (int i = minYearSelectable; i < Main.MspGlobalData.session_num_years; i++)
-                options.Add((Main.MspGlobalData.start + i).ToString());
+            for (int i = minYearSelectable; i < SessionManager.Instance.MspGlobalData.session_num_years; i++)
+                options.Add((SessionManager.Instance.MspGlobalData.start + i).ToString());
             yearDropdown.AddOptions(options);
 
             //Checks if the set dropdown value needs to be updated
@@ -1062,9 +1062,9 @@ namespace MSP2050.Scripts
 
         private void SetupActivityToggles()
         {
-            SetupActivityToggle(Main.IsSimulationConfigured(ESimulationType.SEL), shippingToggle);
-            SetupActivityToggle(Main.IsSimulationConfigured(ESimulationType.CEL), energyToggle);
-            SetupActivityToggle(Main.IsSimulationConfigured(ESimulationType.MEL), ecologyToggle);
+            SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.SEL), shippingToggle);
+            SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.CEL), energyToggle);
+            SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.MEL), ecologyToggle);
         }
 
         private void SetupActivityToggle(bool available, Toggle toggle)

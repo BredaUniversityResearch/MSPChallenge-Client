@@ -29,7 +29,7 @@ namespace MSP2050.Scripts
 		public void HighlightPointSubEntity(PointSubEntity subEnt)
 		{
 			GameObject temp = Instantiate(highlightPrefab) as GameObject;
-			temp.GetComponent<SpriteRenderer>().color = TeamManager.GetTeamByTeamID(subEnt.Entity.Country).color;
+			temp.GetComponent<SpriteRenderer>().color = SessionManager.Instance.GetTeamByTeamID(subEnt.Entity.Country).color;
 			temp.transform.SetParent(subEnt.GetGameObject().transform);
 			temp.transform.localPosition = Vector3.zero;
 			highlightObjects.Add(temp);

@@ -27,13 +27,13 @@ namespace MSP2050.Scripts
 
 		public void OnPointerEnter(PointerEventData eventData)
 		{
-			previousCursorType = Main.CursorType;
-			Main.CursorType = FSM.CursorType.Rescale;
+			previousCursorType = Main.Instance.CursorType;
+			Main.Instance.CursorType = FSM.CursorType.Rescale;
 		}
 
 		public void OnPointerExit(PointerEventData eventData)
 		{
-			Main.CursorType = previousCursorType;
+			Main.Instance.CursorType = previousCursorType;
 		}
 	}
 }

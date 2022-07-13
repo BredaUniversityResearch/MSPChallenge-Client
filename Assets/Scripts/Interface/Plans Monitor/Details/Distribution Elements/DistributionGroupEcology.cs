@@ -20,7 +20,7 @@ namespace MSP2050.Scripts
 
 		public override void ApplySliderValues(Plan plan, int index)
 		{
-			string fleetName = PlanManager.fishingFleets[index];
+			string fleetName = PlanManager.Instance.fishingFleets[index];
 			SetFishingToSliderValues(plan.fishingDistributionDelta, fleetName);
 		}
 
@@ -110,7 +110,7 @@ namespace MSP2050.Scripts
 					}
 					else
 					{
-						Color col = TeamManager.GetTeamByTeamID(kvp.Key).color;
+						Color col = SessionManager.Instance.GetTeamByTeamID(kvp.Key).color;
 						item.graphic.color = col;
 						item.Country = kvp.Key;
 					}
