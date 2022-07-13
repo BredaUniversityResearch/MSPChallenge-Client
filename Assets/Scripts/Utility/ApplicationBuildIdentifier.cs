@@ -9,7 +9,7 @@ using UnityEditor;
 	/// Small scriptable object that acts as the build identifier. Contains information about the build date.
 	/// </summary>
 	[CreateAssetMenu]
-public class ApplicationBuildIdentifier : MonoBehaviour
+public class ApplicationBuildIdentifier : ScriptableObject
 {
 	//Actual file reside in Assets/Resources/
 	private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
