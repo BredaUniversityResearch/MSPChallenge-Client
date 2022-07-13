@@ -108,7 +108,7 @@ namespace MSP2050.Scripts
 			if (identifier != null)
 			{
 				buildDateText.text = identifier.GetBuildTime();
-                ///buildRevisionText.text = identifier.GetGitTag();
+                		//buildRevisionText.text = identifier.GetGitTag();
 			}
 		}
 
