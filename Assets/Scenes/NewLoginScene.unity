@@ -6390,6 +6390,11 @@ PrefabInstance:
       propertyPath: m_text
       value: API End Point Root
       objectReference: {fileID: 0}
+    - target: {fileID: 6010675131681945238, guid: 73adb1f4e85f7204eaddbd402bc68cfd,
+        type: 3}
+      propertyPath: m_text
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 73adb1f4e85f7204eaddbd402bc68cfd, type: 3}
 --- !u!1 &776503806
@@ -6443,6 +6448,49 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AllowSwitchOff: 1
+--- !u!1 &777074777
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 777074779}
+  - component: {fileID: 777074778}
+  m_Layer: 0
+  m_Name: BuildiIdentifier
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &777074778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777074777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e459473616e60f244b80b26a1a4b1162, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &777074779
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777074777}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 959.99963, y: 540.0011, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &780967160
 GameObject:
   m_ObjectHideFlags: 0
@@ -6681,6 +6729,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 785370274}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &785789319 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6010675131681945238, guid: 73adb1f4e85f7204eaddbd402bc68cfd,
+    type: 3}
+  m_PrefabInstance: {fileID: 1722893896}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &795804416
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13723,7 +13783,7 @@ PrefabInstance:
     - target: {fileID: 6010675131681945238, guid: 73adb1f4e85f7204eaddbd402bc68cfd,
         type: 3}
       propertyPath: m_text
-      value: 4.0-beta10
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 73adb1f4e85f7204eaddbd402bc68cfd, type: 3}
@@ -15567,28 +15627,16 @@ MonoBehaviour:
   fullscreenToggle: {fileID: 205181128}
   onDisplaySettingsChange:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 800216223}
-        m_TargetAssemblyTypeName: MSP2050.Scripts.LoginBGMask, MSP2050
-        m_MethodName: UpdateImageSizes
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   masterVolume: {fileID: 1875020245}
   soundEffects: {fileID: 1424372652}
   developerModeToggle: {fileID: 630669407}
   buildDateText: {fileID: 1781218038}
-  buildRevisionText: {fileID: 0}
+  buildRevisionText: {fileID: 785789319}
   apiEndpointText: {fileID: 1522165752}
   cancel: {fileID: 2000389401}
   accept: {fileID: 1648489321}
-  closeWindowOnCancelConfirm: 0
+  closeWindowOnCancelConfirm: 1
 --- !u!1 &2086052813
 GameObject:
   m_ObjectHideFlags: 0
@@ -16563,6 +16611,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_text
       value: Built On
+      objectReference: {fileID: 0}
+    - target: {fileID: 6010675131681945238, guid: 73adb1f4e85f7204eaddbd402bc68cfd,
+        type: 3}
+      propertyPath: m_text
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 73adb1f4e85f7204eaddbd402bc68cfd, type: 3}
