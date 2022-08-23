@@ -39,7 +39,7 @@ namespace MSP2050.Scripts
 		{
 			get
 			{
-				Team currentTeam = TeamManager.CurrentTeam;
+				Team currentTeam = SessionManager.Instance.CurrentTeam;
 				if (currentTeam.IsManager)
 				{
 					return countryDropdown.GetSelectedCountryId();
@@ -59,7 +59,7 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			allCountries.SetActive(TeamManager.AreWeManager);
+			allCountries.SetActive(SessionManager.Instance.AreWeManager);
 
 			title.onValueChanged.AddListener(OnValueChanged);
 			description.onValueChanged.AddListener(OnValueChanged);

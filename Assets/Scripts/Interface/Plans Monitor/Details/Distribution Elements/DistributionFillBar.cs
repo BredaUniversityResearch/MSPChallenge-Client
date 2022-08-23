@@ -64,7 +64,7 @@ namespace MSP2050.Scripts
 
 		private DistributionFill CreateFill(int teamID)
 		{
-			Color teamColor = teamID > 0 ? TeamManager.GetTeamByTeamID(teamID).color : Color.white;
+			Color teamColor = teamID > 0 ? SessionManager.Instance.GetTeamByTeamID(teamID).color : Color.white;
 
 			GameObject go = Instantiate(fillPrefab);
 			DistributionFill fill = go.GetComponent<DistributionFill>();
@@ -146,7 +146,7 @@ namespace MSP2050.Scripts
 			// Set player color first
 			for (int i = 0; i < fills.Count; i++)
 			{
-				if (fills[i].TeamID == TeamManager.CurrentUserTeamID)
+				if (fills[i].TeamID == SessionManager.Instance.CurrentUserTeamID)
 				{
 					fills[i].transform.SetAsFirstSibling();
 				}

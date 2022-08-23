@@ -47,11 +47,12 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
+			InterfaceCanvas ic = InterfaceCanvas.Instance;
 
-			UIManager.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			UIManager.ToolbarEnable(true, FSM.ToolbarInput.Delete);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Abort);
-			//UIManager.SetActivePlanWindowInteractability(true, true);
+			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
+			ic.ToolbarEnable(true, FSM.ToolbarInput.Delete);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
+			//InterfaceCanvas.SetActivePlanWindowInteractability(true, true);
 			IssueManager.instance.SetIssueInteractability(false);
 		
 			foreach (PolygonSubEntity pse in selectedSubEntities)
@@ -82,7 +83,7 @@ namespace MSP2050.Scripts
 		//            }
 		//        }
 		//    }
-		//    UIManager.ToolbarEnable(anyRecallableSubEntities, FSM.ToolbarInput.Recall);
+		//    InterfaceCanvas.ToolbarEnable(anyRecallableSubEntities, FSM.ToolbarInput.Recall);
 		//}
 
 		private void RedrawObject(PolygonSubEntity entity)
@@ -109,7 +110,7 @@ namespace MSP2050.Scripts
 
 		private void getLineAt(Vector3 position, HashSet<PolygonSubEntity> selectedSubEntities, out PolygonSubEntity subEntity, out int lineA, out int lineB)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			lineA = -1;
@@ -165,7 +166,7 @@ namespace MSP2050.Scripts
 
 		private Dictionary<PolygonSubEntity, HashSet<int>> getPointAt(Vector3 position, HashSet<PolygonSubEntity> selectedSubEntities)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			int closestPoint = -1;
@@ -276,7 +277,7 @@ namespace MSP2050.Scripts
 				// case 2: clicked on a line + shift isn't pressed: add a point on the line and select the new point
 				if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
 				{
-					AudioMain.PlaySound(AudioMain.ITEM_PLACED);
+					AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
 					int lineA, lineB;
 					PolygonSubEntity subEntity;
@@ -324,7 +325,7 @@ namespace MSP2050.Scripts
 
 		private PolygonSubEntity getSubEntityFromSelection(Vector2 position, HashSet<PolygonSubEntity> selection)
 		{
-			float maxDistance = VisualizationUtil.GetSelectMaxDistancePolygon();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistancePolygon();
 
 			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
@@ -419,10 +420,10 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			//UIManager.ToolbarEnable(selectedPoints.Count > 0, FSM.ToolbarInput.Delete);
+			//InterfaceCanvas.ToolbarEnable(selectedPoints.Count > 0, FSM.ToolbarInput.Delete);
 			//updateRecallAvailability();
-			UIManager.SetActivePlanWindowChangeable(!selectedRemovedEntity);
-			UIManager.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
+			InterfaceCanvas.Instance.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			InterfaceCanvas.Instance.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
 		}
 
 		private void mergeSelectionBIntoSelectionA(Dictionary<PolygonSubEntity, HashSet<int>> a, Dictionary<PolygonSubEntity, HashSet<int>> b)
@@ -623,7 +624,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			float maxDistance = VisualizationUtil.GetSelectMaxDistance();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 			if (closestPointSqrDistance < maxDistance * maxDistance)
 			{
 				return dragStartPosition - closestPoint;
@@ -745,7 +746,7 @@ namespace MSP2050.Scripts
 		{
 			if (draggingSelection)
 			{
-				AudioMain.PlaySound(AudioMain.ITEM_MOVED);
+				AudioMain.Instance.PlaySound(AudioMain.ITEM_MOVED);
 
 				//TODO: Update restriction polygon
 				updateSelectionDragPositions(dragFinalPosition - dragStartPosition, true);
@@ -880,7 +881,7 @@ namespace MSP2050.Scripts
 
 		//private void simplifySelection()
 		//{
-		//	UIManager.CreateSingleValueWindow("Simplify Polygon", "tolerance", "0.5", 200, (value) =>
+		//	InterfaceCanvas.CreateSingleValueWindow("Simplify Polygon", "tolerance", "0.5", 200, (value) =>
 		//	{
 		//		fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
@@ -925,7 +926,7 @@ namespace MSP2050.Scripts
 
 		//private void tryFixingInvalidPolygonsInSelection()
 		//{
-		//	UIManager.CreateSingleValueWindow("Try To Fix Polygon", "fix offset", "0.01", 200, (value) =>
+		//	InterfaceCanvas.CreateSingleValueWindow("Try To Fix Polygon", "fix offset", "0.01", 200, (value) =>
 		//	{
 		//		tryFixingInvalidPolygonsInSelection(Util.ParseToFloat(value, 0.01f));
 		//	});
@@ -1185,7 +1186,7 @@ namespace MSP2050.Scripts
 			IssueManager.instance.SetIssueInteractability(true);
 
 			// make sure the entity type dropdown shows a valid value
-			//UIManager.SetCurrentEntityTypeSelection(UIManager.GetCurrentEntityTypeSelection());
+			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());
 		}
 
 		public void AddSelectedSubEntity(PolygonSubEntity subEntity, bool updateActivePlanWindow = true)
@@ -1203,8 +1204,8 @@ namespace MSP2050.Scripts
 			foreach (PolygonSubEntity poly in subEntities) //Check if this is a polygon marked for removal, this limits editing
 			{
 				selectedRemovedEntity = poly.IsPlannedForRemoval();
-				UIManager.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
-				UIManager.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+				InterfaceCanvas.Instance.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
+				InterfaceCanvas.Instance.SetActivePlanWindowChangeable(!selectedRemovedEntity);
 				break;
 			}
 			if (this is EditEnergyPolygonState)
@@ -1245,7 +1246,7 @@ namespace MSP2050.Scripts
 				selectedParams.Add(parameters);
 			}
 
-			UIManager.SetActiveplanWindowToSelection(
+			InterfaceCanvas.Instance.SetActiveplanWindowToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
 				selectedParams);

@@ -29,21 +29,8 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			GameState.OnCurrentMonthChanged += OnCurrentMonthChanged;
-
-			if (Main.MspGlobalData != null)
-			{
-				SetupYearMarkers(yearSpacing);
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += OnMspGlobalDataLoaded;
-			}
-		}
-
-		private void OnDestroy()
-		{
-			GameState.OnCurrentMonthChanged -= OnCurrentMonthChanged;
+			TimeManager.Instance.OnCurrentMonthChanged += OnCurrentMonthChanged;
+			SetupYearMarkers(yearSpacing);
 		}
 
 		//Callback set in Unity Editor.
@@ -70,24 +57,18 @@ namespace MSP2050.Scripts
 		{
 			if (availableSliderRangeFill != null)
 			{
-				availableSliderRangeFill.anchorMax = new Vector2((float)newCurrentMonth / (float)Main.MspGlobalData.session_end_month, availableSliderRangeFill.anchorMax.y);
+				availableSliderRangeFill.anchorMax = new Vector2((float)newCurrentMonth / (float)SessionManager.Instance.MspGlobalData.session_end_month, availableSliderRangeFill.anchorMax.y);
 			}
-		}
-
-		private void OnMspGlobalDataLoaded()
-		{
-			Main.OnGlobalDataLoaded -= OnMspGlobalDataLoaded;
-			SetupYearMarkers(yearSpacing);
 		}
 
 		private void SetupYearMarkers(int labelSpacingInYears)
 		{
-			int numYears = Main.MspGlobalData.session_num_years;
+			int numYears = SessionManager.Instance.MspGlobalData.session_num_years;
 			float desiredSubdivisions = ((float)numYears / labelSpacingInYears);
 			int numLabels = Mathf.FloorToInt(desiredSubdivisions) + 1;
 			for (int i = 0; i < numLabels; ++i)
 			{
-				int year = Main.MspGlobalData.start + (labelSpacingInYears * i);
+				int year = SessionManager.Instance.MspGlobalData.start + (labelSpacingInYears * i);
 				RectTransform label = CreateYearLabel(year.ToString());
 
 				float percentage = (float)i / (desiredSubdivisions);
@@ -114,7 +95,7 @@ namespace MSP2050.Scripts
 				monthSelectorSlider.onValueChanged.AddListener(OnSliderValueChanged);
 			}
 
-			SetLatestAvailableMonth(GameState.GetCurrentMonth());
+			SetLatestAvailableMonth(TimeManager.Instance.GetCurrentMonth());
 		}
 
 		private RectTransform CreateYearLabel(string labelText)

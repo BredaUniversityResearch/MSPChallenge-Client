@@ -52,7 +52,7 @@ namespace MSP2050.Scripts
 		protected override void BeginEditing(Plan plan)
 		{
 			//Show the plan to be edited before edit mode is entered!
-			PlanManager.ShowPlan(plan);
+			PlanManager.Instance.ShowPlan(plan);
 
 			//Should not use base, as this is diverted into the usual geom editing flow
 			lockedPlan = plan;
@@ -62,8 +62,8 @@ namespace MSP2050.Scripts
 
 			if (plan.energyPlan)
 			{
-				removedInvalidCables = LayerManager.ForceEnergyLayersActiveUpTo(plan);
-				energyGridsBeforePlan = PlanManager.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
+				removedInvalidCables = LayerManager.Instance.ForceEnergyLayersActiveUpTo(plan);
+				energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
 			}
 
 			//Enter edit mode in FSM
@@ -79,25 +79,25 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public void StartEditingLayer(PlanLayer layer, bool calledByUndo = false)
 		{
-			LayerManager.SetNonReferenceLayers(new HashSet<AbstractLayer>() { layer.BaseLayer }, false, true);
-			LayerManager.ShowLayer(layer.BaseLayer);
+			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { layer.BaseLayer }, false, true);
+			LayerManager.Instance.ShowLayer(layer.BaseLayer);
 
 			if (!calledByUndo)
-				Main.FSM.SetInterruptState(null);
+				Main.Instance.fsm.SetInterruptState(null);
 
 			if (currentlyEditingLayer != null)
 			{
-				UIManager.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
+				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
 				if (!calledByUndo)
-					Main.FSM.AddToUndoStack(new SwitchLayerOperation(currentlyEditingLayer, layer));
+					Main.Instance.fsm.AddToUndoStack(new SwitchLayerOperation(currentlyEditingLayer, layer));
 			}
 
 			InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
-			UIManager.SetLayerVisibilityLock(layer.BaseLayer, true);
+			InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(layer.BaseLayer, true);
 			currentlyEditingLayer = layer;
-			UIManager.StartEditingLayer(layer.BaseLayer);
-			Main.FSM.StartEditingLayer(layer);
-			LayerManager.RedrawVisibleLayers();
+			InterfaceCanvas.Instance.StartEditingLayer(layer.BaseLayer);
+			Main.Instance.fsm.StartEditingLayer(layer);
+			LayerManager.Instance.RedrawVisibleLayers();
 		}
 
 		public void ForceCancelChanges()
@@ -108,7 +108,7 @@ namespace MSP2050.Scripts
 		public override void CancelChangesAndUnlock()
 		{
 			//This already unlocks and calls StoppedEditingSuccessfully if succesful
-			Main.FSM.UndoAllAndClearStacks();
+			Main.Instance.fsm.UndoAllAndClearStacks();
 			lockedPlan.energyGrids = energyGridBackup;
 			lockedPlan.removedGrids = energyGridRemovedBackup;
 			if (issuesBackup != null)
@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 			}
 			if (removedInvalidCables != null)
 			{
-				LayerManager.RestoreRemovedCables(removedInvalidCables);
+				LayerManager.Instance.RestoreRemovedCables(removedInvalidCables);
 			}
 			lockedPlan.AttemptUnlock();
 			StopEditing();
@@ -126,7 +126,7 @@ namespace MSP2050.Scripts
 		protected override void SubmitChangesAndUnlock()
 		{
 			InterfaceCanvas.ShowNetworkingBlocker();
-			if (lockedPlan.energyPlan && !string.IsNullOrEmpty(Main.MspGlobalData.windfarm_data_api_url))
+			if (lockedPlan.energyPlan && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
 			{
 				int nextTempID = -1;
 				Dictionary<int, SubEntity> energyEntities = new Dictionary<int, SubEntity>();
@@ -147,7 +147,7 @@ namespace MSP2050.Scripts
 					}
 				}
 				//Try getting external data before calculating the effects of editing
-				ServerCommunication.DoExternalAPICall<FeatureCollection>(Main.MspGlobalData.windfarm_data_api_url, energyEntities, (result) => ExternalEnergyEffectsReturned(result, energyEntities), ExternalEnergyEffectsFailed);
+				ServerCommunication.Instance.DoExternalAPICall<FeatureCollection>(SessionManager.Instance.MspGlobalData.windfarm_data_api_url, energyEntities, (result) => ExternalEnergyEffectsReturned(result, energyEntities), ExternalEnergyEffectsFailed);
 			}
 			else
 			{
@@ -177,12 +177,12 @@ namespace MSP2050.Scripts
 			CalculateEffectsOfEditing();
 		}
 
-		void ExternalEnergyEffectsFailed(ServerCommunication.ARequest request, string message)
+		void ExternalEnergyEffectsFailed(ARequest request, string message)
 		{
 			if (request.retriesRemaining > 0)
 			{
 				Debug.LogError($"External API call failed, message: {message}. Retrying {request.retriesRemaining} more times.");
-				ServerCommunication.RetryRequest(request);
+				ServerCommunication.Instance.RetryRequest(request);
 			}
 			else
 			{
@@ -199,7 +199,7 @@ namespace MSP2050.Scripts
 		private void CalculateEffectsOfEditing()
 		{
 			//Aborts any geometry being created
-			Main.FSM.AbortCurrentState();
+			Main.Instance.fsm.AbortCurrentState();
 
 			//Check invalid geometry
 			SubEntity invalid = lockedPlan.CheckForInvalidGeometry();
@@ -222,7 +222,7 @@ namespace MSP2050.Scripts
 			}
 
 			//Check constraints and show them in the UI.
-			ConstraintManager.CheckConstraints(lockedPlan, issuesBackup, true);
+			ConstraintManager.Instance.CheckConstraints(lockedPlan, issuesBackup, true);
 
 			//Energy effects
 			if (lockedPlan.energyPlan)
@@ -235,7 +235,7 @@ namespace MSP2050.Scripts
 				foreach (EnergyGrid grid in energyGridsBeforePlan)
 					lockedPlan.removedGrids.Add(grid.persistentID);
 
-				foreach (AbstractLayer layer in LayerManager.energyLayers)
+				foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 				{
 					if (layer.editingType == AbstractLayer.EditingType.Socket)
 					{
@@ -277,7 +277,7 @@ namespace MSP2050.Scripts
 			lockedPlan.SubmitRequiredApproval(batch, newApproval);
 
 			//Check issues again and submit according to latest tests. To ensure that changes in other plans while editing this plan get detected as well.
-			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.CheckConstraints(lockedPlan, issuesBackup, true);
+			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.CheckConstraints(lockedPlan, issuesBackup, true);
 			if (issuesToSubmit != null)
 			{
 				issuesToSubmit.SubmitToServer(batch);
@@ -286,7 +286,7 @@ namespace MSP2050.Scripts
 
 			//Submit all geometry changes 
 			//Automatically submits corresponding energy_output and connection for geom. 
-			Main.FSM.SubmitAllChanges(batch);
+			Main.Instance.fsm.SubmitAllChanges(batch);
 
 			//If energy plan, submit grid content after geometry has at least a batch id
 			if (lockedPlan.energyPlan && lockedPlan.energyGrids.Count > 0)
@@ -307,7 +307,7 @@ namespace MSP2050.Scripts
 		protected override void HandleChangesSubmissionSuccess(BatchRequest batch)
 		{
 			countriesAffectedByRemovedGrids = null;
-			Main.FSM.ClearUndoRedoAndFinishEditing();
+			Main.Instance.fsm.ClearUndoRedoAndFinishEditing();
 			base.HandleChangesSubmissionSuccess(batch);
 		}
 
@@ -336,14 +336,14 @@ namespace MSP2050.Scripts
 		{
 			if (currentlyEditingLayer != null)
 			{
-				UIManager.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
+				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
 				PlansMonitor.UpdatePlan(lockedPlan, false, false, false);
 			}
 
 			base.StopEditing();
 
-			UIManager.StopEditing();
-			Main.FSM.StopEditing();
+			InterfaceCanvas.Instance.StopEditing();
+			Main.Instance.fsm.StopEditing();
 
 			currentlyEditingLayer = null;
 			energyGridBackup = null;
@@ -357,8 +357,8 @@ namespace MSP2050.Scripts
 			PlansMonitor.instance.plansMinMax.Maximize();
 			PlanDetails.UpdateTabAvailability();
 
-			LayerManager.ClearNonReferenceLayers();
-			LayerManager.RedrawVisibleLayers();
+			LayerManager.Instance.ClearNonReferenceLayers();
+			LayerManager.Instance.RedrawVisibleLayers();
 			InterfaceCanvas.Instance.activePlanWindow.CloseEditingUI();
 			PlansMonitor.RefreshPlanButtonInteractablity();
 

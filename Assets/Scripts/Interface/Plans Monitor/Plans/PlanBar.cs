@@ -27,17 +27,17 @@ namespace MSP2050.Scripts
 			this.planRepresenting = planRepresenting;
 			viewButton.onClick.AddListener(() =>
 			{
-				if (!Main.InEditMode && !Main.EditingPlanDetailsContent)
+				if (!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
 				{
 					//if (planRepresenting.State == Plan.PlanState.DESIGN)
 					//{
-					//	PlanManager.RequestPlanLockForEditing(planRepresenting);
+					//	PlanManager.Instance.RequestPlanLockForEditing(planRepresenting);
 					//	PlanDetails.SelectPlan(planRepresenting);
 
 					//}
 					//else if (planRepresenting.InInfluencingState)
 					//{
-					PlanManager.ShowPlan(planRepresenting);
+					PlanManager.Instance.ShowPlan(planRepresenting);
 					//}
 				}
 			});
@@ -47,7 +47,7 @@ namespace MSP2050.Scripts
 				if (!ignoreBarCallback)
 				{
 					if (PlanDetails.IsOpen)
-						PlanManager.SetPlanUnseenChanges(planRepresenting, false);
+						PlanManager.Instance.SetPlanUnseenChanges(planRepresenting, false);
 					if (b)
 						PlanDetails.SelectPlan(planRepresenting);
 					else
@@ -94,7 +94,7 @@ namespace MSP2050.Scripts
 		public void SetViewEditButtonInteractable(bool value)
 		{
 			//Don't allow the edit button to be interactable if we are in simulation and this is a plan that is still in design.
-			if (GameState.CurrentState == GameState.PlanningState.Simulation)
+			if (TimeManager.Instance.CurrentState == TimeManager.PlanningState.Simulation)
 			{
 				if (!planRepresenting.InInfluencingState)
 				{
@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			//Non GM players cant interact with plans during setup
-			else if(GameState.CurrentState == GameState.PlanningState.Setup && !TeamManager.AreWeGameMaster)
+			else if(TimeManager.Instance.CurrentState == TimeManager.PlanningState.Setup && !SessionManager.Instance.AreWeGameMaster)
 			{
 				value = false;
 			}
@@ -129,7 +129,7 @@ namespace MSP2050.Scripts
 			if (planRepresenting.State == Plan.PlanState.APPROVAL)
 			{
 				EPlanApprovalState approvalState;
-				if (planRepresenting.countryApproval.TryGetValue(TeamManager.CurrentUserTeamID, out approvalState))
+				if (planRepresenting.countryApproval.TryGetValue(SessionManager.Instance.CurrentUserTeamID, out approvalState))
 				{
 					if (approvalState == EPlanApprovalState.Maybe)
 					{

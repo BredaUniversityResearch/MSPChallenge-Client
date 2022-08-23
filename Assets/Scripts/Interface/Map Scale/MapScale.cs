@@ -55,7 +55,7 @@ namespace MSP2050.Scripts
 
 		public void Awake()
 		{
-			LayerImporter.OnDoneImporting += OnDoneImportingLayers;
+			Main.Instance.OnFinishedLoadingLayers += OnDoneImportingLayers;
 			labelOriginalPosition = expandButtonLabel.localPosition;
 			xPositionTarget = labelOriginalPosition .x - (GetComponent<RectTransform>().sizeDelta.x - expandButtonLabel.sizeDelta.x);
 			originalLabelBorderColor = expandButtonBorder.color;
@@ -70,16 +70,10 @@ namespace MSP2050.Scripts
 		private void Update()
 		{
 			double x, y;
-			Main.GetRealWorldMousePosition(out x, out y);
+			Main.Instance.GetRealWorldMousePosition(out x, out y);
 			xCoordinateText.text = ((float)x).FormatAsCoordinateText();
 			yCoordinateText.text = ((float)y).FormatAsCoordinateText();
-
-			//double x_deg, y_deg;
-			////UTMToDegrees(x, y, out x_deg, out y_deg);
-			//ToLatLon(x, y, 29, true, out x_deg, out y_deg);
-			//xCoordinateText.text = x_deg.ToString("n2", CultureInfo.CurrentUICulture) + "(" + x.ToString("n2", CultureInfo.CurrentUICulture) + ")";
-			//yCoordinateText.text = y_deg.ToString("n2", CultureInfo.CurrentUICulture) + "(" + y.ToString("n2", CultureInfo.CurrentUICulture) + ")";
-
+			
 			if (animationActive)
 			{
 				if (opening && !pointerOnObject)
@@ -110,15 +104,10 @@ namespace MSP2050.Scripts
 				expandButtonLabel.localPosition = new Vector3(newX, labelOriginalPosition.y);
 			}
 		}
-
-		public void OnDestroy()
-		{
-			LayerImporter.OnDoneImporting -= OnDoneImportingLayers;
-		}
-
+		
 		private void OnDoneImportingLayers()
 		{
-			AbstractLayer layer = LayerManager.FindFirstLayerContainingName("_PLAYAREA");
+			AbstractLayer layer = LayerManager.Instance.FindFirstLayerContainingName("_PLAYAREA");
 			if (layer == null)
 			{
 				throw new Exception("Could not find the play area layer.");
@@ -157,8 +146,6 @@ namespace MSP2050.Scripts
 
 		public float GetRealWorldLineLength(List<Vector3> line)
 		{
-			//float xConversion = (currentScaledWorldAreaSize.x) / gameBounds.size.x;
-			//float yConversion = (currentScaledWorldAreaSize.y) / gameBounds.size.y;
 			float gameToWorldScale = GameToRealWorldScale;
 
 			float length = 0;
@@ -169,15 +156,12 @@ namespace MSP2050.Scripts
 
 		public float GetRealWorldPolygonAreaInSquareKm(List<Vector3> polygon, List<List<Vector3>> holes = null)
 		{
-			//float xConversion = (currentScaledWorldAreaSize.x) / gameBounds.size.x;
-			//float yConversion = (currentScaledWorldAreaSize.y) / gameBounds.size.y;
 			float gameToWorldScale = GameToRealWorldScale;
 
 			float area = 0;
 			for (int i = 0; i < polygon.Count; ++i)
 			{
 				int j = (i + 1) % polygon.Count;
-				//area += (polygon[i].y * yConversion) * (polygon[j].x * xConversion) - (polygon[i].x * xConversion) * (polygon[j].y * yConversion);
 				area += (polygon[i].x * gameToWorldScale) * 
 				        (polygon[j].y * gameToWorldScale) - 
 				        (polygon[i].y * gameToWorldScale) * 
@@ -200,7 +184,7 @@ namespace MSP2050.Scripts
 			opening = true;
 			animationActive = true;
 			pointerOnObject = true;
-			expandButtonBorder.color = TeamManager.CurrentTeamColor;
+			expandButtonBorder.color = SessionManager.Instance.CurrentTeamColor;
 		}
 
 		public void OnPointerExit(PointerEventData eventData)
@@ -232,9 +216,9 @@ namespace MSP2050.Scripts
 		public void ZoomToAreaClicked()
 		{
 			if (!zoomToAreaButton.selected)
-				Main.InterruptFSMState((fsm) => new ZoomToAreaState(fsm, zoomToAreaButton));
+				Main.Instance.InterruptFSMState((fsm) => new ZoomToAreaState(fsm, zoomToAreaButton));
 			else
-				Main.CancelFSMInterruptState();
+				Main.Instance.CancelFSMInterruptState();
 		}
 
 		public void ZoomAllTheWayOut()
@@ -246,17 +230,17 @@ namespace MSP2050.Scripts
 		public void LayerProbeClicked()
 		{
 			if (!layerProbeButton.selected)
-				Main.InterruptFSMState((fsm) => new LayerProbeState(fsm, layerProbeButton));
+				Main.Instance.InterruptFSMState((fsm) => new LayerProbeState(fsm, layerProbeButton));
 			else
-				Main.CancelFSMInterruptState();
+				Main.Instance.CancelFSMInterruptState();
 		}
 
 		public void RulerClicked()
 		{
 			if (!rulerButton.selected)
-				Main.InterruptFSMState((fsm) => new MeasurementState(fsm, rulerButton));
+				Main.Instance.InterruptFSMState((fsm) => new MeasurementState(fsm, rulerButton));
 			else
-				Main.CancelFSMInterruptState();
+				Main.Instance.CancelFSMInterruptState();
 		}
 
 		public void IssueVisibilityClicked()

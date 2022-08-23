@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	[RequireComponent(typeof(TeamImporter))]
+	//Non functional
+	[RequireComponent(typeof(SessionManager))]
 	public class AutomatedTestGameRunner: MonoBehaviour
 	{
 		private const int ADMIN_COUNTRY_ID = 1;
@@ -12,7 +13,7 @@ namespace MSP2050.Scripts
 		private GameObject persistentObject = null;
 
 		[SerializeField]
-		private TeamImporter teamImporter = null;
+		private SessionManager teamImporter = null;
 
 		private void Awake()
 		{
@@ -24,7 +25,7 @@ namespace MSP2050.Scripts
 			Server.Endpoint = "stable";
 			teamImporter.ImportGlobalData();
 			teamImporter.OnImportComplete += OnGlobalDataImportComplete;
-			LayerImporter.OnDoneImporting += OnDoneImportingLayers;
+			//LayerImporter.OnDoneImporting += OnDoneImportingLayers; //currently disabled because unused
 		}
 
 		private void OnGlobalDataImportComplete(bool success)
@@ -45,7 +46,7 @@ namespace MSP2050.Scripts
 			//If Successful load next scene
 			GameObject tObj = Instantiate(persistentObject);
 
-			tObj.GetComponent<PersistentDataLogIn>().Initialize(ADMIN_COUNTRY_ID, "AUTOMATED_TEST_USER", teamImporter.MspGlobalData, teamImporter.teams);
+			//tObj.GetComponent<PersistentDataLogIn>().Initialize(ADMIN_COUNTRY_ID, "AUTOMATED_TEST_USER", teamImporter.MspGlobalData, teamImporter.);
 		}
 
 		private void OnDoneImportingLayers()
@@ -57,12 +58,12 @@ namespace MSP2050.Scripts
 		{
 			int secondsPerEra = 10;
 			Debug.Log(string.Format("Setting era time to {0} seconds for all eras", secondsPerEra));
-			TimeManager.instance.SetEraRealtimeValues(new[] {secondsPerEra, secondsPerEra, secondsPerEra, secondsPerEra});
+			TimeManager.Instance.SetEraRealtimeValues(new[] {secondsPerEra, secondsPerEra, secondsPerEra, secondsPerEra});
 			yield return new WaitForSeconds(3.0f);
 			
 			Debug.Log("Sending state PAUSE to end Setup phase");
-			GameState.SetGameState(GameState.PlanningStateToString(GameState.PlanningState.Pause));
-			while (GameState.CurrentState == GameState.PlanningState.Setup)
+			TimeManager.SetGameState(TimeManager.PlanningStateToString(TimeManager.PlanningState.Pause));
+			while (TimeManager.Instance.CurrentState == TimeManager.PlanningState.Setup)
 			{
 				yield return new WaitForSeconds(1.0f);
 			}
@@ -70,9 +71,9 @@ namespace MSP2050.Scripts
 			yield return new WaitForSeconds(3.0f);
 
 			Debug.Log("Sending state PLAY to start game");
-			GameState.SetGameState(GameState.PlanningStateToString(GameState.PlanningState.Play));
+			TimeManager.SetGameState(TimeManager.PlanningStateToString(TimeManager.PlanningState.Play));
 
-			while (GameState.CurrentState != GameState.PlanningState.End)
+			while (TimeManager.Instance.CurrentState != TimeManager.PlanningState.End)
 			{
 				yield return new WaitForSeconds(1.0f);
 			}

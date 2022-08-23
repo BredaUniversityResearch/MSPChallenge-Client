@@ -48,7 +48,7 @@ namespace MSP2050.Scripts
 			baseDataParent.Initialise();
 			baseDataParent.DestroyAllContent();
 
-			Team team = TeamManager.FindTeamByID(entity.Country);
+			Team team = SessionManager.Instance.FindTeamByID(entity.Country);
 			AddEntry(baseDataParent, "Name", entity.name, countryIcon, team == null ? Color.white : team.color);
 			AddEntry(baseDataParent, "X", (subEntity.BoundingBox.center.x * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
 			AddEntry(baseDataParent, "Y", (subEntity.BoundingBox.center.y * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
@@ -220,7 +220,7 @@ namespace MSP2050.Scripts
 		//	MovieTexture tMovieTex = new MovieTexture();
 		//	if (PropertyWindowVideoAssigner.instance.GetVideo(videoName, ref tMovieTex))
 		//	{
-		//		GenericWindow tVideoWindow = UIManager.GetInterfaceCanvas().CreateGenericWindow(windowName);
+		//		GenericWindow tVideoWindow = InterfaceCanvas.GetInterfaceCanvas().CreateGenericWindow(windowName);
 		//		if (tVideoWindow.gameObject.GetComponent<VerticalLayoutGroup>())
 		//		{
 		//			MonoBehaviour.DestroyImmediate(tVideoWindow.gameObject.GetComponent<VerticalLayoutGroup>());

@@ -19,14 +19,14 @@ namespace MSP2050.Scripts
 			//Calculate offset
 			ClipperLib.ClipperOffset co = new ClipperLib.ClipperOffset();
 			if (isPolygon)
-				co.AddPath(SetOperations.VectorToIntPoint(newPoints), ClipperLib.JoinType.jtSquare, ClipperLib.EndType.etClosedPolygon);
+				co.AddPath(GeometryOperations.VectorToIntPoint(newPoints), ClipperLib.JoinType.jtSquare, ClipperLib.EndType.etClosedPolygon);
 			else
-				co.AddPath(SetOperations.VectorToIntPoint(newPoints), ClipperLib.JoinType.jtSquare, ClipperLib.EndType.etOpenSquare);
+				co.AddPath(GeometryOperations.VectorToIntPoint(newPoints), ClipperLib.JoinType.jtSquare, ClipperLib.EndType.etOpenSquare);
 			List<List<ClipperLib.IntPoint>> csolution = new List<List<ClipperLib.IntPoint>>();
-			co.Execute(ref csolution, (double)restrictionSize * SetOperations.intConverstion * 10d);
+			co.Execute(ref csolution, (double)restrictionSize * GeometryOperations.intConverstion * 10d);
 			if (csolution.Count == 0)
 				return;
-			polygon = SetOperations.IntPointToVector(csolution[0]);
+			polygon = GeometryOperations.IntPointToVector(csolution[0]);
 
 			//Set mesh to result
 			Poly2Mesh.Polygon poly = new Poly2Mesh.Polygon();

@@ -97,9 +97,9 @@ namespace MSP2050.Scripts
 				activeLayers.Add(layer, activeLayer);
 				activeLayer.closeButton.onClick.AddListener(() => 
 				{
-					if (PlanManager.planViewing == null || !PlanManager.planViewing.IsLayerpartOfPlan(activeLayer.layerRepresenting))
+					if (PlanManager.Instance.planViewing == null || !PlanManager.Instance.planViewing.IsLayerpartOfPlan(activeLayer.layerRepresenting))
 					{
-						LayerManager.HideLayer(activeLayer.layerRepresenting);
+						LayerManager.Instance.HideLayer(activeLayer.layerRepresenting);
 						RemoveLayer(activeLayer.layerRepresenting);
 					}
 				});
@@ -117,19 +117,19 @@ namespace MSP2050.Scripts
 
 				activeLayer.visibilityToggle.onValueChanged.AddListener((value) =>
 				{
-					if (UIManager.ignoreLayerToggleCallback)
+					if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
 						return;
 
-					UIManager.ignoreLayerToggleCallback = true;
+					InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 					if (value)
 					{
-						LayerManager.ShowLayer(activeLayer.layerRepresenting);
+						LayerManager.Instance.ShowLayer(activeLayer.layerRepresenting);
 					}
 					else
 					{
-						LayerManager.HideLayer(activeLayer.layerRepresenting);
+						LayerManager.Instance.HideLayer(activeLayer.layerRepresenting);
 					}
-					UIManager.ignoreLayerToggleCallback = false;
+					InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 				});
 			}
 		}
@@ -163,12 +163,12 @@ namespace MSP2050.Scripts
 		private IEnumerator CoroutineHideAllVisibleLayers()
 		{
 			List<AbstractLayer> layers = activeLayers.Keys.ToList();
-			Plan currentPlan = PlanManager.planViewing;
+			Plan currentPlan = PlanManager.Instance.planViewing;
 			foreach(AbstractLayer layer in layers)
 			{
 				if (layer.Toggleable && (currentPlan == null || !currentPlan.IsLayerpartOfPlan(layer)))
 				{
-					LayerManager.HideLayer(layer);
+					LayerManager.Instance.HideLayer(layer);
 					RemoveLayer(layer);
 					yield return 0;
 				}

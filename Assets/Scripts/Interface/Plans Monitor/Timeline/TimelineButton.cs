@@ -28,7 +28,6 @@ namespace MSP2050.Scripts
 			large.color = col;
 			if (multiplPlansIcon != null)
 			{
-				//multiplPlansIcon.color = new Color(col.r, col.g, col.b, 0.5f);
 				multiplPlansIcon.gameObject.SetActive(false);
 			}
 		}
@@ -36,14 +35,10 @@ namespace MSP2050.Scripts
 		public void SetMonth(int month, Transform parentBar)
 		{
 			this.month = month;
-			float totalMonths = (float)Main.MspGlobalData.session_end_month;
+			float totalMonths = (float)SessionManager.Instance.MspGlobalData.session_end_month;
 		
 			rect.anchorMax = new Vector2( (float)month / totalMonths, rect.anchorMax.y);
 			rect.anchorMin = new Vector2( (float)month / totalMonths, rect.anchorMax.y);
-			//float oldAnchor = rect.position.y;
-			//rect.SetParent(parentBar, false);
-			//rect.position = new Vector2(rect.position.x, oldAnchor);
-			//rect.anchoredPosition = new Vector2(month + (1f * month), rect.anchoredPosition.y);
 		}
 
 		public void OnPointerEnter(PointerEventData eventData)

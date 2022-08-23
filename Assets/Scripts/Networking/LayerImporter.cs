@@ -13,76 +13,72 @@ namespace MSP2050.Scripts
 {
 	public class LayerImporter
 	{
-		public delegate void DoneImporting();
-		public static event DoneImporting OnDoneImporting;
+		int importedLayers;
+		int expectedLayers;
+		Stopwatch stopWatch;
+		private LayerPickerUI layerPickerUI;
 
-		static int importedLayers;
-		static int expectedLayers;
-		static Stopwatch stopWatch;
+		private bool loadAllLayers = false;
 
-		private static bool loadAllLayers = false;
-
-		public static bool IsCurrentlyImportingLayers 
+		public bool IsCurrentlyImportingLayers 
 		{ 
 			get; 
 			private set; 
 		}
 
-		public static void ImportLayerMetaData()
-		{
+		public LayerImporter(LayerPickerUI layerPickerUI)
+		{ 
+			this.layerPickerUI = layerPickerUI;
+
 			if (!Main.IsDeveloper)
 			{
 				//Force the loading screen active so we don't show a single frame of uglyness.
 				InterfaceCanvas.Instance.loadingScreen.ShowHideLoadScreen(true);
 				InterfaceCanvas.Instance.loadingScreen.SetLoadingBarPercentage(0.0f);
 				InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("Layer Meta Data");
+				layerPickerUI.HideUI();
 			}
 
 			NetworkForm form = new NetworkForm();
-			form.AddField("user", TeamManager.CurrentSessionID.ToString());
-			ServerCommunication.DoRequest<List<LayerMeta>>(Server.LayerMeta(), form, handleImportLayerMetaCallback);
+			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
+			ServerCommunication.Instance.DoRequest<List<LayerMeta>>(Server.LayerMeta(), form, HandleImportLayerMetaCallback);
 		}
 
-		private static void handleImportLayerMetaCallback(List<LayerMeta> layerMeta)
+		private void HandleImportLayerMetaCallback(List<LayerMeta> layerMeta)
 		{
 			//Load layers
 			LayerInfo.Load(layerMeta);
 			if (Main.IsDeveloper)
 			{
-				LayerPickerUI.CreateUI();
+				layerPickerUI.CreateUI();
+				layerPickerUI.onLayersSelected = ImportLayers;
 			}
 			else
 			{
 				loadAllLayers = true;
-				LayerPickerUI.HideUI();
 			}
 
-			if (TeamManager.TeamCount == 0)
-			{
-				TeamManager.LoadTeams();
-			}
-			else
-			{
-				TeamManager.TeamsLoaded();
-			}
+			InterfaceCanvas.Instance.SetAccent(SessionManager.Instance.CurrentTeamColor);
+			InterfaceCanvas.Instance.activePlanWindow.OnCountriesLoaded();
+			KPIManager.Instance.CreateEnergyKPIs();
 
 			//MEL config use requires layers to be loaded (for kpi creation)
 			NetworkForm form = new NetworkForm();
-			ServerCommunication.DoRequest<CELConfig>(Server.GetCELConfig(), form, handleCELConfigCallback);
-			ServerCommunication.DoRequest<JObject>(Server.GetMELConfig(), form, handleMELConfigCallback);
-			ServerCommunication.DoRequest<SELGameClientConfig>(Server.GetShippingClientConfig(), form, HandleSELClientConfigCallback);
-			ServerCommunication.DoRequest<KPICategoryDefinition[]>(Server.ShippingKPIConfig(), form, handleShippingKPIConfig);
+			ServerCommunication.Instance.DoRequest<CELConfig>(Server.GetCELConfig(), form, HandleCELConfigCallback);
+			ServerCommunication.Instance.DoRequest<JObject>(Server.GetMELConfig(), form, HandleMELConfigCallback);
+			ServerCommunication.Instance.DoRequest<SELGameClientConfig>(Server.GetShippingClientConfig(), form, HandleSELClientConfigCallback);
+			ServerCommunication.Instance.DoRequest<KPICategoryDefinition[]>(Server.ShippingKPIConfig(), form, HandleShippingKPIConfig);
 		}
 
-		private static void handleShippingKPIConfig(KPICategoryDefinition[] config)
+		private void HandleShippingKPIConfig(KPICategoryDefinition[] config)
 		{
-			KPIManager.CreateShippingKPIBars(config);
+			KPIManager.Instance.CreateShippingKPIBars(config);
 		}
 
-		private static void handleMELConfigCallback(JObject melConfig)
+		private void HandleMELConfigCallback(JObject melConfig)
 		{
-			KPIManager.CreateEcologyKPIs(melConfig);
-			PlanManager.LoadFishingFleets(melConfig);
+			KPIManager.Instance.CreateEcologyKPIs(melConfig);
+			PlanManager.Instance.LoadFishingFleets(melConfig);
 
 			if (loadAllLayers)
 			{
@@ -90,7 +86,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void handleCELConfigCallback(CELConfig config)
+		private void HandleCELConfigCallback(CELConfig config)
 		{
 			if(config != null)
 			{ 
@@ -99,7 +95,7 @@ namespace MSP2050.Scripts
 				Color greenColor = Util.HexToColor(config.green_centerpoint_color);
 				Color greyColor = Util.HexToColor(config.grey_centerpoint_color);
 
-				foreach (PointLayer layer in LayerManager.GetCenterPointLayers())
+				foreach (PointLayer layer in LayerManager.Instance.GetCenterPointLayers())
 				{
 					layer.EntityTypes[0].DrawSettings.PointColor = layer.greenEnergy ? greenColor : greyColor;
 					layer.EntityTypes[0].DrawSettings.PointSprite = layer.greenEnergy ? greenSprite : greySprite;
@@ -108,24 +104,24 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void HandleSELClientConfigCallback(SELGameClientConfig newSelConfig)
+		private void HandleSELClientConfigCallback(SELGameClientConfig newSelConfig)
 		{
-			Main.SelConfig = newSelConfig;
+			Main.Instance.SelConfig = newSelConfig;
 		}
 
 #if UNITY_EDITOR
 		[MenuItem("MSP 2050/Reload layer meta")]
-		public static void ReimportLayerTypeColors()
+		public void ReimportLayerTypeColors()
 		{
 			NetworkForm form = new NetworkForm();
-			form.AddField("user", TeamManager.CurrentSessionID.ToString());
-			ServerCommunication.DoRequest< List<LayerMeta>>(Server.LayerMeta(), form, handleReimportLayerTypeColorsCallback);
+			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
+			ServerCommunication.Instance.DoRequest< List<LayerMeta>>(Server.LayerMeta(), form, HandleReimportLayerTypeColorsCallback);
 		}
 #endif
 
-		private static void handleReimportLayerTypeColorsCallback(List<LayerMeta> layerMeta)
+		private void HandleReimportLayerTypeColorsCallback(List<LayerMeta> layerMeta)
 		{
-			foreach (AbstractLayer layer in LayerManager.GetLoadedLayers())
+			foreach (AbstractLayer layer in LayerManager.Instance.GetLoadedLayers())
 			{
 				foreach (LayerMeta meta in layerMeta)
 					if (layer.ID == meta.layer_id)
@@ -138,9 +134,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void ImportAllLayers()
+		public void ImportAllLayers()
 		{
-			List<AbstractLayer> layerList = LayerManager.GetAllValidLayers();
+			List<AbstractLayer> layerList = LayerManager.Instance.GetAllValidLayers();
 			List<int> layersToLoad = new List<int>(layerList.Count);
 			foreach (AbstractLayer layerToLoad in layerList)
 			{
@@ -149,24 +145,21 @@ namespace MSP2050.Scripts
 			ImportLayers(layersToLoad);
 		}
 
-		public static void ImportLayers(List<int> selectedLayerIDs)
+		public void ImportLayers(List<int> selectedLayerIDs)
 		{
 			// only allow a single request during loading of layers, to minimize the load on the server - think of multiple clients starting simultaneously
 			ServerCommunication.maxRequests = 1;
-			// to be restored to the default number of requests, once all layers have been loaded
-			OnDoneImporting += () => ServerCommunication.maxRequests = ServerCommunication.DEFAULT_MAX_REQUESTS;
+			
 
 			IsCurrentlyImportingLayers = true;
 
-			string layerName = LayerManager.GetLayerByID(selectedLayerIDs[0]).FileName;
+			string layerName = LayerManager.Instance.GetLayerByID(selectedLayerIDs[0]).FileName;
 			InterfaceCanvas.Instance.loadingScreen.CreateLoadingBar(selectedLayerIDs.Count + 2, "layers");
 			expectedLayers = selectedLayerIDs.Count;
-		
-			//stopWatch = new Stopwatch();
-			//stopWatch.Start();
+
 			foreach (int selectedLayerID in selectedLayerIDs)
 			{
-				AbstractLayer layer = LayerManager.GetLayerByID(selectedLayerID);
+				AbstractLayer layer = LayerManager.Instance.GetLayerByID(selectedLayerID);
 				if (layer.GetGeoType() == LayerManager.GeoType.raster)
 				{
 					ImportRasterLayer((layer as RasterLayer));
@@ -175,37 +168,18 @@ namespace MSP2050.Scripts
 				{
 					NetworkForm form = new NetworkForm();
 					form.AddField("layer_id", selectedLayerID);
-					ServerCommunication.DoRequest<List<SubEntityObject>>(Server.GetLayer(), form, (objs) => HandleVectorLayerImport(objs, layer));
+					ServerCommunication.Instance.DoRequest<List<SubEntityObject>>(Server.GetLayer(), form, (objs) => HandleVectorLayerImport(objs, layer));
 				}
 			}
-
-			//selectedLayerIDList = selectedLayerIDs;
-			//LoadNextLayer();
 		}
 
-		//static List<int> selectedLayerIDList;
-		//private static void LoadNextLayer()
-		//{
-		//	AbstractLayer layer = LayerManager.GetLayerByID(selectedLayerIDList[importedLayers]);
-		//	if (layer.GetGeoType() == LayerManager.GeoType.raster)
-		//	{
-		//		ImportRasterLayer((layer as RasterLayer));
-		//	}
-		//	else
-		//	{
-		//		NetworkForm form = new NetworkForm();
-		//		form.AddField("layer_id", selectedLayerIDList[importedLayers]);
-		//		ServerCommunication.DoRequest<List<SubEntityObject>>(Server.GetLayer(), form, (objs) => HandleVectorLayerImport(objs, layer));
-		//	}
-		//}
-
-		static void HandleVectorLayerImport(List<SubEntityObject> layerObjects, AbstractLayer layer)
+		private void HandleVectorLayerImport(List<SubEntityObject> layerObjects, AbstractLayer layer)
 		{
 			importLayer(layerObjects, layer);
 			LayerImportComplete();
 		}
 
-		static void ImportRasterLayer(RasterLayer layer)
+		private void ImportRasterLayer(RasterLayer layer)
 		{
 			List<SubEntityObject> objects = new List<SubEntityObject>();
 			SubEntityObject entityObject = new SubEntityObject();
@@ -223,41 +197,32 @@ namespace MSP2050.Scripts
 
 			entityObject.type = typeIdString.ToString();
 			objects.Add(entityObject); // add one empty object, it doesnt need this anyways
-			LayerManager.LoadLayer(layer, objects);
+			LayerManager.Instance.LoadLayer(layer, objects);
 			LayerImportComplete();
 		}
 
-		static void LayerImportComplete()
+		private void LayerImportComplete()
 		{
 			importedLayers++;
 			InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("layers");
 
 			if (importedLayers == expectedLayers)
 			{
-				//stopWatch.Stop();
-				//UnityEngine.Debug.Log($"Importing layers took {stopWatch.ElapsedMilliseconds} ms");
-				Main.AllLayersImported();
+				Main.Instance.AllLayersImported();
 
-				LayerManager.ReorderLayers();
+				LayerManager.Instance.ReorderLayers();
 
 				CameraManager.Instance.GetNewPlayArea();
 
+				// to be restored to the default number of requests, once all layers have been loaded
+				ServerCommunication.maxRequests = ServerCommunication.DEFAULT_MAX_REQUESTS;
 				IsCurrentlyImportingLayers = false;
-				if (OnDoneImporting != null)
-				{
-					OnDoneImporting();
-				}
 			}
-			//else
-			//{
-			//	InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem(LayerManager.GetLayerByID(selectedLayerIDList[importedLayers]).ShortName);
-			//	LoadNextLayer();
-			//}
 		}
 
-		private static void importLayer(List<SubEntityObject> objects, AbstractLayer layer)
+		private void importLayer(List<SubEntityObject> objects, AbstractLayer layer)
 		{
-			LayerManager.LoadLayer(layer, objects);
+			LayerManager.Instance.LoadLayer(layer, objects);
 		}
 	}
 

@@ -56,7 +56,7 @@ namespace MSP2050.Scripts
 					Debug.LogError("Layer has invalid geotype: " + layerMeta[i].layer_geotype + " in layer " + layer.FileName);
 				}
 				layer.versionNr = layerMeta[i].layer_filecreationtime;
-				LayerManager.AddLayer(layer);
+				LayerManager.Instance.AddLayer(layer);
 			}
 
 			return layerMeta;
@@ -97,50 +97,7 @@ namespace MSP2050.Scripts
 			lineWidth = 1.0f;
 		}
 	}
-
-// Remove later
-//public class EntityTypeObject
-//{
-//    public EntityTypeObject()
-//    {
-//        name = "default";
-
-//        displayPolygon = true;
-//        polygonColor = "#ff00ffaa";
-//        polygonPatternIndex = 0;
-
-//        innerGlowEnabled = false;
-//        innerGlowRadius = 5;
-//        innerGlowIterations = 2;
-//        innerGlowMultiplier = 2.5f;
-
-//        displayLines = false;
-//        lineColor = "#ff00ffaa";
-
-//        displayPoints = false;
-//        pointColor = "#ff00ffaa";
-//        pointSize = 1.0f;
-//    }
-
-//    public string name { get; set; }
-
-//    public bool displayPolygon { get; set; }
-//    public string polygonColor { get; set; }
-//    public int polygonPatternIndex { get; set; }
-
-//    public bool innerGlowEnabled { get; set; }
-//    public int innerGlowRadius { get; set; }
-//    public int innerGlowIterations { get; set; }
-//    public float innerGlowMultiplier { get; set; }
-
-//    public bool displayLines { get; set; }
-//    public string lineColor { get; set; }
-
-//    public bool displayPoints { get; set; }
-//    public string pointColor { get; set; }
-//    public float pointSize { get; set; }
-//}
-
+	
 	public class LayerMeta
 	{
 		public LayerMeta()

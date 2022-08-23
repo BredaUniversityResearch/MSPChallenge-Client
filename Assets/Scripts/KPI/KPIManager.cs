@@ -4,24 +4,44 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public static class KPIManager
+	public class KPIManager : MonoBehaviour
 	{
-		private static KPIValueCollection ecologyKPI;
-		private static CountryKPICollectionShipping shippingKPI;
-		private static CountryKPICollectionEnergy energyKPIs = new CountryKPICollectionEnergy();
-		private static CountryKPICollectionGeometry geometryKPIs = new CountryKPICollectionGeometry();
-
-		static KPIManager()
+		private static KPIManager singleton;
+		public static KPIManager Instance
 		{
-			Main.OnFinishedLoadingLayers += CreateGeometryKPI;
+			get
+			{
+				if (singleton == null)
+					singleton = FindObjectOfType<KPIManager>();
+				return singleton;
+			}
 		}
 
-		public static void CreateEnergyKPIs()
+		private KPIValueCollection ecologyKPI;
+		private CountryKPICollectionShipping shippingKPI;
+		private CountryKPICollectionEnergy energyKPIs = new CountryKPICollectionEnergy();
+		private CountryKPICollectionGeometry geometryKPIs = new CountryKPICollectionGeometry();
+
+		void Start()
 		{
-			if (Main.IsSimulationConfigured(ESimulationType.CEL))
+			if (singleton != null && singleton != this)
+				Destroy(this);
+			else
+				singleton = this;
+			Main.Instance.OnFinishedLoadingLayers += CreateGeometryKPI;
+		}
+
+		void OnDestroy()
+		{
+			singleton = null;
+		}
+
+		public void CreateEnergyKPIs()
+		{
+			if (Main.Instance.IsSimulationConfigured(ESimulationType.CEL))
 			{
 				//Initialise KPIs
-				foreach (Team team in TeamManager.GetTeams())
+				foreach (Team team in SessionManager.Instance.GetTeams())
 				{
 					if (!team.IsManager)
 					{
@@ -102,41 +122,41 @@ namespace MSP2050.Scripts
 					investmentCategory.valueDefinitions[i] = new KPIValueDefinition { valueName = type + " investment", valueColor = Color.cyan, unit = "€/MWh" };
 				}
 
-				energyKPIs.SetupKPIValues(new[] { productionCategory, usedCategory, sharedCategory, wastedCategory, areaCategory, investmentCategory }, Main.MspGlobalData.session_end_month);			
+				energyKPIs.SetupKPIValues(new[] { productionCategory, usedCategory, sharedCategory, wastedCategory, areaCategory, investmentCategory }, SessionManager.Instance.MspGlobalData.session_end_month);			
 			}
 		}
 
-		public static void CreateEcologyKPIs(JObject melConfig)
+		public void CreateEcologyKPIs(JObject melConfig)
 		{
-			if (Main.IsSimulationConfigured(ESimulationType.MEL))
+			if (Main.Instance.IsSimulationConfigured(ESimulationType.MEL))
 			{
 				KPICategoryDefinition[] categoryDefinitions = melConfig["ecologyCategories"].ToObject<KPICategoryDefinition[]>();
 				ecologyKPI = new KPIValueCollection();
-				ecologyKPI.SetupKPIValues(categoryDefinitions, Main.MspGlobalData.session_end_month);
+				ecologyKPI.SetupKPIValues(categoryDefinitions, SessionManager.Instance.MspGlobalData.session_end_month);
 				ecologyKPI.OnKPIValuesReceivedAndProcessed += OnEcologyKPIReceivedNewMonth;
 			}
 		}
 
-		internal static void CreateShippingKPIBars(KPICategoryDefinition[] categories)
+		internal void CreateShippingKPIBars(KPICategoryDefinition[] categories)
 		{
-			if (Main.IsSimulationConfigured(ESimulationType.SEL))
+			if (Main.Instance.IsSimulationConfigured(ESimulationType.SEL))
 			{
 				shippingKPI = new CountryKPICollectionShipping();
-				shippingKPI.SetupKPIValues(categories, Main.MspGlobalData.session_end_month);
+				shippingKPI.SetupKPIValues(categories, SessionManager.Instance.MspGlobalData.session_end_month);
 			}
 		}
 
-		public static void ReceiveEcologyKPIUpdate(EcologyKPIObject[] objects)
+		public void ReceiveEcologyKPIUpdate(EcologyKPIObject[] objects)
 		{
-			if (Main.IsSimulationConfigured(ESimulationType.MEL))
+			if (Main.Instance.IsSimulationConfigured(ESimulationType.MEL))
 			{
 				ecologyKPI.ProcessReceivedKPIData(objects);
 			}
 		}
 
-		private static void OnEcologyKPIReceivedNewMonth(KPIValueCollection valueCollection, int previousMostRecentMonth, int mostRecentMonth)
+		private void OnEcologyKPIReceivedNewMonth(KPIValueCollection valueCollection, int previousMostRecentMonth, int mostRecentMonth)
 		{
-			foreach (AbstractLayer layer in LayerManager.protectedAreaLayers)
+			foreach (AbstractLayer layer in LayerManager.Instance.protectedAreaLayers)
 			{
 				LayerState state = layer.GetLayerStateAtTime(previousMostRecentMonth);
 				for (int i = previousMostRecentMonth + 1; i <= mostRecentMonth; ++i)
@@ -170,15 +190,15 @@ namespace MSP2050.Scripts
 
 			//Todo move this to it's own MonoBehaviour and trigger this OnMonthAdvanced.
 			KPIRoot ecologyKPIRoot = InterfaceCanvas.Instance.KPIEcology;
-			ecologyKPIRoot.groups.SetBarsToFishing(PlanManager.GetFishingDistributionAtTime(mostRecentMonth));
+			ecologyKPIRoot.groups.SetBarsToFishing(PlanManager.Instance.GetFishingDistributionAtTime(mostRecentMonth));
 		}
 
-		public static void ReceiveEnergyKPIUpdate(EnergyKPIObject[] updateData)
+		public void ReceiveEnergyKPIUpdate(EnergyKPIObject[] updateData)
 		{
 			energyKPIs.ProcessReceivedKPIEnergyData(updateData);		
 		}
 
-		public static void ReceiveShippingKPIUpdate(EcologyKPIObject[] shippingData)
+		public void ReceiveShippingKPIUpdate(EcologyKPIObject[] shippingData)
 		{
 			if (shippingKPI != null)
 			{
@@ -186,7 +206,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static KPIValueCollection GetKPIValuesForCategory(EKPICategory targetCategory, int countryId = -1)
+		public KPIValueCollection GetKPIValuesForCategory(EKPICategory targetCategory, int countryId = -1)
 		{
 			KPIValueCollection result = null;
 			switch (targetCategory)
@@ -214,9 +234,9 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		private static void CreateGeometryKPI()
+		private void CreateGeometryKPI()
 		{
-			foreach (Team team in TeamManager.GetTeams())
+			foreach (Team team in SessionManager.Instance.GetTeams())
 			{
 				if (!team.IsManager)
 				{
@@ -225,11 +245,11 @@ namespace MSP2050.Scripts
 			}
 			//Collection for all countries together
 			geometryKPIs.AddKPIForCountry(0);
-			geometryKPIs.SetupKPIValues(null, Main.MspGlobalData.session_end_month);
-			GameState.OnCurrentMonthChanged += UpdateGeometryKPI;
+			geometryKPIs.SetupKPIValues(null, SessionManager.Instance.MspGlobalData.session_end_month);
+			TimeManager.Instance.OnCurrentMonthChanged += UpdateGeometryKPI;
 		}
 
-		private static void UpdateGeometryKPI(int oldMonth, int newMonth)
+		private void UpdateGeometryKPI(int oldMonth, int newMonth)
 		{
 			geometryKPIs.CalculateKPIValues(newMonth);
 		}
