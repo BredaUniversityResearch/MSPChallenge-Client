@@ -11,25 +11,7 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			if (Main.MspGlobalData != null)
-			{
-				SetYear();
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += GlobalDataLoaded;
-			}
-		}
-
-		void GlobalDataLoaded()
-		{
-			Main.OnGlobalDataLoaded -= GlobalDataLoaded;
-			SetYear();
-		}
-
-		void SetYear()
-		{
-			GetComponent<TextMeshProUGUI>().text = (Main.MspGlobalData.start + era * Main.MspGlobalData.YearsPerEra + yearOffset).ToString();
+			GetComponent<TextMeshProUGUI>().text = (SessionManager.Instance.MspGlobalData.start + era * SessionManager.Instance.MspGlobalData.YearsPerEra + yearOffset).ToString();
 		}
 	}
 }

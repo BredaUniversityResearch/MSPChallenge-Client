@@ -6,7 +6,7 @@ namespace MSP2050.Scripts
 	{
 		public void Start()
 		{
-			GameSettings.ApplyCurrentSettings(false);
+			GameSettings.Instance.ApplyCurrentSettings(false);
 		}
 	}
 }

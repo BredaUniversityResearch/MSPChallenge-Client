@@ -45,7 +45,7 @@ namespace MSP2050.Scripts
 			yesIcon.color = country.color;
 			noIcon.color = country.color;
 			maybeIcon.color = country.color;
-			if(TeamManager.CurrentTeam.ID == country.ID)
+			if(SessionManager.Instance.CurrentTeam.ID == country.ID)
 			{
 				playerCanChangeApproval = true;
 				backgroundImage.enabled = true;
@@ -53,7 +53,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				playerCanChangeApproval = TeamManager.AreWeGameMaster;
+				playerCanChangeApproval = SessionManager.Instance.AreWeGameMaster;
 				backgroundImage.enabled = false;
 				countryNameText.color = normalTextColour.GetColour();
 			}

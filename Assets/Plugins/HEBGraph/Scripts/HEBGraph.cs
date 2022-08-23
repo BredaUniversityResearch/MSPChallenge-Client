@@ -36,10 +36,9 @@ namespace HEBGraph
 		HEBGraphLeaf m_selectedLeaf;
 		BezierDrawer m_bezierDrawer;
 
-		void Start()
+		public void Initialise(HEBGraphData a_data)
 		{
 			m_bezierDrawer = new BezierDrawer();
-			HEBGraphData data = JsonConvert.DeserializeObject<HEBGraphData>(m_HEBConfigFile.text);
 
 			m_leaves = new Dictionary<int, HEBGraphLeaf>();
 			m_branches = new List<HEBGraphBranch>();
@@ -48,7 +47,7 @@ namespace HEBGraph
 			List<float> gapStarts = new List<float>();
 
 			//Create groups and items
-			foreach (HEBGraphDataGroup group in data.groups)
+			foreach (HEBGraphDataGroup group in a_data.groups)
 			{
 				m_branches.Add(new HEBGraphBranch(group, this)); //This adds radial offsets for all created leaves
 				gapStarts.Add(m_totalRadialOffset);
@@ -56,7 +55,7 @@ namespace HEBGraph
 			}
 
 			//Position elements and gaps
-			foreach(HEBGraphBranch branch in m_branches)
+			foreach (HEBGraphBranch branch in m_branches)
 			{
 				branch.SetPosition(m_totalRadialOffset, this);
 			}
@@ -67,7 +66,7 @@ namespace HEBGraph
 			m_groupBackground.SetGaps(gaps);
 
 			//Assign links and create lines
-			foreach (HEBGraphDataLink link in data.links)
+			foreach (HEBGraphDataLink link in a_data.links)
 			{
 				if (link.toId < link.fromId ? !m_lines.ContainsKey((link.toId, link.fromId)) : !m_lines.ContainsKey((link.fromId, link.toId)))
 				{
@@ -80,10 +79,10 @@ namespace HEBGraph
 			}
 		}
 
-		public HEBGraphLeaf[] CreateEntries(HEBGraphDataEntry[] a_entries, HEBGraphBranch a_parent)
+		public HEBGraphLeaf[] CreateEntries(List<HEBGraphDataEntry> a_entries, HEBGraphBranch a_parent)
 		{
-			HEBGraphLeaf[] result = new HEBGraphLeaf[a_entries.Length];
-			for (int i = 0; i < a_entries.Length; i++)
+			HEBGraphLeaf[] result = new HEBGraphLeaf[a_entries.Count];
+			for (int i = 0; i < a_entries.Count; i++)
 			{
 				HEBGraphLeaf leaf = GameObject.Instantiate(m_entryPrefab, m_entryParent).GetComponent<HEBGraphLeaf>();
 				m_totalRadialOffset += leaf.Initialise(m_totalRadialOffset, a_entries[i], this, a_parent);
@@ -108,7 +107,7 @@ namespace HEBGraph
 				if (a_singleLine)
 					obj.m_radius -= 30f;
 			}
-			obj.UpdateCurve();
+			obj.SetDirty();
 
 			return obj.GetComponent<TextMeshProUGUI>();
 		}

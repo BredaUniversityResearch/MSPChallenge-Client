@@ -49,9 +49,9 @@ namespace MSP2050.Scripts
 			m_callQueue = new List<QueuedBatchCall>();
 			m_outstandingCallRequests = new HashSet<int>();
 			NetworkForm form = new NetworkForm();
-			form.AddField("country_id", TeamManager.CurrentUserTeamID);
-			form.AddField("user_id", TeamManager.CurrentSessionID);
-			ServerCommunication.DoRequest<int>(Server.StartBatch(), form, HandleGetBatchIDSuccess, HandleGetBatchIDFailure);
+			form.AddField("country_id", SessionManager.Instance.CurrentUserTeamID);
+			form.AddField("user_id", SessionManager.Instance.CurrentSessionID);
+			ServerCommunication.Instance.DoRequest<int>(Server.StartBatch(), form, HandleGetBatchIDSuccess, HandleGetBatchIDFailure);
 		}
 
 		private void HandleGetBatchIDSuccess(int newBatchID)
@@ -66,11 +66,11 @@ namespace MSP2050.Scripts
 			m_callQueue.Clear();
 		}
 
-		private void HandleGetBatchIDFailure(ServerCommunication.ARequest request, string message)
+		private void HandleGetBatchIDFailure(ARequest request, string message)
 		{
 			if (request.retriesRemaining > 0)
 			{
-				ServerCommunication.RetryRequest(request);
+				ServerCommunication.Instance.RetryRequest(request);
 			}
 			else
 			{
@@ -133,7 +133,7 @@ namespace MSP2050.Scripts
 			form.AddField("call_id", callID);
 			form.AddField("endpoint", endPoint);
 			form.AddField("endpoint_data", data);
-			ServerCommunication.DoRequest<int>(Server.AddToBatch(), form, HandleAddRequestSuccess, HandleAddRequestFailure);
+			ServerCommunication.Instance.DoRequest<int>(Server.AddToBatch(), form, HandleAddRequestSuccess, HandleAddRequestFailure);
 		}
 
 		private void HandleAddRequestSuccess(int callID)
@@ -146,11 +146,11 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void HandleAddRequestFailure(ServerCommunication.ARequest request, string message)
+		private void HandleAddRequestFailure(ARequest request, string message)
 		{
 			if (request.retriesRemaining > 0)
 			{
-				ServerCommunication.RetryRequest(request);
+				ServerCommunication.Instance.RetryRequest(request);
 			}
 			else
 			{
@@ -174,7 +174,7 @@ namespace MSP2050.Scripts
 		{
 			if (m_status == EBatchStatus.Failed)
 			{
-				UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
+				UpdateManager.Instance.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
 
 				//Something caused the batch to already fail, call the failure callback directly
 				m_executeWhenReady = false;
@@ -196,12 +196,12 @@ namespace MSP2050.Scripts
 
 				if (m_async)
 				{
-					UpdateData.WsServerCommunicationInteractor?.RegisterBatchRequestCallbacks(m_batchID, HandleBatchSuccess,
-						CreateHandleBatchFailureAction(ServerCommunication.DoRequest(Server.ExecuteBatch(), form))); // todo : handle error of executebatch
+					UpdateManager.Instance.WsServerCommunicationInteractor?.RegisterBatchRequestCallbacks(m_batchID, HandleBatchSuccess,
+						CreateHandleBatchFailureAction(ServerCommunication.Instance.DoRequest(Server.ExecuteBatch(), form))); // todo : handle error of executebatch
 				}
 				else
 				{
-					ServerCommunication.DoRequest<BatchExecutionResult>(Server.ExecuteBatch(), form, HandleBatchSuccess,
+					ServerCommunication.Instance.DoRequest<BatchExecutionResult>(Server.ExecuteBatch(), form, HandleBatchSuccess,
 						HandleBatchFailure);
 				}
 			}
@@ -211,16 +211,16 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private Action<string> CreateHandleBatchFailureAction(ServerCommunication.ARequest request)
+		private Action<string> CreateHandleBatchFailureAction(ARequest request)
 		{
 			return delegate(string message) {
 				if (request.retriesRemaining > 0)
 				{
-					ServerCommunication.RetryRequest(request);
+					ServerCommunication.Instance.RetryRequest(request);
 				}
 				else
 				{
-					UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
+					UpdateManager.Instance.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
 					Debug.LogError($"Batch with ID {m_batchID} failed. Error message: {message}");
 					m_status = EBatchStatus.Failed;
 					if (m_failureCallback != null)
@@ -231,7 +231,7 @@ namespace MSP2050.Scripts
 			};
 		}
 
-		private void HandleBatchFailure(ServerCommunication.ARequest request, string message)
+		private void HandleBatchFailure(ARequest request, string message)
 		{
 			CreateHandleBatchFailureAction(request)(message);
 		}
@@ -252,7 +252,7 @@ namespace MSP2050.Scripts
 				m_successCallback.Invoke(this);
 			}
 
-			UpdateData.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
+			UpdateManager.Instance.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchID);
 		}
 
 		public static string FormatCallIDReference(int batchCallID, string field = null)

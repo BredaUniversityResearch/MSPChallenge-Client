@@ -40,27 +40,36 @@ namespace HEBGraph
 
 		private void Awake()
 		{
-			m_TextComponent = gameObject.GetComponent<TMP_Text>();
+			if(m_TextComponent == null)
+				m_TextComponent = gameObject.GetComponent<TMP_Text>();
 		}
 
-		//private void OnEnable()
-		//{
-		//	//every time the object gets enabled, we have to force a re-creation of the text mesh
-		//	UpdateCurve();
-		//}
+		private void OnEnable()
+		{
+			//every time the object gets enabled, we have to force a re-creation of the text mesh
+			SetDirty();
+		}
 
 		private void Update()
 		{
-			//if(m_dirty)
-			//{
-			//	UpdateCurve();
-			//	m_dirty = false;
-			//}
-			UpdateCurve();
+			if (m_dirty)
+			{
+				UpdateCurve();
+				m_dirty = false;
+			}
+			//UpdateCurve();
 		}
 
-		public void UpdateCurve()
+		public void SetDirty()
 		{
+			m_dirty = true;
+		}
+
+		private void UpdateCurve()
+		{
+			if(m_TextComponent == null)
+				m_TextComponent = gameObject.GetComponent<TMP_Text>();
+
 			//during the loop, vertices represents the 4 vertices of a single character we're analyzing, 
 			//while matrix is the roto-translation matrix that will rotate and scale the characters so that they will
 			//follow the curve

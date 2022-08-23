@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 
 		public EditEnergyPointsState(FSM fsm, PlanLayer planLayer) : base(fsm, planLayer)
 		{
-			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? LayerManager.energyCableLayerGreen.CurrentPlanLayer() : LayerManager.energyCableLayerGrey.CurrentPlanLayer();
+			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? LayerManager.Instance.energyCableLayerGreen.CurrentPlanLayer() : LayerManager.Instance.energyCableLayerGrey.CurrentPlanLayer();
 		}
 
 		protected override void deleteSelection()
@@ -103,7 +103,7 @@ namespace MSP2050.Scripts
 		{
 			if (draggingSelection)
 			{
-				AudioMain.PlaySound(AudioMain.ITEM_MOVED);
+				AudioMain.Instance.PlaySound(AudioMain.ITEM_MOVED);
 
 				Vector3 offset = dragFinalPosition - dragStartPosition;
 				foreach (PointSubEntity subEntity in selection)

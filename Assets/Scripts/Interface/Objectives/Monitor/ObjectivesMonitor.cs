@@ -210,7 +210,7 @@ namespace MSP2050.Scripts
 
 		private void SortObjectives()
 		{
-			int currentTeamId = TeamManager.CurrentUserTeamID;
+			int currentTeamId = SessionManager.Instance.CurrentUserTeamID;
 			for (int i = 0; i < objectives.Count; i++)
 			{
 				if (objectives[i].TeamId != currentTeamId)

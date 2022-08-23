@@ -31,6 +31,7 @@ namespace MSP2050.Scripts
 		// Other
 		public Toggle developerModeToggle;
 		public TextMeshProUGUI buildDateText;
+		public TextMeshProUGUI buildRevisionText;
 		public TextMeshProUGUI apiEndpointText;
 
 		public Button cancel, accept;
@@ -49,7 +50,7 @@ namespace MSP2050.Scripts
 		{
 			List<string> resNames = new List<string>();
 
-			foreach (Vector2 res in GameSettings.Resolutions)
+			foreach (Vector2 res in GameSettings.Instance.Resolutions)
 			{
 				// format 16:10 - 1680 x 1050
 				string name = "" + res.x + " x " + res.y;
@@ -57,7 +58,8 @@ namespace MSP2050.Scripts
 			}
 			displayResolution.AddOptions(resNames);
 
-			fullscreenToggle.isOn = GameSettings.Fullscreen;
+			fullscreenToggle.isOn = GameSettings.Instance.Fullscreen;
+
 			developerModeToggle.isOn = Main.IsDeveloper;
 			uiScale.m_onRelease.AddListener(OnUIScaleSliderUp);
 
@@ -75,19 +77,20 @@ namespace MSP2050.Scripts
 		// Only apply this on pointer up
 		public void OnUIScaleSliderUp()
 		{
-			GameSettings.SetUIScale(uiScale.value);
+			GameSettings.Instance.SetUIScale(uiScale.value);
 			InterfaceCanvas.Instance?.propertiesWindow.Close();
 			onDisplaySettingsChange.Invoke();
 		}
 
 		public void OnCancel()
 		{
-			GameSettings.SetUIScale(oldScale);
-			GameSettings.SetQualityLevel(oldGraphicsSettings);
-			GameSettings.SetResolution(oldDisplayResolution);
-			GameSettings.SetMasterVolume(oldMasterVolume);
-			GameSettings.SetSFXVolume(oldSoundEffects);
-			GameSettings.SetFullscreen(oldFullscreen);
+			GameSettings.Instance.SetUIScale(oldScale);
+			GameSettings.Instance.SetQualityLevel(oldGraphicsSettings);
+			GameSettings.Instance.SetResolution(oldDisplayResolution);
+			GameSettings.Instance.SetMasterVolume(oldMasterVolume);
+			GameSettings.Instance.SetSFXVolume(oldSoundEffects);
+			GameSettings.Instance.SetFullscreen(oldFullscreen);
+			UpdatePosition();
 
 			if(closeWindowOnCancelConfirm)
 				gameObject.SetActive(false);
@@ -102,10 +105,11 @@ namespace MSP2050.Scripts
 		private void SetBuildInformation()
 		{
 			ApplicationBuildIdentifier identifier = ApplicationBuildIdentifier.FindBuildIdentifier();
+
 			if (identifier != null)
 			{
 				buildDateText.text = identifier.GetBuildTime();
-				//buildRevisionText.text = identifier.GetSvnRevisionNumber().ToString();
+				//buildRevisionText.text = identifier.GetGitTag();
 			}
 		}
 
@@ -116,16 +120,16 @@ namespace MSP2050.Scripts
 
 		private void SetOptions()
 		{
-			oldScale = GameSettings.UIScale;
-			oldGraphicsSettings = GameSettings.GraphicsSettings;
-			oldMasterVolume = GameSettings.GetMasterVolume();
-			oldSoundEffects = GameSettings.GetSFXVolume();
-			oldFullscreen = GameSettings.Fullscreen;
+			oldScale = GameSettings.Instance.UIScale;
+			oldGraphicsSettings = GameSettings.Instance.GraphicsSettings;
+			oldMasterVolume = GameSettings.Instance.GetMasterVolume();
+			oldSoundEffects = GameSettings.Instance.GetSFXVolume();
+			oldFullscreen = GameSettings.Instance.Fullscreen;
 
 			if (Application.isEditor) // This is to fix it for the editor, it only ever displays one resolution
 				oldDisplayResolution = 0;
 			else
-				oldDisplayResolution = GameSettings.DisplayResolution;
+				oldDisplayResolution = GameSettings.Instance.DisplayResolution;
 
 			uiScale.value = oldScale;
 			//uiScale.maxValue = GameSettings.GetMaxUIScaleForWidth(Camera.main.pixelWidth);//TODO: disabled for testing
@@ -143,22 +147,23 @@ namespace MSP2050.Scripts
 			fullscreenToggle.onValueChanged.RemoveAllListeners();
 			masterVolume.onValueChanged.RemoveAllListeners();
 
-			//uiScale.slider.onValueChanged.AddListener((value) => { GameSettings.SetUIScale(value); });
-			//qualitySettings.onValueChanged.AddListener((value) => { GameSettings.SetQualityLevel(value); });
+			//uiScale.slider.onValueChanged.AddListener((value) => { GameSettings.Instance.SetUIScale(value); });
+			// qualitySettings.onValueChanged.AddListener((value) => { GameSettings.Instance.SetQualityLevel(value); });
 			displayResolution.onValueChanged.AddListener(OnResolutionChanged);
-			fullscreenToggle.onValueChanged.AddListener(b => GameSettings.SetFullscreen(b));
+			fullscreenToggle.onValueChanged.AddListener(b => GameSettings.Instance.SetFullscreen(b));
 			developerModeToggle.onValueChanged.AddListener((value) => { Main.IsDeveloper = value; });
-			masterVolume.onValueChanged.AddListener((value) => { GameSettings.SetMasterVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
-			soundEffects.onValueChanged.AddListener((value) => { GameSettings.SetSFXVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
+			masterVolume.onValueChanged.AddListener((value) => { GameSettings.Instance.SetMasterVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
+			soundEffects.onValueChanged.AddListener((value) => { GameSettings.Instance.SetSFXVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
 		}
 
 		private void OnResolutionChanged(int resolutionIndex)
 		{
-			Vector2 newResolution = GameSettings.SetResolution(resolutionIndex);
-			//float maxUIScale = GameSettings.GetMaxUIScaleForWidth(newResolution.x);
-			//uiScale.maxValue = maxUIScale;
-			//if (GameSettings.UIScale > maxUIScale)
-			//	GameSettings.SetUIScale(maxUIScale);
+			Vector2 newResolution = GameSettings.Instance.SetResolution(resolutionIndex);
+			// float maxUIScale = GameSettings.GetMaxUIScaleForWidth(newResolution.x);
+			// uiScale.maxValue = maxUIScale;
+			// if (GameSettings.Instance.UIScale > maxUIScale)
+			// 	GameSettings.Instance.SetUIScale(maxUIScale);
+			StartCoroutine(LateUpdatePosition());
 			if(InterfaceCanvas.Instance != null)
 				StartCoroutine(InterfaceCanvas.Instance.gameMenu.LateUpdatePosition());
 			onDisplaySettingsChange.Invoke();
@@ -166,7 +171,7 @@ namespace MSP2050.Scripts
 
 		private void playSoundEffect(string audioID)
 		{
-			AudioSource audioSource = AudioMain.GetAudioSource(audioID);
+			AudioSource audioSource = AudioMain.Instance.GetAudioSource(audioID);
 			if (audioSource != null && !audioSource.isPlaying)
 			{
 				audioSource.Play();

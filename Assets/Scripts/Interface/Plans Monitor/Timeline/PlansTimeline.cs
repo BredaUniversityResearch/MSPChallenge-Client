@@ -20,7 +20,6 @@ namespace MSP2050.Scripts
 		public GameObject trackPrefab;
 		public RectTransform trackLocation;
 		private List<TimelineTrack> tracks;
-		public Animator anim;
 		public TimeLineUtil timeLineUtil;
 
 		// Button Group Overlay
@@ -36,13 +35,6 @@ namespace MSP2050.Scripts
 		[SerializeField]
 		private bool foldOnStart = true;
 
-		private delegate void PlansEventDelegate(Plan plan);
-		private delegate void PlansUpdateEventDelegate(Plan plan, int oldTime);
-
-		private static event PlansEventDelegate OnNewPlanAddedEvent;
-		private static event PlansUpdateEventDelegate OnUpdatePlanEvent;
-		private static event PlansUpdateEventDelegate OnPlanRemovedEvent;
-
 		protected void Awake()
 		{
 			timelineGridLayout.minHeight = 0.0f;
@@ -52,9 +44,9 @@ namespace MSP2050.Scripts
 
 			teamTrackID = new Dictionary<int, int>();
 
-			OnNewPlanAddedEvent += OnAddNewPlan;
-			OnUpdatePlanEvent += OnUpdatePlan;
-			OnPlanRemovedEvent += OnRemoveExistingPlan;
+			PlanManager.Instance.OnPlanVisibleInUIEvent += OnAddNewPlan;
+			PlanManager.Instance.OnPlanUpdateInUIEvent += OnUpdatePlan;
+			PlanManager.Instance.OnPlanHideInUIEvent += OnRemoveExistingPlan;
 
 			if (foldOnStart)
 			{
@@ -62,74 +54,19 @@ namespace MSP2050.Scripts
 				Fold();
 			}
 
-			if (TeamManager.TeamCount != 0)
-			{
-				CreateTracks();
-			}
-			else
-			{
-				TeamManager.OnTeamsLoadComplete += OnDelayedTeamLoad;
-			}
-		}
-
-		//protected void Start()
-		//{
-		//if (foldOnStart)
-		//{
-		//	gameObject.SetActive(false);
-		//	Fold();
-		//}
-
-		//if (TeamManager.teamCount != 0)
-		//{
-		//	CreateTracks();
-		//}
-		//else
-		//{
-		//	TeamManager.OnTeamsLoadComplete += OnDelayedTeamLoad;
-		//}
-
-		//}
-
-		private void OnDelayedTeamLoad()
-		{
 			CreateTracks();
-			TeamManager.OnTeamsLoadComplete -= OnDelayedTeamLoad;
 		}
+
 
 		private void CreateTracks()
 		{
 			// Create tracks
-			foreach (var kvp in TeamManager.GetTeamsByID())
+			foreach (var kvp in SessionManager.Instance.GetTeamsByID())
 			{
 				CreateTrack(kvp.Value.color);
 				teamTrackID.Add(kvp.Key, tracks.Count - 1);
 			}
 			timelineGridLayout.minHeight = 16f * tracks.Count;
-		}
-
-		public static void AddNewPlan(Plan plan)
-		{
-			if (OnNewPlanAddedEvent != null)
-			{
-				OnNewPlanAddedEvent(plan);
-			}
-		}
-
-		public static void RemoveExistingPlan(Plan plan, int oldPlanTime = -1)
-		{
-			if (OnPlanRemovedEvent != null)
-			{
-				OnPlanRemovedEvent(plan, oldPlanTime);
-			}
-		}
-
-		public static void UpdatePlan(Plan plan, int oldPlanTime = -1)
-		{
-			if (OnUpdatePlanEvent != null)
-			{
-				OnUpdatePlanEvent(plan, oldPlanTime);
-			}
 		}
 
 		private void OnAddNewPlan(Plan plan)
@@ -157,7 +94,6 @@ namespace MSP2050.Scripts
 				Vector3 rot = foldButtonRect.eulerAngles;
 				foldButtonRect.eulerAngles = (rot.z == 0) ? new Vector3(rot.x, rot.y, 90f) : new Vector3(rot.x, rot.y, 0f);
 				foldParent.SetActive(!foldParent.activeSelf);
-				//GetComponentInParent<PlansWindowMinMax>().ResizeLayout();
 			}
 		}
 
@@ -188,7 +124,7 @@ namespace MSP2050.Scripts
 				groupButtonLocation.transform.SetAsLastSibling();
 			}
 
-			anim.SetBool("Show", dir);
+			trackCover.gameObject.SetActive(dir);
 		}
 	}
 }

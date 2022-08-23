@@ -41,7 +41,7 @@ namespace MSP2050.Scripts
 		{
 			if (!isActiveAndEnabled || lockedPlan != null)
 				return;
-			energyDistribution.SetSliderValuesToEnergyDistribution(planDetails.SelectedPlan, PlanManager.GetEnergyGridsBeforePlan(planDetails.SelectedPlan, EnergyGrid.GridColor.Either, true, true));
+			energyDistribution.SetSliderValuesToEnergyDistribution(planDetails.SelectedPlan, PlanManager.Instance.GetEnergyGridsBeforePlan(planDetails.SelectedPlan, EnergyGrid.GridColor.Either, true, true));
 			emptyContentOverlay.SetActive(energyDistribution.NumberGroups == 0);
 		}
 
@@ -49,12 +49,12 @@ namespace MSP2050.Scripts
 		{
 			base.BeginEditing(plan);
 
-			removedCables = LayerManager.ForceEnergyLayersActiveUpTo(plan);
+			removedCables = LayerManager.Instance.ForceEnergyLayersActiveUpTo(plan);
 			emptyContentOverlay.SetActive(false);
 
 			energyGridBackup = lockedPlan.energyGrids;
 			energyGridRemovedBackup = lockedPlan.removedGrids;
-			energyGridsBeforePlan = PlanManager.GetEnergyGridsBeforePlan(lockedPlan, EnergyGrid.GridColor.Either);
+			energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(lockedPlan, EnergyGrid.GridColor.Either);
 
 			//Reset plan's grids
 			List<EnergyGrid> oldGrids = lockedPlan.energyGrids; 
@@ -64,7 +64,7 @@ namespace MSP2050.Scripts
 			foreach (EnergyGrid grid in energyGridsBeforePlan)
 				lockedPlan.removedGrids.Add(grid.persistentID);
 
-			foreach (AbstractLayer layer in LayerManager.energyLayers)
+			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 			{
 				if (layer.editingType == AbstractLayer.EditingType.Socket)
 				{
@@ -82,7 +82,7 @@ namespace MSP2050.Scripts
 						if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
 							countriesAffectedByRemovedGrids.Add(countryAmount.Key);
 
-			energyDistribution.SetSliderValuesToEnergyDistribution(planDetails.SelectedPlan, PlanManager.GetEnergyGridsBeforePlan(planDetails.SelectedPlan, EnergyGrid.GridColor.Either, true, true));
+			energyDistribution.SetSliderValuesToEnergyDistribution(planDetails.SelectedPlan, PlanManager.Instance.GetEnergyGridsBeforePlan(planDetails.SelectedPlan, EnergyGrid.GridColor.Either, true, true));
 			energyDistribution.SetInteractability(true);
 			contentInfo.SetActive(false);
 		}
@@ -104,7 +104,7 @@ namespace MSP2050.Scripts
 
 		protected override void SubmitChangesAndUnlock()
 		{
-			BatchRequest batch = new BatchRequest();
+			BatchRequest batch = new BatchRequest(true);
 
 			energyDistribution.SetGridsToSliderValues(lockedPlan);
 
@@ -145,7 +145,7 @@ namespace MSP2050.Scripts
 
 			lockedPlan.energyGrids = energyGridBackup;
 			lockedPlan.removedGrids = energyGridRemovedBackup;
-			LayerManager.RestoreRemovedCables(removedCables);
+			LayerManager.Instance.RestoreRemovedCables(removedCables);
 
 			lockedPlan.AttemptUnlock();
 			StopEditing();

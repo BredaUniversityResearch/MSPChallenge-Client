@@ -169,14 +169,14 @@ namespace MSP2050.Scripts
 
 		public static int YearToGameTime(int year)
 		{
-			return (year - Main.MspGlobalData.start) * 12;
+			return (year - SessionManager.Instance.MspGlobalData.start) * 12;
 		}
 
 		public static string MonthToText(int months, bool shortened = false)
 		{
-			if (Main.MspGlobalData == null)
+			if (SessionManager.Instance.MspGlobalData == null)
 				return "";
-			int baseYear = Main.MspGlobalData.start;
+			int baseYear = SessionManager.Instance.MspGlobalData.start;
 			while (months < 0)
 			{
 				months += 12;
@@ -193,9 +193,9 @@ namespace MSP2050.Scripts
 
 		public static string MonthToYearText(int months)
 		{
-			if (Main.MspGlobalData == null)
+			if (SessionManager.Instance.MspGlobalData == null)
 				return "";
-			int baseYear = Main.MspGlobalData.start;
+			int baseYear = SessionManager.Instance.MspGlobalData.start;
 			while (months < 0)
 			{
 				months += 12;

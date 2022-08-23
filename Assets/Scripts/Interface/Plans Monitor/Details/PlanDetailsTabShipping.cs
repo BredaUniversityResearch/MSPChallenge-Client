@@ -65,8 +65,8 @@ namespace MSP2050.Scripts
 		protected override void StopEditing()
 		{
 			distributions.SetInteractability(false);
-			if (PlanManager.planViewing == lockedPlan)
-				LayerManager.RedrawVisibleLayers();
+			if (PlanManager.Instance.planViewing == lockedPlan)
+				LayerManager.Instance.RedrawVisibleLayers();
 			base.StopEditing();
 		}
 
@@ -104,9 +104,9 @@ namespace MSP2050.Scripts
 				PlanLayer layer = selectedPlan.PlanLayers[i];
 				foreach (var kvp in layer.BaseLayer.EntityTypes)
 				{
-					if (TeamManager.IsManager(selectedPlan.Country))
+					if (SessionManager.Instance.IsManager(selectedPlan.Country))
 					{
-						foreach (Team team in TeamManager.GetTeams())
+						foreach (Team team in SessionManager.Instance.GetTeams())
 						{
 							if (!team.IsManager)
 							{

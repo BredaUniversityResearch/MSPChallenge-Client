@@ -132,9 +132,9 @@ namespace MSP2050.Scripts
 				return;
 			receivedPlanMessages.Add(planMessages.message_id);
 
-			string feedback = $"<color=#A3A0A2>[{planMessages.time}]</color> [<color=#{ColorUtility.ToHtmlStringRGB(TeamManager.GetTeamByTeamID(planMessages.team_id).color)}>{planMessages.user_name}</color>] {planMessages.message}";
+			string feedback = $"<color=#A3A0A2>[{planMessages.time}]</color> [<color=#{ColorUtility.ToHtmlStringRGB(SessionManager.Instance.GetTeamByTeamID(planMessages.team_id).color)}>{planMessages.user_name}</color>] {planMessages.message}";
 
-			Plan plan = PlanManager.GetPlanWithID(planMessages.plan_id);
+			Plan plan = PlanManager.Instance.GetPlanWithID(planMessages.plan_id);
 
 			if (messageEntriesPerPlan.TryGetValue(plan, out var list))
 			{
@@ -183,7 +183,7 @@ namespace MSP2050.Scripts
 
 				if (nextAvailableApprovalIndex < planApprovalEntries.Count)
 				{
-					planApprovalEntries[nextAvailableApprovalIndex].SetContent(TeamManager.GetTeamByTeamID(kvp.Key), kvp.Value);
+					planApprovalEntries[nextAvailableApprovalIndex].SetContent(SessionManager.Instance.GetTeamByTeamID(kvp.Key), kvp.Value);
 					planApprovalEntries[nextAvailableApprovalIndex].gameObject.SetActive(true);
 				}
 				else
@@ -192,7 +192,7 @@ namespace MSP2050.Scripts
 					PlanApprovalEntry entry = go.GetComponentInChildren<PlanApprovalEntry>();
 					entry.SetCallback(ApprovalChangedCountry);
 					planApprovalEntries.Add(entry);
-					entry.SetContent(TeamManager.GetTeamByTeamID(kvp.Key), kvp.Value);
+					entry.SetContent(SessionManager.Instance.GetTeamByTeamID(kvp.Key), kvp.Value);
 				}
 				nextAvailableApprovalIndex++;
 			}
@@ -215,7 +215,7 @@ namespace MSP2050.Scripts
 				int planId = planDetails.SelectedPlan.ID;
 				if (newApproval == EPlanApprovalState.Disapproved)
 				{
-					if (team.ID == TeamManager.CurrentUserTeamID)
+					if (team.ID == SessionManager.Instance.CurrentUserTeamID)
 						planDetails.SendMessage(planId, "Disapproved the plan.", batch);
 					else
 						planDetails.SendMessage(planId, "Disapproved the plan for <color=#" + Util.ColorToHex(team.color) + ">" + team.name + "</color>.", batch);
@@ -225,7 +225,7 @@ namespace MSP2050.Scripts
 				}
 				else if (newApproval == EPlanApprovalState.Maybe)
 				{
-					if (team.ID == TeamManager.CurrentUserTeamID)
+					if (team.ID == SessionManager.Instance.CurrentUserTeamID)
 						planDetails.SendMessage(planId, "Retracted the previous approval state.", batch);
 					else
 						planDetails.SendMessage(planId, "Retracted the previous approval state for <color=#" + Util.ColorToHex(team.color) + ">" + team.name + "</color>.", batch);
@@ -234,7 +234,7 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					if (team.ID == TeamManager.CurrentUserTeamID)
+					if (team.ID == SessionManager.Instance.CurrentUserTeamID)
 						planDetails.SendMessage(planId, "Approved the plan.", batch);
 					else
 						planDetails.SendMessage(planId, "Approved the plan for <color=#" + Util.ColorToHex(team.color) + ">" + team.name + "</color>.", batch);

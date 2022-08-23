@@ -24,9 +24,9 @@ namespace MSP2050.Scripts
 		private void Start()
 		{
 			dropdown.onValueChanged.AddListener(OnDropDownValueChanged);
-			LayerImporter.OnDoneImporting += () =>
+			Main.Instance.OnFinishedLoadingLayers += () =>
 			{
-				if (!TeamManager.AreWeGameMaster)
+				if (!SessionManager.Instance.AreWeGameMaster)
 					gameObject.SetActive(false);
 			};
 		}
@@ -56,9 +56,9 @@ namespace MSP2050.Scripts
 		{
 			teamIndexToID = new Dictionary<int, int>();
 			int index = 0;
-			foreach (Team team in TeamManager.GetTeams())
+			foreach (Team team in SessionManager.Instance.GetTeams())
 			{
-				if (team.ID != TeamManager.GM_ID)
+				if (team.ID != SessionManager.GM_ID)
 				{
 					teamIndexToID.Add(index, team.ID);
 					index++;
@@ -68,7 +68,7 @@ namespace MSP2050.Scripts
 			multipleIndex = index;
 			teamIndexToID.Add(index, -1);
 			//GM
-			teamIndexToID.Add(index + 1, TeamManager.GM_ID);
+			teamIndexToID.Add(index + 1, SessionManager.GM_ID);
 			RecreateDropdownOptions();
 		}
 
@@ -83,7 +83,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				Team nextTeam = TeamManager.GetTeamByTeamID(teamIndexToID[currentItemIndex]);
+				Team nextTeam = SessionManager.Instance.GetTeamByTeamID(teamIndexToID[currentItemIndex]);
 				item.SetValues(currentItemIndex, nextTeam.name, nextTeam.color);
 			}
 			currentItemIndex++;
@@ -134,7 +134,7 @@ namespace MSP2050.Scripts
 			{
 				selectedIndex = index;
 				dropdown.value = index;
-				Team team = TeamManager.GetTeamByTeamID(teamIndexToID[selectedIndex]);
+				Team team = SessionManager.Instance.GetTeamByTeamID(teamIndexToID[selectedIndex]);
 				selectedLabel.text = team.name;
 				selectedCountryColor.color = team.color;
 				dropdownArrow.color = team.color;

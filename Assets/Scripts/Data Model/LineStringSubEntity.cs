@@ -171,7 +171,7 @@ namespace MSP2050.Scripts
 
 		public int GetPointAt(Vector3 position, out float closestDistanceSquared, int ignorePointId = -1)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			int closestPoint = -1;
@@ -197,7 +197,7 @@ namespace MSP2050.Scripts
 
 		public void GetLineAt(Vector3 position, out int lineA, out int lineB, out float closestDistanceSquared)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			lineA = -1;
@@ -326,7 +326,7 @@ namespace MSP2050.Scripts
 			if (gameObject == null)
 				return;
 
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.IsReferenceLayer(Entity.Layer))
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer))
 				drawMode = SubEntityDrawMode.PlanReference;
 
 			SnappingToThisEnabled = IsSnapToDrawMode(drawMode);
@@ -336,7 +336,7 @@ namespace MSP2050.Scripts
 
 			if (drawMode != SubEntityDrawMode.Default)
 			{
-				drawSettings = VisualizationUtil.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings);
+				drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings);
 			}
 
 			bool meshDirtyFromOverride = false;
@@ -386,13 +386,13 @@ namespace MSP2050.Scripts
 			if (targetLod.IconsObject.transform.childCount != expectedChildCount)
 			{
 				// redraw everything
-				VisualizationUtil.DestroyChildren(targetLod.IconsObject);
+				VisualizationUtil.Instance.DestroyChildren(targetLod.IconsObject);
 
 				if (shouldDrawIcons)
 				{
 					for (int i = 0; i < expectedChildCount; ++i)
 					{
-						GameObject segmentIcon = VisualizationUtil.CreateLineStringIconObject(drawSettings.LineIcon, drawSettings.LineIconColor);
+						GameObject segmentIcon = VisualizationUtil.Instance.CreateLineStringIconObject(drawSettings.LineIcon, drawSettings.LineIconColor);
 						segmentIcon.transform.SetParent(targetLod.IconsObject.transform, false);
 					}
 				}
@@ -416,7 +416,7 @@ namespace MSP2050.Scripts
 			base.UpdateRestrictionArea(newRestrictionSize);
 			if (m_restrictionArea == null && newRestrictionSize > 0.0f && !restrictionHidden)
 			{
-				m_restrictionArea = VisualizationUtil.CreateRestrictionArea();
+				m_restrictionArea = VisualizationUtil.Instance.CreateRestrictionArea();
 				m_restrictionArea.SetParent(gameObject.transform);
 			}
 
@@ -543,11 +543,11 @@ namespace MSP2050.Scripts
 					bool hover = hoverPoints != null && hoverPoints.Contains(i);
 					bool selected = selectedPoints != null && selectedPoints.Contains(i);
 
-					Color pointColor = hover ? VisualizationUtil.SelectionColor : drawSettings.PointColor;
+					Color pointColor = hover ? VisualizationUtil.Instance.SelectionColor : drawSettings.PointColor;
 					pointColor = selected ? Color.white : pointColor;
 
-					VisualizationUtil.PointRenderMode pointRenderMode = VisualizationUtil.GetPointRenderMode(drawSettings, planState, selected);
-					VisualizationUtil.UpdatePoint(point, lod.Points[i], pointColor, drawSettings.PointSize, pointRenderMode);
+					VisualizationUtil.PointRenderMode pointRenderMode = VisualizationUtil.Instance.GetPointRenderMode(drawSettings, planState, selected);
+					VisualizationUtil.Instance.UpdatePoint(point, lod.Points[i], pointColor, drawSettings.PointSize, pointRenderMode);
 				}
 			}
 			else
@@ -587,11 +587,11 @@ namespace MSP2050.Scripts
 			if (lod.PointsObject.transform.childCount != expectedChildCount)
 			{
 				// redraw everything
-				VisualizationUtil.DestroyChildren(lod.PointsObject);
+				VisualizationUtil.Instance.DestroyChildren(lod.PointsObject);
 
 				for (int i = 0; i < lod.Points.Count; ++i)
 				{
-					GameObject point = VisualizationUtil.CreatePointGameObject();
+					GameObject point = VisualizationUtil.Instance.CreatePointGameObject();
 					point.transform.SetParent(lod.PointsObject.transform);
 				}
 
@@ -607,12 +607,12 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				lod.LineRenderer.widthMultiplier = VisualizationUtil.DisplayScale * drawSettings.LineWidth / 50f;
+				lod.LineRenderer.widthMultiplier = VisualizationUtil.Instance.DisplayScale * drawSettings.LineWidth / 50f;
 			}
 
 			//Update Points 
 			int pointCount = lod.PointsObject.transform.childCount;
-			float newScale = drawSettings.PointSize * VisualizationUtil.DisplayScale * VisualizationUtil.pointResolutionScale;
+			float newScale = drawSettings.PointSize * VisualizationUtil.Instance.DisplayScale * VisualizationUtil.Instance.pointResolutionScale;
 			for (int i = 0; i < pointCount; ++i)
 			{
 				lod.PointsObject.transform.GetChild(i).localScale = new Vector3(newScale, newScale, 1);
@@ -623,7 +623,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < iconsCount; ++i)
 			{
 				Transform child = lod.IconsObject.transform.GetChild(i);
-				child.localScale = new Vector3(VisualizationUtil.DisplayScale, VisualizationUtil.DisplayScale, 1.0f);
+				child.localScale = new Vector3(VisualizationUtil.Instance.DisplayScale, VisualizationUtil.Instance.DisplayScale, 1.0f);
 			}
 		}
 
@@ -643,7 +643,7 @@ namespace MSP2050.Scripts
 			//Convert line
 			double[][] linePoints = new double[m_points.Count][];
 			for (int i = 0; i < m_points.Count; i++)
-				linePoints[i] = Main.ConvertToGeoJSONCoordinate(new double[] { (double)m_points[i].x * 1000, (double)m_points[i].y * 1000 });
+				linePoints[i] = Main.Instance.ConvertToGeoJSONCoordinate(new double[] { (double)m_points[i].x * 1000, (double)m_points[i].y * 1000 });
 
 			return new Feature(new LineString(linePoints), GetGeoJSONProperties(), idToUse.ToString());
 		}

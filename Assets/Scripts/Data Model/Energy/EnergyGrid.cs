@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 			sourcePower = 0;
 			foreach (GeomIDObject source in gridObject.sources)
 			{
-				EnergyPointSubEntity subEnt = LayerManager.GetEnergySubEntityByID(source.geometry_id, true) as EnergyPointSubEntity;
+				EnergyPointSubEntity subEnt = LayerManager.Instance.GetEnergySubEntityByID(source.geometry_id, true) as EnergyPointSubEntity;
 				if (subEnt != null)
 				{
 					sources.Add(subEnt);
@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 			sockets = new List<EnergyPointSubEntity>();
 			foreach (GeomIDObject socket in gridObject.sockets)
 			{
-				EnergyPointSubEntity subEnt = LayerManager.GetEnergySubEntityByID(socket.geometry_id) as EnergyPointSubEntity;
+				EnergyPointSubEntity subEnt = LayerManager.Instance.GetEnergySubEntityByID(socket.geometry_id) as EnergyPointSubEntity;
 				if (subEnt != null)
 				{
 					sockets.Add(subEnt);
@@ -342,7 +342,7 @@ namespace MSP2050.Scripts
 		{
 			databaseID = value;
 			databaseIDSet = true;
-			PlanManager.AddEnergyGrid(this);
+			PlanManager.Instance.AddEnergyGrid(this);
 		}
 
 		public int GetDatabaseID()
@@ -430,7 +430,7 @@ namespace MSP2050.Scripts
 				NetworkForm form = new NetworkForm();
 				form.AddField("id", databaseID);
 				form.AddField("name", name);
-				ServerCommunication.DoRequest(Server.UpdateGridName(), form);
+				ServerCommunication.Instance.DoRequest(Server.UpdateGridName(), form);
 			}
 		}
 
@@ -451,7 +451,7 @@ namespace MSP2050.Scripts
 			foreach (EnergyPointSubEntity socket in sockets)
 			{
 				int country = socket.Entity.Country;
-				if (country <= TeamManager.AM_ID)
+				if (country <= SessionManager.AM_ID)
 					Debug.LogError("Socket (ID: " + socket.GetDatabaseID() + ") has an invalid country (" + country);
 
 				if (!distribution.ContainsKey(country))
@@ -470,7 +470,7 @@ namespace MSP2050.Scripts
 			foreach (EnergyPointSubEntity source in sources)
 			{
 				int country = source.Entity.Country;
-				if (country <= TeamManager.AM_ID)
+				if (country <= SessionManager.AM_ID)
 					Debug.LogError("Source (ID: " + source.GetDatabaseID() + ") has an invalid country (" + country);
 
 				if (!distribution.ContainsKey(country))
@@ -659,8 +659,8 @@ namespace MSP2050.Scripts
 			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in energyDistribution.distribution)
 			{
 				if (kvp.Key == targetPlan.Country 
-				    || TeamManager.AM_ID == targetPlan.Country
-				    || TeamManager.GM_ID == targetPlan.Country)
+				    || SessionManager.AM_ID == targetPlan.Country
+				    || SessionManager.GM_ID == targetPlan.Country)
 				{
 					countryInGrid = true;
 					break;
@@ -795,9 +795,9 @@ namespace MSP2050.Scripts
 		public void ShowGridOnMap()
 		{
 			bool green = IsGreen;
-			foreach (AbstractLayer layer in LayerManager.energyLayers)
+			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
 				if (layer.greenEnergy == green)
-					LayerManager.ShowLayer(layer);
+					LayerManager.Instance.ShowLayer(layer);
         
 			CameraManager.Instance.ZoomToBounds(GetGridRect());
 		}

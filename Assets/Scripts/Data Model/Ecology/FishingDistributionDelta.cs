@@ -51,12 +51,17 @@ namespace MSP2050.Scripts
 			values.Clear();
 		}
 
+		public bool HasFinishingValue(string fleetName)
+		{
+			return values.ContainsKey(fleetName);
+		}
+
 		public void SetFishingValue(string fleetName, int country, float fishingValue)
 		{
 			Dictionary<int, float> fleetValues;
 			if (!values.TryGetValue(fleetName, out fleetValues))
 			{
-				fleetValues = new Dictionary<int, float>(TeamManager.TeamCount);
+				fleetValues = new Dictionary<int, float>(SessionManager.Instance.TeamCount);
 				values.Add(fleetName, fleetValues);
 			}
 

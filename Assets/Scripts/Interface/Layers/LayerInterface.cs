@@ -36,12 +36,12 @@ namespace MSP2050.Scripts
 
 		protected void Start()
 		{
-			panel = UIManager.GetLayerPanel();
-			layerSelect = UIManager.GetLayerSelect();
+			panel = InterfaceCanvas.Instance.layerPanel;
+			layerSelect = InterfaceCanvas.Instance.layerSelect;
 			categories = new Dictionary<string, LayerCategoryGroup>();
 			subCategories = new Dictionary<string, LayerSubCategoryToggleGroup>();
 
-			menuLayerToggle = UIManager.GetInterfaceCanvas().menuBarLayers;
+			menuLayerToggle = InterfaceCanvas.Instance.menuBarLayers;
 
 			// This is for the menu bar toggle so that it acts correctly
 			menuLayerToggle.GetComponent<Toggle>().isOn = true;
@@ -76,7 +76,7 @@ namespace MSP2050.Scripts
 			string category = layer.Category;
 			string subcategoryID = layer.SubCategory;
 
-			string categoryName = LayerManager.MakeCategoryDisplayString(category);
+			string categoryName = LayerManager.Instance.MakeCategoryDisplayString(category);
 
 			// Creating/Getting the group
 			LayerCategoryGroup categoryGroup = FindCategory(categoryName);
@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 
 		private LayerSubCategoryToggleGroup CreateSubCategory(LayerCategoryGroup categoryGroup, string subCategoryID)
 		{
-			string subCategoryName = LayerManager.MakeCategoryDisplayString(subCategoryID);
+			string subCategoryName = LayerManager.Instance.MakeCategoryDisplayString(subCategoryID);
 
 			LayerButton subcategoryToggleButton = categoryGroup.CreateLayerButton(subCategoryName);
 

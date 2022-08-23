@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ColourPalette;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
@@ -12,8 +13,6 @@ namespace MSP2050.Scripts
 		{
 			get
 			{
-				//if (singleton == null)
-				//    singleton = (InterfaceCanvas)FindObjectOfType(typeof(InterfaceCanvas));
 				return singleton;
 			}
 		}
@@ -44,7 +43,8 @@ namespace MSP2050.Scripts
 		public LayerProbeWindow layerProbeWindow;
 		public WebViewWindow webViewWindow;
 		public GameObject networkingBlocker;
-		public GameObject impactTool;
+		public GenericWindow impactToolWindow;
+		public HEBGraph.HEBGraph ImpactToolGraph;
 
 		[Header("Game Menu")]
 		public GameMenu gameMenu;
@@ -56,6 +56,7 @@ namespace MSP2050.Scripts
 		public MenuBarToggle menuBarPlanWizard;
 		public MenuBarToggle menuBarObjectivesMonitor;
 		public MenuBarToggle menuBarPlansMonitor;
+		public MenuBarToggle menuBarImpactTool;
 		public MenuBarToggle menuBarActiveLayers;
 		public MenuBarToggle menuBarGameMenu;
 
@@ -75,14 +76,23 @@ namespace MSP2050.Scripts
 		public ColourAsset regionColour;
 		public RegionSettingsAsset regionSettings;
 
+		private List<Button> ToolbarButtons = new List<Button>();
+
+		[HideInInspector]
+		public LayerInterface layerInterface;
+
+		[HideInInspector]
+		public bool ignoreLayerToggleCallback;//If this is true the layer callback labda functions will return immediately
+
 		private void Awake()
 		{
 			singleton = this;
+			layerInterface = layerPanel.GetComponent<LayerInterface>();
 		}
 
 		void Start()
 		{
-			canvas.scaleFactor = GameSettings.UIScale;
+			canvas.scaleFactor = GameSettings.Instance.UIScale;
 			menuBarActiveLayers.toggle.isOn = true;
 			for (int i = 0; i < lineMaterials.Length; i++)
 			{
@@ -278,6 +288,162 @@ namespace MSP2050.Scripts
 		public static void HideNetworkingBlocker()
 		{
 			Instance.networkingBlocker.SetActive(false);
+		}
+		
+		//====================================== Below used to be InterfaceCanvas ===============================================
+
+		public void StartEditingLayer(AbstractLayer layer)
+		{
+			ToolbarVisibility(true);
+			toolBar.ShowToolBar(true);
+			ToolbarTitleVisibility(true, FSM.ToolbarInput.Create);
+			ToolbarTitleVisibility(true, FSM.ToolbarInput.Delete);
+			ToolbarVisibility(false, FSM.ToolbarInput.Difference, FSM.ToolbarInput.Intersect, FSM.ToolbarInput.Union);
+			ToolbarTitleVisibility(false, FSM.ToolbarInput.Union);
+			toolBar.SetCreateButtonSprite(layer);
+			ToolbarEnable(true);
+		}
+
+		public void StopEditing()
+		{
+			ToolbarEnable(false);
+			Instance.toolBar.ShowToolBar(false);
+		}
+		
+		public static void ShowLayerBar(bool show)
+		{
+			Instance.layerPanel.gameObject.SetActive(show);
+		}
+
+		public static void ShowTimeBar(bool show)
+		{
+			Instance.timeBar.gameObject.SetActive(show);
+		}
+
+		public void ToolbarTitleVisibility(bool enabled, FSM.ToolbarInput button)
+		{
+			for (int i = 0; i < ToolbarButtons.Count; i++)
+			{
+				if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == button)
+				{
+					ToolbarButtons[i].transform.parent.parent.Find("Label").gameObject.SetActive(enabled);
+					ToolbarButtons[i].transform.parent.gameObject.SetActive(enabled);
+				}
+			}
+		}
+
+		public void ToolbarVisibility(bool enabled, params FSM.ToolbarInput[] buttons)
+		{
+			for (int i = 0; i < ToolbarButtons.Count; i++)
+			{
+				if (buttons.Length <= 0)
+				{
+					ToolbarButtons[i].gameObject.SetActive(enabled);
+				}
+				else
+				{
+					for (int j = 0; j < buttons.Length; j++)
+					{
+						if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == buttons[j])
+						{
+							ToolbarButtons[i].gameObject.SetActive(enabled);
+						}
+					}
+				}
+			}
+		}
+
+		public void SetToolbarMode(ToolBar.DrawingMode drawingMode)
+		{
+			if (drawingMode == ToolBar.DrawingMode.Create)
+			{
+				toolBar.CreateMode();
+			}
+			else if (drawingMode == ToolBar.DrawingMode.Edit)
+			{
+				toolBar.EditMode();
+			}
+		}
+
+		public void ToolbarEnable(bool enabled, params FSM.ToolbarInput[] buttons)
+		{
+			for (int i = 0; i < ToolbarButtons.Count; i++)
+			{
+				if (buttons.Length <= 0)
+				{
+					//ToolbarButtons[i].interactable = enabled;
+					toolBar.SetActive(ToolbarButtons[i], enabled);
+				}
+				else
+				{
+					for (int j = 0; j < buttons.Length; j++)
+					{
+						if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == buttons[j])
+						{
+							//ToolbarButtons[i].interactable = enabled;
+							toolBar.SetActive(ToolbarButtons[i], enabled);
+						}
+					}
+				}
+			}
+		}
+		
+		public static void CreatePropertiesWindow(SubEntity subentity, Vector3 worldSamplePosition, Vector3 windowPosition)
+		{
+			InterfaceCanvas.Instance.propertiesWindow.ShowPropertiesWindow(subentity, worldSamplePosition, windowPosition);
+		}
+
+		public static void CreateLayerProbeWindow(List<SubEntity> subentities, Vector3 worldSamplePosition, Vector3 windowPosition)
+		{
+			InterfaceCanvas.Instance.layerProbeWindow.ShowLayerProbeWindow(subentities, worldSamplePosition, windowPosition);
+		}
+
+		public static List<EntityType> GetCurrentEntityTypeSelection()
+		{
+			return Instance.activePlanWindow.GetEntityTypeSelection();
+		}
+
+		public static int GetCurrentTeamSelection()
+		{
+			return Instance.activePlanWindow.SelectedTeam;
+		}
+
+		public void SetActiveplanWindowToSelection(List<List<EntityType>> entityTypes, int team, List<Dictionary<EntityPropertyMetaData, string>> selectedParams)
+		{
+			activePlanWindow.SetSelectedEntityTypes(entityTypes);
+			activePlanWindow.SetSelectedParameters(selectedParams);
+			if (SessionManager.Instance.AreWeGameMaster)
+			{
+				activePlanWindow.SelectedTeam = team;
+			}
+		}
+
+		public void SetTeamAndTypeToBasicIfEmpty()
+		{
+			activePlanWindow.SetEntityTypeToBasicIfEmpty();
+			if (SessionManager.Instance.AreWeGameMaster)
+				activePlanWindow.SetTeamToBasicIfEmpty();
+		}
+
+		public void SetActivePlanWindowInteractability(bool value, bool parameterValue = false)
+		{
+			activePlanWindow.SetParameterInteractability(parameterValue);
+			if (!value)
+			{
+				activePlanWindow.DeselectAllEntityTypes();
+				if (SessionManager.Instance.AreWeGameMaster)
+					activePlanWindow.SelectedTeam = -2;
+			}
+		}
+
+		public void SetActivePlanWindowChangeable(bool value)
+		{
+			activePlanWindow.SetObjectChangeInteractable(value);
+		}
+
+		public void RegisterToolbarButton(Button button)
+		{
+			ToolbarButtons.Add(button);
 		}
 	}
 }

@@ -12,7 +12,7 @@ namespace MSP2050.Scripts
 		{
 			// Set colour depending on place in hierarchy
 			string tText = transform.Find("Item Label").GetComponent<Text>().text;
-			Team targetTeam = TeamManager.FindTeamByName(tText);
+			Team targetTeam = SessionManager.Instance.FindTeamByName(tText);
 			if (targetTeam != null)
 			{
 				countryGraphic.color = targetTeam.color;

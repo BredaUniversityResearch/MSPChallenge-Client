@@ -25,9 +25,9 @@ namespace MSP2050.Scripts
 		{
 			if (shouldFollowCurrentDate)
 			{
-				GameState.OnCurrentMonthChanged += OnMonthChanged;
+				TimeManager.Instance.OnCurrentMonthChanged += OnMonthChanged;
 			}
-			SetDate(GameState.GetCurrentMonth());
+			SetDate(TimeManager.Instance.GetCurrentMonth());
 
 			if(matchingWindow != null)
 				matchingWindow.RegisterResizeHandler(this);
@@ -47,10 +47,10 @@ namespace MSP2050.Scripts
 
 		private void OnDestroy()
 		{
-			if (shouldFollowCurrentDate)
-			{
-				GameState.OnCurrentMonthChanged -= OnMonthChanged;
-			}
+			//if (shouldFollowCurrentDate)
+			//{
+			//	TimeManager.Instance.OnCurrentMonthChanged -= OnMonthChanged;
+			//}
 			if (matchingWindow != null)
 				matchingWindow.UnRegisterResizeHandler(this);
 		}
@@ -63,9 +63,9 @@ namespace MSP2050.Scripts
 		//Also called via the UnityEditor
 		public void SetDate(int month)
 		{
-			if (Main.MspGlobalData != null)
+			if (SessionManager.Instance.MspGlobalData != null)
 			{
-				float timePercentage = month / (float)Main.MspGlobalData.session_end_month;
+				float timePercentage = month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
 
 				targetTransform.anchorMin = new Vector2(timePercentage, 0f);
 				targetTransform.anchorMax = new Vector2(timePercentage, 1f);

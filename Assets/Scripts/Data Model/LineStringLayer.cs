@@ -34,8 +34,8 @@ namespace MSP2050.Scripts
 		{
 			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(planLayer, entityType);
 			LineStringSubEntity subEntity = new LineStringSubEntity(lineStringEntity);
-			if (TeamManager.AreWeGameMaster)
-				lineStringEntity.Country = UIManager.GetCurrentTeamSelection();
+			if (SessionManager.Instance.AreWeGameMaster)
+				lineStringEntity.Country = InterfaceCanvas.GetCurrentTeamSelection();
 			lineStringEntity.AddSubEntity(subEntity);
 			subEntity.AddPoint(initialPoint);
 			subEntity.AddPoint(initialPoint);
@@ -47,8 +47,8 @@ namespace MSP2050.Scripts
 		{
 			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(planLayer, entityType);
 			EnergyLineStringSubEntity subEntity = new EnergyLineStringSubEntity(lineStringEntity);
-			if (TeamManager.AreWeGameMaster)
-				lineStringEntity.Country = UIManager.GetCurrentTeamSelection();
+			if (SessionManager.Instance.AreWeGameMaster)
+				lineStringEntity.Country = InterfaceCanvas.GetCurrentTeamSelection();
 			lineStringEntity.AddSubEntity(subEntity);
 			subEntity.AddPoint(initialPoint);
 
@@ -138,7 +138,7 @@ namespace MSP2050.Scripts
 			SubEntity result = null;
 			float closestDistance = float.MaxValue;
 
-			float maxDistance = VisualizationUtil.GetSelectMaxDistance();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
 			foreach (LineStringEntity entity in activeEntities)
@@ -165,7 +165,7 @@ namespace MSP2050.Scripts
 
 		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)
 		{
-			float maxDistance = VisualizationUtil.GetSelectMaxDistance();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 
 			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
@@ -222,9 +222,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override LayerManager.GeoType GetGeoType()
+		public override  LayerManager.GeoType GetGeoType()
 		{
-			return LayerManager.GeoType.line;
+			return  LayerManager.GeoType.line;
 		}
 
 		#region Legacy Stuff

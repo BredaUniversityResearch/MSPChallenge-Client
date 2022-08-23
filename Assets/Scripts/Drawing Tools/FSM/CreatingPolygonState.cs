@@ -17,13 +17,14 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
-		
-			UIManager.SetToolbarMode(ToolBar.DrawingMode.Create);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			UIManager.ToolbarEnable(true, FSM.ToolbarInput.Abort);
-			UIManager.SetTeamAndTypeToBasicIfEmpty();
-			UIManager.SetActivePlanWindowInteractability(true);
+			InterfaceCanvas ic = InterfaceCanvas.Instance;
+
+			ic.SetToolbarMode(ToolBar.DrawingMode.Create);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
+			ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			ic.SetTeamAndTypeToBasicIfEmpty();
+			ic.SetActivePlanWindowInteractability(true);
 
 			int pointCount = subEntity.GetPolygonPointCount();
 			subEntity.SetPointPosition(pointCount - 1, subEntity.GetPointPosition(pointCount - 2), true);
@@ -85,7 +86,7 @@ namespace MSP2050.Scripts
 
 			if (subEntity.InvalidPoints == null)
 			{
-				AudioMain.PlaySound(AudioMain.ITEM_PLACED);
+				AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 				if (finishing)
 				{
 					fsm.AddToUndoStack(new FinalizePolygonOperation(subEntity, planLayer));
@@ -130,7 +131,7 @@ namespace MSP2050.Scripts
 			//if (subEntity is EnergyPolygonSubEntity)
 			//    (subEntity as EnergyPolygonSubEntity).FinalizePoly();
 
-			List<EntityType> selectedType = UIManager.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
 
 			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
 

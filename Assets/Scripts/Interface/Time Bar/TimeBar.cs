@@ -93,15 +93,7 @@ namespace MSP2050.Scripts
 
 		public void Start()
 		{
-			if (Main.MspGlobalData != null)
-			{
-				CreateEraMarkers();
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += GlobalDataLoaded;
-			}
-
+			CreateEraMarkers();
 			viewTimeToggle.onValueChanged.AddListener((b) =>
 			{
 				if(b)
@@ -125,12 +117,18 @@ namespace MSP2050.Scripts
 
 			viewDifferenceMonthDropdown1.onValueChanged.AddListener((v) => DifferenceMonthDropdownChanged(v, 1));
 			viewDifferenceYearDropdown1.onValueChanged.AddListener((v) => DifferencedYearDropdownChanged(v, 1));
-		}
 
-		void GlobalDataLoaded()
+			TimeManager.Instance.OnCurrentMonthChanged += OnMonthChanged;
+		}
+		
+		private void OnMonthChanged(int oldCurrentMonth, int newCurrentMonth)
 		{
-			Main.OnGlobalDataLoaded -= GlobalDataLoaded;
-			CreateEraMarkers();
+			if (viewMode != WorldViewMode.Normal)
+			{
+				ignoreActivityCallback = true;
+				UpdateDropdowns();
+				ignoreActivityCallback = false;
+			}
 		}
 
 		void CreateEraMarkers()
@@ -139,10 +137,6 @@ namespace MSP2050.Scripts
 			{
 				TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerLocation, false);
 				markers.Add(marker);
-
-				// Set position based on month
-				//float posX = ((month + 120) / (float)GameState.EndMonth) * eraMarkerLocation.rect.width;
-				//marker.thisRectTrans.anchoredPosition = new Vector2(posX, marker.thisRectTrans.anchoredPosition.y);
 			}
 		}
 
@@ -151,7 +145,7 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public void SetDate(int month)
 		{
-			if (GameState.GameStarted == false)
+			if (!TimeManager.Instance.GameStarted)
 			{
 				simulationTimeText.text =
 					planViewingText.text =
@@ -159,7 +153,7 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			fill.fillAmount = (float)month / (float)Main.MspGlobalData.session_end_month;
+			fill.fillAmount = (float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
 			collapsedDate.text = simulationTimeText.text = Util.MonthToText(month);
 			UpdateIndicator(simulationTimeIndicatorTop, month);
 
@@ -173,8 +167,8 @@ namespace MSP2050.Scripts
 		{
 			if (isViewingPlan)
 			{
-				planViewingText.text = Util.MonthToText(PlanManager.planViewing.StartTime, false);
-				UpdateIndicator(viewingTimeIndicatorBottom, PlanManager.planViewing.StartTime);
+				planViewingText.text = Util.MonthToText(PlanManager.Instance.planViewing.StartTime, false);
+				UpdateIndicator(viewingTimeIndicatorBottom, PlanManager.Instance.planViewing.StartTime);
 			}
 		}
 
@@ -187,7 +181,7 @@ namespace MSP2050.Scripts
 
 			if (openingViewMode)
 			{
-				if(Main.InEditMode || Main.EditingPlanDetailsContent)
+				if(Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 				{
 					DialogBoxManager.instance.NotificationWindow("Editing plan content", "View settings are unavailable while editing a plan's content. Please confirm or cancel your changes before trying again.", null);
 					ignoreActivityCallback = true;
@@ -195,10 +189,10 @@ namespace MSP2050.Scripts
 					ignoreActivityCallback = false;
 					return;
 				}
-				if (PlanManager.planViewing != null)
+				if (PlanManager.Instance.planViewing != null)
 				{
 					ignoreActivityCallback = true;
-					PlanManager.HideCurrentPlan(false);
+					PlanManager.Instance.HideCurrentPlan(false);
 					ignoreActivityCallback = false;
 				}
 				ignoreActivityCallback = true;
@@ -235,14 +229,14 @@ namespace MSP2050.Scripts
 					viewingTimeIndicatorBottom.gameObject.SetActive(active);
 					if (active)
 					{
-						PlanManager.SetPlanViewState(PlanManager.PlanViewState.Time, false);
+						PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Time, false);
 						if (updateWorldView)
 						{
 							UpdateWorldViewingTime();
 						}
 					}
 					else
-						PlanManager.SetPlanViewState(PlanManager.PlanViewState.All, false);
+						PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.All, false);
 					break;
 				case WorldViewMode.Difference:
 					viewDifferenceContentBottom.SetActive(active);
@@ -268,7 +262,7 @@ namespace MSP2050.Scripts
 					expandedBackground.gameObject.SetActive(!active);
 					if (active && updateWorldView)
 					{
-						PlanManager.ShowWorldAt(-1);
+						PlanManager.Instance.ShowWorldAt(-1);
 					}
 					break;
 			}
@@ -280,7 +274,7 @@ namespace MSP2050.Scripts
 			markers.Add(marker);
 
 			// Set position based on month
-			float posX = ((month + 120) / (float)Main.MspGlobalData.session_end_month) * eraMarkerLocation.rect.width;
+			float posX = ((month + 120) / (float)SessionManager.Instance.MspGlobalData.session_end_month) * eraMarkerLocation.rect.width;
 			marker.thisRectTrans.anchoredPosition = new Vector2(posX, marker.thisRectTrans.anchoredPosition.y);
 
 			return marker;
@@ -288,14 +282,14 @@ namespace MSP2050.Scripts
 
 		public void ViewCurrentTime()
 		{
-			PlanManager.HideCurrentPlan();
+			PlanManager.Instance.HideCurrentPlan();
 		}
 
 
 		public void UpdateDropdowns()
 		{
 			//Update options in dropdowns
-			int currentMonth = GameState.GetCurrentMonth();
+			int currentMonth = TimeManager.Instance.GetCurrentMonth();
 			maxSelectableMonth = currentMonth % 12;
 			maxSelectableYear = (currentMonth - maxSelectableMonth) / 12;
 
@@ -326,7 +320,7 @@ namespace MSP2050.Scripts
 			dropdown.ClearOptions();
 			List<string> options = new List<string>();
 			for (int i = 0; i <= year; i++)
-				options.Add((Main.MspGlobalData.start + i).ToString());
+				options.Add((SessionManager.Instance.MspGlobalData.start + i).ToString());
 			dropdown.AddOptions(options);
 			dropdown.value = selectedIndex;
 		}
@@ -400,7 +394,7 @@ namespace MSP2050.Scripts
 		{
 			int time = selectedMonthView + selectedYearView * 12;
 			UpdateIndicator(viewingTimeIndicatorBottom, time);
-			PlanManager.ShowWorldAt(time);
+			PlanManager.Instance.ShowWorldAt(time);
 		}
 
 		void UpdateWorldViewingDifference()
@@ -426,7 +420,7 @@ namespace MSP2050.Scripts
 
 		void UpdateIndicator(RectTransform indicator, int month)
 		{
-			float timePercent = (float)month / (float)Main.MspGlobalData.session_end_month;
+			float timePercent = (float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
 			indicator.anchorMin = new Vector2(timePercent, 0);
 			indicator.anchorMax = new Vector2(timePercent, 0);
 			indicator.anchoredPosition = Vector2.zero;
@@ -434,7 +428,7 @@ namespace MSP2050.Scripts
 
 		bool isViewingPlan
 		{
-			get { return viewMode == WorldViewMode.Plan && PlanManager.planViewing != null; }
+			get { return viewMode == WorldViewMode.Plan && PlanManager.Instance.planViewing != null; }
 		}
 	}
 }

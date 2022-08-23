@@ -44,16 +44,17 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
+			InterfaceCanvas ic = InterfaceCanvas.Instance;
 
-			UIManager.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			UIManager.ToolbarEnable(true, FSM.ToolbarInput.Delete);
-			UIManager.ToolbarEnable(false, FSM.ToolbarInput.Abort);
+			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
+			ic.ToolbarEnable(true, FSM.ToolbarInput.Delete);
+			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
 			if (planLayer.BaseLayer is ShippingLineStringLayer)
 			{
-				UIManager.ToolbarVisibility(true, FSM.ToolbarInput.ChangeDirection);
-				UIManager.ToolbarEnable(true, FSM.ToolbarInput.ChangeDirection);
+				ic.ToolbarVisibility(true, FSM.ToolbarInput.ChangeDirection);
+				ic.ToolbarEnable(true, FSM.ToolbarInput.ChangeDirection);
 			}
-			//UIManager.SetActivePlanWindowInteractability(true, true);
+			//InterfaceCanvas.SetActivePlanWindowInteractability(true, true);
 
 			foreach (LineStringSubEntity lse in selectedSubEntities)
 			{
@@ -73,6 +74,7 @@ namespace MSP2050.Scripts
 		public void SetSelectedSubEntities(HashSet<LineStringSubEntity> subEntities)
 		{
 			selectedSubEntities = subEntities;
+			InterfaceCanvas ic = InterfaceCanvas.Instance;
 			//Check if this is a line marked for removal, this limits editing and enables recall
 			if (this is EditEnergyLineStringsState)
 				foreach (LineStringSubEntity line in subEntities)
@@ -85,17 +87,17 @@ namespace MSP2050.Scripts
 						foreach (Connection con in energyLine.connections)
 							if (con.point.IsPlannedForRemoval() || !con.point.IsNotShownInPlan())
 								canRecall = false;
-					UIManager.ToolbarEnable(canRecall, FSM.ToolbarInput.Recall);
+					ic.ToolbarEnable(canRecall, FSM.ToolbarInput.Recall);
 					break;
 				}
 			else
 				foreach (LineStringSubEntity line in subEntities)
 				{
 					selectedRemovedEntity = line.IsPlannedForRemoval();
-					UIManager.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
+					ic.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
 					break;
 				}
-			UIManager.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
 			foreach (LineStringSubEntity line in subEntities)
 				line.SetInFrontOfLayer(true);
 		}
@@ -123,7 +125,7 @@ namespace MSP2050.Scripts
 		//            }
 		//        }
 		//    }
-		//    UIManager.ToolbarEnable(anyRecallableSubEntities, FSM.ToolbarInput.Recall);
+		//    InterfaceCanvas.ToolbarEnable(anyRecallableSubEntities, FSM.ToolbarInput.Recall);
 		//}
 
 		private void previewInsertPoint(Vector3 position)
@@ -140,7 +142,7 @@ namespace MSP2050.Scripts
 
 		private void getLineAt(Vector3 position, HashSet<LineStringSubEntity> selectedSubEntities, out LineStringSubEntity subEntity, out int lineA, out int lineB)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			lineA = -1;
@@ -196,7 +198,7 @@ namespace MSP2050.Scripts
 
 		private Dictionary<LineStringSubEntity, HashSet<int>> getPointAt(Vector3 position, HashSet<LineStringSubEntity> selectedSubEntities)
 		{
-			float threshold = VisualizationUtil.GetSelectMaxDistance();
+			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
 			int closestPoint = -1;
@@ -299,7 +301,7 @@ namespace MSP2050.Scripts
 				// case 2: clicked on a line + shift isn't pressed: add a point on the line and select the new point
 				if (!insertingPointsDisabled && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
 				{
-					AudioMain.PlaySound(AudioMain.ITEM_PLACED);
+					AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
 					int lineA, lineB;
 					LineStringSubEntity subEntity;
@@ -352,7 +354,7 @@ namespace MSP2050.Scripts
 
 		protected LineStringSubEntity getSubEntityFromSelection(Vector2 position, HashSet<LineStringSubEntity> selection)
 		{
-			float maxDistance = VisualizationUtil.GetSelectMaxDistance();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 
 			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
@@ -424,8 +426,8 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			UIManager.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
-			UIManager.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			InterfaceCanvas.Instance.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
+			InterfaceCanvas.Instance.SetActivePlanWindowChangeable(!selectedRemovedEntity);
 		}
 
 		private void mergeSelectionBIntoSelectionA(Dictionary<LineStringSubEntity, HashSet<int>> a, Dictionary<LineStringSubEntity, HashSet<int>> b)
@@ -626,7 +628,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			float maxDistance = VisualizationUtil.GetSelectMaxDistance();
+			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 			if (closestPointSqrDistance < maxDistance * maxDistance)
 			{
 				return dragStartPosition - closestPoint;
@@ -747,7 +749,7 @@ namespace MSP2050.Scripts
 		{
 			if (draggingSelection)
 			{
-				AudioMain.PlaySound(AudioMain.ITEM_MOVED);
+				AudioMain.Instance.PlaySound(AudioMain.ITEM_MOVED);
 
 				UpdateSelectionDragPositions(dragFinalPosition - dragStartPosition);
 				draggingSelection = false;
@@ -880,7 +882,7 @@ namespace MSP2050.Scripts
 
 		//private void simplifySelection()
 		//{
-		//	UIManager.CreateSingleValueWindow("Simplify line string", "tolerance", "0.5", 200, (value) =>
+		//	InterfaceCanvas.CreateSingleValueWindow("Simplify line string", "tolerance", "0.5", 200, (value) =>
 		//	{
 		//		fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
@@ -1054,7 +1056,7 @@ namespace MSP2050.Scripts
 			IssueManager.instance.SetIssueInteractability(true);
 
 			// make sure the entity type dropdown shows a valid value
-			//UIManager.SetCurrentEntityTypeSelection(UIManager.GetCurrentEntityTypeSelection());
+			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());
 		}
 
 		private void UpdateActivePlanWindowToSelection()
@@ -1080,7 +1082,7 @@ namespace MSP2050.Scripts
 				selectedParams.Add(parameters);
 			}
 
-			UIManager.SetActiveplanWindowToSelection(
+			InterfaceCanvas.Instance.SetActiveplanWindowToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
 				selectedParams);
