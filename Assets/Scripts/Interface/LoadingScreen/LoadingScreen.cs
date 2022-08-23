@@ -5,20 +5,22 @@ namespace MSP2050.Scripts
 {
 	public class LoadingScreen : MonoBehaviour
 	{
-		[SerializeField]
-		private Text editionText = null;
-		[SerializeField]
-		private Text loadingPercentageText = null;
-		[SerializeField]
-		private Text loadingNameText = null;
-		[SerializeField]
-		private Image loadingScreenImage = null;
-		[SerializeField]
-		private GameObject loadingBar = null;
-		private RectTransform loadingBarRect;
+		//[SerializeField]
+		//private Text editionText = null;
+		[SerializeField] private Text loadingPercentageText = null;
+		[SerializeField] private Text loadingNameText = null;
+		//[SerializeField]
+		//private Image loadingScreenImage = null;
+		//[SerializeField]
+		//private GameObject loadingBar = null;
+		//private RectTransform loadingBarRect;
 
-		public Image mspIcon;
+		[SerializeField] private RectTransform m_bgRect;
+		[SerializeField] private RectTransform m_mask;
+		[SerializeField] private RectTransform m_maskedImage;
 
+		//public Image mspIcon;
+		private bool m_initialized;
 		private float progress = 0; // 0 - 100
 		private float increment = 0;
 		private bool doneLoading = false;
@@ -28,8 +30,8 @@ namespace MSP2050.Scripts
 
 		public void Awake()
 		{
-			loadingNameText.gameObject.SetActive(Main.IsDeveloper);
-			loadingBarRect = loadingBar.GetComponent<RectTransform>();
+			//loadingNameText.gameObject.SetActive(Main.IsDeveloper);
+			//loadingBarRect = loadingBar.GetComponent<RectTransform>();
 			SetLoadingBarPercentage(0.0f);
 		}
 
@@ -40,13 +42,19 @@ namespace MSP2050.Scripts
 			{
 				//MSP Icon Swap
 				RegionInfo region = InterfaceCanvas.Instance.regionSettings.GetRegionInfo(SessionManager.Instance.MspGlobalData.region);
-				mspIcon.sprite = region.sprite;
-				editionText.text = region.editionPostFix;
+				//mspIcon.sprite = region.sprite;
+				//editionText.text = region.editionPostFix;
 			}
 		}
 
 		protected void Update()
 		{
+			if (!m_initialized)
+			{
+				m_initialized = true;
+				UpdateImageSizes(); //Has to be done in update so canvas has initialized
+			}
+
 			SetLoadingBarPercentage(progress);
 			if (doneLoading)
 			{
@@ -72,9 +80,9 @@ namespace MSP2050.Scripts
 
 		public void SetLoadingBarPercentage(float percentage)
 		{
-			loadingBarRect.anchorMax = new Vector2(percentage / 100.0f, loadingBarRect.anchorMax.y);
-			loadingBarRect.offsetMax = new Vector2(1f, 0);
-			loadingBarRect.offsetMin = new Vector2(1f, 0);
+			float t = percentage / 200f;
+			m_mask.anchorMin = new Vector2(0.5f - t, 0f);
+			m_mask.anchorMax = new Vector2(0.5f + t, 1f);
 		}
 
 		public void CreateLoadingBar(int amountOfThingsToLoad, string loadingItemName)
@@ -102,8 +110,33 @@ namespace MSP2050.Scripts
 
 		private void UpdateLoadingScreenText()
 		{
-			loadingPercentageText.text = "Loading: " + progress.ToString("n0") + "%";
-			loadingNameText.text = "Now Loading: " + loadingBarText;
+			loadingPercentageText.text = progress.ToString("n0") + "%";
+			loadingNameText.text = "Now loading: " + loadingBarText;
+		}
+
+		public void UpdateImageSizes()
+		{
+			Image bg = m_bgRect.GetComponent<Image>();
+			RectTransform canvasRect = GetComponentInParent<Canvas>().transform as RectTransform;
+			float bgAspect = (float)bg.sprite.texture.width / (float)bg.sprite.texture.height;
+			float canvasAspect = canvasRect.sizeDelta.x / canvasRect.sizeDelta.y;
+
+			float height, width;
+			if (bgAspect > canvasAspect)
+			{
+				//Match height
+				height = canvasRect.sizeDelta.y;
+				width = height * bgAspect;
+			}
+			else
+			{
+				//Match width
+				width = canvasRect.sizeDelta.x;
+				height = width / bgAspect;
+			}
+
+			m_bgRect.sizeDelta = new Vector2(width, height);
+			m_maskedImage.sizeDelta = new Vector2(width, height);
 		}
 	}
 }
