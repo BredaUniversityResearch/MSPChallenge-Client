@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 			m_newsEntries = new List<LoginNewsEntry>();
 			m_searchBar.onValueChanged.AddListener(OnSearchtextChanged);
 			CreateEntries();
-			ServerCommunication.DoExternalAPICall<WikiNewsListResult>(GetNewsListURL, OnNewsListQuerySuccess, OnNewsListQueryFail);
+			ServerCommunication.Instance.DoExternalAPICall<WikiNewsListResult>(GetNewsListURL, OnNewsListQuerySuccess, OnNewsListQueryFail);
 			m_latestNewsReadMoreButton.onClick.AddListener(OpenNewsTab);
 			m_clearSearchButton.onClick.AddListener(ClearSearch);
 		}
@@ -139,7 +139,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		void OnNewsListQueryFail(ServerCommunication.ARequest a_request, string a_message)
+		void OnNewsListQueryFail(ARequest a_request, string a_message)
 		{
 			Debug.Log("Failed to get news list");
 		}
@@ -148,7 +148,7 @@ namespace MSP2050.Scripts
 		{
 			string URL = $"https://community.mspchallenge.info/api.php?action=parse&page={a_title}&format=json&prop=text|images";
 			//string URL = $"https://community.mspchallenge.info/api.php?action=parse&page=How_to_add_geo-data_to_the_platform&format=json&prop=text|images";
-			ServerCommunication.DoExternalAPICall<WikiNewsEntryResult>(URL, (r) => OnNewsEntryQuerySuccess(r, a_date), OnNewsEntryQueryFail);
+			ServerCommunication.Instance.DoExternalAPICall<WikiNewsEntryResult>(URL, (r) => OnNewsEntryQuerySuccess(r, a_date), OnNewsEntryQueryFail);
 		}
 
 		void OnNewsEntryQuerySuccess(WikiNewsEntryResult a_data, string a_date)
@@ -167,7 +167,7 @@ namespace MSP2050.Scripts
 				CreateEntries();
 		}
 
-		void OnNewsEntryQueryFail(ServerCommunication.ARequest a_request, string a_message)
+		void OnNewsEntryQueryFail(ARequest a_request, string a_message)
 		{
 			Debug.Log($"Failed to get news entry content. Message: {a_message}");
 			m_returnedResults++;

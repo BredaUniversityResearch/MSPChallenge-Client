@@ -17,7 +17,7 @@ namespace MSP2050.Scripts
 
 		void Start()
 		{
-			ServerCommunication.DoExternalAPICall<WikiSocialsListResult>(GetSocialsListURL, OnWikiSocialsQuerySuccess, OnWikiSocialsQueryFail);
+			ServerCommunication.Instance.DoExternalAPICall<WikiSocialsListResult>(GetSocialsListURL, OnWikiSocialsQuerySuccess, OnWikiSocialsQueryFail);
 			gameObject.SetActive(false);
 		}
 
@@ -48,7 +48,7 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(true);
 		}
 
-		void OnWikiSocialsQueryFail(ServerCommunication.ARequest a_request, string a_message)
+		void OnWikiSocialsQueryFail(ARequest a_request, string a_message)
 		{
 			Debug.Log("Failed to get socials list");
 		}

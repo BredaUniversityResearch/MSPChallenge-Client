@@ -173,7 +173,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void DoExternalAPICall<T>(string url, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
+		public void DoExternalAPICall<T>(string url, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
 		{
 			ARequest request = new FormRequest<T>(url, null, successCallback, failureCallback, retriesOnFail, false); //Needs to be separate so the server URL is not added
 			request.timeoutLevel = 2;

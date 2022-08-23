@@ -90,7 +90,6 @@ namespace MSP2050.Scripts
 			GameSettings.Instance.SetMasterVolume(oldMasterVolume);
 			GameSettings.Instance.SetSFXVolume(oldSoundEffects);
 			GameSettings.Instance.SetFullscreen(oldFullscreen);
-			UpdatePosition();
 
 			if(closeWindowOnCancelConfirm)
 				gameObject.SetActive(false);
@@ -163,7 +162,7 @@ namespace MSP2050.Scripts
 			// uiScale.maxValue = maxUIScale;
 			// if (GameSettings.Instance.UIScale > maxUIScale)
 			// 	GameSettings.Instance.SetUIScale(maxUIScale);
-			StartCoroutine(LateUpdatePosition());
+			//StartCoroutine(LateUpdatePosition());
 			if(InterfaceCanvas.Instance != null)
 				StartCoroutine(InterfaceCanvas.Instance.gameMenu.LateUpdatePosition());
 			onDisplaySettingsChange.Invoke();

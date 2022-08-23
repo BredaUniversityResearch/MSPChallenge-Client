@@ -42,13 +42,13 @@ namespace MSP2050.Scripts
 		public void SetToSession(GameSession a_session)
 		{
 			//Populate the dropdown list with countries as soon as the team importer is finished
-			List<TMP_Dropdown.OptionData> dropdownOptionList = new List<TMP_Dropdown.OptionData>(LoginManager.Instance.m_teamImporter.teams.Count);
-			m_countryDropdownIndexToID = new int[LoginManager.Instance.m_teamImporter.teams.Count];
+			List<TMP_Dropdown.OptionData> dropdownOptionList = new List<TMP_Dropdown.OptionData>(SessionManager.Instance.TeamCount);
+			m_countryDropdownIndexToID = new int[SessionManager.Instance.TeamCount];
 			int index = 0;
-			foreach (KeyValuePair<int, Team> team in LoginManager.Instance.m_teamImporter.teams)
+			foreach (Team team in SessionManager.Instance.GetTeams())
 			{
-				dropdownOptionList.Add(new TMP_Dropdown.OptionData(team.Value.name));
-				m_countryDropdownIndexToID[index] = team.Key;
+				dropdownOptionList.Add(new TMP_Dropdown.OptionData(team.name));
+				m_countryDropdownIndexToID[index] = team.ID;
 				index++;
 			}
 			m_countryDropdown.ClearOptions();
@@ -76,7 +76,7 @@ namespace MSP2050.Scripts
 				m_countryDropdown.value = 0;
 
 			//Load expertise definitions and populate the dropdown
-			if (LoginManager.Instance.m_teamImporter.MspGlobalData.expertise_definitions == null || LoginManager.Instance.m_teamImporter.MspGlobalData.expertise_definitions.Length == 0)
+			if (SessionManager.Instance.MspGlobalData.expertise_definitions == null || SessionManager.Instance.MspGlobalData.expertise_definitions.Length == 0)
 			{
 				m_expertiseContainer.gameObject.SetActive(false);
 				PlayerPrefs.SetInt(LOGIN_EXPERTISE_INDEX_STR, -1);
@@ -84,8 +84,8 @@ namespace MSP2050.Scripts
 			else
 			{
 				m_expertiseContainer.gameObject.SetActive(true);
-				dropdownOptionList = new List<TMP_Dropdown.OptionData>(LoginManager.Instance.m_teamImporter.MspGlobalData.expertise_definitions.Length);
-				foreach (var expertise in LoginManager.Instance.m_teamImporter.MspGlobalData.expertise_definitions)
+				dropdownOptionList = new List<TMP_Dropdown.OptionData>(SessionManager.Instance.MspGlobalData.expertise_definitions.Length);
+				foreach (var expertise in SessionManager.Instance.MspGlobalData.expertise_definitions)
 				{
 					dropdownOptionList.Add(new TMP_Dropdown.OptionData(expertise.name));
 				}
@@ -106,14 +106,14 @@ namespace MSP2050.Scripts
 
 		void OnCountryChanged(int a_newIndex)
 		{
-			bool isAdmin = TeamManager.IsGameMaster(m_countryDropdownIndexToID[m_countryDropdown.value]);
+			bool isAdmin = SessionManager.Instance.IsGameMaster(m_countryDropdownIndexToID[m_countryDropdown.value]);
 			if (isAdmin)
 			{
-				m_passwordContainer.SetActive(LoginManager.Instance.m_teamImporter.MspGlobalData.user_admin_has_password);
+				m_passwordContainer.SetActive(SessionManager.Instance.MspGlobalData.user_admin_has_password);
 			}
 			else
 			{
-				m_passwordContainer.SetActive(LoginManager.Instance.m_teamImporter.MspGlobalData.user_common_has_password);
+				m_passwordContainer.SetActive(SessionManager.Instance.MspGlobalData.user_common_has_password);
 			}
 		}
 
@@ -151,23 +151,20 @@ namespace MSP2050.Scripts
 
 			int countryID = m_countryDropdownIndexToID[m_countryDropdown.value];
 			LoginManager.Instance.SetLoadingOverlayActive(true);
-			ServerCommunication.RequestSession(
+			ServerCommunication.Instance.RequestSession(
 				countryID, m_usernameField.text, (response) => RequestSessionSuccess(response, countryID),
 				RequestSessionFailure, m_passwordContainer.activeInHierarchy ? m_passwordField.text : null
 			);
 		}
 
-		void RequestSessionSuccess(ServerCommunication.RequestSessionResponse response, int countryIndex)
+		void RequestSessionSuccess(ServerCommunication.RequestSessionResponse response, int countryID)
 		{
-			ServerCommunication.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
-			TeamManager.InitializeUserValues(countryIndex, m_usernameField.text, response.session_id,
-				LoginManager.Instance.m_teamImporter.teams, m_passwordContainer.activeInHierarchy ? m_passwordField.text : null);
-			Main.MspGlobalData = LoginManager.Instance.m_teamImporter.MspGlobalData;
-
+			ServerCommunication.Instance.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
+			SessionManager.Instance.SetSession(countryID, m_passwordContainer.activeInHierarchy ? m_passwordField.text : null, m_usernameField.text, response.session_id);
 			SceneManager.LoadScene("MSP2050");
 		}
 
-		void RequestSessionFailure(ServerCommunication.ARequest request, string message)
+		void RequestSessionFailure(ARequest request, string message)
 		{
 			LoginManager.Instance.SetLoadingOverlayActive(false);
 			DialogBoxManager.instance.NotificationWindow("Connecting failed", message.Split('\n')[0], null, "Continue");

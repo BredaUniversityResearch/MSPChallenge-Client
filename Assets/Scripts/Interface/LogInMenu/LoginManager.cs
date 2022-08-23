@@ -27,7 +27,6 @@ namespace MSP2050.Scripts
 		[SerializeField] private GameObject m_tabScriptObject;
 
 		[Header("Generic")]
-		public TeamImporter m_teamImporter;
 		[SerializeField] private GameObject m_loadingOverlay;
 		[SerializeField] private Button m_optionsButton;
 
@@ -54,7 +53,7 @@ namespace MSP2050.Scripts
 
 		void Update()
 		{
-			ServerCommunication.Update(false);
+			ServerCommunication.Instance.UpdateCommunication(false);
 		}
 
 		void OnOptionsButtonClicked()
@@ -101,14 +100,14 @@ namespace MSP2050.Scripts
 
 			//Import global data for session
 			m_sessionConnectingTo = a_session;
-			m_teamImporter.OnImportComplete += OnTeamImportFinished;
+			SessionManager.Instance.OnImportComplete += OnTeamImportFinished;
 			m_loadingOverlay.SetActive(true);
-			m_teamImporter.ImportGlobalData();
+			SessionManager.Instance.ImportGlobalData();
 		}
 
 		public void OnTeamImportFinished(bool success)
 		{
-			m_teamImporter.OnImportComplete -= OnTeamImportFinished;
+			SessionManager.Instance.OnImportComplete -= OnTeamImportFinished;
 			m_loadingOverlay.SetActive(false);
 			if (success)
 			{
