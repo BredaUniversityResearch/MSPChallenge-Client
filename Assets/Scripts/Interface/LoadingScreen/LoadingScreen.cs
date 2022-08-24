@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		[SerializeField] private RectTransform m_bgRect;
 		[SerializeField] private RectTransform m_mask;
 		[SerializeField] private RectTransform m_maskedImage;
+		[SerializeField] private float m_loadingBarLerpSpeed = 0.1f;
 
 		//public Image mspIcon;
 		private bool m_initialized;
@@ -21,6 +22,7 @@ namespace MSP2050.Scripts
 		private bool startedLoading = false;
 		private bool isLoading = false;
 		private string loadingBarText = "";
+		private float currentBarProgress = 0;
 
 		public void Awake()
 		{
@@ -47,7 +49,8 @@ namespace MSP2050.Scripts
 				UpdateImageSizes(); //Has to be done in update so canvas has initialized
 			}
 
-			SetLoadingBarPercentage(progress);
+			currentBarProgress += (progress - currentBarProgress) * m_loadingBarLerpSpeed;
+			SetLoadingBarPercentage(currentBarProgress);
 			if (doneLoading)
 			{
 				ShowHideLoadScreen(false);

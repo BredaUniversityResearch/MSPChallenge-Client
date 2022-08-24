@@ -180,7 +180,7 @@ namespace MSP2050.Scripts
 
 				if (InterfaceCanvas.Instance != null)
 				{
-					InterfaceCanvas.Instance.canvas.scaleFactor = scale;
+					InterfaceCanvas.Instance.canvas.scaleFactor = (scale + 1f) / 4f;
 					InterfaceCanvas.Instance.plansMonitor.thisGenericWindow.HandleResolutionOrScaleChange(oldScale, true);
 					InterfaceCanvas.Instance.objectivesMonitor.thisGenericWindow.HandleResolutionOrScaleChange(oldScale, true);
 					InterfaceCanvas.Instance.impactToolWindow.HandleResolutionOrScaleChange(oldScale, true);
