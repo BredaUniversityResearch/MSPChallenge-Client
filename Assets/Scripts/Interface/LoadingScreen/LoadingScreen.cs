@@ -1,19 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace MSP2050.Scripts
 {
 	public class LoadingScreen : MonoBehaviour
 	{
-		//[SerializeField]
-		//private Text editionText = null;
-		[SerializeField] private Text loadingPercentageText = null;
-		[SerializeField] private Text loadingNameText = null;
-		//[SerializeField]
-		//private Image loadingScreenImage = null;
-		//[SerializeField]
-		//private GameObject loadingBar = null;
-		//private RectTransform loadingBarRect;
+		[SerializeField] private TextMeshProUGUI loadingPercentageText = null;
+		[SerializeField] private TextMeshProUGUI loadingNameText = null;
 
 		[SerializeField] private RectTransform m_bgRect;
 		[SerializeField] private RectTransform m_mask;
@@ -30,22 +24,20 @@ namespace MSP2050.Scripts
 
 		public void Awake()
 		{
-			//loadingNameText.gameObject.SetActive(Main.IsDeveloper);
-			//loadingBarRect = loadingBar.GetComponent<RectTransform>();
 			SetLoadingBarPercentage(0.0f);
 		}
 
-		protected void Start()
-		{
-			//IMPORTANT NOTE to self, this is only true when project is run through LoginScene
-			if (SessionManager.Instance.MspGlobalData != null)
-			{
-				//MSP Icon Swap
-				RegionInfo region = InterfaceCanvas.Instance.regionSettings.GetRegionInfo(SessionManager.Instance.MspGlobalData.region);
-				//mspIcon.sprite = region.sprite;
-				//editionText.text = region.editionPostFix;
-			}
-		}
+		//protected void Start()
+		//{
+		//	//IMPORTANT NOTE to self, this is only true when project is run through LoginScene
+		//	if (SessionManager.Instance.MspGlobalData != null)
+		//	{
+		//		//MSP Icon Swap
+		//		RegionInfo region = InterfaceCanvas.Instance.regionSettings.GetRegionInfo(SessionManager.Instance.MspGlobalData.region);
+		//		//mspIcon.sprite = region.sprite;
+		//		//editionText.text = region.editionPostFix;
+		//	}
+		//}
 
 		protected void Update()
 		{
@@ -88,7 +80,6 @@ namespace MSP2050.Scripts
 		public void CreateLoadingBar(int amountOfThingsToLoad, string loadingItemName)
 		{
 			increment = 100.0f / (float)amountOfThingsToLoad;
-			//inputBlocker.enabled = true;
 			startedLoading = true;
 			isLoading = true;
 			loadingBarText = loadingItemName;
@@ -98,7 +89,6 @@ namespace MSP2050.Scripts
 		public void OnFinishedLoading()
 		{
 			CameraManager.Instance.cameraZoom.ZoomOrthoCamera(CameraManager.Instance.gameCamera.ScreenToWorldPoint(Input.mousePosition), CameraManager.Instance.gameCamera.orthographicSize * 0.01f);
-			//inputBlocker.enabled = false;
 			doneLoading = true;
 		}
 
