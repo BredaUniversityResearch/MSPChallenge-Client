@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 
 		void Start()
 		{
-			canvas.scaleFactor = GameSettings.Instance.UIScale;
+			canvas.scaleFactor = (GameSettings.Instance.UIScale + 1f) / 4f;
 			menuBarActiveLayers.toggle.isOn = true;
 			for (int i = 0; i < lineMaterials.Length; i++)
 			{

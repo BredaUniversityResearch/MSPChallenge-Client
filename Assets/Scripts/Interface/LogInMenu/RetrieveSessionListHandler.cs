@@ -31,19 +31,6 @@ namespace MSP2050.Scripts
 
 		public IEnumerator RetrieveListAsync()
 		{
-			//string address = $"http://{hostname}/api/getsessionslist.php";
-			//yield return TryRetrieveSessionList(address);
-			//if (!Success)
-			//{
-			//    address = $"http://{hostname}/stable/servermanager/api/getsessionslist.php";
-			//    yield return TryRetrieveSessionList(address);
-			//    if (!Success)
-			//    {
-			//        address = $"http://{hostname}/ServerManager/api/getsessionslist.php";
-			//  yield return TryRetrieveSessionList(address);
-			//    }
-			//}
-
 			string address = $"https://{hostname}/ServerManager/api/getsessionslist.php";
 			yield return TryRetrieveSessionList(address);
 			if (!Success)

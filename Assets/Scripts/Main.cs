@@ -69,7 +69,7 @@ namespace MSP2050.Scripts
 			fsmActive = true;
 			Application.wantsToQuit += OnApplicationQuit;
 
-			currentExpertiseIndex = PlayerPrefs.GetInt(LoginMenu.LOGIN_EXPERTISE_INDEX_STR, -1);
+			currentExpertiseIndex = PlayerPrefs.GetInt(LoginContentTabLogin.LOGIN_EXPERTISE_INDEX_STR, -1);
 			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
 			if (SessionManager.Instance.MspGlobalData.expertise_definitions != null)
 				InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = true;
