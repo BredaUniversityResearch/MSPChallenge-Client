@@ -36,7 +36,6 @@ namespace MSP2050.Scripts
 		public void SetText(string newText)
 		{
 			tooltipText.text = newText;
-			//animator.SetBool("Fade", false);
 		}
 
 		public string GetText()

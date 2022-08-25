@@ -16,6 +16,7 @@ namespace MSP2050.Scripts
 		public int watchdog_server_id;
 		public int game_creation_time;
 		public int game_start_year;
+		public int game_current_month;
 		public int game_end_month;
 		public int game_running_til_time;
 		public SessionState session_state;

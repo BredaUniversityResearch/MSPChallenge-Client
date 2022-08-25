@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 		private const string LOGIN_USER_NAME = "LoginScreenUserName";
 		private const string LOGIN_COUNTRY_NAME_STR = "LoginScreenCountryName";
 		private const string LOGIN_COUNTRY_INDEX_STR = "LoginScreenCountryIndex";
-		private const string LOGIN_EXPERTISE_INDEX_STR = "LoginScreenExpertiseIndex";
+		public const string LOGIN_EXPERTISE_INDEX_STR = "LoginScreenExpertiseIndex";
 
 		[SerializeField] private CustomInputField m_usernameField;
 		[SerializeField] private CustomInputField m_passwordField;
