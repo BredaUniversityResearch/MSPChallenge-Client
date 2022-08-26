@@ -87,7 +87,12 @@ namespace MSP2050.Scripts
 			//Sessions from server address
 			WWWForm form = new WWWForm();
 			form.AddField("visibility", 0);
-			form.AddField("client_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier().GetBuildTime());
+
+            if (!ApplicationBuildIdentifier.Instance.GetHasInformation())
+                ApplicationBuildIdentifier.Instance.GetUCBManifest();
+
+            form.AddField("client_timestamp", ApplicationBuildIdentifier.Instance.GetBuildTime());
+
 			RetrieveSessionListHandler handler = new RetrieveSessionListHandler(host, form);
 			yield return handler.RetrieveListAsync();
 

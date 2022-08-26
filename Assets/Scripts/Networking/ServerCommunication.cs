@@ -413,7 +413,12 @@ namespace MSP2050.Scripts
 			{
 				form.AddField("country_password", password);
 			}
-			form.AddField("build_timestamp", ApplicationBuildIdentifier.FindBuildIdentifier()?.GetBuildTime());
+
+			if (!ApplicationBuildIdentifier.Instance.GetHasInformation())
+				ApplicationBuildIdentifier.Instance.GetUCBManifest();
+
+			form.AddField("build_timestamp", ApplicationBuildIdentifier.Instance.GetBuildTime());
+
 			DoRequest(Server.RequestSession(), form, successCallback, failureCallback);
 		}
 
