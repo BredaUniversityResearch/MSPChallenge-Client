@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using ColourPalette;
+using Unity.Plastic.Newtonsoft.Json.Serialization;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace MSP2050.Scripts
@@ -20,14 +22,7 @@ namespace MSP2050.Scripts
 		[HideInInspector]
 		public Canvas canvas;
 
-		[Header("Prefabs")]
-		[SerializeField]
-		private Transform genericWindowParent = null;
-		[SerializeField]
-		private GameObject genericWindowPrefab = null;
-
 		[Header("References")]
-		public List<GenericWindow> genericWindow = new List<GenericWindow>();
 		public TimeBar timeBar;
 		public MapScale mapScale;
 		public ToolBar toolBar;
@@ -84,6 +79,11 @@ namespace MSP2050.Scripts
 		[HideInInspector]
 		public bool ignoreLayerToggleCallback;//If this is true the layer callback labda functions will return immediately
 
+		private Dictionary<string, Button> buttonUIReferences;
+		private Dictionary<string, Toggle> toggleUIReferences;
+		private Dictionary<string, IPointerClickHandler> genericUIReferences;
+		private event Action<string, string[]> interactionEvent;
+
 		private void Awake()
 		{
 			singleton = this;
@@ -118,167 +118,6 @@ namespace MSP2050.Scripts
 
 		}
 
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		public GenericWindow CreateGenericWindow () {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="centered">Center the window?</param>
-		public GenericWindow CreateGenericWindow(bool centered, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			if (centered) {
-				window.CenterWindow();
-			}
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="title">The text in the title bar of the window</param>
-		public GenericWindow CreateGenericWindow(string title, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetTitle(title);
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="title">The text in the title bar of the window</param>
-		/// <param name="centered">Center the window?</param>
-		public GenericWindow CreateGenericWindow(string title, bool centered, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetTitle(title);
-
-			if (centered) {
-				window.CenterWindow();
-			}
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="width">The width of the window</param>
-		public GenericWindow CreateGenericWindow(float width, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetWidth(width);
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="centered">Center the window?</param>
-		/// <param name="width">The width of the window</param>
-		public GenericWindow CreateGenericWindow(bool centered, float width, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetWidth(width);
-
-			if (centered) {
-				window.CenterWindow();
-			}
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="title">The text in the title bar of the window</param>
-		/// <param name="width">The width of the window</param>
-		public GenericWindow CreateGenericWindow(string title, float width, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetTitle(title);
-			window.SetWidth(width);
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="title">The text in the title bar of the window</param>
-		/// <param name="centered">Center the window?</param>
-		/// <param name="width">The width of the window</param>
-		public GenericWindow CreateGenericWindow(string title, bool centered, float width, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetTitle(title);
-			window.SetWidth(width);
-
-			if (centered) {
-				window.CenterWindow();
-			}
-
-			return window;
-		}
-
-		/// <summary>
-		/// Generate window
-		/// </summary>
-		private GenericWindow GenerateGenericWindow() {
-			// Instantiate prefab
-			GameObject go = Instantiate(genericWindowPrefab);
-
-			// Store component
-			GenericWindow window = go.GetComponent<GenericWindow>();
-
-			// Add to list
-			genericWindow.Add(window);
-
-			// Assign parent
-			go.transform.SetParent(genericWindowParent, false);		
-
-			return window;
-		}
-
-		/// <summary>
-		/// Remove window from list and destroy the gameobject
-		/// </summary>
-		public void DestroyGenericWindow(GenericWindow window) {
-			genericWindow.Remove(window);
-			Destroy(window.gameObject);
-		}
-
-		public static void SetLineMaterialTiling(float tiling)
-		{
-			foreach (Material mat in Instance.lineMaterials)
-			{
-				if (mat != null)
-				{
-					if (mat.HasProperty("_MainTex"))
-						mat.mainTextureScale = new Vector2(tiling, 1f);
-				}
-			}
-		}
-
 		public static void ShowNetworkingBlocker()
 		{
 			Instance.networkingBlocker.transform.SetAsLastSibling();
@@ -310,16 +149,6 @@ namespace MSP2050.Scripts
 			Instance.toolBar.ShowToolBar(false);
 		}
 		
-		public static void ShowLayerBar(bool show)
-		{
-			Instance.layerPanel.gameObject.SetActive(show);
-		}
-
-		public static void ShowTimeBar(bool show)
-		{
-			Instance.timeBar.gameObject.SetActive(show);
-		}
-
 		public void ToolbarTitleVisibility(bool enabled, FSM.ToolbarInput button)
 		{
 			for (int i = 0; i < ToolbarButtons.Count; i++)
@@ -371,7 +200,6 @@ namespace MSP2050.Scripts
 			{
 				if (buttons.Length <= 0)
 				{
-					//ToolbarButtons[i].interactable = enabled;
 					toolBar.SetActive(ToolbarButtons[i], enabled);
 				}
 				else
@@ -380,7 +208,6 @@ namespace MSP2050.Scripts
 					{
 						if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == buttons[j])
 						{
-							//ToolbarButtons[i].interactable = enabled;
 							toolBar.SetActive(ToolbarButtons[i], enabled);
 						}
 					}
@@ -388,16 +215,6 @@ namespace MSP2050.Scripts
 			}
 		}
 		
-		public static void CreatePropertiesWindow(SubEntity subentity, Vector3 worldSamplePosition, Vector3 windowPosition)
-		{
-			InterfaceCanvas.Instance.propertiesWindow.ShowPropertiesWindow(subentity, worldSamplePosition, windowPosition);
-		}
-
-		public static void CreateLayerProbeWindow(List<SubEntity> subentities, Vector3 worldSamplePosition, Vector3 windowPosition)
-		{
-			InterfaceCanvas.Instance.layerProbeWindow.ShowLayerProbeWindow(subentities, worldSamplePosition, windowPosition);
-		}
-
 		public static List<EntityType> GetCurrentEntityTypeSelection()
 		{
 			return Instance.activePlanWindow.GetEntityTypeSelection();
@@ -444,6 +261,67 @@ namespace MSP2050.Scripts
 		public void RegisterToolbarButton(Button button)
 		{
 			ToolbarButtons.Add(button);
+		}
+
+		public void TriggerInteractionCallback(string name, string[] tags)
+		{
+			interactionEvent?.Invoke(name, tags);
+		}
+
+		public void RegisterInteractionListener(Action<string, string[]> callback)
+		{
+			interactionEvent += callback;
+		}
+
+		public void UnregisterInteractionListener(Action<string, string[]> callback)
+		{
+			interactionEvent -= callback;
+		}
+
+		public void RegisterUIReference(string name, Button button)
+		{
+			buttonUIReferences[name] = button;
+		}
+
+		public void RegisterUIReference(string name, Toggle toggle)
+		{
+			toggleUIReferences[name] = toggle;
+		}
+
+		public void RegisterUIReference(string name, IPointerClickHandler ui)
+		{
+			genericUIReferences[name] = ui;
+		}
+
+		public void UnregisterUIReference(string name)
+		{
+			if (buttonUIReferences.ContainsKey(name))
+				buttonUIReferences.Remove(name);
+			else if (toggleUIReferences.ContainsKey(name))
+				toggleUIReferences.Remove(name);
+			else if (genericUIReferences.ContainsKey(name))
+				genericUIReferences.Remove(name);
+		}
+
+		public Button GetUIButton(string name)
+		{
+			if (buttonUIReferences.TryGetValue(name, out var result))
+				return result;
+			return null;
+		}
+
+		public Toggle GetUIToggle(string name)
+		{
+			if (toggleUIReferences.TryGetValue(name, out var result))
+				return result;
+			return null;
+		}
+
+		public IPointerClickHandler GetUIInteractable(string name)
+		{
+			if (genericUIReferences.TryGetValue(name, out var result))
+				return result;
+			return null;
 		}
 	}
 }

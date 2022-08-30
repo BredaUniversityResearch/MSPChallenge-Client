@@ -43,7 +43,6 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private List<GenericContent> genericContent = new List<GenericContent>();
 		private GameObject modalBackground;
 
 		void Start()
@@ -80,73 +79,29 @@ namespace MSP2050.Scripts
 			//40f = topbar size
 			SetPosition(new Vector2((corners[1].x - corners[2].x) * 0.5f * (1f / scale), (corners[1].y - corners[0].y - 40f) * 0.5f * (1f / scale)));
 		}
-	
-		/// <summary>
-		/// Set window title
-		/// </summary>
+		
 		public void SetTitle(string text) {
 			title.text = text;
 		}
 
-		/// <summary>
-		/// Set window position
-		/// </summary>
 		public void SetPosition(Vector2 pos) {
-			//LayoutRebuilder.ForceRebuildLayoutImmediate(windowTransform);
 			windowTransform.anchoredPosition = pos;
 		}
 
-		/// <summary>
-		/// Get window position
-		/// </summary>
 		public Vector2 GetPosition()
 		{
 			return windowTransform.anchoredPosition;
 		}
 
-		/// <summary>
-		/// Set window width
-		/// </summary>
 		public void SetWidth(float width) {
 			windowTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mathf.Clamp(width, 150f, 800f));
 		}
 
-		/// <summary>
-		/// Get window width
-		/// </summary>
 		public Vector2 GetSize()
 		{
 			return windowTransform.sizeDelta;
 		}
 
-		/// <summary>
-		/// Destroy this
-		/// </summary>
-		public void Destroy() {
-        
-			if (modalBackground) {
-				Destroy(modalBackground.gameObject);
-			}
-
-			if (CloseWindowDelegate != null)
-			{
-				CloseWindowDelegate();
-			}
-
-			InterfaceCanvas.Instance.DestroyGenericWindow(this);
-		}
-
-		/// <summary>
-		/// Remove from list and destroy a content window
-		/// </summary>
-		public void DestroyGenericContent(GenericContent content) {
-			genericContent.Remove(content);
-			Destroy(content.gameObject);
-		}
-
-		/// <summary>
-		/// Hide the content
-		/// </summary>
 		public void Hide() 
 		{
 			if (OnAttemptHideWindow == null || OnAttemptHideWindow())
@@ -161,36 +116,6 @@ namespace MSP2050.Scripts
 			{
 				Hide();
 			}
-		}
-
-		/// <summary>
-		/// Create a content window
-		/// </summary>
-		public GenericContent CreateContentWindow() {
-
-			GenericContent content = GenerateContentWindow();
-
-			return content;
-		}
-
-		/// <summary>
-		/// Generates the content window
-		/// </summary>
-		private GenericContent GenerateContentWindow() {
-
-			// Instantiate prefab
-			GameObject go = Instantiate(genericContentPrefab);
-
-			// Store component
-			GenericContent content = go.GetComponent<GenericContent>();
-
-			// Add to list
-			genericContent.Add(go.GetComponent<GenericContent>());
-
-			// Assign parent
-			go.transform.SetParent(contentLocation, false);
-
-			return content;
 		}
 
 		/// <summary>
