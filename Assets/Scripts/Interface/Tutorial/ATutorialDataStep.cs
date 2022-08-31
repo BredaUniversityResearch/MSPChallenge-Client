@@ -5,12 +5,16 @@ namespace MSP2050.Scripts
 {
 	public abstract class ATutorialDataStep
 	{
-		public string m_headerText;
-		public string m_contentText;
+		[SerializeField] protected string m_headerText;
+		[SerializeField] protected string m_contentText;
+		
+		public abstract void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep);
+		public abstract void ExitStep(TutorialManager a_manager);
+		public abstract void Update(TutorialManager a_manager);
 
-		//Prerequisite within sequence
-
-		//TODO: branching next steps
-		//Alt: single step with multiple versions based on condition
+		public virtual bool CheckPrerequisites()
+		{
+			return true;
+		}
 	}
 }

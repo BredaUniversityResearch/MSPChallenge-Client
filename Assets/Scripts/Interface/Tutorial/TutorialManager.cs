@@ -5,38 +5,80 @@ namespace MSP2050.Scripts
 {
 	public class TutorialManager : MonoBehaviour
 	{
+		[SerializeField] private GameObject m_tutorialUIPrefab;
+
+		TutorialUI m_UI;
 		TutorialData m_data;
 		int m_currentStep;
-
-
-		void Start()
-		{
-
-		}
+		
+		public TutorialUI UI => m_UI;
 
 		private void Update()
 		{
-			//Check current step completion
-			//If not complete: check current step prerequisites
-			//If not met: go back until met
+			if (m_currentStep >= 0)
+			{
+				m_data.m_steps[m_currentStep].Update(this);
+			}
 		}
-
 
 		public void StartTutorial(TutorialData a_tutorialData)
 		{
 			m_data = a_tutorialData;
+			if (m_UI == null)
+			{
+				m_UI = Instantiate(m_tutorialUIPrefab, transform).GetComponent<TutorialUI>();
+				m_UI.Initialise(MoveToNextStep, MoveToPreviousStep);
+			}
+
 			m_currentStep = -1;
 			MoveToNextStep();
 		}
 
+		public void CloseTutorial()
+		{
+			if (m_currentStep >= 0)
+			{
+				m_data.m_steps[m_currentStep].ExitStep(this);
+			}
+			Destroy(m_UI.gameObject);
+			m_UI = null;
+			m_currentStep = -1;
+		}
+
 		public void MoveToNextStep()
 		{
-			//TODO
+			if (m_currentStep >= 0)
+			{
+				m_data.m_steps[m_currentStep].ExitStep(this);
+			}
+
+
+			m_currentStep++;
+			if(m_currentStep == m_data.m_steps.Length)
+				CloseTutorial();
+			else
+				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length-1);
 		}
 
 		public void MoveToPreviousStep()
 		{
-			//TODO: check prerequisites, keep going back until they are met
+			m_data.m_steps[m_currentStep].ExitStep(this);
+			m_currentStep--;
+			while (m_currentStep >= 0)
+			{
+				if (m_data.m_steps[m_currentStep].CheckPrerequisites())
+					break;
+				m_currentStep--;
+			}
+
+			if (m_currentStep >= 0)
+			{
+				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1);
+			}
+			else
+			{
+				CloseTutorial();
+			}
 		}
 	}
 }

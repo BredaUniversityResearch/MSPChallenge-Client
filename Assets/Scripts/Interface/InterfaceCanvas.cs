@@ -143,6 +143,18 @@ namespace MSP2050.Scripts
 			ToolbarEnable(true);
 		}
 
+		public static void SetLineMaterialTiling(float tiling)
+		{
+			foreach (Material mat in Instance.lineMaterials)
+			{
+				if (mat != null)
+				{
+					if (mat.HasProperty("_MainTex"))
+						mat.mainTextureScale = new Vector2(tiling, 1f);
+				}
+			}
+		}
+
 		public void StopEditing()
 		{
 			ToolbarEnable(false);

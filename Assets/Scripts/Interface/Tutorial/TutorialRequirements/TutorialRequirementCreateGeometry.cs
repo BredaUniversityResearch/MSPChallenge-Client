@@ -5,5 +5,10 @@ namespace MSP2050.Scripts
 {
 	public class TutorialRequirementCreateGeometry : ATutorialRequirement
 	{
+		public override bool EvaluateRequirement()
+		{
+			//TODO
+			return true;
+		}
 	}
 }

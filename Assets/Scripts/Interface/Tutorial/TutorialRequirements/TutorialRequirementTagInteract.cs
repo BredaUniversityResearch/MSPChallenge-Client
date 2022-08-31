@@ -14,14 +14,15 @@ namespace MSP2050.Scripts
 			return m_complete;
 		}
 
-		public virtual void ActivateRequirement()
+		public override void ActivateRequirement()
 		{
 			m_complete = false;
 			InterfaceCanvas.Instance.RegisterInteractionListener(OnInteract);
 		}
 
-		public virtual void DeactivateRequirement()
+		public override void DeactivateRequirement()
 		{
+			m_complete = false;
 			InterfaceCanvas.Instance.UnregisterInteractionListener(OnInteract);
 		}
 

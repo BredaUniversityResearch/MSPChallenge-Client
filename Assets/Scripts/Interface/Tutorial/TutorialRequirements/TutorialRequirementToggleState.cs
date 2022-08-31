@@ -45,7 +45,7 @@ namespace MSP2050.Scripts
 			return m_complete;
 		}
 
-		public virtual void ActivateRequirement()
+		public override void ActivateRequirement()
 		{
 			m_complete = false;
 			m_toggles = new Toggle[m_toggleNames.Length];
@@ -53,6 +53,11 @@ namespace MSP2050.Scripts
 			{
 				m_toggles[i] = InterfaceCanvas.Instance.GetUIToggle(m_toggleNames[i]);
 			}
+		}
+
+		public override void DeactivateRequirement()
+		{
+			m_complete = false;
 		}
 	}
 }

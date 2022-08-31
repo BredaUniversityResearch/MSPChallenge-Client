@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public class TutorialRequirementMapPan : ATutorialRequirement
+	public class TutorialRequirementObjectActive : ATutorialRequirement
 	{
 		public override bool EvaluateRequirement()
 		{
