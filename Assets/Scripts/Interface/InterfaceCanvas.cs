@@ -79,9 +79,9 @@ namespace MSP2050.Scripts
 		[HideInInspector]
 		public bool ignoreLayerToggleCallback;//If this is true the layer callback labda functions will return immediately
 
-		private Dictionary<string, Button> buttonUIReferences;
-		private Dictionary<string, Toggle> toggleUIReferences;
-		private Dictionary<string, IPointerClickHandler> genericUIReferences;
+		private Dictionary<string, Button> buttonUIReferences = new Dictionary<string, Button>();
+		private Dictionary<string, Toggle> toggleUIReferences = new Dictionary<string, Toggle>();
+		private Dictionary<string, IPointerClickHandler> genericUIReferences = new Dictionary<string, IPointerClickHandler>();
 		private event Action<string, string[]> interactionEvent;
 
 		private void Awake()

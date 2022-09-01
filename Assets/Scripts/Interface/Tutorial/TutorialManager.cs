@@ -5,6 +5,9 @@ namespace MSP2050.Scripts
 {
 	public class TutorialManager : MonoBehaviour
 	{
+		private static TutorialManager m_instance;
+		public static TutorialManager Instance => m_instance;
+
 		[SerializeField] private GameObject m_tutorialUIPrefab;
 
 		TutorialUI m_UI;
@@ -13,9 +16,19 @@ namespace MSP2050.Scripts
 		
 		public TutorialUI UI => m_UI;
 
+		private void Awake()
+		{
+			m_instance = this;
+		}
+
+		private void OnDestroy()
+		{
+			m_instance = null;
+		}
+
 		private void Update()
 		{
-			if (m_currentStep >= 0)
+			if (m_data != null && m_currentStep >= 0)
 			{
 				m_data.m_steps[m_currentStep].Update(this);
 			}
@@ -27,7 +40,7 @@ namespace MSP2050.Scripts
 			if (m_UI == null)
 			{
 				m_UI = Instantiate(m_tutorialUIPrefab, transform).GetComponent<TutorialUI>();
-				m_UI.Initialise(MoveToNextStep, MoveToPreviousStep);
+				m_UI.Initialise(MoveToNextStep, MoveToPreviousStep, CloseTutorial);
 			}
 
 			m_currentStep = -1;
@@ -36,11 +49,12 @@ namespace MSP2050.Scripts
 
 		public void CloseTutorial()
 		{
-			if (m_currentStep >= 0)
+			if (m_currentStep >= 0 && m_currentStep < m_data.m_steps.Length)
 			{
 				m_data.m_steps[m_currentStep].ExitStep(this);
 			}
 			Destroy(m_UI.gameObject);
+			m_data = null;
 			m_UI = null;
 			m_currentStep = -1;
 		}

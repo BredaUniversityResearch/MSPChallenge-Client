@@ -70,6 +70,7 @@ namespace MSP2050.Scripts
 				foreach (ATutorialRequirement prerequisite in m_prerequisites)
 					prerequisite.DeactivateRequirement();
 			}
+			//TODO: Unhighlight objects
 		}
 
 		public override void Update(TutorialManager a_manager)
@@ -88,6 +89,10 @@ namespace MSP2050.Scripts
 							break;
 						}
 					}
+				}
+				if(m_complete)
+				{
+					a_manager.UI.SetRequirementChecked(true);
 				}
 			}
 
