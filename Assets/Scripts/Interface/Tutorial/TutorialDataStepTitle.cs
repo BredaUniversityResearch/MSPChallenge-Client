@@ -5,6 +5,8 @@ namespace MSP2050.Scripts
 {
 	public class TutorialDataStepTitle : ATutorialDataStep
 	{
+		[SerializeField, TextArea] protected string m_headerText;
+		[SerializeField, TextArea] protected string m_contentText;
 		[SerializeField] protected string m_partText;
 
 		public override void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep)

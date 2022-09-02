@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using Unity.Plastic.Newtonsoft.Json.Serialization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -27,6 +29,8 @@ namespace MSP2050.Scripts
 		private Vector3 autoPanTarget;
 		private IEasingFunction autoPanEase = new EaseTunableSlowFastSlow(-0.5f);
 		private bool canPanOnCurrentMousePress;
+
+		public event System.Action onPanStart;
 
 		protected void Start()
 		{
@@ -86,6 +90,7 @@ namespace MSP2050.Scripts
 			prevPos = transform.position;
 			panOrigin = cam.ScreenToViewportPoint(Input.mousePosition);
 			canPanOnCurrentMousePress = true;
+			onPanStart?.Invoke();
 		}
 
 		private void Pan()

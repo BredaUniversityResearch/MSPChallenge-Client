@@ -34,6 +34,8 @@ namespace MSP2050.Scripts
 	
 		private Coroutine rescaleCoroutine = null;
 
+		public event System.Action onScrollZoom;
+
 		protected void Start()
 		{
 			UpdateBounds();
@@ -84,8 +86,9 @@ namespace MSP2050.Scripts
 
 			if (wheel != 0)
 			{
-				ZoomOrthoCamera(cameraComponent.ScreenToWorldPoint(Input.mousePosition), (wheel * speed * cameraComponent.orthographicSize) /**Time.deltaTime*/ * 0.01f);
+				ZoomOrthoCamera(cameraComponent.ScreenToWorldPoint(Input.mousePosition), (wheel * speed * cameraComponent.orthographicSize) * 0.01f);
 				autoZoom = false;
+				onScrollZoom?.Invoke();
 			}
 		}
 

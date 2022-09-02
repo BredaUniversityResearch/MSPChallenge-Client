@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 {
 	public class RegisterInteraction : SerializedMonoBehaviour
 	{
-		[SerializeField] IPointerClickHandler m_uiElement;
+		[SerializeField] Selectable m_uiElement;
 		[SerializeField] string[] m_tags;
 
 		void Start()
@@ -23,11 +23,11 @@ namespace MSP2050.Scripts
 			if (m_uiElement is Toggle t)
 			{
 				InterfaceCanvas.Instance.RegisterUIReference(gameObject.name, t);
-				t.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.TriggerInteractionCallback(gameObject.name, m_tags));
+				t.onValueChanged.AddListener((boolv) => InterfaceCanvas.Instance.TriggerInteractionCallback(gameObject.name, m_tags));
 			}
 			else
 			{
-				InterfaceCanvas.Instance.RegisterUIReference(gameObject.name, m_uiElement);
+				InterfaceCanvas.Instance.RegisterUIReference(gameObject.name, gameObject);
 			}
 		}
 	}

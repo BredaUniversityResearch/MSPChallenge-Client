@@ -5,6 +5,8 @@ namespace MSP2050.Scripts
 {
 	public class TutorialDataStepRegular : ATutorialDataStep
 	{
+		[SerializeField, TextArea] protected string m_headerText;
+		[SerializeField, TextArea] protected string m_contentText;
 		[SerializeField] bool m_alignTop;
 		[SerializeField] ATutorialRequirement[] m_completionRequirements;
 		[SerializeField] ATutorialRequirement[] m_prerequisites;
@@ -54,7 +56,8 @@ namespace MSP2050.Scripts
 			}
 
 			a_manager.UI.SetUIToRegular(m_headerText, m_contentText, m_completionRequirements != null && m_completionRequirements.Length > 0, m_alignTop, m_visualsPrefab);
-			//TODO: Highlight objects
+			if(m_highlightedObjects != null && m_highlightedObjects.Length > 0)
+				HighlightManager.instance.SetUIHighlights(m_highlightedObjects);
 			m_complete = false;
 		}
 
@@ -70,7 +73,7 @@ namespace MSP2050.Scripts
 				foreach (ATutorialRequirement prerequisite in m_prerequisites)
 					prerequisite.DeactivateRequirement();
 			}
-			//TODO: Unhighlight objects
+			HighlightManager.instance.ClearUIHighlights();
 		}
 
 		public override void Update(TutorialManager a_manager)

@@ -81,7 +81,7 @@ namespace MSP2050.Scripts
 
 		private Dictionary<string, Button> buttonUIReferences = new Dictionary<string, Button>();
 		private Dictionary<string, Toggle> toggleUIReferences = new Dictionary<string, Toggle>();
-		private Dictionary<string, IPointerClickHandler> genericUIReferences = new Dictionary<string, IPointerClickHandler>();
+		private Dictionary<string, GameObject> genericUIReferences = new Dictionary<string, GameObject>();
 		private event Action<string, string[]> interactionEvent;
 
 		private void Awake()
@@ -300,7 +300,7 @@ namespace MSP2050.Scripts
 			toggleUIReferences[name] = toggle;
 		}
 
-		public void RegisterUIReference(string name, IPointerClickHandler ui)
+		public void RegisterUIReference(string name, GameObject ui)
 		{
 			genericUIReferences[name] = ui;
 		}
@@ -329,7 +329,18 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public IPointerClickHandler GetUIInteractable(string name)
+		public GameObject GetUIObject(string name)
+		{
+			if (genericUIReferences.TryGetValue(name, out var result))
+				return result;
+			if (buttonUIReferences.TryGetValue(name, out var result1))
+				return result1.gameObject;
+			if (toggleUIReferences.TryGetValue(name, out var result2))
+				return result2.gameObject;
+			return null;
+		}
+
+		public GameObject GetUIGeneric(string name)
 		{
 			if (genericUIReferences.TryGetValue(name, out var result))
 				return result;
