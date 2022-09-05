@@ -5,10 +5,11 @@ namespace MSP2050.Scripts
 {
 	public class TutorialRequirementEditingState : ATutorialRequirement
 	{
+		[SerializeField] private FSMState.EEditingStateType m_targetState;
+
 		public override bool EvaluateRequirement()
 		{
-			//TODO
-			return true;
+			return FSM.CurrentState.StateType == m_targetState;
 		}
 	}
 }

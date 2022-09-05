@@ -19,6 +19,7 @@ namespace MSP2050.Scripts
 			PointSubEntity subEntity = entity.GetSubEntity(0) as PointSubEntity;
 			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 
+			fsm.TriggerGeometryComplete();
 			fsm.AddToUndoStack(new CreateEnergyPointOperation(subEntity, planLayer));
 		}
 	}
