@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		HashSet<PolygonSubEntity> currentBoxSelection = new HashSet<PolygonSubEntity>();
 
 		PolygonSubEntity previousHover = null;
+		public override EEditingStateType StateType => EEditingStateType.Edit;
 
 		public SelectPolygonsState(FSM fsm, PlanLayer planLayer) : base(fsm)
 		{

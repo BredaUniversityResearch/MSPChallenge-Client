@@ -9,13 +9,13 @@ namespace MSP2050.Scripts
 
 		public override void ActivateRequirement()
 		{
-			CameraManager.Instance.cameraPan.onPanStart += OnPan;
+			CameraManager.Instance.cameraZoom.onScrollZoom += OnZoom;
 			m_complete = false;
 		}
 
 		public override void DeactivateRequirement()
 		{
-			CameraManager.Instance.cameraPan.onPanStart -= OnPan;
+			CameraManager.Instance.cameraZoom.onScrollZoom -= OnZoom;
 			m_complete = false;
 		}
 
@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 			return m_complete;
 		}
 
-		void OnPan()
+		void OnZoom()
 		{
 			m_complete = true;
 		}

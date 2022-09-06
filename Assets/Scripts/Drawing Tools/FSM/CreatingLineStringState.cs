@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 	{
 		protected LineStringSubEntity subEntity;
 		protected PlanLayer planLayer;
-
+		public override EEditingStateType StateType => EEditingStateType.Create;
 		public CreatingLineStringState(FSM fsm, PlanLayer planLayer, LineStringSubEntity subEntity) : base(fsm)
 		{
 			this.subEntity = subEntity;

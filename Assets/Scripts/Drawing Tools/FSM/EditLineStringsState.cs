@@ -28,6 +28,7 @@ namespace MSP2050.Scripts
 
 		LineStringSubEntity insertPointPreviewSubEntity = null;
 		int insertPointPreviewIndex = -1;
+		public override EEditingStateType StateType => EEditingStateType.Edit;
 
 		public EditLineStringsState(FSM fsm, PlanLayer planLayer, HashSet<LineStringSubEntity> selectedSubEntities) : base(fsm)
 		{

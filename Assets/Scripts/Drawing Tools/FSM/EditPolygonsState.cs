@@ -31,6 +31,7 @@ namespace MSP2050.Scripts
 
 		PolygonSubEntity insertPointPreviewSubEntity = null;
 		int insertPointPreviewIndex = -1;
+		public override EEditingStateType StateType => EEditingStateType.Edit;
 
 		public EditPolygonsState(FSM fsm, PlanLayer planLayer, HashSet<PolygonSubEntity> selectedSubEntities) : base(fsm)
 		{

@@ -9,6 +9,7 @@ namespace MSP2050.Scripts
 		PlanLayer planLayer;
 		PolygonLayer baseLayer;
 		private bool showingToolTip = false;
+		public override EEditingStateType StateType => EEditingStateType.Create;
 
 		public StartCreatingPolygonState(FSM fsm, PlanLayer planLayer) : base(fsm)
 		{

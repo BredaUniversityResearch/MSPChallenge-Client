@@ -10,6 +10,8 @@ namespace MSP2050.Scripts
 		protected PlanLayer planLayer;
 		private bool showingToolTip = false;
 
+		public override EEditingStateType StateType => EEditingStateType.Create;
+
 		public CreatePointsState(FSM fsm, PlanLayer planLayer) : base(fsm)
 		{
 			this.planLayer = planLayer;
