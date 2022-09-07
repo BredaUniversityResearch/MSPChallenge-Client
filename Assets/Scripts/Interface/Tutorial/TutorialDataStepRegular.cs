@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		[SerializeField] ATutorialRequirement[] m_prerequisites;
 		[SerializeField] string[] m_highlightedObjects;
 		[SerializeField] GameObject m_visualsPrefab;
+		[SerializeField] ATutorialAction[] m_enterStepActions;
 
 		private bool m_complete;
 
@@ -58,6 +59,12 @@ namespace MSP2050.Scripts
 			a_manager.UI.SetUIToRegular(m_headerText, m_contentText, m_completionRequirements != null && m_completionRequirements.Length > 0, m_alignTop, m_visualsPrefab);
 			if(m_highlightedObjects != null && m_highlightedObjects.Length > 0)
 				HighlightManager.instance.SetUIHighlights(m_highlightedObjects);
+
+			if (m_enterStepActions != null)
+			{
+				foreach(ATutorialAction action in m_enterStepActions)
+					action.Invoke();
+			}
 			m_complete = false;
 		}
 
@@ -100,7 +107,7 @@ namespace MSP2050.Scripts
 			}
 
 			//Check prerequisites
-			if (!m_complete && !CheckPrerequisites())
+			if ((m_completionRequirements == null || !m_complete) && !CheckPrerequisites())
 			{
 				a_manager.MoveToPreviousStep();
 			}

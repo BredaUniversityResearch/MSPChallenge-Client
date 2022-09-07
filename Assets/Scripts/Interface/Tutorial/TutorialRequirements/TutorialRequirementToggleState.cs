@@ -7,6 +7,7 @@ namespace MSP2050.Scripts
 	public class TutorialRequirementToggleState : ATutorialRequirement
 	{
 		[SerializeField] private string[] m_toggleNames;
+		[SerializeField] private bool m_targetState = true;
 		[SerializeField] private bool m_requireAll;
 
 		private bool m_complete;
@@ -21,7 +22,7 @@ namespace MSP2050.Scripts
 				bool allChecked = true;
 				foreach (Toggle toggle in m_toggles)
 				{
-					if (!toggle.isOn)
+					if (toggle.isOn != m_targetState)
 					{
 						allChecked = false;
 						break;
@@ -34,9 +35,9 @@ namespace MSP2050.Scripts
 			{
 				foreach (Toggle toggle in m_toggles)
 				{
-					if (toggle.isOn)
+					if (toggle.isOn == m_targetState)
 					{
-						m_complete = false;
+						m_complete = true;
 						break;
 					}
 				}
