@@ -17,13 +17,13 @@ namespace MSP2050.Scripts
 		public override void ActivateRequirement()
 		{
 			m_complete = false;
-			InterfaceCanvas.Instance.RegisterInteractionListener(OnInteract);
+			InterfaceCanvas.Instance.interactionEvent += OnInteract;
 		}
 
 		public override void DeactivateRequirement()
 		{
 			m_complete = false;
-			InterfaceCanvas.Instance.UnregisterInteractionListener(OnInteract);
+			InterfaceCanvas.Instance.interactionEvent -= OnInteract;
 		}
 
 		void OnInteract(string a_name, string[] a_tags)

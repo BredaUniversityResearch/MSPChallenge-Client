@@ -43,13 +43,13 @@ namespace MSP2050.Scripts
 				if (m_currentSize > m_maxSize)
 				{
 					m_currentSize = m_minSize;
-					m_image.color = Color.clear;
+					m_image.color = new Color(m_image.color.r, m_image.color.g, m_image.color.b, 0f);
 					m_remainingInterval = m_interval;
 				}
 				else
 				{
 					m_rect.sizeDelta = new Vector2(m_currentSize, m_currentSize);
-					m_image.color = new Color(1f, 1f, 1f, m_alphaCurve.Evaluate((m_currentSize - m_minSize) / (m_maxSize - m_minSize)));
+					m_image.color = new Color(m_image.color.r, m_image.color.g, m_image.color.b, m_alphaCurve.Evaluate((m_currentSize - m_minSize) / (m_maxSize - m_minSize)));
 				}
 				
 			}

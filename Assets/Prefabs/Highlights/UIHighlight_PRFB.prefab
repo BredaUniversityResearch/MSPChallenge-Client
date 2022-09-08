@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 9142258850430607739}
   - component: {fileID: 9142258850430607738}
   - component: {fileID: 9142258850430607737}
+  - component: {fileID: 7277923958102992088}
   m_Layer: 5
   m_Name: UIHighlight_PRFB
   m_TagString: Untagged
@@ -66,7 +67,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b492a926d9a2baf439ba0de14fa3a228, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f59fbbe6989dc5749a11ca615cd8ecc7, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -117,3 +118,21 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   m_image: {fileID: 9142258850430607738}
+--- !u!114 &7277923958102992088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9142258850430607687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef4c00f50fb0be243a14fabcb408cd5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colourAsset: {fileID: 11400000, guid: f60f649dcdfc7ca4883981ac12c67ef5, type: 2}
+  graphics:
+  - {fileID: 9142258850430607738}
+  colourChanged:
+    m_PersistentCalls:
+      m_Calls: []

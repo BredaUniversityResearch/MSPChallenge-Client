@@ -82,7 +82,8 @@ namespace MSP2050.Scripts
 		private Dictionary<string, Button> buttonUIReferences = new Dictionary<string, Button>();
 		private Dictionary<string, Toggle> toggleUIReferences = new Dictionary<string, Toggle>();
 		private Dictionary<string, GameObject> genericUIReferences = new Dictionary<string, GameObject>();
-		private event Action<string, string[]> interactionEvent;
+		public event Action<string, string[]> interactionEvent;
+		public event Action<string, GameObject> uiReferenceRegisteredEvent;
 
 		private void Awake()
 		{
@@ -280,29 +281,22 @@ namespace MSP2050.Scripts
 			interactionEvent?.Invoke(name, tags);
 		}
 
-		public void RegisterInteractionListener(Action<string, string[]> callback)
-		{
-			interactionEvent += callback;
-		}
-
-		public void UnregisterInteractionListener(Action<string, string[]> callback)
-		{
-			interactionEvent -= callback;
-		}
-
 		public void RegisterUIReference(string name, Button button)
 		{
 			buttonUIReferences[name] = button;
+			uiReferenceRegisteredEvent?.Invoke(name, button.gameObject);
 		}
 
 		public void RegisterUIReference(string name, Toggle toggle)
 		{
 			toggleUIReferences[name] = toggle;
+			uiReferenceRegisteredEvent?.Invoke(name, toggle.gameObject);
 		}
 
 		public void RegisterUIReference(string name, GameObject ui)
 		{
 			genericUIReferences[name] = ui;
+			uiReferenceRegisteredEvent?.Invoke(name, ui.gameObject);
 		}
 
 		public void UnregisterUIReference(string name)

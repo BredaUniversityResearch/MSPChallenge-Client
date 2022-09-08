@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Runtime.Remoting.Messaging;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -16,32 +17,6 @@ namespace MSP2050.Scripts
 
 		private bool m_complete;
 
-		//===Progression requirements
-		/* Scroll => register specific event
-		 * Map drag => register specific event
-		 * Create geometry complete => register specific event
-		 * Press button => UI string reference
-		 * Toggle state => UI string reference
-		 * Press one of X specific buttons (ex: window more info ? buttons)  => UI string reference
-		 * Press any button of type X (ex: layer category, layer) => button tags, generic button callback receiver InterfaceCanvas
-		 */
-
-		//===Graphics/animation
-		//Sprite
-		//Sprite sequence (cut) + fps playback
-
-		//===Elements to highlight
-
-		//===Automatic actions (are these needed?)
-		/* Open/close windows => UI string reference toggles + state
-		 */
-
-		//Tutorial sequences are shown in series (e.g. making a plan), the system auto detects at what step in the sequence you are and will move you back if you mess up.
-		//This would require tutorial step prerequisites, besides progression requirements:
-		/* Window open => UI string reference
-		 * In edit mode
-		 * In create mode
-		 */
 		public override void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep)
 		{
 			//Initialise requirements
@@ -65,7 +40,15 @@ namespace MSP2050.Scripts
 				foreach(ATutorialAction action in m_enterStepActions)
 					action.Invoke();
 			}
-			m_complete = false;
+
+			if(m_completionRequirements == null || m_completionRequirements.Length == 0)
+				m_complete = true;
+			else if (CheckCompletion())
+			{
+				//Don't automatically move on if we are complete on start
+				m_complete = true;
+				a_manager.UI.SetRequirementChecked(true);
+			}
 		}
 
 		public override void ExitStep(TutorialManager a_manager)
@@ -88,21 +71,11 @@ namespace MSP2050.Scripts
 			//Check completion
 			if (!m_complete)
 			{
-				m_complete = true;
-				if (m_completionRequirements != null && m_completionRequirements.Length > 0)
-				{
-					foreach (ATutorialRequirement requirement in m_completionRequirements)
-					{
-						if (!requirement.EvaluateRequirement())
-						{
-							m_complete = false;
-							break;
-						}
-					}
-				}
+				CheckCompletion();
 				if(m_complete)
 				{
 					a_manager.UI.SetRequirementChecked(true);
+					a_manager.MoveToNextStep();
 				}
 			}
 
@@ -111,6 +84,23 @@ namespace MSP2050.Scripts
 			{
 				a_manager.MoveToPreviousStep();
 			}
+		}
+
+		bool CheckCompletion()
+		{
+			m_complete = true;
+			if (m_completionRequirements != null && m_completionRequirements.Length > 0)
+			{
+				foreach (ATutorialRequirement requirement in m_completionRequirements)
+				{
+					if (!requirement.EvaluateRequirement())
+					{
+						m_complete = false;
+						break;
+					}
+				}
+			}
+			return m_complete;
 		}
 
 		public override bool CheckPrerequisites()

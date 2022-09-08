@@ -23,10 +23,12 @@ namespace MSP2050.Scripts
 		[SerializeField] private Transform uiHighlightParent;
 		List<GameObject> pointHighlightObjects = new List<GameObject>();
 		List<GameObject> uiHighlightObjects = new List<GameObject>();
+		private List<string> unresolvedHighlights = new List<string>();
 
 		void Start()
 		{
 			singleton = this;
+			InterfaceCanvas.Instance.uiReferenceRegisteredEvent += OnUIObjectRegistered;
 		}
 
 		public void HighlightPointSubEntity(PointSubEntity subEnt)
@@ -49,6 +51,7 @@ namespace MSP2050.Scripts
 			foreach (GameObject go in uiHighlightObjects)
 				Destroy(go);
 			uiHighlightObjects = new List<GameObject>();
+			unresolvedHighlights = new List<string>();
 		}
 
 		public void SetUIHighlights(string[] uiReferences)
@@ -67,7 +70,22 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					Debug.LogError("Trying to highlight not existent UI object: " + reference);
+					unresolvedHighlights.Add(reference);
+				}
+			}
+		}
+
+		void OnUIObjectRegistered(string name, GameObject obj)
+		{
+			for (int i = 0; i < unresolvedHighlights.Count; i++)
+			{
+				if (unresolvedHighlights[i] == name)
+				{
+					GameObject temp = Instantiate(uiHighlightPrefab, uiHighlightParent) as GameObject;
+					temp.GetComponent<HighlightPulse>().SetTarget(obj.transform);
+					uiHighlightObjects.Add(temp);
+					unresolvedHighlights.RemoveAt(i);
+					break;
 				}
 			}
 		}
