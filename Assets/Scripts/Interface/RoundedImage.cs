@@ -87,6 +87,12 @@ namespace UnityEngine.UI
 			SetAllDirty();
 		}
 
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+			RoundingManager.UnRegisterUIScaleChangeReceiver(this);
+		}
+
 		protected RoundedImage()
 		{
 			useLegacyMeshGeneration = false;
