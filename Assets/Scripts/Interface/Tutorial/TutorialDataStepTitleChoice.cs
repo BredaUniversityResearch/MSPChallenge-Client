@@ -10,7 +10,7 @@ namespace MSP2050.Scripts
 
 		public override void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep)
 		{
-			a_manager.UI.SetUIToTitle(m_headerText, m_contentText, m_partText, m_continueButtonText, m_quitButtonText);
+			a_manager.UI.SetUIToTitle(m_headerText, m_contentText, m_partText, m_continueButtonText, m_quitButtonText, !a_firstStep);
 		}
 	}
 }

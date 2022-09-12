@@ -64,7 +64,7 @@ namespace MSP2050.Scripts
 			m_titlePart.text = a_part;
 
 			m_previousButton.gameObject.SetActive(a_hasPreviousButton);
-			m_nextButton.gameObject.SetActive(a_hasPreviousButton);
+			m_nextButton.gameObject.SetActive(m_hasNextButton);
 			m_nextButton.interactable = true;
 			m_titleContinueButton.gameObject.SetActive(false);
 			m_titleQuitButton.gameObject.SetActive(false);
@@ -73,13 +73,13 @@ namespace MSP2050.Scripts
 			StartCoroutine(FadeIn());
 		}
 
-		public void SetUIToTitle(string a_header, string a_content, string a_part, string a_continueButtonText, string a_quitButtonText)
+		public void SetUIToTitle(string a_header, string a_content, string a_part, string a_continueButtonText, string a_quitButtonText, bool a_hasPreviousButton)
 		{
-			StartCoroutine(SetUIToTitleFade(a_header, a_content, a_part, a_continueButtonText, a_quitButtonText));
+			StartCoroutine(SetUIToTitleFade(a_header, a_content, a_part, a_continueButtonText, a_quitButtonText, a_hasPreviousButton));
 
 		}
 
-		IEnumerator SetUIToTitleFade(string a_header, string a_content, string a_part, string a_continueButtonText, string a_quitButtonText)
+		IEnumerator SetUIToTitleFade(string a_header, string a_content, string a_part, string a_continueButtonText, string a_quitButtonText, bool a_hasPreviousButton)
 		{
 			m_fade.interactable = false;
 			yield return StartCoroutine(FadeOutCenter());
@@ -94,8 +94,9 @@ namespace MSP2050.Scripts
 			m_titlePart.text = a_part;
 
 			m_titleContinueButton.gameObject.SetActive(!string.IsNullOrEmpty(a_continueButtonText));
-			m_previousButton.gameObject.SetActive(string.IsNullOrEmpty(a_quitButtonText));
+			m_previousButton.gameObject.SetActive(a_hasPreviousButton);
 			m_titleQuitButton.gameObject.SetActive(!string.IsNullOrEmpty(a_quitButtonText));
+			m_nextButton.gameObject.SetActive(false);
 
 			m_titleQuitButtonText.text = a_quitButtonText;
 			m_titleContinueButtonText.text = a_continueButtonText;
@@ -104,20 +105,20 @@ namespace MSP2050.Scripts
 			StartCoroutine(FadeIn());
 		}
 
-		public void SetUIToRegular(string a_header, string a_content, bool a_hasRequirements, bool a_alignTop, GameObject a_graphicPrefab = null)
+		public void SetUIToRegular(string a_header, string a_content, bool a_hasRequirements, bool a_alignTop, GameObject a_graphicPrefab, bool a_preComplete)
 		{
 			
 			if(a_alignTop)
 			{
-				StartCoroutine(SetUIToRegularFade(a_header, a_content, a_hasRequirements, a_alignTop, a_graphicPrefab, new Vector2(0f, 1f), Vector2.one, new Vector2(0.5f, 1f)));
+				StartCoroutine(SetUIToRegularFade(a_header, a_content, a_hasRequirements, a_alignTop, a_graphicPrefab, a_preComplete, new Vector2(0f, 1f), Vector2.one, new Vector2(0.5f, 1f)));
 			}
 			else
 			{
-				StartCoroutine(SetUIToRegularFade(a_header, a_content, a_hasRequirements, a_alignTop, a_graphicPrefab, Vector2.zero, new Vector2(1f, 0f), new Vector2(0.5f, 0f)));
+				StartCoroutine(SetUIToRegularFade(a_header, a_content, a_hasRequirements, a_alignTop, a_graphicPrefab, a_preComplete, Vector2.zero, new Vector2(1f, 0f), new Vector2(0.5f, 0f)));
 			}
 		}
 
-		IEnumerator SetUIToRegularFade(string a_header, string a_content, bool a_hasRequirements, bool a_alignTop, GameObject a_graphicPrefab,
+		IEnumerator SetUIToRegularFade(string a_header, string a_content, bool a_hasRequirements, bool a_alignTop, GameObject a_graphicPrefab, bool a_preComplete,
 			Vector2 a_targetAnchorMin, Vector2 a_targetAnchorMax, Vector2 a_targetPivot)
 		{
 			m_fade.interactable = false;
@@ -172,7 +173,7 @@ namespace MSP2050.Scripts
 			if (a_hasRequirements)
 			{
 				m_regularCheckbox.SetActive(true);
-				SetRequirementChecked(false);
+				SetRequirementChecked(a_preComplete);
 			}
 			else
 			{

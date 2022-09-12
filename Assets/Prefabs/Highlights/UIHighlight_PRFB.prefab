@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 9142258850430607739}
   - component: {fileID: 9142258850430607738}
   - component: {fileID: 9142258850430607737}
-  - component: {fileID: 7277923958102992088}
   m_Layer: 5
   m_Name: UIHighlight_PRFB
   m_TagString: Untagged
@@ -67,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f59fbbe6989dc5749a11ca615cd8ecc7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d4ea9142f4ef7584aaeb9dd51cd92b15, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -90,8 +89,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_minSize: 16
-  m_maxSize: 176
-  m_speed: 80
+  m_maxSize: 512
+  m_speed: 200
   m_interval: 1
   m_alphaCurve:
     serializedVersion: 2
@@ -99,40 +98,22 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 1
-      inSlope: -1.0142726
-      outSlope: -1.0142726
-      tangentMode: 34
+      inSlope: -1.0328403
+      outSlope: -1.0328403
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.33333334
+      outWeight: 0.022471908
     - serializedVersion: 3
       time: 0.999465
       value: -0.01372993
-      inSlope: -4.1750317
-      outSlope: -4.1750317
+      inSlope: -2.1255753
+      outSlope: -2.1255753
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.011242026
+      inWeight: 0.02675242
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   m_image: {fileID: 9142258850430607738}
---- !u!114 &7277923958102992088
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9142258850430607687}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef4c00f50fb0be243a14fabcb408cd5d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  colourAsset: {fileID: 11400000, guid: f60f649dcdfc7ca4883981ac12c67ef5, type: 2}
-  graphics:
-  - {fileID: 9142258850430607738}
-  colourChanged:
-    m_PersistentCalls:
-      m_Calls: []

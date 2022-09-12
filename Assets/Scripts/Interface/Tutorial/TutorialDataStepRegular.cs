@@ -31,16 +31,6 @@ namespace MSP2050.Scripts
 					prerequisite.ActivateRequirement();
 			}
 
-			a_manager.UI.SetUIToRegular(m_headerText, m_contentText, m_completionRequirements != null && m_completionRequirements.Length > 0, m_alignTop, m_visualsPrefab);
-			if(m_highlightedObjects != null && m_highlightedObjects.Length > 0)
-				HighlightManager.instance.SetUIHighlights(m_highlightedObjects);
-
-			if (m_enterStepActions != null)
-			{
-				foreach(ATutorialAction action in m_enterStepActions)
-					action.Invoke();
-			}
-
 			if(m_completionRequirements == null || m_completionRequirements.Length == 0)
 				m_complete = true;
 			else if (CheckCompletion())
@@ -48,6 +38,20 @@ namespace MSP2050.Scripts
 				//Don't automatically move on if we are complete on start
 				m_complete = true;
 				a_manager.UI.SetRequirementChecked(true);
+			}
+			else
+			{
+				m_complete = false;
+			}
+
+			a_manager.UI.SetUIToRegular(m_headerText, m_contentText, m_completionRequirements != null && m_completionRequirements.Length > 0, m_alignTop, m_visualsPrefab, m_complete);
+			if(m_highlightedObjects != null && m_highlightedObjects.Length > 0)
+				HighlightManager.instance.SetUIHighlights(m_highlightedObjects);
+
+			if (m_enterStepActions != null)
+			{
+				foreach(ATutorialAction action in m_enterStepActions)
+					action.Invoke();
 			}
 		}
 

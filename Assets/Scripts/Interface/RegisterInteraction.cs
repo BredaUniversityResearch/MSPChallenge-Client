@@ -24,20 +24,25 @@ namespace MSP2050.Scripts
 			{
 				if(m_registerReference)
 					InterfaceCanvas.Instance.RegisterUIReference(gameObject.name, b);
-				b.onClick.AddListener(() => InterfaceCanvas.Instance.TriggerInteractionCallback(gameObject.name, m_tags));
+				b.onClick.AddListener(TriggerCallback);
 
 			}
 			else if (m_uiElement is Toggle t)
 			{
 				if(m_registerReference)
 					InterfaceCanvas.Instance.RegisterUIReference(gameObject.name, t);
-				t.onValueChanged.AddListener((boolv) => InterfaceCanvas.Instance.TriggerInteractionCallback(gameObject.name, m_tags));
+				t.onValueChanged.AddListener((boolv) => TriggerCallback());
 			}
 			else
 			{
 				if(m_registerReference)
 					InterfaceCanvas.Instance.RegisterUIReference(gameObject.name, gameObject);
 			}
+		}
+
+		void TriggerCallback()
+		{
+			InterfaceCanvas.Instance.TriggerInteractionCallback(gameObject.name, m_tags);
 		}
 
 		void OnDestroy()
