@@ -116,9 +116,6 @@ namespace MSP2050.Scripts
 
         public void OnEnable()
         {
-            //transform.SetAsLastSibling();
-            //transform.SetSiblingIndex(transform.parent.childCount - 4);
-
             editingPlan = null;
             CheckForErrors();
             this.thisGenericWindow.CreateModalBackground();

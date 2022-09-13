@@ -35,7 +35,6 @@ namespace MSP2050.Scripts
 			tutorial.onClick.AddListener(() => 
 			{
 				gameObject.SetActive(false);
-				//InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow("https://community.mspchallenge.info/wiki/Tutorial");
 				TutorialManager.Instance.StartTutorial(Resources.Load<TutorialData>("MainTutorialData"));
 			});
 			exit.onClick.AddListener(() => 
