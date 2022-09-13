@@ -91,6 +91,11 @@ namespace MSP2050.Scripts
 			layerInterface = layerPanel.GetComponent<LayerInterface>();
 		}
 
+		private void OnDestroy()
+		{
+			singleton = null;
+		}
+
 		void Start()
 		{
 			canvas.scaleFactor = (GameSettings.Instance.UIScale + 1f) / 4f;
