@@ -58,8 +58,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 1, a: 1}
+  m_Color: {r: 0, g: 1, b: 0.5058824, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -89,6 +91,7 @@ GameObject:
   - component: {fileID: 7859274474127172881}
   - component: {fileID: 698792811236807607}
   - component: {fileID: 2778005705857112370}
+  - component: {fileID: 2699064135370170165}
   m_Layer: 5
   m_Name: TopBarToggleKPI
   m_TagString: Untagged
@@ -129,10 +132,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: Toggle KPI
-  consumeUpEvent: 0
-  consumeDownEvent: 0
-  consumeEnterEvent: 0
-  consumeExitEvent: 0
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!114 &6534464120999703275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,6 +168,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 0
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -216,8 +218,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010d00000063006f006c006f007200530065006c0065006300740065006400010000000b010e00000063006f006c006f00720048006900670068006c006900670068007400020000002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 19768a7a05b5453428250d29b5a4fb5f, type: 2}
     - {fileID: 11400000, guid: 1afea417ee2992642b33a99618b401d5, type: 2}
@@ -226,19 +228,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorSelected
-      Entry: 10
-      Data: 1
-    - Name: colorHighlight
-      Entry: 10
-      Data: 2
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 6534464057019326315}
   highlightIfOn: 1
@@ -272,6 +262,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   simulationType: 0
+--- !u!114 &2699064135370170165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6573456215196505557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02557f98f0d3a3848b3eca8ceed2bf7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 0
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  m_uiElement: {fileID: 8687469840393930414}
+  m_tags:
+  - Topbar
+  - KPI
+  m_registerReference: 1
 --- !u!1 &6573456216106046347
 GameObject:
   m_ObjectHideFlags: 0
@@ -334,6 +350,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -407,6 +425,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []

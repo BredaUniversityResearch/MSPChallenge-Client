@@ -10,6 +10,8 @@ namespace MSP2050.Scripts
 		protected PlanLayer planLayer;
 		private bool showingToolTip = false;
 
+		public override EEditingStateType StateType => EEditingStateType.Create;
+
 		public CreatePointsState(FSM fsm, PlanLayer planLayer) : base(fsm)
 		{
 			this.planLayer = planLayer;
@@ -78,6 +80,7 @@ namespace MSP2050.Scripts
 			PointSubEntity subEntity = entity.GetSubEntity(0) as PointSubEntity;
 			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 
+			fsm.TriggerGeometryComplete();
 			fsm.AddToUndoStack(new CreatePointOperation(subEntity, planLayer));
 		}
 

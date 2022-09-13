@@ -6,21 +6,31 @@ namespace MSP2050.Scripts
 {
 	public class PlansWindowMinMax : MonoBehaviour {
 
-		public Button button;
+		public Toggle minMaxToggle;
 		public GameObject timeline;
-		public Image minIcon, maxIcon;
-		//public LayoutGroup layoutPadding;
 		public RectTransform rectTrans;
-		//public LayoutElement windowLayoutElement;
 		public float maximizedLayoutSize, minimizedLayoutSize;
 	
 		private GenericWindow genericWindow;
 
 		bool maximized = false;
+		private bool ignoreToggleChange;
 
 		void Awake()
 		{
 			genericWindow = GetComponent<GenericWindow>();
+			minMaxToggle.onValueChanged.AddListener(OnToggleChange);
+		}
+
+		void OnToggleChange(bool value)
+		{
+			if (ignoreToggleChange)
+				return;
+
+			if(value)
+				Maximize();
+			else
+				Minimize();
 		}
 
 		public void Minimize()
@@ -28,20 +38,14 @@ namespace MSP2050.Scripts
 			// Function
 			timeline.gameObject.SetActive(false);
 			PlanDetails.IsOpen = false;
-			button.onClick.RemoveListener(Minimize);
-			button.onClick.AddListener(Maximize);
-
-			// Feedback
-			minIcon.gameObject.SetActive(false);
-			maxIcon.gameObject.SetActive(true);
-			button.targetGraphic = maxIcon;
-			//windowLayoutElement.preferredWidth = minimizedLayoutSize / InterfaceCanvas.instance.canvas.scaleFactor;
-			//genericWindow.SetMinWindowWidth(minimizedLayoutSize);
-			genericWindow.contentLayout.preferredWidth = minimizedLayoutSize;
-
+			
 			// Presentation
-			//UpdatePadding(true);
+			genericWindow.contentLayout.preferredWidth = minimizedLayoutSize;
 			maximized = false;
+
+			ignoreToggleChange = true;
+			minMaxToggle.isOn = false;
+			ignoreToggleChange = false;
 		}
 
 		public void Maximize()
@@ -52,21 +56,15 @@ namespace MSP2050.Scripts
 			// Function
 			timeline.gameObject.SetActive(true);
 			PlanDetails.IsOpen = true;
-			button.onClick.RemoveListener(Maximize);
-			button.onClick.AddListener(Minimize);
-
-			// Feedback
-			minIcon.gameObject.SetActive(true);
-			maxIcon.gameObject.SetActive(false);
-			button.targetGraphic = minIcon;
-			//windowLayoutElement.preferredWidth = maximizedLayoutSize / InterfaceCanvas.instance.canvas.scaleFactor;
-			//genericWindow.SetMinWindowWidth(maximizedLayoutSize);
-			genericWindow.contentLayout.preferredWidth = maximizedLayoutSize;
 
 			// Presentation
-			//UpdatePadding(false);
+			genericWindow.contentLayout.preferredWidth = maximizedLayoutSize;
 			StartCoroutine(LimitPositionEndFrame());
 			maximized = true;
+
+			ignoreToggleChange = true;
+			minMaxToggle.isOn = true;
+			ignoreToggleChange = false;
 		}
 
 		IEnumerator LimitPositionEndFrame()
@@ -82,34 +80,5 @@ namespace MSP2050.Scripts
 				transform.position.y,
 				transform.position.z);      
 		}
-
-		//public void HandleVerticalResize(PointerEventData data, ResizeHandle.RescaleDirection direction)
-		//{
-		//	Vector3[] corners = new Vector3[4];
-		//	float scale = InterfaceCanvas.instance.canvas.scaleFactor;
-		//	rect.GetWorldCorners(corners);
-
-		//	float target = corners[1].y - (data.position.y - resizeRect.sizeDelta.y * 0.5f);
-		//	float min = 250f / scale;
-		//	float max = corners[1].y;
-		//	windowLayoutElement.preferredHeight = Mathf.Clamp(target, min, max) / InterfaceCanvas.instance.canvas.scaleFactor;
-		//}
-
-		//public void HandleResolutionOrScaleChange()
-		//{
-		//	//Vector3[] corners = new Vector3[4];
-		//	//rect.GetWorldCorners(corners);
-		//	//float target = (rect.GetChild(0) as RectTransform).rect.height;
-		//	//float max = corners[1].y;
-		//	//layoutElement.preferredHeight = Mathf.Min(target, max) / InterfaceCanvas.instance.canvas.scaleFactor;
-
-		//	float scale = InterfaceCanvas.instance.canvas.scaleFactor;
-		//	windowLayoutElement.preferredHeight = 250f / scale;
-		//	windowLayoutElement.preferredWidth = Mathf.Min((maximized ? maximizedLayoutSize : minimizedLayoutSize), Screen.width) / scale;
-		//	transform.position = new Vector3(
-		//		Mathf.Clamp(transform.position.x, 0f, Screen.width - (rect.rect.width * scale)),
-		//		Mathf.Clamp(transform.position.y, (rect.rect.height * scale), Screen.height - (41f * scale)),
-		//		transform.position.z);
-		//}
 	}
 }

@@ -5,6 +5,7 @@ namespace MSP2050.Scripts
 {
 	public abstract class FSMState
 	{
+		public enum EEditingStateType {Create, Edit, Other}
 		protected FSM fsm;
 
 		public FSMState(FSM fsm)
@@ -18,6 +19,7 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.ToolbarVisibility(false, FSM.ToolbarInput.ChangeDirection);
 		}
 		public virtual void ExitState(Vector3 currentMousePosition) { }
+		public virtual EEditingStateType StateType => EEditingStateType.Other;
 
 		//Mouse input
 		public virtual void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI) { }

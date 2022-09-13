@@ -20,6 +20,7 @@ namespace MSP2050.Scripts
 		PointSubEntity previousHover = null;
 
 		protected static HashSet<int> firstPoint = new HashSet<int>() { 0 };
+		public override EEditingStateType StateType => EEditingStateType.Edit;
 
 		public EditPointsState(FSM fsm, PlanLayer planLayer) : base(fsm)
 		{

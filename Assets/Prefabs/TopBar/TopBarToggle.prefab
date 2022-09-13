@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2759324427918898241}
   - component: {fileID: 320904868305338372}
   - component: {fileID: 1294154820448691131}
+  - component: {fileID: 5275838214187808153}
   m_Layer: 5
   m_Name: TopBarToggle
   m_TagString: Untagged
@@ -68,10 +69,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: Plans Monitor
-  consumeUpEvent: 0
-  consumeDownEvent: 0
-  consumeEnterEvent: 0
-  consumeExitEvent: 0
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!114 &2759324427918898241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,6 +105,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 0
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -183,6 +183,30 @@ MonoBehaviour:
   highlightIfOn: 1
   useHighlightColor: 1
   useDisabledColor: 0
+--- !u!114 &5275838214187808153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2872620449564332927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02557f98f0d3a3848b3eca8ceed2bf7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  m_uiElement: {fileID: 320904868305338372}
+  m_tags:
+  - Topbar
 --- !u!1 &2872620449771560237
 GameObject:
   m_ObjectHideFlags: 0
@@ -243,6 +267,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -319,6 +345,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -392,6 +420,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []

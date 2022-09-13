@@ -9,6 +9,7 @@ namespace MSP2050.Scripts
 		protected LineStringLayer baseLayer;
 		protected PlanLayer planLayer;
 		protected bool showingToolTip = false;
+		public override EEditingStateType StateType => EEditingStateType.Create;
 
 		public StartCreatingLineStringState(FSM fsm, PlanLayer planLayer) : base(fsm)
 		{

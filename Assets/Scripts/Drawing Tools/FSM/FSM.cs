@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using Unity.Plastic.Newtonsoft.Json.Serialization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -30,10 +31,10 @@ namespace MSP2050.Scripts
 
 		private FSMState currentState;
 		private FSMState interruptState = null;
-		public FSMState InputReceivingState
-		{
-			get { return interruptState ?? currentState; }
-		}
+		public static FSMState CurrentState => instance.currentState;
+		public FSMState InputReceivingState => interruptState ?? currentState;
+
+		public event Action onGeometryCompleted;
 
 		private Vector3 leftMouseButtonDownStartPosition;
 		private Vector3 previousMousePosition;
@@ -129,7 +130,28 @@ namespace MSP2050.Scripts
 		{
 			AbstractLayer layer = planLayer.BaseLayer;
 
-			if (layer is PolygonLayer)
+			if (currentState.StateType == FSMState.EEditingStateType.Create)
+			{
+				if (layer is PolygonLayer)
+				{
+					SetCurrentState(new StartCreatingPolygonState(this, planLayer));
+				}
+				else if (layer is LineStringLayer)
+				{
+					if(layer.IsEnergyLayer())
+						SetCurrentState(new StartCreatingEnergyLineStringState(this, planLayer));
+					else
+						SetCurrentState(new StartCreatingLineStringState(this, planLayer));
+				}
+				else if (layer is PointLayer)
+				{
+					if (layer.IsEnergyLayer())
+						SetCurrentState(new CreateEnergyPointState(this, planLayer));
+					else
+						SetCurrentState(new CreatePointsState(this, planLayer));
+				}
+			}
+			else if (layer is PolygonLayer)
 			{
 				SetCurrentState(new SelectPolygonsState(this, planLayer));
 			}
@@ -143,7 +165,7 @@ namespace MSP2050.Scripts
 					SetCurrentState(new EditEnergyPointsState(this, planLayer));
 				else
 					SetCurrentState(new EditPointsState(this, planLayer));
-			}        
+			}
 
 			updateUndoRedoButtonEnabled();
 		}
@@ -736,6 +758,11 @@ namespace MSP2050.Scripts
 			if (instance == null)
 				return;
 			instance.InputReceivingState.HandleCameraZoomChanged();
+		}
+
+		public void TriggerGeometryComplete()
+		{
+			onGeometryCompleted?.Invoke();
 		}
 	}
 }

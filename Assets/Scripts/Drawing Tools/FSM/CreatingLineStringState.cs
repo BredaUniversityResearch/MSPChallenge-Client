@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 	{
 		protected LineStringSubEntity subEntity;
 		protected PlanLayer planLayer;
-
+		public override EEditingStateType StateType => EEditingStateType.Create;
 		public CreatingLineStringState(FSM fsm, PlanLayer planLayer, LineStringSubEntity subEntity) : base(fsm)
 		{
 			this.subEntity = subEntity;
@@ -156,6 +156,7 @@ namespace MSP2050.Scripts
 
 			subEntity = null; // set line string to null so the exit state function doesn't remove it
 
+			fsm.TriggerGeometryComplete();
 			fsm.SetCurrentState(new StartCreatingLineStringState(fsm, planLayer));
 		}
 

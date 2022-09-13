@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 	{
 		PolygonSubEntity subEntity;
 		PlanLayer planLayer;
-
+		public override EEditingStateType StateType => EEditingStateType.Create;
 		public CreatingPolygonState(FSM fsm, PolygonSubEntity subEntity, PlanLayer planLayer) : base(fsm)
 		{
 			this.subEntity = subEntity;
@@ -141,6 +141,7 @@ namespace MSP2050.Scripts
 
 			subEntity = null; // set polygon to null so the exit state function doesn't remove it
 
+			fsm.TriggerGeometryComplete();
 			fsm.SetCurrentState(new StartCreatingPolygonState(fsm, planLayer));
 		}
 

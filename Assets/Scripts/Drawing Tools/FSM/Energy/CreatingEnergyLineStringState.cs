@@ -122,6 +122,7 @@ namespace MSP2050.Scripts
 
 			subEntity = null; // set line string to null so the exit state function doesn't remove it
 
+			fsm.TriggerGeometryComplete();
 			fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, planLayer));
 		}
 

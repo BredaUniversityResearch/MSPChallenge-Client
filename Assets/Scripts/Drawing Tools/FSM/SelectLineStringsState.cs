@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		protected HashSet<LineStringSubEntity> currentBoxSelection = new HashSet<LineStringSubEntity>();
 
 		protected LineStringSubEntity previousHover = null;
+		public override EEditingStateType StateType => EEditingStateType.Edit;
 
 		public SelectLineStringsState(FSM fsm, PlanLayer planLayer) : base(fsm)
 		{

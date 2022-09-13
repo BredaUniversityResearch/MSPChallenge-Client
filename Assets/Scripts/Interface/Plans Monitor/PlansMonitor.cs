@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 			{
 				faded = false;
 				canvasGroup.alpha = 1f;
-				HighlightManager.instance.RemoveHighlight();
+				HighlightManager.instance.ClearPointHighlights();
 			}
 		}
 
