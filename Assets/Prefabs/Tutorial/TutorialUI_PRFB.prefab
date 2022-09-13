@@ -109,8 +109,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010e00000063006f006c006f00720048006900670068006c006900670068007400010000002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 4543826e4143d5940b21e081f0e727d9, type: 2}
     - {fileID: 11400000, guid: c730a0031d5e82c4db4573a575b055a8, type: 2}
@@ -118,16 +118,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorHighlight
-      Entry: 10
-      Data: 1
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 3245324203208404915}
   useHighlightColor: 1
@@ -284,8 +275,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010e00000063006f006c006f00720048006900670068006c006900670068007400010000002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 4543826e4143d5940b21e081f0e727d9, type: 2}
     - {fileID: 11400000, guid: c730a0031d5e82c4db4573a575b055a8, type: 2}
@@ -293,16 +284,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorHighlight
-      Entry: 10
-      Data: 1
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 7695456709599503831}
   useHighlightColor: 1
@@ -771,9 +753,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 80, y: 68}
+  m_AnchoredPosition: {x: 60, y: 88}
   m_SizeDelta: {x: 40, y: 40}
-  m_Pivot: {x: 1, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7733291040686173171
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1817,8 +1799,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010e00000063006f006c006f00720048006900670068006c006900670068007400010000000b010d00000063006f006c006f007200440069007300610062006c006500640002000000
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
     - {fileID: 11400000, guid: f60f649dcdfc7ca4883981ac12c67ef5, type: 2}
@@ -1827,16 +1809,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorHighlight
-      Entry: 10
-      Data: 1
-    - Name: colorDisabled
-      Entry: 10
-      Data: 2
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 7733291042009519460}
   useHighlightColor: 1
@@ -1892,6 +1865,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_contentRect: {fileID: 7733291041181163547}
   m_fade: {fileID: 5622462199933351771}
+  m_nextButton: {fileID: 7733291042229923666}
+  m_previousButton: {fileID: 7733291042009519462}
+  m_fadeTime: 0.5
   m_titleContainer: {fileID: 7733291041569823837}
   m_titleHeader: {fileID: 7733291041605606845}
   m_titleContent: {fileID: 7733291041144549963}
@@ -1907,9 +1883,58 @@ MonoBehaviour:
   m_regularCheckbox: {fileID: 7733291040686173175}
   m_regularCheckmark: {fileID: 7733291040764781181}
   m_regularHeight: 176
-  m_nextButton: {fileID: 7733291042229923666}
-  m_previousButton: {fileID: 7733291042009519462}
-  m_fadeTime: 0.5
+  m_checkboxHighlightTime: 1
+  m_checkboxHighlightCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 4.412136
+      outSlope: 4.412136
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.13541998
+      value: 1.5974914
+      inSlope: -0.61985517
+      outSlope: -0.61985517
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.24113612
+      value: 1
+      inSlope: 0.023348741
+      outSlope: 0.023348741
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.23557676
+    - serializedVersion: 3
+      time: 0.37177086
+      value: 1.4046186
+      inSlope: -0.27459645
+      outSlope: -0.27459645
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.48273104
+      value: 1
+      inSlope: -3.6465209
+      outSlope: -3.6465209
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &7733291042229923671
 GameObject:
   m_ObjectHideFlags: 0
@@ -2047,8 +2072,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010e00000063006f006c006f00720048006900670068006c006900670068007400010000000b010d00000063006f006c006f007200440069007300610062006c006500640002000000
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
     - {fileID: 11400000, guid: f60f649dcdfc7ca4883981ac12c67ef5, type: 2}
@@ -2057,16 +2082,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorHighlight
-      Entry: 10
-      Data: 1
-    - Name: colorDisabled
-      Entry: 10
-      Data: 2
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 7733291042229923664}
   useHighlightColor: 1

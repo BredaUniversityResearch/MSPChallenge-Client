@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		public const string NOTIFICATION_RECEIVED = "Notification Received";
 		public const string ITEM_PLACED = "Item Placed";
 		public const string ITEM_MOVED = "Item Moved";
+		public const string TUTORIAL_CHECKMARK = "Message Received";
 
 		private static AudioMain singleton;
 		public static AudioMain Instance
@@ -30,6 +31,7 @@ namespace MSP2050.Scripts
 			MESSAGE_RECEIVED,
 			NOTIFICATION_RECEIVED,
 			ITEM_PLACED,
+			TUTORIAL_CHECKMARK,
 			ITEM_MOVED
 		};
 

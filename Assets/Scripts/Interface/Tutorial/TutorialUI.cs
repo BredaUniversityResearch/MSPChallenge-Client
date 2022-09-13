@@ -9,8 +9,14 @@ namespace MSP2050.Scripts
 {
 	public class TutorialUI : MonoBehaviour
 	{
+		[Header("General")]
 		[SerializeField] RectTransform m_contentRect;
 		[SerializeField] CanvasGroup m_fade;
+		[SerializeField] private Button m_nextButton;
+		[SerializeField] private Button m_previousButton;
+		[SerializeField] private float m_fadeTime = 0.5f;
+
+		[Header("Title")]
 		[SerializeField] private GameObject m_titleContainer;
 		[SerializeField] private TextMeshProUGUI m_titleHeader;
 		[SerializeField] private TextMeshProUGUI m_titleContent;
@@ -20,6 +26,7 @@ namespace MSP2050.Scripts
 		[SerializeField] private TextMeshProUGUI m_titleContinueButtonText;
 		[SerializeField] private TextMeshProUGUI m_titleQuitButtonText;
 
+		[Header("Regular")]
 		[SerializeField] private GameObject m_regularContainer;
 		[SerializeField] private Transform m_regularGraphicsParent;
 		[SerializeField] private TextMeshProUGUI m_regularHeader;
@@ -27,14 +34,12 @@ namespace MSP2050.Scripts
 		[SerializeField] private GameObject m_regularCheckbox;
 		[SerializeField] private GameObject m_regularCheckmark;
 		[SerializeField] float m_regularHeight;
-
-		[SerializeField] private Button m_nextButton;
-		[SerializeField] private Button m_previousButton;
-		[SerializeField] private float m_fadeTime = 0.5f;
+		[SerializeField] private float m_checkboxHighlightTime = 0.5f;
+		[SerializeField] private AnimationCurve m_checkboxHighlightCurve;
 
 		enum EScreenPosition {Top, Center, Bottom}
 		private EScreenPosition m_screenPosition = EScreenPosition.Center;
-
+		bool m_highlightingCheckbox;
 
 		public void Initialise(UnityAction a_nextButtonCallback, UnityAction a_previousButtonCallback, UnityAction a_quitButtonCallback)
 		{
@@ -52,6 +57,9 @@ namespace MSP2050.Scripts
 		IEnumerator SetUIToTitleFade(string a_header, string a_content, string a_part, bool a_hasPreviousButton = true, bool m_hasNextButton = true)
 		{
 			m_fade.interactable = false;
+			while (m_highlightingCheckbox)
+				yield return 0;
+
 			yield return StartCoroutine(FadeOutCenter());
 			m_screenPosition = EScreenPosition.Center;
 
@@ -82,6 +90,9 @@ namespace MSP2050.Scripts
 		IEnumerator SetUIToTitleFade(string a_header, string a_content, string a_part, string a_continueButtonText, string a_quitButtonText, bool a_hasPreviousButton)
 		{
 			m_fade.interactable = false;
+			while (m_highlightingCheckbox)
+				yield return 0;
+
 			yield return StartCoroutine(FadeOutCenter());
 			m_screenPosition = EScreenPosition.Center;
 
@@ -122,6 +133,9 @@ namespace MSP2050.Scripts
 			Vector2 a_targetAnchorMin, Vector2 a_targetAnchorMax, Vector2 a_targetPivot)
 		{
 			m_fade.interactable = false;
+			while (m_highlightingCheckbox)
+				yield return 0;
+
 			float timePassed = 0f;
 			bool moving = (a_alignTop && m_screenPosition == EScreenPosition.Bottom) || (!a_alignTop && m_screenPosition == EScreenPosition.Top);
 			if (!moving)
@@ -165,6 +179,8 @@ namespace MSP2050.Scripts
 			m_screenPosition = a_alignTop ? EScreenPosition.Top : EScreenPosition.Bottom;
 			m_regularContainer.SetActive(true);
 			m_titleContainer.SetActive(false);
+			m_nextButton.gameObject.SetActive(true);
+			m_previousButton.gameObject.SetActive(true);
 			ClearGraphics();
 
 			m_regularHeader.text = a_header;
@@ -198,8 +214,14 @@ namespace MSP2050.Scripts
 
 		public void SetRequirementChecked(bool a_checked)
 		{
+			if (a_checked && !m_regularCheckmark.activeInHierarchy)
+			{
+				StartCoroutine(HighlightCheckbox());
+			}
+			else
+				m_nextButton.interactable = a_checked;
+
 			m_regularCheckmark.SetActive(a_checked);
-			m_nextButton.interactable = a_checked;
 		}
 
 		void ClearGraphics()
@@ -238,6 +260,30 @@ namespace MSP2050.Scripts
 			m_contentRect.anchorMin = Vector2.zero;
 			m_contentRect.anchorMax = Vector2.one;
 			m_contentRect.sizeDelta = Vector2.zero;
+		}
+
+		IEnumerator HighlightCheckbox()
+		{
+			m_highlightingCheckbox = true;
+
+			float timePassed = 0f;
+			AudioMain.Instance.PlaySound(AudioMain.TUTORIAL_CHECKMARK);
+
+			while (true)
+			{
+				yield return 0;
+				timePassed += Time.deltaTime;
+				if (timePassed >= m_checkboxHighlightTime)
+				{
+					break;
+				}
+				float scale = m_checkboxHighlightCurve.Evaluate(timePassed / m_checkboxHighlightTime);
+				m_regularCheckbox.transform.localScale = new Vector3(scale, scale, 1f);
+			}
+			m_regularCheckbox.transform.localScale = Vector3.one;
+			m_nextButton.interactable = true;
+
+			m_highlightingCheckbox = false;
 		}
 
 		IEnumerator FadeIn()

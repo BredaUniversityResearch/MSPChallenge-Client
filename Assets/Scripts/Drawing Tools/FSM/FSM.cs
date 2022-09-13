@@ -130,7 +130,28 @@ namespace MSP2050.Scripts
 		{
 			AbstractLayer layer = planLayer.BaseLayer;
 
-			if (layer is PolygonLayer)
+			if (currentState.StateType == FSMState.EEditingStateType.Create)
+			{
+				if (layer is PolygonLayer)
+				{
+					SetCurrentState(new StartCreatingPolygonState(this, planLayer));
+				}
+				else if (layer is LineStringLayer)
+				{
+					if(layer.IsEnergyLayer())
+						SetCurrentState(new StartCreatingEnergyLineStringState(this, planLayer));
+					else
+						SetCurrentState(new StartCreatingLineStringState(this, planLayer));
+				}
+				else if (layer is PointLayer)
+				{
+					if (layer.IsEnergyLayer())
+						SetCurrentState(new CreateEnergyPointState(this, planLayer));
+					else
+						SetCurrentState(new CreatePointsState(this, planLayer));
+				}
+			}
+			else if (layer is PolygonLayer)
 			{
 				SetCurrentState(new SelectPolygonsState(this, planLayer));
 			}
@@ -144,7 +165,7 @@ namespace MSP2050.Scripts
 					SetCurrentState(new EditEnergyPointsState(this, planLayer));
 				else
 					SetCurrentState(new EditPointsState(this, planLayer));
-			}        
+			}
 
 			updateUndoRedoButtonEnabled();
 		}

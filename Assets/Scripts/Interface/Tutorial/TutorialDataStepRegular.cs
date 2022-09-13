@@ -31,6 +31,12 @@ namespace MSP2050.Scripts
 					prerequisite.ActivateRequirement();
 			}
 
+			if (m_enterStepActions != null)
+			{
+				foreach(ATutorialAction action in m_enterStepActions)
+					action.Invoke();
+			}
+
 			if(m_completionRequirements == null || m_completionRequirements.Length == 0)
 				m_complete = true;
 			else if (CheckCompletion())
@@ -48,11 +54,6 @@ namespace MSP2050.Scripts
 			if(m_highlightedObjects != null && m_highlightedObjects.Length > 0)
 				HighlightManager.instance.SetUIHighlights(m_highlightedObjects);
 
-			if (m_enterStepActions != null)
-			{
-				foreach(ATutorialAction action in m_enterStepActions)
-					action.Invoke();
-			}
 		}
 
 		public override void ExitStep(TutorialManager a_manager)

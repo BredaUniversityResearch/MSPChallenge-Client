@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 	{
 		public const float SCALE = 1000.0f;
 		public const double SCALE_DOUBLE = 1000.0;
+		public const string FIRST_TIME_KEY = "FirstTimePlaying";
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD 
 		public static bool IsDeveloper = true;
@@ -178,6 +179,12 @@ namespace MSP2050.Scripts
 		{
 			InterfaceCanvas.Instance.loadingScreen.OnFinishedLoading();
 			StartCoroutine(UpdateManager.Instance.GetUpdates());
+
+			if (!PlayerPrefs.HasKey(FIRST_TIME_KEY))
+			{
+				TutorialManager.Instance.StartTutorial(Resources.Load<TutorialData>("MainTutorialData"));
+				PlayerPrefs.SetInt(FIRST_TIME_KEY, 1);
+			}
 		}
 
 		public static Plan CurrentlyEditingPlan
