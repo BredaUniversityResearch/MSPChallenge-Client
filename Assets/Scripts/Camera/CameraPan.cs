@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using Unity.Plastic.Newtonsoft.Json.Serialization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -30,7 +29,7 @@ namespace MSP2050.Scripts
 		private IEasingFunction autoPanEase = new EaseTunableSlowFastSlow(-0.5f);
 		private bool canPanOnCurrentMousePress;
 
-		public event System.Action onPanStart;
+		public event Action onPanStart;
 
 		protected void Start()
 		{
