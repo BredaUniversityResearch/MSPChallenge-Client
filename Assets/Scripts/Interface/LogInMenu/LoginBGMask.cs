@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace MSP2050.Scripts
 {
@@ -16,7 +17,7 @@ namespace MSP2050.Scripts
 		private bool m_active;
 		private bool m_movingDown;
 		private float m_maskPosition = 0.5f;
-		private Vector2 m_maskOrigin;
+		//private Vector2 m_maskOrigin;
 
 		void Update()
 		{
@@ -56,11 +57,20 @@ namespace MSP2050.Scripts
 						m_mask.anchorMax = new Vector2(01f, m_maskPosition);
 					}
 				}
-				//RectTransformUtility.ScreenPointToLocalPointInRectangle(m_canvas.transform as RectTransform, Input.mousePosition, m_canvas.worldCamera, out var localMousePos);
-				//m_mask.anchoredPosition = new Vector2(0f, Mathf.MoveTowards(m_mask.anchoredPosition.y, localMousePos.y, m_maskFollowSpeed * Time.deltaTime));
-				//m_maskedImage.anchoredPosition = -m_mask.anchoredPosition;
-				m_maskedImage.position = m_maskOrigin;
+				//m_maskedImage.position = m_maskOrigin;
+				m_maskedImage.position = Vector2.zero;
 			}
+		}
+
+		public void UpdateUpdateImageSizesDelayed()
+		{
+			StartCoroutine(UpdateUpdateImageSizesDelayedHelper());
+		}
+
+		IEnumerator UpdateUpdateImageSizesDelayedHelper()
+		{
+			yield return new WaitForEndOfFrame();
+			UpdateImageSizes();
 		}
 
 		//This is also called when display options change, linked through the inspector callback
@@ -88,7 +98,7 @@ namespace MSP2050.Scripts
 
 			m_bgRect.sizeDelta = new Vector2(width, height);
 			m_maskedImage.sizeDelta = new Vector2(width, height);
-			m_maskOrigin = new Vector2(width / 2f, height / 2f);
+			//m_maskOrigin = new Vector2(width / 2f, height / 2f);
 		}
 
 		public void SetMaskActive(bool a_active)
