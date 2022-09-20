@@ -17,15 +17,12 @@ namespace MSP2050.Scripts
 
 		// Buttons
 		public Button exitButton;
-		public Button cancelButton;
-		public Button acceptButton;
 
 		public ResizeHandle resizeHandle;
 		public DragHandle dragHandle;
 		public List<IOnResizeHandler> secondaryResizeHandlers;
 
 		[Header("Prefabs")]
-		public GameObject genericContentPrefab;
 		public GameObject modalBackgroundPrefab;
 
 		public delegate void CloseWindow();

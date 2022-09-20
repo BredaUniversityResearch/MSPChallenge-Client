@@ -54,36 +54,37 @@ namespace UnityEngine.UI
 		{
 			base.Start();
 			RoundingManager.RegisterUIScaleChangeReceiver(this);
-			switch (m_slice)
-			{
-				case RoundingAssetDatabase.ESliceSection.Full:
-					m_borderDisplaySize = new Vector4(m_rounding, m_rounding, m_rounding, m_rounding);
-					break;
-				case RoundingAssetDatabase.ESliceSection.Left:
-					m_borderDisplaySize = new Vector4(m_rounding, 0f, 0f, 0f);
-					break;
-				case RoundingAssetDatabase.ESliceSection.Top:
-					m_borderDisplaySize = new Vector4(0f, m_rounding, 0f, 0f);
-					break;
-				case RoundingAssetDatabase.ESliceSection.Right:
-					m_borderDisplaySize = new Vector4(0f, 0f, m_rounding, 0f);
-					break;
-				case RoundingAssetDatabase.ESliceSection.Bottom:
-					m_borderDisplaySize = new Vector4(0f, 0f, 0f, m_rounding);
-					break;
-				case RoundingAssetDatabase.ESliceSection.TopLeft:
-					m_borderDisplaySize = new Vector4(m_rounding, m_rounding, 0f, 0f);
-					break;
-				case RoundingAssetDatabase.ESliceSection.TopRight:
-					m_borderDisplaySize = new Vector4(0f, m_rounding, m_rounding, 0f);
-					break;
-				case RoundingAssetDatabase.ESliceSection.BottomRight:
-					m_borderDisplaySize = new Vector4(0f, 0f, m_rounding, m_rounding);
-					break;
-				default:
-					m_borderDisplaySize = new Vector4(m_rounding, 0f, 0f, m_rounding);
-					break;
-			}
+			m_borderDisplaySize = new Vector4(m_rounding, m_rounding, m_rounding, m_rounding);
+			//switch (m_slice)
+			//{
+			//	case RoundingAssetDatabase.ESliceSection.Full:
+			//		m_borderDisplaySize = new Vector4(m_rounding, m_rounding, m_rounding, m_rounding);
+			//		break;
+			//	case RoundingAssetDatabase.ESliceSection.Left:
+			//		m_borderDisplaySize = new Vector4(m_rounding, 0f, 0f, 0f);
+			//		break;
+			//	case RoundingAssetDatabase.ESliceSection.Top:
+			//		m_borderDisplaySize = new Vector4(0f, m_rounding, 0f, 0f);
+			//		break;
+			//	case RoundingAssetDatabase.ESliceSection.Right:
+			//		m_borderDisplaySize = new Vector4(0f, 0f, m_rounding, 0f);
+			//		break;
+			//	case RoundingAssetDatabase.ESliceSection.Bottom:
+			//		m_borderDisplaySize = new Vector4(m_rounding, m_rounding, m_rounding, m_rounding);
+			//		break;
+			//	case RoundingAssetDatabase.ESliceSection.TopLeft:
+			//		m_borderDisplaySize = new Vector4(m_rounding, m_rounding, 0f, 0f);
+			//		break;
+			//	case RoundingAssetDatabase.ESliceSection.TopRight:
+			//		m_borderDisplaySize = new Vector4(0f, m_rounding, m_rounding, 0f);
+			//		break;
+			//	case RoundingAssetDatabase.ESliceSection.BottomRight:
+			//		m_borderDisplaySize = new Vector4(0f, 0f, m_rounding, m_rounding);
+			//		break;
+			//	default:
+			//		m_borderDisplaySize = new Vector4(m_rounding, 0f, 0f, m_rounding);
+			//		break;
+			//}
 			SetAllDirty();
 		}
 
