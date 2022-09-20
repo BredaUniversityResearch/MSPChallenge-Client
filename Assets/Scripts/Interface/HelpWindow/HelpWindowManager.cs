@@ -36,6 +36,5 @@ namespace MSP2050.Scripts
             contentContainer.SetActive(false);
             Destroy(helpPrefab);
         }
-
     }
 }
