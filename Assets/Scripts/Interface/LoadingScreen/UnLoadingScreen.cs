@@ -11,9 +11,8 @@ namespace MSP2050.Scripts
 
 		protected void Start()
 		{
-			RegionInfo region = InterfaceCanvas.Instance.regionSettings.GetRegionInfo(SessionManager.Instance.MspGlobalData.region);
-			mspIcon.sprite = region.sprite;
-			editionText.text = region.editionPostFix;
+			mspIcon.sprite = SessionManager.Instance.MspGlobalData.edition_icon;
+			editionText.text = SessionManager.Instance.MspGlobalData.edition_name;
 		}
 
 		public void Activate()

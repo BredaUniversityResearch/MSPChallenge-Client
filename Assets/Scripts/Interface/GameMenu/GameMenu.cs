@@ -58,10 +58,10 @@ namespace MSP2050.Scripts
 			thisGenericWindow.DestroyModalWindow();
 		}
 
-		public void SetRegion(RegionInfo region)
+		public void SetRegion(MspGlobalData globalData)
 		{
-			logo.sprite = region.sprite;
-			editionText.text = region.editionPostFix;
+			logo.sprite = globalData.edition_icon;
+			editionText.text = globalData.edition_name;
 		}
 	
 		public IEnumerator LateUpdatePosition()
