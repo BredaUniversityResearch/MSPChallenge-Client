@@ -79,8 +79,8 @@ namespace MSP2050.Scripts
 						{
 							m_blendType = EAlphaBlendType.Add,
 							m_sectors = ESectors.All,
-							m_circleFadeEnd = newSize,
-							m_circleFadeStart = newSize - 1
+							m_circleFadeEnd = newSize+1,
+							m_circleFadeStart = newSize
 						};
 						bool success = RoundingTextureWindow.CreateTexture(newSize, 0f, layers, RoundingEditorUtility.ESliceSection.Corners | RoundingEditorUtility.ESliceSection.Full | RoundingEditorUtility.ESliceSection.Sides, $"Assets/Resources/Rounding/rounded_{newSize}px.png", true);
 						if (!success)
