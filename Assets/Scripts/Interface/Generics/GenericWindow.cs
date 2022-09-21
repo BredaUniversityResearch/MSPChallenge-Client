@@ -12,7 +12,6 @@ namespace MSP2050.Scripts
 		public RectTransform windowTransform;
 		public LayoutElement contentLayout;
 		public TextMeshProUGUI title;
-		public Transform contentLocation;
 		public bool shouldCenter;
 
 		// Buttons
