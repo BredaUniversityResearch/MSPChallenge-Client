@@ -66,11 +66,6 @@ namespace MSP2050.Scripts
 			plansListStatic.SetLockIcon(plan, value);
 		}
 
-		public static void SetViewPlanFrameState(Plan plan, bool state)
-		{
-			plansListStatic.SetViewPlanFrameState(plan, state);
-		}
-
 		public static void SetPlanBarToggleState(Plan plan, bool state)
 		{
 			plansListStatic.SetPlanBarToggleState(plan, state);
@@ -79,22 +74,6 @@ namespace MSP2050.Scripts
 		public static void UpdatePlan(Plan plan, bool nameChanged, bool timeChanged, bool stateChanged)
 		{
 			plansListStatic.UpdatePlan(plan, nameChanged, timeChanged, stateChanged);
-		}
-
-		public static void AddPlanLayer(Plan plan, PlanLayer planLayer)
-		{
-			plansListStatic.AddPlanLayer(plan, planLayer);
-		}
-
-		public static void SetPlanUnseenChanges(Plan plan, bool unseenChanges)
-		{
-			plansListStatic.SetPlanUnseenChanges(plan, unseenChanges);	
-
-		}
-
-		public static void RemovePlanLayer(Plan plan, PlanLayer planLayer)
-		{
-			plansListStatic.RemovePlanLayer(plan, planLayer);
 		}
 
 		public static void SetAllPlanBarInteractable(bool value)

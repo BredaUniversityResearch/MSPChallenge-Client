@@ -2,205 +2,174 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using ColourPalette;
 
 namespace MSP2050.Scripts
 {
 	public class PlanBar : MonoBehaviour
 	{
-		public Image lockIcon, countryIcon;
-		public GameObject changeIndicator;
-		public GameObject actionRequiredIcon;
-		//public Sprite viewSprite, editSprite;
-		public TextMeshProUGUI title, date, issueIndicator;
-		public Button foldButton, viewButton;
-		public Toggle barToggle;
-		public Transform foldButtonRect;
-		public GameObject layersContainer;
-		public GameObject viewFrame;
-		public List<PlanLayerBar> planLayers;
+		[SerializeField] Image m_lockIcon;
+		[SerializeField] Image m_countryIcon;
+		[SerializeField] Image m_actionRequiredIcon;
+		[SerializeField] Image m_stateIcon;
+		[SerializeField] TextMeshProUGUI m_title;
+		[SerializeField] TextMeshProUGUI m_date;
+		[SerializeField] Toggle m_barToggle;
+		[SerializeField] ColourAsset m_errorColour;
+		[SerializeField] ColourAsset m_actionRequiredColour;
 
-		private Plan planRepresenting;
-		private bool ignoreBarCallback;
+		private Plan m_plan;
+		private bool m_ignoreBarCallback;
+		private bool m_actionWasRequired;
+		private bool m_hasError;
+		private bool m_hiddenByFilter;
+		private bool m_hiddenByVisibility;
+		private PlansGroupBar m_group;
 
-		public void Initialise(Plan planRepresenting)
+		public void Initialise(Plan a_plan)
 		{
-			this.planRepresenting = planRepresenting;
-			viewButton.onClick.AddListener(() =>
-			{
-				if (!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
-				{
-					//if (planRepresenting.State == Plan.PlanState.DESIGN)
-					//{
-					//	PlanManager.Instance.RequestPlanLockForEditing(planRepresenting);
-					//	PlanDetails.SelectPlan(planRepresenting);
+			UpdateInfo();
+			this.m_plan = a_plan;
 
-					//}
-					//else if (planRepresenting.InInfluencingState)
-					//{
-					PlanManager.Instance.ShowPlan(planRepresenting);
-					//}
+			m_barToggle.onValueChanged.AddListener((b) =>
+			{
+				if (!m_ignoreBarCallback && b)
+				{
+					PlanManager.Instance.ShowPlan(a_plan);
 				}
 			});
-
-			barToggle.onValueChanged.AddListener((b) =>
-			{
-				if (!ignoreBarCallback)
-				{
-					if (PlanDetails.IsOpen)
-						PlanManager.Instance.SetPlanUnseenChanges(planRepresenting, false);
-					if (b)
-						PlanDetails.SelectPlan(planRepresenting);
-					else
-						PlanDetails.SelectPlan(null);
-				}
-			});
-
-			foldButton.onClick.AddListener(() =>
-			{
-				//ToggleContent(false);
-				SetDropDown(!layersContainer.activeSelf);
-			});
+			UpdateActionRequired();
 		}
 
-		//public void ToggleContent(bool aToggled)
-		//{
-		//	if (aToggled)
-		//	{
-		//		SetDropDown(!layersContainer.activeSelf);
-		//	}
-		//	else
-		//	{
-		//		if (PlanDetails.GetSelectedPlan() == null)
-		//		{
-		//			SetDropDown(true);
-		//		}
-		//		else if (PlanDetails.GetSelectedPlan().ID == planRepresenting.ID)
-		//		{
-		//			SetDropDown(!layersContainer.activeSelf);
-		//		}
-		//	}
-		//}
-
-		public void SetViewEditButtonState(bool? edit)
+		public void UpdateInfo()
 		{
-			viewButton.gameObject.SetActive(edit.HasValue);
-			//if (edit.HasValue)
-			//{
-			//	viewEditButtonImage.sprite = edit.Value ? editSprite : viewSprite;
-			//	TooltipManager.UpdateText(viewEditButtonImage.gameObject, edit.Value ? editTooltip : viewTooltip);
-			//}
-		}
-
-		public void SetViewEditButtonInteractable(bool value)
-		{
-			//Don't allow the edit button to be interactable if we are in simulation and this is a plan that is still in design.
-			if (TimeManager.Instance.CurrentState == TimeManager.PlanningState.Simulation)
-			{
-				if (!planRepresenting.InInfluencingState)
-				{
-					value = false;
-				}
-			}
-			//Non GM players cant interact with plans during setup
-			else if(TimeManager.Instance.CurrentState == TimeManager.PlanningState.Setup && !SessionManager.Instance.AreWeGameMaster)
-			{
-				value = false;
-			}
-			viewButton.interactable = value;
-		}
-
-		private void SetDropDown(bool aDown)
-		{
-			layersContainer.SetActive(aDown);
-
-			//Rotates the little triangle that indicates a dropdown list
-			Vector3 rot = foldButtonRect.eulerAngles;
-			foldButtonRect.eulerAngles = aDown ? new Vector3(rot.x, rot.y, 0f) : new Vector3(rot.x, rot.y, 90f);
-		}
-
-		public void ToggleChangeIndicator(bool show)
-		{
-			changeIndicator.SetActive(show);
+			m_title.text = m_plan.Name;
+			m_date.text = Util.MonthToText(m_plan.StartTime, true);
+			m_countryIcon.color = SessionManager.Instance.GetTeamByTeamID(m_plan.Country).color;
 		}
 
 		public void UpdateActionRequired()
 		{
 			bool actionRequired = false;
-			if (planRepresenting.State == Plan.PlanState.APPROVAL)
+			if (m_plan.State == Plan.PlanState.APPROVAL)
 			{
 				EPlanApprovalState approvalState;
-				if (planRepresenting.countryApproval.TryGetValue(SessionManager.Instance.CurrentUserTeamID, out approvalState))
+				if (m_plan.countryApproval.TryGetValue(SessionManager.Instance.CurrentUserTeamID, out approvalState))
 				{
 					if (approvalState == EPlanApprovalState.Maybe)
 					{
 						actionRequired = true;
-
 					}
 				}
 			}
 
 			if (actionRequired)
 			{
-				PlayerNotifications.AddApprovalActionRequiredNotification(planRepresenting);
+				PlayerNotifications.AddApprovalActionRequiredNotification(m_plan);
+				m_actionRequiredIcon.color = m_actionRequiredColour.GetColour();
+				m_actionRequiredIcon.gameObject.SetActive(true);
 			}
 			else
 			{
-				PlayerNotifications.RemoveApprovalActionRequiredNotification(planRepresenting);
+				PlayerNotifications.RemoveApprovalActionRequiredNotification(m_plan);
+				if(m_hasError)
+				{
+					m_actionRequiredIcon.color = m_errorColour.GetColour();
+				}
+				else
+				{
+					m_actionRequiredIcon.gameObject.SetActive(false);
+				}
 			}
 
-			SetActionRequired(actionRequired);
+			m_actionWasRequired = actionRequired;
 		}
 
-		private void SetActionRequired(bool actionIsRequired)
+		public void SetIssue(ERestrictionIssueType a_issue)
 		{
-			actionRequiredIcon.SetActive(actionIsRequired);
-		}
-
-		public void AddLayer(PlanLayerBar layer)
-		{
-			layer.transform.SetParent(layersContainer.transform, false);
-			planLayers.Add(layer);
-		}
-
-		public void RemoveLayer(PlanLayerBar layer)
-		{
-			planLayers.Remove(layer);
-		}
-
-		public void SetIssue(ERestrictionIssueType issue)
-		{
-			switch (issue)
+			if(a_issue == ERestrictionIssueType.Error)
 			{
-				case ERestrictionIssueType.None:
-				case ERestrictionIssueType.Info:
-					issueIndicator.gameObject.SetActive(false);
-					break;
-				case ERestrictionIssueType.Warning:
-					issueIndicator.gameObject.SetActive(true);
-					issueIndicator.color = new Color(1f, 250f / 255, 49f / 255f);
-					break;
-				case ERestrictionIssueType.Error:
-					issueIndicator.gameObject.SetActive(true);
-					issueIndicator.color = new Color(1f, 84f / 255, 84f / 255f);
-					break;
+				m_hasError = true;
+				if(!m_actionWasRequired)
+				{
+					m_actionRequiredIcon.gameObject.SetActive(true);
+					m_actionRequiredIcon.color = m_errorColour.GetColour();
+				}
+			}
+			else if (m_hasError)
+			{
+				m_hasError = false;
+				if (!m_actionWasRequired)
+					m_actionRequiredIcon.gameObject.SetActive(false);
 			}
 		}
 
-		public void SetViewFrameActivity(bool active)
+		public void SetPlanBarToggleValue(bool a_value)
 		{
-			viewFrame.SetActive(active);
+			m_ignoreBarCallback = true;
+			m_barToggle.isOn = a_value;
+			m_ignoreBarCallback = false;
 		}
 
-		public void SetPlanBarToggleValue(bool value)
+		public void SetPlanBarToggleInteractability(bool a_value)
 		{
-			ignoreBarCallback = true;
-			barToggle.isOn = value;
-			ignoreBarCallback = false;
+			m_barToggle.interactable = a_value;
 		}
 
-		public void SetPlanBarToggleInteractability(bool value)
+		public void SetLockActive(bool a_value)
 		{
-			barToggle.interactable = value;
+			m_lockIcon.gameObject.SetActive(true);
+		}
+
+		public void MoveToGroup(PlansGroupBar a_group)
+		{
+			transform.SetParent(a_group.ContentParent);
+
+			if (m_group != null)
+				m_group.CheckEmpty();
+			m_group = a_group;
+		}
+
+		public void MoveToParent(Transform a_parent)
+		{
+			transform.SetParent(a_parent);
+
+			if (m_group != null)
+				m_group.CheckEmpty();
+			m_group = null;
+		}
+
+		public void Filter(string a_filter)
+		{
+			if(string.IsNullOrEmpty(a_filter))
+			{
+				m_hiddenByFilter = false;
+			}
+			else
+			{
+				m_hiddenByFilter = m_plan.Name.Contains(a_filter);
+				if(!m_hiddenByFilter)
+				{
+					foreach(PlanLayer pl in m_plan.PlanLayers)
+					{
+						m_hiddenByFilter = pl.BaseLayer.ShortName.Contains(a_filter);
+						if (m_hiddenByFilter)
+							break;
+					}
+				}
+			}
+			UpdateActivity();
+		}
+
+		public void SetPlanVisibility(bool a_value)
+		{
+			m_hiddenByVisibility = !a_value;
+			UpdateActivity();
+		}
+
+		void UpdateActivity()
+		{
+			gameObject.SetActive(!m_hiddenByFilter && !m_hiddenByVisibility);
 		}
 	}
 }

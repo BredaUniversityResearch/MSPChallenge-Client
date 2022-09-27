@@ -47,6 +47,8 @@ namespace MSP2050.Scripts
 
 		private bool ignoreRedrawOnViewStateChange = false;
 
+		public List<Plan> Plans => plans;
+
 		void Start()
 		{
 			if (singleton != null && singleton != this)
@@ -131,13 +133,8 @@ namespace MSP2050.Scripts
 
 			//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
-			if (planViewing != null)
-			{
-				PlansMonitor.SetViewPlanFrameState(planViewing, false);
-			}
 			planViewing = plan;
 			timeViewing = -1;
-			PlansMonitor.SetViewPlanFrameState(planViewing, true);
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
 			LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
@@ -150,10 +147,6 @@ namespace MSP2050.Scripts
 				return;
 
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
-			if (planViewing != null)
-			{
-				PlansMonitor.SetViewPlanFrameState(planViewing, false);
-			}
 			planViewing = null;
 
 			//Doesnt have to redraw as we'll do so when updating layers to base anyway
@@ -579,7 +572,6 @@ namespace MSP2050.Scripts
 				PlansMonitor.AddPlan(plan);
 				if (plan.ShouldBeVisibleInTimeline)
 				{
-					SetPlanUnseenChanges(plan, true);
 					OnPlanVisibleInUIEvent(plan);
 				}
 			}
@@ -632,7 +624,6 @@ namespace MSP2050.Scripts
 			if (stateChanged || timeChanged || nameOrDescriptionChanged || forceMonitorUpdate)
 			{
 				PlansMonitor.UpdatePlan(plan, nameOrDescriptionChanged, timeChanged, stateChanged);
-				SetPlanUnseenChanges(plan, plan.ShouldBeVisibleInUI);
 			}
 
 			//These changes don't require a general update, only plandetails if they are being viewed
@@ -669,44 +660,19 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public void SetPlanUnseenChanges(Plan plan, bool unseenChanges)
-		{
-			if (unseenChanges)
-			{
-				//Check if viewing in plansdetails
-				if (PlanDetails.IsOpen && PlanDetails.GetSelectedPlan() == plan)
-					return;
-
-				if(!unseenPlanChanges.Contains(plan))
-					unseenPlanChanges.Add(plan);
-				PlansMonitor.SetPlanUnseenChanges(plan, unseenChanges);
-				PlansMonitor.SetUnseenChangesCounter(unseenPlanChanges.Count);
-			}
-			else
-			{
-				if (unseenPlanChanges.Contains(plan))
-					unseenPlanChanges.Remove(plan);
-				PlansMonitor.SetPlanUnseenChanges(plan, unseenChanges);
-				PlansMonitor.SetUnseenChangesCounter(unseenPlanChanges.Count);
-			}
-		}
-
 		public void PlanLayerAdded(Plan plan, PlanLayer addedLayer, bool addToUI = true)
 		{
 			planLayers[addedLayer.ID] = addedLayer;
 			IssueManager.instance.InitialiseIssuesForPlanLayer(addedLayer);
 			if (addToUI)
-				PlansMonitor.AddPlanLayer(plan, addedLayer);
-
-			//Sets entities active and redraws if the layer is visible
-			//LayerManager.Instance.UpdateLayerToPlan(addedLayer.BaseLayer, plan, plan == planViewing);
+			{ 
+				//TODO: if viewing plan, add to active plan window?
+			}
 		}
 
 		public void PlanLayerRemoved(Plan plan, PlanLayer removedLayer)
 		{
-			PlansMonitor.RemovePlanLayer(plan, removedLayer);
 			IssueManager.instance.DeleteIssuesForPlanLayer(removedLayer);
-			//HidePlanLayer(removedLayer);
 			RemovePlanLayer(removedLayer);
 		}
 

@@ -6,45 +6,33 @@ namespace MSP2050.Scripts
 {
 	public class PlansGroupBar : MonoBehaviour
 	{
+		[SerializeField] TextMeshProUGUI m_title;
+		[SerializeField] Toggle m_expandToggle;
+		[SerializeField] Image m_icon;
+		[SerializeField] Transform m_contentContainer;
+		[SerializeField] AddTooltip m_tooltip;
+		[SerializeField] GameObject m_emptyEntry;
 
-		public TextMeshProUGUI title;
-		public GameObject plansContainerOuter;
-		public RectTransform plansContainerOuterRect;
-		public Transform plansContainerInner;
-		public Button foldButton;
-		public RectTransform foldButtonRect;
-		public AddTooltip tooltip;
+		public Transform ContentParent => m_contentContainer;
 
-		void Awake()
+		public void SetContent(string a_title, string a_tooltip, Sprite a_icon)
 		{
-			foldButton.onClick.AddListener(ToggleContent);
-			plansContainerOuterRect = plansContainerOuter.GetComponent<RectTransform>();
-			foldButtonRect.gameObject.SetActive(plansContainerOuterRect.rect.height != 0);
+			m_title.text = a_title;
+			m_tooltip.text = a_tooltip;
+			if (a_icon != null)
+				m_icon.sprite = a_icon;
+			else
+				m_icon.gameObject.SetActive(false);
 		}
 
-		private void Update()
+		public void CheckEmpty()
 		{
-			bool shouldBeActive = plansContainerOuterRect.rect.height != 0;
-			if (shouldBeActive != foldButtonRect.gameObject.activeSelf)
-				foldButtonRect.gameObject.SetActive(shouldBeActive);
+			m_emptyEntry.SetActive(m_contentContainer.childCount == 0);
 		}
 
-		public void ToggleContent()
+		public void SetExpanded(bool a_value)
 		{
-			// Ignore empty content
-			if (plansContainerOuterRect.rect.height == 0)
-				return;
-
-			plansContainerOuter.SetActive(!plansContainerOuter.activeSelf);
-
-			Vector3 rot = foldButtonRect.eulerAngles;
-			foldButtonRect.eulerAngles = (rot.z == 0) ? new Vector3(rot.x, rot.y, 90f) : new Vector3(rot.x, rot.y, 0f);
-		}
-
-		public void AddPlan(PlanBar plan)
-		{
-			plan.transform.SetParent(plansContainerInner, false);
-			foldButtonRect.gameObject.SetActive(plansContainerOuterRect.rect.height != 0);
+			m_expandToggle.isOn = a_value;
 		}
 	}
 }

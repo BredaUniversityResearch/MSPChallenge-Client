@@ -1,56 +1,60 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using System;
 
 namespace MSP2050.Scripts
 {
 	public class PlansList : MonoBehaviour
 	{
-		public Transform contentLocation;
-		public List<PlansGroupBar> planGroups;
-		public List<PlanBar> plans;
-		public List<PlanLayerBar> planLayerBars;
+		enum EPlanSorting { State, Team, Time }
 
-		[Header("Prefabs")]
-		public GameObject plansGroupPrefab;
-		public GameObject planBarPrefab;
-		public GameObject planLayerPrefab;
+		[SerializeField] Transform m_contentParent;
+		[SerializeField] GameObject m_plansGroupPrefab;
+		[SerializeField] GameObject m_planBarPrefab;
+		[SerializeField] SearchBar m_searchbar;
+		[SerializeField] TMP_Dropdown m_sortingDropdown;
 
-		private PlansGroupBar designStatePlans;
-		private PlansGroupBar consultationStatePlans;
-		private PlansGroupBar needApprovalStatePlans;
-		private PlansGroupBar approvedStatePlans;
-		private PlansGroupBar implementedStatePlans;
-		private PlansGroupBar deletedPlans;
+		private Dictionary<Plan.PlanState, PlansGroupBar> m_planGroupsPerState;
+		private Dictionary<Plan, PlanBar> m_planBarsPerPlan;
+		EPlanSorting m_currentSorting = EPlanSorting.State;
 
-		private Dictionary<Plan.PlanState, PlansGroupBar> stateGroup;
-		private Dictionary<Plan, PlanBar> planToPlanBar;
-		private Dictionary<PlanLayer, PlanLayerBar> planLayerToPlanLayerBar;
-
-		private bool needsSorting;
+		private bool m_needsSorting;
 
 		void Awake()
 		{
-			planGroups = new List<PlansGroupBar>();
-			plans = new List<PlanBar>();
-			planLayerBars = new List<PlanLayerBar>();
-			stateGroup = new Dictionary<Plan.PlanState, PlansGroupBar>();
-			planToPlanBar = new Dictionary<Plan, PlanBar>();
-			planLayerToPlanLayerBar = new Dictionary<PlanLayer, PlanLayerBar>();
+			m_planGroupsPerState = new Dictionary<Plan.PlanState, PlansGroupBar>();
+			m_planBarsPerPlan = new Dictionary<Plan, PlanBar>();
 
 			IssueManager.instance.SubscribeToIssueChangedEvent(OnIssueChanged);
 
-			CreateGroups();
-			AddPlanStates();
+			m_planGroupsPerState.Add(Plan.PlanState.DESIGN, CreatePlansGroup("Design", "A plan's content (layers and policies) can only be edited in the DESIGN state.\nPlans in DESIGN are not visible in other plans or to other teams."));
+			m_planGroupsPerState.Add(Plan.PlanState.CONSULTATION, CreatePlansGroup("Consultation", "Plans in CONSULTATION are visible in other plans and to other teams.\nUse the CONSULTATION state for early drafts that will need to be discussed with other teams."));
+			m_planGroupsPerState.Add(Plan.PlanState.APPROVAL, CreatePlansGroup("Awaiting Approval", "Plans in the APPROVAL state will automatically be set to APPROVED once all required teams have accepted.\nPlans that require approval cannot be manually set to APPROVED, they must go through APPROVAL."));
+			m_planGroupsPerState.Add(Plan.PlanState.APPROVED, CreatePlansGroup("Approved", "Plans in the APPROVED state will be implemented when their implementation time is reached."));
+			m_planGroupsPerState.Add(Plan.PlanState.IMPLEMENTED, CreatePlansGroup("Implemented", "IMPLEMENTED plans have had their proposed changes applied to the world."));
+			m_planGroupsPerState.Add(Plan.PlanState.DELETED, CreatePlansGroup("Archived", "When a plan's implementation time is reached and it is not in APPROVED or it has issues, it will automatically be ARCHIVED.\nIf an ARCHIVED plan's implementation time has passed, it must be updated before it can be set back to another state."));
+
+			List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
+			foreach(EPlanSorting sorting in (EPlanSorting[])Enum.GetValues(typeof(EPlanSorting)))
+			{
+				options.Add(new TMP_Dropdown.OptionData(sorting.ToString()));
+			}
+			m_sortingDropdown.ClearOptions();
+			m_sortingDropdown.AddOptions(options);
+			m_sortingDropdown.onValueChanged.AddListener(OnSortingDropdownChange);
+
+			m_searchbar.m_ontextChange = OnSearchBarValueChanged;
 		}
 
 		public void LateUpdate()
 		{
 			//Only sort after all the updates so we don't do it multiple times
-			if (needsSorting)
+			if (m_needsSorting)
 			{
-				SortByDate();
-				needsSorting = false;
+				Sort();
+				m_needsSorting = false;
 			}
 		}
 
@@ -63,228 +67,216 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void OnIssueChanged(PlanLayer changedIssueLayer)
+		private void OnIssueChanged(PlanLayer a_changedIssueLayer)
 		{
-			SetPlanIssues(changedIssueLayer.Plan);
+			SetPlanIssues(a_changedIssueLayer.Plan);
 		}
 
-		private void CreateGroups()
+		public void AddPlanToList(Plan a_plan)
 		{
-			designStatePlans = CreatePlansGroup("Design", "A plan's content (layers and policies) can only be edited in the DESIGN state.\nPlans in DESIGN are not visible in other plans or to other teams.");
-			consultationStatePlans = CreatePlansGroup("Consultation", "Plans in CONSULTATION are visible in other plans and to other teams.\nUse the CONSULTATION state for early drafts that will need to be discussed with other teams.");
-			needApprovalStatePlans = CreatePlansGroup("Awaiting Approval", "Plans in the APPROVAL state will automatically be set to APPROVED once all required teams have accepted.\nPlans that require approval cannot be manually set to APPROVED, they must go through APPROVAL.");
-			approvedStatePlans = CreatePlansGroup("Approved", "Plans in the APPROVED state will be implemented when their implementation time is reached.");
-			implementedStatePlans = CreatePlansGroup("Implemented", "IMPLEMENTED plans have had their proposed changes applied to the world.");
-			deletedPlans = CreatePlansGroup("Archived", "When a plan's implementation time is reached and it is not in APPROVED or it has issues, it will automatically be ARCHIVED.\nIf an ARCHIVED plan's implementation time has passed, it must be updated before it can be set back to another state.");
-		}
+			PlanBar planBar = Instantiate(m_planBarPrefab, GetparentForState(a_plan.State)).GetComponent<PlanBar>();
+			m_planBarsPerPlan.Add(a_plan, planBar);
 
-		private void AddPlanStates()
-		{
-			stateGroup.Add(Plan.PlanState.DESIGN, designStatePlans);
-			stateGroup.Add(Plan.PlanState.CONSULTATION, consultationStatePlans);
-			stateGroup.Add(Plan.PlanState.APPROVAL, needApprovalStatePlans);
-			stateGroup.Add(Plan.PlanState.APPROVED, approvedStatePlans);
-			stateGroup.Add(Plan.PlanState.IMPLEMENTED, implementedStatePlans);
-			stateGroup.Add(Plan.PlanState.DELETED, deletedPlans);
-		}
-
-		public PlanBar AddPlanToList(Plan plan)
-		{
-			// Create the plan and put it in the correct group
-			PlanBar planBar = CreatePlanBar(SessionManager.Instance.GetTeamByTeamID(plan.Country).color, Util.MonthToText(plan.StartTime, true), plan);
-			stateGroup[plan.State].AddPlan(planBar);
-
-			if (PlanDetails.GetSelectedPlan() != plan)
-			{
-				planBar.ToggleChangeIndicator(true);
-			}		
-
-			// show all layers within a plan
-			foreach (PlanLayer layer in plan.PlanLayers)
-				AddPlanLayer(plan, layer, planBar);
-
-			planToPlanBar.Add(plan, planBar);
-
-			SetLockIcon(plan, plan.IsLocked);
-			needsSorting = true;
-
-			SetPlanIssues(plan);
+			planBar.Initialise(a_plan);
+			planBar.MoveToGroup(m_planGroupsPerState[a_plan.State]);
 			planBar.UpdateActionRequired();
+			planBar.Filter(m_searchbar.Text);
 
 			//Hide new plan if it shouldnt be visible
-			if (!plan.ShouldBeVisibleInUI)
+			if (!a_plan.ShouldBeVisibleInUI)
 				planBar.gameObject.SetActive(false);
 
-			return planBar;
+			RefreshPlanBarInteractablity(a_plan, planBar);
+			SetLockIcon(a_plan, a_plan.IsLocked);
+			SetPlanIssues(a_plan);
+			m_needsSorting = true;
 		}
 
-		public void AddPlanLayer(Plan plan, PlanLayer addedLayer, PlanBar planBar = null)
+		void OnSearchBarValueChanged(string a_newValue)
 		{
-			// Show the layerbar, they always start off
-			PlanLayerBar layerBar = CreatePlanLayer(SessionManager.Instance.GetTeamByTeamID(plan.Country).color, addedLayer, plan, addedLayer.BaseLayer.GetShortName());
-			layerBar.SetIssue(ERestrictionIssueType.None);
-			if (planBar == null)
-				planToPlanBar[plan].AddLayer(layerBar);
-			else
-				planBar.AddLayer(layerBar);
-			planLayerToPlanLayerBar.Add(addedLayer, layerBar);
-		}
-
-
-		public void RemovePlanLayer(Plan plan, PlanLayer removedLayer)
-		{
-			PlanLayerBar bar = planLayerToPlanLayerBar[removedLayer];
-			GameObject.Destroy(bar.gameObject);
-			planToPlanBar[removedLayer.Plan].RemoveLayer(bar);
-			planLayerToPlanLayerBar.Remove(removedLayer);
-		}
-
-		public void SortByDate()
-		{
-			int uiPlanIndex = 0;
-			for (int planId = 0; planId < PlanManager.Instance.GetPlanCount(); ++planId)
+			foreach (var kvp in m_planBarsPerPlan)
 			{
-				Plan planInstance = PlanManager.Instance.GetPlanAtIndex(planId);
-				PlanBar planBar;
-				if (planToPlanBar.TryGetValue(planInstance, out planBar))
+				kvp.Value.Filter(a_newValue);
+			}
+			if (m_currentSorting == EPlanSorting.State)
+			{
+				foreach (var kvp in m_planGroupsPerState)
 				{
-					planToPlanBar[planInstance].transform.SetSiblingIndex(uiPlanIndex);
-					++uiPlanIndex;
+					kvp.Value.CheckEmpty();
+				}
+			}
+		}
+
+		void OnSortingDropdownChange(int a_newValue)
+		{
+			if(m_currentSorting == EPlanSorting.State)
+			{
+				//Remove state bars, reparent plans
+				foreach (var kvp in m_planGroupsPerState)
+				{
+					kvp.Value.gameObject.SetActive(false);
+				}
+				foreach (var kvp in m_planBarsPerPlan)
+				{
+					kvp.Value.MoveToParent(m_contentParent);
+				}
+			}
+			m_currentSorting = (EPlanSorting)a_newValue;
+
+			if(m_currentSorting == EPlanSorting.State)
+			{
+				//Reparent to state bars and enable bars
+				foreach (var kvp in m_planBarsPerPlan)
+				{
+					kvp.Value.MoveToGroup(m_planGroupsPerState[kvp.Key.State]);
+				}
+				foreach (var kvp in m_planGroupsPerState)
+				{
+					kvp.Value.gameObject.SetActive(true);
+				}
+			}
+			m_needsSorting = true;
+		}
+
+		Transform GetparentForState(Plan.PlanState a_state)
+		{
+			if (m_currentSorting == EPlanSorting.State)
+				return m_planGroupsPerState[a_state].ContentParent;
+			return m_contentParent;
+		}
+
+		public void Sort()
+		{
+			if (m_currentSorting == EPlanSorting.State)
+			{
+				int uiPlanIndex = 0;
+				for (int planId = 0; planId < PlanManager.Instance.GetPlanCount(); ++planId)
+				{
+					Plan planInstance = PlanManager.Instance.GetPlanAtIndex(planId);
+					if (m_planBarsPerPlan.TryGetValue(planInstance, out PlanBar planBar))
+					{
+						m_planBarsPerPlan[planInstance].transform.SetSiblingIndex(uiPlanIndex);
+						++uiPlanIndex;
+					}
+				}
+			}
+			else if (m_currentSorting == EPlanSorting.Time)
+			{
+				//Plans manager list is already sorted by time, so just use that order
+				int uiPlanIndex = 0;
+				for (int i = 0; i < PlanManager.Instance.GetPlanCount(); i++)
+				{
+					Plan planInstance = PlanManager.Instance.GetPlanAtIndex(i);
+					if (m_planBarsPerPlan.TryGetValue(planInstance, out PlanBar planBar))
+					{
+						m_planBarsPerPlan[planInstance].transform.SetSiblingIndex(uiPlanIndex);
+						uiPlanIndex++;
+					}
+				}
+			}
+			else //Sort by country
+			{
+				List<Plan> plans = new List<Plan>(PlanManager.Instance.Plans);
+				plans.Sort(ComparePlanByCountry);
+				int uiPlanIndex = 0;
+				for (int i = 0; i < plans.Count; i++)
+				{
+					if (m_planBarsPerPlan.TryGetValue(plans[i], out PlanBar planBar))
+					{
+						m_planBarsPerPlan[plans[i]].transform.SetSiblingIndex(uiPlanIndex);
+						uiPlanIndex++;
+					}
 				}
 			}
 		}
 
 		public void UpdatePlan(Plan plan, bool nameChanged, bool timeChanged, bool stateChanged)
 		{
-			PlanBar planBar;
-			if (!planToPlanBar.TryGetValue(plan, out planBar))
+			if (m_planBarsPerPlan.TryGetValue(plan, out PlanBar planBar))
 			{
-				return;
-			}
-
-			if (nameChanged)
-			{
-				planBar.title.text = plan.Name;
-			}
-			if (timeChanged)
-			{
-				planBar.date.text = Util.MonthToText(plan.StartTime, true);
-				needsSorting = true;
-			}
-			if (stateChanged)
-			{
-				//Update plan visibility 
-				if (planBar.gameObject.activeSelf)
-				{		
-					if (!plan.ShouldBeVisibleInUI)
-						planBar.gameObject.SetActive(false);
+				if (nameChanged || timeChanged || stateChanged)
+				{
+					planBar.UpdateInfo();
+					m_needsSorting = true;
 				}
-				else if (plan.ShouldBeVisibleInUI)
-					planBar.gameObject.SetActive(true);
+				if (stateChanged)
+				{
+					//Update plan visibility 
+					if (planBar.gameObject.activeSelf)
+					{
+						if (!plan.ShouldBeVisibleInUI)
+							planBar.SetPlanVisibility(false);
+					}
+					else if (plan.ShouldBeVisibleInUI)
+						planBar.SetPlanVisibility(true);
 
-				if (plan.State == Plan.PlanState.DELETED)
-					planBar.SetViewEditButtonState(null); //Hides edit/view button
-				else
-					planBar.SetViewEditButtonState(false);//Sets edit/view button to view
+					//Reparents the planbar to the right group
+					m_planBarsPerPlan[plan].MoveToGroup(m_planGroupsPerState[plan.State]);
+				}
 
-				//Reparents the planbar to the right group
-				stateGroup[plan.State].AddPlan(planToPlanBar[plan]);
-				needsSorting = true;
-			}
-		
-			planBar.UpdateActionRequired();
-			SetPlanIssues(plan);
-		}
-
-		public void SetPlanUnseenChanges(Plan plan, bool unseenChanges)
-		{
-			if (planToPlanBar.ContainsKey(plan))
-			{
-				PlanBar planBar = planToPlanBar[plan];
-				if (planBar != null)
-					planBar.ToggleChangeIndicator(unseenChanges);
+				planBar.UpdateActionRequired();
+				SetPlanIssues(plan);
 			}
 		}
 
-		public void SetViewPlanFrameState(Plan plan, bool state)
+		public void SetPlanBarToggleState(Plan a_plan, bool a_state)
 		{
-			planToPlanBar[plan].SetViewFrameActivity(state);
+			m_planBarsPerPlan[a_plan].SetPlanBarToggleValue(a_state);
 		}
 
-		public void SetPlanBarToggleState(Plan plan, bool state)
+		private void SetPlanIssues(Plan a_plan)
 		{
-			planToPlanBar[plan].SetPlanBarToggleValue(state);
-		}
-
-		private void SetPlanIssues(Plan plan)
-		{
-			PlanBar planBar;
-			if (planToPlanBar.TryGetValue(plan, out planBar))
+			if (m_planBarsPerPlan.TryGetValue(a_plan, out var planBar))
 			{
 				ERestrictionIssueType maximumSeverity = ERestrictionIssueType.None;
-				// first set the planlayers icons
-				if (plan.energyError)
+				if (a_plan.energyError)
 					maximumSeverity = ERestrictionIssueType.Error;
-				foreach (PlanLayer layer in plan.PlanLayers)
-				{
-					ERestrictionIssueType issueType = IssueManager.instance.GetMaximumSeverity(layer);
-					planLayerToPlanLayerBar[layer].SetIssue(issueType);
-					if (issueType < maximumSeverity)
-					{
-						maximumSeverity = issueType;
-					}
-				}
 
 				planBar.SetIssue(maximumSeverity);
 
-				if (plan.Country == SessionManager.Instance.CurrentUserTeamID)
+				if (a_plan.Country == SessionManager.Instance.CurrentUserTeamID)
 				{
 					if (maximumSeverity <= ERestrictionIssueType.Error)
 					{
-						PlayerNotifications.AddPlanIssueNotification(plan);
+						PlayerNotifications.AddPlanIssueNotification(a_plan);
 					}
 					else
 					{
-						PlayerNotifications.RemovePlanIssueNotification(plan);
+						PlayerNotifications.RemovePlanIssueNotification(a_plan);
 					}
 				}
 			}
 		}
 
-		public void SetLockIcon(Plan plan, bool value)
+		public void SetLockIcon(Plan a_plan, bool a_value)
 		{
-			PlanBar planBar;
-			if (planToPlanBar.TryGetValue(plan, out planBar))
+			if (m_planBarsPerPlan.TryGetValue(a_plan, out var planBar))
 			{
-				planBar.lockIcon.gameObject.SetActive(value);
+				planBar.SetLockActive(a_value);
 			}
 		}
 
-		public PlansGroupBar CreatePlansGroup(string title = "New Plans Group", string tooltip = "")
+		public PlansGroupBar CreatePlansGroup(string a_title = "New Plans Group", string a_tooltip = "")
 		{
-			GameObject go = Instantiate(plansGroupPrefab);
-			PlansGroupBar group = go.GetComponent<PlansGroupBar>();
-			planGroups.Add(group);
-			go.transform.SetParent(contentLocation, false);
-			group.title.text = title;
-			group.tooltip.text = tooltip;
+			PlansGroupBar group = Instantiate(m_plansGroupPrefab, m_contentParent).GetComponent<PlansGroupBar>();
+			group.SetContent(a_title, a_tooltip, null); //TODO: get state icon
 			return group;
 		}
 
-		public void SetAllButtonInteractable(bool value)
+		public void SetAllButtonInteractable(bool a_value)
 		{
-			foreach (PlanBar planBar in plans)
+			foreach (var kvp in m_planBarsPerPlan)
 			{
-				planBar.SetViewEditButtonInteractable(value);
+				kvp.Value.SetPlanBarToggleInteractability(a_value);
 			}
 		}
 
-		private Plan GetPlanForPlanBar(PlanBar planBar)
+		private Plan GetPlanForPlanBar(PlanBar a_planBar)
 		{
 			Plan result = null;
-			foreach (var kvp in planToPlanBar)
+			foreach (var kvp in m_planBarsPerPlan)
 			{
-				if (kvp.Value == planBar)
+				if (kvp.Value == a_planBar)
 				{
 					result = kvp.Key;
 				}
@@ -296,60 +288,22 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public PlanBar CreatePlanBar(Color col, string date, Plan planRepresenting)
-		{
-			GameObject go = Instantiate(planBarPrefab);
-			PlanBar planBar = go.GetComponent<PlanBar>();
-			plans.Add(planBar);
-
-			planBar.Initialise(planRepresenting);
-			planBar.title.text = planRepresenting.Name;
-			planBar.countryIcon.color = col;
-			planBar.date.text = date;
-
-			RefreshPlanBarInteractablity(planRepresenting, planBar);
-
-			ColorBlock block = planBar.foldButton.colors;
-			block.highlightedColor = col;
-			planBar.foldButton.colors = block;
-
-			planBar.ToggleChangeIndicator(true);
-
-			return planBar;
-		}
-
-		public PlanLayerBar CreatePlanLayer(Color col, PlanLayer planLayer, Plan plan, string title = "New Layer")
-		{
-			GameObject go = Instantiate(planLayerPrefab);
-			PlanLayerBar layer = go.GetComponent<PlanLayerBar>();
-			planLayerBars.Add(layer);
-
-			layer.title.text = title;
-
-			return layer;
-		}
-
 		public void RefreshPlanBarInteractablityForAllPlans()
 		{
-			foreach (var kvp in planToPlanBar)
+			foreach (var kvp in m_planBarsPerPlan)
 			{
 				RefreshPlanBarInteractablity(kvp.Key, kvp.Value);
 			}
 		}
 
-		private void RefreshPlanBarInteractablity(Plan planRepresenting, PlanBar planBar)
+		private void RefreshPlanBarInteractablity(Plan a_planRepresenting, PlanBar a_planBar)
 		{
-			if (planRepresenting.State == Plan.PlanState.DELETED)
-			{
-				planBar.SetViewEditButtonState(null);
-			}
-			else
-			{
-				//planBar.SetViewEditButtonState(!planRepresenting.InInfluencingState);
-				planBar.SetViewEditButtonState(false);
-			}
-			planBar.SetViewEditButtonInteractable(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent && !Main.Instance.PreventPlanAndTabChange);
-			planBar.SetPlanBarToggleInteractability(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent && !Main.Instance.PreventPlanAndTabChange);
+			a_planBar.SetPlanBarToggleInteractability(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent && !Main.Instance.PreventPlanAndTabChange);
+		}
+
+		int ComparePlanByCountry(Plan a_plan1, Plan a_plan2)
+		{
+			return a_plan1.Country.CompareTo(a_plan2.Country);
 		}
 	}
 }

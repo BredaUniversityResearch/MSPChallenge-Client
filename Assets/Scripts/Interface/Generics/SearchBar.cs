@@ -9,9 +9,10 @@ using TMPro;
 public class SearchBar : MonoBehaviour
 {
     [SerializeField] Button m_clearButton;
-    TMP_InputField m_inputField;
+    [SerializeField] TMP_InputField m_inputField;
 
     public Action<string> m_ontextChange;
+    public string Text => m_inputField.text;
 
     void Start()
     {

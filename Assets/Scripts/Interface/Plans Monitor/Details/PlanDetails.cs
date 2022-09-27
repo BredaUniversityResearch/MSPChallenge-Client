@@ -148,8 +148,6 @@ namespace MSP2050.Scripts
 			set
 			{
 				instance.gameObject.SetActive(value);
-				if (value && instance.selectedPlan != null)
-					PlanManager.Instance.SetPlanUnseenChanges(instance.selectedPlan, false);
 			}
 		}
 
