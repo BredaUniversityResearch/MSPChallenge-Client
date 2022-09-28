@@ -89,8 +89,6 @@ namespace MSP2050.Scripts
 
 				allEnabled = true;
 
-				InterfaceCanvas.Instance.SetRegionWithName(tmpName);
-
 				groupDropdown.RefreshShownValue();
 
 			});

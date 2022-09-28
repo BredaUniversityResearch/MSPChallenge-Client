@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace MSP2050.Scripts
 {
@@ -34,6 +35,10 @@ namespace MSP2050.Scripts
 		public string config_file_name;
 		public string config_file_description;
 		public string region;
+		public string edition_name;
+		[JsonConverter(typeof(JsonConverterHexColor))]
+		public Color edition_colour;
+		public string edition_letter;
 		public string endpoint;
 
 		public string GetStartTime()

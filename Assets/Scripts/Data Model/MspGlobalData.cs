@@ -10,6 +10,10 @@ namespace MSP2050.Scripts
 		public const int num_eras = 4;
 
 		public string region;
+		public string edition_name;
+		[JsonConverter(typeof(JsonConverterHexColor))] 
+		public Color edition_colour;
+		public string edition_letter;
 		public int start; //Year
 		public int era_total_months;
 		public string era_planning_months;
