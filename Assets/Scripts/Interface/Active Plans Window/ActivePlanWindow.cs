@@ -12,38 +12,38 @@ namespace MSP2050.Scripts
 		public delegate void ParameterChangeCallback(EntityPropertyMetaData parameter, string value);
 
 		[Header("General")]
-		public GenericWindow window;
+		[SerializeField] GenericWindow window;
 
 		[Header("Start Editing")]
-		public Button startEditingButton;
+		[SerializeField] Button startEditingButton;
 
 		[Header("Plan name")]
-		public Image countryBall;
-		public TextMeshProUGUI planNameAndDate;
-		public Button zoomToPlanButton;
+		[SerializeField] Image countryBall;
+		[SerializeField] TextMeshProUGUI planNameAndDate;
+		[SerializeField] Button zoomToPlanButton;
 
 		[Header("View mode")]
-		public GameObject viewModeSection;
-		public Toggle viewAllToggle;
-		public Toggle viewPlanToggle;
-		public Toggle viewBaseToggle;
+		[SerializeField] GameObject viewModeSection;
+		[SerializeField] Toggle viewAllToggle;
+		[SerializeField] Toggle viewPlanToggle;
+		[SerializeField] Toggle viewBaseToggle;
 
 		[Header("Layers")]
-		public GameObject layerSection;
-		public Transform layerParent;
-		public Object layerPrefab;
-		public ToggleGroup layerToggleGroup;
+		[SerializeField] GameObject layerSection;
+		[SerializeField] Transform layerParent;
+		[SerializeField] Object layerPrefab;
+		[SerializeField] ToggleGroup layerToggleGroup;
 
 		private Dictionary<PlanLayer, ActivePlanLayer> layers;
 		private bool ignoreLayerCallback;
 
 		[Header("Layer types")]
-		public GameObject layerTypeSection;
-		public Transform layerTypeParent;
-		public Object layerTypePrefabSingle;
-		public Object layerTypePrefabMulti;
-		public EntityTypeChangeCallback typeChangeCallback;
-		public ToggleGroup layerTypeToggleGroup;
+		[SerializeField] GameObject layerTypeSection;
+		[SerializeField] Transform layerTypeParent;
+		[SerializeField] Object layerTypePrefabSingle;
+		[SerializeField] Object layerTypePrefabMulti;
+		[SerializeField] EntityTypeChangeCallback typeChangeCallback;
+		[SerializeField] ToggleGroup layerTypeToggleGroup;
 
 		private Dictionary<EntityType, ActivePlanLayerType> layerTypes;
 		private ActivePlanLayerType multipleTypesEntry;
@@ -51,12 +51,12 @@ namespace MSP2050.Scripts
 		private bool ignoreLayerTypeCallback;//Used to ignore callbacks from above (Main.Instance.StartEditingLayer) and below (ActivePlanLayer.toggle)
 
 		[Header("Country")]
-		public GameObject countrySection;
-		public Transform countryParent;
-		public Object countryPrefab;
-		public Object countryPrefabMultiple;
-		public TeamChangeCallback countryChangeCallback;
-		public ToggleGroup countryToggleGroup;
+		[SerializeField] GameObject countrySection;
+		[SerializeField] Transform countryParent;
+		[SerializeField] Object countryPrefab;
+		[SerializeField] Object countryPrefabMultiple;
+		[SerializeField] TeamChangeCallback countryChangeCallback;
+		[SerializeField] ToggleGroup countryToggleGroup;
 
 		private Dictionary<int, Toggle> countryToggles;
 		private Toggle gmCountryToggle, multiCountryToggle;
@@ -65,10 +65,10 @@ namespace MSP2050.Scripts
 		private bool ignoreCountryToggleCallback;
 
 		[Header("Parameters")]
-		public GameObject parameterSection;
-		public Transform parameterParent;
-		public Object parameterPrefab;
-		public ParameterChangeCallback parameterChangeCallback;
+		[SerializeField] GameObject parameterSection;
+		[SerializeField] Transform parameterParent;
+		[SerializeField] Object parameterPrefab;
+		[SerializeField] ParameterChangeCallback parameterChangeCallback;
 
 		private Dictionary<EntityPropertyMetaData, ActivePlanParameter> parameters;
 		private Dictionary<EntityPropertyMetaData, string> originalParameterValues;
@@ -86,7 +86,6 @@ namespace MSP2050.Scripts
 					PlanDetails.SelectPlan(selectedPlan);
 					PlanDetails.instance.TabSelect(PlanDetails.EPlanDetailsTab.Layers);
 					PlanDetails.instance.editTabContentButton.onClick.Invoke();
-					//PlanManager.Instance.RequestPlanLockForEditing(selectedPlan);
 				}
 			});
 
