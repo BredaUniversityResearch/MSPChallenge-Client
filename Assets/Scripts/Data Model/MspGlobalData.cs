@@ -14,7 +14,6 @@ namespace MSP2050.Scripts
 		[JsonConverter(typeof(JsonConverterHexColor))] 
 		public Color edition_colour;
 		public string edition_letter;
-		public Sprite edition_icon; //This gets loaded later
 		public int start; //Year
 		public int era_total_months;
 		public string era_planning_months;

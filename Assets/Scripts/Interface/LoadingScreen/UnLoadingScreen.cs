@@ -7,11 +7,11 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField]
 		private Text editionText = null;
-		public Image mspIcon;
+		public DynamicLogo mspIcon;
 
 		protected void Start()
 		{
-			mspIcon.sprite = SessionManager.Instance.MspGlobalData.edition_icon;
+			mspIcon.SetContent(SessionManager.Instance.MspGlobalData.edition_colour, SessionManager.Instance.MspGlobalData.edition_letter);
 			editionText.text = SessionManager.Instance.MspGlobalData.edition_name;
 		}
 
