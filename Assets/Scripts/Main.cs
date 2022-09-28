@@ -38,7 +38,6 @@ namespace MSP2050.Scripts
 		[HideInInspector] public bool fsmActive;
 
 		private bool interceptQuit = true;
-		private bool editingPlanDetailsContent = false;
 		private bool preventPlanAndTabChange = false;
 
 		private ProjectionInfo mspCoordinateProjection;
@@ -195,12 +194,6 @@ namespace MSP2050.Scripts
 		public static bool InEditMode
 		{
 			get { return CurrentlyEditingPlan != null; }
-		}
-
-		public bool EditingPlanDetailsContent
-		{
-			get { return editingPlanDetailsContent; }
-			set { editingPlanDetailsContent = value; }
 		}
 
 		public bool PreventPlanAndTabChange

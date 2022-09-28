@@ -13,12 +13,23 @@ namespace MSP2050.Scripts
 		[SerializeField] TextMeshProUGUI m_nameText;
 		[SerializeField] Image m_icon;
 
-		public void SetContent(string a_name, Sprite a_icon, UnityAction<bool> a_callback)
+		public void Initialise(UnityAction<bool> a_callback, ToggleGroup a_toggleGroup)
 		{
 			m_toggle.onValueChanged.RemoveAllListeners();
 			m_toggle.onValueChanged.AddListener(a_callback);
-			m_nameText.text = a_name;
+			m_toggle.group = a_toggleGroup;
+		}
+
+		public void SetContent(string a_text, Sprite a_icon)
+		{
+			m_nameText.text = a_text;
 			m_icon.sprite = a_icon;
+			gameObject.SetActive(true);
+		}
+
+		public void SetContent(string a_text)
+		{
+			m_nameText.text = a_text;
 		}
 	}
 }

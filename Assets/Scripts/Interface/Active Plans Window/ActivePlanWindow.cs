@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace MSP2050.Scripts
 {
@@ -12,119 +13,101 @@ namespace MSP2050.Scripts
 		public delegate void ParameterChangeCallback(EntityPropertyMetaData parameter, string value);
 
 		[Header("General")]
-		[SerializeField] GenericWindow window;
+		[SerializeField] GenericWindow m_window;
+		[SerializeField] ToggleGroup m_contentToggleGroup;
 
-		[Header("Start Editing")]
-		[SerializeField] Button startEditingButton;
+		[Header("Buttons")]
+		[SerializeField] GameObject m_editButtonParent;
+		[SerializeField] Button m_startEditingButton;
+		[SerializeField] GameObject m_cancelAcceptButtonParent;
+		[SerializeField] Button m_acceptEditButton;
+		[SerializeField] Button m_cancelEditButton;
+		[SerializeField] Button m_zoomToPlanButton;
 
-		[Header("Plan name")]
+		[Header("Plan info")]
 		[SerializeField] Image countryBall;
-		[SerializeField] TextMeshProUGUI planNameAndDate;
-		[SerializeField] Button zoomToPlanButton;
+		[SerializeField] CustomInputField m_planName;
+		[SerializeField] CustomInputField m_planDescription;
+		[SerializeField] AP_ContentToggle m_planDate;
+		[SerializeField] AP_ContentToggle m_planState;
 
 		[Header("View mode")]
-		[SerializeField] GameObject viewModeSection;
-		[SerializeField] Toggle viewAllToggle;
-		[SerializeField] Toggle viewPlanToggle;
-		[SerializeField] Toggle viewBaseToggle;
+		[SerializeField] GameObject m_viewModeSection;
+		[SerializeField] Toggle m_viewAllToggle;
+		[SerializeField] Toggle m_viewPlanToggle;
+		[SerializeField] Toggle m_viewBaseToggle;
 
 		[Header("Layers")]
-		[SerializeField] GameObject layerSection;
-		[SerializeField] Transform layerParent;
-		[SerializeField] Object layerPrefab;
-		[SerializeField] ToggleGroup layerToggleGroup;
+		[SerializeField] GameObject m_layerSection;
+		[SerializeField] Transform m_layerParent;
+		[SerializeField] GameObject m_layerPrefab;
+		[SerializeField] Button m_changeLayersButton;
+
+		List<AP_ContentToggle> m_layerToggles;
+
+		[Header("Policies")]
+		[SerializeField] GameObject m_policySection;
+		[SerializeField] Transform m_policyParent;
+		[SerializeField] GameObject m_policyPrefab;
+		[SerializeField] Button m_changePoliciesButton;
+
+		List<AP_ContentToggle> m_policyToggles;
 
 		private Dictionary<PlanLayer, ActivePlanLayer> layers;
-		private bool ignoreLayerCallback;
-
-		[Header("Layer types")]
-		[SerializeField] GameObject layerTypeSection;
-		[SerializeField] Transform layerTypeParent;
-		[SerializeField] Object layerTypePrefabSingle;
-		[SerializeField] Object layerTypePrefabMulti;
-		[SerializeField] EntityTypeChangeCallback typeChangeCallback;
-		[SerializeField] ToggleGroup layerTypeToggleGroup;
-
-		private Dictionary<EntityType, ActivePlanLayerType> layerTypes;
-		private ActivePlanLayerType multipleTypesEntry;
-		private bool multiType;
-		private bool ignoreLayerTypeCallback;//Used to ignore callbacks from above (Main.Instance.StartEditingLayer) and below (ActivePlanLayer.toggle)
-
-		[Header("Country")]
-		[SerializeField] GameObject countrySection;
-		[SerializeField] Transform countryParent;
-		[SerializeField] Object countryPrefab;
-		[SerializeField] Object countryPrefabMultiple;
-		[SerializeField] TeamChangeCallback countryChangeCallback;
-		[SerializeField] ToggleGroup countryToggleGroup;
-
-		private Dictionary<int, Toggle> countryToggles;
-		private Toggle gmCountryToggle, multiCountryToggle;
-		private int selectedCountry;
-		private bool gmSelectable = true;
-		private bool ignoreCountryToggleCallback;
-
-		[Header("Parameters")]
-		[SerializeField] GameObject parameterSection;
-		[SerializeField] Transform parameterParent;
-		[SerializeField] Object parameterPrefab;
-		[SerializeField] ParameterChangeCallback parameterChangeCallback;
-
-		private Dictionary<EntityPropertyMetaData, ActivePlanParameter> parameters;
-		private Dictionary<EntityPropertyMetaData, string> originalParameterValues;
+		private bool m_ignoreLayerCallback;
 
 		//General
-		private Plan selectedPlan;
-		private DialogBox cancelChangesConfirmationWindow = null;
+		private Plan m_selectedPlan;
+		private DialogBox m_cancelChangesConfirmationWindow = null;
 
 		void Awake()
 		{
-			startEditingButton.onClick.AddListener(() =>
+			m_startEditingButton.onClick.AddListener(() =>
 			{
-				if (selectedPlan != null)
+				if (m_selectedPlan != null)
 				{
-					PlanDetails.SelectPlan(selectedPlan);
+					PlanDetails.SelectPlan(m_selectedPlan);
 					PlanDetails.instance.TabSelect(PlanDetails.EPlanDetailsTab.Layers);
 					PlanDetails.instance.editTabContentButton.onClick.Invoke();
 				}
 			});
 
-			viewAllToggle.onValueChanged.AddListener((value) =>
+			m_viewAllToggle.onValueChanged.AddListener((value) =>
 			{
 				if (value)
 					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.All);
 			});
 
-			viewPlanToggle.onValueChanged.AddListener((value) =>
+			m_viewPlanToggle.onValueChanged.AddListener((value) =>
 			{
 				if (value)
 					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Changes);
 			});
 
-			viewBaseToggle.onValueChanged.AddListener((value) =>
+			m_viewBaseToggle.onValueChanged.AddListener((value) =>
 			{
 				if (value)
 					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Base);
 			});
 
-			zoomToPlanButton.onClick.AddListener(() =>
+			m_zoomToPlanButton.onClick.AddListener(() =>
 			{
-				selectedPlan.ZoomToPlan();
+				m_selectedPlan.ZoomToPlan();
 			});
 
-			window.OnAttemptHideWindow = OnAttemptHideWindow;
+			m_window.OnAttemptHideWindow = OnAttemptHideWindow;
 		}
 
 		private bool OnAttemptHideWindow()
 		{
 			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
 			{
-				if (cancelChangesConfirmationWindow == null || !cancelChangesConfirmationWindow.isActiveAndEnabled)
+				if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
 				{
 					UnityEngine.Events.UnityAction lb = () => { };
 					UnityEngine.Events.UnityAction rb = () =>
 					{
-						if (Main.InEditMode)				
+						if (Main.InEditMode)
 							PlanDetails.LayersTab.ForceCancelChanges();
 						else
 							PlanDetails.instance.CancelEditingContent();
@@ -132,7 +115,7 @@ namespace MSP2050.Scripts
 						PlanManager.Instance.HideCurrentPlan();
 						gameObject.SetActive(false);
 					};
-					cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "All changes made to the plan will be lost. Are you sure you want to cancel?", lb, rb);
+					m_cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "All changes made to the plan will be lost. Are you sure you want to cancel?", lb, rb);
 				}
 
 				return false;
@@ -144,21 +127,11 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void OnCountriesLoaded()
-		{
-			countryToggles = new Dictionary<int, Toggle>();
-			foreach (Team team in SessionManager.Instance.GetTeams())
-				if(!team.IsAreaManager)
-					CreateCountryToggle(team);
-
-			//Create the multiple selected toggle
-			CreateCountryToggle(null);
-		}
 
 		public void SetToPlan(Plan plan)
 		{
 			gameObject.SetActive(true);
-			selectedPlan = plan;
+			m_selectedPlan = plan;
 			countryBall.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
 			UpdateNameAndDate();
 			UpdateEditButtonActivity();
@@ -166,17 +139,16 @@ namespace MSP2050.Scripts
 
 		public void UpdateNameAndDate()
 		{
-			planNameAndDate.text = string.Format("{0} ({1})", selectedPlan.Name, Util.MonthToText(selectedPlan.StartTime, true));
+			m_planDate.text = string.Format("{0} ({1})", m_selectedPlan.Name, Util.MonthToText(m_selectedPlan.StartTime, true));
 
 		}
 
 		public void UpdateEditButtonActivity()
 		{
-			startEditingButton.gameObject.SetActive(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent
-			                                                         && selectedPlan != null 
-			                                                         && selectedPlan.State == Plan.PlanState.DESIGN
-			                                                         && (SessionManager.Instance.AreWeManager || selectedPlan.Country == SessionManager.Instance.CurrentUserTeamID)
-			                                                         && selectedPlan.PlanLayers.Count > 0);
+			m_editButtonParent.SetActive(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent
+																	 && m_selectedPlan != null
+																	 && m_selectedPlan.State == Plan.PlanState.DESIGN
+																	 && (SessionManager.Instance.AreWeManager || m_selectedPlan.Country == SessionManager.Instance.CurrentUserTeamID);
 		}
 
 		public void CloseWindow()
@@ -186,501 +158,95 @@ namespace MSP2050.Scripts
 
 		public void CloseEditingUI()
 		{
-			viewModeSection.SetActive(true);
+			m_viewModeSection.SetActive(true);
 			UpdateEditButtonActivity();
+			m_cancelAcceptButtonParent.SetActive(false);
 
-			layerTypeSection.SetActive(false);
-			layerSection.SetActive(false);
-			countrySection.SetActive(false);
-			parameterSection.SetActive(false);
+			m_changeLayersButton.gameObject.SetActive(false);
+			m_changePoliciesButton.gameObject.SetActive(false);
 		}
 
-		public void OpenEditingUI(PlanLayer editingLayer)
+		public void OpenEditingUI()
 		{
-			//Disable viewing and edit sections
-			if (!viewAllToggle.isOn)
-				viewAllToggle.isOn = true;
-			viewModeSection.SetActive(false);
-			startEditingButton.gameObject.SetActive(false);
+			if (!m_viewAllToggle.isOn)
+				m_viewAllToggle.isOn = true;
+			m_viewModeSection.SetActive(false);
+			m_cancelAcceptButtonParent.SetActive(true);
+			m_editButtonParent.gameObject.SetActive(false);
 
-			//If not a layerless plan, enable editing UI
-			if (editingLayer != null)
-			{
-				//Activate editing sections
-				layerTypeSection.SetActive(true);
-				layerSection.SetActive(true);
-				countrySection.SetActive(SessionManager.Instance.AreWeManager);
-
-				//Clear and create new layers
-				ClearLayers();
-				foreach (PlanLayer pl in selectedPlan.PlanLayers)
-					CreateLayer(pl);
-
-				StartEditingLayer(editingLayer);
-			}
+			m_changeLayersButton.gameObject.SetActive(true);
+			m_changePoliciesButton.gameObject.SetActive(true);
 		}
 
 		public void StartEditingLayer(PlanLayer layer)
 		{
 			//Handle visual selection
-			if (!ignoreLayerCallback)
+			if (!m_ignoreLayerCallback)
 			{
-				ignoreLayerCallback = true;
+				m_ignoreLayerCallback = true;
 				layers[layer].toggle.isOn = true;
-				ignoreLayerCallback = false;
+				m_ignoreLayerCallback = false;
 			}
 
-			//Clear and recreate layer types
-			multiType = layer.BaseLayer.MultiTypeSelect;
-			layerTypeToggleGroup.allowSwitchOff = multiType;
-			ClearLayerTypes();
-			foreach (KeyValuePair<int, EntityType> kvp in layer.BaseLayer.EntityTypes)
-				CreateLayerType(kvp.Value, kvp.Value.availabilityDate <= layer.Plan.StartTime);
-			CreateMultipleLayerType();
-			SetNoEntityTypesSelected();
-
-			//Clear and recreate parameters
-			ClearParameters();
-			if (layer.BaseLayer.propertyMetaData == null || layer.BaseLayer.propertyMetaData.Count == 0)
-				parameterSection.SetActive(false);
-			else
-			{
-				bool activeParamsOnLayer = false;
-				foreach (EntityPropertyMetaData param in layer.BaseLayer.propertyMetaData)
-					if (param.ShowInEditMode)
-					{
-						CreateParameter(param);
-						activeParamsOnLayer = true;
-					}
-				if(activeParamsOnLayer)
-					parameterSection.SetActive(true);
-				else
-					parameterSection.SetActive(false);
-			}
-
-			//Set admin country option available/unavailable
-			if (SessionManager.Instance.AreWeGameMaster)
-				GMSelectable = !layer.BaseLayer.IsEnergyLayer();
+			//TODO: set geometry tool active & content
 		}
 
-		public void ActivePlanLayerCallback(PlanLayer planLayer)
+		private void SetEntriesToPolicies()
 		{
+			//TODO
+		}
+
+		private void SetEntriesToLayers()
+		{
+			int i = 0;
+			for (; i < m_selectedPlan.PlanLayers.Count; i++)
+			{
+				if (i < m_layerToggles.Count)
+					m_layerToggles[i].SetContent(m_selectedPlan.PlanLayers[i].BaseLayer.ShortName, LayerInterface.GetIconStatic(m_selectedPlan.PlanLayers[i].BaseLayer.SubCategory));
+				else
+					CreateLayerEntry(m_selectedPlan.PlanLayers[i]);
+			}
+			for (; i < m_layerToggles.Count; i++)
+			{
+				m_layerToggles[i].gameObject.SetActive(false);
+			}
+			m_changeLayersButton.transform.SetAsLastSibling();
+		}
+
+		private void CreateLayerEntry(PlanLayer layer)
+		{
+			AP_ContentToggle obj = Instantiate(m_layerPrefab, m_layerParent).GetComponent<AP_ContentToggle>();
+			int layerIndex = m_layerToggles.Count;
+			obj.Initialise((b) => OnLayerContentToggled(b, layerIndex), m_contentToggleGroup);
+			obj.SetContent(layer.BaseLayer.ShortName, LayerInterface.GetIconStatic(layer.BaseLayer.SubCategory));
+			m_layerToggles.Add(obj);
+		}
+
+		void OnLayerContentToggled(bool a_value, int a_layerIndex)
+		{
+			//TODO
 			//Ignore if we just set the planlayer to active
-			if (ignoreLayerCallback)
+			if (m_ignoreLayerCallback)
 				return;
 
 			//Ignore callback from Main.Instance.StartEditingLayer
-			ignoreLayerCallback = true;
+			m_ignoreLayerCallback = true;
 			PlanDetails.LayersTab.StartEditingLayer(planLayer);
-			ignoreLayerCallback = false;
+			m_ignoreLayerCallback = false;
 		}
 
-		public void SetObjectChangeInteractable(bool value)
+		private void CreatePolicyEntry(PlanLayer layer)
 		{
-			SetEntityTypeSelectionInteractable(value);
-			SetParameterInteractability(value, false);
-			SetCountrySelectionInteractable(value);
+			AP_ContentToggle obj = Instantiate(m_policyPrefab, m_policyParent).GetComponent<AP_ContentToggle>();
+			int policyIndex = m_policyToggles.Count;
+			obj.Initialise((b) => OnpolicyContentToggled(b, policyIndex), m_contentToggleGroup);
+			obj.SetContent(layer.BaseLayer.ShortName, LayerInterface.GetIconStatic(layer.BaseLayer.SubCategory));
+			m_policyToggles.Add(obj);
 		}
 
-		#region Country Selection
-		public void SetTeamToBasicIfEmpty()
+		void OnpolicyContentToggled(bool a_value, int a_policyIndex)
 		{
-			foreach (KeyValuePair<int, Toggle> kvp in countryToggles)
-				if (kvp.Value.isOn)
-					return;
-			SelectedTeam = countryToggles.GetFirstKey();
+			//TODO
 		}
-
-		//Is the GM team an option in the dropdown
-		public bool GMSelectable
-		{
-			get { return gmSelectable; }
-			set
-			{
-				if (value != gmSelectable)
-				{
-					gmSelectable = value;
-					gmCountryToggle.gameObject.SetActive(gmSelectable);
-				}
-			}
-		}
-
-		public void SetCountrySelectionInteractable(bool value)
-		{
-			foreach (KeyValuePair<int, Toggle> kvp in countryToggles)
-				kvp.Value.interactable = value;
-		}
-
-		//Get/Set selected team by team ID 
-		public int SelectedTeam
-		{
-			get
-			{
-				foreach (KeyValuePair<int, Toggle> kvp in countryToggles)
-					if (kvp.Value.isOn)
-						return kvp.Key;
-				return countryToggles.GetFirstKey();
-			}
-			set
-			{
-				ignoreCountryToggleCallback = true;
-				if (value < -1)
-				{
-					//Select none
-					foreach (KeyValuePair<int, Toggle> kvp in countryToggles)
-						if (kvp.Value.isOn)
-							kvp.Value.isOn = false;
-					gmCountryToggle.isOn = false;
-					multiCountryToggle.gameObject.SetActive(false);
-				}
-				else if (value == -1)
-				{
-					//Multiple selected
-					multiCountryToggle.gameObject.SetActive(true);
-					multiCountryToggle.isOn = true;
-				}
-				else if (countryToggles.ContainsKey(value))
-				{
-					countryToggles[value].isOn = true;
-				}
-				ignoreCountryToggleCallback = false;
-			}
-		}
-
-		private void CountryToggleClicked()
-		{
-			if (ignoreCountryToggleCallback)
-				return;
-			multiCountryToggle.gameObject.SetActive(false);
-			if (countryChangeCallback != null)
-				countryChangeCallback(SelectedTeam);
-		}
-		#endregion
-
-		#region Layer Type Selection
-		public void DeselectAllEntityTypes()
-		{
-			multipleTypesEntry.gameObject.SetActive(false);
-			SetNoEntityTypesSelected();
-		}
-
-		public void SetEntityTypeSelectionInteractable(bool value)
-		{
-			foreach (KeyValuePair<EntityType, ActivePlanLayerType> kvp in layerTypes)
-				kvp.Value.toggle.interactable = value;
-		}
-
-		public void SetSelectedEntityTypes(List<List<EntityType>> selectedTypes)
-		{
-			//If null, display nothing selected
-			if (selectedTypes == null || selectedTypes.Count == 0)
-			{
-				multipleTypesEntry.gameObject.SetActive(false);
-				SetNoEntityTypesSelected();
-			}
-			//One geom selected, show its type
-			else if (selectedTypes.Count == 1)
-			{
-				SetSelectedEntityTypes(selectedTypes[0]);
-			}
-			//Multiple geom selected, determine if we should show types
-			else
-			{
-
-				bool identical = true;
-				int count = selectedTypes[0].Count;
-				for (int i = 1; i < selectedTypes.Count && identical; i++)
-				{
-					if (selectedTypes[i].Count != count)
-					{
-						identical = false;
-						break;
-					}
-					for (int a = 0; a < count; a++)
-					{
-						//TODO: this can be greatly optimized if entity types are sorted by key, current worst case: selectedTypes.count * selectedTypes[0].count^2
-						if (!selectedTypes[i].Contains(selectedTypes[0][a]))
-						{
-							identical = false;
-							break;
-						}
-					}
-				}
-
-				//Check of all entity types are the same
-				if (identical)
-					SetSelectedEntityTypes(selectedTypes[0]);
-				else
-					SetMultipleEntityTypesSelected();
-			}
-		}
-
-		private void SetMultipleEntityTypesSelected()
-		{
-			//if (multiType)
-			SetNoEntityTypesSelected();
-			multipleTypesEntry.gameObject.SetActive(true);
-			multipleTypesEntry.toggle.isOn = true;
-		}
-
-		private void SetNoEntityTypesSelected()
-		{
-			ignoreLayerTypeCallback = true;
-			foreach (KeyValuePair<EntityType, ActivePlanLayerType> kvp in layerTypes)
-				if (kvp.Value.toggle.isOn)
-					kvp.Value.toggle.isOn = false;
-			ignoreLayerTypeCallback = false;
-		}
-
-		private void SetSelectedEntityTypes(List<EntityType> selectedTypes)
-		{
-			ignoreLayerTypeCallback = true;
-			multipleTypesEntry.gameObject.SetActive(false);
-			if (selectedTypes == null)
-				SetNoEntityTypesSelected();
-			else
-			{
-				//If multitype they're not in the toggle group, so first disable all
-				if(multiType)
-					foreach (KeyValuePair<EntityType, ActivePlanLayerType> kvp in layerTypes)
-						if (kvp.Value.toggle.isOn)
-							kvp.Value.toggle.isOn = false;
-
-				foreach (EntityType t in selectedTypes)
-					layerTypes[t].toggle.isOn = true;
-			}
-			ignoreLayerTypeCallback = false;
-		}
-
-		private void LayerTypeToggleClicked(bool value)
-		{
-			if (ignoreLayerTypeCallback)
-				return;
-			if (!value && !multiType)
-				return;
-			multipleTypesEntry.gameObject.SetActive(false);
-			if (typeChangeCallback != null)
-				typeChangeCallback(GetEntityTypeSelection());
-		}
-
-		public List<EntityType> GetEntityTypeSelection()
-		{
-			List<EntityType> result = new List<EntityType>();
-
-			foreach (KeyValuePair<EntityType, ActivePlanLayerType> kvp in layerTypes)		
-				if (kvp.Value.toggle.isOn)
-					result.Add(kvp.Key);
-
-			if (result.Count == 0)
-				result.Add(layerTypes.GetFirstKey());
-			return result;
-		}
-
-		public void SetEntityTypeToBasicIfEmpty()
-		{
-			foreach (KeyValuePair<EntityType, ActivePlanLayerType> kvp in layerTypes)
-			{
-				if (kvp.Value.toggle.isOn)
-					return;
-			}
-
-			//Select first interactable layer type
-			foreach (KeyValuePair<EntityType, ActivePlanLayerType> kvp in layerTypes)
-			{
-
-				if(kvp.Value.toggle.interactable)
-					SetSelectedEntityTypes(new List<EntityType>() { layerTypes.GetFirstKey() });
-			}
-		}
-		#endregion
-
-		#region Parameters
-		public void OnParameterChanged(EntityPropertyMetaData parameter, string value)
-		{
-			//If we expect a numeric value and it isnt, put the original value back
-			if (parameter.ContentValidation != LayerInfoPropertiesObject.ContentValidation.None)
-			{
-				if (parameter.ContentValidation == LayerInfoPropertiesObject.ContentValidation.ShippingWidth)
-				{
-					if (Util.ParseToFloat(value) < 0)
-					{
-						parameters[parameter].SetValue(originalParameterValues[parameter]);
-						return;
-					}
-				}
-				else
-				{
-					if (Util.ParseToInt(value) < 1)
-					{
-						parameters[parameter].SetValue(originalParameterValues[parameter]);
-						return;
-					}
-				}
-			}
-			//Only invoke callback if value changed
-			if (originalParameterValues != null && originalParameterValues[parameter] != value && parameterChangeCallback != null)
-			{
-				parameterChangeCallback(parameter, value);
-				originalParameterValues[parameter] = value;
-			}
-		}
-
-		public void SetParameterInteractability(bool value, bool reset = true)
-		{
-			foreach (var kvp in parameters)
-				kvp.Value.SetInteractable(value, reset);
-		}
-
-		public void SetSelectedParameters(List<Dictionary<EntityPropertyMetaData, string>> selectedParams)
-		{
-			if (selectedParams == null || selectedParams.Count == 0)
-			{
-				//Deselect
-				SetParameterInteractability(false);
-			}
-			else if (selectedParams.Count == 1)
-			{
-				//Show single selected
-				SetParameterValues(selectedParams[0]);
-			}
-			else
-			{
-				Dictionary<EntityPropertyMetaData, bool> identical = new Dictionary<EntityPropertyMetaData, bool>();
-				foreach (var kvp in selectedParams[0])
-				{
-					identical[kvp.Key] = true;
-				}
-
-				//Check if objects have idental values per param
-				for (int i = 1; i < selectedParams.Count; i++)
-				{
-					bool canCutOff = true;
-					foreach (var kvp in selectedParams[i])
-					{
-						//Already found to not be identical
-						if (!identical[kvp.Key])
-							continue;
-
-						//Wasn't already false, so the check is useful
-						canCutOff = false;
-
-						//Check if param idental to the first
-						if (selectedParams[0][kvp.Key] != kvp.Value)
-							identical[kvp.Key] = false;
-					}
-					if (canCutOff)
-						break;
-				}
-
-				originalParameterValues = new Dictionary<EntityPropertyMetaData, string>();
-				//show a value or "multiple" per entity type
-				foreach (var kvp in identical)
-				{
-					//If all identical, use the first. Otherwise a preset value.
-					string value = kvp.Value ? selectedParams[0][kvp.Key] : "multiple";
-					parameters[kvp.Key].SetValue(value);				
-					originalParameterValues[kvp.Key] = value;
-				}
-			}
-		}
-
-		public void SetParameterValues(Dictionary<EntityPropertyMetaData, string> values)
-		{
-			originalParameterValues = values;
-			foreach (var kvp in values)
-			{
-				parameters[kvp.Key].SetValue(kvp.Value);
-			}
-		}
-		#endregion
-
-		#region Object creation
-		private void ClearLayerTypes()
-		{
-			for(int i = 0; i < layerTypeParent.transform.childCount; i++)
-				Destroy(layerTypeParent.transform.GetChild(i).gameObject);
-			layerTypes = new Dictionary<EntityType, ActivePlanLayerType>();
-		}
-
-		private void CreateLayerType(EntityType type, bool interactable)
-		{
-			ActivePlanLayerType obj = ((GameObject)GameObject.Instantiate(multiType ? layerTypePrefabMulti : layerTypePrefabSingle)).GetComponent<ActivePlanLayerType>();
-			obj.transform.SetParent(layerTypeParent, false);
-			obj.SetToType(type, window, !interactable);
-			if (!multiType)
-				obj.toggle.group = layerTypeToggleGroup;
-			obj.toggle.onValueChanged.AddListener((value) => LayerTypeToggleClicked(value));
-			obj.DisabledIfNotSelected = !interactable;
-			layerTypes.Add(type, obj);
-		}
-
-		private void CreateMultipleLayerType()
-		{
-			ActivePlanLayerType obj = ((GameObject)GameObject.Instantiate(multiType ? layerTypePrefabMulti : layerTypePrefabSingle)).GetComponent<ActivePlanLayerType>();
-			obj.transform.SetParent(layerTypeParent, false);
-			obj.SetToMultiple();
-			if (!multiType)
-				obj.toggle.group = layerTypeToggleGroup;
-			multipleTypesEntry = obj;
-			obj.gameObject.SetActive(false);
-		}
-
-		private void ClearLayers()
-		{
-			for (int i = 0; i < layerParent.transform.childCount; i++)
-				Destroy(layerParent.transform.GetChild(i).gameObject);
-			layers = new Dictionary<PlanLayer, ActivePlanLayer>();
-		}
-
-		private void CreateLayer(PlanLayer layer)
-		{
-			ActivePlanLayer obj = ((GameObject)GameObject.Instantiate(layerPrefab)).GetComponent<ActivePlanLayer>();
-			obj.transform.SetParent(layerParent, false);
-			obj.SetToLayer(layer);
-			obj.toggle.group = layerToggleGroup;
-			layers.Add(layer, obj);
-		}
-
-		//If null, create the muliple selected toggle
-		private void CreateCountryToggle(Team team)
-		{
-			ActivePlanCountry obj = ((GameObject)GameObject.Instantiate(team == null ? countryPrefabMultiple : countryPrefab)).GetComponent<ActivePlanCountry>();
-			obj.transform.SetParent(countryParent, false);
-			obj.toggle.group = countryToggleGroup;
-
-			if (team == null)
-			{
-				multiCountryToggle = obj.toggle;
-				obj.gameObject.SetActive(false);
-			}
-			else
-			{
-				if (team.IsGameMaster)
-					gmCountryToggle = obj.toggle;
-				else			
-					countryToggles.Add(team.ID, obj.toggle);
-			
-				obj.ballImage.color = team.color;
-				obj.toggle.onValueChanged.AddListener((value) => CountryToggleClicked());
-			}
-		}
-
-		private void ClearParameters()
-		{
-			for (int i = 0; i < parameterParent.transform.childCount; i++)
-				Destroy(parameterParent.transform.GetChild(i).gameObject);
-			parameters = new Dictionary<EntityPropertyMetaData, ActivePlanParameter>();
-			originalParameterValues = null;
-		}
-
-		private void CreateParameter(EntityPropertyMetaData parameter)
-		{
-			ActivePlanParameter obj = ((GameObject)GameObject.Instantiate(parameterPrefab)).GetComponent<ActivePlanParameter>();
-			obj.transform.SetParent(parameterParent, false);
-			obj.SetToParameter(parameter);
-			obj.parameterChangedCallback = OnParameterChanged;
-			parameters.Add(parameter, obj);
-		}
-		#endregion
 	}
 }
