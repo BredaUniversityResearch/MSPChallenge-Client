@@ -83,7 +83,7 @@ namespace MSP2050.Scripts
 			if (categoryGroup == null)
 			{
 				LayerCategoryGroup newCategoryGroup = panel.CreateLayerGroup();
-				newCategoryGroup.title.text = categoryName;
+				newCategoryGroup.SetContent(categoryName);
 				categories.Add(categoryName, newCategoryGroup);
 				categoryGroup = newCategoryGroup;
 			}
