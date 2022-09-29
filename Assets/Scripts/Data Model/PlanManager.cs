@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
+using System;
 
 namespace MSP2050.Scripts
 {
@@ -128,7 +129,7 @@ namespace MSP2050.Scripts
 
 		public void ShowPlan(Plan plan)
 		{
-			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
+			if (Main.InEditMode)
 				return;
 
 			//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
@@ -143,7 +144,7 @@ namespace MSP2050.Scripts
 
 		public void HideCurrentPlan(bool updateLayers = true)
 		{
-			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
+			if (Main.InEditMode)
 				return;
 
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
@@ -585,7 +586,7 @@ namespace MSP2050.Scripts
 			if (nameOrDescriptionChanged)
 			{
 				PlanDetails.UpdateNameAndDescription(plan);
-				if (planViewing == plan && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
+				if (planViewing == plan && !Main.InEditMode)
 					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();			
 			}
 			if (stateChanged)
@@ -614,7 +615,7 @@ namespace MSP2050.Scripts
 				if (!timeLineUpdated && inTimelineNow)
 					OnPlanUpdateInUIEvent(plan, oldTime);
 				PlanDetails.ChangeDate(plan);
-				if (planViewing == plan && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
+				if (planViewing == plan && !Main.InEditMode)
 				{
 					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();							
 					InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
@@ -645,7 +646,7 @@ namespace MSP2050.Scripts
 		public void PlanLockUpdated(Plan plan)
 		{
 			PlansMonitor.SetLockIcon(plan, plan.IsLocked);
-			if((Main.InEditMode && Main.CurrentlyEditingPlan == plan) || (Main.Instance.EditingPlanDetailsContent && PlanDetails.GetSelectedPlan() == plan))
+			if(Main.InEditMode && Main.CurrentlyEditingPlan == plan)
 			{
 				PlanDetails.instance.CancelEditingContent();
 				DialogBoxManager.instance.NotificationWindow("Plan Unexpectedly Unlocked", "Plan has been unlocked by an external party. All changes have been discarded.", null);

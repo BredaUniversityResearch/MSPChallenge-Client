@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Sirenix.Utilities;
 using UnityEngine;
+using Newtonsoft.Json;
 using Object = UnityEngine.Object;
 
 namespace MSP2050.Scripts
@@ -201,7 +202,7 @@ namespace MSP2050.Scripts
 
 			PlanDetails.AddFeedbackFromServer(a_Update.planmessages);
 
-			if (PlanManager.Instance.planViewing != null && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
+			if (PlanManager.Instance.planViewing != null && !Main.InEditMode)
 			{
 				int viewingTime = PlanManager.Instance.planViewing.StartTime;
 				foreach (KeyValuePair<AbstractLayer, int> kvp in layerUpdateTimes)
@@ -316,15 +317,17 @@ namespace MSP2050.Scripts
 		public double lastupdate;
 		public string locked;
 		public string active;
-		public string type; // energy,fishing,shipping : ex 1,0,1
-		public bool alters_energy_distribution;
 		public List<PlanLayerObject> layers;
-		public List<GridObject> grids;
-		public List<FishingObject> fishing;
-		public HashSet<int> deleted_grids;
-		public string energy_error;
 		public List<ApprovalObject> votes;
-		public RestrictionAreaObject[] restriction_settings;
+		[JsonConverter(typeof(PolicyJsonConverter))]
+		public APolicyData[] policies;
+		//public string type; // energy,fishing,shipping : ex 1,0,1
+		//public bool alters_energy_distribution;
+		//public List<GridObject> grids;
+		//public List<FishingObject> fishing;
+		//public HashSet<int> deleted_grids;
+		//public string energy_error;
+		//public RestrictionAreaObject[] restriction_settings;
 
 		public int CompareTo(PlanObject other)
 		{

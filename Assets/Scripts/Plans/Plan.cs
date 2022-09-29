@@ -31,7 +31,9 @@ namespace MSP2050.Scripts
 		public bool shippingPlan;
 		public bool ecologyPlan;
 		public bool energyError; 
-		public bool altersEnergyDistribution; 
+		public bool altersEnergyDistribution;
+
+		Dictionary<string, APolicyData> m_policies;
 
 		private bool requestingLock;
 

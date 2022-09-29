@@ -100,7 +100,7 @@ namespace MSP2050.Scripts
 
 		private bool OnAttemptHideWindow()
 		{
-			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
+			if (Main.InEditMode)
 			{
 				if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
 				{

@@ -142,12 +142,8 @@ namespace MSP2050.Scripts
 
 		protected void Update()
 		{
-			if (fsmActive)
-			{
-				fsm.Update();
-			}
+			fsm?.Update();
 			ServerCommunication.Instance.UpdateCommunication();
-
 			MaterialManager.Instance.Update();
 		}
 
