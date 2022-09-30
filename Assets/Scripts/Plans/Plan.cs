@@ -24,16 +24,16 @@ namespace MSP2050.Scripts
 		public List<PlanLayer> PlanLayers { get; private set; }
 
 		public Dictionary<int, EPlanApprovalState> countryApproval;
-		public List<EnergyGrid> energyGrids;
-		public HashSet<int> removedGrids; //persis ID of removed grids
-		public FishingDistributionDelta fishingDistributionDelta;
-		public bool energyPlan;
-		public bool shippingPlan;
-		public bool ecologyPlan;
-		public bool energyError; 
-		public bool altersEnergyDistribution;
+		//public List<EnergyGrid> energyGrids;
+		//public HashSet<int> removedGrids; //persis ID of removed grids
+		//public FishingDistributionDelta fishingDistributionDelta;
+		//public bool energyPlan;
+		//public bool shippingPlan;
+		//public bool ecologyPlan;
+		//public bool energyError; 
+		//public bool altersEnergyDistribution;
 
-		Dictionary<string, APolicyData> m_policies;
+		Dictionary<string, APolicyData> m_policies; //These are PolicyPlanData
 
 		private bool requestingLock;
 
@@ -88,14 +88,15 @@ namespace MSP2050.Scripts
 			//=================================== PLAN TYPE =====================================
 
 			//Determine plan type
-			if (planObject.type != null)
-			{
-				string[] types = planObject.type.Split(',');
-				energyPlan = types[0] == "1" && Main.Instance.IsSimulationConfigured(ESimulationType.CEL); //MSP-1856, Energy plans only valid when CEL is configured.
-				ecologyPlan = types[1] == "1";
-				shippingPlan = types[2] == "1";
-			}
+			//if (planObject.type != null)
+			//{
+			//	string[] types = planObject.type.Split(',');
+			//	energyPlan = types[0] == "1" && Main.Instance.IsSimulationConfigured(ESimulationType.CEL); //MSP-1856, Energy plans only valid when CEL is configured.
+			//	ecologyPlan = types[1] == "1";
+			//	shippingPlan = types[2] == "1";
+			//}
 
+			//TODO: resolve these in policyLogic
 			if (ecologyPlan)
 			{
 				if (planObject.fishing == null)
@@ -117,6 +118,7 @@ namespace MSP2050.Scripts
 				altersEnergyDistribution = planObject.alters_energy_distribution;
 			}
 			energyError = planObject.energy_error == "1";
+			PolicyManager.Instance.RunPlanUpdate(planObject.policies, this);
 		}
 
 		public bool IsRequestingLock()
@@ -204,7 +206,7 @@ namespace MSP2050.Scripts
 
 		public bool HasErrors()
 		{
-			return energyError || IssueManager.instance.HasError(this);
+			return energyError || IssueManager.Instance.HasError(this);
 		}
 
 		public void UpdatePlan(PlanObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
@@ -246,10 +248,8 @@ namespace MSP2050.Scripts
 			{
 				if (State != PlanState.DESIGN)
 				{
-					bool editingLayers = Main.CurrentlyEditingPlan != null && Main.CurrentlyEditingPlan.ID == updatedData.id;
-					bool editingContent = Main.Instance.EditingPlanDetailsContent && PlanDetails.GetSelectedPlan().ID == updatedData.id;
 					//Cancel editing if we were editing it before
-					if (editingLayers || editingContent)
+					if (Main.CurrentlyEditingPlan != null && Main.CurrentlyEditingPlan.ID == updatedData.id)
 					{
 						PlanDetails.instance.CancelEditingContent();
 
@@ -275,13 +275,13 @@ namespace MSP2050.Scripts
 					foreach (PlanLayer layer in PlanLayers)
 					{
 						layer.BaseLayer.RemovePlanLayer(layer);
-						IssueManager.instance.DeleteIssuesForPlanLayer(layer);
+						IssueManager.Instance.DeleteIssuesForPlanLayer(layer);
 					}
 				}
 				else if (State == PlanState.IMPLEMENTED)
 				{
 					foreach (PlanLayer layer in PlanLayers)
-						IssueManager.instance.DeleteIssuesForPlanLayer(layer);
+						IssueManager.Instance.DeleteIssuesForPlanLayer(layer);
 					//Stop viewing plan if we were before
 					if (PlanManager.Instance.planViewing != null)
 						if (PlanManager.Instance.planViewing.ID == ID)
@@ -292,7 +292,7 @@ namespace MSP2050.Scripts
 					foreach (PlanLayer layer in PlanLayers)
 					{
 						layer.BaseLayer.AddPlanLayer(layer);
-						IssueManager.instance.InitialiseIssuesForPlanLayer(layer);
+						IssueManager.Instance.InitialiseIssuesForPlanLayer(layer);
 					}
 				}
 
@@ -434,6 +434,8 @@ namespace MSP2050.Scripts
 
 				//Update shipping
 				shippingPlan = newShippingPlan;
+
+				PolicyManager.Instance.RunPlanUpdate(updatedData.policies, this);
 			}
 			//ServerCommunication.Instance.WaitForCondition(planLayerUpdateTracker.CompletedPlanLayerUpdates, () => planUpdateTracker.CompletedUpdate());
 

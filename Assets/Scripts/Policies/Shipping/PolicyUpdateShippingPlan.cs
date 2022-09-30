@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public abstract class PolicyDataShippingPlan : APolicyData
+	public class PolicyUpdateShippingPlan : APolicyData
 	{
 		public RestrictionAreaObject[] restriction_settings;
 	}

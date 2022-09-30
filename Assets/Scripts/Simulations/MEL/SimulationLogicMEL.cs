@@ -6,17 +6,10 @@ namespace MSP2050.Scripts
 {
 	public class SimulationLogicMEL : ASimulationLogic
 	{
-		public override ASimulationData FormatPlanData(Plan a_plan)
-		{
-			return null;
-		}
-
 		public override void HandleGeneralUpdate(ASimulationData a_data)
 		{
-		}
-
-		public override void HandlePlanUpdate(ASimulationData a_data, Plan a_plan)
-		{
+			SimulationUpdateMEL data = (SimulationUpdateMEL)a_data;
+			KPIManager.Instance.ReceiveEcologyKPIUpdate(data.kpi);
 		}
 
 		public override void Initialise(ASimulationData a_settings)
@@ -28,15 +21,11 @@ namespace MSP2050.Scripts
 			KPIManager.Instance.CreateEcologyKPIs(config.content);
 			PlanManager.Instance.LoadFishingFleets(config.content);
 
-			//TODO: run this when all simultion setup is done
+			//TODO: run this when all simulation setup is done
 			//if (loadAllLayers)
 			//{
 			//	ImportAllLayers();
 			//}
-		}
-
-		public override void UpdateAfterEditing(Plan a_plan)
-		{
 		}
 	}
 }

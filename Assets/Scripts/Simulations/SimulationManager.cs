@@ -42,8 +42,13 @@ namespace MSP2050.Scripts
 
 		public void InitialiseSimulations(ASimulationData[] a_simulationSettings)
 		{
+			//Register built in simulations
+			m_simulationDefinitions.Add("MEL", new SimulationDefinition { m_name = "MEL", m_updateType = typeof(SimulationUpdateMEL), m_logicType = typeof(SimulationLogicMEL) });
+			m_simulationDefinitions.Add("CEL", new SimulationDefinition { m_name = "CEL", m_updateType = typeof(SimulationUpdateCEL), m_logicType = typeof(SimulationLogicCEL) });
+			m_simulationDefinitions.Add("SEL", new SimulationDefinition { m_name = "SEL", m_updateType = typeof(SimulationUpdateSEL), m_logicType = typeof(SimulationLogicSEL) });
+
 			//Create logic instances
-			foreach(ASimulationData data in a_simulationSettings)
+			foreach (ASimulationData data in a_simulationSettings)
 			{
 				if(m_simulationDefinitions.TryGetValue(data.simulation_type, out SimulationDefinition definition))
 				{
@@ -66,6 +71,17 @@ namespace MSP2050.Scripts
 		public bool TryGetLogic(string a_name, out ASimulationLogic a_logic)
 		{
 			return m_simulationLogic.TryGetValue(a_name, out a_logic);
+		}
+
+		public void RunGeneralUpdate(ASimulationData[] a_data)
+		{
+			foreach (ASimulationData data in a_data)
+			{
+				if (m_simulationLogic.TryGetValue(data.simulation_type, out ASimulationLogic simulation))
+				{
+					simulation.HandleGeneralUpdate(data);
+				}
+			}
 		}
 	}
 }

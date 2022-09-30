@@ -10,8 +10,8 @@ namespace MSP2050.Scripts
 
 		public ShippingIssueInstance(ShippingIssueObject issueData)
 		{
-			sourceLabel = IssueManager.instance.CreateWarningLabelInstance();
-			destinationLabel = IssueManager.instance.CreateWarningLabelInstance();
+			sourceLabel = IssueManager.Instance.CreateWarningLabelInstance();
+			destinationLabel = IssueManager.Instance.CreateWarningLabelInstance();
 
 			SubEntity sourceEntity = LayerManager.Instance.FindSubEntityByPersistentID(issueData.source_geometry_persistent_id);
 			SubEntity destinationEntity = LayerManager.Instance.FindSubEntityByPersistentID(issueData.destination_geometry_persistent_id);

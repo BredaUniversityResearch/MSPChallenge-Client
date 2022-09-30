@@ -10,7 +10,7 @@ namespace MSP2050.Scripts
 
 		public PlanIssueInstance(PlanIssueObject planIssueData, string text)
 		{
-			label = IssueManager.instance.CreateWarningLabelInstance();
+			label = IssueManager.Instance.CreateWarningLabelInstance();
 			Text = text;
 			PlanIssueData = planIssueData;
 			SetupIssueLabel(new Vector3(planIssueData.x, planIssueData.y, 0.0f), text, planIssueData.type);
@@ -34,7 +34,7 @@ namespace MSP2050.Scripts
 
 		private void OnInspectIssue()
 		{
-			IssueManager.instance.ShowRelevantPlanLayersForIssue(this);
+			IssueManager.Instance.ShowRelevantPlanLayersForIssue(this);
 		}
 
 		public override void SetLabelVisibility(bool visibility)

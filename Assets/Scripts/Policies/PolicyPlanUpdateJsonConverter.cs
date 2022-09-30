@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MSP2050.Scripts
 {
-	public class PolicyJsonConverter : JsonConverter
+	public class PolicyPlanUpdateJsonConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
@@ -23,7 +23,7 @@ namespace MSP2050.Scripts
 
             if(PolicyManager.Instance.TryGetDefinition(policyType, out PolicyDefinition definition))
 			{
-                target = Activator.CreateInstance(definition.m_dataType);
+                target = Activator.CreateInstance(definition.m_planUpdateType);
             }
             else
 			{
@@ -44,6 +44,5 @@ namespace MSP2050.Scripts
         {
             get { return false; }
         }
-	{
 	}
 }

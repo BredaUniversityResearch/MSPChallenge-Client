@@ -145,10 +145,9 @@ namespace MSP2050.Scripts
 
 		public void UpdateEditButtonActivity()
 		{
-			m_editButtonParent.SetActive(!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent
-																	 && m_selectedPlan != null
-																	 && m_selectedPlan.State == Plan.PlanState.DESIGN
-																	 && (SessionManager.Instance.AreWeManager || m_selectedPlan.Country == SessionManager.Instance.CurrentUserTeamID);
+			m_editButtonParent.SetActive(!Main.InEditMode	 && m_selectedPlan != null
+															 && m_selectedPlan.State == Plan.PlanState.DESIGN
+															 && (SessionManager.Instance.AreWeManager || m_selectedPlan.Country == SessionManager.Instance.CurrentUserTeamID));
 		}
 
 		public void CloseWindow()
@@ -247,6 +246,22 @@ namespace MSP2050.Scripts
 		void OnpolicyContentToggled(bool a_value, int a_policyIndex)
 		{
 			//TODO
+		}
+
+		public void SetViewMode(PlanManager.PlanViewState a_viewMode)
+		{
+			if (a_viewMode == PlanManager.PlanViewState.All)
+			{
+				m_viewAllToggle.isOn = true;
+			}
+			else if (a_viewMode == PlanManager.PlanViewState.Changes)
+			{
+				m_viewPlanToggle.isOn = true;
+			}
+			else if (a_viewMode == PlanManager.PlanViewState.Base)
+			{
+				m_viewBaseToggle.isOn = true;
+			}
 		}
 	}
 }

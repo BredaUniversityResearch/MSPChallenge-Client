@@ -32,7 +32,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void ProcessReceivedKPIData(EcologyKPIObject[] shippingData)
+		public void ProcessReceivedKPIData(KPIObject[] shippingData)
 		{
 			foreach (KeyValuePair<int, KPIValueCollectionShipping> kvp in shippingKPIs)
 			{

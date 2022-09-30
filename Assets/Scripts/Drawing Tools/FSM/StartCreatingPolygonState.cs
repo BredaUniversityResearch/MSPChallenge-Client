@@ -32,7 +32,7 @@ namespace MSP2050.Scripts
 			fsm.SetCursor(FSM.CursorType.Add);
 			fsm.SetSnappingEnabled(true);
 
-			IssueManager.instance.SetIssueInteractability(false);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
 
 		public override void ExitState(Vector3 currentMousePosition)
@@ -40,7 +40,7 @@ namespace MSP2050.Scripts
 			base.ExitState(currentMousePosition);
 			if (showingToolTip)
 				TooltipManager.HideTooltip();
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 		}
 
 		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)

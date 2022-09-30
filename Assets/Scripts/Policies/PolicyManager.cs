@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reactive.Joins;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -42,8 +43,26 @@ namespace MSP2050.Scripts
 
 		public void InitialisePolicies(APolicyData[] a_policySettings)
 		{
+			//Register built in policies
+			m_policyDefinitions.Add("energy", new PolicyDefinition { m_name = "energy", 
+				m_displayName = "Energy Distribution", 
+				m_planUpdateType = typeof(PolicyUpdateEnergyPlan), 
+				m_updateType = typeof(PolicyUpdateEnergy), 
+				m_logicType = typeof(PolicySettingsEnergy) 
+			});
+			m_policyDefinitions.Add("fishing", new PolicyDefinition { m_name = "fishing",
+				m_displayName = "Fishing Effort",
+				m_planUpdateType = typeof(PolicyUpdateFishingPlan),
+				m_logicType = typeof(PolicyLogicFishing)
+			});
+			m_policyDefinitions.Add("shipping", new PolicyDefinition { m_name = "shipping",
+				m_displayName = "Shipping Restriction Zones",
+				m_planUpdateType = typeof(PolicyUpdateShippingPlan),
+				m_logicType = typeof(PolicyLogicShipping)
+			});
+
 			//Create logic instances
-			foreach(APolicyData data in a_policySettings)
+			foreach (APolicyData data in a_policySettings)
 			{
 				if(m_policyDefinitions.TryGetValue(data.policy_type, out PolicyDefinition definition))
 				{
@@ -66,6 +85,39 @@ namespace MSP2050.Scripts
 		public bool TryGetLogic(string a_name, out APolicyLogic a_logic)
 		{
 			return m_policyLogic.TryGetValue(a_name, out a_logic);
+		}
+
+		public void RunPlanUpdate(APolicyData[] a_data, Plan a_plan)
+		{ 
+			foreach(APolicyData data in a_data)
+			{
+				if(m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
+				{
+					policy.HandlePlanUpdate(data, a_plan);
+				}
+			}
+		}
+
+		public void RunPreSimulationUpdate(APolicyData[] a_data)
+		{
+			foreach (APolicyData data in a_data)
+			{
+				if (m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
+				{
+					policy.HandlePreKPIUpdate(data);
+				}
+			}
+		}
+
+		public void RunPostSimulationUpdate(APolicyData[] a_data)
+		{
+			foreach (APolicyData data in a_data)
+			{
+				if (m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
+				{
+					policy.HandlePostKPIUpdate(data);
+				}
+			}
 		}
 	}
 }

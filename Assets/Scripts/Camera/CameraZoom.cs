@@ -180,7 +180,7 @@ namespace MSP2050.Scripts
 		public void UpdateUIScale()
 		{
 			VisualizationUtil.Instance.UpdateDisplayScale();
-			IssueManager.instance.RescaleIssues();
+			IssueManager.Instance.RescaleIssues();
 			InterfaceCanvas.Instance.mapScale.SetScale(cameraComponent.orthographicSize);
 			FSM.CameraZoomChanged();
 		}

@@ -284,7 +284,7 @@ namespace MSP2050.Scripts
                         layer.RemovePlanLayer(editingPlan.GetPlanLayerForLayer(layer));
                     }
                     //Get updated issue delta (but don't apply them yet, that'll happen when the batch gets executed
-                    RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), layersToRemove, GetNewPlanStartDate(), out hasUnavailableTypes);
+                    RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.Instance.FindIssueDataForPlan(editingPlan), layersToRemove, GetNewPlanStartDate(), out hasUnavailableTypes);
                     if (issuesToSubmit != null)
                     {
                         issuesToSubmit.SubmitToServer(batch);
@@ -368,12 +368,12 @@ namespace MSP2050.Scripts
                         MultiLayerRestrictionIssueCollection resultIssues = new MultiLayerRestrictionIssueCollection();
                         ConstraintManager.Instance.CheckTypeUnavailableConstraints(editingPlan, GetNewPlanStartDate(), resultIssues);
                         RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
-                        IssueManager.instance.AddIssuesToDeltaIfNew(resultIssues, deltaSet);
+                        IssueManager.Instance.AddIssuesToDeltaIfNew(resultIssues, deltaSet);
                     }
                     else
                     {
                         //Moving the plan to the future requires a full recheck, as we can't filter existing issue for TypeUnavailable ones
-                        RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.instance.FindIssueDataForPlan(editingPlan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
+                        RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.Instance.FindIssueDataForPlan(editingPlan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
                         if (issuesToSubmit != null)
                         {
                             issuesToSubmit.SubmitToServer(batch);

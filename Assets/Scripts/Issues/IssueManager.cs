@@ -6,21 +6,21 @@ namespace MSP2050.Scripts
 {
 	public class IssueManager : MonoBehaviour
 	{
-		private static IssueManager ms_instance = null;
+		private static IssueManager m_instance = null;
 
-		public static IssueManager instance
+		public static IssueManager Instance
 		{
 			get
 			{
-				if (ms_instance == null)
+				if (m_instance == null)
 				{
-					ms_instance = FindObjectOfType<IssueManager>();
-					if (ms_instance == null)
+					m_instance = FindObjectOfType<IssueManager>();
+					if (m_instance == null)
 					{
 						Debug.LogWarning("Could not find singleton instance of IssueManager in the current scene.");
 					}
 				}
-				return ms_instance;
+				return m_instance;
 			}
 		}
 
@@ -46,7 +46,7 @@ namespace MSP2050.Scripts
 		private void OnDestroy()
 		{
 			DestroyAllShippingIssues();
-			ms_instance = null;
+			m_instance = null;
 		}
 
 		public void InitialiseIssuesForPlanLayer(PlanLayer planLayer)
@@ -431,16 +431,11 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void OnIssuesReceived(WarningObject warningUpdateData)
+		public void OnIssuesReceived(List<PlanIssueObject> warningUpdateData)
 		{
-			foreach (PlanIssueObject planIssue in warningUpdateData.plan_issues)
+			foreach (PlanIssueObject planIssue in warningUpdateData)
 			{
 				OnPlanIssueReceivedFromServer(planIssue);
-			}
-
-			if (warningUpdateData.shipping_issues.Count > 0)
-			{
-				UpdateShippingIssues(warningUpdateData.shipping_issues);
 			}
 		}
 
@@ -533,7 +528,7 @@ namespace MSP2050.Scripts
 			shippingIssueInstances.Clear();
 		}
 
-		private void UpdateShippingIssues(List<ShippingIssueObject> shippingIssues)
+		public void UpdateShippingIssues(List<ShippingIssueObject> shippingIssues)
 		{
 			for (int i = 0; i < shippingIssues.Count; ++i)
 			{

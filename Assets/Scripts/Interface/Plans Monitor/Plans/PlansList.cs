@@ -27,7 +27,7 @@ namespace MSP2050.Scripts
 			m_planGroupsPerState = new Dictionary<Plan.PlanState, PlansGroupBar>();
 			m_planBarsPerPlan = new Dictionary<Plan, PlanBar>();
 
-			IssueManager.instance.SubscribeToIssueChangedEvent(OnIssueChanged);
+			IssueManager.Instance.SubscribeToIssueChangedEvent(OnIssueChanged);
 
 			m_planGroupsPerState.Add(Plan.PlanState.DESIGN, CreatePlansGroup("Design", "A plan's content (layers and policies) can only be edited in the DESIGN state.\nPlans in DESIGN are not visible in other plans or to other teams."));
 			m_planGroupsPerState.Add(Plan.PlanState.CONSULTATION, CreatePlansGroup("Consultation", "Plans in CONSULTATION are visible in other plans and to other teams.\nUse the CONSULTATION state for early drafts that will need to be discussed with other teams."));
@@ -60,7 +60,7 @@ namespace MSP2050.Scripts
 
 		public void OnDestroy()
 		{
-			IssueManager issueManager = IssueManager.instance;
+			IssueManager issueManager = IssueManager.Instance;
 			if (issueManager != null)
 			{
 				issueManager.UnsubscribeFromIssueChangedEvent(OnIssueChanged);

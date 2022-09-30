@@ -87,7 +87,7 @@ namespace MSP2050.Scripts
 				
 			statusDropdown.onValueChanged.AddListener(OnStatusDropdownValueChanged);
 
-			IssueManager.instance.SubscribeToIssueChangedEvent(OnPlanLayerIssuesChanged);
+			IssueManager.Instance.SubscribeToIssueChangedEvent(OnPlanLayerIssuesChanged);
 
 			forceUnlockButton.gameObject.SetActive(false);
 			if (SessionManager.Instance.AreWeGameMaster)

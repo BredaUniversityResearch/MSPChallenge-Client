@@ -146,7 +146,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void ReceiveEcologyKPIUpdate(EcologyKPIObject[] objects)
+		public void ReceiveEcologyKPIUpdate(KPIObject[] objects)
 		{
 			if (Main.Instance.IsSimulationConfigured(ESimulationType.MEL))
 			{
@@ -193,12 +193,12 @@ namespace MSP2050.Scripts
 			ecologyKPIRoot.groups.SetBarsToFishing(PlanManager.Instance.GetFishingDistributionAtTime(mostRecentMonth));
 		}
 
-		public void ReceiveEnergyKPIUpdate(EnergyKPIObject[] updateData)
+		public void ReceiveEnergyKPIUpdate(KPIObjectEnergy[] updateData)
 		{
 			energyKPIs.ProcessReceivedKPIEnergyData(updateData);		
 		}
 
-		public void ReceiveShippingKPIUpdate(EcologyKPIObject[] shippingData)
+		public void ReceiveShippingKPIUpdate(KPIObject[] shippingData)
 		{
 			if (shippingKPI != null)
 			{

@@ -69,7 +69,7 @@ namespace MSP2050.Scripts
 			reEnableInsertingPointsPosition = currentMousePosition;
 
 			fsm.SetSnappingEnabled(true);
-			IssueManager.instance.SetIssueInteractability(false);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
 	
 		public void SetSelectedSubEntities(HashSet<LineStringSubEntity> subEntities)
@@ -1054,7 +1054,7 @@ namespace MSP2050.Scripts
 
 			BoxSelect.HideBoxSelection();
 
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 
 			// make sure the entity type dropdown shows a valid value
 			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());

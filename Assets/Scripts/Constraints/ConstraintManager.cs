@@ -223,7 +223,7 @@ namespace MSP2050.Scripts
 			}
 
 			// Replace all the issues 
-			IssueManager.instance.RemoveIssuesForPlan(plan, existingIssues == null? deltaSet : null);
+			IssueManager.Instance.RemoveIssuesForPlan(plan, existingIssues == null? deltaSet : null);
 
 			// check against all future plan layers and past baselayers
 			foreach (PlanLayer planLayer in plan.PlanLayers)
@@ -240,8 +240,8 @@ namespace MSP2050.Scripts
 			CheckTypeUnavailableConstraints(plan, plan.StartTime, issueCollection);
 
 			//Send the issues to the issue manager.
-			IssueManager.instance.ImportNewIssues(issueCollection, deltaSet);
-			IssueManager.instance.SetIssueVisibilityForPlan(plan, true);
+			IssueManager.Instance.ImportNewIssues(issueCollection, deltaSet);
+			IssueManager.Instance.SetIssueVisibilityForPlan(plan, true);
 
 			if (notifyUserOfExternalIssues)
 			{

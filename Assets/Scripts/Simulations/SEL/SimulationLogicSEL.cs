@@ -6,17 +6,12 @@ namespace MSP2050.Scripts
 {
 	public class SimulationLogicSEL : ASimulationLogic
 	{
-		public override ASimulationData FormatPlanData(Plan a_plan)
-		{
-			return null;
-		}
-
 		public override void HandleGeneralUpdate(ASimulationData a_data)
 		{
-		}
-
-		public override void HandlePlanUpdate(ASimulationData a_data, Plan a_plan)
-		{
+			SimulationUpdateSEL data = (SimulationUpdateSEL)a_data;
+			KPIManager.Instance.ReceiveShippingKPIUpdate(data.kpi);
+			if(data.shipping_issues != null && data.shipping_issues.Count > 0)
+				IssueManager.Instance.UpdateShippingIssues(data.shipping_issues);
 		}
 
 		public override void Initialise(ASimulationData a_settings)
@@ -25,10 +20,6 @@ namespace MSP2050.Scripts
 
 			KPIManager.Instance.CreateShippingKPIBars(config.kpis);
 			//TODO: handle direction colour
-		}
-
-		public override void UpdateAfterEditing(Plan a_plan)
-		{
 		}
 	}
 }

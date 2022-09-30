@@ -25,13 +25,13 @@ namespace MSP2050.Scripts
             }
         }
 
-        public void ProcessReceivedKPIEnergyData(EnergyKPIObject[] updateData)
+        public void ProcessReceivedKPIEnergyData(KPIObjectEnergy[] updateData)
         {
             // <month, <grid_id, grid_data>>
             Dictionary<int, Dictionary<int, GridActualAndWasted>> parsedUpdateData = new Dictionary<int, Dictionary<int, GridActualAndWasted>>();
 
             //Parse data into a more convenient format.
-            foreach (EnergyKPIObject data in updateData)
+            foreach (KPIObjectEnergy data in updateData)
             {
                 Dictionary<int, GridActualAndWasted> monthData;
                 if (parsedUpdateData.TryGetValue(data.month, out monthData))

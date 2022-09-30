@@ -64,7 +64,7 @@ namespace MSP2050.Scripts
 			layerProbeButton.button.onClick.AddListener(LayerProbeClicked);
 			rulerButton.button.onClick.AddListener(RulerClicked);
 			issueVisibilityButton.button.onClick.AddListener(IssueVisibilityClicked);
-			issueVisibilityButton.SetSelected(IssueManager.instance.GetIssueVisibility());
+			issueVisibilityButton.SetSelected(IssueManager.Instance.GetIssueVisibility());
 		}
 
 		private void Update()
@@ -247,7 +247,7 @@ namespace MSP2050.Scripts
 		{
 			bool oldVisibility = issueVisibilityButton.selected;
 			issueVisibilityButton.SetSelected(!oldVisibility);
-			IssueManager.instance.SetIssueVisibility(!oldVisibility);
+			IssueManager.Instance.SetIssueVisibility(!oldVisibility);
 		}
 
 		public void ShowHideGrid()

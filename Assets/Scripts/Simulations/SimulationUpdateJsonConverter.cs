@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MSP2050.Scripts
 {
-	public class SimulationJsonConverter : JsonConverter
+	public class SimulationUpdateJsonConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
@@ -23,7 +23,7 @@ namespace MSP2050.Scripts
 
             if(SimulationManager.Instance.TryGetDefinition(simulationType, out SimulationDefinition definition))
 			{
-                target = Activator.CreateInstance(definition.m_dataType);
+                target = Activator.CreateInstance(definition.m_updateType);
             }
             else
 			{
@@ -44,6 +44,5 @@ namespace MSP2050.Scripts
         {
             get { return false; }
         }
-	{
 	}
 }

@@ -54,7 +54,7 @@ namespace MSP2050.Scripts
 			ic.ToolbarEnable(true, FSM.ToolbarInput.Delete);
 			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
 			//InterfaceCanvas.SetActivePlanWindowInteractability(true, true);
-			IssueManager.instance.SetIssueInteractability(false);
+			IssueManager.Instance.SetIssueInteractability(false);
 		
 			foreach (PolygonSubEntity pse in selectedSubEntities)
 			{
@@ -1184,7 +1184,7 @@ namespace MSP2050.Scripts
 			selectedSourcePoints = new HashSet<EnergyPointSubEntity>();
 
 			BoxSelect.HideBoxSelection();
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 
 			// make sure the entity type dropdown shows a valid value
 			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());

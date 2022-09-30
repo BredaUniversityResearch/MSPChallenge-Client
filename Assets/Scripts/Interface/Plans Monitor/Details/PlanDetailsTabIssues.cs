@@ -32,20 +32,20 @@ namespace MSP2050.Scripts
 		protected override void OnTabActivate()
 		{
 			base.OnTabActivate();
-			IssueManager.instance.SubscribeToIssueChangedEvent(OnIssuesChanged);
+			IssueManager.Instance.SubscribeToIssueChangedEvent(OnIssuesChanged);
 			planDetails.editTabContentBox.SetActive(false);
 		}
 
 		protected override void OnTabDeactivate()
 		{
 			base.OnTabDeactivate();
-			IssueManager.instance.UnsubscribeFromIssueChangedEvent(OnIssuesChanged);
+			IssueManager.Instance.UnsubscribeFromIssueChangedEvent(OnIssuesChanged);
 			ClearIssues();
 		}
 
 		private void PopulateIssuesList(Plan selectedPlan)
 		{
-			foreach (PlanIssueInstance issue in IssueManager.instance.FindIssuesForPlan(selectedPlan))
+			foreach (PlanIssueInstance issue in IssueManager.Instance.FindIssuesForPlan(selectedPlan))
 			{
 				CreateIssueInstanceMessage(issue);
 			}
@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 		private void OnViewOnMapClicked(PlanIssueInstance planIssueInstance)
 		{
 			PlanManager.Instance.ShowPlan(PlanDetails.GetSelectedPlan());
-			IssueManager.instance.ShowRelevantPlanLayersForIssue(planIssueInstance);
+			IssueManager.Instance.ShowRelevantPlanLayersForIssue(planIssueInstance);
 			PlansMonitor.instance.plansMinMax.Minimize();
 
 			Rect viewBounds = new Rect(planIssueInstance.PlanIssueData.x, planIssueInstance.PlanIssueData.y, 1.0f, 1.0f);
@@ -126,7 +126,7 @@ namespace MSP2050.Scripts
 
 		public void UpdateIssueStatus()
 		{
-			ERestrictionIssueType severity = planDetails.SelectedPlan.energyError ? ERestrictionIssueType.Error : IssueManager.instance.GetMaximumSeverity(planDetails.SelectedPlan);
+			ERestrictionIssueType severity = planDetails.SelectedPlan.energyError ? ERestrictionIssueType.Error : IssueManager.Instance.GetMaximumSeverity(planDetails.SelectedPlan);
 			switch (severity)
 			{
 				case ERestrictionIssueType.None:

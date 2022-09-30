@@ -309,11 +309,11 @@ namespace MSP2050.Scripts
 			}
 			if (enabled)
 			{
-				IssueManager.instance.ShowIssuesForPlan(this);
+				IssueManager.Instance.ShowIssuesForPlan(this);
 			}
 			else
 			{
-				IssueManager.instance.HideIssuesForPlan(this);
+				IssueManager.Instance.HideIssuesForPlan(this);
 			}
 			isEnabled = enabled;
 		}

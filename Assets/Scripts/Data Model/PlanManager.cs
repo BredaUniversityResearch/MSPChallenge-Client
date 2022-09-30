@@ -77,10 +77,9 @@ namespace MSP2050.Scripts
 				targetPlan = new Plan(planObject, layerUpdateTimes);
 				AddPlan(targetPlan);
 				PlanAdded(targetPlan);
-				//tracker.CompletedUpdate();
 			}
 
-			RestrictionAreaManager.instance.ProcessReceivedRestrictions(targetPlan, planObject.restriction_settings);
+			//RestrictionAreaManager.instance.ProcessReceivedRestrictions(targetPlan, planObject.restriction_settings);
 			return targetPlan;
 		}
 
@@ -152,7 +151,7 @@ namespace MSP2050.Scripts
 
 			//Doesnt have to redraw as we'll do so when updating layers to base anyway
 			ignoreRedrawOnViewStateChange = true;
-			InterfaceCanvas.Instance.activePlanWindow.viewAllToggle.isOn = true;
+			InterfaceCanvas.Instance.activePlanWindow.SetViewMode(PlanManager.PlanViewState.All);
 			ignoreRedrawOnViewStateChange = false;
 
 			if(updateLayers)
@@ -664,7 +663,7 @@ namespace MSP2050.Scripts
 		public void PlanLayerAdded(Plan plan, PlanLayer addedLayer, bool addToUI = true)
 		{
 			planLayers[addedLayer.ID] = addedLayer;
-			IssueManager.instance.InitialiseIssuesForPlanLayer(addedLayer);
+			IssueManager.Instance.InitialiseIssuesForPlanLayer(addedLayer);
 			if (addToUI)
 			{ 
 				//TODO: if viewing plan, add to active plan window?
@@ -673,7 +672,7 @@ namespace MSP2050.Scripts
 
 		public void PlanLayerRemoved(Plan plan, PlanLayer removedLayer)
 		{
-			IssueManager.instance.DeleteIssuesForPlanLayer(removedLayer);
+			IssueManager.Instance.DeleteIssuesForPlanLayer(removedLayer);
 			RemovePlanLayer(removedLayer);
 		}
 
@@ -713,7 +712,7 @@ namespace MSP2050.Scripts
 				planToViewOnUpdate = targetPlanID;
 		}
 
-		public void CheckIfExpectedplanReceived()
+		public void CheckIfExpectedPlanReceived()
 		{
 			if (planToViewOnUpdate == -1)
 				return;

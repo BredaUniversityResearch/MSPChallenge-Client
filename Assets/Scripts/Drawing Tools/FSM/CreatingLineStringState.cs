@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 			fsm.SetCursor(FSM.CursorType.Add);
 			fsm.SetSnappingEnabled(true);
 
-			IssueManager.instance.SetIssueInteractability(false);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
 
 		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
@@ -192,7 +192,7 @@ namespace MSP2050.Scripts
 				subEntity.RemoveGameObject();
 			}
 
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 		}
 	}
 }

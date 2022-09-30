@@ -113,7 +113,7 @@ namespace MSP2050.Scripts
 			lockedPlan.removedGrids = energyGridRemovedBackup;
 			if (issuesBackup != null)
 			{
-				IssueManager.instance.SetIssuesForPlan(lockedPlan, issuesBackup);
+				IssueManager.Instance.SetIssuesForPlan(lockedPlan, issuesBackup);
 			}
 			if (removedInvalidCables != null)
 			{
@@ -217,7 +217,7 @@ namespace MSP2050.Scripts
 			{
 				energyGridBackup = lockedPlan.energyGrids;
 				energyGridRemovedBackup = lockedPlan.removedGrids;
-				issuesBackup = IssueManager.instance.FindIssueDataForPlan(lockedPlan);
+				issuesBackup = IssueManager.Instance.FindIssueDataForPlan(lockedPlan);
 				backupMade = true;
 			}
 

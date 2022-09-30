@@ -6,17 +6,10 @@ namespace MSP2050.Scripts
 {
 	public class SimulationLogicCEL : ASimulationLogic
 	{
-		public override ASimulationData FormatPlanData(Plan a_plan)
-		{
-			return null;
-		}
-
 		public override void HandleGeneralUpdate(ASimulationData a_data)
 		{
-		}
-
-		public override void HandlePlanUpdate(ASimulationData a_data, Plan a_plan)
-		{
+			SimulationUpdateCEL data = (SimulationUpdateCEL)a_data;
+			KPIManager.Instance.ReceiveEnergyKPIUpdate(data.kpi);
 		}
 
 		public override void Initialise(ASimulationData a_settings)
@@ -37,8 +30,5 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void UpdateAfterEditing(Plan a_plan)
-		{
-		}
 	}
 }
