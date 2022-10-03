@@ -12,65 +12,28 @@ namespace MSP2050.Scripts
 		[SerializeField] TextMeshProUGUI m_title;
         [SerializeField] GameObject m_layersCategoryPrefab;
 
-		public Transform ContentParent => m_contentParent;
+        Dictionary<string, LayerSubCategory> layerButtons = new Dictionary<string, LayerSubCategory>();
 
-		//[Header("Prefabs")]
-		//public GameObject buttonPrefab;
+        public Transform ContentParent => m_contentParent;
+        public TextMeshProUGUI Title => m_title;
 
-		//[Header("Content")]
-		//public Dictionary<string, LayerButton> layerButtons = new Dictionary<string, LayerButton>();
-
-		/// <summary>
-		/// Set window title
-		/// </summary>
 		public void SetContent(string text)
 		{
 			m_title.text = text;
 		}
 
-        public LayerButton CreateLayerButton(string subCategory)
+        public LayerSubCategory CreateLayerButton(string subCategory)
         {
             // Instantiate prefab
-            GameObject go = Instantiate(m_layersCategoryPrefab, m_contentParent, false);
+            GameObject go = Instantiate(m_layersCategoryPrefab, m_contentParent);
 
             // Store component
-            LayerButton button = go.GetComponent<LayerButton>();
+            LayerSubCategory button = go.GetComponent<LayerSubCategory>();
 
             // Add to list
             layerButtons.Add(subCategory, button);
 
             return button;
         }
-
-        ///// <summary>
-        ///// Destroy this
-        ///// </summary>
-        //public void Destroy()
-        //{
-        //	for (int i = 0; i < layerPanel.layerGroup.Count; i++)
-        //	{
-        //		if (layerPanel.layerGroup[i] == this)
-        //		{
-        //			layerPanel.DestroyLayerGroup(this);
-        //		}
-        //	}
-        //}
-
-        ///// <summary>
-        ///// Properly destroys a layer button
-        ///// </summary>
-        //public void DestroyLayerButton(string subCategory, LayerButton button)
-        //{
-        //	layerButtons.Remove(subCategory);
-        //	Destroy(button.gameObject);
-        //}
-
-        ///// <summary>
-        ///// Hide the button
-        ///// </summary>
-        //public void Hide(bool toggle)
-        //{
-        //	gameObject.SetActive(toggle);
-        //}
     }
 }

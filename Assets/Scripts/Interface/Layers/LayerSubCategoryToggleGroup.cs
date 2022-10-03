@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 		private RectTransform layerToggleContainer = null;
 
 		private Dictionary<AbstractLayer, GenericLayer> layerToggles = new Dictionary<AbstractLayer, GenericLayer>(8);
-		public LayerButton subcategoryButton;
+		public LayerSubCategory subcategoryButton;
 
 		public string DisplayName
 		{

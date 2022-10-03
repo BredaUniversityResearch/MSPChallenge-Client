@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
-	public class LayerButton : MonoBehaviour {
+	public class LayerSubCategory : MonoBehaviour {
 
 		public DoubleClickButton button;
 		public CustomButtonColorSet outlineColourSet;

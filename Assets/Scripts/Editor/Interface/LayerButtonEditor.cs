@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(LayerButton))]
+[CustomEditor(typeof(LayerSubCategory))]
 public class LayerButtonEditor : Editor
 {
 
@@ -12,7 +12,7 @@ public class LayerButtonEditor : Editor
 	{
 		DrawDefaultInspector();
 
-		LayerButton _target = (LayerButton)target;
+		LayerSubCategory _target = (LayerSubCategory)target;
 
 		GUILayout.Label("Editor", EditorStyles.boldLabel);
 
