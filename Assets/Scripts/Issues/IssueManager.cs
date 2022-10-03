@@ -83,11 +83,6 @@ namespace MSP2050.Scripts
 			return maxSeverity;
 		}
 
-		/// <summary>
-		/// Returns the maximum severity of the issues in the given plan layer.
-		/// </summary>
-		/// <param name="planLayer"></param>
-		/// <returns></returns>
 		public ERestrictionIssueType GetMaximumSeverity(PlanLayer planLayer)
 		{
 			List<PlanIssueInstance> issuesForPlan;

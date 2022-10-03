@@ -8,6 +8,10 @@ namespace MSP2050.Scripts
 {
 	public class PolicyManager : MonoBehaviour
 	{
+		public const string ENERGY_POLICY_NAME = "energy";
+		public const string FISHING_POLICY_NAME = "fishing";
+		public const string SHIPPING_POLICY_NAME = "shipping";
+
 		private static PolicyManager singleton;
 		public static PolicyManager Instance
 		{
@@ -44,18 +48,18 @@ namespace MSP2050.Scripts
 		public void InitialisePolicies(APolicyData[] a_policySettings)
 		{
 			//Register built in policies
-			m_policyDefinitions.Add("energy", new PolicyDefinition { m_name = "energy", 
+			m_policyDefinitions.Add(ENERGY_POLICY_NAME, new PolicyDefinition { m_name = ENERGY_POLICY_NAME, 
 				m_displayName = "Energy Distribution", 
 				m_planUpdateType = typeof(PolicyUpdateEnergyPlan), 
 				m_updateType = typeof(PolicyUpdateEnergy), 
 				m_logicType = typeof(PolicySettingsEnergy) 
 			});
-			m_policyDefinitions.Add("fishing", new PolicyDefinition { m_name = "fishing",
+			m_policyDefinitions.Add(FISHING_POLICY_NAME, new PolicyDefinition { m_name = FISHING_POLICY_NAME,
 				m_displayName = "Fishing Effort",
 				m_planUpdateType = typeof(PolicyUpdateFishingPlan),
 				m_logicType = typeof(PolicyLogicFishing)
 			});
-			m_policyDefinitions.Add("shipping", new PolicyDefinition { m_name = "shipping",
+			m_policyDefinitions.Add(SHIPPING_POLICY_NAME, new PolicyDefinition { m_name = SHIPPING_POLICY_NAME,
 				m_displayName = "Shipping Restriction Zones",
 				m_planUpdateType = typeof(PolicyUpdateShippingPlan),
 				m_logicType = typeof(PolicyLogicShipping)
@@ -88,12 +92,29 @@ namespace MSP2050.Scripts
 		}
 
 		public void RunPlanUpdate(APolicyData[] a_data, Plan a_plan)
-		{ 
+		{
+			HashSet<string> existingPolicies = new HashSet<string>();
+			foreach(var kvp in a_plan.m_policies)
+			{
+				existingPolicies.Add(kvp.Key);
+			}
+
+			//Handle updates
 			foreach(APolicyData data in a_data)
 			{
 				if(m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
 				{
 					policy.HandlePlanUpdate(data, a_plan);
+				}
+				existingPolicies.Remove(data.policy_type);
+			}
+
+			//Handle removal
+			foreach (string removed in existingPolicies)
+			{
+				if (m_policyLogic.TryGetValue(removed, out APolicyLogic policy))
+				{
+					policy.RemoveFromPlan(a_plan);
 				}
 			}
 		}

@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 				if (item.changed)
 				{
 					if (energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
-						energyGrid = plan.DuplicateEnergyGridToPlan(energyGrid);
+						energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(energyGrid, plan);
 					energyGrid.energyDistribution.distribution[item.Country].expected = item.GetDistributionValueLong();
 				}
 			}
@@ -59,7 +59,7 @@ namespace MSP2050.Scripts
 			{
 				if (energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
 				{
-					energyGrid = plan.DuplicateEnergyGridToPlan(energyGrid);
+					energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(energyGrid, plan);
 					energyGrid.name = gridNameField.text;
 				}
 				else

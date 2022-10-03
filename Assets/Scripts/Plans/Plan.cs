@@ -33,7 +33,7 @@ namespace MSP2050.Scripts
 		//public bool energyError; 
 		//public bool altersEnergyDistribution;
 
-		Dictionary<string, APolicyData> m_policies; //These are PolicyPlanData
+		public Dictionary<string, APolicyData> m_policies { get; private set; } //These are PolicyPlanData
 
 		private bool requestingLock;
 
@@ -96,28 +96,27 @@ namespace MSP2050.Scripts
 			//	shippingPlan = types[2] == "1";
 			//}
 
-			//TODO: resolve these in policyLogic
-			if (ecologyPlan)
-			{
-				if (planObject.fishing == null)
-				{
-					fishingDistributionDelta = new FishingDistributionDelta(); //If null, it cant pick the right constructor automatically
-				}
-				else
-				{
-					fishingDistributionDelta = new FishingDistributionDelta(planObject.fishing);
-				}
-			}
+			//if (ecologyPlan)
+			//{
+			//	if (planObject.fishing == null)
+			//	{
+			//		fishingDistributionDelta = new FishingDistributionDelta(); //If null, it cant pick the right constructor automatically
+			//	}
+			//	else
+			//	{
+			//		fishingDistributionDelta = new FishingDistributionDelta(planObject.fishing);
+			//	}
+			//}
 
-			if (energyPlan)
-			{
-				//removedGrids = planObject.deleted_grids;
-				//energyGrids = new List<EnergyGrid>();
-				//foreach (GridObject obj in planObject.grids)
-				//	energyGrids.Add(new EnergyGrid(obj, this));
-				altersEnergyDistribution = planObject.alters_energy_distribution;
-			}
-			energyError = planObject.energy_error == "1";
+			//if (energyPlan)
+			//{
+			//	//removedGrids = planObject.deleted_grids;
+			//	//energyGrids = new List<EnergyGrid>();
+			//	//foreach (GridObject obj in planObject.grids)
+			//	//	energyGrids.Add(new EnergyGrid(obj, this));
+			//	altersEnergyDistribution = planObject.alters_energy_distribution;
+			//}
+			//energyError = planObject.energy_error == "1";
 			PolicyManager.Instance.RunPlanUpdate(planObject.policies, this);
 		}
 
@@ -206,7 +205,15 @@ namespace MSP2050.Scripts
 
 		public bool HasErrors()
 		{
-			return energyError || IssueManager.Instance.HasError(this);
+			foreach (var kvp in m_policies)
+			{ 
+				if(PolicyManager.Instance.TryGetLogic( kvp.Value.policy_type, out var logic))
+				{
+					if (logic.HasError(kvp.Value))
+						return true;
+				}
+			}
+			return IssueManager.Instance.HasError(this);
 		}
 
 		public void UpdatePlan(PlanObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
@@ -388,52 +395,52 @@ namespace MSP2050.Scripts
 				//{
 				//=================================== PLAN TYPE UPDATE =====================================
 
-				bool newEnergyPlan = false;
-				bool newEcologyPlan = false;
-				bool newShippingPlan = false;
-				if (updatedData.type != null)
-				{
-					string[] types = updatedData.type.Split(',');
-					newEnergyPlan = types[0] == "1";
-					newEcologyPlan = types[1] == "1";
-					newShippingPlan = types[2] == "1";
-					typeChanged = true;
-				}
+				//bool newEnergyPlan = false;
+				//bool newEcologyPlan = false;
+				//bool newShippingPlan = false;
+				//if (updatedData.type != null)
+				//{
+				//	string[] types = updatedData.type.Split(',');
+				//	newEnergyPlan = types[0] == "1";
+				//	newEcologyPlan = types[1] == "1";
+				//	newShippingPlan = types[2] == "1";
+				//	typeChanged = true;
+				//}
 
 				//Update energy
-				if (energyPlan && !newEnergyPlan)
-				{
-					//If error changed, plandetails needs update
-					if (energyError)
-						stateChanged = true;
+				//if (energyPlan && !newEnergyPlan)
+				//{
+				//	//If error changed, plandetails needs update
+				//	if (energyError)
+				//		stateChanged = true;
 
-					energyGrids = null;
-					energyError = false;
-					altersEnergyDistribution = false;
-					forceMonitorUpdate = true;
-				}
-				else if (newEnergyPlan)
-				{
-					bool oldEnergyError = energyError;
-					energyError = updatedData.energy_error == "1";
-					altersEnergyDistribution = updatedData.alters_energy_distribution;
-					forceMonitorUpdate = true;
+				//	energyGrids = null;
+				//	energyError = false;
+				//	altersEnergyDistribution = false;
+				//	forceMonitorUpdate = true;
+				//}
+				//else if (newEnergyPlan)
+				//{
+				//	bool oldEnergyError = energyError;
+				//	energyError = updatedData.energy_error == "1";
+				//	altersEnergyDistribution = updatedData.alters_energy_distribution;
+				//	forceMonitorUpdate = true;
 
-					//If error changed, plandetails needs update
-					if (energyError != oldEnergyError)
-						stateChanged = true;
-				}
-				energyPlan = newEnergyPlan;
+				//	//If error changed, plandetails needs update
+				//	if (energyError != oldEnergyError)
+				//		stateChanged = true;
+				//}
+				//energyPlan = newEnergyPlan;
 
 				//Update fishing
-				if (ecologyPlan && !newEcologyPlan)
-					fishingDistributionDelta = null;
-				else if (newEcologyPlan)
-					fishingDistributionDelta = new FishingDistributionDelta(updatedData.fishing);
-				ecologyPlan = newEcologyPlan;
+				//if (ecologyPlan && !newEcologyPlan)
+				//	fishingDistributionDelta = null;
+				//else if (newEcologyPlan)
+				//	fishingDistributionDelta = new FishingDistributionDelta(updatedData.fishing);
+				//ecologyPlan = newEcologyPlan;
 
 				//Update shipping
-				shippingPlan = newShippingPlan;
+				//shippingPlan = newShippingPlan;
 
 				PolicyManager.Instance.RunPlanUpdate(updatedData.policies, this);
 			}
@@ -443,17 +450,7 @@ namespace MSP2050.Scripts
 			PlanManager.Instance.UpdatePlanInUI(this, nameOrDescriptionChanged, timeChanged, stateChanged, layersChanged, typeChanged, forceMonitorUpdate, oldStartTime, oldState, inTimelineBefore);
 		}
 
-		public void UpdateGrids(HashSet<int> deleted, List<GridObject> newGrids)
-		{
-			//Don't update grids if we have the plan locked. Prevents updates while editing.
-			if (!IsLockedByUs)
-			{
-				removedGrids = deleted;
-				energyGrids = new List<EnergyGrid>();
-				foreach (GridObject obj in newGrids)
-					energyGrids.Add(new EnergyGrid(obj, this));
-			}
-		}
+		
 
 		public PlanLayer GetPlanLayerForLayer(AbstractLayer baseLayer)
 		{
@@ -615,18 +612,7 @@ namespace MSP2050.Scripts
 
 			return result;
 		}
-
-		/// <summary>
-		/// Duplicates (value copies) the given energy grid and adds it to this plan.
-		/// </summary>
-		public EnergyGrid DuplicateEnergyGridToPlan(EnergyGrid gridToDuplicate)
-		{
-			EnergyGrid duplicate = new EnergyGrid(gridToDuplicate, this);
-			duplicate.distributionOnly = true;
-			energyGrids.Add(duplicate);
-			return duplicate;
-		}
-
+		
 		public Dictionary<int, EPlanApprovalState> CalculateRequiredApproval(HashSet<int> countriesAffectedByRemovedGrids)
 		{
 			bool requireAMApproval = false;
@@ -636,7 +622,7 @@ namespace MSP2050.Scripts
 			//Store this so we don't have to find removed geometry twice per layer
 			List<List<SubEntity>> removedGeom = new List<List<SubEntity>>();
 
-			//Check required approval for layers in plan
+			//Check required approval level for layers in plan
 			for (int i = 0; i < PlanLayers.Count; i++)
 			{
 				//Check removed geometry
@@ -669,73 +655,62 @@ namespace MSP2050.Scripts
 			if (requireAMApproval)
 				newCountryApproval.Add(SessionManager.AM_ID, EPlanApprovalState.Maybe);
 
-			if (ecologyPlan)
+			//Check required approval for policies
+			foreach(var kvp in m_policies)
 			{
-				SetupEcologyApproval(newCountryApproval, ref requiredApprovalLevel);
-			}
-
-			//If not all approval required yet, check energy required approval
-			if (energyPlan && requiredApprovalLevel < EApprovalType.AllCountries)
-			{
-				//Removed grids
-				if (countriesAffectedByRemovedGrids != null)
-					foreach (int i in countriesAffectedByRemovedGrids)
-						if (!newCountryApproval.ContainsKey(i))
-							newCountryApproval.Add(i, EPlanApprovalState.Maybe);
-
-				//Added grids
-				if (energyGrids != null)
-					foreach (EnergyGrid grid in energyGrids)
-					foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.energyDistribution.distribution)
-						if (!newCountryApproval.ContainsKey(countryAmount.Key))
-							newCountryApproval.Add(countryAmount.Key, EPlanApprovalState.Maybe);
-			}
-
-			//All team approval required, there is no chance for AM approval
-			if (requiredApprovalLevel >= EApprovalType.AllCountries)
-			{
-				foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
-					if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID)
-						newCountryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
-				return newCountryApproval;
-			}
-
-			if (requiredApprovalLevel > 0 && LayerManager.Instance.EEZLayer != null)
-			{
-				List<PolygonEntity> EEZs = LayerManager.Instance.EEZLayer.Entities;
-				int userCountry = SessionManager.Instance.CurrentUserTeamID;
-				for (int i = 0; i < PlanLayers.Count; i++)
+				if(PolicyManager.Instance.TryGetLogic(kvp.Value.policy_type, out var logic))
 				{
-					//The overlap function depends on the layer type
-					Func<PolygonSubEntity, SubEntity, bool> overlapCheck;
-					if (PlanLayers[i].BaseLayer is PolygonLayer)
-						overlapCheck = (a, b) => Util.PolygonPolygonIntersection(a, b as PolygonSubEntity);
-					else if (PlanLayers[i].BaseLayer is LineStringLayer)
-						overlapCheck = (a, b) => Util.PolygonLineIntersection(a, b as LineStringSubEntity);
-					else
-						overlapCheck = (a, b) => Util.PolygonPointIntersection(a, b as PointSubEntity);
-
-					//Check for new geometry
-					for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
-					{
-						Entity t = PlanLayers[i].GetNewGeometryByIndex(entityIndex);
-						if (t.Country != userCountry && !newCountryApproval.ContainsKey(t.Country))
-							newCountryApproval.Add(t.Country, EPlanApprovalState.Maybe);
-						foreach (PolygonEntity eez in EEZs)
-							if (eez.Country != userCountry && !newCountryApproval.ContainsKey(eez.Country) && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
-								newCountryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
-					}
+					logic.GetRequiredApproval(kvp.Value, this, newCountryApproval, ref requiredApprovalLevel);
 				}
 			}
 
-			//Check for removed geometry. Only the country which owns the geometry will need to give their approval.
-			for (int i = 0; i < PlanLayers.Count; i++)
+			if (requiredApprovalLevel >= EApprovalType.AllCountries)
 			{
-				foreach (SubEntity t in removedGeom[i])
+				//All team approval required, there is no chance for AM approval
+				foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
+					if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID)
+						newCountryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
+			}
+			else
+			{
+				//Actually check the geometry to add required approval based on level
+				if (requiredApprovalLevel > 0 && LayerManager.Instance.EEZLayer != null)
 				{
-					if (t.Entity.Country != Entity.INVALID_COUNTRY_ID && t.Entity.Country != SessionManager.Instance.CurrentUserTeamID && !newCountryApproval.ContainsKey(t.Entity.Country))
+					List<PolygonEntity> EEZs = LayerManager.Instance.EEZLayer.Entities;
+					int userCountry = SessionManager.Instance.CurrentUserTeamID;
+					for (int i = 0; i < PlanLayers.Count; i++)
 					{
-						newCountryApproval.Add(t.Entity.Country, EPlanApprovalState.Maybe);
+						//The overlap function depends on the layer type
+						Func<PolygonSubEntity, SubEntity, bool> overlapCheck;
+						if (PlanLayers[i].BaseLayer is PolygonLayer)
+							overlapCheck = (a, b) => Util.PolygonPolygonIntersection(a, b as PolygonSubEntity);
+						else if (PlanLayers[i].BaseLayer is LineStringLayer)
+							overlapCheck = (a, b) => Util.PolygonLineIntersection(a, b as LineStringSubEntity);
+						else
+							overlapCheck = (a, b) => Util.PolygonPointIntersection(a, b as PointSubEntity);
+
+						//Check for new geometry
+						for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
+						{
+							Entity t = PlanLayers[i].GetNewGeometryByIndex(entityIndex);
+							if (t.Country != userCountry && !newCountryApproval.ContainsKey(t.Country))
+								newCountryApproval.Add(t.Country, EPlanApprovalState.Maybe);
+							foreach (PolygonEntity eez in EEZs)
+								if (eez.Country != userCountry && !newCountryApproval.ContainsKey(eez.Country) && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
+									newCountryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
+						}
+					}
+				}
+
+				//Check for removed geometry. Only the country which owns the geometry will need to give their approval.
+				for (int i = 0; i < PlanLayers.Count; i++)
+				{
+					foreach (SubEntity t in removedGeom[i])
+					{
+						if (t.Entity.Country != Entity.INVALID_COUNTRY_ID && t.Entity.Country != SessionManager.Instance.CurrentUserTeamID && !newCountryApproval.ContainsKey(t.Entity.Country))
+						{
+							newCountryApproval.Add(t.Entity.Country, EPlanApprovalState.Maybe);
+						}
 					}
 				}
 			}
@@ -749,33 +724,6 @@ namespace MSP2050.Scripts
 				newCountryApproval.Remove(SessionManager.GM_ID);
 
 			return newCountryApproval;
-		}
-
-		private void SetupEcologyApproval(Dictionary<int, EPlanApprovalState> approvalStates, ref EApprovalType requiredApprovalLevel)
-		{
-			if (fishingDistributionDelta == null)
-			{
-				Debug.LogError("Need to calculate Ecology approval for a plan without fishing distributions.");
-				return;
-			}
-
-			bool hasChangedFishingValue = false;
-			foreach (KeyValuePair<string, Dictionary<int, float>> fishingFleets in fishingDistributionDelta.GetValuesByFleet())
-			{
-				foreach (KeyValuePair<int, float> fishingValues in fishingFleets.Value)
-				{
-					if (!approvalStates.ContainsKey(fishingValues.Key))
-					{
-						approvalStates.Add(fishingValues.Key, EPlanApprovalState.Maybe);
-						hasChangedFishingValue = true;
-					}
-				}
-			}
-
-			if (hasChangedFishingValue && requiredApprovalLevel < EApprovalType.EEZ)
-			{
-				requiredApprovalLevel = EApprovalType.EEZ;
-			}
 		}
 
 		public bool NeedsApproval()
@@ -985,6 +933,22 @@ namespace MSP2050.Scripts
 			form.AddField("text", text);
 
 			ServerCommunication.Instance.DoRequest(Server.PostPlanFeedback(), form);
+		}
+
+		public bool TryGetPolicyData<T>(string a_policyType, out T a_result) where T : APolicyData
+		{
+			if(m_policies.TryGetValue(a_policyType, out var temp))
+			{
+				a_result = (T)temp;
+				return true;
+			}
+			a_result = null;
+			return false;
+		}
+
+		public void AddPolicyData(APolicyData a_data)
+		{
+			m_policies.Add(a_data.policy_type, a_data);
 		}
 	}
 
