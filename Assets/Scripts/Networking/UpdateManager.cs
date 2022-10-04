@@ -132,6 +132,8 @@ namespace MSP2050.Scripts
 			Dictionary<AbstractLayer, int> layerUpdateTimes = new Dictionary<AbstractLayer, int>();
 			List<Plan> plans = null;
 
+			//General update
+			PolicyManager.Instance.RunGeneralUpdate(a_Update.policy_updates, APolicyLogic.EPolicyUpdateStage.PreKPI);
 			if (a_Update.plan != null)
 			{
 				//Sort plans by time and ID so there are no issues with dependencies when loading them in
@@ -154,52 +156,29 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			PolicyManager.Instance.RunPreSimulationUpdate(a_Update.policy_updates);
+			//Pre sim update
+			PolicyManager.Instance.RunGeneralUpdate(a_Update.policy_updates, APolicyLogic.EPolicyUpdateStage.PreKPI);
+			if (plans != null)
+			{
+				for (int i = 0; i < plans.Count; i++)
+				{
+					PolicyManager.Instance.RunPlanUpdate(a_Update.plan[i].policies, plans[i], APolicyLogic.EPolicyUpdateStage.PreKPI);
+				}
+			}
 
-			//Run output update before KPI/Grid update. Source output is required for the KPIs and Capacity for grids.
-			//foreach (EnergyOutputObject outputUpdate in a_Update.energy.output)
-			//{
-			//	UpdateOutput(outputUpdate);
-			//}
-
-			////Update grids
-			//if (a_Update.plan != null)
-			//{
-			//	for(int i = 0; i < plans.Count; i++)
-			//	{
-			//		plans[i].UpdateGrids(a_Update.plan[i].deleted_grids, a_Update.plan[i].grids);
-			//	}
-			//}
-
-			////Run connection update before KPI update so cable networks are accurate in the KPIs
-			//foreach (EnergyConnectionObject connection in a_Update.energy.connections)
-			//{
-			//	UpdateConnection(connection);
-			//}
-
+			//Sim update
 			TimeManager.Instance.UpdateTime(a_Update.tick);
-
 			SimulationManager.Instance.RunGeneralUpdate(a_Update.simulation_updates);
 
-			//if (a_Update.kpi != null)
-			//{
-			//	if (a_Update.kpi.energy != null && a_Update.kpi.energy.Length > 0)
-			//	{
-			//		KPIManager.Instance.ReceiveEnergyKPIUpdate(a_Update.kpi.energy);
-			//	}
-
-			//	if (a_Update.kpi.ecology != null && a_Update.kpi.ecology.Length > 0)
-			//	{
-			//		KPIManager.Instance.ReceiveEcologyKPIUpdate(a_Update.kpi.ecology);
-			//	}
-
-			//	if (a_Update.kpi.shipping != null && a_Update.kpi.shipping.Length > 0)
-			//	{
-			//		KPIManager.Instance.ReceiveShippingKPIUpdate(a_Update.kpi.shipping);
-			//	}
-			//}
-
-			PolicyManager.Instance.RunPostSimulationUpdate(a_Update.policy_updates);
+			//Post sim update
+			PolicyManager.Instance.RunGeneralUpdate(a_Update.policy_updates, APolicyLogic.EPolicyUpdateStage.PostKPI);
+			if (plans != null)
+			{
+				for (int i = 0; i < plans.Count; i++)
+				{
+					PolicyManager.Instance.RunPlanUpdate(a_Update.plan[i].policies, plans[i], APolicyLogic.EPolicyUpdateStage.PostKPI);
+				}
+			}
 
 			if (a_Update.objectives.Count > 0)
 			{

@@ -11,56 +11,56 @@ namespace MSP2050.Scripts
 		public override void Initialise(APolicyData a_settings)
 		{ }
 
-		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan)
+		public override void HandlePlanUpdate(APolicyData a_planUpdateData, Plan a_plan, EPolicyUpdateStage a_stage)
 		{
-			PolicyUpdateEnergyPlan updateData = (PolicyUpdateEnergyPlan)a_data;
-			//Grids are handled later
-			if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(updateData.policy_type, out PolicyPlanDataEnergy planData))
+			if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
 			{
-				planData.energyError = updateData.energy_error == "1";
-				planData.altersEnergyDistribution = updateData.alters_energy_distribution;
-			}
-			else
-			{
-				a_plan.AddPolicyData(new PolicyPlanDataEnergy()
+				PolicyUpdateEnergyPlan updateData = (PolicyUpdateEnergyPlan)a_planUpdateData;
+				//Grids are handled later
+				if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(updateData.policy_type, out PolicyPlanDataEnergy planData))
 				{
-					policy_type = updateData.policy_type,
-					altersEnergyDistribution = updateData.alters_energy_distribution,
-					energyError = updateData.energy_error == "1"
-				});
-			}
-		}
-
-		public override void HandlePreKPIUpdate(APolicyData a_data)
-		{
-			//Run output update before KPI/Grid update. Source output is required for the KPIs and Capacity for grids.
-			foreach (EnergyOutputObject outputUpdate in a_Update.energy.output)
-			{
-				UpdateOutput(outputUpdate);
-			}
-
-			//Update grids
-			if (a_Update.plan != null)
-			{
-				for (int i = 0; i < plans.Count; i++)
+					planData.energyError = updateData.energy_error == "1";
+					planData.altersEnergyDistribution = updateData.alters_energy_distribution;
+				}
+				else
 				{
-					plans[i].UpdateGrids(a_Update.plan[i].deleted_grids, a_Update.plan[i].grids);
+					a_plan.AddPolicyData(new PolicyPlanDataEnergy()
+					{
+						policy_type = updateData.policy_type,
+						altersEnergyDistribution = updateData.alters_energy_distribution,
+						energyError = updateData.energy_error == "1"
+					});
 				}
 			}
-
-			//Run connection update before KPI update so cable networks are accurate in the KPIs
-			foreach (EnergyConnectionObject connection in a_Update.energy.connections)
+			else if (a_stage == APolicyLogic.EPolicyUpdateStage.PreKPI)
 			{
-				UpdateConnection(connection);
+				PolicyUpdateEnergyPlan updateData = (PolicyUpdateEnergyPlan)a_planUpdateData;
+				UpdateGrids(a_plan, updateData.deleted_grids, updateData.grids);
 			}
 		}
 
-		public override void HandlePostKPIUpdate(APolicyData a_data)
+		public override void HandleGeneralUpdate(APolicyData a_updateData, EPolicyUpdateStage a_stage)
 		{
+			if (a_stage == APolicyLogic.EPolicyUpdateStage.PreKPI)
+			{
+				PolicyUpdateEnergy updateData = (PolicyUpdateEnergy)a_updateData;
+				//Run output update before KPI/Grid update. Source output is required for the KPIs and Capacity for grids.
+				foreach (EnergyOutputObject outputUpdate in updateData.output)
+				{
+					UpdateOutput(outputUpdate);
+				}
+				//Run connection update before KPI update so cable networks are accurate in the KPIs
+				//TODO: This used to be after grid updates, check if this causes issues
+				foreach (EnergyConnectionObject connection in updateData.connections)
+				{
+					UpdateConnection(connection);
+				}
+			}
 		}
 
 		public override APolicyData FormatPlanData(Plan a_plan)
 		{
+			//TODO
 			return null;
 		}
 
@@ -72,12 +72,10 @@ namespace MSP2050.Scripts
 			return ((PolicyPlanDataEnergy)a_data).energyError;
 		}
 
-		public void UpdateGrids(APolicyData a_planData, Plan a_plan, HashSet<int> a_deleted, List<GridObject> a_newGrids)
+		public void UpdateGrids(Plan a_plan, HashSet<int> a_deleted, List<GridObject> a_newGrids)
 		{
-			//TODO: call this
-			PolicyPlanDataEnergy planData = (PolicyPlanDataEnergy)a_planData;
 			//Don't update grids if we have the plan locked. Prevents updates while editing.
-			if (!a_plan.IsLockedByUs)
+			if (!a_plan.IsLockedByUs && a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var planData))
 			{
 				planData.removedGrids = a_deleted;
 				planData.energyGrids = new List<EnergyGrid>();
@@ -168,7 +166,7 @@ namespace MSP2050.Scripts
 				PolicyPlanDataEnergy planData = (PolicyPlanDataEnergy)a_planData;
 
 				//Determine countries affected by removed grids
-				List<EnergyGrid> energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(a_plan, EnergyGrid.GridColor.Either);
+				List<EnergyGrid> energyGridsBeforePlan = GetEnergyGridsBeforePlan(a_plan, EnergyGrid.GridColor.Either);
 
 				HashSet<int> countriesAffectedByRemovedGrids = new HashSet<int>();
 				foreach (EnergyGrid grid in energyGridsBeforePlan)
@@ -210,52 +208,52 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Returns a list of energy grids that are active right before the given plan would be implemented.
 		/// </summary>
-		/// <param name="plan"> Plan before which grids are calced </param>
-		/// <param name="removedGridIds"> Persistent IDs of grids that have been removed in at this plan's point</param>
-		/// <param name="includePlanItself"> Is the given plan included </param>
-		/// <param name="forDisplaying"> Is the given plan included even if it's in design</param>
+		/// <param name="a_plan"> Plan before which grids are calced </param>
+		/// <param name="a_removedGridIds"> Persistent IDs of grids that have been removed in at this plan's point</param>
+		/// <param name="a_includePlanItself"> Is the given plan included </param>
+		/// <param name="a_forDisplaying"> Is the given plan included even if it's in design</param>
 		/// <returns></returns>
-		public List<EnergyGrid> GetEnergyGridsBeforePlan(Plan plan, out HashSet<int> removedGridIds, EnergyGrid.GridColor color, bool includePlanItself = false, bool forDisplaying = false)
+		public List<EnergyGrid> GetEnergyGridsBeforePlan(Plan a_plan, out HashSet<int> a_removedGridIds, EnergyGrid.GridColor a_color, bool a_includePlanItself = false, bool a_forDisplaying = false)
 		{
 			List<Plan> plans = PlanManager.Instance.Plans;
 
 			List<EnergyGrid> result = new List<EnergyGrid>();
-			removedGridIds = new HashSet<int>();
+			a_removedGridIds = new HashSet<int>();
 			HashSet<int> ignoredGridIds = new HashSet<int>();
 			HashSet<int> previousGridIDsLookingFor = new HashSet<int>();
 
 			//Find the index of the given plan
 			int planIndex = 0;
 			for (; planIndex < plans.Count; planIndex++)
-				if (plans[planIndex] == plan)
+				if (plans[planIndex] == a_plan)
 					break;
 
 			//Handle plan itself if conditions are met
-			if (includePlanItself && plan.energyPlan && plan.energyGrids != null && (plan.InInfluencingState || (forDisplaying && plan.State == Plan.PlanState.DESIGN)))
+			if (a_includePlanItself && (a_plan.InInfluencingState || (a_forDisplaying && a_plan.State == Plan.PlanState.DESIGN)) && a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var energyData) && energyData.energyGrids != null)
 			{
-				foreach (EnergyGrid grid in plan.energyGrids)
+				foreach (EnergyGrid grid in energyData.energyGrids)
 				{
-					if (!grid.MatchesColor(color))
+					if (!grid.MatchesColor(a_color))
 						continue;
-					if (grid.persistentID == -1 || (!removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
+					if (grid.persistentID == -1 || (!a_removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
 					{
 						result.Add(grid);
 						ignoredGridIds.Add(grid.persistentID);
 					}
 				}
-				removedGridIds.UnionWith(plans[planIndex].removedGrids);
-				if (forDisplaying)
-					previousGridIDsLookingFor = new HashSet<int>(plans[planIndex].removedGrids);
+				a_removedGridIds.UnionWith(energyData.removedGrids);
+				if (a_forDisplaying)
+					previousGridIDsLookingFor = new HashSet<int>(energyData.removedGrids);
 			}
 
 			//Add all grids whose persistentID is not in ignoredgrids
 			for (int i = planIndex - 1; i >= 0; i--)
 			{
-				if (plans[i].energyPlan && plans[i].InInfluencingState)
+				if (plans[i].InInfluencingState && plans[i].TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var planEnergyData) && planEnergyData.energyGrids != null)
 				{
-					foreach (EnergyGrid grid in plans[i].energyGrids)
+					foreach (EnergyGrid grid in planEnergyData.energyGrids)
 					{
-						if (!grid.MatchesColor(color))
+						if (!grid.MatchesColor(a_color))
 							continue;
 						if (previousGridIDsLookingFor.Contains(grid.persistentID))
 						{
@@ -264,13 +262,13 @@ namespace MSP2050.Scripts
 							ignoredGridIds.Add(grid.persistentID);
 							previousGridIDsLookingFor.Remove(grid.persistentID);
 						}
-						else if (grid.persistentID == -1 || (!removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
+						else if (grid.persistentID == -1 || (!a_removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
 						{
 							result.Add(grid);
 							ignoredGridIds.Add(grid.persistentID);
 						}
 					}
-					removedGridIds.UnionWith(plans[i].removedGrids);
+					a_removedGridIds.UnionWith(planEnergyData.removedGrids);
 				}
 			}
 
@@ -285,6 +283,7 @@ namespace MSP2050.Scripts
 
 		public List<EnergyGrid> GetEnergyGridsAtTime(int time, EnergyGrid.GridColor color)
 		{
+			List<Plan> plans = PlanManager.Instance.Plans;
 			if (plans.Count == 0)
 			{
 				return new List<EnergyGrid>(0);

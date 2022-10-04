@@ -91,52 +91,54 @@ namespace MSP2050.Scripts
 			return m_policyLogic.TryGetValue(a_name, out a_logic);
 		}
 
-		public void RunPlanUpdate(APolicyData[] a_data, Plan a_plan)
+		public void RunPlanUpdate(APolicyData[] a_data, Plan a_plan, APolicyLogic.EPolicyUpdateStage a_stage)
 		{
-			HashSet<string> existingPolicies = new HashSet<string>();
-			foreach(var kvp in a_plan.m_policies)
+			if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
 			{
-				existingPolicies.Add(kvp.Key);
-			}
-
-			//Handle updates
-			foreach(APolicyData data in a_data)
-			{
-				if(m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
+				HashSet<string> existingPolicies = new HashSet<string>();
+				foreach (var kvp in a_plan.m_policies)
 				{
-					policy.HandlePlanUpdate(data, a_plan);
+					existingPolicies.Add(kvp.Key);
 				}
-				existingPolicies.Remove(data.policy_type);
-			}
 
-			//Handle removal
-			foreach (string removed in existingPolicies)
-			{
-				if (m_policyLogic.TryGetValue(removed, out APolicyLogic policy))
+				//Handle updates
+				foreach (APolicyData data in a_data)
 				{
-					policy.RemoveFromPlan(a_plan);
+					if (m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
+					{
+						policy.HandlePlanUpdate(data, a_plan, a_stage);
+					}
+					existingPolicies.Remove(data.policy_type);
+				}
+
+				//Handle removal
+				foreach (string removed in existingPolicies)
+				{
+					if (m_policyLogic.TryGetValue(removed, out APolicyLogic policy))
+					{
+						policy.RemoveFromPlan(a_plan);
+					}
+				}
+			}
+			else
+			{
+				foreach (APolicyData data in a_data)
+				{
+					if (m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
+					{
+						policy.HandlePlanUpdate(data, a_plan, a_stage);
+					}
 				}
 			}
 		}
 
-		public void RunPreSimulationUpdate(APolicyData[] a_data)
+		public void RunGeneralUpdate(APolicyData[] a_data, APolicyLogic.EPolicyUpdateStage a_stage)
 		{
 			foreach (APolicyData data in a_data)
 			{
 				if (m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
 				{
-					policy.HandlePreKPIUpdate(data);
-				}
-			}
-		}
-
-		public void RunPostSimulationUpdate(APolicyData[] a_data)
-		{
-			foreach (APolicyData data in a_data)
-			{
-				if (m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
-				{
-					policy.HandlePostKPIUpdate(data);
+					policy.HandleGeneralUpdate(data, a_stage);
 				}
 			}
 		}

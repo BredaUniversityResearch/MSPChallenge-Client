@@ -10,36 +10,37 @@ namespace MSP2050.Scripts
 		public override void Initialise(APolicyData a_settings)
 		{ }
 
-		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan)
+		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage)
 		{
-			PolicyUpdateFishingPlan updateData = (PolicyUpdateFishingPlan)a_data;
-			if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(updateData.policy_type, out PolicyPlanDataFishing planData))
+			if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
 			{
-				planData.fishingDistributionDelta = new FishingDistributionDelta(updateData.fishing);
-			}
-			else
-			{
-				a_plan.AddPolicyData(new PolicyPlanDataFishing() { 
-					policy_type = updateData.policy_type, 
-					fishingDistributionDelta = updateData.fishing != null ? new FishingDistributionDelta(updateData.fishing) : new FishingDistributionDelta() //If null, it cant pick the right constructor automatically
-				});
+				PolicyUpdateFishingPlan updateData = (PolicyUpdateFishingPlan)a_data;
+				if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(updateData.policy_type, out PolicyPlanDataFishing planData))
+				{
+					planData.fishingDistributionDelta = new FishingDistributionDelta(updateData.fishing);
+				}
+				else
+				{
+					a_plan.AddPolicyData(new PolicyPlanDataFishing()
+					{
+						policy_type = updateData.policy_type,
+						fishingDistributionDelta = updateData.fishing != null ? new FishingDistributionDelta(updateData.fishing) : new FishingDistributionDelta() //If null, it cant pick the right constructor automatically
+					});
+				}
 			}
 		}
 
-		public override void HandlePreKPIUpdate(APolicyData a_data) 
+		public override void HandleGeneralUpdate(APolicyData a_data, EPolicyUpdateStage a_stage) 
 		{ }
 
 		public override APolicyData FormatPlanData(Plan a_plan) 
 		{
+			//TODO
 			return null;
 		}
 
 		public override void UpdateAfterEditing(Plan a_plan) 
 		{ }
-
-		public override void HandlePostKPIUpdate(APolicyData a_data)
-		{
-		}
 
 		public override void RemoveFromPlan(Plan a_plan)
 		{

@@ -10,26 +10,27 @@ namespace MSP2050.Scripts
 		public override void Initialise(APolicyData a_settings)
 		{ }
 
-		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan) 
+		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage) 
 		{
-			PolicyUpdateShippingPlan data = (PolicyUpdateShippingPlan)a_data;
-			RestrictionAreaManager.instance.ProcessReceivedRestrictions(a_plan, data.restriction_settings);
-			if (!a_plan.m_policies.ContainsKey(PolicyManager.SHIPPING_POLICY_NAME))
-				a_plan.m_policies.Add(PolicyManager.SHIPPING_POLICY_NAME, new PolicyPlanDataShipping());
+			if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
+			{
+				PolicyUpdateShippingPlan data = (PolicyUpdateShippingPlan)a_data;
+				RestrictionAreaManager.instance.ProcessReceivedRestrictions(a_plan, data.restriction_settings);
+				if (!a_plan.m_policies.ContainsKey(PolicyManager.SHIPPING_POLICY_NAME))
+					a_plan.m_policies.Add(PolicyManager.SHIPPING_POLICY_NAME, new PolicyPlanDataShipping());
+			}
 		}
 
-		public override void HandlePreKPIUpdate(APolicyData a_data) 
+		public override void HandleGeneralUpdate(APolicyData a_data, EPolicyUpdateStage a_stage) 
 		{ }
 
 		public override APolicyData FormatPlanData(Plan a_plan) 
 		{
+			//TODO
 			return null;
 		}
 
 		public override void UpdateAfterEditing(Plan a_plan) 
-		{ }
-
-		public override void HandlePostKPIUpdate(APolicyData a_data)
 		{ }
 
 		public override void RemoveFromPlan(Plan a_plan)

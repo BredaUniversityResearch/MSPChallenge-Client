@@ -483,6 +483,7 @@ namespace MSP2050.Scripts
 				foreach (AbstractLayer energyLayer in energyLayers)
 					energyLayer.ResetCurrentGrids();
 
+				//TODO: move to policy logic
 				List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(plan.StartTime, EnergyGrid.GridColor.Either);
 				if (energyCableLayerGreen != null)
 				{
