@@ -8,15 +8,9 @@ namespace MSP2050.Scripts
 {
 	/// <summary>
 	/// The IssueObject is the JSON representation of an issue which is sent back and forth to the API server.
-	/// 
-	/// super short variable names to get less characters when serialising
-	/// ^ IMO this is a terrible motivation for creating unreadable code. 
 	/// </summary>
 	public class PlanIssueObject
 	{
-		//21-11-2017 PdG: I've aliased these values with their old names so we can at least have some readability in the code.
-		//24-11-2017 PdG: And they're gone...
-
 		//This issue_id cannot be trusted. New issues will always have issue_id -1 until they have been received by the update tick.
 		//To check if issues are the same please use the IsSameIssueAs function.
 		public int issue_database_id { get; set; }

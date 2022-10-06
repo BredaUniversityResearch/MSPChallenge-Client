@@ -43,12 +43,11 @@ namespace MSP2050.Scripts
 		private ProjectionInfo mspCoordinateProjection;
 		private ProjectionInfo geoJSONCoordinateProjection;
 		[HideInInspector] public int currentExpertiseIndex;
-		[HideInInspector] public SELGameClientConfig SelConfig{ get; set; }
-
-		private ESimulationType availableSimulations;
+		//[HideInInspector] public SELGameClientConfig SelConfig{ get; set; }
 
 		[HideInInspector] public event Action OnFinishedLoadingLayers; //Called when we finished loading all layers and right before the first tick is requested.
 		[HideInInspector] public event Action OnPostFinishedLoadingLayers;
+		
 
 		protected void Awake()
 		{
@@ -70,10 +69,9 @@ namespace MSP2050.Scripts
 			Application.wantsToQuit += OnApplicationQuit;
 
 			currentExpertiseIndex = PlayerPrefs.GetInt(LoginContentTabLogin.LOGIN_EXPERTISE_INDEX_STR, -1);
-			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
+			
 			if (SessionManager.Instance.MspGlobalData.expertise_definitions != null)
 				InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = true;
-			ParseAvailableSimulations(SessionManager.Instance.MspGlobalData.configured_simulations);
 			InterfaceCanvas.Instance.SetRegionWithName(SessionManager.Instance.MspGlobalData.region);
 
 			if (SessionManager.Instance.MspGlobalData.dependencies != null)
@@ -87,6 +85,14 @@ namespace MSP2050.Scripts
 				else
 					InterfaceCanvas.Instance.ImpactToolGraph.Initialise(HEBData);
 			}
+			ServerCommunication.Instance.DoRequest<PolicySimSettings>(Server.PolicySimSettings(), new NetworkForm(), HandlePolicySimSettingsCallback);
+		}
+
+		private void HandlePolicySimSettingsCallback(PolicySimSettings a_settings)
+		{
+			SimulationManager.Instance.InitialiseSimulations(a_settings.simulation_settings);
+			PolicyManager.Instance.InitialisePolicies(a_settings.policy_settings);
+			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
 		}
 
 		void OnDestroy()
@@ -205,23 +211,6 @@ namespace MSP2050.Scripts
 			if (PlanManager.Instance.planViewing == null) //This currently shows current and past (through ViewAtTime)
 				return ETextState.Current;
 			return ETextState.View;
-		}
-
-		private void ParseAvailableSimulations(ESimulationType[] configuredSimulations)
-		{
-			availableSimulations = ESimulationType.None;
-			if (configuredSimulations != null)
-			{
-				foreach (ESimulationType simType in configuredSimulations)
-				{
-					availableSimulations |= simType;
-				}
-			}
-		}
-
-		public bool IsSimulationConfigured(ESimulationType simulationType)
-		{
-			return (availableSimulations & simulationType) == simulationType;
 		}
 
 		public void GetRealWorldMousePosition(out double x, out double y)

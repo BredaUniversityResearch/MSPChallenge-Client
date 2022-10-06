@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 		private Animator animator = null;
 
 		[SerializeField]
-		private EKPICategory targetCategory = EKPICategory.Ecology;
+		private string targetCategory;
 
 		[SerializeField]
 		private GameObject categoryPrefab = null;
@@ -82,7 +82,8 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			KPIValueCollection collection = KPIManager.Instance.GetKPIValuesForCategory(targetCategory, targetTeamId);
+			KPIValueCollection collection = SimulationManager.Instance.GetKPIValuesForCategory(targetCategory, targetTeamId);
+
 			if (collection != null)
 			{
 				CreateValuesForCollection(collection);
@@ -128,7 +129,7 @@ namespace MSP2050.Scripts
 				}
 	
 				targetTeamId = teamId;
-				SetTargetCollection(KPIManager.Instance.GetKPIValuesForCategory(targetCategory, targetTeamId));
+				SetTargetCollection(SimulationManager.Instance.GetKPIValuesForCategory(targetCategory, targetTeamId));
 
 				if (targetCollection != null)
 				{

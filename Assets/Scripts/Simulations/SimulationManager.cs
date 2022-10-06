@@ -7,6 +7,10 @@ namespace MSP2050.Scripts
 {
 	public class SimulationManager : MonoBehaviour
 	{
+		public const string CEL_SIM_NAME = "CEL";
+		public const string MEL_SIM_NAME = "MEL";
+		public const string SEL_SIM_NAME = "SEL";
+
 		private static SimulationManager singleton;
 		public static SimulationManager Instance
 		{
@@ -20,6 +24,9 @@ namespace MSP2050.Scripts
 
 		private Dictionary<string, SimulationDefinition> m_simulationDefinitions = new Dictionary<string, SimulationDefinition>();
 		private Dictionary<string, ASimulationLogic> m_simulationLogic = new Dictionary<string, ASimulationLogic>();
+		private Dictionary<string, ASimulationData> m_simulationSettings = new Dictionary<string, ASimulationData>();
+
+		private CountryKPICollectionGeometry geometryKPIs = new CountryKPICollectionGeometry();
 
 		void Start()
 		{
@@ -27,11 +34,16 @@ namespace MSP2050.Scripts
 				Destroy(this);
 			else
 				singleton = this;
+			Main.Instance.OnFinishedLoadingLayers += CreateGeometryKPI;
 		}
 
 		void OnDestroy()
 		{
 			singleton = null;
+			foreach (var kvp in m_simulationLogic)
+			{
+				kvp.Value.Destroy();
+			}
 		}
 
 		//All possible policies should be registered before policies are initilised
@@ -43,9 +55,9 @@ namespace MSP2050.Scripts
 		public void InitialiseSimulations(ASimulationData[] a_simulationSettings)
 		{
 			//Register built in simulations
-			m_simulationDefinitions.Add("MEL", new SimulationDefinition { m_name = "MEL", m_updateType = typeof(SimulationUpdateMEL), m_logicType = typeof(SimulationLogicMEL) });
-			m_simulationDefinitions.Add("CEL", new SimulationDefinition { m_name = "CEL", m_updateType = typeof(SimulationUpdateCEL), m_logicType = typeof(SimulationLogicCEL) });
-			m_simulationDefinitions.Add("SEL", new SimulationDefinition { m_name = "SEL", m_updateType = typeof(SimulationUpdateSEL), m_logicType = typeof(SimulationLogicSEL) });
+			m_simulationDefinitions.Add(MEL_SIM_NAME, new SimulationDefinition { m_name = MEL_SIM_NAME, m_updateType = typeof(SimulationUpdateMEL), m_logicType = typeof(SimulationLogicMEL) });
+			m_simulationDefinitions.Add(CEL_SIM_NAME, new SimulationDefinition { m_name = CEL_SIM_NAME, m_updateType = typeof(SimulationUpdateCEL), m_logicType = typeof(SimulationLogicCEL) });
+			m_simulationDefinitions.Add(SEL_SIM_NAME, new SimulationDefinition { m_name = SEL_SIM_NAME, m_updateType = typeof(SimulationUpdateSEL), m_logicType = typeof(SimulationLogicSEL) });
 
 			//Create logic instances
 			foreach (ASimulationData data in a_simulationSettings)
@@ -55,6 +67,7 @@ namespace MSP2050.Scripts
 					ASimulationLogic logic = (ASimulationLogic)gameObject.AddComponent(definition.m_logicType);
 					logic.Initialise(data);
 					m_simulationLogic.Add(data.simulation_type, logic);
+					m_simulationSettings.Add(data.simulation_type, data);
 				}
 				else
 				{
@@ -73,6 +86,11 @@ namespace MSP2050.Scripts
 			return m_simulationLogic.TryGetValue(a_name, out a_logic);
 		}
 
+		public bool TryGetSettings(string a_name, out ASimulationData a_settings)
+		{
+			return m_simulationSettings.TryGetValue(a_name, out a_settings);
+		}
+
 		public void RunGeneralUpdate(ASimulationData[] a_data)
 		{
 			foreach (ASimulationData data in a_data)
@@ -82,6 +100,35 @@ namespace MSP2050.Scripts
 					simulation.HandleGeneralUpdate(data);
 				}
 			}
+		}
+
+		public KPIValueCollection GetKPIValuesForCategory(string a_targetSimulation, int a_countryId = -1)
+		{
+			if(string.IsNullOrEmpty(a_targetSimulation))
+			{
+				return geometryKPIs.GetKPIForCountry(a_countryId);
+			}
+			return m_simulationLogic[a_targetSimulation].GetKPIValuesForCountry(a_countryId);
+		}
+
+		private void CreateGeometryKPI()
+		{
+			foreach (Team team in SessionManager.Instance.GetTeams())
+			{
+				if (!team.IsManager)
+				{
+					geometryKPIs.AddKPIForCountry(team.ID);
+				}
+			}
+			//Collection for all countries together
+			geometryKPIs.AddKPIForCountry(0);
+			geometryKPIs.SetupKPIValues(null, SessionManager.Instance.MspGlobalData.session_end_month);
+			TimeManager.Instance.OnCurrentMonthChanged += UpdateGeometryKPI;
+		}
+
+		private void UpdateGeometryKPI(int oldMonth, int newMonth)
+		{
+			geometryKPIs.CalculateKPIValues(newMonth);
 		}
 	}
 }

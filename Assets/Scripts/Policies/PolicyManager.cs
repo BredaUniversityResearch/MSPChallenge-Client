@@ -25,6 +25,7 @@ namespace MSP2050.Scripts
 
 		private Dictionary<string, PolicyDefinition> m_policyDefinitions = new Dictionary<string, PolicyDefinition>();
 		private Dictionary<string, APolicyLogic> m_policyLogic = new Dictionary<string, APolicyLogic>();
+		private Dictionary<string, APolicyData> m_policySettings = new Dictionary<string, APolicyData>();
 
 		void Start()
 		{
@@ -37,6 +38,10 @@ namespace MSP2050.Scripts
 		void OnDestroy()
 		{
 			singleton = null;
+			foreach(var kvp in m_policyLogic)
+			{
+				kvp.Value.Destroy();
+			}
 		}
 
 		//All possible policies should be registered before policies are initilised
@@ -73,6 +78,7 @@ namespace MSP2050.Scripts
 					APolicyLogic logic = (APolicyLogic)gameObject.AddComponent(definition.m_logicType);
 					logic.Initialise(data);
 					m_policyLogic.Add(data.policy_type, logic);
+					m_policySettings.Add(data.policy_type, data);
 				}
 				else
 				{
@@ -89,6 +95,11 @@ namespace MSP2050.Scripts
 		public bool TryGetLogic(string a_name, out APolicyLogic a_logic)
 		{
 			return m_policyLogic.TryGetValue(a_name, out a_logic);
+		}
+
+		public bool TryGetSettings(string a_name, out APolicyData a_settings)
+		{
+			return m_policySettings.TryGetValue(a_name, out a_settings);
 		}
 
 		public void RunPlanUpdate(APolicyData[] a_data, Plan a_plan, APolicyLogic.EPolicyUpdateStage a_stage)

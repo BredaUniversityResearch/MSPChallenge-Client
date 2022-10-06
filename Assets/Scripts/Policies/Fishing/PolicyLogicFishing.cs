@@ -39,6 +39,13 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
+		public override bool FormatGeneralData(out APolicyData a_data)
+		{
+			//TODO
+			a_data = null;
+			return false;
+		}
+
 		public override void UpdateAfterEditing(Plan a_plan) 
 		{ }
 
@@ -65,5 +72,7 @@ namespace MSP2050.Scripts
 				}
 			}
 		}
+
+		
 	}
 }

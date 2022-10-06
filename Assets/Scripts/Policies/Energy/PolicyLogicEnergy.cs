@@ -8,8 +8,25 @@ namespace MSP2050.Scripts
 {
 	public class PolicyLogicEnergy : APolicyLogic
 	{
+		static PolicyLogicEnergy m_instance;
+		public static PolicyLogicEnergy Instance => m_instance;
+
+		private Dictionary<int, EnergyGrid> energyGrids = new Dictionary<int, EnergyGrid>();
+		private List<PointLayer> energyPointLayers = new List<PointLayer>();
+		public LineStringLayer energyCableLayerGreen;
+		public LineStringLayer energyCableLayerGrey;
+		public List<AbstractLayer> energyLayers = new List<AbstractLayer>(); //Does not include sourcepolygonpoints
+		public Dictionary<int, int> sourceCountries = new Dictionary<int, int>();
+		public Dictionary<int, SubEntity> energySubEntities;
+
 		public override void Initialise(APolicyData a_settings)
-		{ }
+		{
+			m_instance = this;
+		}
+		public override void Destroy()
+		{
+			m_instance = null;
+		}
 
 		public override void HandlePlanUpdate(APolicyData a_planUpdateData, Plan a_plan, EPolicyUpdateStage a_stage)
 		{
@@ -62,6 +79,13 @@ namespace MSP2050.Scripts
 		{
 			//TODO
 			return null;
+		}
+
+		public override bool FormatGeneralData(out APolicyData a_data)
+		{
+			//TODO
+			a_data = null;
+			return false;
 		}
 
 		public override void UpdateAfterEditing(Plan a_plan)
@@ -294,6 +318,57 @@ namespace MSP2050.Scripts
 					return GetEnergyGridsBeforePlan(plans[i], color);
 
 			return GetEnergyGridsBeforePlan(plans[plans.Count - 1], color, true);
+		}
+
+		public void AddEnergyGrid(EnergyGrid energyGrid)
+		{
+			energyGrids[energyGrid.GetDatabaseID()] = energyGrid;
+		}
+
+		public EnergyGrid GetEnergyGrid(int ID)
+		{
+			if (!energyGrids.ContainsKey(ID))
+			{
+				Debug.LogError("Retrieving on non-existing key: " + ID);
+				Debug.LogError("Keys available: " + string.Join(", ", energyGrids.Keys));
+			}
+			return energyGrids[ID];
+		}
+
+		public List<EnergyLineStringSubEntity> ForceEnergyLayersActiveUpTo(Plan plan)
+		{
+			//Call setactiveupto on all energy layers not yet active and clear connections
+			foreach (AbstractLayer energyLayer in energyLayers)
+			{
+				if (!plan.IsLayerpartOfPlan(energyLayer))
+					energyLayer.SetEntitiesActiveUpTo(plan);
+				energyLayer.ResetEnergyConnections();
+			}
+
+			List<EnergyLineStringSubEntity> cablesToRemove = new List<EnergyLineStringSubEntity>();
+
+			//Have the cable layer activate all connections that are present in the current state
+			if (energyCableLayerGreen != null)
+			{
+				if (plan.GetPlanLayerForLayer(energyCableLayerGreen) != null) //Only remove invalid cables if the plan contains a cable layer
+				{
+					List<EnergyLineStringSubEntity> newCablesToRemove = energyCableLayerGreen.RemoveInvalidCables();
+					if (newCablesToRemove != null)
+						cablesToRemove = newCablesToRemove;
+				}
+				energyCableLayerGreen.ActivateCableLayerConnections();
+			}
+			if (energyCableLayerGrey != null)
+			{
+				if (plan.GetPlanLayerForLayer(energyCableLayerGrey) != null) //Only remove invalid cables if the plan contains a cable layer
+				{
+					List<EnergyLineStringSubEntity> newCablesToRemove = energyCableLayerGrey.RemoveInvalidCables();
+					if (newCablesToRemove != null && newCablesToRemove.Count > 0)
+						cablesToRemove.AddRange(newCablesToRemove);
+				}
+				energyCableLayerGrey.ActivateCableLayerConnections();
+			}
+			return cablesToRemove;
 		}
 	}
 }

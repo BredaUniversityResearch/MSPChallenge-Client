@@ -30,7 +30,7 @@ namespace MSP2050.Scripts
 				targetKPICollection.OnKPIValuesUpdated -= OnTargetCollectionValuesUpdated;
 			}
 
-			targetKPICollection = KPIManager.Instance.GetKPIValuesForCategory(EKPICategory.Energy, targetTeamId);
+			targetKPICollection = SimulationManager.Instance.GetKPIValuesForCategory(SimulationManager.CEL_SIM_NAME, targetTeamId);
 
 			if (targetKPICollection != null)
 			{

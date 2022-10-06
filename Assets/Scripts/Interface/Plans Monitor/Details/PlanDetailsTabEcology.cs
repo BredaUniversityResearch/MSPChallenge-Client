@@ -37,7 +37,7 @@ namespace MSP2050.Scripts
 				return;
 			if (planDetails.SelectedPlan.fishingDistributionDelta == null)
 				planDetails.SelectedPlan.fishingDistributionDelta = new FishingDistributionDelta();
-			ecologyDistribution.SetSliderValuesToFishingDistribution(PlanManager.Instance.GetFishingDistributionForPreviousPlan(planDetails.SelectedPlan), planDetails.SelectedPlan.fishingDistributionDelta);
+			ecologyDistribution.SetSliderValuesToFishingDistribution(SimulationLogicMEL.Instance.GetFishingDistributionForPreviousPlan(planDetails.SelectedPlan), planDetails.SelectedPlan.fishingDistributionDelta);
 			emptyContentOverlay.SetActive(ecologyDistribution.NumberGroups == 0);
 		}
 
@@ -56,7 +56,7 @@ namespace MSP2050.Scripts
 			{
 				lockedPlan.fishingDistributionDelta = new FishingDistributionDelta();
 			}
-			ecologyDistribution.SetSliderValuesToFishingDistribution(PlanManager.Instance.GetFishingDistributionForPreviousPlan(planDetails.SelectedPlan), planDetails.SelectedPlan.fishingDistributionDelta);
+			ecologyDistribution.SetSliderValuesToFishingDistribution(SimulationLogicMEL.Instance.GetFishingDistributionForPreviousPlan(planDetails.SelectedPlan), planDetails.SelectedPlan.fishingDistributionDelta);
 		}
 
 		protected override void StopEditing()

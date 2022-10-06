@@ -253,8 +253,12 @@ namespace MSP2050.Scripts
 		public string active;
 		public List<PlanLayerObject> layers;
 		public List<ApprovalObject> votes;
+
+		//Added
 		[JsonConverter(typeof(PolicyPlanUpdateJsonConverter))]
 		public APolicyData[] policies;
+
+		//Removed
 		//public string type; // energy,fishing,shipping : ex 1,0,1
 		//public bool alters_energy_distribution;
 		//public List<GridObject> grids;
@@ -293,22 +297,27 @@ namespace MSP2050.Scripts
 
 	public class UpdateObject
 	{
-		public List<PlanObject> plan;
+		//Changed
+		public List<PlanObject> plan; 
 		public List<PlanMessageObject> planmessages;
 		public List<RasterUpdateObject> raster;
-		//public KPIObject kpi;
-		//public EnergyObject energy;
-		//public WarningObject warning;
+
 		public List<ObjectiveObject> objectives;
 		public TimelineState tick;
 		public double prev_update_time;
 		public double update_time; //Timestamp received from the server at which this update was accurate.
 
+		//Added
 		public List<PlanIssueObject> plan_issues; //Moved from WarningObject
 		[JsonConverter(typeof(PolicyUpdateJsonConverter))]
 		public APolicyData[] policy_updates;
 		[JsonConverter(typeof(SimulationUpdateJsonConverter))]
 		public ASimulationData[] simulation_updates;
+
+		//Removed
+		//public KPIObject kpi;
+		//public EnergyObject energy;
+		//public WarningObject warning;
 	}
 
 	public class KPIObject

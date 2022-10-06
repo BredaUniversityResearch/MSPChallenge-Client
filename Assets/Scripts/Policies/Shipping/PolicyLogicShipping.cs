@@ -7,6 +7,8 @@ namespace MSP2050.Scripts
 {
 	public class PolicyLogicShipping : APolicyLogic
 	{
+		public const float shippingDisplayScale = 10000; // = 10km
+
 		public override void Initialise(APolicyData a_settings)
 		{ }
 
@@ -28,6 +30,13 @@ namespace MSP2050.Scripts
 		{
 			//TODO
 			return null;
+		}
+
+		public override bool FormatGeneralData(out APolicyData a_data)
+		{
+			//TODO
+			a_data = null;
+			return false;
 		}
 
 		public override void UpdateAfterEditing(Plan a_plan) 

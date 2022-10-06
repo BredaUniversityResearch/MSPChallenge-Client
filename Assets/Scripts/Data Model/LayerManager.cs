@@ -23,17 +23,10 @@ namespace MSP2050.Scripts
 		private List<AbstractLayer> layers = new List<AbstractLayer>();
 		private HashSet<AbstractLayer> loadedLayers = new HashSet<AbstractLayer>();
 		private HashSet<AbstractLayer> visibleLayers = new HashSet<AbstractLayer>();
-		private List<PointLayer> energyPointLayers = new List<PointLayer>();
 		private HashSet<AbstractLayer> nonReferenceLayers; //Layers that are drawn as normal during edit mode
 
-		public LineStringLayer energyCableLayerGreen;
-		public LineStringLayer energyCableLayerGrey;
 		public PolygonLayer EEZLayer;
-		public List<AbstractLayer> energyLayers = new List<AbstractLayer>(); //Does not include sourcepolygonpoints
 		public List<AbstractLayer> protectedAreaLayers = new List<AbstractLayer>();
-		public Dictionary<int, int> sourceCountries = new Dictionary<int, int>();
-
-		public Dictionary<int, SubEntity> energySubEntities;
 
 		private Dictionary<string, List<string>> categorySubcategories = new Dictionary<string, List<string>>();
 		private bool finishedImporting = false;
@@ -754,7 +747,7 @@ namespace MSP2050.Scripts
 		public void UpdateVisibleLayersFromPlan(Plan plan)
 		{
 			//Dont update layers while in edit mode, quickly causes errors
-			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
+			if (Main.InEditMode)
 				return;
 
 			//Only update if we are viewing the plan or one further in the future

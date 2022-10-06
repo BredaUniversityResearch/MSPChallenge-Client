@@ -23,7 +23,6 @@ namespace MSP2050.Scripts
 
 		private List<Plan> plans = new List<Plan>();
 		private Dictionary<int, PlanLayer> planLayers = new Dictionary<int, PlanLayer>();
-		private Dictionary<int, EnergyGrid> energyGrids = new Dictionary<int, EnergyGrid>();
 		private HashSet<Plan> unseenPlanChanges = new HashSet<Plan>();
 
 		public delegate void PlansEventDelegate(Plan plan);
@@ -31,13 +30,6 @@ namespace MSP2050.Scripts
 		public event PlansEventDelegate OnPlanVisibleInUIEvent;
 		public event PlansUpdateEventDelegate OnPlanUpdateInUIEvent;
 		public event PlansUpdateEventDelegate OnPlanHideInUIEvent;
-
-		//Fishing
-		[HideInInspector] public List<string> fishingFleets;
-		[HideInInspector] public float initialFishingMapping;
-		[HideInInspector] public float fishingDisplayScale;
-		[HideInInspector] public float shippingDisplayScale = 10000; // = 10km
-		[HideInInspector,CanBeNull] public FishingDistributionDelta initialFishingValues;
 
 		//Viewing & Viewstates
 		[HideInInspector] public PlanViewState planViewState = PlanViewState.All;
@@ -363,26 +355,6 @@ namespace MSP2050.Scripts
 			return planLayers.Remove(planLayer.ID);
 		}
 
-		public void AddEnergyGrid(EnergyGrid energyGrid)
-		{
-			energyGrids[energyGrid.GetDatabaseID()] = energyGrid;
-		}
-
-		public EnergyGrid GetEnergyGrid(int ID)
-		{
-			if (!energyGrids.ContainsKey(ID))
-			{
-				Debug.LogError("Retrieving on non-existing key: " + ID);
-				Debug.LogError("Keys available: " + string.Join(", ", energyGrids.Keys));
-			}
-			return energyGrids[ID];
-		}
-
-		public bool RemoveEnergyGridr(EnergyGrid energyGrid)
-		{
-			return energyGrids.Remove(energyGrid.GetDatabaseID());
-		}
-
 		/// <summary>
 		/// Called whenever a new month starts
 		/// </summary>
@@ -394,79 +366,6 @@ namespace MSP2050.Scripts
 				layer.AdvanceTimeTo(newMonth);
 		}
 
-		private void SetInitialFishingValuesFromPlans()
-		{
-			if (initialFishingValues != null)
-			{
-				return; // already set.
-			}
-			foreach (Plan plan in plans)
-			{
-				if (plan.fishingDistributionDelta == null)
-				{
-					continue;
-				}
-				foreach (KeyValuePair<string, Dictionary<int, float>> values in plan.fishingDistributionDelta.GetValuesByFleet())
-				{
-					var fleetName = values.Key;
-					if (initialFishingValues != null && initialFishingValues.HasFinishingValue(fleetName))
-					{
-						continue; // already there, skip it
-					}
-					// gonna set fishing values, make sure initialFishingValues is initialised. Assuming a fleet always has values
-					if (initialFishingValues == null)
-					{
-						initialFishingValues = new FishingDistributionDelta();
-					}
-					foreach (var item in values.Value)
-					{
-						initialFishingValues.SetFishingValue(fleetName, item.Key, item.Value); // add it the initial value
-					}
-				}
-			}
-		}
-
-		public FishingDistributionSet GetFishingDistributionForPreviousPlan(Plan referencePlan)
-		{
-			SetInitialFishingValuesFromPlans();
-			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
-			foreach(Plan plan in plans)
-			{
-				if (plan.ID == referencePlan.ID)
-				{
-					break;
-				}
-				else
-				{
-					if (plan.ecologyPlan && plan.fishingDistributionDelta != null)
-					{
-						result.ApplyValues(plan.fishingDistributionDelta);
-					}
-				}
-			}
-
-			return result;
-		}
-
-		public FishingDistributionSet GetFishingDistributionAtTime(int timeMonth)
-		{
-			SetInitialFishingValuesFromPlans();
-			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
-			foreach (Plan plan in plans)
-			{
-				if (plan.StartTime > timeMonth)
-				{
-					break;
-				}
-
-				if (plan.State == Plan.PlanState.IMPLEMENTED && plan.ecologyPlan && plan.fishingDistributionDelta != null)
-				{
-					result.ApplyValues(plan.fishingDistributionDelta);
-				}
-			}
-
-			return result;
-		}
 
 		/////////////////////////////////////////
 		// EVENT HANDLERS, MOSTLY FOR UI STUFF //
@@ -588,25 +487,6 @@ namespace MSP2050.Scripts
 			RemovePlanLayer(removedLayer);
 		}
 
-		public void LoadFishingFleets(JObject melConfig)
-		{
-			fishingFleets = new List<string>();
-			try
-			{
-				JEnumerable<JToken> results = melConfig["fishing"].Children();
-				foreach (JToken token in results)
-					fishingFleets.Add(token.ToObject<FishingFleet>().name);
-				initialFishingMapping = melConfig["initialFishingMapping"].ToObject<float>();
-				fishingDisplayScale = melConfig["fishingDisplayScale"].ToObject<float>();
-			}
-			catch
-			{
-				Debug.Log("Fishing fleets json does not match expected format.");
-			}
-
-			initialFishingValues = null;
-		}
-
 		public void ViewPlanWithIDWhenReceived(int targetPlanID)
 		{
 			bool found = false;
@@ -639,11 +519,5 @@ namespace MSP2050.Scripts
 				}
 			}
 		}
-	}
-
-	public class FishingFleet
-	{
-		public string name;
-		public float scalar;
 	}
 }

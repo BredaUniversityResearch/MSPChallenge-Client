@@ -26,7 +26,7 @@ namespace MSP2050.Scripts
 
 		public virtual void UpdateTabAvailability()
 		{
-			tabToggle.interactable = isActive || (!Main.Instance.EditingPlanDetailsContent && !Main.InEditMode && !Main.Instance.PreventPlanAndTabChange);
+			tabToggle.interactable = isActive || (!Main.InEditMode && !Main.Instance.PreventPlanAndTabChange);
 		}
 
 		public virtual void UpdateTabContent()
