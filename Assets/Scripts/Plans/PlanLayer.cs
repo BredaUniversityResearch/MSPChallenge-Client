@@ -230,7 +230,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < count; i++)
 			{
 				SubEntity sub = existingNewEntity.GetSubEntity(i);
-				LayerManager.Instance.RemoveEnergySubEntityReference(sub.GetDatabaseID());
+				PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(sub.GetDatabaseID());
 				sub.RemoveGameObject();
 			}
 		}

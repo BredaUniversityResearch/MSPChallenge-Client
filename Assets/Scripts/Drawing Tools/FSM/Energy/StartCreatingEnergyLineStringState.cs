@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			//All points are non-reference
-			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
 			{
 				if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy)
 				{
@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 		{
 			if (!cursorIsOverUI)
 			{
-				EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(currentPosition);
+				EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(currentPosition);
 				if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
 				{
 					fsm.SetCursor(FSM.CursorType.Invalid);
@@ -79,7 +79,7 @@ namespace MSP2050.Scripts
 
 		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
 		{        
-			EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(finalPosition);
+			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(finalPosition);
 			if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
 				return;
 

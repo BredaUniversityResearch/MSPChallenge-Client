@@ -49,7 +49,7 @@ namespace MSP2050.Scripts
 		{
 			base.BeginEditing(plan);
 
-			removedCables = LayerManager.Instance.ForceEnergyLayersActiveUpTo(plan);
+			removedCables = PolicyLogicEnergy.Instance.ForceEnergyLayersActiveUpTo(plan);
 			emptyContentOverlay.SetActive(false);
 
 			energyGridBackup = lockedPlan.energyGrids;
@@ -145,7 +145,7 @@ namespace MSP2050.Scripts
 
 			lockedPlan.energyGrids = energyGridBackup;
 			lockedPlan.removedGrids = energyGridRemovedBackup;
-			LayerManager.Instance.RestoreRemovedCables(removedCables);
+			PolicyLogicEnergy.Instance.RestoreRemovedCables(removedCables);
 
 			lockedPlan.AttemptUnlock();
 			StopEditing();

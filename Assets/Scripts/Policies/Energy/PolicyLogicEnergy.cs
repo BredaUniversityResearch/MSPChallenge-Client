@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Reactive.Joins;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace MSP2050.Scripts
 {
@@ -22,10 +23,28 @@ namespace MSP2050.Scripts
 		public override void Initialise(APolicyData a_settings)
 		{
 			m_instance = this;
+			LayerManager.Instance.OnLayerLoaded += OnLayerLoaded;
+			LayerManager.Instance.OnVisibleLayersUpdatedToBase += OnUpdateVisibleLayersToBase;
+			LayerManager.Instance.OnVisibleLayersUpdatedToPlan += OnUpdateVisibleLayersToPlan;
+			LayerManager.Instance.OnVisibleLayersUpdatedToTime += OnUpdateVisibleLayersToTime;
 		}
+
 		public override void Destroy()
 		{
 			m_instance = null;
+		}
+
+		void OnLayerLoaded(AbstractLayer a_layer)
+		{
+			if (a_layer.IsEnergyLineLayer())
+			{
+				if (a_layer.greenEnergy)
+					energyCableLayerGreen = a_layer as LineStringLayer;
+				else
+					energyCableLayerGrey = a_layer as LineStringLayer;
+			}
+			if (a_layer.editingType != AbstractLayer.EditingType.Normal && a_layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+				energyLayers.Add(a_layer);
 		}
 
 		public override void HandlePlanUpdate(APolicyData a_planUpdateData, Plan a_plan, EPolicyUpdateStage a_stage)
@@ -96,6 +115,65 @@ namespace MSP2050.Scripts
 			return ((PolicyPlanDataEnergy)a_data).energyError;
 		}
 
+		void OnUpdateVisibleLayersToPlan(Plan plan)
+		{
+			if (energyCableLayerGreen != null || energyCableLayerGrey != null)
+			{
+				foreach (AbstractLayer energyLayer in energyLayers)
+					energyLayer.ResetCurrentGrids();
+
+				List<EnergyGrid> grids = GetEnergyGridsAtTime(plan.StartTime, EnergyGrid.GridColor.Either);
+				if (energyCableLayerGreen != null)
+				{
+					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGreen.GetCableNetworkForPlan(plan);
+					foreach (EnergyGrid grid in grids)
+						if (grid.IsGreen)
+							grid.SetAsCurrentGridForContent(network);
+				}
+				if (energyCableLayerGrey != null)
+				{
+					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGrey.GetCableNetworkForPlan(plan);
+					foreach (EnergyGrid grid in grids)
+						if (!grid.IsGreen)
+							grid.SetAsCurrentGridForContent(network);
+				}
+			}
+		}
+
+		void OnUpdateVisibleLayersToBase()
+		{
+			if (energyCableLayerGreen != null || energyCableLayerGrey != null)
+			{
+				foreach (AbstractLayer energyLayer in energyLayers)
+					energyLayer.ResetCurrentGrids();
+			}
+		}
+
+		void OnUpdateVisibleLayersToTime(int month)
+		{
+			if (energyCableLayerGreen != null || energyCableLayerGrey != null)
+			{
+				foreach (AbstractLayer energyLayer in energyLayers)
+					energyLayer.ResetCurrentGrids();
+
+				List<EnergyGrid> grids = GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
+				if (energyCableLayerGreen != null)
+				{
+					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGreen.GetCableNetworkAtTime(month);
+					foreach (EnergyGrid grid in grids)
+						if (grid.IsGreen)
+							grid.SetAsCurrentGridForContent(network);
+				}
+				if (energyCableLayerGrey != null)
+				{
+					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGrey.GetCableNetworkAtTime(month);
+					foreach (EnergyGrid grid in grids)
+						if (!grid.IsGreen)
+							grid.SetAsCurrentGridForContent(network);
+				}
+			}
+		}
+
 		public void UpdateGrids(Plan a_plan, HashSet<int> a_deleted, List<GridObject> a_newGrids)
 		{
 			//Don't update grids if we have the plan locked. Prevents updates while editing.
@@ -110,7 +188,7 @@ namespace MSP2050.Scripts
 
 		private void UpdateOutput(EnergyOutputObject outputUpdate)
 		{
-			SubEntity tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(outputUpdate.id);
+			SubEntity tempSubEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(outputUpdate.id);
 			if (tempSubEnt == null) return;
 			IEnergyDataHolder energyObj = (IEnergyDataHolder)tempSubEnt;
 			energyObj.UsedCapacity = outputUpdate.capacity;
@@ -131,19 +209,19 @@ namespace MSP2050.Scripts
 
 			EnergyPointSubEntity point1;
 			EnergyPointSubEntity point2;
-			SubEntity tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(cableID);
+			SubEntity tempSubEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(cableID);
 			if (tempSubEnt == null) return;
 			EnergyLineStringSubEntity cable = tempSubEnt as EnergyLineStringSubEntity;
 
 			//Get the points, check if they reference to a polygon or point
-			tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(startID);
+			tempSubEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(startID);
 			if (tempSubEnt == null) return;
 			else if (tempSubEnt is EnergyPolygonSubEntity)
 				point1 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
 			else
 				point1 = tempSubEnt as EnergyPointSubEntity;
 
-			tempSubEnt = LayerManager.Instance.GetEnergySubEntityByID(endID);
+			tempSubEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(endID);
 			if (tempSubEnt == null) return;
 			else if (tempSubEnt is EnergyPolygonSubEntity)
 				point2 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
@@ -369,6 +447,68 @@ namespace MSP2050.Scripts
 				energyCableLayerGrey.ActivateCableLayerConnections();
 			}
 			return cablesToRemove;
+		}
+
+		public void RestoreRemovedCables(List<EnergyLineStringSubEntity> removedCables)
+		{
+			if (energyCableLayerGreen != null)
+			{
+				energyCableLayerGreen.RestoreInvalidCables(removedCables);
+			}
+			if (energyCableLayerGrey != null)
+			{
+				energyCableLayerGrey.RestoreInvalidCables(removedCables);
+			}
+		}
+
+		public void AddEnergyPointLayer(PointLayer layer)
+		{
+			energyPointLayers.Add(layer);
+		}
+
+		public List<PointLayer> GetCenterPointLayers()
+		{
+			List<PointLayer> result = new List<PointLayer>();
+			foreach (PointLayer layer in energyPointLayers)
+				if (layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+					result.Add(layer);
+			return result;
+		}
+
+		public EnergyPointSubEntity GetEnergyPointAtPosition(Vector3 pos)
+		{
+			foreach (PointLayer p in energyPointLayers)
+				if (LayerManager.Instance.LayerIsVisible(p) || (p.sourcePolyLayer != null && LayerManager.Instance.LayerIsVisible(p.sourcePolyLayer)))
+					foreach (SubEntity e in p.GetSubEntitiesAt(pos))
+						if (e is EnergyPointSubEntity)
+							return (e as EnergyPointSubEntity);
+			return null;
+		}
+
+		public void RemoveEnergySubEntityReference(int ID)
+		{
+			if (ID == -1)
+				return;
+			if (energySubEntities != null)
+				energySubEntities.Remove(ID);
+		}
+		public void AddEnergySubEntityReference(int ID, SubEntity subent)
+		{
+			if (ID == -1)
+				return;
+			if (energySubEntities == null)
+				energySubEntities = new Dictionary<int, SubEntity>();
+			if (!energySubEntities.ContainsKey(ID))
+				energySubEntities.Add(ID, subent);
+		}
+		public SubEntity GetEnergySubEntityByID(int ID, bool getSourcePointIfPoly = false)
+		{
+			SubEntity result = null;
+			if (energySubEntities != null)
+				energySubEntities.TryGetValue(ID, out result);
+			if (getSourcePointIfPoly && result is EnergyPolygonSubEntity)
+				result = ((EnergyPolygonSubEntity)result).sourcePoint;
+			return result;
 		}
 	}
 }

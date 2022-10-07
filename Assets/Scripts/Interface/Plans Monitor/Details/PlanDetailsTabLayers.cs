@@ -62,7 +62,7 @@ namespace MSP2050.Scripts
 
 			if (plan.energyPlan)
 			{
-				removedInvalidCables = LayerManager.Instance.ForceEnergyLayersActiveUpTo(plan);
+				removedInvalidCables = PolicyLogicEnergy.Instance.ForceEnergyLayersActiveUpTo(plan);
 				energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
 			}
 
@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 			}
 			if (removedInvalidCables != null)
 			{
-				LayerManager.Instance.RestoreRemovedCables(removedInvalidCables);
+				PolicyLogicEnergy.Instance.RestoreRemovedCables(removedInvalidCables);
 			}
 			lockedPlan.AttemptUnlock();
 			StopEditing();

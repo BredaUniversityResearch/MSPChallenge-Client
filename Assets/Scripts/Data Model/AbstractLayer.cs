@@ -135,15 +135,15 @@ namespace MSP2050.Scripts
 					break;
 				case "transformer":
 					editingType = EditingType.Transformer;
-					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
+					PolicyLogicEnergy.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "socket":
 					editingType = EditingType.Socket;
-					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
+					PolicyLogicEnergy.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "sourcepoint":
 					editingType = EditingType.SourcePoint;
-					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
+					PolicyLogicEnergy.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "sourcepolygon":
 					editingType = EditingType.SourcePolygon;

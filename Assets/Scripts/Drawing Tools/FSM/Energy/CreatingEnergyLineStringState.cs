@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 			if (cable.connections[0].point.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 			{
 				//All points except sourcepoints are non-reference
-				foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
 				{
 					if (layer.greenEnergy == cable.Entity.Layer.greenEnergy &&
 					    (layer.editingType == AbstractLayer.EditingType.Socket ||
@@ -26,7 +26,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				//All points are non-reference
-				foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
 				{
 					if (layer.greenEnergy == cable.Entity.Layer.greenEnergy)
 					{
@@ -52,7 +52,7 @@ namespace MSP2050.Scripts
 		protected override bool ClickingWouldFinishDrawing(Vector3 position, out Vector3 snappingPoint, out bool drawAsInvalid)
 		{
 			EnergyLineStringSubEntity cable = subEntity as EnergyLineStringSubEntity;
-			EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(position);
+			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(position);
 			if (point != null)
 			{
 				snappingPoint = point.GetPosition();
@@ -77,7 +77,7 @@ namespace MSP2050.Scripts
 			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
 			EnergyLineStringSubEntity cable = subEntity as EnergyLineStringSubEntity;
-			EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(finalPosition);
+			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(finalPosition);
 			if (point != null)
 			{
 				if (point.CanConnectToEnergySubEntity(cable.connections.First().point))

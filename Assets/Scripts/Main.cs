@@ -43,7 +43,6 @@ namespace MSP2050.Scripts
 		private ProjectionInfo mspCoordinateProjection;
 		private ProjectionInfo geoJSONCoordinateProjection;
 		[HideInInspector] public int currentExpertiseIndex;
-		//[HideInInspector] public SELGameClientConfig SelConfig{ get; set; }
 
 		[HideInInspector] public event Action OnFinishedLoadingLayers; //Called when we finished loading all layers and right before the first tick is requested.
 		[HideInInspector] public event Action OnPostFinishedLoadingLayers;

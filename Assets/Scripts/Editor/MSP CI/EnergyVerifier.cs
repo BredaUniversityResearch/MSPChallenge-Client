@@ -207,7 +207,7 @@ public class EnergyVerifierObj : MonoBehaviour
 			foreach (SubEntity sub in layer.GetActiveSubEntities())
 			{
 				int id = sub.GetDatabaseID();
-				if (LayerManager.Instance.GetEnergySubEntityByID(id) == null)
+				if (PolicyLogicEnergy.Instance.GetEnergySubEntityByID(id) == null)
 				{
 					Debug.LogError($"Energy subentity with id: {id} was not found in LayerManager's energy subentities.");
 					errors++;

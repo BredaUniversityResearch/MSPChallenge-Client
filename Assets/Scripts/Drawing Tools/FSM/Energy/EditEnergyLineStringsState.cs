@@ -111,7 +111,7 @@ namespace MSP2050.Scripts
 					Vector3 newPosition = selectionDragStart[kvp.Key][kvp.Value.First()] + offset;
 					EnergyLineStringSubEntity energySubEntity = kvp.Key as EnergyLineStringSubEntity;
 					bool first = kvp.Value.First() == 0;
-					EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(newPosition);
+					EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(newPosition);
 					if (point != null)
 					{
 						//Snap to point
@@ -152,7 +152,7 @@ namespace MSP2050.Scripts
 					{
 						EnergyLineStringSubEntity energySubEntity = kvp.Key as EnergyLineStringSubEntity;
 						bool first = kvp.Value.First() == 0;
-						EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(dragFinalPosition);
+						EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(dragFinalPosition);
 						if (point == null || !point.CanConnectToEnergySubEntity(energySubEntity.GetConnection(!first).point))
 						{
 							//Snap back to original position

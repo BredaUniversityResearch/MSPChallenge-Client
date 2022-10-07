@@ -10,6 +10,9 @@ namespace MSP2050.Scripts
 		public override void Initialise(APolicyData a_settings)
 		{ }
 
+		public override void Destroy()
+		{ }
+
 		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage)
 		{
 			if (a_stage == APolicyLogic.EPolicyUpdateStage.General)

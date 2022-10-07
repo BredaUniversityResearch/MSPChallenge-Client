@@ -22,17 +22,17 @@ namespace MSP2050.Scripts
 		public EnergyPointSubEntity(Entity entity, SubEntityObject geometry, int databaseID) : base(entity, geometry, databaseID)
 		{
 			if (Entity.Layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
+				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 			connections = new List<Connection>();
 		}
 
 		public override void SetDatabaseID(int databaseID)
 		{
 			if (Entity.Layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				LayerManager.Instance.RemoveEnergySubEntityReference(databaseID);
+				PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(databaseID);
 			this.databaseID = databaseID;
 			if (Entity.Layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
+				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 		}
 
 		/// <summary>
@@ -103,7 +103,7 @@ namespace MSP2050.Scripts
 		public override void RestoreDependencies()
 		{
 			if (Entity.Layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
+				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 		}
 
 		public override int GetDatabaseID()

@@ -26,13 +26,16 @@ namespace MSP2050.Scripts
 			Color greenColor = Util.HexToColor(config.green_centerpoint_color);
 			Color greyColor = Util.HexToColor(config.grey_centerpoint_color);
 
-			foreach (PointLayer layer in LayerManager.Instance.GetCenterPointLayers())
+			foreach (PointLayer layer in PolicyLogicEnergy.Instance.GetCenterPointLayers())
 			{
 				layer.EntityTypes[0].DrawSettings.PointColor = layer.greenEnergy ? greenColor : greyColor;
 				layer.EntityTypes[0].DrawSettings.PointSprite = layer.greenEnergy ? greenSprite : greySprite;
 				layer.EntityTypes[0].DrawSettings.PointSize = layer.greenEnergy ? config.green_centerpoint_size : config.grey_centerpoint_size;
 			}
 		}
+
+		public override void Destroy()
+		{ }
 
 		public void CreateEnergyKPIs()
 		{

@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 			//	altersEnergyDistribution = planObject.alters_energy_distribution;
 			//}
 			//energyError = planObject.energy_error == "1";
-			PolicyManager.Instance.RunPlanUpdate(planObject.policies, this);
+			PolicyManager.Instance.RunPlanUpdate(planObject.policies, this, APolicyLogic.EPolicyUpdateStage.General);
 		}
 
 		public bool IsRequestingLock()
@@ -388,63 +388,10 @@ namespace MSP2050.Scripts
 					if (planLayer.BaseLayer.AssemblyTime > maxConstructionTime)
 						maxConstructionTime = planLayer.BaseLayer.AssemblyTime;
 				ConstructionStartTime = StartTime - maxConstructionTime;
-				//}
 
-				////Do not update geometry or type if it is being edited. It is locked by this user anyway.
-				//if (Main.CurrentlyEditingPlan == null || Main.CurrentlyEditingPlan.ID != updatedData.id)
-				//{
-				//=================================== PLAN TYPE UPDATE =====================================
-
-				//bool newEnergyPlan = false;
-				//bool newEcologyPlan = false;
-				//bool newShippingPlan = false;
-				//if (updatedData.type != null)
-				//{
-				//	string[] types = updatedData.type.Split(',');
-				//	newEnergyPlan = types[0] == "1";
-				//	newEcologyPlan = types[1] == "1";
-				//	newShippingPlan = types[2] == "1";
-				//	typeChanged = true;
-				//}
-
-				//Update energy
-				//if (energyPlan && !newEnergyPlan)
-				//{
-				//	//If error changed, plandetails needs update
-				//	if (energyError)
-				//		stateChanged = true;
-
-				//	energyGrids = null;
-				//	energyError = false;
-				//	altersEnergyDistribution = false;
-				//	forceMonitorUpdate = true;
-				//}
-				//else if (newEnergyPlan)
-				//{
-				//	bool oldEnergyError = energyError;
-				//	energyError = updatedData.energy_error == "1";
-				//	altersEnergyDistribution = updatedData.alters_energy_distribution;
-				//	forceMonitorUpdate = true;
-
-				//	//If error changed, plandetails needs update
-				//	if (energyError != oldEnergyError)
-				//		stateChanged = true;
-				//}
-				//energyPlan = newEnergyPlan;
-
-				//Update fishing
-				//if (ecologyPlan && !newEcologyPlan)
-				//	fishingDistributionDelta = null;
-				//else if (newEcologyPlan)
-				//	fishingDistributionDelta = new FishingDistributionDelta(updatedData.fishing);
-				//ecologyPlan = newEcologyPlan;
-
-				//Update shipping
-				//shippingPlan = newShippingPlan;
-
-				PolicyManager.Instance.RunPlanUpdate(updatedData.policies, this);
+				//=================================== POLICY UPDATE =====================================
+				PolicyManager.Instance.RunPlanUpdate(updatedData.policies, this, APolicyLogic.EPolicyUpdateStage.General);
 			}
-			//ServerCommunication.Instance.WaitForCondition(planLayerUpdateTracker.CompletedPlanLayerUpdates, () => planUpdateTracker.CompletedUpdate());
 
 			LayerManager.Instance.UpdateVisibleLayersFromPlan(this);
 			PlanManager.Instance.UpdatePlanInUI(this, nameOrDescriptionChanged, timeChanged, stateChanged, layersChanged, typeChanged, forceMonitorUpdate, oldStartTime, oldState, inTimelineBefore);
@@ -853,7 +800,7 @@ namespace MSP2050.Scripts
 				{
 					//Create layer states for energy layers of a marching color, ignoring the cable layer
 					Dictionary<AbstractLayer, LayerState> energyLayerStates = new Dictionary<AbstractLayer, LayerState>();
-					foreach (AbstractLayer energyLayer in LayerManager.Instance.energyLayers)
+					foreach (AbstractLayer energyLayer in PolicyLogicEnergy.Instance.energyLayers)
 						if (energyLayer.greenEnergy == planLayer.BaseLayer.greenEnergy && energyLayer.ID != planLayer.BaseLayer.ID)
 							energyLayerStates.Add(energyLayer, energyLayer.GetLayerStateAtPlan(this));
 

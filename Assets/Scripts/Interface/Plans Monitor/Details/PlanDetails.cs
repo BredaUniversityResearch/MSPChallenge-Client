@@ -201,7 +201,7 @@ namespace MSP2050.Scripts
 		{
 			if (instance.selectedPlan != null)
 			{
-				instance.changeDetailsButton.interactable = (instance.isOwner || SessionManager.Instance.AreWeManager) && !instance.selectedPlan.InInfluencingState && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent;
+				instance.changeDetailsButton.interactable = (instance.isOwner || SessionManager.Instance.AreWeManager) && !instance.selectedPlan.InInfluencingState && !Main.InEditMode;
 				UpdateTabAvailability();
 			}
 		}
@@ -210,7 +210,7 @@ namespace MSP2050.Scripts
 		{
 			get
 			{
-				return (isOwner || SessionManager.Instance.AreWeManager) && selectedPlan.State == Plan.PlanState.DESIGN && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent;
+				return (isOwner || SessionManager.Instance.AreWeManager) && selectedPlan.State == Plan.PlanState.DESIGN && !Main.InEditMode;
 			}
 		}
 
@@ -231,7 +231,7 @@ namespace MSP2050.Scripts
 
 		void SetPlan(Plan plan)
 		{
-			if (Main.InEditMode && plan.ID != Main.CurrentlyEditingPlan.ID || plan == selectedPlan || Main.Instance.EditingPlanDetailsContent)
+			if (Main.InEditMode && plan.ID != Main.CurrentlyEditingPlan.ID || plan == selectedPlan)
 				return;
 
 			if (selectedPlan != null)
@@ -364,7 +364,7 @@ namespace MSP2050.Scripts
 				{
 					statusDropdown.interactable = true;
 					SetStatusDropdownOptions();
-					if (!Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
+					if (!Main.InEditMode)
 					{
 						changeDetailsButton.interactable = !selectedPlan.InInfluencingState;
 					}

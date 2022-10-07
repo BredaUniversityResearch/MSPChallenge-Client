@@ -33,6 +33,11 @@ namespace MSP2050.Scripts
 
 		public AbstractLayer highLightedLayer;
 
+		[HideInInspector] public event Action<AbstractLayer> OnLayerLoaded;
+		[HideInInspector] public event Action<Plan> OnVisibleLayersUpdatedToPlan;
+		[HideInInspector] public event Action OnVisibleLayersUpdatedToBase;
+		[HideInInspector] public event Action<int> OnVisibleLayersUpdatedToTime;
+
 		void Start()
 		{
 			if (singleton != null && singleton != this)
@@ -54,17 +59,12 @@ namespace MSP2050.Scripts
 				layers.Add(null);
 			}
 			layers[layer.ID] = layer;
-			if (layer.IsEnergyLineLayer())
-			{
-				if (layer.greenEnergy)
-					energyCableLayerGreen = layer as LineStringLayer;
-				else
-					energyCableLayerGrey = layer as LineStringLayer;
-			}
-			if (layer.editingType != AbstractLayer.EditingType.Normal && layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				energyLayers.Add(layer);
+			
 			if (layer.FileName == SessionManager.Instance.MspGlobalData.countries)
 				EEZLayer = layer as PolygonLayer;
+
+			if(OnLayerLoaded != null)
+				OnLayerLoaded(layer);
 		}
 
 		public void FinishedImportingLayers()
@@ -145,12 +145,6 @@ namespace MSP2050.Scripts
 					continue;
 				}
 			}
-		}
-
-		public bool AllLayersImported()
-		{
-			PopulateAllCountryIDs();
-			return finishedImporting;
 		}
 
 		public int GetLayerCount()
@@ -406,55 +400,7 @@ namespace MSP2050.Scripts
 				visibleLayerIndexByType[layer.GetType()] = layerIndex;
 			}
 		}
-
-		public List<EnergyLineStringSubEntity> ForceEnergyLayersActiveUpTo(Plan plan)
-		{
-			//Call setactiveupto on all energy layers not yet active and clear connections
-			foreach (AbstractLayer energyLayer in energyLayers)
-			{
-				if (!plan.IsLayerpartOfPlan(energyLayer))
-					energyLayer.SetEntitiesActiveUpTo(plan);
-				energyLayer.ResetEnergyConnections();
-			}
-
-			List<EnergyLineStringSubEntity> cablesToRemove = new List<EnergyLineStringSubEntity>();
-
-			//Have the cable layer activate all connections that are present in the current state
-			if (energyCableLayerGreen != null)
-			{
-				if (plan.GetPlanLayerForLayer(energyCableLayerGreen) != null) //Only remove invalid cables if the plan contains a cable layer
-				{
-					List<EnergyLineStringSubEntity> newCablesToRemove = energyCableLayerGreen.RemoveInvalidCables();
-					if (newCablesToRemove != null)
-						cablesToRemove = newCablesToRemove;
-				}
-				energyCableLayerGreen.ActivateCableLayerConnections();
-			}
-			if (energyCableLayerGrey != null)
-			{
-				if (plan.GetPlanLayerForLayer(energyCableLayerGrey) != null) //Only remove invalid cables if the plan contains a cable layer
-				{
-					List<EnergyLineStringSubEntity> newCablesToRemove = energyCableLayerGrey.RemoveInvalidCables();
-					if (newCablesToRemove != null && newCablesToRemove.Count > 0)
-						cablesToRemove.AddRange(newCablesToRemove);
-				}
-				energyCableLayerGrey.ActivateCableLayerConnections();
-			}
-			return cablesToRemove;
-		}
-
-		public void RestoreRemovedCables(List<EnergyLineStringSubEntity> removedCables)
-		{
-			if (energyCableLayerGreen != null)
-			{
-				energyCableLayerGreen.RestoreInvalidCables(removedCables);
-			}
-			if (energyCableLayerGrey != null)
-			{
-				energyCableLayerGrey.RestoreInvalidCables(removedCables);
-			}
-		}
-
+					
 		/// <summary>
 		/// Sets entities in visible layers active to plan and shows layers in the plan that were not visible.
 		/// </summary>
@@ -471,28 +417,8 @@ namespace MSP2050.Scripts
 				if (!visibleLayers.Contains(planLayer.BaseLayer))
 					ShowLayer(planLayer.BaseLayer);
 
-			if (energyCableLayerGreen != null || energyCableLayerGrey != null)
-			{
-				foreach (AbstractLayer energyLayer in energyLayers)
-					energyLayer.ResetCurrentGrids();
-
-				//TODO: move to policy logic
-				List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(plan.StartTime, EnergyGrid.GridColor.Either);
-				if (energyCableLayerGreen != null)
-				{
-					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGreen.GetCableNetworkForPlan(plan);
-					foreach (EnergyGrid grid in grids)
-						if (grid.IsGreen)
-							grid.SetAsCurrentGridForContent(network);
-				}
-				if (energyCableLayerGrey != null)
-				{
-					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGrey.GetCableNetworkForPlan(plan);
-					foreach (EnergyGrid grid in grids)
-						if (!grid.IsGreen)
-							grid.SetAsCurrentGridForContent(network);
-				}
-			}
+			if (OnVisibleLayersUpdatedToPlan != null)
+				OnVisibleLayersUpdatedToPlan(plan);
 		}
 
 		public void UpdateVisibleLayersToBase()
@@ -503,11 +429,8 @@ namespace MSP2050.Scripts
 				layer.SetEntitiesActiveUpTo(-1);
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
-			if (energyCableLayerGreen != null || energyCableLayerGrey != null)
-			{
-				foreach (AbstractLayer energyLayer in energyLayers)
-					energyLayer.ResetCurrentGrids();
-			}
+			if (OnVisibleLayersUpdatedToBase != null)
+				OnVisibleLayersUpdatedToBase();
 		}
 
 		public void UpdateVisibleLayersToTime(int month)
@@ -517,28 +440,8 @@ namespace MSP2050.Scripts
 				layer.SetEntitiesActiveUpToTime(month);
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
-		
-			if (energyCableLayerGreen != null || energyCableLayerGrey != null)
-			{
-				foreach (AbstractLayer energyLayer in energyLayers)
-					energyLayer.ResetCurrentGrids();
-
-				List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
-				if (energyCableLayerGreen != null)
-				{
-					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGreen.GetCableNetworkAtTime(month);
-					foreach (EnergyGrid grid in grids)
-						if (grid.IsGreen)
-							grid.SetAsCurrentGridForContent(network);
-				}
-				if (energyCableLayerGrey != null)
-				{
-					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGrey.GetCableNetworkAtTime(month);
-					foreach (EnergyGrid grid in grids)
-						if (!grid.IsGreen)
-							grid.SetAsCurrentGridForContent(network);
-				}
-			}
+			if (OnVisibleLayersUpdatedToTime != null)
+				OnVisibleLayersUpdatedToTime(month);
 		}
 
 		public void UpdateLayerToPlan(AbstractLayer baseLayer, Plan plan, bool showIfHidden)
@@ -629,27 +532,6 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void moveGeometry(AbstractLayer from, AbstractLayer to, int offset)
-		{
-			NetworkForm form = new NetworkForm();
-
-			form.AddField("old", from.ID);
-			form.AddField("new", to.ID);
-			form.AddField("offset", offset);
-
-			ServerCommunication.Instance.DoRequest(Server.MergeLayer(), form);
-		}
-
-		public delegate void AddNewLayerCallback(AbstractLayer layer);
-
-		public void ResetAll()
-		{
-			layers.Clear();
-			loadedLayers.Clear();
-			visibleLayers.Clear();
-			finishedImporting = false;
-		}
-
 		private void AddToCategories(string category, string subcategory)
 		{
 			if (!categorySubcategories.ContainsKey(category))
@@ -661,57 +543,6 @@ namespace MSP2050.Scripts
 			{
 				categorySubcategories[category].Add(subcategory);
 			}
-
-		}
-
-		public void AddEnergyPointLayer(PointLayer layer)
-		{
-			energyPointLayers.Add(layer);
-		}
-
-		public EnergyPointSubEntity GetEnergyPointAtPosition(Vector3 pos)
-		{
-			foreach (PointLayer p in energyPointLayers)
-				if (visibleLayers.Contains(p) || (p.sourcePolyLayer != null && visibleLayers.Contains(p.sourcePolyLayer)))
-					foreach (SubEntity e in p.GetSubEntitiesAt(pos))
-						if (e is EnergyPointSubEntity)
-							return (e as EnergyPointSubEntity);
-			return null;
-		}
-
-		public List<PointLayer> GetCenterPointLayers()
-		{
-			List<PointLayer> result = new List<PointLayer>();
-			foreach (PointLayer layer in energyPointLayers)
-				if (layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
-					result.Add(layer);
-			return result;
-		}
-
-		public void RemoveEnergySubEntityReference(int ID)
-		{
-			if (ID == -1)
-				return;
-			if (energySubEntities != null)
-				energySubEntities.Remove(ID);
-		}
-		public void AddEnergySubEntityReference(int ID, SubEntity subent)
-		{
-			if (ID == -1)
-				return;
-			if (energySubEntities == null)
-				energySubEntities = new Dictionary<int, SubEntity>();
-			if (!energySubEntities.ContainsKey(ID))
-				energySubEntities.Add(ID, subent);
-		}
-		public SubEntity GetEnergySubEntityByID(int ID, bool getSourcePointIfPoly = false)
-		{
-			SubEntity result = null;
-			if (energySubEntities != null)
-				energySubEntities.TryGetValue(ID, out result);
-			if (getSourcePointIfPoly && result is EnergyPolygonSubEntity)
-				result = ((EnergyPolygonSubEntity)result).sourcePoint;
-			return result;
 		}
 
 		/// <summary>

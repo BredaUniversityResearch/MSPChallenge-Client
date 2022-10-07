@@ -122,25 +122,24 @@ namespace MSP2050.Scripts
 			}
 			foreach (Plan plan in PlanManager.Instance.Plans)
 			{
-				if (plan.fishingDistributionDelta == null)
+				if (plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData) && fishingData.fishingDistributionDelta != null)
 				{
-					continue;
-				}
-				foreach (KeyValuePair<string, Dictionary<int, float>> values in plan.fishingDistributionDelta.GetValuesByFleet())
-				{
-					var fleetName = values.Key;
-					if (initialFishingValues != null && initialFishingValues.HasFinishingValue(fleetName))
+					foreach (KeyValuePair<string, Dictionary<int, float>> values in fishingData.fishingDistributionDelta.GetValuesByFleet())
 					{
-						continue; // already there, skip it
-					}
-					// gonna set fishing values, make sure initialFishingValues is initialised. Assuming a fleet always has values
-					if (initialFishingValues == null)
-					{
-						initialFishingValues = new FishingDistributionDelta();
-					}
-					foreach (var item in values.Value)
-					{
-						initialFishingValues.SetFishingValue(fleetName, item.Key, item.Value); // add it the initial value
+						var fleetName = values.Key;
+						if (initialFishingValues != null && initialFishingValues.HasFinishingValue(fleetName))
+						{
+							continue; // already there, skip it
+						}
+						// gonna set fishing values, make sure initialFishingValues is initialised. Assuming a fleet always has values
+						if (initialFishingValues == null)
+						{
+							initialFishingValues = new FishingDistributionDelta();
+						}
+						foreach (var item in values.Value)
+						{
+							initialFishingValues.SetFishingValue(fleetName, item.Key, item.Value); // add it the initial value
+						}
 					}
 				}
 			}
@@ -158,9 +157,9 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					if (plan.ecologyPlan && plan.fishingDistributionDelta != null)
+					if (plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData) && fishingData.fishingDistributionDelta != null)
 					{
-						result.ApplyValues(plan.fishingDistributionDelta);
+						result.ApplyValues(fishingData.fishingDistributionDelta);
 					}
 				}
 			}
@@ -179,9 +178,9 @@ namespace MSP2050.Scripts
 					break;
 				}
 
-				if (plan.State == Plan.PlanState.IMPLEMENTED && plan.ecologyPlan && plan.fishingDistributionDelta != null)
+				if (plan.State == Plan.PlanState.IMPLEMENTED && plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData) && fishingData.fishingDistributionDelta != null)
 				{
-					result.ApplyValues(plan.fishingDistributionDelta);
+					result.ApplyValues(fishingData.fishingDistributionDelta);
 				}
 			}
 

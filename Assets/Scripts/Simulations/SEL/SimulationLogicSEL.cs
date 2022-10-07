@@ -26,6 +26,9 @@ namespace MSP2050.Scripts
 			shippingKPI.SetupKPIValues(config.kpis, SessionManager.Instance.MspGlobalData.session_end_month);
 		}
 
+		public override void Destroy()
+		{ }
+
 		public override KPIValueCollection GetKPIValuesForCountry(int a_countryId = -1)
 		{
 			return shippingKPI.GetKPIForCountry(a_countryId);
