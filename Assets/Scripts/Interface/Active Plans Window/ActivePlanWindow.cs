@@ -230,7 +230,7 @@ namespace MSP2050.Scripts
 
 			//Ignore callback from Main.Instance.StartEditingLayer
 			m_ignoreLayerCallback = true;
-			PlanDetails.LayersTab.StartEditingLayer(planLayer);
+			PlanDetails.LayersTab.StartEditingLayer(m_selectedPlan.PlanLayers[a_layerIndex]);
 			m_ignoreLayerCallback = false;
 		}
 
