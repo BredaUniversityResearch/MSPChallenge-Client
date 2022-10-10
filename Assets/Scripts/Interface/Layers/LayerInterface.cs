@@ -51,6 +51,15 @@ namespace MSP2050.Scripts
 			instance = this;
 		}
 
+        public void DisableLayerSelect(bool b)
+        {
+            if (!b)
+            {
+                InterfaceCanvas.Instance.layerSelect.gameObject.SetActive(b);
+                NotifyLayerSelectClosing();
+            }
+        }
+
         private void OnDisable()
         {
             if (InterfaceCanvas.Instance.menuBarLayers.toggle.isOn)
@@ -99,7 +108,7 @@ namespace MSP2050.Scripts
 
 			if (subCategory == null)
 			{
-				subCategory = CreateSubCategory(categoryGroup, subcategoryID);
+				subCategory = CreateSubCategory(categoryGroup, subcategoryID, categoryGroup.ContentParent);
 			}
 
 			subCategory.CreateLayerToggle(layer, subcategoryID, this);
@@ -246,12 +255,12 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.activeLayers.SetLayerVisibilityLocked(layer, value);
 		}
 
-		public void RefreshActiveLayer(AbstractLayer layer)
+		/*public void RefreshActiveLayer(AbstractLayer layer)
 		{
 			InterfaceCanvas.Instance.activeLayers.RemoveLayer(layer);
 			InterfaceCanvas.Instance.activeLayers.AddLayer(layer);
 			//activeLayerTab.UpdateInterfaceVisibility(); // This is so that if one the layertab has been closed, itll open again so you can see changes
-		}
+		}*/
 
 		public static void SortLayerToggles()
 		{

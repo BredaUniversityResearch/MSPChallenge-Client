@@ -26,7 +26,7 @@ namespace MSP2050.Scripts
 		public TimeBar timeBar;
 		public MapScale mapScale;
 		public ToolBar toolBar;
-		public LayerPanel layerPanel;
+		public LayerInterface layerInterface;
 		public GenericWindow layerSelect;
 		public ActiveLayerWindow activeLayers;
 		public ActivePlanWindow activePlanWindow;
@@ -74,9 +74,6 @@ namespace MSP2050.Scripts
 		private List<Button> ToolbarButtons = new List<Button>();
 
 		[HideInInspector]
-		public LayerInterface layerInterface;
-
-		[HideInInspector]
 		public bool ignoreLayerToggleCallback;//If this is true the layer callback labda functions will return immediately
 
 		private Dictionary<string, Button> buttonUIReferences = new Dictionary<string, Button>();
@@ -88,7 +85,6 @@ namespace MSP2050.Scripts
 		private void Awake()
 		{
 			singleton = this;
-			layerInterface = layerPanel.GetComponent<LayerInterface>();
 		}
 
 		private void OnDestroy()
@@ -134,8 +130,6 @@ namespace MSP2050.Scripts
 		{
 			Instance.networkingBlocker.SetActive(false);
 		}
-		
-		//====================================== Below used to be InterfaceCanvas ===============================================
 
 		public void StartEditingLayer(AbstractLayer layer)
 		{

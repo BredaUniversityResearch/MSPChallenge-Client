@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using ColourPalette;
 
 //Class for holding all layer toggles shown in the layer selector UI for a specific layer subcategory. 
 namespace MSP2050.Scripts
@@ -12,10 +14,23 @@ namespace MSP2050.Scripts
 		[SerializeField, Tooltip("Container element that will house all the layer toggles.")]
 		private RectTransform layerToggleContainer = null;
 
-		private Dictionary<AbstractLayer, GenericLayer> layerToggles = new Dictionary<AbstractLayer, GenericLayer>(8);
-		public LayerSubCategory subcategoryButton;
+        //public LayerSubCategory subcategoryButton;
 
-		public string DisplayName
+        [SerializeField]
+        private DoubleClickButton button;
+
+        [SerializeField]
+        private CustomButtonColorSet outlineColourSet;
+
+        [SerializeField]
+        private ColourAsset accentColour;
+
+        [SerializeField]
+        private Image icon;
+
+        private Dictionary<AbstractLayer, GenericLayer> layerToggles = new Dictionary<AbstractLayer, GenericLayer>(8);
+
+        public string DisplayName
 		{
 			get;
 			set;
@@ -92,7 +107,7 @@ namespace MSP2050.Scripts
 		public void SetVisible(bool state)
 		{
 			gameObject.SetActive(state);
-			subcategoryButton.SetSelectedVisuals(state);
+			SetSelectedVisuals(state);
 		}
 
 		public void SortLayerToggles()
@@ -104,5 +119,21 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < toggles.Count; i++)
 				toggles[i].transform.SetSiblingIndex(i);
 		}
-	}
+
+        /// <summary>
+		/// Hide the button
+		/// </summary>
+		public void SetVisibility(bool toggle)
+        {
+            gameObject.SetActive(toggle);
+        }
+
+        public void SetSelectedVisuals(bool selected)
+        {
+            if (selected)
+                outlineColourSet.LockToColor(accentColour);
+            else
+                outlineColourSet.UnlockColor();
+        }
+    }
 }

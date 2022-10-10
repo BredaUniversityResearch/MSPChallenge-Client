@@ -20,9 +20,9 @@ namespace MSP2050.Scripts
 					SetRegionButtonCallback();                          
 					break;
 				case Selection.Layers:
-					toggle.isOn = InterfaceCanvas.Instance.layerPanel.gameObject.activeSelf; // Init
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerPanel.gameObject.SetActive(toggle.isOn));
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerPanel.DisableLayerSelect(toggle.isOn));
+					toggle.isOn = InterfaceCanvas.Instance.layerInterface.gameObject.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerInterface.gameObject.SetActive(toggle.isOn));
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerInterface.DisableLayerSelect(toggle.isOn));
 					break;
 				case Selection.PlanWizard:
 					toggle.isOn = InterfaceCanvas.Instance.planWizard.gameObject.activeSelf; // Init
