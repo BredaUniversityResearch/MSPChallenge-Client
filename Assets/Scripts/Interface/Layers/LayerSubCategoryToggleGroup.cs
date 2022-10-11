@@ -14,9 +14,9 @@ namespace MSP2050.Scripts
 		[SerializeField, Tooltip("Container element that will house all the layer toggles.")]
 		private RectTransform layerToggleContainer = null;
 
-        //public LayerSubCategory subcategoryButton;
+        public LayerSubCategory subcategoryButton;
 
-        [SerializeField]
+        /*[SerializeField]
         private DoubleClickButton button;
 
         [SerializeField]
@@ -26,7 +26,7 @@ namespace MSP2050.Scripts
         private ColourAsset accentColour;
 
         [SerializeField]
-        private Image icon;
+        private Image icon;*/
 
         private Dictionary<AbstractLayer, GenericLayer> layerToggles = new Dictionary<AbstractLayer, GenericLayer>(8);
 
@@ -107,7 +107,7 @@ namespace MSP2050.Scripts
 		public void SetVisible(bool state)
 		{
 			gameObject.SetActive(state);
-			SetSelectedVisuals(state);
+            subcategoryButton.SetSelectedVisuals(state);
 		}
 
 		public void SortLayerToggles()
@@ -120,7 +120,7 @@ namespace MSP2050.Scripts
 				toggles[i].transform.SetSiblingIndex(i);
 		}
 
-        /// <summary>
+        /*/// <summary>
 		/// Hide the button
 		/// </summary>
 		public void SetVisibility(bool toggle)
@@ -134,6 +134,6 @@ namespace MSP2050.Scripts
                 outlineColourSet.LockToColor(accentColour);
             else
                 outlineColourSet.UnlockColor();
-        }
+        }*/
     }
 }

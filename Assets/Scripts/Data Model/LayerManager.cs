@@ -301,7 +301,7 @@ namespace MSP2050.Scripts
 
 				AddToCategories(layer.Category, layer.SubCategory);
 
-				LayerInterface.AddLayerToInterface(layer);
+				LayerInterface.Instance.AddLayerToInterface(layer);
 
 				if (layer.ActiveOnStart)
 				{

@@ -19,8 +19,11 @@ namespace MSP2050.Scripts
 		[SerializeField]
 		private RectTransform layerSubcategoryToggleGroupContainer = null;
 
-        [SerializeField] Transform layerGroupLocation;
-        [SerializeField] GameObject layerGroupPrefab;
+        [SerializeField]
+        private Transform layerGroupLocation;
+
+        [SerializeField]
+        private GameObject layerGroupPrefab;
 
         // To get which layer corresponds to which genericLayer
         private Dictionary<string, LayerCategoryGroup> categories;
@@ -32,8 +35,19 @@ namespace MSP2050.Scripts
 		private MenuBarToggle menuLayerToggle;
 
 		private Dictionary<string, Sprite> categoryIcon;
-        
-		private static LayerInterface instance;
+
+        //private static LayerInterface instance;
+
+        private static LayerInterface singleton;
+        public static LayerInterface Instance
+        {
+            get
+            {
+                if (singleton == null)
+                    singleton = FindObjectOfType<LayerInterface>();
+                return singleton;
+            }
+        }
 
         protected void Start()
 		{
@@ -48,7 +62,7 @@ namespace MSP2050.Scripts
 		
 			SetIcons();
 
-			instance = this;
+			//Instance = this;
 		}
 
         public void DisableLayerSelect(bool b)
@@ -77,12 +91,12 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void AddLayerToInterface(AbstractLayer layer)
+		/*public static void AddLayerToInterface(AbstractLayer layer)
 		{
 			instance.addLayerToInterface(layer);
-		}
+		}*/
 
-		private void addLayerToInterface(AbstractLayer layer)
+		public void AddLayerToInterface(AbstractLayer layer)
 		{
 			if (layer.FileName.StartsWith("_PLAYAREA") || !layer.Toggleable)
 			{
@@ -131,7 +145,7 @@ namespace MSP2050.Scripts
 			tooltip.text = subCategoryName;
 
             LayerSubCategoryToggleGroup subCategory = Instantiate(layerSubcategoryToggleGroupPrefab, a_parent).GetComponent<LayerSubCategoryToggleGroup>();
-			subCategory.subcategoryButton = subcategoryToggleButton;
+			//subCategory.subcategoryButton = subcategoryToggleButton;
 			subCategory.SetVisible(false);
 			subCategory.DisplayName = subCategoryName;
 			subCategories.Add(a_subCategoryID, subCategory);
@@ -194,7 +208,7 @@ namespace MSP2050.Scripts
 
 		public static Sprite GetIconStatic(string category)
 		{
-			return instance.GetIcon(category);
+			return Instance.GetIcon(category);
 		}
 
 		public Sprite GetIcon(string category)
@@ -264,7 +278,7 @@ namespace MSP2050.Scripts
 
 		public static void SortLayerToggles()
 		{
-			foreach (var kvp in instance.subCategories)
+			foreach (var kvp in Instance.subCategories)
 				kvp.Value.SortLayerToggles();
 		}
 	}
