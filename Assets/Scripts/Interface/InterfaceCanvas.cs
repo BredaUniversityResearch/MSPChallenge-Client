@@ -27,7 +27,6 @@ namespace MSP2050.Scripts
 		public MapScale mapScale;
 		public ToolBar toolBar;
 		public LayerInterface layerInterface;
-		public GenericWindow layerSelect;
 		public ActiveLayerWindow activeLayers;
 		public ActivePlanWindow activePlanWindow;
 		public PlanWizard planWizard;
