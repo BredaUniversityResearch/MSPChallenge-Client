@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		{
 			//Set visuals
 			layerNameText.text = layer.BaseLayer.ShortName;
-			layerIcon.sprite = LayerInterface.GetIconStatic(layer.BaseLayer.SubCategory);
+			layerIcon.sprite = InterfaceCanvas.Instance.layerInterface.GetIcon(layer.BaseLayer.SubCategory);
 
 			//Button callback
 			toggle.onValueChanged.AddListener((value) =>

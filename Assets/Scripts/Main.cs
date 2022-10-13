@@ -168,7 +168,6 @@ namespace MSP2050.Scripts
 				OnPostFinishedLoadingLayers = null;
 			}
 
-			LayerInterface.SortLayerToggles();
 			InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("Existing plans");
 			StartCoroutine(UpdateManager.Instance.GetFirstUpdate());
 

@@ -32,6 +32,7 @@ namespace MSP2050.Scripts
 		public List<AbstractLayer> energyLayers = new List<AbstractLayer>(); //Does not include sourcepolygonpoints
 		public List<AbstractLayer> protectedAreaLayers = new List<AbstractLayer>();
 		public Dictionary<int, int> sourceCountries = new Dictionary<int, int>();
+		private Dictionary<string, List<AbstractLayer>> m_subcategoryToLayers = new Dictionary<string, List<AbstractLayer>>();
 
 		public Dictionary<int, SubEntity> energySubEntities;
 
@@ -39,6 +40,9 @@ namespace MSP2050.Scripts
 		private bool finishedImporting = false;
 
 		public AbstractLayer highLightedLayer;
+
+		public delegate void OnLayerVisibilityChanged(AbstractLayer a_layer, bool a_visible);
+		public event OnLayerVisibilityChanged m_onLayerVisibilityChanged;
 
 		void Start()
 		{
@@ -72,6 +76,14 @@ namespace MSP2050.Scripts
 				energyLayers.Add(layer);
 			if (layer.FileName == SessionManager.Instance.MspGlobalData.countries)
 				EEZLayer = layer as PolygonLayer;
+			if(m_subcategoryToLayers.TryGetValue(layer.SubCategory, out var entry))
+			{
+				entry.Add(layer);
+			}
+			else
+			{
+				m_subcategoryToLayers.Add(layer.SubCategory, new List<AbstractLayer>() { layer });
+			}
 		}
 
 		public void FinishedImportingLayers()
@@ -79,6 +91,11 @@ namespace MSP2050.Scripts
 			PopulateAllCountryIDs();
 			finishedImporting = true;
 			Debug.Log("All layers imported (" + GetValidLayerCount() + ")");
+
+			foreach(var kvp in m_subcategoryToLayers)
+			{
+				kvp.Value.Sort((x, y) => x.ShortName.CompareTo(y.ShortName));
+			}
 		}
 
 
@@ -301,7 +318,7 @@ namespace MSP2050.Scripts
 
 				AddToCategories(layer.Category, layer.SubCategory);
 
-				LayerInterface.Instance.AddLayerToInterface(layer);
+				InterfaceCanvas.Instance.layerInterface.AddLayerToInterface(layer);
 
 				if (layer.ActiveOnStart)
 				{
@@ -356,7 +373,9 @@ namespace MSP2050.Scripts
 				if (shownInUI && layer.Toggleable)
 				{
 					//Show in Layer Select and Active Layers
-					InterfaceCanvas.Instance.layerInterface.OnShowLayer(layer);
+					//InterfaceCanvas.Instance.layerInterface.OnShowLayer(layer);
+					if (m_onLayerVisibilityChanged != null)
+						m_onLayerVisibilityChanged.Invoke(layer, true);
 				}
 			}
 
@@ -393,7 +412,9 @@ namespace MSP2050.Scripts
 				layer.LayerHidden();
 
 				//hide in Layer Select and Active Layers
-				InterfaceCanvas.Instance.layerInterface.OnHideLayer(layer);
+				if (m_onLayerVisibilityChanged != null)
+					m_onLayerVisibilityChanged.Invoke(layer, false);
+				//InterfaceCanvas.Instance.layerInterface.OnHideLayer(layer);
 			}
 
 			UpdateVisibleLayerIndexForAllTypes();
@@ -828,6 +849,15 @@ namespace MSP2050.Scripts
 			}
 
 			return result.ToString();
+		}
+
+		public List<AbstractLayer> GetLayersInSubcategory(string a_subcategory)
+		{
+			if(m_subcategoryToLayers.TryGetValue(a_subcategory, out List<AbstractLayer> layers))
+			{
+				return layers;
+			}
+			return null;
 		}
 	}
 }
