@@ -3,10 +3,92 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
 	public class AP_Communication : MonoBehaviour
 	{
+		[SerializeField] Transform m_messageParent;
+		[SerializeField] GameObject m_messagePrefab;
+		[SerializeField] TMP_InputField m_chatInputField;
+		[SerializeField] Button m_sendButton;
+
+		Plan m_currentPlan;
+		List<AP_CommunicationMessage> m_messageObjects = new List<AP_CommunicationMessage>();
+		int m_nextMessageIndex;
+
+		private void Start()
+		{
+			m_sendButton.onClick.AddListener(SendMessage);
+		}
+
+		protected void Update()
+		{
+			if (gameObject.activeInHierarchy && Input.GetKeyDown(KeyCode.Return))
+			{
+				SendMessage();
+			}
+		}
+		private void OnDisable()
+		{
+			if (m_currentPlan != null)
+			{
+				m_currentPlan.OnMessageReceivedCallback -= OnMessageReceived;
+				m_currentPlan = null;
+			}
+		}
+
+		public void SetToPlan(Plan a_plan)
+		{
+			if (m_currentPlan != null)
+			{
+				m_currentPlan.OnMessageReceivedCallback -= OnMessageReceived;
+				m_currentPlan = null;
+			}
+			m_currentPlan = a_plan;
+			m_currentPlan.OnMessageReceivedCallback += OnMessageReceived;
+
+			m_nextMessageIndex = 0;
+			for(; m_nextMessageIndex < a_plan.PlanMessages.Count; m_nextMessageIndex++)
+			{
+				SetMessageEntry(a_plan.PlanMessages[m_nextMessageIndex]);
+			}
+			for(int i = m_nextMessageIndex; i < m_messageObjects.Count; i++)
+			{
+				m_messageObjects[i].gameObject.SetActive(false);
+			}
+		}
+
+		void SetMessageEntry(PlanMessage a_message)
+		{
+			if (m_nextMessageIndex < m_messageObjects.Count)
+			{
+				m_messageObjects[m_nextMessageIndex].SetToContent(a_message);
+			}
+			else
+			{
+				AP_CommunicationMessage newMessage = Instantiate(m_messagePrefab, m_messageParent).GetComponent<AP_CommunicationMessage>();
+				newMessage.SetToContent(a_message);
+				m_messageObjects.Add(newMessage);
+			}
+		}
+
+		void OnMessageReceived(PlanMessage a_message)
+		{
+			SetMessageEntry(a_message);
+			m_nextMessageIndex++;
+		}
+
+		void SendMessage()
+		{
+			if (!string.IsNullOrEmpty(m_chatInputField.text))
+			{
+				m_currentPlan.SendMessage(m_chatInputField.text);
+				m_chatInputField.text = "";
+				m_chatInputField.ActivateInputField();
+				m_chatInputField.Select();
+			}
+		}
 	}
 }

@@ -22,6 +22,7 @@ namespace MSP2050.Scripts
 		public int LockedBy;
 
 		public List<PlanLayer> PlanLayers { get; private set; }
+		public List<PlanMessage> PlanMessages { get; private set; }
 
 		public Dictionary<int, EPlanApprovalState> countryApproval;
 		//public List<EnergyGrid> energyGrids;
@@ -35,7 +36,11 @@ namespace MSP2050.Scripts
 
 		public Dictionary<string, APolicyData> m_policies { get; private set; } //These are PolicyPlanData
 
+		public delegate void OnMessageReceived(PlanMessage a_message);
+		public event OnMessageReceived OnMessageReceivedCallback;
+
 		private bool requestingLock;
+		private static HashSet<int> m_receivedPlanMessages = new HashSet<int>();
 
 		public Plan(PlanObject planObject, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
@@ -61,7 +66,7 @@ namespace MSP2050.Scripts
 				foreach (ApprovalObject obj in planObject.votes)
 					countryApproval.Add(obj.country, obj.vote);
 			}
-
+			PlanMessages = new List<PlanMessage>();
 
 			//=================================== PLANLAYERS =====================================
 
@@ -203,16 +208,23 @@ namespace MSP2050.Scripts
 			batch.AddRequest(Server.UnlockPlan(), dataObject, BatchRequest.BATCH_GROUP_UNLOCK);
 		}
 
-		public bool HasErrors()
+		public bool HasPolicyErrors()
 		{
 			foreach (var kvp in m_policies)
-			{ 
-				if(PolicyManager.Instance.TryGetLogic( kvp.Value.policy_type, out var logic))
+			{
+				if (PolicyManager.Instance.TryGetLogic(kvp.Value.policy_type, out var logic))
 				{
 					if (logic.HasError(kvp.Value))
 						return true;
 				}
 			}
+			return false;
+		}
+
+		public bool HasErrors()
+		{
+			if (HasPolicyErrors())
+				return true;
 			return IssueManager.Instance.HasError(this);
 		}
 
@@ -397,7 +409,19 @@ namespace MSP2050.Scripts
 			PlanManager.Instance.UpdatePlanInUI(this, nameOrDescriptionChanged, timeChanged, stateChanged, layersChanged, typeChanged, forceMonitorUpdate, oldStartTime, oldState, inTimelineBefore);
 		}
 
-		
+		public void ReceiveMessage(PlanMessageObject a_message)
+		{
+			if (m_receivedPlanMessages.Contains(a_message.message_id))
+				return;
+			m_receivedPlanMessages.Add(a_message.message_id);
+
+			PlanMessage newMessage = new PlanMessage() { message = a_message.message, team = SessionManager.Instance.GetTeamByTeamID(a_message.team_id), time = a_message.time, user_name = a_message.user_name };
+			PlanMessages.Add(newMessage);
+			if(OnMessageReceivedCallback != null)
+			{
+				OnMessageReceivedCallback.Invoke(newMessage);
+			}
+		}
 
 		public PlanLayer GetPlanLayerForLayer(AbstractLayer baseLayer)
 		{
@@ -896,6 +920,26 @@ namespace MSP2050.Scripts
 		public void AddPolicyData(APolicyData a_data)
 		{
 			m_policies.Add(a_data.policy_type, a_data);
+		}
+
+		public void SendMessage(string text)
+		{
+			NetworkForm form = new NetworkForm();
+			form.AddField("plan", ID);
+			form.AddField("team_id", SessionManager.Instance.CurrentUserTeamID);
+			form.AddField("user_name", SessionManager.Instance.CurrentUserName);
+			form.AddField("text", text);
+			ServerCommunication.Instance.DoRequest(Server.PostPlanFeedback(), form);
+		}
+
+		public void SendMessage(string text, BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("plan", ID);
+			dataObject.Add("team_id", SessionManager.Instance.CurrentUserTeamID);
+			dataObject.Add("user_name", SessionManager.Instance.CurrentUserName);
+			dataObject.Add("text", text);
+			batch.AddRequest(Server.PostPlanFeedback(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 	}
 

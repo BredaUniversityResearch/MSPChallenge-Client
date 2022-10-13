@@ -25,11 +25,14 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_zoomToPlanButton;
 
 		[Header("Plan info")]
-		[SerializeField] Image countryBall;
+		[SerializeField] Image m_countryIndicator;
 		[SerializeField] CustomInputField m_planName;
 		[SerializeField] CustomInputField m_planDescription;
 		[SerializeField] AP_ContentToggle m_planDate;
 		[SerializeField] AP_ContentToggle m_planState;
+
+		[Header("Communication")]
+		[SerializeField] GameObject m_communicationSection;
 
 		[Header("View mode")]
 		[SerializeField] GameObject m_viewModeSection;
@@ -132,7 +135,7 @@ namespace MSP2050.Scripts
 		{
 			gameObject.SetActive(true);
 			m_selectedPlan = plan;
-			countryBall.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
+			m_countryIndicator.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
 			UpdateNameAndDate();
 			UpdateEditButtonActivity();
 		}
@@ -262,6 +265,11 @@ namespace MSP2050.Scripts
 			{
 				m_viewBaseToggle.isOn = true;
 			}
+		}
+
+		public void DeactivateCurrentContentToggle()
+		{
+			//TODO: should be called by all popup window x buttons
 		}
 	}
 }

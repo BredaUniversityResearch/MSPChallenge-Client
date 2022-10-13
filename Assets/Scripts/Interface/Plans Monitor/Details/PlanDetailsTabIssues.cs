@@ -126,7 +126,7 @@ namespace MSP2050.Scripts
 
 		public void UpdateIssueStatus()
 		{
-			ERestrictionIssueType severity = planDetails.SelectedPlan.energyError ? ERestrictionIssueType.Error : IssueManager.Instance.GetMaximumSeverity(planDetails.SelectedPlan);
+			ERestrictionIssueType severity = planDetails.SelectedPlan.HasPolicyErrors() ? ERestrictionIssueType.Error : IssueManager.Instance.GetMaximumSeverity(planDetails.SelectedPlan);
 			switch (severity)
 			{
 				case ERestrictionIssueType.None:

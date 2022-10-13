@@ -117,35 +117,35 @@ namespace MSP2050.Scripts
 			ProcessUpdates(a_Updates.Dequeue());
 		}
 
-		private void ProcessUpdates(UpdateObject a_Update)
+		private void ProcessUpdates(UpdateObject a_update)
 		{
 			HandleWsServerConnectionChanges();
-			if (StopProcessingUpdates || a_Update.update_time <= m_LastUpdateTimestamp)
+			if (StopProcessingUpdates || a_update.update_time <= m_LastUpdateTimestamp)
 			{
-				Debug.Log("stopProcessingUpdates: " + StopProcessingUpdates + ", update.update_time <= lastUpdateTimestamp: " + (a_Update.update_time <= m_LastUpdateTimestamp));
+				Debug.Log("stopProcessingUpdates: " + StopProcessingUpdates + ", update.update_time <= lastUpdateTimestamp: " + (a_update.update_time <= m_LastUpdateTimestamp));
 				return;
 			}
 
-			m_LastUpdateTimestamp = a_Update.update_time;
-			LastUpdate = a_Update;
+			m_LastUpdateTimestamp = a_update.update_time;
+			LastUpdate = a_update;
 
 			Dictionary<AbstractLayer, int> layerUpdateTimes = new Dictionary<AbstractLayer, int>();
 			List<Plan> plans = null;
 
 			//General update
-			PolicyManager.Instance.RunGeneralUpdate(a_Update.policy_updates, APolicyLogic.EPolicyUpdateStage.PreKPI);
-			if (a_Update.plan != null)
+			PolicyManager.Instance.RunGeneralUpdate(a_update.policy_updates, APolicyLogic.EPolicyUpdateStage.PreKPI);
+			if (a_update.plan != null)
 			{
 				//Sort plans by time and ID so there are no issues with dependencies when loading them in
-				a_Update.plan.Sort();
-				plans = new List<Plan>(a_Update.plan.Count);
-				foreach (PlanObject plan in a_Update.plan)
+				a_update.plan.Sort();
+				plans = new List<Plan>(a_update.plan.Count);
+				foreach (PlanObject plan in a_update.plan)
 				{
 					plans.Add(PlanManager.Instance.ProcessReceivedPlan(plan, layerUpdateTimes));
 				}
 			}
 
-			foreach (RasterUpdateObject raster in a_Update.raster)
+			foreach (RasterUpdateObject raster in a_update.raster)
 			{
 				AbstractLayer layer = LayerManager.Instance.GetLayerByID(raster.id);
 
@@ -157,35 +157,39 @@ namespace MSP2050.Scripts
 			}
 
 			//Pre sim update
-			PolicyManager.Instance.RunGeneralUpdate(a_Update.policy_updates, APolicyLogic.EPolicyUpdateStage.PreKPI);
+			PolicyManager.Instance.RunGeneralUpdate(a_update.policy_updates, APolicyLogic.EPolicyUpdateStage.PreKPI);
 			if (plans != null)
 			{
 				for (int i = 0; i < plans.Count; i++)
 				{
-					PolicyManager.Instance.RunPlanUpdate(a_Update.plan[i].policies, plans[i], APolicyLogic.EPolicyUpdateStage.PreKPI);
+					PolicyManager.Instance.RunPlanUpdate(a_update.plan[i].policies, plans[i], APolicyLogic.EPolicyUpdateStage.PreKPI);
 				}
 			}
 
 			//Sim update
-			TimeManager.Instance.UpdateTime(a_Update.tick);
-			SimulationManager.Instance.RunGeneralUpdate(a_Update.simulation_updates);
+			TimeManager.Instance.UpdateTime(a_update.tick);
+			SimulationManager.Instance.RunGeneralUpdate(a_update.simulation_updates);
 
 			//Post sim update
-			PolicyManager.Instance.RunGeneralUpdate(a_Update.policy_updates, APolicyLogic.EPolicyUpdateStage.PostKPI);
+			PolicyManager.Instance.RunGeneralUpdate(a_update.policy_updates, APolicyLogic.EPolicyUpdateStage.PostKPI);
 			if (plans != null)
 			{
 				for (int i = 0; i < plans.Count; i++)
 				{
-					PolicyManager.Instance.RunPlanUpdate(a_Update.plan[i].policies, plans[i], APolicyLogic.EPolicyUpdateStage.PostKPI);
+					PolicyManager.Instance.RunPlanUpdate(a_update.plan[i].policies, plans[i], APolicyLogic.EPolicyUpdateStage.PostKPI);
 				}
 			}
 
-			if (a_Update.objectives.Count > 0)
+			if (a_update.objectives.Count > 0)
 			{
-				InterfaceCanvas.Instance.objectivesMonitor.UpdateObjectivesFromServer(a_Update.objectives);
+				InterfaceCanvas.Instance.objectivesMonitor.UpdateObjectivesFromServer(a_update.objectives);
 			}
 
-			PlanDetails.AddFeedbackFromServer(a_Update.planmessages);
+			//PlanDetails.AddFeedbackFromServer(a_update.planmessages);
+			foreach(PlanMessageObject messageObj in a_update.planmessages)
+			{
+				PlanManager.Instance.GetPlanWithID(messageObj.plan_id).ReceiveMessage(messageObj);
+			}
 
 			if (PlanManager.Instance.planViewing != null && !Main.InEditMode)
 			{
@@ -200,9 +204,9 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			if (a_Update.plan_issues != null)
+			if (a_update.plan_issues != null)
 			{
-				IssueManager.Instance.OnIssuesReceived(a_Update.plan_issues);
+				IssueManager.Instance.OnIssuesReceived(a_update.plan_issues);
 			}
 
 			PlanManager.Instance.CheckIfExpectedPlanReceived();

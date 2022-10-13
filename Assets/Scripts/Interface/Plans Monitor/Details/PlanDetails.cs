@@ -219,15 +219,15 @@ namespace MSP2050.Scripts
 			((LockablePlanDetailsTab)currentTab).CancelChangesAndUnlock();
 		}
 
-		public static void AddFeedbackFromServer(List<PlanMessageObject> planMessages)
-		{
-			PlanDetailsTabFeedback feedbacktab = ((PlanDetailsTabFeedback)instance.tabs[EPlanDetailsTab.Feedback]);
-			foreach (PlanMessageObject message in planMessages)
-			{
-				feedbacktab.AddFeedback(message);
-			}
-			feedbacktab.UpdateTabContent();
-		}
+		//public static void AddFeedbackFromServer(List<PlanMessageObject> planMessages)
+		//{
+		//	PlanDetailsTabFeedback feedbacktab = ((PlanDetailsTabFeedback)instance.tabs[EPlanDetailsTab.Feedback]);
+		//	foreach (PlanMessageObject message in planMessages)
+		//	{
+		//		feedbacktab.AddFeedback(message);
+		//	}
+		//	feedbacktab.UpdateTabContent();
+		//}
 
 		void SetPlan(Plan plan)
 		{
@@ -483,7 +483,7 @@ namespace MSP2050.Scripts
 
 				if (!submitDelayed)
 				{
-					SendMessage(changedPlan.ID, "Changed the plans status to: " + newState.GetDisplayName(), batch);
+					changedPlan.SendMessage("Changed the plans status to: " + newState.GetDisplayName(), batch);
 					plan.SetState(newState, batch);
 					batch.ExecuteBatch(null, null);
 				}
@@ -495,7 +495,7 @@ namespace MSP2050.Scripts
 			if (planErrorsIDs == null || planErrorsIDs.Length == 0)
 			{
 				//No plans with errors, set new state
-				SendMessage(plan.ID, "Changed the plans status to: " + targetState.GetDisplayName(), batch);
+				plan.SendMessage("Changed the plans status to: " + targetState.GetDisplayName(), batch);
 				plan.SetState(targetState, batch);
 				batch.ExecuteBatch(null, null);
 			}
@@ -526,32 +526,12 @@ namespace MSP2050.Scripts
 				});
 				UnityEngine.Events.UnityAction rb = new UnityEngine.Events.UnityAction(() =>
 				{
-					SendMessage(plan.ID, "Changed the plans status to: " + targetState.GetDisplayName(), batch);
+					plan.SendMessage("Changed the plans status to: " + targetState.GetDisplayName(), batch);
 					plan.SetState(targetState, batchRequest);
 					batchRequest.ExecuteBatch(null, null);
 				});
 				DialogBoxManager.instance.ConfirmationWindow("Energy error warning", description, lb, rb);
 			}
-		}
-
-		public void SendMessage(int planID, string text)
-		{
-			NetworkForm form = new NetworkForm();
-			form.AddField("plan", planID);
-			form.AddField("team_id", SessionManager.Instance.CurrentUserTeamID);
-			form.AddField("user_name", SessionManager.Instance.CurrentUserName);
-			form.AddField("text", text);
-			ServerCommunication.Instance.DoRequest(Server.PostPlanFeedback(), form);
-		}
-
-		public void SendMessage(int planID, string text, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("plan", planID);
-			dataObject.Add("team_id", SessionManager.Instance.CurrentUserTeamID);
-			dataObject.Add("user_name", SessionManager.Instance.CurrentUserName);
-			dataObject.Add("text", text);
-			batch.AddRequest(Server.PostPlanFeedback(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public void TabSelect(EPlanDetailsTab tab)
