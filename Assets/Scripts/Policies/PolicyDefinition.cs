@@ -12,6 +12,6 @@ namespace MSP2050.Scripts
 		public Type m_updateType;
 		public Type m_planUpdateType;
 		public Type m_logicType;
-		public GameObject m_editingPrefab;
+		public GameObject m_activePlanPrefab;
 	}
 }

@@ -96,7 +96,7 @@ namespace MSP2050.Scripts
 
 		public void ImportAllLayers()
 		{
-			List<AbstractLayer> layerList = LayerManager.Instance.GetAllValidLayers();
+			List<AbstractLayer> layerList = LayerManager.Instance.GetAllLayers();
 			List<int> layersToLoad = new List<int>(layerList.Count);
 			foreach (AbstractLayer layerToLoad in layerList)
 			{

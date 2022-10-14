@@ -8,7 +8,7 @@ using UnityEditor.Experimental.GraphView;
 
 namespace MSP2050.Scripts
 {
-	public class AP_GeometryTool : MonoBehaviour
+	public class AP_GeometryTool : AP_PopoutWindow
 	{
 		[Header("Layer types")]
 		[SerializeField] GameObject layerTypeSection;
@@ -425,7 +425,7 @@ namespace MSP2050.Scripts
 		{
 			ActivePlanLayerType obj = ((GameObject)GameObject.Instantiate(multiType ? layerTypePrefabMulti : layerTypePrefabSingle)).GetComponent<ActivePlanLayerType>();
 			obj.transform.SetParent(layerTypeParent, false);
-			obj.SetToType(type, m_window, !interactable);
+			obj.SetToType(type, !interactable);
 			if (!multiType)
 				obj.toggle.group = layerTypeToggleGroup;
 			obj.toggle.onValueChanged.AddListener((value) => LayerTypeToggleClicked(value));

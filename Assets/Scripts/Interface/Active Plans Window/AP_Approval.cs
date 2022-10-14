@@ -6,7 +6,7 @@ using TMPro;
 
 namespace MSP2050.Scripts
 {
-	public class AP_StateSelect : AP_PopoutWindow
+	public class AP_Approval : AP_PopoutWindow
 	{
 	}
 }

@@ -6,7 +6,7 @@ using TMPro;
 
 namespace MSP2050.Scripts
 {
-	public class AP_PolicyContent : MonoBehaviour
+	public class AP_Energy : AP_PopoutWindow
 	{
 	}
 }

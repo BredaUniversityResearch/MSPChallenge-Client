@@ -148,7 +148,7 @@ namespace MSP2050.Scripts
                             if (!isSubCategoryCreated)
                             {
                                 isSubCategoryCreated = true;
-                                CreateSubCategoryPlan(LayerManager.Instance.MakeCategoryDisplayString(subcategory), LayerInterface.GetIconStatic(subcategory));
+                                CreateSubCategoryPlan(LayerManager.Instance.MakeCategoryDisplayString(subcategory), LayerManager.Instance.GetSubcategoryIcon(subcategory));
                             }
 
                             CreateLayerPlan(layer);

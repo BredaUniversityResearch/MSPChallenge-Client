@@ -6,7 +6,7 @@ using TMPro;
 
 namespace MSP2050.Scripts
 {
-	public class AP_IssueList : MonoBehaviour
+	public class AP_IssueList : AP_PopoutWindow
 	{
 	}
 }

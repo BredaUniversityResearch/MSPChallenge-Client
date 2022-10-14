@@ -362,7 +362,7 @@ namespace MSP2050.Scripts
 		public void MonthTick(int newMonth)
 		{
 			//Advance time on layers (merging approved ones) 
-			foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
+			foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
 				layer.AdvanceTimeTo(newMonth);
 		}
 
@@ -395,9 +395,7 @@ namespace MSP2050.Scripts
 
 			if (nameOrDescriptionChanged)
 			{
-				PlanDetails.UpdateNameAndDescription(plan);
-				if (planViewing == plan && !Main.InEditMode)
-					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();			
+				PlanDetails.UpdateNameAndDescription(plan);	
 			}
 			if (stateChanged)
 			{
@@ -427,7 +425,6 @@ namespace MSP2050.Scripts
 				PlanDetails.ChangeDate(plan);
 				if (planViewing == plan && !Main.InEditMode)
 				{
-					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();							
 					InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
 					LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
 				}

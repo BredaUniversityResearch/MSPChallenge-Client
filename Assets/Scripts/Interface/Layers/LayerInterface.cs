@@ -7,9 +7,6 @@ namespace MSP2050.Scripts
 {
 	public class LayerInterface : MonoBehaviour
 	{
-		[SerializeField]
-		private List<Sprite> icons = null; // Initialised in the inspector!!!
-
 		[SerializeField, Tooltip("Prefab used for housing all the layer toggles belonging to a certain subcategory")]
 		private GameObject layerSubcategoryToggleGroupPrefab = null;
 
@@ -30,7 +27,7 @@ namespace MSP2050.Scripts
 
 		private MenuBarToggle menuLayerToggle;
 
-		private Dictionary<string, Sprite> categoryIcon;
+		
 
 		private static LayerInterface instance;
 
@@ -46,9 +43,6 @@ namespace MSP2050.Scripts
 			// This is for the menu bar toggle so that it acts correctly
 			menuLayerToggle.GetComponent<Toggle>().isOn = true;
 			//menuLayerToggle.GetComponent<Toggle>().onValueChanged.AddListener((toggleValue) => { layerSelectOpen = !toggleValue; });
-		
-			SetIcons();
-
 			instance = this;
 		}
 
@@ -110,7 +104,7 @@ namespace MSP2050.Scripts
 			subcategoryToggleButton.button.onDoubleClick.AddListener(() => { ToggleAllLayersInSubcategory(subCategoryID); });
 
 			// Creating/Getting the icon
-			subcategoryToggleButton.icon.sprite = GetIcon(subCategoryID);
+			subcategoryToggleButton.icon.sprite = LayerManager.Instance.GetSubcategoryIcon(subCategoryID);
 			AddTooltip tooltip = subcategoryToggleButton.gameObject.AddComponent<AddTooltip>();
 			tooltip.text = subCategoryName;
 
@@ -174,38 +168,6 @@ namespace MSP2050.Scripts
 			if (subCategories.TryGetValue(subCategoryID, out toggleGroup))
 			{
 				toggleGroup.ToggleAllLayers();
-			}
-		}
-
-		public static Sprite GetIconStatic(string category)
-		{
-			return instance.GetIcon(category);
-		}
-
-		public Sprite GetIcon(string category)
-		{
-			if (categoryIcon.ContainsKey(category))
-			{
-				return categoryIcon[category];
-			}
-
-			return categoryIcon["nothing"];
-		}
-
-		private void SetIcons()
-		{
-			categoryIcon = new Dictionary<string, Sprite>();
-
-			if (icons != null)
-			{
-				for (int i = 0; i < icons.Count; i++)
-				{
-					categoryIcon.Add(icons[i].name, icons[i]);
-				}
-			}
-			else
-			{
-				Debug.LogError("Icons for layer categories are not assigned on " + gameObject.name);
 			}
 		}
 

@@ -13,11 +13,15 @@ namespace MSP2050.Scripts
 		[SerializeField] TextMeshProUGUI m_nameText;
 		[SerializeField] Image m_icon;
 
-		public void Initialise(UnityAction<bool> a_callback, ToggleGroup a_toggleGroup)
+		ActivePlanWindow m_apWindow;
+		AP_PopoutWindow m_popoutWindow;
+		bool m_ignoreCallback;
+
+		public void Initialise(ActivePlanWindow a_apWindow, AP_PopoutWindow a_popoutWindow)
 		{
-			m_toggle.onValueChanged.RemoveAllListeners();
-			m_toggle.onValueChanged.AddListener(a_callback);
-			m_toggle.group = a_toggleGroup;
+			m_toggle.onValueChanged.AddListener(OnToggleValueChanged);
+			m_apWindow = a_apWindow;
+			m_popoutWindow = a_popoutWindow;
 		}
 
 		public void SetContent(string a_text, Sprite a_icon)
@@ -30,6 +34,43 @@ namespace MSP2050.Scripts
 		public void SetContent(string a_text)
 		{
 			m_nameText.text = a_text;
+		}
+
+		void OnToggleValueChanged(bool a_value)
+		{
+			if (m_ignoreCallback)
+				return;
+
+			if(a_value)
+			{
+				if (!m_apWindow.MayOpenNewPopout())
+				{
+					m_ignoreCallback = true;
+					m_toggle.isOn = false;
+					m_ignoreCallback = false;
+				}
+				else
+				{
+					m_popoutWindow.OpenToContent(m_apWindow.CurrentPlan, this);
+				}
+			}
+			else
+			{
+				TryClose();
+			}
+		}
+
+		public bool TryClose()
+		{
+			if (m_popoutWindow.MayClose())
+			{
+				m_ignoreCallback = true;
+				m_toggle.isOn = false;
+				m_ignoreCallback = false;
+				m_popoutWindow.Close();
+				return true;
+			}
+			return false;
 		}
 	}
 }

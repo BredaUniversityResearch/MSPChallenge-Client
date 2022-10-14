@@ -7,19 +7,19 @@ using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
-	public class AP_Communication : MonoBehaviour
+	public class AP_Communication : AP_PopoutWindow
 	{
 		[SerializeField] Transform m_messageParent;
 		[SerializeField] GameObject m_messagePrefab;
 		[SerializeField] TMP_InputField m_chatInputField;
 		[SerializeField] Button m_sendButton;
 
-		Plan m_currentPlan;
 		List<AP_CommunicationMessage> m_messageObjects = new List<AP_CommunicationMessage>();
 		int m_nextMessageIndex;
 
-		private void Start()
+		protected override void Start()
 		{
+			base.Start();
 			m_sendButton.onClick.AddListener(SendMessage);
 		}
 
@@ -32,22 +32,23 @@ namespace MSP2050.Scripts
 		}
 		private void OnDisable()
 		{
-			if (m_currentPlan != null)
+			if (m_plan != null)
 			{
-				m_currentPlan.OnMessageReceivedCallback -= OnMessageReceived;
-				m_currentPlan = null;
+				m_plan.OnMessageReceivedCallback -= OnMessageReceived;
+				m_plan = null;
 			}
 		}
 
-		public void SetToPlan(Plan a_plan)
+		public override void OpenToContent(Plan a_plan, AP_ContentToggle a_toggle)
 		{
-			if (m_currentPlan != null)
+			if (m_plan != null)
 			{
-				m_currentPlan.OnMessageReceivedCallback -= OnMessageReceived;
-				m_currentPlan = null;
+				m_plan.OnMessageReceivedCallback -= OnMessageReceived;
+				m_plan = null;
 			}
-			m_currentPlan = a_plan;
-			m_currentPlan.OnMessageReceivedCallback += OnMessageReceived;
+			base.OpenToContent(a_plan, a_toggle);
+
+			m_plan.OnMessageReceivedCallback += OnMessageReceived;
 
 			m_nextMessageIndex = 0;
 			for(; m_nextMessageIndex < a_plan.PlanMessages.Count; m_nextMessageIndex++)
@@ -84,7 +85,7 @@ namespace MSP2050.Scripts
 		{
 			if (!string.IsNullOrEmpty(m_chatInputField.text))
 			{
-				m_currentPlan.SendMessage(m_chatInputField.text);
+				m_plan.SendMessage(m_chatInputField.text);
 				m_chatInputField.text = "";
 				m_chatInputField.ActivateInputField();
 				m_chatInputField.Select();

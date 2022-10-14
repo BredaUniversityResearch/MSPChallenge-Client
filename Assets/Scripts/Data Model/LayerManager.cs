@@ -20,6 +20,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		[SerializeField] List<Sprite> m_subcategoryIcons = null;
+		private Dictionary<string, Sprite> m_subcategoryIconDict;
+
 		private List<AbstractLayer> layers = new List<AbstractLayer>();
 		private HashSet<AbstractLayer> loadedLayers = new HashSet<AbstractLayer>();
 		private HashSet<AbstractLayer> visibleLayers = new HashSet<AbstractLayer>();
@@ -44,6 +47,7 @@ namespace MSP2050.Scripts
 				Destroy(this);
 			else
 				singleton = this;
+			SetSubcategoryIcons();
 		}
 
 		void OnDestroy()
@@ -72,6 +76,31 @@ namespace MSP2050.Scripts
 			PopulateAllCountryIDs();
 			finishedImporting = true;
 			Debug.Log("All layers imported (" + GetValidLayerCount() + ")");
+		}
+
+		private void SetSubcategoryIcons()
+		{
+			m_subcategoryIconDict = new Dictionary<string, Sprite>();
+
+			if (m_subcategoryIcons != null)
+			{
+				for (int i = 0; i < m_subcategoryIcons.Count; i++)
+				{
+					m_subcategoryIconDict.Add(m_subcategoryIcons[i].name, m_subcategoryIcons[i]);
+				}
+			}
+			else
+			{
+				Debug.LogError("Icons for layer categories are not assigned on " + gameObject.name);
+			}
+		}
+		public Sprite GetSubcategoryIcon(string a_subcategory)
+		{
+			if (m_subcategoryIconDict.TryGetValue(a_subcategory, out var result))
+			{
+				return result;
+			}
+			return null;
 		}
 
 
@@ -238,25 +267,16 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public List<AbstractLayer> GetAllValidLayers()
+		public List<AbstractLayer> GetAllLayers()
 		{
-			List<AbstractLayer> result = new List<AbstractLayer>();
-			foreach (AbstractLayer layer in layers)
-			{
-				if (layer != null)
-				{
-					result.Add(layer);
-				}
-			}
-
-			return result;
+			return layers;
 		}
 
-		public List<AbstractLayer> GetAllValidLayersOfGroup(string group)
+		public List<AbstractLayer> GetAllLayersOfGroup(string group)
 		{
 			if (group == string.Empty)
 			{
-				return GetAllValidLayers();
+				return GetAllLayers();
 			}
 
 			List<AbstractLayer> result = new List<AbstractLayer>();

@@ -18,7 +18,7 @@ namespace MSP2050.Scripts
 		//Should this toggle be disabled if it's not selected
 		private bool disabledIfNotSelected;
 
-		public void SetToType(EntityType type, GenericWindow activePlanWindow, bool addAvailabilityDate = false)
+		public void SetToType(EntityType type, bool addAvailabilityDate = false)
 		{
 			if(addAvailabilityDate)
 				typeName.text = $"{type.Name} ({Util.MonthToText(type.availabilityDate, true)})";
@@ -29,8 +29,6 @@ namespace MSP2050.Scripts
 			{
 				infoButton.onClick.AddListener(() =>
 				{
-					Vector3[] corners = new Vector3[4];
-					activePlanWindow.windowTransform.GetWorldCorners(corners);
 					InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(MediaUrl.Parse(type.media));
 				});
 			}

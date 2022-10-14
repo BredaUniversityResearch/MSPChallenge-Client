@@ -40,9 +40,7 @@ namespace MSP2050.Scripts
 			groupDropdown = Instantiate(dropdownObject, contentParent).GetComponent<Dropdown>();
 			groupDropdown.gameObject.transform.SetSiblingIndex(heirachyIndex + 1);
 
-			List<AbstractLayer> validLayers = LayerManager.Instance.GetAllValidLayers();
-
-			foreach (AbstractLayer layer in validLayers)
+			foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
 			{
 				AddLayer(layer);
 			}
@@ -64,14 +62,14 @@ namespace MSP2050.Scripts
 				if (value != 0) // If the dropdown is not on the first element ("All")
 				{
 					// Disable everything
-					foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
+					foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
 					{
 						buttons[layer].gameObject.SetActive(false);
 						buttons[layer].isOn = false;
 					}
 
 					// layers that match this type
-					foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers().Intersect(LayerManager.Instance.GetAllValidLayersOfGroup(tmpName)))
+					foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers().Intersect(LayerManager.Instance.GetAllLayersOfGroup(tmpName)))
 					{
 						buttons[layer].gameObject.SetActive(true);
 						buttons[layer].isOn = true;
@@ -80,7 +78,7 @@ namespace MSP2050.Scripts
 				else
 				{
 
-					foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
+					foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
 					{
 						buttons[layer].gameObject.SetActive(true);
 						buttons[layer].isOn = true;
