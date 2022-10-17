@@ -27,6 +27,8 @@ namespace MSP2050.Scripts
 		private Dictionary<string, APolicyLogic> m_policyLogic = new Dictionary<string, APolicyLogic>();
 		private Dictionary<string, APolicyData> m_policySettings = new Dictionary<string, APolicyData>();
 
+		public Dictionary<string, APolicyLogic> PolicyLogic => m_policyLogic;
+
 		void Start()
 		{
 			if (singleton != null && singleton != this)
@@ -79,7 +81,7 @@ namespace MSP2050.Scripts
 				if(m_policyDefinitions.TryGetValue(data.policy_type, out PolicyDefinition definition))
 				{
 					APolicyLogic logic = (APolicyLogic)gameObject.AddComponent(definition.m_logicType);
-					logic.Initialise(data);
+					logic.Initialise(data, definition);
 					m_policyLogic.Add(data.policy_type, logic);
 					m_policySettings.Add(data.policy_type, data);
 				}

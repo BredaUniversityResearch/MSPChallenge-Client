@@ -20,8 +20,9 @@ namespace MSP2050.Scripts
 		public Dictionary<int, int> sourceCountries = new Dictionary<int, int>();
 		public Dictionary<int, SubEntity> energySubEntities;
 
-		public override void Initialise(APolicyData a_settings)
+		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
 		{
+			base.Initialise(a_settings, a_definition);
 			m_instance = this;
 			LayerManager.Instance.OnLayerLoaded += OnLayerLoaded;
 			LayerManager.Instance.OnVisibleLayersUpdatedToBase += OnUpdateVisibleLayersToBase;
@@ -62,7 +63,7 @@ namespace MSP2050.Scripts
 				{
 					a_plan.AddPolicyData(new PolicyPlanDataEnergy()
 					{
-						policy_type = updateData.policy_type,
+						logic = this,
 						altersEnergyDistribution = updateData.alters_energy_distribution,
 						energyError = updateData.energy_error == "1"
 					});
@@ -107,10 +108,41 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
+		public override void AddToPlan(Plan a_plan)
+		{
+			AddToPlan(a_plan, false);
+		}
+
+		void AddToPlan(Plan a_plan, bool a_altersEnergyDistribution)
+		{
+			//TODO
+		}
+
 		public override void UpdateAfterEditing(Plan a_plan)
 		{ }
 
-		public override bool HasError(APolicyData a_data)
+		public override bool ShowPolicyToggled(APolicyPlanData a_planData)
+		{
+			return ((PolicyPlanDataEnergy)a_planData).altersEnergyDistribution;
+		}
+
+		public virtual void SetPolicyToggled(Plan a_plan, bool a_value)
+		{
+			if(a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var energyData))
+			{
+				energyData.altersEnergyDistribution = a_value;
+				if(!a_value)
+				{
+					//TODO: if no energy layers, remove energy policy data
+				}
+			}
+			else if(a_value)
+			{
+				AddToPlan(a_plan, true);
+			}
+		}
+
+		public override bool HasError(APolicyPlanData a_data)
 		{
 			return ((PolicyPlanDataEnergy)a_data).energyError;
 		}
@@ -261,7 +293,7 @@ namespace MSP2050.Scripts
 			return duplicate;
 		}
 
-		public override void GetRequiredApproval(APolicyData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
+		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
 		{
 			if (a_requiredApprovalLevel < EApprovalType.AllCountries)
 			{

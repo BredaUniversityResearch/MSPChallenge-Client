@@ -7,9 +7,6 @@ namespace MSP2050.Scripts
 {
 	public class PolicyLogicFishing : APolicyLogic
 	{
-		public override void Initialise(APolicyData a_settings)
-		{ }
-
 		public override void Destroy()
 		{ }
 
@@ -26,7 +23,7 @@ namespace MSP2050.Scripts
 				{
 					a_plan.AddPolicyData(new PolicyPlanDataFishing()
 					{
-						policy_type = updateData.policy_type,
+						logic = this,
 						fishingDistributionDelta = updateData.fishing != null ? new FishingDistributionDelta(updateData.fishing) : new FishingDistributionDelta() //If null, it cant pick the right constructor automatically
 					});
 				}
@@ -57,7 +54,7 @@ namespace MSP2050.Scripts
 			a_plan.m_policies.Remove(PolicyManager.FISHING_POLICY_NAME);
 		}
 
-		public override void GetRequiredApproval(APolicyData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
+		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
 		{
 			if (a_requiredApprovalLevel < EApprovalType.AllCountries)
 			{
@@ -76,6 +73,10 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		
+		public override void AddToPlan(Plan a_plan)
+		{
+			throw new NotImplementedException();
+			//TODO
+		}
 	}
 }

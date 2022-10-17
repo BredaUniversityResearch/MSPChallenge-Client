@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 		protected Plan m_plan;
 		protected AP_ContentToggle m_contentToggle;
 		protected GenericWindow m_genericWindow;
+		protected ActivePlanWindow m_APWindow;
 
 		protected virtual void Start()
 		{
@@ -18,16 +19,13 @@ namespace MSP2050.Scripts
 			m_genericWindow.exitButton.onClick.AddListener(TryClose);
 		}
 
-		public virtual void OpenToContent(Plan a_content, AP_ContentToggle a_toggle)
+		public virtual void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
 		{
 			m_plan = a_content;
 			m_contentToggle = a_toggle;
+			m_APWindow = a_APWindow;
+			gameObject.SetActive(true);
 			//TODO: align to toggle
-		}
-
-		public virtual void Close()
-		{
-			gameObject.SetActive(false);
 		}
 
 		protected void TryClose()

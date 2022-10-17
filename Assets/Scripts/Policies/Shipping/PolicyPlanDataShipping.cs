@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public class PolicyPlanDataShipping: APolicyData
+	public class PolicyPlanDataShipping: APolicyPlanData
 	{
 	}
 }

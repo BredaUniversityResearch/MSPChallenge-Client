@@ -22,25 +22,15 @@ namespace MSP2050.Scripts
 		public int LockedBy;
 
 		public List<PlanLayer> PlanLayers { get; private set; }
-		public List<PlanMessage> PlanMessages { get; private set; }
-
 		public Dictionary<int, EPlanApprovalState> countryApproval;
-		//public List<EnergyGrid> energyGrids;
-		//public HashSet<int> removedGrids; //persis ID of removed grids
-		//public FishingDistributionDelta fishingDistributionDelta;
-		//public bool energyPlan;
-		//public bool shippingPlan;
-		//public bool ecologyPlan;
-		//public bool energyError; 
-		//public bool altersEnergyDistribution;
+		public Dictionary<string, APolicyPlanData> m_policies { get; private set; } //These are PolicyPlanData
 
-		public Dictionary<string, APolicyData> m_policies { get; private set; } //These are PolicyPlanData
-
+		public List<PlanMessage> PlanMessages { get; private set; }
+		private static HashSet<int> m_receivedPlanMessages = new HashSet<int>();
 		public delegate void OnMessageReceived(PlanMessage a_message);
 		public event OnMessageReceived OnMessageReceivedCallback;
 
 		private bool requestingLock;
-		private static HashSet<int> m_receivedPlanMessages = new HashSet<int>();
 
 		public Plan(PlanObject planObject, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
@@ -92,36 +82,6 @@ namespace MSP2050.Scripts
 
 			//=================================== PLAN TYPE =====================================
 
-			//Determine plan type
-			//if (planObject.type != null)
-			//{
-			//	string[] types = planObject.type.Split(',');
-			//	energyPlan = types[0] == "1" && Main.Instance.IsSimulationConfigured(ESimulationType.CEL); //MSP-1856, Energy plans only valid when CEL is configured.
-			//	ecologyPlan = types[1] == "1";
-			//	shippingPlan = types[2] == "1";
-			//}
-
-			//if (ecologyPlan)
-			//{
-			//	if (planObject.fishing == null)
-			//	{
-			//		fishingDistributionDelta = new FishingDistributionDelta(); //If null, it cant pick the right constructor automatically
-			//	}
-			//	else
-			//	{
-			//		fishingDistributionDelta = new FishingDistributionDelta(planObject.fishing);
-			//	}
-			//}
-
-			//if (energyPlan)
-			//{
-			//	//removedGrids = planObject.deleted_grids;
-			//	//energyGrids = new List<EnergyGrid>();
-			//	//foreach (GridObject obj in planObject.grids)
-			//	//	energyGrids.Add(new EnergyGrid(obj, this));
-			//	altersEnergyDistribution = planObject.alters_energy_distribution;
-			//}
-			//energyError = planObject.energy_error == "1";
 			PolicyManager.Instance.RunPlanUpdate(planObject.policies, this, APolicyLogic.EPolicyUpdateStage.General);
 		}
 
@@ -212,11 +172,8 @@ namespace MSP2050.Scripts
 		{
 			foreach (var kvp in m_policies)
 			{
-				if (PolicyManager.Instance.TryGetLogic(kvp.Value.policy_type, out var logic))
-				{
-					if (logic.HasError(kvp.Value))
-						return true;
-				}
+				if (kvp.Value.logic.HasError(kvp.Value))
+					return true;
 			}
 			return false;
 		}
@@ -629,10 +586,7 @@ namespace MSP2050.Scripts
 			//Check required approval for policies
 			foreach(var kvp in m_policies)
 			{
-				if(PolicyManager.Instance.TryGetLogic(kvp.Value.policy_type, out var logic))
-				{
-					logic.GetRequiredApproval(kvp.Value, this, newCountryApproval, ref requiredApprovalLevel);
-				}
+				kvp.Value.logic.GetRequiredApproval(kvp.Value, this, newCountryApproval, ref requiredApprovalLevel);
 			}
 
 			if (requiredApprovalLevel >= EApprovalType.AllCountries)
@@ -906,7 +860,7 @@ namespace MSP2050.Scripts
 			ServerCommunication.Instance.DoRequest(Server.PostPlanFeedback(), form);
 		}
 
-		public bool TryGetPolicyData<T>(string a_policyType, out T a_result) where T : APolicyData
+		public bool TryGetPolicyData<T>(string a_policyType, out T a_result) where T : APolicyPlanData
 		{
 			if(m_policies.TryGetValue(a_policyType, out var temp))
 			{
@@ -917,9 +871,9 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public void AddPolicyData(APolicyData a_data)
+		public void AddPolicyData(APolicyPlanData a_data)
 		{
-			m_policies.Add(a_data.policy_type, a_data);
+			m_policies.Add(a_data.logic.m_definition.m_name, a_data);
 		}
 
 		public void SendMessage(string text)

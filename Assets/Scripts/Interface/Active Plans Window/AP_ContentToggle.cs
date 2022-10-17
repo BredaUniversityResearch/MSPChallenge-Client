@@ -15,13 +15,20 @@ namespace MSP2050.Scripts
 
 		ActivePlanWindow m_apWindow;
 		AP_PopoutWindow m_popoutWindow;
+		Action m_onOpenCallback;
 		bool m_ignoreCallback;
 
-		public void Initialise(ActivePlanWindow a_apWindow, AP_PopoutWindow a_popoutWindow)
+		public void Initialise(ActivePlanWindow a_apWindow, AP_PopoutWindow a_popoutWindow, Action a_onOpenCallback = null)
 		{
 			m_toggle.onValueChanged.AddListener(OnToggleValueChanged);
 			m_apWindow = a_apWindow;
 			m_popoutWindow = a_popoutWindow;
+			m_onOpenCallback = a_onOpenCallback;
+		}
+
+		private void OnDisable()
+		{
+			ForceClose();
 		}
 
 		public void SetContent(string a_text, Sprite a_icon)
@@ -51,7 +58,9 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					m_popoutWindow.OpenToContent(m_apWindow.CurrentPlan, this);
+					m_popoutWindow.OpenToContent(m_apWindow.CurrentPlan, this, m_apWindow);
+					if (m_onOpenCallback != null)
+						m_onOpenCallback.Invoke();
 				}
 			}
 			else
@@ -66,11 +75,19 @@ namespace MSP2050.Scripts
 			{
 				m_ignoreCallback = true;
 				m_toggle.isOn = false;
+				m_popoutWindow.gameObject.SetActive(false);
 				m_ignoreCallback = false;
-				m_popoutWindow.Close();
 				return true;
 			}
 			return false;
+		}
+
+		public void ForceClose()
+		{
+			m_ignoreCallback = true;
+			m_toggle.isOn = false;
+			m_popoutWindow.gameObject.SetActive(false);
+			m_ignoreCallback = false;
 		}
 	}
 }

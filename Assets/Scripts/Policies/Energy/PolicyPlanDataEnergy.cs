@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public class PolicyPlanDataEnergy: APolicyData
+	public class PolicyPlanDataEnergy: APolicyPlanData
 	{
 		public List<EnergyGrid> energyGrids;
 		public HashSet<int> removedGrids;

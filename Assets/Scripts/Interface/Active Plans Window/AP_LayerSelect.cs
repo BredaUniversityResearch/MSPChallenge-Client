@@ -110,7 +110,7 @@ namespace MSP2050.Scripts
 		{
 			if(m_changed)
 			{
-				DialogBoxManager.instance.ConfirmationWindow("Discard layer changes?", "Are you sure you want to discard any changes made to what layers are in the plan?", null, Close);
+				DialogBoxManager.instance.ConfirmationWindow("Discard layer changes?", "Are you sure you want to discard any changes made to what layers are in the plan?", null, m_contentToggle.ForceClose);
 				return false;
 			}
 			return true;

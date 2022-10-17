@@ -46,6 +46,10 @@ namespace MSP2050.Scripts
 		private Dictionary<EntityPropertyMetaData, ActivePlanParameter> parameters;
 		private Dictionary<EntityPropertyMetaData, string> originalParameterValues;
 
+		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
+		{
+			base.OpenToContent(a_content, a_toggle, a_APWindow);
+		}
 
 		public void OnCountriesLoaded()
 		{
@@ -92,7 +96,6 @@ namespace MSP2050.Scripts
 			if (SessionManager.Instance.AreWeGameMaster)
 				GMSelectable = !layer.BaseLayer.IsEnergyLayer();
 		}
-
 
 		public void SetObjectChangeInteractable(bool value)
 		{

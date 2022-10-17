@@ -15,6 +15,7 @@ namespace MSP2050.Scripts
 		[Header("General")]
 		[SerializeField] GenericWindow m_window;
 		[SerializeField] ToggleGroup m_contentToggleGroup;
+		[SerializeField] Transform m_popoutParent;
 
 		[Header("Buttons")]
 		[SerializeField] GameObject m_editButtonParent;
@@ -62,8 +63,7 @@ namespace MSP2050.Scripts
 		[SerializeField] AP_PolicySelect m_policySelect;
 
 		private List<AP_ContentToggle> m_layerToggles = new List<AP_ContentToggle>();
-		private List<AP_ContentToggle> m_policyToggles = new List<AP_ContentToggle>();
-		private Dictionary<string, AP_PopoutWindow> m_policyPopouts = new Dictionary<string, AP_PopoutWindow>();
+		private Dictionary<string, AP_ContentToggle> m_policyToggles = new Dictionary<string, AP_ContentToggle>(); //popouts can be reached through toggles
 		private AP_ContentToggle m_selectedContentToggle;
 
 		private Dictionary<PlanLayer, ActivePlanLayer> layers;
@@ -110,18 +110,29 @@ namespace MSP2050.Scripts
 			});
 
 			m_window.OnAttemptHideWindow = OnAttemptHideWindow;
+
+			foreach(var kvp in PolicyManager.Instance.PolicyLogic)
+			{
+				AP_PopoutWindow popout = Instantiate(kvp.Value.m_definition.m_activePlanPrefab, m_popoutParent).GetComponent<AP_PopoutWindow>();
+				popout.gameObject.SetActive(false);
+
+				AP_ContentToggle toggle = Instantiate(m_policyPrefab, m_policyParent).GetComponent<AP_ContentToggle>();
+				toggle.Initialise(this, popout);
+				toggle.SetContent(kvp.Value.m_definition.m_displayName);
+				m_policyToggles.Add(kvp.Key, toggle);
+			}
 		}
 
 		private bool OnAttemptHideWindow()
 		{
-			if (Main.InEditMode)
+			if (m_editing)
 			{
 				if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
 				{
 					UnityEngine.Events.UnityAction lb = () => { };
 					UnityEngine.Events.UnityAction rb = () =>
 					{
-						if (Main.InEditMode)
+						if (m_editing)
 							PlanDetails.LayersTab.ForceCancelChanges();
 						else
 							PlanDetails.instance.CancelEditingContent();
@@ -148,6 +159,7 @@ namespace MSP2050.Scripts
 			m_currentPlan = plan;
 			m_countryIndicator.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
 			UpdateEditButtonActivity();
+			RefreshContent();
 		}
 
 		public void UpdateEditButtonActivity()
@@ -178,6 +190,8 @@ namespace MSP2050.Scripts
 		{
 			m_editing = true;
 			//TODO
+
+			PlansMonitor.instance.plansMonitorToggle.toggle.isOn = false;
 
 			if (!m_viewAllToggle.isOn)
 				m_viewAllToggle.isOn = true;
@@ -220,9 +234,26 @@ namespace MSP2050.Scripts
 			//TODO: set geometry tool active & content
 		}
 
-		private void SetEntriesToPolicies()
+		public void RefreshContent()
 		{
 			//TODO
+			SetEntriesToPolicies();
+			SetEntriesToLayers();
+		}
+
+		private void SetEntriesToPolicies()
+		{
+			foreach (var kvp in m_policyToggles)
+			{
+				kvp.Value.gameObject.SetActive(false);
+			}
+			if(m_currentPlan.m_policies != null)
+			{
+				foreach(var kvp in m_currentPlan.m_policies)
+				{
+					m_policyToggles[kvp.Key].gameObject.SetActive(true);
+				}
+			}
 		}
 
 		private void SetEntriesToLayers()
@@ -246,12 +277,12 @@ namespace MSP2050.Scripts
 		{
 			AP_ContentToggle obj = Instantiate(m_layerPrefab, m_layerParent).GetComponent<AP_ContentToggle>();
 			int layerIndex = m_layerToggles.Count;
-			obj.Initialise(this, m_geometryTool);
+			obj.Initialise(this, m_geometryTool, () => OnLayerContentToggled(layerIndex));
 			obj.SetContent(layer.BaseLayer.ShortName, LayerManager.Instance.GetSubcategoryIcon(layer.BaseLayer.SubCategory));
 			m_layerToggles.Add(obj);
 		}
 
-		void OnLayerContentToggled(bool a_value, int a_layerIndex)
+		void OnLayerContentToggled(int a_layerIndex)
 		{
 			//TODO
 			//Ignore if we just set the planlayer to active
@@ -260,22 +291,9 @@ namespace MSP2050.Scripts
 
 			//Ignore callback from Main.Instance.StartEditingLayer
 			m_ignoreLayerCallback = true;
+			m_geometryTool.StartEditingLayer(m_currentPlan.PlanLayers[a_layerIndex]);
 			PlanDetails.LayersTab.StartEditingLayer(m_currentPlan.PlanLayers[a_layerIndex]);
 			m_ignoreLayerCallback = false;
-		}
-
-		private void CreatePolicyEntry(PlanLayer layer)
-		{
-			AP_ContentToggle obj = Instantiate(m_policyPrefab, m_policyParent).GetComponent<AP_ContentToggle>();
-			int policyIndex = m_policyToggles.Count;
-			obj.Initialise((b) => OnpolicyContentToggled(b, policyIndex), m_contentToggleGroup);
-			obj.SetContent(layer.BaseLayer.ShortName, LayerManager.Instance.GetSubcategoryIcon(layer.BaseLayer.SubCategory));
-			m_policyToggles.Add(obj);
-		}
-
-		void OnpolicyContentToggled(bool a_value, int a_policyIndex)
-		{
-			//TODO
 		}
 
 		public void SetViewMode(PlanManager.PlanViewState a_viewMode)
@@ -300,5 +318,7 @@ namespace MSP2050.Scripts
 				return m_selectedContentToggle.TryClose();
 			return true;
 		}
+
+		
 	}
 }

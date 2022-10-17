@@ -9,9 +9,6 @@ namespace MSP2050.Scripts
 	{
 		public const float shippingDisplayScale = 10000; // = 10km
 
-		public override void Initialise(APolicyData a_settings)
-		{ }
-
 		public override void Destroy()
 		{ }
 
@@ -50,8 +47,14 @@ namespace MSP2050.Scripts
 			a_plan.m_policies.Remove(PolicyManager.SHIPPING_POLICY_NAME);
 		}
 
-		public override void GetRequiredApproval(APolicyData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
+		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
 		{
+		}
+
+		public override void AddToPlan(Plan a_plan)
+		{
+			throw new NotImplementedException();
+			//TODO
 		}
 	}
 }
