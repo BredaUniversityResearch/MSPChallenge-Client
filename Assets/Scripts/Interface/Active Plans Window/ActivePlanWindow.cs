@@ -31,6 +31,9 @@ namespace MSP2050.Scripts
 		[SerializeField] CustomInputField m_planDescription;
 		[SerializeField] AP_ContentToggle m_planDate;
 		[SerializeField] AP_ContentToggle m_planState;
+		[SerializeField] GameObject m_creationTimeSection;
+		[SerializeField] CustomDropdown m_creationTimeYearDropdown;
+		[SerializeField] CustomDropdown m_creationTimeMonthDropdown;
 
 		[Header("Communication")]
 		[SerializeField] GameObject m_communicationSection;
@@ -66,15 +69,18 @@ namespace MSP2050.Scripts
 		private Dictionary<string, AP_ContentToggle> m_policyToggles = new Dictionary<string, AP_ContentToggle>(); //popouts can be reached through toggles
 		private AP_ContentToggle m_selectedContentToggle;
 
-		private Dictionary<PlanLayer, ActivePlanLayer> layers;
 		private bool m_ignoreLayerCallback;
 
 		//General
+		private DialogBox m_cancelChangesConfirmationWindow = null;
 		private Plan m_currentPlan;
 		private bool m_editing;
-		private DialogBox m_cancelChangesConfirmationWindow = null;
+		private bool m_creatingNew;
+
+		//Properties
 		public Plan CurrentPlan => m_currentPlan;
 		public bool Editing => m_editing;
+		public bool CreatingNew => m_creatingNew;
 
 		void Awake()
 		{
@@ -84,7 +90,7 @@ namespace MSP2050.Scripts
 			m_approval.Initialise(this, m_approvalContent);
 			m_issues.Initialise(this, m_issuesContent);
 
-			m_startEditingButton.onClick.AddListener(TryEnterEditMode);
+			m_startEditingButton.onClick.AddListener(OnEditButtonPressed);
 
 			m_viewAllToggle.onValueChanged.AddListener((value) =>
 			{
@@ -110,8 +116,10 @@ namespace MSP2050.Scripts
 			});
 
 			m_window.OnAttemptHideWindow = OnAttemptHideWindow;
+			m_acceptEditButton.onClick.AddListener(OnCancelButton);
 
-			foreach(var kvp in PolicyManager.Instance.PolicyLogic)
+			//create policy popouts and toggles
+			foreach (var kvp in PolicyManager.Instance.PolicyLogic)
 			{
 				AP_PopoutWindow popout = Instantiate(kvp.Value.m_definition.m_activePlanPrefab, m_popoutParent).GetComponent<AP_PopoutWindow>();
 				popout.gameObject.SetActive(false);
@@ -129,47 +137,299 @@ namespace MSP2050.Scripts
 			{
 				if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
 				{
-					UnityEngine.Events.UnityAction lb = () => { };
-					UnityEngine.Events.UnityAction rb = () =>
-					{
-						if (m_editing)
-							PlanDetails.LayersTab.ForceCancelChanges();
-						else
-							PlanDetails.instance.CancelEditingContent();
-
-						PlanManager.Instance.HideCurrentPlan();
-						gameObject.SetActive(false);
-					};
-					m_cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "All changes made to the plan will be lost. Are you sure you want to cancel?", lb, rb);
+					m_cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "All changes made to the plan will be lost. Are you sure you want to cancel?", null, () => ForceCancel(true));
 				}
-
 				return false;
 			}
 			else
 			{
+				m_currentPlan = null;
 				PlanManager.Instance.HideCurrentPlan();
-				return true;
+			}
+			return true;
+		}
+
+		void OnCancelButton()
+		{ 
+			if(m_creatingNew)
+			{ 
+
+			}
+			else if(m_editing)
+			{
+				if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
+				{
+					m_cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "All changes made to the plan will be lost. Are you sure you want to cancel?", null, () => ForceCancel(false));
+				}
+			}
+		}
+
+		void ForceCancel(bool a_closeWindow)
+		{
+			//TODO: add cancel code
+			if (m_selectedContentToggle != null)
+			{
+				m_selectedContentToggle.ForceClose(false);
+			}
+
+			if (a_closeWindow)
+			{
+				m_currentPlan = null;
+				PlanManager.Instance.HideCurrentPlan();
+				gameObject.SetActive(false);
+			}
+
+			//pdt layers (cancelchangesandunlock)
+			Main.Instance.fsm.UndoAllAndClearStacks();
+			lockedPlan.energyGrids = energyGridBackup;
+			lockedPlan.removedGrids = energyGridRemovedBackup;
+			if (issuesBackup != null)
+			{
+				IssueManager.Instance.SetIssuesForPlan(lockedPlan, issuesBackup);
+			}
+			if (removedInvalidCables != null)
+			{
+				PolicyLogicEnergy.Instance.RestoreRemovedCables(removedInvalidCables);
+			}
+			lockedPlan.AttemptUnlock();
+		}
+
+		void OnAcceptButton()
+		{
+			if (m_selectedContentToggle != null && !m_selectedContentToggle.TryClose())
+			{
+				return;
+			}
+
+			InterfaceCanvas.ShowNetworkingBlocker();
+			if (lockedPlan.energyPlan && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
+			{
+				int nextTempID = -1;
+				Dictionary<int, SubEntity> energyEntities = new Dictionary<int, SubEntity>();
+				foreach (PlanLayer planLayer in lockedPlan.PlanLayers)
+				{
+					if (planLayer.BaseLayer.editingType == AbstractLayer.EditingType.SourcePolygon)
+					{
+						//Ignores removed geometry
+						foreach (Entity entity in planLayer.GetNewGeometry())
+						{
+							//Because entities might be newly created and not have IDs, use temporary IDs.
+							int id = entity.DatabaseID;
+							if (id < 0)
+								id = nextTempID--;
+
+							energyEntities.Add(id, entity.GetSubEntity(0));
+						}
+					}
+				}
+				//Try getting external data before calculating the effects of editing
+				ServerCommunication.Instance.DoExternalAPICall<FeatureCollection>(SessionManager.Instance.MspGlobalData.windfarm_data_api_url, energyEntities, (result) => ExternalEnergyEffectsReturned(result, energyEntities), ExternalEnergyEffectsFailed);
+			}
+			else
+			{
+				CalculateEffectsOfEditing();
+			}
+		}
+
+		void ExternalEnergyEffectsReturned(FeatureCollection collection, Dictionary<int, SubEntity> passedEnergyEntities)
+		{
+			double totalCost = 0;
+			foreach (Feature feature in collection.Features)
+			{
+				SubEntity se;
+				if (passedEnergyEntities.TryGetValue(int.Parse(feature.Id), out se))
+				{
+					object cost;
+					if (feature.Properties.TryGetValue("levelized_cost_of_energy", out cost) && cost != null)
+					{
+						totalCost += (double)cost;
+					}
+					se.SetPropertiesToGeoJSONFeature(feature);
+				}
+
+			}
+			lockedPlan.AddSystemMessage("Levelized cost of energy for windfarms in plan: " + totalCost.ToString("N0") + " €/MWh");
+
+			CalculateEffectsOfEditing();
+		}
+
+		void ExternalEnergyEffectsFailed(ARequest request, string message)
+		{
+			if (request.retriesRemaining > 0)
+			{
+				Debug.LogError($"External API call failed, message: {message}. Retrying {request.retriesRemaining} more times.");
+				ServerCommunication.Instance.RetryRequest(request);
+			}
+			else
+			{
+				Debug.LogError($"External API call failed, message: {message}. Using built in alternative.");
+				CalculateEffectsOfEditing();
 			}
 		}
 
 
-		public void SetToPlan(Plan plan)
+		/// <summary>
+		/// Calculates the effect on energy grids and restrictions of the edits of the current plan.
+		/// A plan should not be acceptable without its effect being calculated beforehand.
+		/// Makes a backup of the plan's current energy distributions, so they can be reverted upon canceling.
+		/// </summary>
+		private void CalculateEffectsOfEditing()
 		{
-			gameObject.SetActive(true);
-			m_currentPlan = plan;
-			m_countryIndicator.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
-			UpdateEditButtonActivity();
-			RefreshContent();
+			//Aborts any geometry being created
+			Main.Instance.fsm.AbortCurrentState();
+
+			//Check invalid geometry
+			SubEntity invalid = lockedPlan.CheckForInvalidGeometry();
+			if (invalid != null)
+			{
+				CameraManager.Instance.ZoomToBounds(invalid.BoundingBox);
+				DialogBoxManager.instance.NotificationWindow("Invalid geometry", "The plan contains invalid geometry and cannot be accepted until these have been fixed.", null);
+				InterfaceCanvas.HideNetworkingBlocker();
+				SetConfirmCancelChangesInteractable(true);
+				return;
+			}
+
+			//Create a backup in case the changes are canceled
+			if (!backupMade) //If effects calculated multiple times, backup is only made the first time.
+			{
+				energyGridBackup = lockedPlan.energyGrids;
+				energyGridRemovedBackup = lockedPlan.removedGrids;
+				issuesBackup = IssueManager.Instance.FindIssueDataForPlan(lockedPlan);
+				backupMade = true;
+			}
+
+			//Check constraints and show them in the UI.
+			ConstraintManager.Instance.CheckConstraints(lockedPlan, issuesBackup, true);
+
+			//Energy effects
+			if (lockedPlan.energyPlan)
+			{
+				//Reset plan's grids
+				List<EnergyGrid> oldGrids = lockedPlan.energyGrids; //Can't use backup as player might switch between geom and distribution multiple times
+				lockedPlan.removedGrids = new HashSet<int>();
+				lockedPlan.energyGrids = new List<EnergyGrid>();
+
+				foreach (EnergyGrid grid in energyGridsBeforePlan)
+					lockedPlan.removedGrids.Add(grid.persistentID);
+
+				foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+				{
+					if (layer.editingType == AbstractLayer.EditingType.Socket)
+					{
+						//Add results of the grids on the socket layer to the existing ones
+						lockedPlan.energyGrids.AddRange(layer.DetermineGrids(lockedPlan, oldGrids, energyGridsBeforePlan, lockedPlan.removedGrids, out lockedPlan.removedGrids));
+					}
+				}
+
+				//Add countries affected by removed grids
+				countriesAffectedByRemovedGrids = new HashSet<int>();
+				foreach (EnergyGrid grid in energyGridsBeforePlan)
+					if (lockedPlan.removedGrids.Contains(grid.persistentID))
+						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.energyDistribution.distribution)
+							if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
+								countriesAffectedByRemovedGrids.Add(countryAmount.Key);
+				lockedPlan.energyError = false;
+			}
+
+			SubmitChanges();
 		}
 
-		public void UpdateEditButtonActivity()
+		private void SubmitChanges()
 		{
-			m_editButtonParent.SetActive(!Main.InEditMode	 && m_currentPlan != null
-															 && m_currentPlan.State == Plan.PlanState.DESIGN
-															 && (SessionManager.Instance.AreWeManager || m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID));
+			BatchRequest batch = new BatchRequest(true);
+			if (lockedPlan.energyPlan)
+			{
+				// Commit new grids (not distributions/sockets/sources yet)
+				foreach (EnergyGrid grid in lockedPlan.energyGrids)
+					grid.SubmitEmptyGridToServer(batch);
+				// Delete grids no longer in this plan
+				foreach (int gridID in GetGridsRemovedFromPlanSinceBackup())
+					EnergyGrid.SubmitGridDeletionToServer(gridID, batch);
+				lockedPlan.SubmitRemovedGrids(batch);
+				lockedPlan.SubmitEnergyError(false, false, batch);
+			}
+
+			//Calculate and submit the countries this plan requires approval from
+			Dictionary<int, EPlanApprovalState> newApproval = lockedPlan.CalculateRequiredApproval(countriesAffectedByRemovedGrids);
+			lockedPlan.SubmitRequiredApproval(batch, newApproval);
+
+			//Check issues again and submit according to latest tests. To ensure that changes in other plans while editing this plan get detected as well.
+			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.CheckConstraints(lockedPlan, issuesBackup, true);
+			if (issuesToSubmit != null)
+			{
+				issuesToSubmit.SubmitToServer(batch);
+			}
+			issuesBackup = null;
+
+			//Submit all geometry changes 
+			//Automatically submits corresponding energy_output and connection for geom. 
+			Main.Instance.fsm.SubmitAllChanges(batch);
+
+			//If energy plan, submit grid content after geometry has at least a batch id
+			if (lockedPlan.energyPlan && lockedPlan.energyGrids.Count > 0)
+			{
+				foreach (EnergyGrid grid in lockedPlan.energyGrids)
+					grid.SubmitEnergyDistribution(batch);
+			}
+			if (removedInvalidCables != null)
+			{
+				foreach (EnergyLineStringSubEntity cable in removedInvalidCables)
+					cable.SubmitDelete(batch);
+			}
+
+			//Description
+			lockedPlan.SetDescription(descriptionInputField.text, batch);
+
+			//TODO: move this to policy logic
+			//Shipping
+			RestrictionAreaManager.instance.SubmitSettingsForPlan(lockedPlan, batch);
+			//Fishing
+			lockedPlan.fishingDistributionDelta.SubmitToServer(lockedPlan.ID, batch);
+
+			lockedPlan.AttemptUnlock(batch);
+			batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
 		}
 
-		public void TryEnterEditMode()
+		void HandleChangesSubmissionSuccess(BatchRequest batch)
+		{
+			countriesAffectedByRemovedGrids = null;
+			Main.Instance.fsm.ClearUndoRedoAndFinishEditing();
+			base.HandleChangesSubmissionSuccess(batch);
+		}
+
+		void HandleChangesSubmissionFailure(BatchRequest batch)
+		{
+			InterfaceCanvas.HideNetworkingBlocker();
+			DialogBoxManager.instance.NotificationWindow("Submitting data failed", "There was an error when submitting the plan's changes to the server. Please try again or see the error log for more information.", null);
+		}
+
+		public List<int> GetGridsRemovedFromPlanSinceBackup()
+		{
+			List<int> result = new List<int>();
+			if (energyGridBackup == null)
+				return result;
+			bool found;
+			foreach (EnergyGrid oldGrid in energyGridBackup)
+			{
+				found = false;
+				foreach (EnergyGrid newGrid in lockedPlan.energyGrids)
+					if (newGrid.GetDatabaseID() == oldGrid.GetDatabaseID())
+					{
+						found = true;
+						break;
+					}
+				if (!found)
+					result.Add(oldGrid.GetDatabaseID());
+			}
+			return result;
+		}
+
+		void ForceAccept()
+		{ 
+		
+		}
+
+		public void OnEditButtonPressed()
 		{
 			Main.Instance.PreventPlanAndTabChange = true;
 			PlansMonitor.RefreshPlanButtonInteractablity();
@@ -186,12 +446,60 @@ namespace MSP2050.Scripts
 				});
 		}
 
+		public void SetToPlan(Plan plan)
+		{
+			if(plan == null)
+			{
+				//TODO: open in create mode
+				m_editing = true;
+				m_creatingNew = true;
+				m_currentPlan = new Plan();
+			}
+			else
+			{
+				m_currentPlan = plan;
+				m_editing = false;
+				m_creatingNew = false;
+			}
+			gameObject.SetActive(true);
+			m_countryIndicator.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
+			RefreshContent();
+			UpdateSectionActivity();
+		}
+
+		public void UpdateSectionActivity()
+		{
+			//Buttons
+			m_editButtonParent.gameObject.SetActive(!m_editing && m_currentPlan != null && m_currentPlan.State == Plan.PlanState.DESIGN && (SessionManager.Instance.AreWeManager || m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID));
+			m_cancelAcceptButtonParent.SetActive(m_editing);
+			m_acceptEditButton.interactable = !string.IsNullOrEmpty(m_planName.text);
+
+			//Content
+			m_planName.interactable = m_editing;
+			m_planDescription.interactable = m_editing;
+			m_layerSection.SetActive(!m_creatingNew);
+			m_policySection.SetActive(!m_creatingNew);
+			m_communicationSection.SetActive(!m_creatingNew);
+			m_viewModeSection.SetActive(!m_editing);
+			m_changeLayersToggle.gameObject.SetActive(m_editing);
+			m_changePoliciesToggle.gameObject.SetActive(m_editing);
+			m_creationTimeSection.SetActive(m_creatingNew);
+			m_planDate.gameObject.SetActive(!m_creatingNew);
+			m_planState.gameObject.SetActive(!m_editing);
+		}
+
 		void EnterEditMode()
 		{
 			m_editing = true;
 			//TODO
 
 			PlansMonitor.instance.plansMonitorToggle.toggle.isOn = false;
+
+			if (plan.energyPlan)
+			{
+				removedInvalidCables = PolicyLogicEnergy.Instance.ForceEnergyLayersActiveUpTo(plan);
+				energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
+			}
 
 			if (!m_viewAllToggle.isOn)
 				m_viewAllToggle.isOn = true;
@@ -201,6 +509,8 @@ namespace MSP2050.Scripts
 
 			m_changeLayersToggle.gameObject.SetActive(true);
 			m_changePoliciesToggle.gameObject.SetActive(true);
+			PlansMonitor.RefreshPlanButtonInteractablity();
+			UpdateSectionActivity();
 		}
 
 		void ExitEditMode()
@@ -208,12 +518,29 @@ namespace MSP2050.Scripts
 			m_editing = false;
 			//TODO
 
-			m_viewModeSection.SetActive(true);
-			UpdateEditButtonActivity();
-			m_cancelAcceptButtonParent.SetActive(false);
+			if (currentlyEditingLayer != null)
+			{
+				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
+				PlansMonitor.UpdatePlan(lockedPlan, false, false, false);
+			}
 
-			m_changeLayersToggle.gameObject.SetActive(false);
-			m_changePoliciesToggle.gameObject.SetActive(false);
+			
+
+			//pdt layers (stopediting)
+			InterfaceCanvas.Instance.StopEditing();
+			Main.Instance.fsm.StopEditing();
+
+			currentlyEditingLayer = null;
+			energyGridBackup = null;
+			energyGridRemovedBackup = null;
+			removedInvalidCables = null;
+			issuesBackup = null;
+			backupMade = false;
+
+			PlansMonitor.RefreshPlanButtonInteractablity();
+			LayerManager.Instance.ClearNonReferenceLayers();
+			LayerManager.Instance.RedrawVisibleLayers();
+			UpdateSectionActivity();
 		}
 
 		public void CloseWindow()
@@ -221,22 +548,36 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(false);
 		}
 
-		public void StartEditingLayer(PlanLayer layer)
-		{
-			//Handle visual selection
-			if (!m_ignoreLayerCallback)
-			{
-				m_ignoreLayerCallback = true;
-				layers[layer].toggle.isOn = true;
-				m_ignoreLayerCallback = false;
-			}
-
-			//TODO: set geometry tool active & content
-		}
-
 		public void RefreshContent()
 		{
-			//TODO
+			//Info
+			m_planName.text = m_currentPlan.Name;
+			m_planDescription.text = m_currentPlan.Description;
+
+			//Time
+			int maxConstructionTime = 0;
+			foreach(PlanLayer layer in m_currentPlan.PlanLayers)
+			{
+				if (layer.BaseLayer.AssemblyTime > maxConstructionTime)
+					maxConstructionTime = layer.BaseLayer.AssemblyTime;
+			}
+			if (maxConstructionTime == 0)
+				m_planDate.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}. No construction time required.");
+			else if (maxConstructionTime == 1)
+				m_planDate.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after 1 month construction.");
+			else
+				m_planDate.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after {maxConstructionTime} months construction.");
+
+			//State
+			m_planState.SetContent($"Plan state: {m_currentPlan.State.GetDisplayName()}", VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(m_currentPlan.State));
+
+			//Messages
+
+			//Approval
+
+			//Issues
+
+			//Content
 			SetEntriesToPolicies();
 			SetEntriesToLayers();
 		}
@@ -284,13 +625,13 @@ namespace MSP2050.Scripts
 
 		void OnLayerContentToggled(int a_layerIndex)
 		{
-			//TODO
 			//Ignore if we just set the planlayer to active
 			if (m_ignoreLayerCallback)
 				return;
 
 			//Ignore callback from Main.Instance.StartEditingLayer
 			m_ignoreLayerCallback = true;
+			//TODO
 			m_geometryTool.StartEditingLayer(m_currentPlan.PlanLayers[a_layerIndex]);
 			PlanDetails.LayersTab.StartEditingLayer(m_currentPlan.PlanLayers[a_layerIndex]);
 			m_ignoreLayerCallback = false;
@@ -312,13 +653,19 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public bool MayOpenNewPopout()
+		public bool MayOpenNewPopout(AP_ContentToggle a_newToggle)
 		{
+			bool result = true;
 			if(m_selectedContentToggle != null)
-				return m_selectedContentToggle.TryClose();
-			return true;
+				result = m_selectedContentToggle.TryClose();
+			if (result)
+				m_selectedContentToggle = a_newToggle;
+			return result;
 		}
 
-		
+		public void ClearSelectedContentToggle()
+		{
+			m_selectedContentToggle = null;
+		}
 	}
 }

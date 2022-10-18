@@ -415,7 +415,7 @@ namespace MSP2050.Scripts
 
 			//Update edit button availability in active plan window
 			if((stateChanged || layersChanged) && planViewing == plan)
-				InterfaceCanvas.Instance.activePlanWindow.UpdateEditButtonActivity();
+				InterfaceCanvas.Instance.activePlanWindow.UpdateSectionActivity();
 
 			if (timeChanged)
 			{

@@ -45,10 +45,20 @@ namespace MSP2050.Scripts
 
 		private Dictionary<EntityPropertyMetaData, ActivePlanParameter> parameters;
 		private Dictionary<EntityPropertyMetaData, string> originalParameterValues;
+		private PlanLayer m_currentlyEditingLayer;
 
 		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
 		{
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
+		}
+
+		private void OnDisable()
+		{
+			if (m_currentlyEditingLayer != null)
+			{
+				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(m_currentlyEditingLayer.BaseLayer, false);
+			}
+			m_currentlyEditingLayer = null;
 		}
 
 		public void OnCountriesLoaded()
@@ -62,25 +72,42 @@ namespace MSP2050.Scripts
 			CreateCountryToggle(null);
 		}
 
-		public void StartEditingLayer(PlanLayer layer)
+		public void StartEditingLayer(PlanLayer a_layer)
 		{
+			//==== General layer setup ==== 
+
+			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { a_layer.BaseLayer }, false, true);
+			LayerManager.Instance.ShowLayer(a_layer.BaseLayer);
+			Main.Instance.fsm.SetInterruptState(null);
+
+			//TODO: assumes the window always closes between layer edits (&OnDisable is called), check this
+
+			//InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
+			InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(a_layer.BaseLayer, true);
+			m_currentlyEditingLayer = a_layer;
+			InterfaceCanvas.Instance.StartEditingLayer(a_layer.BaseLayer);
+			Main.Instance.fsm.StartEditingLayer(a_layer);
+			LayerManager.Instance.RedrawVisibleLayers();
+
+			//==== Window content ==== 
+
 			//Clear and recreate layer types
-			multiType = layer.BaseLayer.MultiTypeSelect;
+			multiType = a_layer.BaseLayer.MultiTypeSelect;
 			layerTypeToggleGroup.allowSwitchOff = multiType;
 			ClearLayerTypes();
-			foreach (KeyValuePair<int, EntityType> kvp in layer.BaseLayer.EntityTypes)
-				CreateLayerType(kvp.Value, kvp.Value.availabilityDate <= layer.Plan.StartTime);
+			foreach (KeyValuePair<int, EntityType> kvp in a_layer.BaseLayer.EntityTypes)
+				CreateLayerType(kvp.Value, kvp.Value.availabilityDate <= a_layer.Plan.StartTime);
 			CreateMultipleLayerType();
 			SetNoEntityTypesSelected();
 
 			//Clear and recreate parameters
 			ClearParameters();
-			if (layer.BaseLayer.propertyMetaData == null || layer.BaseLayer.propertyMetaData.Count == 0)
+			if (a_layer.BaseLayer.propertyMetaData == null || a_layer.BaseLayer.propertyMetaData.Count == 0)
 				parameterSection.SetActive(false);
 			else
 			{
 				bool activeParamsOnLayer = false;
-				foreach (EntityPropertyMetaData param in layer.BaseLayer.propertyMetaData)
+				foreach (EntityPropertyMetaData param in a_layer.BaseLayer.propertyMetaData)
 					if (param.ShowInEditMode)
 					{
 						CreateParameter(param);
@@ -94,7 +121,7 @@ namespace MSP2050.Scripts
 
 			//Set admin country option available/unavailable
 			if (SessionManager.Instance.AreWeGameMaster)
-				GMSelectable = !layer.BaseLayer.IsEnergyLayer();
+				GMSelectable = !a_layer.BaseLayer.IsEnergyLayer();
 		}
 
 		public void SetObjectChangeInteractable(bool value)

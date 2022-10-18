@@ -33,6 +33,12 @@ namespace MSP2050.Scripts
 			m_contentToggle.TryClose();
 		}
 
+		public virtual void ApplyContent()
+		{ }
+
+		public virtual void DiscardContent()
+		{ }
+
 		public virtual bool MayClose()
 		{
 			//Overwritten by children that have confirm / cancel buttons

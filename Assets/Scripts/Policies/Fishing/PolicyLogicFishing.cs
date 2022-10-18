@@ -7,6 +7,8 @@ namespace MSP2050.Scripts
 {
 	public class PolicyLogicFishing : APolicyLogic
 	{
+		private FishingDistributionDelta fishingBackup;
+
 		public override void Destroy()
 		{ }
 
@@ -52,6 +54,22 @@ namespace MSP2050.Scripts
 		public override void RemoveFromPlan(Plan a_plan)
 		{
 			a_plan.m_policies.Remove(PolicyManager.FISHING_POLICY_NAME);
+		}
+
+		public override void StartEditingPlan(Plan a_plan) 
+		{
+			fishingBackup = a_plan.fishingDistributionDelta;
+			a_plan.fishingDistributionDelta = a_plan.fishingDistributionDelta.Clone();
+		}
+
+		public override void RestorebackupForPlan(Plan a_plan) 
+		{
+			a_plan.fishingDistributionDelta = fishingBackup;
+		}
+
+		public override void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch) 
+		{
+			a_plan.fishingDistributionDelta.SubmitToServer(a_plan.ID, a_batch);
 		}
 
 		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)

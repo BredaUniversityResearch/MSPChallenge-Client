@@ -28,7 +28,7 @@ namespace MSP2050.Scripts
 
 		private void OnDisable()
 		{
-			ForceClose();
+			ForceClose(false);
 		}
 
 		public void SetContent(string a_text, Sprite a_icon)
@@ -50,7 +50,7 @@ namespace MSP2050.Scripts
 
 			if(a_value)
 			{
-				if (!m_apWindow.MayOpenNewPopout())
+				if (!m_apWindow.MayOpenNewPopout(this))
 				{
 					m_ignoreCallback = true;
 					m_toggle.isOn = false;
@@ -73,21 +73,28 @@ namespace MSP2050.Scripts
 		{
 			if (m_popoutWindow.MayClose())
 			{
-				m_ignoreCallback = true;
-				m_toggle.isOn = false;
-				m_popoutWindow.gameObject.SetActive(false);
-				m_ignoreCallback = false;
+				ForceClose(true);
 				return true;
 			}
 			return false;
 		}
 
-		public void ForceClose()
+		public void ForceClose(bool a_applyChanges)
 		{
 			m_ignoreCallback = true;
 			m_toggle.isOn = false;
+			if(a_applyChanges)
+				m_popoutWindow.ApplyContent();
+			else
+				m_popoutWindow.DiscardContent();
 			m_popoutWindow.gameObject.SetActive(false);
+			m_apWindow.ClearSelectedContentToggle();
 			m_ignoreCallback = false;
+		}
+
+		public void ForceClose()
+		{
+			ForceClose(false);
 		}
 	}
 }

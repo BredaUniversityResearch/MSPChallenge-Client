@@ -29,12 +29,12 @@ namespace MSP2050.Scripts
 
 			IssueManager.Instance.SubscribeToIssueChangedEvent(OnIssueChanged);
 
-			m_planGroupsPerState.Add(Plan.PlanState.DESIGN, CreatePlansGroup("Design", "A plan's content (layers and policies) can only be edited in the DESIGN state.\nPlans in DESIGN are not visible in other plans or to other teams."));
-			m_planGroupsPerState.Add(Plan.PlanState.CONSULTATION, CreatePlansGroup("Consultation", "Plans in CONSULTATION are visible in other plans and to other teams.\nUse the CONSULTATION state for early drafts that will need to be discussed with other teams."));
-			m_planGroupsPerState.Add(Plan.PlanState.APPROVAL, CreatePlansGroup("Awaiting Approval", "Plans in the APPROVAL state will automatically be set to APPROVED once all required teams have accepted.\nPlans that require approval cannot be manually set to APPROVED, they must go through APPROVAL."));
-			m_planGroupsPerState.Add(Plan.PlanState.APPROVED, CreatePlansGroup("Approved", "Plans in the APPROVED state will be implemented when their implementation time is reached."));
-			m_planGroupsPerState.Add(Plan.PlanState.IMPLEMENTED, CreatePlansGroup("Implemented", "IMPLEMENTED plans have had their proposed changes applied to the world."));
-			m_planGroupsPerState.Add(Plan.PlanState.DELETED, CreatePlansGroup("Archived", "When a plan's implementation time is reached and it is not in APPROVED or it has issues, it will automatically be ARCHIVED.\nIf an ARCHIVED plan's implementation time has passed, it must be updated before it can be set back to another state."));
+			m_planGroupsPerState.Add(Plan.PlanState.DESIGN, CreatePlansGroup(Plan.PlanState.DESIGN, "Design", "A plan's content (layers and policies) can only be edited in the DESIGN state.\nPlans in DESIGN are not visible in other plans or to other teams."));
+			m_planGroupsPerState.Add(Plan.PlanState.CONSULTATION, CreatePlansGroup(Plan.PlanState.CONSULTATION, "Consultation", "Plans in CONSULTATION are visible in other plans and to other teams.\nUse the CONSULTATION state for early drafts that will need to be discussed with other teams."));
+			m_planGroupsPerState.Add(Plan.PlanState.APPROVAL, CreatePlansGroup(Plan.PlanState.APPROVAL, "Awaiting Approval", "Plans in the APPROVAL state will automatically be set to APPROVED once all required teams have accepted.\nPlans that require approval cannot be manually set to APPROVED, they must go through APPROVAL."));
+			m_planGroupsPerState.Add(Plan.PlanState.APPROVED, CreatePlansGroup(Plan.PlanState.APPROVED, "Approved", "Plans in the APPROVED state will be implemented when their implementation time is reached."));
+			m_planGroupsPerState.Add(Plan.PlanState.IMPLEMENTED, CreatePlansGroup(Plan.PlanState.IMPLEMENTED, "Implemented", "IMPLEMENTED plans have had their proposed changes applied to the world."));
+			m_planGroupsPerState.Add(Plan.PlanState.DELETED, CreatePlansGroup(Plan.PlanState.DELETED, "Archived", "When a plan's implementation time is reached and it is not in APPROVED or it has issues, it will automatically be ARCHIVED.\nIf an ARCHIVED plan's implementation time has passed, it must be updated before it can be set back to another state."));
 
 			List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
 			foreach(EPlanSorting sorting in (EPlanSorting[])Enum.GetValues(typeof(EPlanSorting)))
@@ -256,10 +256,10 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public PlansGroupBar CreatePlansGroup(string a_title = "New Plans Group", string a_tooltip = "")
+		public PlansGroupBar CreatePlansGroup(Plan.PlanState a_state, string a_title = "New Plans Group", string a_tooltip = "")
 		{
 			PlansGroupBar group = Instantiate(m_plansGroupPrefab, m_contentParent).GetComponent<PlansGroupBar>();
-			group.SetContent(a_title, a_tooltip, null); //TODO: get state icon
+			group.SetContent(a_title, a_tooltip, VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(a_state));
 			return group;
 		}
 

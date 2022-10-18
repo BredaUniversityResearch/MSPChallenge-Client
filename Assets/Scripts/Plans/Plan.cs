@@ -32,6 +32,16 @@ namespace MSP2050.Scripts
 
 		private bool requestingLock;
 
+		public Plan(/*string a_name, string a_description, int a_startTime*/)
+		{
+			//Name = a_name;
+			//Description = a_description;
+			//StartTime = a_startTime;
+			State = Plan.PlanState.DESIGN;
+			Country = SessionManager.Instance.CurrentUserTeamID;
+			//ConstructionStartTime = a_startTime;
+		}
+
 		public Plan(PlanObject planObject, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
 			//=================================== BASE INFO =====================================
@@ -41,7 +51,6 @@ namespace MSP2050.Scripts
 			StartTime = planObject.startdate;
 			State = StringToPlanState(planObject.state);
 			Country = planObject.country;
-			//Owner = TeamManager.GetTeamByIndex(planObject.user);
 
 			//Set locked state
 			int lockedByUser = -1;

@@ -55,11 +55,11 @@ namespace MSP2050.Scripts
 
 		public List<LODSettings> LODs = new List<LODSettings>();
 
-		[SerializeField]
-		public List<DrawModeSettings> DrawModeSettings;
+		[SerializeField] List<DrawModeSettings> DrawModeSettings;
 
-		[SerializeField]
-		private ValueConversionCollection valueConversions = null;
+		[SerializeField] ValueConversionCollection valueConversions = null;
+
+		[SerializeField] List<Sprite> planStateSprites;
 
 		public ValueConversionCollection ValueConversions
 		{
@@ -85,6 +85,11 @@ namespace MSP2050.Scripts
 				if (settings.DrawModeName == drawMode.ToString()) { return settings; }
 			}
 			return null;
+		}
+
+		public Sprite GetplanStateSprite(Plan.PlanState a_state)
+		{
+			return planStateSprites[(int)a_state];
 		}
 	}
 }

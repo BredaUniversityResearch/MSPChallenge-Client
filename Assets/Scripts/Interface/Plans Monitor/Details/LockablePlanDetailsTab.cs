@@ -24,7 +24,7 @@
 			Main.Instance.EditingPlanDetailsContent = true;
 			SetAcceptChangesButtonEnabled(true);
 			PlansMonitor.RefreshPlanButtonInteractablity();
-			InterfaceCanvas.Instance.activePlanWindow.UpdateEditButtonActivity();
+			InterfaceCanvas.Instance.activePlanWindow.UpdateSectionActivity();
 		}
 
 		/// <summary>
@@ -37,7 +37,7 @@
 			Main.Instance.EditingPlanDetailsContent = false;
 			PlansMonitor.RefreshPlanButtonInteractablity();
 			PlanDetails.UpdateTabContent();
-			InterfaceCanvas.Instance.activePlanWindow.UpdateEditButtonActivity();
+			InterfaceCanvas.Instance.activePlanWindow.UpdateSectionActivity();
 		}
 
 		protected virtual void SubmitChangesAndUnlock()

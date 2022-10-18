@@ -47,6 +47,21 @@ namespace MSP2050.Scripts
 			a_plan.m_policies.Remove(PolicyManager.SHIPPING_POLICY_NAME);
 		}
 
+		public override void StartEditingPlan(Plan a_plan)
+		{
+			//TODO: store backup
+		}
+
+		public override void RestorebackupForPlan(Plan a_plan)
+		{
+			//TODO
+		}
+
+		public override void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch)
+		{
+			RestrictionAreaManager.instance.SubmitSettingsForPlan(a_plan, a_batch);
+		}
+
 		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
 		{
 		}

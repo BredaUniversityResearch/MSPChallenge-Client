@@ -58,12 +58,12 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle)
+		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
 		{
 			if (!m_initialised)
 				Initialise();
 
-			base.OpenToContent(a_content, a_toggle);
+			base.OpenToContent(a_content, a_toggle, a_APWindow);
 
 			m_changed = false;
 			m_ignoreCallback = true;
@@ -103,6 +103,12 @@ namespace MSP2050.Scripts
 
 		void OnAccept()
 		{
+			m_contentToggle.ForceClose(true); //applies content
+			m_APWindow.RefreshContent();
+		}
+
+		public override void ApplyContent()
+		{
 			//TODO
 		}
 
@@ -115,5 +121,6 @@ namespace MSP2050.Scripts
 			}
 			return true;
 		}
+
 	}
 }

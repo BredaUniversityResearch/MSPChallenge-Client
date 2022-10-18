@@ -39,14 +39,14 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void OpenToContent(Plan a_plan, AP_ContentToggle a_toggle)
+		public override void OpenToContent(Plan a_plan, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
 		{
 			if (m_plan != null)
 			{
 				m_plan.OnMessageReceivedCallback -= OnMessageReceived;
 				m_plan = null;
 			}
-			base.OpenToContent(a_plan, a_toggle);
+			base.OpenToContent(a_plan, a_toggle, a_APWindow);
 
 			m_plan.OnMessageReceivedCallback += OnMessageReceived;
 

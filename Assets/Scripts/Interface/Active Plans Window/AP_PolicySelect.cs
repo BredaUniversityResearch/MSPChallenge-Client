@@ -87,11 +87,17 @@ namespace MSP2050.Scripts
 
 		void OnAccept()
 		{
+			m_contentToggle.ForceClose(true); //applies content
+			m_APWindow.RefreshContent();
+		}
+
+		public override void ApplyContent()
+		{
 			HashSet<string> added = m_currentPolicies;
 			added.ExceptWith(m_originalPolicies);
-			foreach(string addedPolicy in added)
+			foreach (string addedPolicy in added)
 			{
-				if(PolicyManager.Instance.TryGetLogic(addedPolicy, out var logic))
+				if (PolicyManager.Instance.TryGetLogic(addedPolicy, out var logic))
 				{
 					logic.SetPolicyToggled(m_plan, true);
 				}
@@ -104,8 +110,6 @@ namespace MSP2050.Scripts
 					logic.SetPolicyToggled(m_plan, false);
 				}
 			}
-			m_contentToggle.ForceClose();
-			m_APWindow.RefreshContent();
 		}
 
 		public override bool MayClose()

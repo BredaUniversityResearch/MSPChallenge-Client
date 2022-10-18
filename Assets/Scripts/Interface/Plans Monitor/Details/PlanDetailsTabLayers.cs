@@ -30,48 +30,48 @@ namespace MSP2050.Scripts
 			base.Initialise();
 		}
 
-		public override void UpdateTabAvailability()
-		{
-			base.UpdateTabAvailability();
-			tabToggle.gameObject.SetActive(planDetails.SelectedPlan.PlanLayers.Count > 0);
-			if (isActive && planDetails.SelectedPlan != null && planDetails.SelectedPlan.PlanLayers.Count == 0)
-			{
-				SetEditContentButtonEnabled(false);
-				planDetails.TabSelect(PlanDetails.EPlanDetailsTab.Feedback);
-				SetTabActive(false);
-			}
-		}
+		//public override void UpdateTabAvailability()
+		//{
+		//	base.UpdateTabAvailability();
+		//	tabToggle.gameObject.SetActive(planDetails.SelectedPlan.PlanLayers.Count > 0);
+		//	if (isActive && planDetails.SelectedPlan != null && planDetails.SelectedPlan.PlanLayers.Count == 0)
+		//	{
+		//		SetEditContentButtonEnabled(false);
+		//		planDetails.TabSelect(PlanDetails.EPlanDetailsTab.Feedback);
+		//		SetTabActive(false);
+		//	}
+		//}
 
-		public override void UpdateTabContent()
-		{
-			if (!isActiveAndEnabled || Main.InEditMode)
-				return;
-			UpdateLayerEntries();
-		}
+		//public override void UpdateTabContent()
+		//{
+		//	if (!isActiveAndEnabled || Main.InEditMode)
+		//		return;
+		//	UpdateLayerEntries();
+		//}
 
 		protected override void BeginEditing(Plan plan)
 		{
-			//Show the plan to be edited before edit mode is entered!
-			PlanManager.Instance.ShowPlan(plan);
+			////Show the plan to be edited before edit mode is entered!
+			//PlanManager.Instance.ShowPlan(plan);
 
-			//Should not use base, as this is diverted into the usual geom editing flow
-			lockedPlan = plan;
-			SetAcceptChangesButtonEnabled(true);
-			PlansMonitor.instance.plansMonitorToggle.toggle.isOn = false;
-			PlanDetails.SelectPlan(plan); 
+			////Should not use base, as this is diverted into the usual geom editing flow
+			//lockedPlan = plan;
+			//SetAcceptChangesButtonEnabled(true);
+			//PlansMonitor.instance.plansMonitorToggle.toggle.isOn = false;
+			//PlanDetails.SelectPlan(plan); 
 
-			if (plan.energyPlan)
-			{
-				removedInvalidCables = PolicyLogicEnergy.Instance.ForceEnergyLayersActiveUpTo(plan);
-				energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
-			}
+			//if (plan.energyPlan)
+			//{
+			//	removedInvalidCables = PolicyLogicEnergy.Instance.ForceEnergyLayersActiveUpTo(plan);
+			//	energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
+			//}
 
-			//Enter edit mode in FSM
-			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(lockedPlan);
-			InterfaceCanvas.Instance.activePlanWindow.OpenEditingUI(plan.PlanLayers[0]);
-			StartEditingLayer(plan.PlanLayers[0]);
+			////Enter edit mode in FSM
+			//InterfaceCanvas.Instance.activePlanWindow.SetToPlan(lockedPlan);
+			//InterfaceCanvas.Instance.activePlanWindow.OpenEditingUI(plan.PlanLayers[0]);
+			//StartEditingLayer(plan.PlanLayers[0]);
 
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			//PlansMonitor.RefreshPlanButtonInteractablity();
 		}
 
 		/// <summary>
@@ -79,25 +79,25 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public void StartEditingLayer(PlanLayer layer, bool calledByUndo = false)
 		{
-			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { layer.BaseLayer }, false, true);
-			LayerManager.Instance.ShowLayer(layer.BaseLayer);
+			//LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { layer.BaseLayer }, false, true);
+			//LayerManager.Instance.ShowLayer(layer.BaseLayer);
 
-			if (!calledByUndo)
-				Main.Instance.fsm.SetInterruptState(null);
+			//if (!calledByUndo)
+			//	Main.Instance.fsm.SetInterruptState(null);
 
-			if (currentlyEditingLayer != null)
-			{
-				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
-				if (!calledByUndo)
-					Main.Instance.fsm.AddToUndoStack(new SwitchLayerOperation(currentlyEditingLayer, layer));
-			}
+			//if (currentlyEditingLayer != null)
+			//{
+			//	InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
+			//	if (!calledByUndo)
+			//		Main.Instance.fsm.AddToUndoStack(new SwitchLayerOperation(currentlyEditingLayer, layer));
+			//}
 
-			InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
-			InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(layer.BaseLayer, true);
-			currentlyEditingLayer = layer;
-			InterfaceCanvas.Instance.StartEditingLayer(layer.BaseLayer);
-			Main.Instance.fsm.StartEditingLayer(layer);
-			LayerManager.Instance.RedrawVisibleLayers();
+			////InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
+			//InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(layer.BaseLayer, true);
+			//currentlyEditingLayer = layer;
+			//InterfaceCanvas.Instance.StartEditingLayer(layer.BaseLayer);
+			//Main.Instance.fsm.StartEditingLayer(layer);
+			//LayerManager.Instance.RedrawVisibleLayers();
 		}
 
 		public void ForceCancelChanges()
@@ -108,19 +108,19 @@ namespace MSP2050.Scripts
 		public override void CancelChangesAndUnlock()
 		{
 			//This already unlocks and calls StoppedEditingSuccessfully if succesful
-			Main.Instance.fsm.UndoAllAndClearStacks();
-			lockedPlan.energyGrids = energyGridBackup;
-			lockedPlan.removedGrids = energyGridRemovedBackup;
-			if (issuesBackup != null)
-			{
-				IssueManager.Instance.SetIssuesForPlan(lockedPlan, issuesBackup);
-			}
-			if (removedInvalidCables != null)
-			{
-				PolicyLogicEnergy.Instance.RestoreRemovedCables(removedInvalidCables);
-			}
-			lockedPlan.AttemptUnlock();
-			StopEditing();
+			//Main.Instance.fsm.UndoAllAndClearStacks();
+			//lockedPlan.energyGrids = energyGridBackup;
+			//lockedPlan.removedGrids = energyGridRemovedBackup;
+			//if (issuesBackup != null)
+			//{
+			//	IssueManager.Instance.SetIssuesForPlan(lockedPlan, issuesBackup);
+			//}
+			//if (removedInvalidCables != null)
+			//{
+			//	PolicyLogicEnergy.Instance.RestoreRemovedCables(removedInvalidCables);
+			//}
+			//lockedPlan.AttemptUnlock();
+			//StopEditing();
 		}
 
 		protected override void SubmitChangesAndUnlock()
@@ -334,33 +334,33 @@ namespace MSP2050.Scripts
 
 		protected override void StopEditing()
 		{
-			if (currentlyEditingLayer != null)
-			{
-				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
-				PlansMonitor.UpdatePlan(lockedPlan, false, false, false);
-			}
+			//if (currentlyEditingLayer != null)
+			//{
+			//	InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
+			//	PlansMonitor.UpdatePlan(lockedPlan, false, false, false);
+			//}
 
-			base.StopEditing();
+			//base.StopEditing();
 
-			InterfaceCanvas.Instance.StopEditing();
-			Main.Instance.fsm.StopEditing();
+			//InterfaceCanvas.Instance.StopEditing();
+			//Main.Instance.fsm.StopEditing();
 
-			currentlyEditingLayer = null;
-			energyGridBackup = null;
-			energyGridRemovedBackup = null;
-			removedInvalidCables = null;
-			issuesBackup = null;
-			backupMade = false;
+			//currentlyEditingLayer = null;
+			//energyGridBackup = null;
+			//energyGridRemovedBackup = null;
+			//removedInvalidCables = null;
+			//issuesBackup = null;
+			//backupMade = false;
 
-			//Open & maximize plansmonitor
-			InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn = true;
-			PlansMonitor.instance.plansMinMax.Maximize();
-			PlanDetails.UpdateTabAvailability();
+			////Open & maximize plansmonitor
+			//InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn = true;
+			//PlansMonitor.instance.plansMinMax.Maximize();
+			//PlanDetails.UpdateTabAvailability();
 
-			LayerManager.Instance.ClearNonReferenceLayers();
-			LayerManager.Instance.RedrawVisibleLayers();
-			InterfaceCanvas.Instance.activePlanWindow.CloseEditingUI();
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			//LayerManager.Instance.ClearNonReferenceLayers();
+			//LayerManager.Instance.RedrawVisibleLayers();
+			//InterfaceCanvas.Instance.activePlanWindow.CloseEditingUI();
+			//PlansMonitor.RefreshPlanButtonInteractablity();
 
 		}
 
