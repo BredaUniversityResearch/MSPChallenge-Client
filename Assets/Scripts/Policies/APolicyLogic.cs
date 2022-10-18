@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 		public virtual void StartEditingPlan(Plan a_plan) { }
 		public virtual void CalculateEffectsOfEditing(Plan a_plan) { }
 		public virtual void RestorebackupForPlan(Plan a_plan) { }
-		public virtual void SubmitChangesTo(Plan a_plan, BatchRequest a_batch) { }
+		public virtual void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch) { }
 		public virtual void UpdateAfterEditing(Plan a_plan) { }
 		public virtual bool HasError(APolicyPlanData a_planData) => false;
 		public virtual bool ShowPolicyToggled(APolicyPlanData a_planData) => true;
