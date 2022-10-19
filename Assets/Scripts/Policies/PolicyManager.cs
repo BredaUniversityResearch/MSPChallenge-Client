@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GluonGui.Dialog;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reactive.Joins;
@@ -157,6 +158,49 @@ namespace MSP2050.Scripts
 					policy.HandleGeneralUpdate(data, a_stage);
 				}
 			}
+		}
+
+		public void StartEditingPlan(Plan a_plan)
+		{ 
+			foreach(var kvp in m_policyLogic)
+			{
+				kvp.Value.StartEditingPlan(a_plan);
+			}
+		}
+
+		public void RestoreBackupForPlan(Plan a_plan)
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.RestoreBackupForPlan(a_plan);
+			}
+		}
+
+		public void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch)
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.SubmitChangesToPlan(a_plan, a_batch);
+			}
+		}
+
+		public void StopEditingPlan(Plan a_plan)
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.StopEditingPlan(a_plan);
+			}
+		}
+
+		public int CalculateEffectsOfEditing(Plan a_plan)
+		{
+			int result = 0;
+			foreach (var kvp in m_policyLogic)
+			{
+				if (kvp.Value.CalculateEffectsOfEditing(a_plan))
+					result++;
+			}
+			return result;
 		}
 	}
 }

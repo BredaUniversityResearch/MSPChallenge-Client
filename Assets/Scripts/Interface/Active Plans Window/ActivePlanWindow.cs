@@ -82,6 +82,10 @@ namespace MSP2050.Scripts
 		public bool Editing => m_editing;
 		public bool CreatingNew => m_creatingNew;
 
+		//Editing backup
+		private List<PlanIssueObject> m_issuesBackup;
+		private int m_delayedPolicyEffects;
+
 		void Awake()
 		{
 			m_changeLayersToggle.Initialise(this, m_layerSelect);
@@ -90,7 +94,6 @@ namespace MSP2050.Scripts
 			m_approval.Initialise(this, m_approvalContent);
 			m_issues.Initialise(this, m_issuesContent);
 
-			m_startEditingButton.onClick.AddListener(OnEditButtonPressed);
 
 			m_viewAllToggle.onValueChanged.AddListener((value) =>
 			{
@@ -116,7 +119,9 @@ namespace MSP2050.Scripts
 			});
 
 			m_window.OnAttemptHideWindow = OnAttemptHideWindow;
-			m_acceptEditButton.onClick.AddListener(OnCancelButton);
+			m_startEditingButton.onClick.AddListener(OnEditButtonPressed);
+			m_acceptEditButton.onClick.AddListener(OnAcceptButton);
+			m_cancelEditButton.onClick.AddListener(OnCancelButton);
 
 			//create policy popouts and toggles
 			foreach (var kvp in PolicyManager.Instance.PolicyLogic)
@@ -166,11 +171,20 @@ namespace MSP2050.Scripts
 
 		void ForceCancel(bool a_closeWindow)
 		{
-			//TODO: add cancel code
 			if (m_selectedContentToggle != null)
 			{
 				m_selectedContentToggle.ForceClose(false);
 			}
+
+			PolicyManager.Instance.RestoreBackupForPlan(m_currentPlan);
+			if (m_issuesBackup != null)
+			{
+				IssueManager.Instance.SetIssuesForPlan(m_currentPlan, m_issuesBackup);
+			}
+			Main.Instance.fsm.UndoAllAndClearStacks();
+			//TODO: restore layers (&content)
+			//TODO: restore description, name, date
+			m_currentPlan.AttemptUnlock();
 
 			if (a_closeWindow)
 			{
@@ -178,20 +192,6 @@ namespace MSP2050.Scripts
 				PlanManager.Instance.HideCurrentPlan();
 				gameObject.SetActive(false);
 			}
-
-			//pdt layers (cancelchangesandunlock)
-			Main.Instance.fsm.UndoAllAndClearStacks();
-			lockedPlan.energyGrids = energyGridBackup;
-			lockedPlan.removedGrids = energyGridRemovedBackup;
-			if (issuesBackup != null)
-			{
-				IssueManager.Instance.SetIssuesForPlan(lockedPlan, issuesBackup);
-			}
-			if (removedInvalidCables != null)
-			{
-				PolicyLogicEnergy.Instance.RestoreRemovedCables(removedInvalidCables);
-			}
-			lockedPlan.AttemptUnlock();
 		}
 
 		void OnAcceptButton()
@@ -202,76 +202,12 @@ namespace MSP2050.Scripts
 			}
 
 			InterfaceCanvas.ShowNetworkingBlocker();
-			if (lockedPlan.energyPlan && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
-			{
-				int nextTempID = -1;
-				Dictionary<int, SubEntity> energyEntities = new Dictionary<int, SubEntity>();
-				foreach (PlanLayer planLayer in lockedPlan.PlanLayers)
-				{
-					if (planLayer.BaseLayer.editingType == AbstractLayer.EditingType.SourcePolygon)
-					{
-						//Ignores removed geometry
-						foreach (Entity entity in planLayer.GetNewGeometry())
-						{
-							//Because entities might be newly created and not have IDs, use temporary IDs.
-							int id = entity.DatabaseID;
-							if (id < 0)
-								id = nextTempID--;
-
-							energyEntities.Add(id, entity.GetSubEntity(0));
-						}
-					}
-				}
-				//Try getting external data before calculating the effects of editing
-				ServerCommunication.Instance.DoExternalAPICall<FeatureCollection>(SessionManager.Instance.MspGlobalData.windfarm_data_api_url, energyEntities, (result) => ExternalEnergyEffectsReturned(result, energyEntities), ExternalEnergyEffectsFailed);
-			}
-			else
-			{
-				CalculateEffectsOfEditing();
-			}
-		}
-
-		void ExternalEnergyEffectsReturned(FeatureCollection collection, Dictionary<int, SubEntity> passedEnergyEntities)
-		{
-			double totalCost = 0;
-			foreach (Feature feature in collection.Features)
-			{
-				SubEntity se;
-				if (passedEnergyEntities.TryGetValue(int.Parse(feature.Id), out se))
-				{
-					object cost;
-					if (feature.Properties.TryGetValue("levelized_cost_of_energy", out cost) && cost != null)
-					{
-						totalCost += (double)cost;
-					}
-					se.SetPropertiesToGeoJSONFeature(feature);
-				}
-
-			}
-			lockedPlan.AddSystemMessage("Levelized cost of energy for windfarms in plan: " + totalCost.ToString("N0") + " €/MWh");
-
 			CalculateEffectsOfEditing();
 		}
-
-		void ExternalEnergyEffectsFailed(ARequest request, string message)
-		{
-			if (request.retriesRemaining > 0)
-			{
-				Debug.LogError($"External API call failed, message: {message}. Retrying {request.retriesRemaining} more times.");
-				ServerCommunication.Instance.RetryRequest(request);
-			}
-			else
-			{
-				Debug.LogError($"External API call failed, message: {message}. Using built in alternative.");
-				CalculateEffectsOfEditing();
-			}
-		}
-
 
 		/// <summary>
 		/// Calculates the effect on energy grids and restrictions of the edits of the current plan.
 		/// A plan should not be acceptable without its effect being calculated beforehand.
-		/// Makes a backup of the plan's current energy distributions, so they can be reverted upon canceling.
 		/// </summary>
 		private void CalculateEffectsOfEditing()
 		{
@@ -279,154 +215,65 @@ namespace MSP2050.Scripts
 			Main.Instance.fsm.AbortCurrentState();
 
 			//Check invalid geometry
-			SubEntity invalid = lockedPlan.CheckForInvalidGeometry();
+			SubEntity invalid = m_currentPlan.CheckForInvalidGeometry();
 			if (invalid != null)
 			{
 				CameraManager.Instance.ZoomToBounds(invalid.BoundingBox);
 				DialogBoxManager.instance.NotificationWindow("Invalid geometry", "The plan contains invalid geometry and cannot be accepted until these have been fixed.", null);
 				InterfaceCanvas.HideNetworkingBlocker();
-				SetConfirmCancelChangesInteractable(true);
 				return;
 			}
 
-			//Create a backup in case the changes are canceled
-			if (!backupMade) //If effects calculated multiple times, backup is only made the first time.
-			{
-				energyGridBackup = lockedPlan.energyGrids;
-				energyGridRemovedBackup = lockedPlan.removedGrids;
-				issuesBackup = IssueManager.Instance.FindIssueDataForPlan(lockedPlan);
-				backupMade = true;
-			}
-
-			//Check constraints and show them in the UI.
-			ConstraintManager.Instance.CheckConstraints(lockedPlan, issuesBackup, true);
-
-			//Energy effects
-			if (lockedPlan.energyPlan)
-			{
-				//Reset plan's grids
-				List<EnergyGrid> oldGrids = lockedPlan.energyGrids; //Can't use backup as player might switch between geom and distribution multiple times
-				lockedPlan.removedGrids = new HashSet<int>();
-				lockedPlan.energyGrids = new List<EnergyGrid>();
-
-				foreach (EnergyGrid grid in energyGridsBeforePlan)
-					lockedPlan.removedGrids.Add(grid.persistentID);
-
-				foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
-				{
-					if (layer.editingType == AbstractLayer.EditingType.Socket)
-					{
-						//Add results of the grids on the socket layer to the existing ones
-						lockedPlan.energyGrids.AddRange(layer.DetermineGrids(lockedPlan, oldGrids, energyGridsBeforePlan, lockedPlan.removedGrids, out lockedPlan.removedGrids));
-					}
-				}
-
-				//Add countries affected by removed grids
-				countriesAffectedByRemovedGrids = new HashSet<int>();
-				foreach (EnergyGrid grid in energyGridsBeforePlan)
-					if (lockedPlan.removedGrids.Contains(grid.persistentID))
-						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.energyDistribution.distribution)
-							if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
-								countriesAffectedByRemovedGrids.Add(countryAmount.Key);
-				lockedPlan.energyError = false;
-			}
-
-			SubmitChanges();
+			ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_issuesBackup, true);
+			m_delayedPolicyEffects = PolicyManager.Instance.CalculateEffectsOfEditing(m_currentPlan);
+			if(m_delayedPolicyEffects == 0)
+				SubmitChanges();
 		}
 
 		private void SubmitChanges()
 		{
 			BatchRequest batch = new BatchRequest(true);
-			if (lockedPlan.energyPlan)
-			{
-				// Commit new grids (not distributions/sockets/sources yet)
-				foreach (EnergyGrid grid in lockedPlan.energyGrids)
-					grid.SubmitEmptyGridToServer(batch);
-				// Delete grids no longer in this plan
-				foreach (int gridID in GetGridsRemovedFromPlanSinceBackup())
-					EnergyGrid.SubmitGridDeletionToServer(gridID, batch);
-				lockedPlan.SubmitRemovedGrids(batch);
-				lockedPlan.SubmitEnergyError(false, false, batch);
-			}
+
+			if (m_currentPlan.ID == -1)
+				m_currentPlan.SendPlanCreation(batch);
 
 			//Calculate and submit the countries this plan requires approval from
-			Dictionary<int, EPlanApprovalState> newApproval = lockedPlan.CalculateRequiredApproval(countriesAffectedByRemovedGrids);
-			lockedPlan.SubmitRequiredApproval(batch, newApproval);
+			Dictionary<int, EPlanApprovalState> newApproval = m_currentPlan.CalculateRequiredApproval();
+			m_currentPlan.SubmitRequiredApproval(batch, newApproval);
 
 			//Check issues again and submit according to latest tests. To ensure that changes in other plans while editing this plan get detected as well.
-			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.CheckConstraints(lockedPlan, issuesBackup, true);
+			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_issuesBackup, true);
 			if (issuesToSubmit != null)
 			{
 				issuesToSubmit.SubmitToServer(batch);
 			}
-			issuesBackup = null;
+			m_issuesBackup = null;
 
-			//Submit all geometry changes 
-			//Automatically submits corresponding energy_output and connection for geom. 
+			//Submit all geometry changes. Automatically submits corresponding energy_output and connection for geom. 
 			Main.Instance.fsm.SubmitAllChanges(batch);
 
-			//If energy plan, submit grid content after geometry has at least a batch id
-			if (lockedPlan.energyPlan && lockedPlan.energyGrids.Count > 0)
-			{
-				foreach (EnergyGrid grid in lockedPlan.energyGrids)
-					grid.SubmitEnergyDistribution(batch);
-			}
-			if (removedInvalidCables != null)
-			{
-				foreach (EnergyLineStringSubEntity cable in removedInvalidCables)
-					cable.SubmitDelete(batch);
-			}
+			//Submit policy data after geometry has a batch id
+			PolicyManager.Instance.SubmitChangesToPlan(m_currentPlan, batch);
 
-			//Description
-			lockedPlan.SetDescription(descriptionInputField.text, batch);
+			//Plan info
+			m_currentPlan.SetDescription(m_planDescription.text, batch);
+			m_currentPlan.RenamePlan(m_planName.text, batch);
+			m_currentPlan.ChangePlanDate(m_currentPlan.StartTime, batch);
 
-			//TODO: move this to policy logic
-			//Shipping
-			RestrictionAreaManager.instance.SubmitSettingsForPlan(lockedPlan, batch);
-			//Fishing
-			lockedPlan.fishingDistributionDelta.SubmitToServer(lockedPlan.ID, batch);
-
-			lockedPlan.AttemptUnlock(batch);
+			m_currentPlan.AttemptUnlock(batch);
 			batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
 		}
 
 		void HandleChangesSubmissionSuccess(BatchRequest batch)
 		{
-			countriesAffectedByRemovedGrids = null;
-			Main.Instance.fsm.ClearUndoRedoAndFinishEditing();
-			base.HandleChangesSubmissionSuccess(batch);
+			InterfaceCanvas.HideNetworkingBlocker();
+			ExitEditMode();
 		}
 
 		void HandleChangesSubmissionFailure(BatchRequest batch)
 		{
 			InterfaceCanvas.HideNetworkingBlocker();
 			DialogBoxManager.instance.NotificationWindow("Submitting data failed", "There was an error when submitting the plan's changes to the server. Please try again or see the error log for more information.", null);
-		}
-
-		public List<int> GetGridsRemovedFromPlanSinceBackup()
-		{
-			List<int> result = new List<int>();
-			if (energyGridBackup == null)
-				return result;
-			bool found;
-			foreach (EnergyGrid oldGrid in energyGridBackup)
-			{
-				found = false;
-				foreach (EnergyGrid newGrid in lockedPlan.energyGrids)
-					if (newGrid.GetDatabaseID() == oldGrid.GetDatabaseID())
-					{
-						found = true;
-						break;
-					}
-				if (!found)
-					result.Add(oldGrid.GetDatabaseID());
-			}
-			return result;
-		}
-
-		void ForceAccept()
-		{ 
-		
 		}
 
 		public void OnEditButtonPressed()
@@ -491,51 +338,28 @@ namespace MSP2050.Scripts
 		void EnterEditMode()
 		{
 			m_editing = true;
-			//TODO
-
-			PlansMonitor.instance.plansMonitorToggle.toggle.isOn = false;
-
-			if (plan.energyPlan)
-			{
-				removedInvalidCables = PolicyLogicEnergy.Instance.ForceEnergyLayersActiveUpTo(plan);
-				energyGridsBeforePlan = PlanManager.Instance.GetEnergyGridsBeforePlan(plan, EnergyGrid.GridColor.Either);
-			}
 
 			if (!m_viewAllToggle.isOn)
 				m_viewAllToggle.isOn = true;
-			m_viewModeSection.SetActive(false);
-			m_cancelAcceptButtonParent.SetActive(true);
-			m_editButtonParent.gameObject.SetActive(false);
 
-			m_changeLayersToggle.gameObject.SetActive(true);
-			m_changePoliciesToggle.gameObject.SetActive(true);
+			m_issuesBackup = IssueManager.Instance.FindIssueDataForPlan(m_currentPlan);
+			PolicyManager.Instance.StartEditingPlan(m_currentPlan);
+
 			PlansMonitor.RefreshPlanButtonInteractablity();
+			PlansMonitor.instance.plansMonitorToggle.toggle.isOn = false;
+
 			UpdateSectionActivity();
 		}
 
 		void ExitEditMode()
 		{
 			m_editing = false;
-			//TODO
 
-			if (currentlyEditingLayer != null)
-			{
-				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(currentlyEditingLayer.BaseLayer, false);
-				PlansMonitor.UpdatePlan(lockedPlan, false, false, false);
-			}
+			PolicyManager.Instance.StopEditingPlan(m_currentPlan);
 
-			
-
-			//pdt layers (stopediting)
-			InterfaceCanvas.Instance.StopEditing();
+			InterfaceCanvas.Instance.StopEditing();//TODO: remove once toolbar removed
+			Main.Instance.fsm.ClearUndoRedoAndFinishEditing();
 			Main.Instance.fsm.StopEditing();
-
-			currentlyEditingLayer = null;
-			energyGridBackup = null;
-			energyGridRemovedBackup = null;
-			removedInvalidCables = null;
-			issuesBackup = null;
-			backupMade = false;
 
 			PlansMonitor.RefreshPlanButtonInteractablity();
 			LayerManager.Instance.ClearNonReferenceLayers();
@@ -666,6 +490,15 @@ namespace MSP2050.Scripts
 		public void ClearSelectedContentToggle()
 		{
 			m_selectedContentToggle = null;
+		}
+
+		public void OnDelayedPolicyEffectCalculated()
+		{
+			m_delayedPolicyEffects--;
+			if(m_delayedPolicyEffects == 0)
+			{
+				SubmitChanges();
+			}
 		}
 	}
 }

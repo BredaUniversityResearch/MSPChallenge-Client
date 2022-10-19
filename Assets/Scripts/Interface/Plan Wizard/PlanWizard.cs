@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 {
     public class PlanWizard : MonoBehaviour
     {
-        public enum UpdateReach { NoWhere = 0, MinYear = 1, Year = 2, MinMonth = 3, Month = 4 }
+        
         public enum ErrorCode { None, NoName, NoSelection, InvalidDate }
 
         public GenericWindow thisGenericWindow;
@@ -897,184 +897,184 @@ namespace MSP2050.Scripts
             }
         }
 
-        public static void UpdateMinSelectableTime()
-        {
-            if (instance != null)
-                instance.updateMinSelectableTime();
-        }
+        //public static void UpdateMinSelectableTime()
+        //{
+        //    if (instance != null)
+        //        instance.updateMinSelectableTime();
+        //}
 
-        private UpdateReach updateMinSelectableTime()
-        {
-            minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + maxConstructionTime;
-            if (finishTime < minTimeSelectable)
-                finishTime = minTimeSelectable;
-            UpdateReach reach = UpdateMinSelectableYear();
-            if (reach < UpdateReach.MinMonth)
-            {
-                reach = UpdateMinSelectableMonth();
-                if(reach < UpdateReach.Month)
-                    UpdateSecondaryTimeText();
-            }
-            return reach;
-        }
+        //private UpdateReach updateMinSelectableTime()
+        //{
+        //    minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + maxConstructionTime;
+        //    if (finishTime < minTimeSelectable)
+        //        finishTime = minTimeSelectable;
+        //    UpdateReach reach = UpdateMinSelectableYear();
+        //    if (reach < UpdateReach.MinMonth)
+        //    {
+        //        reach = UpdateMinSelectableMonth();
+        //        if(reach < UpdateReach.Month)
+        //            UpdateSecondaryTimeText();
+        //    }
+        //    return reach;
+        //}
 
-        /// <summary>
-        /// Updates the minimum implementation date and sets a target implementatio date right afterwards.
-        /// Avoids double updates that would occur if UpdateMin and SetImplementation time were called seperately.
-        /// </summary>
-        private void UpdateMinAndSetTime(int time)
-        {
-            minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + maxConstructionTime;
-            if (finishTime < minTimeSelectable)
-                finishTime = minTimeSelectable;
-            UpdateMinSelectableYear(false);
-            SetImplementationTime(time);
-        }
+        ///// <summary>
+        ///// Updates the minimum implementation date and sets a target implementatio date right afterwards.
+        ///// Avoids double updates that would occur if UpdateMin and SetImplementation time were called seperately.
+        ///// </summary>
+        //private void UpdateMinAndSetTime(int time)
+        //{
+        //    minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + maxConstructionTime;
+        //    if (finishTime < minTimeSelectable)
+        //        finishTime = minTimeSelectable;
+        //    UpdateMinSelectableYear(false);
+        //    SetImplementationTime(time);
+        //}
 
-        /// <summary>
-        /// Updates the UI text for construction time and implementation start time
-        /// </summary>
-        private void UpdateSecondaryTimeText()
-        {
-            constructionDurationText.text = "(" + maxConstructionTime.ToString() + " months construction time)";
-            constructionStartText.text = Util.MonthToText(finishTime - maxConstructionTime);
-        }
+        ///// <summary>
+        ///// Updates the UI text for construction time and implementation start time
+        ///// </summary>
+        //private void UpdateSecondaryTimeText()
+        //{
+        //    constructionDurationText.text = "(" + maxConstructionTime.ToString() + " months construction time)";
+        //    constructionStartText.text = Util.MonthToText(finishTime - maxConstructionTime);
+        //}
 
-        private void SetImplementationTime(int time)
-        {
-            if (time < minTimeSelectable)
-                finishTime = minTimeSelectable;
-            else
-                finishTime = time;
+        //private void SetImplementationTime(int time)
+        //{
+        //    if (time < minTimeSelectable)
+        //        finishTime = minTimeSelectable;
+        //    else
+        //        finishTime = time;
 
-            if (SetSelectedYear((int)((float)finishTime / 12f)) < UpdateReach.Month)
-                SetSelectedMonth(finishTime % 12);
-        }
+        //    if (SetSelectedYear((int)((float)finishTime / 12f)) < UpdateReach.Month)
+        //        SetSelectedMonth(finishTime % 12);
+        //}
 
-        private UpdateReach SetSelectedYear(int newYear, bool forceUpdated = false)
-        {
-            ignoreTimeUICallback = true;
-            yearDropdown.value = newYear - minYearSelectable;
-            finishYear = newYear;
-            UpdateReach reach = UpdateMinSelectableMonth(forceUpdated);
-            ignoreTimeUICallback = false;
-            return reach > UpdateReach.Year ? reach : UpdateReach.Year;
-        }
+        //private UpdateReach SetSelectedYear(int newYear, bool forceUpdated = false)
+        //{
+        //    ignoreTimeUICallback = true;
+        //    yearDropdown.value = newYear - minYearSelectable;
+        //    finishYear = newYear;
+        //    UpdateReach reach = UpdateMinSelectableMonth(forceUpdated);
+        //    ignoreTimeUICallback = false;
+        //    return reach > UpdateReach.Year ? reach : UpdateReach.Year;
+        //}
 
-        private UpdateReach SetSelectedMonth(int newMonth)
-        {
-            ignoreTimeUICallback = true;
-            monthDropdown.value = newMonth - minMonthSelectable;
-            finishMonth = newMonth;
-            ignoreTimeUICallback = false;
-            UpdateSecondaryTimeText();
-            return UpdateReach.Month;
-        }
+        //private UpdateReach SetSelectedMonth(int newMonth)
+        //{
+        //    ignoreTimeUICallback = true;
+        //    monthDropdown.value = newMonth - minMonthSelectable;
+        //    finishMonth = newMonth;
+        //    ignoreTimeUICallback = false;
+        //    UpdateSecondaryTimeText();
+        //    return UpdateReach.Month;
+        //}
 
-        /// <summary>
-        /// Returns wether the month value was updated.
-        /// </summary>
-        private UpdateReach UpdateMinSelectableYear(bool setValues = true)
-        {
-            int newMinimum = (int)((float)minTimeSelectable / 12f);
-            if (newMinimum == minYearSelectable && dropDownsFilled)
-                return UpdateReach.NoWhere;
+        ///// <summary>
+        ///// Returns wether the month value was updated.
+        ///// </summary>
+        //private UpdateReach UpdateMinSelectableYear(bool setValues = true)
+        //{
+        //    int newMinimum = (int)((float)minTimeSelectable / 12f);
+        //    if (newMinimum == minYearSelectable && dropDownsFilled)
+        //        return UpdateReach.NoWhere;
 
-            //Adds new year options
-            minYearSelectable = newMinimum;
-            yearDropdown.ClearOptions();
-            List<string> options = new List<string>();
-            for (int i = minYearSelectable; i < SessionManager.Instance.MspGlobalData.session_num_years; i++)
-                options.Add((SessionManager.Instance.MspGlobalData.start + i).ToString());
-            yearDropdown.AddOptions(options);
+        //    //Adds new year options
+        //    minYearSelectable = newMinimum;
+        //    yearDropdown.ClearOptions();
+        //    List<string> options = new List<string>();
+        //    for (int i = minYearSelectable; i < SessionManager.Instance.MspGlobalData.session_num_years; i++)
+        //        options.Add((SessionManager.Instance.MspGlobalData.start + i).ToString());
+        //    yearDropdown.AddOptions(options);
 
-            //Checks if the set dropdown value needs to be updated
-            if (setValues)
-            {
-                UpdateReach reach;
-                if (finishYear < minYearSelectable)
-                {
-                    reach = SetSelectedYear(minYearSelectable, true);
-                }
-                else
-                    reach = SetSelectedYear(finishYear);
-                return reach > UpdateReach.MinYear ? reach : UpdateReach.MinYear;
-            }
-            else
-                return UpdateReach.MinYear;
-        }
+        //    //Checks if the set dropdown value needs to be updated
+        //    if (setValues)
+        //    {
+        //        UpdateReach reach;
+        //        if (finishYear < minYearSelectable)
+        //        {
+        //            reach = SetSelectedYear(minYearSelectable, true);
+        //        }
+        //        else
+        //            reach = SetSelectedYear(finishYear);
+        //        return reach > UpdateReach.MinYear ? reach : UpdateReach.MinYear;
+        //    }
+        //    else
+        //        return UpdateReach.MinYear;
+        //}
 
-        /// <summary>
-        /// Returns wether the month value was updated.
-        /// </summary>
-        private UpdateReach UpdateMinSelectableMonth(bool forceUpdated = false)
-        {
-            int newMinimum = finishYear == minYearSelectable ? minTimeSelectable % 12 : 0;
-            if (newMinimum == minMonthSelectable && dropDownsFilled)
-                return UpdateReach.NoWhere;
+        ///// <summary>
+        ///// Returns wether the month value was updated.
+        ///// </summary>
+        //private UpdateReach UpdateMinSelectableMonth(bool forceUpdated = false)
+        //{
+        //    int newMinimum = finishYear == minYearSelectable ? minTimeSelectable % 12 : 0;
+        //    if (newMinimum == minMonthSelectable && dropDownsFilled)
+        //        return UpdateReach.NoWhere;
 
-            //Adds new month options
-            minMonthSelectable = newMinimum;
-            monthDropdown.ClearOptions();
-            List<string> options = new List<string>();
-            for (int i = minMonthSelectable; i < 12; i++)
-                options.Add(Util.MonthToMonthText(i));
-            monthDropdown.AddOptions(options);
+        //    //Adds new month options
+        //    minMonthSelectable = newMinimum;
+        //    monthDropdown.ClearOptions();
+        //    List<string> options = new List<string>();
+        //    for (int i = minMonthSelectable; i < 12; i++)
+        //        options.Add(Util.MonthToMonthText(i));
+        //    monthDropdown.AddOptions(options);
 
-            //Checks if the set dropdown value needs to be updated
-            UpdateReach reach;
-            if (finishMonth < minMonthSelectable || forceUpdated)
-            {
-                reach = SetSelectedMonth(minMonthSelectable);
-                finishTime = finishYear * 12 + finishMonth;
-            }
-            else
-                reach = SetSelectedMonth(finishMonth);
-            dropDownsFilled = true;
-            return reach > UpdateReach.MinMonth ? reach : UpdateReach.MinMonth;
-        }
+        //    //Checks if the set dropdown value needs to be updated
+        //    UpdateReach reach;
+        //    if (finishMonth < minMonthSelectable || forceUpdated)
+        //    {
+        //        reach = SetSelectedMonth(minMonthSelectable);
+        //        finishTime = finishYear * 12 + finishMonth;
+        //    }
+        //    else
+        //        reach = SetSelectedMonth(finishMonth);
+        //    dropDownsFilled = true;
+        //    return reach > UpdateReach.MinMonth ? reach : UpdateReach.MinMonth;
+        //}
 
-        public void YearDropdownChanged(int value)
-        {
-            if (!ignoreTimeUICallback)
-            {
-                finishYear = value + minYearSelectable;
-                finishTime = finishYear * 12 + finishMonth;
+        //public void YearDropdownChanged(int value)
+        //{
+        //    if (!ignoreTimeUICallback)
+        //    {
+        //        finishYear = value + minYearSelectable;
+        //        finishTime = finishYear * 12 + finishMonth;
 
-                //Update months availabe in dropdown
-                if (UpdateMinSelectableMonth() == UpdateReach.NoWhere)
-                    UpdateSecondaryTimeText();
-            }
-        }
+        //        //Update months availabe in dropdown
+        //        if (UpdateMinSelectableMonth() == UpdateReach.NoWhere)
+        //            UpdateSecondaryTimeText();
+        //    }
+        //}
 
-        public void MonthDropdownChanged(int value)
-        {
-            if (!ignoreTimeUICallback)
-            {
-                finishMonth = value + minMonthSelectable;
-                finishTime = finishYear * 12 + finishMonth;
-                UpdateSecondaryTimeText();
-            }
-        }
+        //public void MonthDropdownChanged(int value)
+        //{
+        //    if (!ignoreTimeUICallback)
+        //    {
+        //        finishMonth = value + minMonthSelectable;
+        //        finishTime = finishYear * 12 + finishMonth;
+        //        UpdateSecondaryTimeText();
+        //    }
+        //}
 
-        private void SetupActivityToggles()
-        {
-            SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.SEL), shippingToggle);
-            SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.CEL), energyToggle);
-            SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.MEL), ecologyToggle);
-        }
+        //private void SetupActivityToggles()
+        //{
+        //    SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.SEL), shippingToggle);
+        //    SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.CEL), energyToggle);
+        //    SetupActivityToggle(Main.Instance.IsSimulationConfigured(ESimulationType.MEL), ecologyToggle);
+        //}
 
-        private void SetupActivityToggle(bool available, Toggle toggle)
-        {
-            toggle.gameObject.SetActive(available);
-            if (available)
-            {
-                toggle.onValueChanged.AddListener((value) =>
-                {
-                    if (!settingUpPlan)
-                        CheckForErrors();
-                });
-            }
-        }
+        //private void SetupActivityToggle(bool available, Toggle toggle)
+        //{
+        //    toggle.gameObject.SetActive(available);
+        //    if (available)
+        //    {
+        //        toggle.onValueChanged.AddListener((value) =>
+        //        {
+        //            if (!settingUpPlan)
+        //                CheckForErrors();
+        //        });
+        //    }
+        //}
     }
 }

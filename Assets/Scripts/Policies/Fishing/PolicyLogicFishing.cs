@@ -48,7 +48,7 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public override void UpdateAfterEditing(Plan a_plan) 
+		public override void StopEditingPlan(Plan a_plan) 
 		{ }
 
 		public override void RemoveFromPlan(Plan a_plan)
@@ -62,7 +62,7 @@ namespace MSP2050.Scripts
 			a_plan.fishingDistributionDelta = a_plan.fishingDistributionDelta.Clone();
 		}
 
-		public override void RestorebackupForPlan(Plan a_plan) 
+		public override void RestoreBackupForPlan(Plan a_plan) 
 		{
 			a_plan.fishingDistributionDelta = fishingBackup;
 		}

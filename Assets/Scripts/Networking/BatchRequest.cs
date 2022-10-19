@@ -8,6 +8,7 @@ namespace MSP2050.Scripts
 {
 	public class BatchRequest
 	{
+		public const int BATCH_GROUP_PLAN_CREATE = 1;
 		public const int BATCH_GROUP_ENERGY_DELETE = 2;
 		public const int BATCH_GROUP_GEOMETRY_DELETE = 3;
 

@@ -2,8 +2,8 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
-using System.Reactive.Joins;
-using static UnityEditor.Experimental.GraphView.GraphView;
+using Newtonsoft.Json.Linq;
+using GeoJSON.Net.Feature;
 
 namespace MSP2050.Scripts
 {
@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		static PolicyLogicEnergy m_instance;
 		public static PolicyLogicEnergy Instance => m_instance;
 
+		//References
 		private Dictionary<int, EnergyGrid> energyGrids = new Dictionary<int, EnergyGrid>();
 		private List<PointLayer> energyPointLayers = new List<PointLayer>();
 		public LineStringLayer energyCableLayerGreen;
@@ -19,6 +20,13 @@ namespace MSP2050.Scripts
 		public List<AbstractLayer> energyLayers = new List<AbstractLayer>(); //Does not include sourcepolygonpoints
 		public Dictionary<int, int> sourceCountries = new Dictionary<int, int>();
 		public Dictionary<int, SubEntity> energySubEntities;
+
+		//Editing backups
+		bool m_wasEnergyPlanBeforeEditing;
+		List<EnergyGrid> energyGridBackup;
+		List<EnergyGrid> energyGridsBeforePlan;
+		HashSet<int> energyGridRemovedBackup;
+		List<EnergyLineStringSubEntity> removedCables;
 
 		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
 		{
@@ -115,18 +123,171 @@ namespace MSP2050.Scripts
 
 		void AddToPlan(Plan a_plan, bool a_altersEnergyDistribution)
 		{
-			//TODO
+			//TODO: add base energy data
+			a_plan.AddPolicyData(new PolicyPlanDataEnergy() { logic = this, altersEnergyDistribution = a_altersEnergyDistribution });
+			//TODO: check removed cables, grids before plan etc.
 		}
 
-		public override void UpdateAfterEditing(Plan a_plan)
-		{ }
+		public override void RemoveFromPlan(Plan a_plan)
+		{
+			a_plan.m_policies.Remove(PolicyManager.ENERGY_POLICY_NAME);
+		}
+
+		public override void StartEditingPlan(Plan a_plan)
+		{
+			if(a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
+			{ 
+				m_wasEnergyPlanBeforeEditing = true;
+				energyGridBackup = data.energyGrids;
+				energyGridRemovedBackup = data.removedGrids;
+			
+				//Reset plan's grids
+				List<EnergyGrid> oldGrids = data.energyGrids;
+				data.removedGrids = new HashSet<int>();
+				data.energyGrids = new List<EnergyGrid>();
+
+				foreach (EnergyGrid grid in energyGridsBeforePlan)
+					data.removedGrids.Add(grid.persistentID);
+
+				foreach (AbstractLayer layer in energyLayers)
+				{
+					if (layer.editingType == AbstractLayer.EditingType.Socket)
+					{
+						//Add results of the grids on the socket layer to the existing ones
+						data.energyGrids.AddRange(layer.DetermineGrids(a_plan, oldGrids, energyGridsBeforePlan, data.removedGrids, out data.removedGrids));
+						//TODO: this adds all energygrids to the plan while that shouldnt happen!
+					}
+				}
+			}
+			else
+			{
+				m_wasEnergyPlanBeforeEditing = false;
+			}
+			removedCables = ForceEnergyLayersActiveUpTo(a_plan);
+			energyGridsBeforePlan = GetEnergyGridsBeforePlan(a_plan, EnergyGrid.GridColor.Either);
+		}
+
+		public override bool CalculateEffectsOfEditing(Plan a_plan) 
+		{
+			if (a_plan.m_policies.ContainsKey(PolicyManager.ENERGY_POLICY_NAME) && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
+			{
+				int nextTempID = -1;
+				Dictionary<int, SubEntity> energyEntities = new Dictionary<int, SubEntity>();
+				foreach (PlanLayer planLayer in a_plan.PlanLayers)
+				{
+					if (planLayer.BaseLayer.editingType == AbstractLayer.EditingType.SourcePolygon)
+					{
+						//Ignores removed geometry
+						foreach (Entity entity in planLayer.GetNewGeometry())
+						{
+							//Because entities might be newly created and not have IDs, use temporary IDs.
+							int id = entity.DatabaseID;
+							if (id < 0)
+								id = nextTempID--;
+
+							energyEntities.Add(id, entity.GetSubEntity(0));
+						}
+					}
+				}
+				ServerCommunication.Instance.DoExternalAPICall<FeatureCollection>(SessionManager.Instance.MspGlobalData.windfarm_data_api_url, energyEntities, (result) => ExternalEnergyEffectsReturned(a_plan, result, energyEntities), ExternalEnergyEffectsFailed);
+				return true;
+			}
+			return false;
+		}
+
+		void ExternalEnergyEffectsReturned(Plan a_plan, FeatureCollection a_collection, Dictionary<int, SubEntity> a_passedEnergyEntities)
+		{
+			double totalCost = 0;
+			foreach (Feature feature in a_collection.Features)
+			{
+				SubEntity se;
+				if (a_passedEnergyEntities.TryGetValue(int.Parse(feature.Id), out se))
+				{
+					object cost;
+					if (feature.Properties.TryGetValue("levelized_cost_of_energy", out cost) && cost != null)
+					{
+						totalCost += (double)cost;
+					}
+					se.SetPropertiesToGeoJSONFeature(feature);
+				}
+
+			}
+			a_plan.AddSystemMessage("Levelized cost of energy for windfarms in plan: " + totalCost.ToString("N0") + " €/MWh");
+		}
+
+		void ExternalEnergyEffectsFailed(ARequest request, string message)
+		{
+			if (request.retriesRemaining > 0)
+			{
+				Debug.LogError($"External API call failed, message: {message}. Retrying {request.retriesRemaining} more times.");
+				ServerCommunication.Instance.RetryRequest(request);
+			}
+			else
+			{
+				Debug.LogError($"External API call failed, message: {message}. Using built in alternative.");
+				InterfaceCanvas.Instance.activePlanWindow.OnDelayedPolicyEffectCalculated();
+			}
+		}
+
+		public override void RestoreBackupForPlan(Plan a_plan)
+		{
+			if(removedCables != null)
+				RestoreRemovedCables(removedCables);
+			if(m_wasEnergyPlanBeforeEditing)
+			{ 
+				//TODO
+			
+			}
+			else
+			{
+				RemoveFromPlan(a_plan);
+			}
+		}
+
+		public override void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch)
+		{
+			if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
+			{
+				// Add new grids (not distributions/sockets/sources yet)
+				foreach (EnergyGrid grid in data.energyGrids)
+					grid.SubmitEmptyGridToServer(a_batch);
+				// Delete previously added grids no longer in this plan
+				foreach (int gridID in GetGridsRemovedFromPlanSinceBackup(data))
+					EnergyGrid.SubmitGridDeletionToServer(gridID, a_batch);
+
+				SubmitRemovedGrids(a_plan, data, a_batch);
+				SubmitEnergyError(a_plan, false, false, a_batch);
+
+				//Submit grid distributions
+				foreach (EnergyGrid grid in data.energyGrids)
+					grid.SubmitEnergyDistribution(a_batch);
+				//Submit removed (unconnected) cables
+				foreach (EnergyLineStringSubEntity cable in removedCables)
+					cable.SubmitDelete(a_batch);
+			}
+			else if(m_wasEnergyPlanBeforeEditing)
+			{
+				JObject dataObject = new JObject();
+				dataObject.Add("plan", a_plan.ID);
+				a_batch.AddRequest(Server.DeleteEnergyFromPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			}
+		}
+
+		public override void StopEditingPlan(Plan a_plan)
+		{
+			energyGridBackup = null;
+			energyGridsBeforePlan = null;
+			energyGridRemovedBackup = null;
+			removedCables = null;
+		}
+
 
 		public override bool ShowPolicyToggled(APolicyPlanData a_planData)
 		{
 			return ((PolicyPlanDataEnergy)a_planData).altersEnergyDistribution;
 		}
 
-		public virtual void SetPolicyToggled(Plan a_plan, bool a_value)
+		public override void SetPolicyToggled(Plan a_plan, bool a_value)
 		{
 			if(a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var energyData))
 			{
@@ -267,11 +428,6 @@ namespace MSP2050.Scripts
 			cable.AddConnection(conn1);
 			cable.AddConnection(conn2);
 			cable.SetEndPointsToConnections();
-		}
-
-		public override void RemoveFromPlan(Plan a_plan)
-		{
-			a_plan.m_policies.Remove(PolicyManager.ENERGY_POLICY_NAME);
 		}
 
 		/// <summary>
@@ -541,6 +697,45 @@ namespace MSP2050.Scripts
 			if (getSourcePointIfPoly && result is EnergyPolygonSubEntity)
 				result = ((EnergyPolygonSubEntity)result).sourcePoint;
 			return result;
+		}
+
+		List<int> GetGridsRemovedFromPlanSinceBackup(PolicyPlanDataEnergy a_data)
+		{
+			List<int> result = new List<int>();
+			if (energyGridBackup == null)
+				return result;
+			bool found;
+			foreach (EnergyGrid oldGrid in energyGridBackup)
+			{
+				found = false;
+				foreach (EnergyGrid newGrid in a_data.energyGrids)
+					if (newGrid.GetDatabaseID() == oldGrid.GetDatabaseID())
+					{
+						found = true;
+						break;
+					}
+				if (!found)
+					result.Add(oldGrid.GetDatabaseID());
+			}
+			return result;
+		}
+
+		public void SubmitEnergyError(Plan a_plan, bool a_value, bool a_checkDependencies, BatchRequest a_batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("id", a_plan.ID); //TODO: plan id might not exist yet
+			dataObject.Add("error", a_value ? 1 : 0);
+			dataObject.Add("check_dependent_plans", a_checkDependencies ? 1 : 0);
+			a_batch.AddRequest(Server.SetEnergyError(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_ERROR);
+		}
+
+		public void SubmitRemovedGrids(Plan a_plan, PolicyPlanDataEnergy a_data, BatchRequest a_batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("plan", a_plan.ID); //TODO: plan id might not exist yet
+			if (a_data.removedGrids != null && a_data.removedGrids.Count > 0)
+				dataObject.Add("delete", JToken.FromObject(a_data.removedGrids));
+			a_batch.AddRequest(Server.SetPlanRemovedGrids(), dataObject, BatchRequest.BATCH_GROUP_PLAN_GRID_CHANGE);
 		}
 	}
 }

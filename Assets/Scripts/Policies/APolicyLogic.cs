@@ -19,14 +19,10 @@ namespace MSP2050.Scripts
 		public abstract void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel);
 		public abstract APolicyData FormatPlanData(Plan a_plan);
 		public abstract bool FormatGeneralData(out APolicyData a_data);
-		public abstract void AddToPlan(Plan a_plan);
-		public abstract void RemoveFromPlan(Plan a_plan);
-		public virtual void StartEditingPlan(Plan a_plan) { }
-		public virtual void CalculateEffectsOfEditing(Plan a_plan) { }
-		public virtual void RestorebackupForPlan(Plan a_plan) { }
-		public virtual void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch) { }
-		public virtual void UpdateAfterEditing(Plan a_plan) { }
 		public virtual bool HasError(APolicyPlanData a_planData) => false;
+
+		//Editing
+		public virtual void StartEditingPlan(Plan a_plan) { }
 		public virtual bool ShowPolicyToggled(APolicyPlanData a_planData) => true;
 		public virtual void SetPolicyToggled(Plan a_plan, bool a_value)
 		{
@@ -35,6 +31,15 @@ namespace MSP2050.Scripts
 			else
 				RemoveFromPlan(a_plan);
 		}
+		public abstract void AddToPlan(Plan a_plan);
+		public abstract void RemoveFromPlan(Plan a_plan);
+		public virtual bool CalculateEffectsOfEditing(Plan a_plan) //Returns true if editing effects need to be awaited
+		{
+			return false;
+		}
+		public virtual void RestoreBackupForPlan(Plan a_plan) { }
+		public virtual void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch) { }
+		public virtual void StopEditingPlan(Plan a_plan) { }
 
 		//Update order: 0
 		public abstract void HandleGeneralUpdate(APolicyData a_updateData, EPolicyUpdateStage a_stage);

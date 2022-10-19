@@ -12,7 +12,8 @@ namespace MSP2050.Scripts
 
 		public enum PlanState { DESIGN = 0, CONSULTATION = 1, APPROVAL = 2, APPROVED = 3, IMPLEMENTED = 4, DELETED = 5 };
 
-		public int ID;
+		public int creationBatchCallID; //ID of the PostPlan call in the batch
+		public int ID = -1;
 		public string Name;
 		public string Description;
 		public int StartTime;
@@ -424,26 +425,37 @@ namespace MSP2050.Scripts
 			batch.AddRequest(Server.SetPlanState(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
-		public static void SendPlan(string planName, List<AbstractLayer> layers, int time, string type, bool altersEnergyDistribution)
+		public void SendPlanCreation(BatchRequest a_batch)
 		{
-			NetworkForm form = new NetworkForm();
-			form.AddField("country", SessionManager.Instance.CurrentUserTeamID);
-			form.AddField("name", planName);
-			form.AddField("time", time);
-
-			if (layers != null && layers.Count > 0)
-			{
-				List<int> layerIDs = new List<int>(layers.Count);
-				foreach (AbstractLayer layer in layers)
-					layerIDs.Add(layer.ID);
-				Debug.Log(JToken.FromObject(layerIDs).ToString());
-				form.AddField("layers", JToken.FromObject(layerIDs));
-			}
-			form.AddField("type", type);
-			form.AddField("alters_energy_distribution", altersEnergyDistribution ? 1 : 0);
-			Debug.Log(form.ToString());
-			ServerCommunication.Instance.DoRequest<int>(Server.PostPlan(), form, PlanPostedCallback);
+			JObject dataObject = new JObject();
+			creationBatchCallID = a_batch.AddRequest<int>(Server.PostPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CREATE, handleDatabaseIDResult);
 		}
+
+		protected virtual void handleDatabaseIDResult(int a_result)
+		{
+			ID = a_result;
+		}
+
+		//public static void SendPlan(string planName, List<AbstractLayer> layers, int time, string type, bool altersEnergyDistribution)
+		//{
+		//	NetworkForm form = new NetworkForm();
+		//	form.AddField("country", SessionManager.Instance.CurrentUserTeamID);
+		//	form.AddField("name", planName);
+		//	form.AddField("time", time);
+
+		//	if (layers != null && layers.Count > 0)
+		//	{
+		//		List<int> layerIDs = new List<int>(layers.Count);
+		//		foreach (AbstractLayer layer in layers)
+		//			layerIDs.Add(layer.ID);
+		//		Debug.Log(JToken.FromObject(layerIDs).ToString());
+		//		form.AddField("layers", JToken.FromObject(layerIDs));
+		//	}
+		//	form.AddField("type", type);
+		//	form.AddField("alters_energy_distribution", altersEnergyDistribution ? 1 : 0);
+		//	Debug.Log(form.ToString());
+		//	ServerCommunication.Instance.DoRequest<int>(Server.PostPlan(), form, PlanPostedCallback);
+		//}
 
 		static void PlanPostedCallback(int newPlanID)
 		{
@@ -550,7 +562,7 @@ namespace MSP2050.Scripts
 			return result;
 		}
 		
-		public Dictionary<int, EPlanApprovalState> CalculateRequiredApproval(HashSet<int> countriesAffectedByRemovedGrids)
+		public Dictionary<int, EPlanApprovalState> CalculateRequiredApproval()
 		{
 			bool requireAMApproval = false;
 			EApprovalType requiredApprovalLevel = EApprovalType.NotDependent;
@@ -724,24 +736,6 @@ namespace MSP2050.Scripts
 			return PlanState.DESIGN;
 		}
 
-		public void SubmitEnergyError(bool value, bool checkDependencies, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
-			dataObject.Add("error", value ? 1 : 0);
-			dataObject.Add("check_dependent_plans", checkDependencies ? 1 : 0);
-			batch.AddRequest(Server.SetEnergyError(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_ERROR);
-		}
-
-		public void SubmitRemovedGrids(BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("plan", ID);
-			if(removedGrids!= null && removedGrids.Count > 0)
-				dataObject.Add("delete", JToken.FromObject(removedGrids));
-			batch.AddRequest(Server.SetPlanRemovedGrids(), dataObject, BatchRequest.BATCH_GROUP_PLAN_GRID_CHANGE);
-		}
-
 		public bool IsLayerpartOfPlan(AbstractLayer layer)
 		{
 			foreach (PlanLayer pl in PlanLayers)
@@ -903,6 +897,14 @@ namespace MSP2050.Scripts
 			dataObject.Add("user_name", SessionManager.Instance.CurrentUserName);
 			dataObject.Add("text", text);
 			batch.AddRequest(Server.PostPlanFeedback(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+		}
+
+		public virtual string GetDataBaseOrBatchIDReference()
+		{
+			if (ID != -1)
+				return ID.ToString();
+			else
+				return BatchRequest.FormatCallIDReference(creationBatchCallID);
 		}
 	}
 
