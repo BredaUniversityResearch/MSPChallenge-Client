@@ -8,9 +8,6 @@ namespace MSP2050.Scripts
 		private string identifier = string.Empty;
 
 		[SerializeField]
-		private TextMeshProUGUI summaryText = null;
-
-		[SerializeField]
 		private TextMeshProUGUI fullDescriptionText = null;
 
 		[SerializeField]
@@ -38,7 +35,6 @@ namespace MSP2050.Scripts
 		public void InitializeForData(NotificationData data)
 		{
 			identifier = data.identifier;
-			summaryText.text = data.summary;
 			fullDescriptionText.text = data.description;
 
 			bool buttonActive = !string.IsNullOrEmpty(data.buttonText) && data.onButtonPress != null;
