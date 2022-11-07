@@ -61,6 +61,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &2563065792040149344
 GameObject:
   m_ObjectHideFlags: 0
@@ -142,13 +143,15 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
   m_text: Geometry
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d494e35f22881064eada9a84c9a2883b, type: 2}
-  m_sharedMaterial: {fileID: -1197575542808204470, guid: d494e35f22881064eada9a84c9a2883b,
+  m_fontAsset: {fileID: 11400000, guid: 18cee9760efcb4e4492ca32ba61f5acc, type: 2}
+  m_sharedMaterial: {fileID: 7939425901369369162, guid: 18cee9760efcb4e4492ca32ba61f5acc,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -313,6 +316,7 @@ MonoBehaviour:
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &2256351863552808776
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -328,6 +332,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -355,6 +361,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 0
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -497,6 +504,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &2563065792727253095
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -568,6 +576,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
         m_MethodName: ToggleGraph
         m_Mode: 0
         m_Arguments:
@@ -643,6 +652,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -737,6 +748,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.49411765, g: 0.80784315, b: 0.99215686, a: 0}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -842,6 +855,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &2563065793023437973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -883,6 +897,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2563065792727253097}
+        m_TargetAssemblyTypeName: 
         m_MethodName: DisplayValuesForTeam
         m_Mode: 0
         m_Arguments:
