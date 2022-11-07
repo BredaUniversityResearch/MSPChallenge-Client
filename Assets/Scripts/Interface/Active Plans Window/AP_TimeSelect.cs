@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using static MSP2050.Scripts.PlanWizard;
 using UnityEngine.Events;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
@@ -12,10 +13,12 @@ namespace MSP2050.Scripts
 	{
 		public enum SelectedTimeUpdateReach { NoWhere = 0, MinYear = 1, Year = 2, MinMonth = 3, Month = 4 }
 
-		[SerializeField] CustomDropdown monthDropdown;
-		[SerializeField] CustomDropdown yearDropdown;
+		[SerializeField] CustomDropdown m_monthDropdown;
+		[SerializeField] CustomDropdown m_yearDropdown;
 		[SerializeField] Button m_confirmButton;
 		[SerializeField] Button m_cancelButton;
+		[SerializeField] Toggle m_startPlanToggle;
+		[SerializeField] GameObject m_startPlanToggleContainer;
 
 		bool m_initialised;
 		bool m_changed = false; //TODO: if min time above current time, this isnt set properly
@@ -32,10 +35,11 @@ namespace MSP2050.Scripts
 		{
 			m_initialised = true;
 
-			monthDropdown.onValueChanged.AddListener(MonthDropdownChanged);
-			yearDropdown.onValueChanged.AddListener(YearDropdownChanged);
+			m_monthDropdown.onValueChanged.AddListener(MonthDropdownChanged);
+			m_yearDropdown.onValueChanged.AddListener(YearDropdownChanged);
 			m_confirmButton.onClick.AddListener(OnAccept);
 			m_cancelButton.onClick.AddListener(TryClose);
+			m_startPlanToggle.onValueChanged.AddListener(OnStartingPlanToggled);
 		}
 
 		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
@@ -45,6 +49,17 @@ namespace MSP2050.Scripts
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
 
 			m_changed = false;
+			UpdateMinAndSetTime(a_content.StartTime);
+			if (SessionManager.Instance.AreWeGameMaster && !TimeManager.Instance.GameStarted)
+			{
+				m_startPlanToggleContainer.SetActive(true);
+				m_startPlanToggle.isOn = a_content.StartTime < 0;
+			}
+			else
+			{
+				m_startPlanToggleContainer.SetActive(false);
+				m_startPlanToggle.isOn = false;
+			}
 		}
 
 		void OnAccept()
@@ -66,14 +81,14 @@ namespace MSP2050.Scripts
 			{
 				//Moving to the past will only ever add more issues, so no need to check for removal
 				MultiLayerRestrictionIssueCollection resultIssues = new MultiLayerRestrictionIssueCollection();
-				ConstraintManager.Instance.CheckTypeUnavailableConstraints(editingPlan, GetNewPlanStartDate(), resultIssues);
+				ConstraintManager.Instance.CheckTypeUnavailableConstraints(m_plan, GetNewPlanStartDate(), resultIssues);
 				RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
 				IssueManager.Instance.AddIssuesToDeltaIfNew(resultIssues, deltaSet);
 			}
 			else
 			{
 				//Moving the plan to the future requires a full recheck, as we can't filter existing issue for TypeUnavailable ones
-				RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(m_plan, IssueManager.Instance.FindIssueDataForPlan(editingPlan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
+				RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(m_plan, IssueManager.Instance.FindIssueDataForPlan(m_plan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
 				if (issuesToSubmit != null)
 				{
 					issuesToSubmit.SubmitToServer(batch);
@@ -84,7 +99,7 @@ namespace MSP2050.Scripts
 			{
 				//TODO: Show actual unavailable types
 				DialogBoxManager.instance.NotificationWindow("Unavailable types",
-					"This plan contains entity types that are not yet available at the new implementation time. ",
+					"This plan contains entity types that are not yet available at the new implementation time.",
 					null, "Confirm");
 			}
 		}
@@ -97,6 +112,12 @@ namespace MSP2050.Scripts
 				return false;
 			}
 			return true;
+		}
+
+		void OnStartingPlanToggled(bool a_value)
+		{
+			m_monthDropdown.interactable = !a_value;
+			m_yearDropdown.interactable = !a_value;
 		}
 
 		/// <summary>
@@ -126,7 +147,7 @@ namespace MSP2050.Scripts
 		private SelectedTimeUpdateReach SetSelectedYear(int newYear, bool forceUpdated = false)
 		{
 			m_ignoreTimeUICallback = true;
-			yearDropdown.value = newYear - m_minYearSelectable;
+			m_yearDropdown.value = newYear - m_minYearSelectable;
 			m_finishYear = newYear;
 			SelectedTimeUpdateReach reach = UpdateMinSelectableMonth(forceUpdated);
 			m_ignoreTimeUICallback = false;
@@ -136,7 +157,7 @@ namespace MSP2050.Scripts
 		private SelectedTimeUpdateReach SetSelectedMonth(int newMonth)
 		{
 			m_ignoreTimeUICallback = true;
-			monthDropdown.value = newMonth - m_minMonthSelectable;
+			m_monthDropdown.value = newMonth - m_minMonthSelectable;
 			m_finishMonth = newMonth;
 			m_ignoreTimeUICallback = false;
 			return SelectedTimeUpdateReach.Month;
@@ -153,11 +174,11 @@ namespace MSP2050.Scripts
 
 			//Adds new year options
 			m_minYearSelectable = newMinimum;
-			yearDropdown.ClearOptions();
+			m_yearDropdown.ClearOptions();
 			List<string> options = new List<string>();
 			for (int i = m_minYearSelectable; i < SessionManager.Instance.MspGlobalData.session_num_years; i++)
 				options.Add((SessionManager.Instance.MspGlobalData.start + i).ToString());
-			yearDropdown.AddOptions(options);
+			m_yearDropdown.AddOptions(options);
 
 			//Checks if the set dropdown value needs to be updated
 			if (setValues)
@@ -186,11 +207,11 @@ namespace MSP2050.Scripts
 
 			//Adds new month options
 			m_minMonthSelectable = newMinimum;
-			monthDropdown.ClearOptions();
+			m_monthDropdown.ClearOptions();
 			List<string> options = new List<string>();
 			for (int i = m_minMonthSelectable; i < 12; i++)
 				options.Add(Util.MonthToMonthText(i));
-			monthDropdown.AddOptions(options);
+			m_monthDropdown.AddOptions(options);
 
 			//Checks if the set dropdown value needs to be updated
 			SelectedTimeUpdateReach reach;
@@ -224,6 +245,10 @@ namespace MSP2050.Scripts
 				m_finishMonth = value + m_minMonthSelectable;
 				m_finishTime = m_finishYear * 12 + m_finishMonth;
 			}
+		}
+		private int GetNewPlanStartDate()
+		{
+			return m_startPlanToggle.isOn ? -1 : m_finishTime;
 		}
 	}
 }
