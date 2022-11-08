@@ -233,7 +233,7 @@ namespace MSP2050.Scripts
                         if (!layersInThisPlan.Contains(kvp.Key))// Check if there are any new Layers
                         {
                             Debug.Log("Adding layer");
-                            editingPlan.AddNewPlanLayer(kvp.Key, batch);//then add them to the plan
+                            editingPlan.SubmitAddNewPlanLayer(kvp.Key, batch);//then add them to the plan
                         }
                     }
                 }
@@ -270,7 +270,7 @@ namespace MSP2050.Scripts
                     }
                     //Removes planlayer from plan and all geom on it
                     //Removes all connections, sockets, sources and output for geom on the layer
-                    editingPlan.RemovePlanLayer(editingPlan.GetPlanLayerForLayer(layer), batch);
+                    editingPlan.SubmitRemovePlanLayer(editingPlan.GetPlanLayerForLayer(layer), batch);
                 }
                 if (energyLayersRemoved)
                     needsEnergyError = true;

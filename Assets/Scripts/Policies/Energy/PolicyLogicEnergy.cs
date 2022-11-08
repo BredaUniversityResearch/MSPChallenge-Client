@@ -103,19 +103,6 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override APolicyData FormatPlanData(Plan a_plan)
-		{
-			//TODO
-			return null;
-		}
-
-		public override bool FormatGeneralData(out APolicyData a_data)
-		{
-			//TODO
-			a_data = null;
-			return false;
-		}
-
 		public override void AddToPlan(Plan a_plan)
 		{
 			AddToPlan(a_plan, false);

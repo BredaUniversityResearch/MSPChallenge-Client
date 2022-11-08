@@ -508,7 +508,7 @@ namespace MSP2050.Scripts
 			batch.AddRequest(Server.ChangePlanDate(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
-		public void AddNewPlanLayer(AbstractLayer layer, BatchRequest batch)
+		public void SubmitAddNewPlanLayer(AbstractLayer layer, BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("id", ID);
@@ -516,7 +516,7 @@ namespace MSP2050.Scripts
 			batch.AddRequest(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
-		public void RemovePlanLayer(PlanLayer planLayerToRemove, BatchRequest batch)
+		public void SubmitRemovePlanLayer(PlanLayer planLayerToRemove, BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("id", planLayerToRemove.ID);
@@ -905,6 +905,36 @@ namespace MSP2050.Scripts
 				return ID.ToString();
 			else
 				return BatchRequest.FormatCallIDReference(creationBatchCallID);
+		}
+
+		public PlanBackup GetPlanBackup()
+		{
+			PlanBackup result = new PlanBackup();
+			result.m_startTime = StartTime;
+			result.m_constructionStartTime = ConstructionStartTime;
+			result.m_name = Name;
+			result.m_description = Description;
+			result.m_issues = IssueManager.Instance.FindIssueDataForPlan(this);
+
+			result.m_approval = new Dictionary<int, EPlanApprovalState>();
+			foreach (var kvp in countryApproval)
+				result.m_approval.Add(kvp.Key, kvp.Value);
+
+			result.m_planLayers = new List<PlanLayerBackup>(PlanLayers.Count);
+			foreach (PlanLayer planlayer in PlanLayers)
+				result.m_planLayers.Add(new PlanLayerBackup(planlayer));
+
+			return result;
+		}
+
+		public void ResetToBackup(PlanBackup a_backup)
+		{
+			StartTime = a_backup.m_startTime;
+			ConstructionStartTime = a_backup.m_constructionStartTime;
+			Name = a_backup.m_name;
+			Description = a_backup.m_description;
+			IssueManager.Instance.SetIssuesForPlan(this, a_backup.m_issues);
+			countryApproval = a_backup.m_approval;
 		}
 	}
 

@@ -187,18 +187,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				dataObject.Add("geometry", JsonConvert.SerializeObject(GetLayerObject().geometry));
-				//dataObject.Add("geometry", JToken.FromObject(GetLayerObject().geometry));
 				dataObject.Add("country", Entity.Country);
-				//if (Entity.PlanLayer != null)
-				//{
-				//	dataObject.Add("layer", Entity.PlanLayer.ID);
-				//}
-				//else
-				//{
-				//	dataObject.Add("layer", Entity.Layer.ID);
-				//}
-				//if (persistentID != -1)
-				//	dataObject.Add("persistent", persistentID);
 				dataObject.Add("id", databaseID);
 
 				batch.AddRequest<int>(Server.UpdateGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_UPDATE, handleDatabaseIDResult);

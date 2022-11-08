@@ -83,7 +83,7 @@ namespace MSP2050.Scripts
 		public bool CreatingNew => m_creatingNew;
 
 		//Editing backup
-		private List<PlanIssueObject> m_issuesBackup;
+		private PlanBackup m_planBackup;
 		private int m_delayedPolicyEffects;
 
 		void Awake()
@@ -176,14 +176,10 @@ namespace MSP2050.Scripts
 				m_selectedContentToggle.ForceClose(false);
 			}
 
+			m_planBackup.ResetPlanToBackup(m_currentPlan);
 			PolicyManager.Instance.RestoreBackupForPlan(m_currentPlan);
-			if (m_issuesBackup != null)
-			{
-				IssueManager.Instance.SetIssuesForPlan(m_currentPlan, m_issuesBackup);
-			}
-			Main.Instance.fsm.UndoAllAndClearStacks();
-			//TODO: restore layers (&content)
-			//TODO: restore description, name, date
+			Main.Instance.fsm.ClearUndoRedo();
+			LayerManager.Instance.UpdateVisibleLayersToPlan(m_currentPlan);
 			m_currentPlan.AttemptUnlock();
 
 			if (a_closeWindow)
@@ -245,7 +241,7 @@ namespace MSP2050.Scripts
 			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_issuesBackup, true);
 			if (issuesToSubmit != null)
 			{
-				issuesToSubmit.SubmitToServer(batch);
+				issuesToSubmit.SubmitToServer(batch); //TODO: make sure this also contains typeunavailable constraints
 			}
 			m_issuesBackup = null;
 
@@ -342,7 +338,7 @@ namespace MSP2050.Scripts
 			if (!m_viewAllToggle.isOn)
 				m_viewAllToggle.isOn = true;
 
-			m_issuesBackup = IssueManager.Instance.FindIssueDataForPlan(m_currentPlan);
+			m_planBackup = new PlanBackup(m_currentPlan);
 			PolicyManager.Instance.StartEditingPlan(m_currentPlan);
 
 			PlansMonitor.RefreshPlanButtonInteractablity();
@@ -355,6 +351,7 @@ namespace MSP2050.Scripts
 		{
 			m_editing = false;
 
+			m_planBackup = null;
 			PolicyManager.Instance.StopEditingPlan(m_currentPlan);
 
 			InterfaceCanvas.Instance.StopEditing();//TODO: remove once toolbar removed

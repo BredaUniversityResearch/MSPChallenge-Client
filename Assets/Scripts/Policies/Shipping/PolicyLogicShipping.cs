@@ -26,19 +26,6 @@ namespace MSP2050.Scripts
 		public override void HandleGeneralUpdate(APolicyData a_data, EPolicyUpdateStage a_stage) 
 		{ }
 
-		public override APolicyData FormatPlanData(Plan a_plan) 
-		{
-			//TODO
-			return null;
-		}
-
-		public override bool FormatGeneralData(out APolicyData a_data)
-		{
-			//TODO
-			a_data = null;
-			return false;
-		}
-
 		public override void StopEditingPlan(Plan a_plan) 
 		{ }
 

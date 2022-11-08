@@ -333,54 +333,54 @@ namespace MSP2050.Scripts
 				if (kvp.Value.RemovedGeometry.Contains(kvp.Key.GetPersistentID()))
 					kvp.Value.SubmitMarkForDeletion(kvp.Key, batch);
 				else
-					kvp.Value.SubmitUnmarkForDeletion(kvp.Key, batch);
+					kvp.Value.SubmitUnmarkForDeletion(kvp.Key.GetPersistentID(), batch);
 			}
 
-			//Submit connections operation
-			if (addedCables.Count > 0)
-			{
-				SubmitConnections(addedCables, Server.CreateConnection(), batch);
-			}
-			if (updatedCables.Count > 0)
-			{
-				SubmitConnections(updatedCables, Server.UpdateConnection(), batch);
-			}
+			////Submit connections operation
+			//if (addedCables.Count > 0)
+			//{
+			//	SubmitConnections(addedCables, Server.CreateConnection(), batch);
+			//}
+			//if (updatedCables.Count > 0)
+			//{
+			//	SubmitConnections(updatedCables, Server.UpdateConnection(), batch);
+			//}
 		}
 
-		public static void SubmitConnections(List<EnergyLineStringSubEntity> addedCables, string endPoint, BatchRequest batch)
-		{
-			for(int i = 0; i < addedCables.Count; i++)
-			{
-				if (addedCables[i].connections == null || addedCables[i].connections.Count == 0)
-				{
-					Debug.LogError($"Trying to submit a cable with no connections. Cable ID: {addedCables[i].GetDatabaseID()}");
-				}
-				else if (addedCables[i].connections.Count < 2)
-				{
-					Debug.LogError($"Trying to submit a cable with a missing connection. Cable ID: {addedCables[i].GetDatabaseID()}. Existing connection to point with ID: {addedCables[i].connections[0].point.GetDatabaseID()}");
-				}
-				else
-				{
-					EnergyPointSubEntity first = null, second = null;
-					foreach (Connection conn in addedCables[i].connections)
-					{
-						if (conn.connectedToFirst)
-							first = conn.point;
-						else
-							second = conn.point;
-					}
+		//public static void SubmitConnections(List<EnergyLineStringSubEntity> addedCables, string endPoint, BatchRequest batch)
+		//{
+		//	for(int i = 0; i < addedCables.Count; i++)
+		//	{
+		//		if (addedCables[i].connections == null || addedCables[i].connections.Count == 0)
+		//		{
+		//			Debug.LogError($"Trying to submit a cable with no connections. Cable ID: {addedCables[i].GetDatabaseID()}");
+		//		}
+		//		else if (addedCables[i].connections.Count < 2)
+		//		{
+		//			Debug.LogError($"Trying to submit a cable with a missing connection. Cable ID: {addedCables[i].GetDatabaseID()}. Existing connection to point with ID: {addedCables[i].connections[0].point.GetDatabaseID()}");
+		//		}
+		//		else
+		//		{
+		//			EnergyPointSubEntity first = null, second = null;
+		//			foreach (Connection conn in addedCables[i].connections)
+		//			{
+		//				if (conn.connectedToFirst)
+		//					first = conn.point;
+		//				else
+		//					second = conn.point;
+		//			}
 
-					Vector2 coordinate = first.GetPosition();
+		//			Vector2 coordinate = first.GetPosition();
 
-					JObject dataObject = new JObject();
-					dataObject.Add("start", first.GetDataBaseOrBatchIDReference());
-					dataObject.Add("end", second.GetDataBaseOrBatchIDReference());
-					dataObject.Add("cable", addedCables[i].GetDataBaseOrBatchIDReference());
-					dataObject.Add("coords", $"[{coordinate.x},{coordinate.y}]");
-					batch.AddRequest(endPoint, dataObject, BatchRequest.BATCH_GROUP_CONNECTIONS);
-				}
-			}		
-		}
+		//			JObject dataObject = new JObject();
+		//			dataObject.Add("start", first.GetDataBaseOrBatchIDReference());
+		//			dataObject.Add("end", second.GetDataBaseOrBatchIDReference());
+		//			dataObject.Add("cable", addedCables[i].GetDataBaseOrBatchIDReference());
+		//			dataObject.Add("coords", $"[{coordinate.x},{coordinate.y}]");
+		//			batch.AddRequest(endPoint, dataObject, BatchRequest.BATCH_GROUP_CONNECTIONS);
+		//		}
+		//	}		
+		//}
 
 		public void ClearUndoRedoAndFinishEditing()
 		{
@@ -417,6 +417,12 @@ namespace MSP2050.Scripts
 			redoStack.Clear();
 
 			updateUndoRedoButtonEnabled();
+		}
+
+		public void ClearUndoRedo()
+		{
+			undoStack.Clear();
+			redoStack.Clear();
 		}
 
 		public void undo()

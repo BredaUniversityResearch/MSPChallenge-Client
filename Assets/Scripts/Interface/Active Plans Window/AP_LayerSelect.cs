@@ -109,7 +109,26 @@ namespace MSP2050.Scripts
 
 		public override void ApplyContent()
 		{
-			//TODO
+			//TODO: For added layers, check if plan previously contained this layer, if so: readd old planlayer, otherwise create new
+
+			//TODO: For removed layers, check dependencies:
+			if (layer.IsEnergyLayer())
+			{
+				energyLayersRemoved = true;
+				if (seperatelyRemoveGreenCables || seperatelyRemoveGreyCables)
+				{
+					PlanLayer currentPlanLayer = a_plan.GetPlanLayerForLayer(layer);
+					for (int i = 0; i < currentPlanLayer.GetNewGeometryCount(); ++i)
+					{
+						Entity t = currentPlanLayer.GetNewGeometryByIndex(i);
+						SubEntity subEnt = t.GetSubEntity(0);
+						if (network.ContainsKey(subEnt.GetDatabaseID()))
+							foreach (EnergyLineStringSubEntity cable in network[subEnt.GetDatabaseID()])
+								//TODO: just delete as part of plan, don't submit yet
+								cable.SubmitDelete(a_batch);//Connections will be removed up to 4 times
+					}
+				}
+			}
 		}
 
 		public override bool MayClose()

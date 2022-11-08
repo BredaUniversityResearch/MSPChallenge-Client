@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 		public const string STATE_ACTIVE = "ACTIVE";
 		public const string STATE_INACTIVE = "INACTIVE";
 
-		public int ID;
+		public int ID = -1;
 
 		public Plan Plan { get; set; }
 		public AbstractLayer BaseLayer; //Pointer
@@ -235,31 +235,31 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SubmitMarkForDeletion(SubEntity subEntity, BatchRequest batch)
+		public void SubmitMarkForDeletion(int persistentID, BatchRequest batch)
 		{
-			if (subEntity.GetPersistentID() == -1)
+			if (persistentID == -1)
 			{
 				Debug.LogError("Trying to mark subentity with persistent ID -1 for deletion. This is impossible.");
 				return;
 			}
 
 			JObject dataObject = new JObject();
-			dataObject.Add("id", subEntity.GetPersistentID());
+			dataObject.Add("id", persistentID);
 			dataObject.Add("plan", Plan.ID);
 			dataObject.Add("layer", ID);
 			batch.AddRequest(Server.MarkForDelete(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
 		}
 
-		public void SubmitUnmarkForDeletion(SubEntity subEntity, BatchRequest batch)
+		public void SubmitUnmarkForDeletion(int persistentID, BatchRequest batch)
 		{
-			if (subEntity.GetPersistentID() == -1)
+			if (persistentID == -1)
 			{
 				Debug.LogError("Trying to unmark subentity with persistent ID -1 for deletion. This is impossible.");
 				return;
 			}
 
 			JObject dataObject = new JObject();
-			dataObject.Add("id", subEntity.GetPersistentID());
+			dataObject.Add("id", persistentID);
 			dataObject.Add("plan", Plan.ID);
 			batch.AddRequest(Server.UnmarkForDelete(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
 		}

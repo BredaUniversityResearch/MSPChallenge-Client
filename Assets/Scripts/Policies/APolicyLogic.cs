@@ -17,8 +17,6 @@ namespace MSP2050.Scripts
 
 		public abstract void Destroy();
 		public abstract void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel);
-		public abstract APolicyData FormatPlanData(Plan a_plan);
-		public abstract bool FormatGeneralData(out APolicyData a_data);
 		public virtual bool HasError(APolicyPlanData a_planData) => false;
 
 		//Editing

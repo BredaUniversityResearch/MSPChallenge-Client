@@ -70,29 +70,26 @@ namespace MSP2050.Scripts
 
 		public override void ApplyContent()
 		{
-			if (m_finishTime == m_plan.StartTime)
+			if (GetNewPlanStartDate() == m_plan.StartTime || !m_APWindow.Editing)
 				return;
 
 			//TODO: change planlayer times
 			bool hasUnavailableTypes = false;
-			m_plan.ChangePlanDate(GetNewPlanStartDate(), batch);
+			m_plan.StartTime = GetNewPlanStartDate();
+			PlanManager.Instance.UpdatePlanTime(m_plan);
 
 			if (GetNewPlanStartDate() < m_plan.StartTime)
 			{
 				//Moving to the past will only ever add more issues, so no need to check for removal
 				MultiLayerRestrictionIssueCollection resultIssues = new MultiLayerRestrictionIssueCollection();
 				ConstraintManager.Instance.CheckTypeUnavailableConstraints(m_plan, GetNewPlanStartDate(), resultIssues);
-				RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
-				IssueManager.Instance.AddIssuesToDeltaIfNew(resultIssues, deltaSet);
+				//RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
+				//IssueManager.Instance.AddIssuesToDeltaIfNew(resultIssues, deltaSet);
 			}
 			else
 			{
 				//Moving the plan to the future requires a full recheck, as we can't filter existing issue for TypeUnavailable ones
 				RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(m_plan, IssueManager.Instance.FindIssueDataForPlan(m_plan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
-				if (issuesToSubmit != null)
-				{
-					issuesToSubmit.SubmitToServer(batch);
-				}
 			}
 			
 			if (hasUnavailableTypes)

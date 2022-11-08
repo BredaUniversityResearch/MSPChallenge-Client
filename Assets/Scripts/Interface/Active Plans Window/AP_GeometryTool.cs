@@ -58,6 +58,7 @@ namespace MSP2050.Scripts
 			{
 				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(m_currentlyEditingLayer.BaseLayer, false);
 			}
+			Main.Instance.fsm.ClearUndoRedo();
 			m_currentlyEditingLayer = null;
 		}
 
