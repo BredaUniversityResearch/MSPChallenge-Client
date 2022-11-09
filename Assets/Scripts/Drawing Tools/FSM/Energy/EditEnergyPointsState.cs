@@ -144,10 +144,14 @@ namespace MSP2050.Scripts
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 
 				fsm.AddToUndoStack(new ModifyEnergyPointOperation(subEntity, planLayer, subEntity.GetDataCopy()));
+				subEntity.edited = true;
 
 				//Create undo operations for attached cables
 				foreach (Connection con in (subEntity as EnergyPointSubEntity).connections)
+				{
 					con.cable.AddModifyLineUndoOperation(fsm);
+					con.cable.edited = true;
+				}
 
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}

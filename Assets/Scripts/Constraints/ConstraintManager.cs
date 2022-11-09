@@ -296,7 +296,7 @@ namespace MSP2050.Scripts
 								ConstraintTarget issueConstraint = FindTypeUnavailableConstraint(layer.BaseLayer, type);
 								if (issueConstraint != null)
 								{
-									issueCollection.AddIssue(plan, layer, issueLocation, issueConstraint);
+									issueCollection.AddIssue(layer, issueLocation, issueConstraint);
 									result = true;
 								}
 							}
@@ -521,7 +521,7 @@ namespace MSP2050.Scripts
 						{
 							if (satisfactionRule == EConstraintSatisfyRule.All)
 							{
-								resultIssueCollection.AddIssue(checkingThisPlan, planLayer, issueLocation, target);
+								resultIssueCollection.AddIssue(planLayer, issueLocation, target);
 							}
 						}
 						else if (satisfactionRule == EConstraintSatisfyRule.Any)
@@ -534,7 +534,7 @@ namespace MSP2050.Scripts
 
 				if (satisfactionRule == EConstraintSatisfyRule.Any && anySatisfies == false)
 				{
-					resultIssueCollection.AddIssue(checkingThisPlan, planLayer, a.BoundingBox.center, target);
+					resultIssueCollection.AddIssue(planLayer, a.BoundingBox.center, target);
 				}
 			}
 		}
@@ -565,7 +565,7 @@ namespace MSP2050.Scripts
 							{
 								if (satisfyRule == EConstraintSatisfyRule.All)
 								{
-									resultIssueCollection.AddIssue(checkingThisPlan, futureLayer, issueLocation, target);
+									resultIssueCollection.AddIssue(futureLayer, issueLocation, target);
 								}
 							}
 							else if (satisfyRule == EConstraintSatisfyRule.Any)
@@ -578,7 +578,7 @@ namespace MSP2050.Scripts
 
 					if (satisfyRule == EConstraintSatisfyRule.Any && anySatisfies == false)
 					{
-						resultIssueCollection.AddIssue(checkingThisPlan, futureLayer, newGeometry.GetSubEntity(0).BoundingBox.center, target);
+						resultIssueCollection.AddIssue(futureLayer, newGeometry.GetSubEntity(0).BoundingBox.center, target);
 					}
 				}
 			}

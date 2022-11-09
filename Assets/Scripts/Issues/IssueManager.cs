@@ -426,31 +426,17 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void OnIssuesReceived(List<PlanIssueObject> warningUpdateData)
+		public void OnPlanIssueReceivedFromServer(PlanIssueObject a_planIssue, PlanLayer a_planLayer)
 		{
-			foreach (PlanIssueObject planIssue in warningUpdateData)
+			if (a_planIssue.active)
 			{
-				OnPlanIssueReceivedFromServer(planIssue);
+				PlanIssueInstance planIssueInstance = AddPlanIssue(a_planLayer, a_planIssue);
+				//Overwrite the ID we received back from te server to ensure it's up to date. This might be a redundant operation, but it might also not be a redundant operation when the issue is newly created.
+				planIssueInstance.PlanIssueData.issue_database_id = a_planIssue.issue_database_id;
 			}
-		}
-
-		private void OnPlanIssueReceivedFromServer(PlanIssueObject planIssue)
-		{
-			PlanLayer targetPlanLayer = PlanManager.Instance.GetPlanLayer(planIssue.plan_layer_id);
-			//This can happen if someone has an error on a plan layer and deletes that layer from their plan.
-			//The plan layer will only not exist on re-connect so this should be safe to ignore then.
-			if (targetPlanLayer != null)
+			else
 			{
-				if (planIssue.active)
-				{
-					PlanIssueInstance planIssueInstance = AddPlanIssue(targetPlanLayer, planIssue);
-					//Overwrite the ID we received back from te server to ensure it's up to date. This might be a redundant operation, but it might also not be a redundant operation when the issue is newly created.
-					planIssueInstance.PlanIssueData.issue_database_id = planIssue.issue_database_id;
-				}
-				else
-				{
-					RemoveIssueForPlanIssueObject(targetPlanLayer, planIssue);
-				}
+				RemoveIssueForPlanIssueObject(a_planLayer, a_planIssue);
 			}
 		}
 

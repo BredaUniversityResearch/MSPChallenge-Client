@@ -158,6 +158,7 @@ namespace MSP2050.Scripts
 			newEntity.Country = country;
 			PointSubEntity newSubEntity = newEntity.GetSubEntity(0) as PointSubEntity;
 			newSubEntity.SetPersistentID(persistentID);
+			newSubEntity.edited = true;
 			fsm.AddToUndoStack(new CreatePointOperation(newSubEntity, planLayer, true));
 			newSubEntity.DrawGameObject(baseLayer.LayerGameObject.transform);
 			return newSubEntity;
@@ -184,6 +185,7 @@ namespace MSP2050.Scripts
 			if (subEntity.Entity.PlanLayer == planLayer)
 			{
 				fsm.AddToUndoStack(new ModifyPointOperation(subEntity, planLayer, subEntity.GetDataCopy()));
+				subEntity.edited = true;
 			}
 			else
 			{

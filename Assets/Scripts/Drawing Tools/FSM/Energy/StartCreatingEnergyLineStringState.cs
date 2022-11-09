@@ -87,6 +87,7 @@ namespace MSP2050.Scripts
 			baseLayer.activeEntities.Add(entity);
 			entity.EntityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
 			LineStringSubEntity subEntity = entity.GetSubEntity(0) as LineStringSubEntity;
+			subEntity.edited = true;
 
 			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			fsm.SetCurrentState(new CreatingEnergyLineStringState(fsm, planLayer, subEntity));

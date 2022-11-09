@@ -78,6 +78,7 @@ namespace MSP2050.Scripts
 			PointEntity entity = baseLayer.CreateNewPointEntity(finalPosition, selectedType != null ? selectedType : new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
 			baseLayer.activeEntities.Add(entity);
 			PointSubEntity subEntity = entity.GetSubEntity(0) as PointSubEntity;
+			subEntity.edited = true;
 			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 
 			fsm.TriggerGeometryComplete();

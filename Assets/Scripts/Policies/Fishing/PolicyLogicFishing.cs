@@ -56,7 +56,7 @@ namespace MSP2050.Scripts
 
 		public override void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch) 
 		{
-			a_plan.fishingDistributionDelta.SubmitToServer(a_plan.ID, a_batch);
+			a_plan.fishingDistributionDelta.SubmitToServer(a_plan.GetDataBaseOrBatchIDReference(), a_batch);
 		}
 
 		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)

@@ -11,12 +11,12 @@ namespace MSP2050.Scripts
 
 		public bool Equals(PlanLayer x, PlanLayer y)
 		{
-			return x.ID == y.ID;
+			return x.ID == y.ID && x.BaseLayer.ID == y.BaseLayer.ID;
 		}
 
 		public int GetHashCode(PlanLayer obj)
 		{
-			return obj.ID;
+			return obj.BaseLayer.ID;
 		}
 	};
 }

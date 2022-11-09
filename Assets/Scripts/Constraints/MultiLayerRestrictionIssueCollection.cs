@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 	{
 		private Dictionary<PlanLayer, List<PlanIssueObject>> issuesPerLayer = new Dictionary<PlanLayer, List<PlanIssueObject>>(8, PlanLayerIdEqualityComparer.Instance);
 
-		public void AddIssue(Plan offendingPlan, PlanLayer targetLayer, Vector3 pos, ConstraintTarget constraint)
+		public void AddIssue(PlanLayer targetLayer, Vector3 pos, ConstraintTarget constraint)
 		{
 			List<PlanIssueObject> issueList;
 			if (!issuesPerLayer.TryGetValue(targetLayer, out issueList))
@@ -16,7 +16,7 @@ namespace MSP2050.Scripts
 				issuesPerLayer.Add(targetLayer, issueList);
 			}
 
-			PlanIssueObject planIssueObject = new PlanIssueObject(constraint.issueType, pos.x, pos.y, offendingPlan.ID, targetLayer.ID, constraint.constraintId);
+			PlanIssueObject planIssueObject = new PlanIssueObject(constraint.issueType, pos.x, pos.y, targetLayer.BaseLayer.ID, constraint.constraintId);
 			issueList.Add(planIssueObject);
 		}
 

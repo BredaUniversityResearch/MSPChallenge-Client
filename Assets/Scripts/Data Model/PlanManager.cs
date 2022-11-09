@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using System;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace MSP2050.Scripts
 {
@@ -22,8 +23,7 @@ namespace MSP2050.Scripts
 		}
 
 		private List<Plan> plans = new List<Plan>();
-		private Dictionary<int, PlanLayer> planLayers = new Dictionary<int, PlanLayer>();
-		private HashSet<Plan> unseenPlanChanges = new HashSet<Plan>();
+		public List<Plan> Plans => plans;
 
 		public delegate void PlansEventDelegate(Plan plan);
 		public delegate void PlansUpdateEventDelegate(Plan plan, int oldTime);
@@ -35,12 +35,7 @@ namespace MSP2050.Scripts
 		[HideInInspector] public PlanViewState planViewState = PlanViewState.All;
 		[HideInInspector] public Plan planViewing;
 		[HideInInspector] public int timeViewing = -1; //Used if planViewing is null. -1 is current time.
-		[HideInInspector] public bool inPlanUIChange;
-		private int planToViewOnUpdate;
-
 		private bool ignoreRedrawOnViewStateChange = false;
-
-		public List<Plan> Plans => plans;
 
 		void Start()
 		{
@@ -71,7 +66,6 @@ namespace MSP2050.Scripts
 				PlanAdded(targetPlan);
 			}
 
-			//RestrictionAreaManager.instance.ProcessReceivedRestrictions(targetPlan, planObject.restriction_settings);
 			return targetPlan;
 		}
 
@@ -342,18 +336,6 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public PlanLayer GetPlanLayer(int ID)
-		{
-			if (planLayers.ContainsKey(ID))
-				return planLayers[ID];
-			else
-				return null;
-		}
-
-		public bool RemovePlanLayer(PlanLayer planLayer)
-		{
-			return planLayers.Remove(planLayer.ID);
-		}
 
 		/// <summary>
 		/// Called whenever a new month starts
@@ -375,7 +357,7 @@ namespace MSP2050.Scripts
 		{
 			//Add planLayers to manager, but don't add to UI individually (done in a batch by plan)
 			foreach (PlanLayer planLayer in plan.PlanLayers)
-				PlanLayerAdded(plan, planLayer, false);
+				IssueManager.Instance.InitialiseIssuesForPlanLayer(planLayer);
 
 			//Show plan if it isnt a hidden plan
 			if (plan.StartTime >= 0 || SessionManager.Instance.AreWeGameMaster)
@@ -468,53 +450,9 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public void PlanLayerAdded(Plan plan, PlanLayer addedLayer, bool addToUI = true)
-		{
-			planLayers[addedLayer.ID] = addedLayer;
-			IssueManager.Instance.InitialiseIssuesForPlanLayer(addedLayer);
-			if (addToUI)
-			{ 
-				//TODO: if viewing plan, add to active plan window?
-			}
-		}
-
 		public void PlanLayerRemoved(Plan plan, PlanLayer removedLayer)
 		{
 			IssueManager.Instance.DeleteIssuesForPlanLayer(removedLayer);
-			RemovePlanLayer(removedLayer);
-		}
-
-		public void ViewPlanWithIDWhenReceived(int targetPlanID)
-		{
-			bool found = false;
-			foreach (Plan plan in plans)
-			{
-				if (plan.ID == targetPlanID)
-				{
-					found = true;
-					ShowPlan(plan);
-					PlanDetails.SelectPlan(plan);
-				}
-			}
-
-			if(!found)
-				planToViewOnUpdate = targetPlanID;
-		}
-
-		public void CheckIfExpectedPlanReceived()
-		{
-			if (planToViewOnUpdate == -1)
-				return;
-
-			foreach (Plan plan in plans)
-			{
-				if (plan.ID == planToViewOnUpdate)
-				{
-					planToViewOnUpdate = -1;
-					ShowPlan(plan);
-					PlanDetails.SelectPlan(plan);
-				}
-			}
 		}
 	}
 }

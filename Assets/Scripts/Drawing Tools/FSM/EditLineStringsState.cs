@@ -234,6 +234,7 @@ namespace MSP2050.Scripts
 			newSubEntity.SetPersistentID(persistentID);
 			newEntity.AddSubEntity(newSubEntity);
 			newSubEntity.SetDataToCopy(dataCopy);
+			newSubEntity.edited = true;
 
 			fsm.AddToUndoStack(new CreateLineStringOperation(newSubEntity, planLayer, UndoOperation.EditMode.Modify, true));
 			newSubEntity.DrawGameObject(baseLayer.LayerGameObject.transform);
@@ -265,6 +266,7 @@ namespace MSP2050.Scripts
 			if (planLayer == subEntity.Entity.PlanLayer)
 			{
 				fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
+				subEntity.edited = true;
 			}
 			else
 			{

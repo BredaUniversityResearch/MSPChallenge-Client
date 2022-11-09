@@ -324,7 +324,7 @@ namespace MSP2050.Scripts
 			//Add new grid on server and get databaseID
 			JObject dataObject = new JObject();
 			dataObject.Add("name", name);
-			dataObject.Add("plan", plan.ID);
+			dataObject.Add("plan", plan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("distribution_only", JsonConvert.SerializeObject(distributionOnly));
 			if (persistentID != -1)
 				dataObject.Add("persistent", persistentID);

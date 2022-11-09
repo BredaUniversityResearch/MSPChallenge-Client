@@ -211,7 +211,7 @@ namespace MSP2050.Scripts
             bool timeChanged = GetNewPlanStartDate() != editingPlan.StartTime;
 
             //Rename Plan
-            editingPlan.RenamePlan(planName.text, batch);
+            editingPlan.SubmitName(planName.text, batch);
 
             //Only time change and renaming are allowed for DELETED plans
             if (editingPlan.State != Plan.PlanState.DELETED)
@@ -358,7 +358,7 @@ namespace MSP2050.Scripts
 
             if (timeChanged)
             {
-                editingPlan.ChangePlanDate(GetNewPlanStartDate(), batch);
+                editingPlan.SubmitPlanDate(GetNewPlanStartDate(), batch);
 
                 if (!issueCheckDone)
                 {

@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		public const string STATE_INACTIVE = "INACTIVE";
 
 		public int ID = -1;
+		public int creationBatchCallID;
 
 		public Plan Plan { get; set; }
 		public AbstractLayer BaseLayer; //Pointer
@@ -61,14 +62,6 @@ namespace MSP2050.Scripts
 			{
 				layerUpdateTimes.Add(BaseLayer, plan.StartTime);
 			}
-		}
-
-		public void UpdatePlanLayer(PlanLayerObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
-		{
-			// wait until all local sub entities have a database ID until processing the updated plan layer
-			//ServerCommunication.Instance.WaitForCondition(AllNewSubEntitiesHaveIDs, () => updatePlanLayer(updatedData, tracker));
-
-			updatePlanLayer(updatedData, layerUpdateTimes);
 		}
 
 		private SubEntity getSubentityOfNewGeometry(int ID)
@@ -142,7 +135,7 @@ namespace MSP2050.Scripts
 			return true;
 		}
 
-		private void updatePlanLayer(PlanLayerObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
+		public void UpdatePlanLayer(PlanLayerObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
 			// Puts existing geometry in a dictionary
 			Dictionary<int, SubEntity> noLongerAddedGeometry = new Dictionary<int, SubEntity>();
@@ -245,8 +238,8 @@ namespace MSP2050.Scripts
 
 			JObject dataObject = new JObject();
 			dataObject.Add("id", persistentID);
-			dataObject.Add("plan", Plan.ID);
-			dataObject.Add("layer", ID);
+			dataObject.Add("plan", Plan.GetDataBaseOrBatchIDReference());
+			dataObject.Add("layer", GetDataBaseOrBatchIDReference());
 			batch.AddRequest(Server.MarkForDelete(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
 		}
 
@@ -260,7 +253,7 @@ namespace MSP2050.Scripts
 
 			JObject dataObject = new JObject();
 			dataObject.Add("id", persistentID);
-			dataObject.Add("plan", Plan.ID);
+			dataObject.Add("plan", Plan.GetDataBaseOrBatchIDReference());
 			batch.AddRequest(Server.UnmarkForDelete(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
 		}
 
@@ -378,6 +371,26 @@ namespace MSP2050.Scripts
 		public void ClearNewGeometry()
 		{
 			newGeometry.Clear();
+		}
+
+		public void SubmitNewPlanLayer(BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("id", Plan.GetDataBaseOrBatchIDReference());
+			dataObject.Add("layerid", BaseLayer.ID);
+			creationBatchCallID = batch.AddRequest<int>(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE, HandleDatabaseIDResult);
+		}
+		void HandleDatabaseIDResult(int a_result)
+		{
+			ID = a_result;
+		}
+
+		public string GetDataBaseOrBatchIDReference()
+		{
+			if (ID != -1)
+				return ID.ToString();
+			else
+				return BatchRequest.FormatCallIDReference(creationBatchCallID);
 		}
 	}
 }

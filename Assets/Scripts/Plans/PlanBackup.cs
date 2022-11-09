@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace MSP2050.Scripts
 {
@@ -51,7 +52,7 @@ namespace MSP2050.Scripts
 					a_plan.PlanLayers.Add(layerbackup.m_planLayer);
 					if (a_plan.State != Plan.PlanState.DELETED)
 						layerbackup.m_planLayer.BaseLayer.AddPlanLayer(layerbackup.m_planLayer);
-					PlanManager.Instance.PlanLayerAdded(a_plan, layerbackup.m_planLayer);
+					IssueManager.Instance.InitialiseIssuesForPlanLayer(layerbackup.m_planLayer);
 				}
 				layerbackup.ResetLayerToBackup();
 			}
@@ -66,6 +67,15 @@ namespace MSP2050.Scripts
 					a_plan.PlanLayers[i].RemoveGameObjects();
 					a_plan.PlanLayers.RemoveAt(i);
 					i--;
+				}
+			}
+
+			//Finish editing for all geometry in old state
+			foreach (PlanLayerBackup planLayer in m_planLayers)
+			{
+				foreach (SubEntity sub in planLayer.m_newGeometry)
+				{
+					sub.FinishEditing();
 				}
 			}
 			IssueManager.Instance.SetIssuesForPlan(a_plan, m_issues);
@@ -147,7 +157,8 @@ namespace MSP2050.Scripts
 				if (!oldLayerIds.Contains(planlayer.BaseLayer.ID))
 				{
 					//New layer in plan, submit creation and all content
-					a_plan.SubmitAddNewPlanLayer(planlayer.BaseLayer, a_batch); //TODO: handle new planlayer ID being set
+					planlayer.SubmitNewPlanLayer(a_batch);
+					
 					foreach (int removedID in planlayer.RemovedGeometry)
 					{
 						planlayer.SubmitMarkForDeletion(removedID, a_batch);
@@ -156,6 +167,12 @@ namespace MSP2050.Scripts
 					{
 						newAddedEntity.GetSubEntity(0).SubmitNew(a_batch);
 					}
+				}
+
+				//Finish editing for all geometry in new state
+				foreach (Entity entity in planlayer.GetNewGeometry())
+				{
+					entity.GetSubEntity(0).FinishEditing();
 				}
 			}
 		}

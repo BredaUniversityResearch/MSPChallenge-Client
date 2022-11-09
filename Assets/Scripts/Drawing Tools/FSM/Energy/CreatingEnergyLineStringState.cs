@@ -99,6 +99,7 @@ namespace MSP2050.Scripts
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 			subEntity.AddPoint(finalPosition);
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
+			subEntity.edited = true;
 
 			fsm.AddToUndoStack(new ModifyEnergyLineStringOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
 		}

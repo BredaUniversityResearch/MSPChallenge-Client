@@ -59,7 +59,7 @@ namespace MSP2050.Scripts
 		{
 			BatchRequest batch = new BatchRequest(true);
 
-			lockedPlan.SetDescription(descriptionInputField.text, batch);
+			lockedPlan.SubmitDescription(descriptionInputField.text, batch);
 
 			lockedPlan.AttemptUnlock(batch);
 			InterfaceCanvas.ShowNetworkingBlocker();

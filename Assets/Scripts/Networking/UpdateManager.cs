@@ -203,13 +203,6 @@ namespace MSP2050.Scripts
 					}
 				}
 			}
-
-			if (a_update.plan_issues != null)
-			{
-				IssueManager.Instance.OnIssuesReceived(a_update.plan_issues);
-			}
-
-			PlanManager.Instance.CheckIfExpectedPlanReceived();
 		}
 	}
 	
@@ -261,6 +254,7 @@ namespace MSP2050.Scripts
 		//Added
 		[JsonConverter(typeof(PolicyPlanUpdateJsonConverter))]
 		public APolicyData[] policies;
+		public List<PlanIssueObject> issues; //Moved from Update.WarningObject
 
 		//Removed
 		//public string type; // energy,fishing,shipping : ex 1,0,1
@@ -312,7 +306,6 @@ namespace MSP2050.Scripts
 		public double update_time; //Timestamp received from the server at which this update was accurate.
 
 		//Added
-		public List<PlanIssueObject> plan_issues; //Moved from WarningObject
 		[JsonConverter(typeof(PolicyUpdateJsonConverter))]
 		public APolicyData[] policy_updates;
 		[JsonConverter(typeof(SimulationUpdateJsonConverter))]

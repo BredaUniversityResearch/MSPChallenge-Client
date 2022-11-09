@@ -220,7 +220,7 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_issuesBackup, true);
+			ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_planBackup.m_issues, true);
 			m_delayedPolicyEffects = PolicyManager.Instance.CalculateEffectsOfEditing(m_currentPlan);
 			if(m_delayedPolicyEffects == 0)
 				SubmitChanges();
@@ -234,29 +234,38 @@ namespace MSP2050.Scripts
 				m_currentPlan.SendPlanCreation(batch);
 
 			//Calculate and submit the countries this plan requires approval from
-			Dictionary<int, EPlanApprovalState> newApproval = m_currentPlan.CalculateRequiredApproval();
-			m_currentPlan.SubmitRequiredApproval(batch, newApproval);
+			m_currentPlan.CalculateRequiredApproval();
+			m_currentPlan.SubmitRequiredApproval(batch);
 
 			//Check issues again and submit according to latest tests. To ensure that changes in other plans while editing this plan get detected as well.
-			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_issuesBackup, true);
+			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_planBackup.m_issues, true);
 			if (issuesToSubmit != null)
 			{
-				issuesToSubmit.SubmitToServer(batch); //TODO: make sure this also contains typeunavailable constraints
+				issuesToSubmit.SubmitToServer(batch); 
 			}
-			m_issuesBackup = null;
 
-			//Submit all geometry changes. Automatically submits corresponding energy_output and connection for geom. 
-			Main.Instance.fsm.SubmitAllChanges(batch);
+			//Submit all layer and geometry changes. Automatically submits corresponding energy_output and connection for geom. 
+			m_planBackup.SubmitChanges(m_currentPlan, batch);
+			foreach(PlanLayer planLayer in m_currentPlan.PlanLayers)
+			{
+				foreach(Entity entity in planLayer.GetNewGeometry())
+				{
+					entity.GetSubEntity(0).FinishEditing();
+				}
+			}
 
 			//Submit policy data after geometry has a batch id
 			PolicyManager.Instance.SubmitChangesToPlan(m_currentPlan, batch);
 
 			//Plan info
-			m_currentPlan.SetDescription(m_planDescription.text, batch);
-			m_currentPlan.RenamePlan(m_planName.text, batch);
-			m_currentPlan.ChangePlanDate(m_currentPlan.StartTime, batch);
+			m_currentPlan.Description = m_planDescription.text;
+			m_currentPlan.Name = m_planName.text;
+			m_currentPlan.SubmitDescription(batch);
+			m_currentPlan.SubmitName(batch);
+			m_currentPlan.SubmitPlanDate(batch);
 
-			m_currentPlan.AttemptUnlock(batch);
+			if(m_currentPlan.ID != -1)
+				m_currentPlan.AttemptUnlock(batch);
 			batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
 		}
 
@@ -355,13 +364,12 @@ namespace MSP2050.Scripts
 			PolicyManager.Instance.StopEditingPlan(m_currentPlan);
 
 			InterfaceCanvas.Instance.StopEditing();//TODO: remove once toolbar removed
-			Main.Instance.fsm.ClearUndoRedoAndFinishEditing();
+			Main.Instance.fsm.ClearUndoRedo();
 			Main.Instance.fsm.StopEditing();
 
 			PlansMonitor.RefreshPlanButtonInteractablity();
 			LayerManager.Instance.ClearNonReferenceLayers();
-			LayerManager.Instance.RedrawVisibleLayers();
-			UpdateSectionActivity();
+			PlanManager.Instance.ShowPlan(m_currentPlan); //Also refreshed our content & activity
 		}
 
 		public void CloseWindow()

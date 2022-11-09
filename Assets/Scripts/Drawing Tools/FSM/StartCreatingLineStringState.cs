@@ -78,6 +78,7 @@ namespace MSP2050.Scripts
 			LineStringSubEntity subEntity = entity.GetSubEntity(0) as LineStringSubEntity;
 
 			entity.DrawGameObjects(baseLayer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
+			subEntity.edited = true;
 			fsm.SetCurrentState(new CreatingLineStringState(fsm, planLayer, subEntity));
 
 			fsm.AddToUndoStack(new CreateLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Create));

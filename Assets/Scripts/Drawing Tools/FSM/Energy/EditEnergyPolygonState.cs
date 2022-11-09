@@ -106,7 +106,10 @@ namespace MSP2050.Scripts
 
 				//Create undo operations for cables attached to sourcepoint
 				foreach (Connection con in (subEntity as EnergyPolygonSubEntity).sourcePoint.connections)
+				{ 
 					con.cable.AddModifyLineUndoOperation(fsm);
+					con.cable.edited = true;
+				}
 
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}

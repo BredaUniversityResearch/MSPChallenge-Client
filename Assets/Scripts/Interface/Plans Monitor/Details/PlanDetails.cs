@@ -436,7 +436,7 @@ namespace MSP2050.Scripts
 						//Check for later plans overlapping with this one
 						submitDelayed = true;
 						NetworkForm form = new NetworkForm();
-						form.AddField("plan_id", changedPlan.ID);
+						form.AddField("plan_id", changedPlan.GetDataBaseOrBatchIDReference());
 						ServerCommunication.Instance.DoRequest<int[]>(Server.GetDependentEnergyPlans(), form, (planErrorsIDs) => CreatePlanChangeConfirmPopup(planErrorsIDs, changedPlan, newState, batch));
 
 					}
@@ -457,14 +457,14 @@ namespace MSP2050.Scripts
 						//Check if the plan wasnt invalidated while being edited
 						Debug.Log("Request prev overlap for plan: " + changedPlan.ID);
 						NetworkForm form = new NetworkForm();
-						form.AddField("plan_id", changedPlan.ID);
+						form.AddField("plan_id", changedPlan.GetDataBaseOrBatchIDReference());
 						ServerCommunication.Instance.DoRequest<int>(Server.OverlapsWithPreviousEnergyPlans(), form, (i) =>
 						{
 							if (i == 0)
 							{
 								//Check for later plans overlapping with this one
 								NetworkForm form2 = new NetworkForm();
-								form2.AddField("plan_id", changedPlan.ID);
+								form2.AddField("plan_id", changedPlan.GetDataBaseOrBatchIDReference());
 								ServerCommunication.Instance.DoRequest<int[]>(Server.GetOverlappingEnergyPlans(), form2, (planErrorsIDs2) => CreatePlanChangeConfirmPopup(planErrorsIDs2, changedPlan, newState, batch));
 							}
 							else

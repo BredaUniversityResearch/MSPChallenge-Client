@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace MSP2050.Scripts
 {
@@ -33,14 +34,10 @@ namespace MSP2050.Scripts
 
 		private bool requestingLock;
 
-		public Plan(/*string a_name, string a_description, int a_startTime*/)
+		public Plan()
 		{
-			//Name = a_name;
-			//Description = a_description;
-			//StartTime = a_startTime;
 			State = Plan.PlanState.DESIGN;
 			Country = SessionManager.Instance.CurrentUserTeamID;
-			//ConstructionStartTime = a_startTime;
 		}
 
 		public Plan(PlanObject planObject, Dictionary<AbstractLayer, int> layerUpdateTimes)
@@ -339,7 +336,7 @@ namespace MSP2050.Scripts
 						PlanLayers.Add(planLayer);
 						if (State != PlanState.DELETED)
 							planLayer.BaseLayer.AddPlanLayer(planLayer);
-						PlanManager.Instance.PlanLayerAdded(this, planLayer);
+						IssueManager.Instance.InitialiseIssuesForPlanLayer(planLayer);
 						planLayer.DrawGameObjects();
 						layersChanged = true;
 					}
@@ -372,6 +369,16 @@ namespace MSP2050.Scripts
 				PolicyManager.Instance.RunPlanUpdate(updatedData.policies, this, APolicyLogic.EPolicyUpdateStage.General);
 			}
 
+			if (updatedData.issues != null)
+			{
+				foreach(PlanIssueObject issueObj in updatedData.issues)
+				{
+					PlanLayer planLayer = GetPlanLayerForLayer(issueObj.base_layer_id);
+					if(planLayer != null)
+						IssueManager.Instance.OnPlanIssueReceivedFromServer(issueObj, planLayer);
+				}
+			}
+
 			LayerManager.Instance.UpdateVisibleLayersFromPlan(this);
 			PlanManager.Instance.UpdatePlanInUI(this, nameOrDescriptionChanged, timeChanged, stateChanged, layersChanged, typeChanged, forceMonitorUpdate, oldStartTime, oldState, inTimelineBefore);
 		}
@@ -399,6 +406,15 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
+		public PlanLayer GetPlanLayerForLayer(int baseLayerID)
+		{
+			foreach (PlanLayer planLayer in PlanLayers)
+				if (planLayer.BaseLayer.ID == baseLayerID)
+					return planLayer;
+
+			return null;
+		}
+
 		public PlanLayer getPlanLayerForID(int planLayerID)
 		{
 			foreach (PlanLayer planLayer in PlanLayers)
@@ -419,7 +435,7 @@ namespace MSP2050.Scripts
 			}
 
 			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("state", newState.ToString());
 			dataObject.Add("user", SessionManager.Instance.CurrentSessionID.ToString());
 			batch.AddRequest(Server.SetPlanState(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
@@ -428,90 +444,44 @@ namespace MSP2050.Scripts
 		public void SendPlanCreation(BatchRequest a_batch)
 		{
 			JObject dataObject = new JObject();
-			creationBatchCallID = a_batch.AddRequest<int>(Server.PostPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CREATE, handleDatabaseIDResult);
+			creationBatchCallID = a_batch.AddRequest<int>(Server.PostPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CREATE, HandleDatabaseIDResult);
 		}
 
-		protected virtual void handleDatabaseIDResult(int a_result)
+		void HandleDatabaseIDResult(int a_result)
 		{
 			ID = a_result;
 		}
 
-		//public static void SendPlan(string planName, List<AbstractLayer> layers, int time, string type, bool altersEnergyDistribution)
-		//{
-		//	NetworkForm form = new NetworkForm();
-		//	form.AddField("country", SessionManager.Instance.CurrentUserTeamID);
-		//	form.AddField("name", planName);
-		//	form.AddField("time", time);
-
-		//	if (layers != null && layers.Count > 0)
-		//	{
-		//		List<int> layerIDs = new List<int>(layers.Count);
-		//		foreach (AbstractLayer layer in layers)
-		//			layerIDs.Add(layer.ID);
-		//		Debug.Log(JToken.FromObject(layerIDs).ToString());
-		//		form.AddField("layers", JToken.FromObject(layerIDs));
-		//	}
-		//	form.AddField("type", type);
-		//	form.AddField("alters_energy_distribution", altersEnergyDistribution ? 1 : 0);
-		//	Debug.Log(form.ToString());
-		//	ServerCommunication.Instance.DoRequest<int>(Server.PostPlan(), form, PlanPostedCallback);
-		//}
-
-		static void PlanPostedCallback(int newPlanID)
-		{
-			PlanManager.Instance.ViewPlanWithIDWhenReceived(newPlanID);
-		}
-
-		public static void SetPlanType(int planId, string type, BatchRequest batch)
+		public void SubmitDescription(BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
 
-			dataObject.Add("id", planId);
-			dataObject.Add("type", type);
-
-			batch.AddRequest(Server.SetPlanType(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-		}
-
-		public static void SetEnergyDistribution(int planId, bool altersEnergyDistribution, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-
-			dataObject.Add("id", planId);
-			dataObject.Add("alters_energy_distribution", altersEnergyDistribution ? 1 : 0);
-
-			batch.AddRequest(Server.SetPlanEnergyDistribution(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-		}
-
-		public void SetDescription(string newDescription, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-
-			dataObject.Add("id", ID);
-			dataObject.Add("description", string.IsNullOrEmpty(newDescription) ? " " : newDescription);
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
+			dataObject.Add("description", string.IsNullOrEmpty(Description) ? " " : Description);
 
 			batch.AddRequest(Server.SetPlanDescription(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
-		public void RenamePlan(string newName, BatchRequest batch)
+		public void SubmitName(BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
-			dataObject.Add("name", newName);
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
+			dataObject.Add("name", Name);
 			batch.AddRequest(Server.RenamePlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
-		public void ChangePlanDate(int newDate, BatchRequest batch)
+		public void SubmitPlanDate(BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
-			dataObject.Add("date", newDate);
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
+			dataObject.Add("date", StartTime);
 			batch.AddRequest(Server.ChangePlanDate(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public void SubmitAddNewPlanLayer(AbstractLayer layer, BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("layerid", layer.ID);
 			batch.AddRequest(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
@@ -523,17 +493,17 @@ namespace MSP2050.Scripts
 			batch.AddRequest(Server.DeletePlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
-		public void SubmitRequiredApproval(BatchRequest batch, Dictionary<int, EPlanApprovalState> newApproval)
+		public void SubmitRequiredApproval(BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
-			if (newApproval.Count > 0)
+			if (countryApproval.Count > 0)
 			{
-				List<int> countries = new List<int>(newApproval.Count);
-				foreach (KeyValuePair<int, EPlanApprovalState> kvp in newApproval)
+				List<int> countries = new List<int>(countryApproval.Count);
+				foreach (KeyValuePair<int, EPlanApprovalState> kvp in countryApproval)
 					countries.Add(kvp.Key);
 				dataObject.Add("countries", JToken.FromObject(countries));
 			}
-			dataObject.Add("id", ID);
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			batch.AddRequest(Server.AddApproval(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
@@ -562,11 +532,11 @@ namespace MSP2050.Scripts
 			return result;
 		}
 		
-		public Dictionary<int, EPlanApprovalState> CalculateRequiredApproval()
+		public void CalculateRequiredApproval()
 		{
 			bool requireAMApproval = false;
 			EApprovalType requiredApprovalLevel = EApprovalType.NotDependent;
-			Dictionary<int, EPlanApprovalState>  newCountryApproval = new Dictionary<int, EPlanApprovalState>();
+			countryApproval = new Dictionary<int, EPlanApprovalState>();
 
 			//Store this so we don't have to find removed geometry twice per layer
 			List<List<SubEntity>> removedGeom = new List<List<SubEntity>>();
@@ -602,12 +572,12 @@ namespace MSP2050.Scripts
 			}
 
 			if (requireAMApproval)
-				newCountryApproval.Add(SessionManager.AM_ID, EPlanApprovalState.Maybe);
+				countryApproval.Add(SessionManager.AM_ID, EPlanApprovalState.Maybe);
 
 			//Check required approval for policies
 			foreach(var kvp in m_policies)
 			{
-				kvp.Value.logic.GetRequiredApproval(kvp.Value, this, newCountryApproval, ref requiredApprovalLevel);
+				kvp.Value.logic.GetRequiredApproval(kvp.Value, this, countryApproval, ref requiredApprovalLevel);
 			}
 
 			if (requiredApprovalLevel >= EApprovalType.AllCountries)
@@ -615,7 +585,7 @@ namespace MSP2050.Scripts
 				//All team approval required, there is no chance for AM approval
 				foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
 					if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID)
-						newCountryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
+						countryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
 			}
 			else
 			{
@@ -639,11 +609,11 @@ namespace MSP2050.Scripts
 						for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
 						{
 							Entity t = PlanLayers[i].GetNewGeometryByIndex(entityIndex);
-							if (t.Country != userCountry && !newCountryApproval.ContainsKey(t.Country))
-								newCountryApproval.Add(t.Country, EPlanApprovalState.Maybe);
+							if (t.Country != userCountry && !countryApproval.ContainsKey(t.Country))
+								countryApproval.Add(t.Country, EPlanApprovalState.Maybe);
 							foreach (PolygonEntity eez in EEZs)
-								if (eez.Country != userCountry && !newCountryApproval.ContainsKey(eez.Country) && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
-									newCountryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
+								if (eez.Country != userCountry && !countryApproval.ContainsKey(eez.Country) && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
+									countryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
 						}
 					}
 				}
@@ -653,23 +623,21 @@ namespace MSP2050.Scripts
 				{
 					foreach (SubEntity t in removedGeom[i])
 					{
-						if (t.Entity.Country != Entity.INVALID_COUNTRY_ID && t.Entity.Country != SessionManager.Instance.CurrentUserTeamID && !newCountryApproval.ContainsKey(t.Entity.Country))
+						if (t.Entity.Country != Entity.INVALID_COUNTRY_ID && t.Entity.Country != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(t.Entity.Country))
 						{
-							newCountryApproval.Add(t.Entity.Country, EPlanApprovalState.Maybe);
+							countryApproval.Add(t.Entity.Country, EPlanApprovalState.Maybe);
 						}
 					}
 				}
 			}
 
 			//Remove owner from required approval
-			if (newCountryApproval.ContainsKey(Country))
-				newCountryApproval.Remove(Country);
-			if (newCountryApproval.ContainsKey(-1))
-				newCountryApproval.Remove(-1);
-			if (newCountryApproval.ContainsKey(SessionManager.GM_ID))
-				newCountryApproval.Remove(SessionManager.GM_ID);
-
-			return newCountryApproval;
+			if (countryApproval.ContainsKey(Country))
+				countryApproval.Remove(Country);
+			if (countryApproval.ContainsKey(-1))
+				countryApproval.Remove(-1);
+			if (countryApproval.ContainsKey(SessionManager.GM_ID))
+				countryApproval.Remove(SessionManager.GM_ID);
 		}
 
 		public bool NeedsApproval()
@@ -855,7 +823,7 @@ namespace MSP2050.Scripts
 		public void AddSystemMessage(string text)
 		{
 			NetworkForm form = new NetworkForm();
-			form.AddField("plan", ID);
+			form.AddField("plan", GetDataBaseOrBatchIDReference());
 			form.AddField("team_id", SessionManager.GM_ID);
 			form.AddField("user_name", "[SYSTEM]");
 			form.AddField("text", text);
@@ -882,7 +850,7 @@ namespace MSP2050.Scripts
 		public void SendMessage(string text)
 		{
 			NetworkForm form = new NetworkForm();
-			form.AddField("plan", ID);
+			form.AddField("plan", GetDataBaseOrBatchIDReference());
 			form.AddField("team_id", SessionManager.Instance.CurrentUserTeamID);
 			form.AddField("user_name", SessionManager.Instance.CurrentUserName);
 			form.AddField("text", text);
@@ -892,49 +860,19 @@ namespace MSP2050.Scripts
 		public void SendMessage(string text, BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
-			dataObject.Add("plan", ID);
+			dataObject.Add("plan", GetDataBaseOrBatchIDReference());
 			dataObject.Add("team_id", SessionManager.Instance.CurrentUserTeamID);
 			dataObject.Add("user_name", SessionManager.Instance.CurrentUserName);
 			dataObject.Add("text", text);
 			batch.AddRequest(Server.PostPlanFeedback(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
-		public virtual string GetDataBaseOrBatchIDReference()
+		public string GetDataBaseOrBatchIDReference()
 		{
 			if (ID != -1)
 				return ID.ToString();
 			else
 				return BatchRequest.FormatCallIDReference(creationBatchCallID);
-		}
-
-		public PlanBackup GetPlanBackup()
-		{
-			PlanBackup result = new PlanBackup();
-			result.m_startTime = StartTime;
-			result.m_constructionStartTime = ConstructionStartTime;
-			result.m_name = Name;
-			result.m_description = Description;
-			result.m_issues = IssueManager.Instance.FindIssueDataForPlan(this);
-
-			result.m_approval = new Dictionary<int, EPlanApprovalState>();
-			foreach (var kvp in countryApproval)
-				result.m_approval.Add(kvp.Key, kvp.Value);
-
-			result.m_planLayers = new List<PlanLayerBackup>(PlanLayers.Count);
-			foreach (PlanLayer planlayer in PlanLayers)
-				result.m_planLayers.Add(new PlanLayerBackup(planlayer));
-
-			return result;
-		}
-
-		public void ResetToBackup(PlanBackup a_backup)
-		{
-			StartTime = a_backup.m_startTime;
-			ConstructionStartTime = a_backup.m_constructionStartTime;
-			Name = a_backup.m_name;
-			Description = a_backup.m_description;
-			IssueManager.Instance.SetIssuesForPlan(this, a_backup.m_issues);
-			countryApproval = a_backup.m_approval;
 		}
 	}
 

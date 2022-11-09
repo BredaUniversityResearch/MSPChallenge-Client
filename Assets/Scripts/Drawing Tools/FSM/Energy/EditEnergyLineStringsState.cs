@@ -199,6 +199,7 @@ namespace MSP2050.Scripts
 			if (planLayer == subEntity.Entity.PlanLayer)
 			{
 				fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
+				subEntity.edited = true;
 			}
 			else
 			{

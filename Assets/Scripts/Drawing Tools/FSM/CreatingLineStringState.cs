@@ -119,6 +119,7 @@ namespace MSP2050.Scripts
 
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 
+			subEntity.edited = true;
 			subEntity.AddPoint(finalPosition);
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 			if (subEntity.GetPointCount() > 1)
@@ -131,6 +132,7 @@ namespace MSP2050.Scripts
 		{
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 
+			subEntity.edited = true;
 			subEntity.Entity.EntityTypes = newTypes;
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 
