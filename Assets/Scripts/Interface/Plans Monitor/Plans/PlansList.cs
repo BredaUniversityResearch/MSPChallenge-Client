@@ -228,7 +228,7 @@ namespace MSP2050.Scripts
 		{
 			if (m_planBarsPerPlan.TryGetValue(a_plan, out var planBar))
 			{
-				ERestrictionIssueType maximumSeverity = IssueManager.Instance.GetMaximumSeverity(a_plan);
+				ERestrictionIssueType maximumSeverity = a_plan.GetMaximumIssueSeverity();
 				if (a_plan.HasPolicyErrors())
 					maximumSeverity = ERestrictionIssueType.Error;
 

@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 					if (selectedPlan != null)
 					{
 						UnityEngine.Events.UnityAction lb = () => { };
-						UnityEngine.Events.UnityAction rb = () => { selectedPlan.AttemptUnlock(true); };
+						UnityEngine.Events.UnityAction rb = () => { selectedPlan.AttemptUnlock(true, null); };
 						DialogBoxManager.instance.ConfirmationWindow("Force unlock plan", "Are you sure you want to force unlock this plan?", lb, rb);
 					}
 				});
@@ -484,7 +484,7 @@ namespace MSP2050.Scripts
 				if (!submitDelayed)
 				{
 					changedPlan.SendMessage("Changed the plans status to: " + newState.GetDisplayName(), batch);
-					plan.SetState(newState, batch);
+					plan.SubmitState(newState, batch);
 					batch.ExecuteBatch(null, null);
 				}
 			}, null);
@@ -496,7 +496,7 @@ namespace MSP2050.Scripts
 			{
 				//No plans with errors, set new state
 				plan.SendMessage("Changed the plans status to: " + targetState.GetDisplayName(), batch);
-				plan.SetState(targetState, batch);
+				plan.SubmitState(targetState, batch);
 				batch.ExecuteBatch(null, null);
 			}
 			else
@@ -527,7 +527,7 @@ namespace MSP2050.Scripts
 				UnityEngine.Events.UnityAction rb = new UnityEngine.Events.UnityAction(() =>
 				{
 					plan.SendMessage("Changed the plans status to: " + targetState.GetDisplayName(), batch);
-					plan.SetState(targetState, batchRequest);
+					plan.SubmitState(targetState, batchRequest);
 					batchRequest.ExecuteBatch(null, null);
 				});
 				DialogBoxManager.instance.ConfirmationWindow("Energy error warning", description, lb, rb);

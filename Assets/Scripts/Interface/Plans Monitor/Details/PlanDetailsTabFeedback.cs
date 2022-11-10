@@ -243,7 +243,7 @@ namespace MSP2050.Scripts
 					planDetails.SelectedPlan.countryApproval[team.ID] = EPlanApprovalState.Approved;
 					if (planDetails.SelectedPlan.HasApproval())
 					{
-						planDetails.SelectedPlan.SetState(Plan.PlanState.APPROVED, batch);
+						planDetails.SelectedPlan.SubmitState(Plan.PlanState.APPROVED, batch);
 					}
 					else
 						SubmitApprovalState(EPlanApprovalState.Approved, team, batch);

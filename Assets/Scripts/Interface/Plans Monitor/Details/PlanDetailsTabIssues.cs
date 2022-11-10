@@ -84,7 +84,7 @@ namespace MSP2050.Scripts
 			});
 
 			string issueText;
-			switch (planIssueInstance.PlanIssueData.type)
+			switch (planIssueInstance.m_planIssueData.type)
 			{
 				case ERestrictionIssueType.Info:
 					issueText = "<color=#7bd7f6>[Info]</color> " + planIssueInstance.Text;
@@ -96,7 +96,7 @@ namespace MSP2050.Scripts
 					issueText = "<color=#FF5454>[Error]</color> " + planIssueInstance.Text;
 					break;
 				default:
-					issueText = "Unknow issue type " + planIssueInstance.PlanIssueData.type;
+					issueText = "Unknow issue type " + planIssueInstance.m_planIssueData.type;
 					break;
 			}
 
@@ -120,13 +120,13 @@ namespace MSP2050.Scripts
 			IssueManager.Instance.ShowRelevantPlanLayersForIssue(planIssueInstance);
 			PlansMonitor.instance.plansMinMax.Minimize();
 
-			Rect viewBounds = new Rect(planIssueInstance.PlanIssueData.x, planIssueInstance.PlanIssueData.y, 1.0f, 1.0f);
+			Rect viewBounds = new Rect(planIssueInstance.m_planIssueData.x, planIssueInstance.m_planIssueData.y, 1.0f, 1.0f);
 			CameraManager.Instance.ZoomToBounds(viewBounds);
 		}
 
 		public void UpdateIssueStatus()
 		{
-			ERestrictionIssueType severity = planDetails.SelectedPlan.HasPolicyErrors() ? ERestrictionIssueType.Error : IssueManager.Instance.GetMaximumSeverity(planDetails.SelectedPlan);
+			ERestrictionIssueType severity = planDetails.SelectedPlan.GetMaximumIssueSeverity();
 			switch (severity)
 			{
 				case ERestrictionIssueType.None:

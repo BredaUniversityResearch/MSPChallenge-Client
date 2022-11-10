@@ -125,6 +125,7 @@ namespace MSP2050.Scripts
 			LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(plan);
+			IssueManager.Instance.SetIssueInstancesToPlan(plan);
 		}
 
 		public void HideCurrentPlan(bool updateLayers = true)
@@ -145,6 +146,7 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.CloseWindow();
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);
+			IssueManager.Instance.HidePlanIssueInstances();
 		}
 
 		public SubEntityPlanState GetSubEntityPlanState(SubEntity subEntity)
@@ -355,10 +357,6 @@ namespace MSP2050.Scripts
 
 		private void PlanAdded(Plan plan)
 		{
-			//Add planLayers to manager, but don't add to UI individually (done in a batch by plan)
-			foreach (PlanLayer planLayer in plan.PlanLayers)
-				IssueManager.Instance.InitialiseIssuesForPlanLayer(planLayer);
-
 			//Show plan if it isnt a hidden plan
 			if (plan.StartTime >= 0 || SessionManager.Instance.AreWeGameMaster)
 			{
@@ -449,10 +447,4 @@ namespace MSP2050.Scripts
 					return true;
 			return false;
 		}
-
-		public void PlanLayerRemoved(Plan plan, PlanLayer removedLayer)
-		{
-			IssueManager.Instance.DeleteIssuesForPlanLayer(removedLayer);
-		}
-	}
 }

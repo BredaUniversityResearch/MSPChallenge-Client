@@ -73,25 +73,14 @@ namespace MSP2050.Scripts
 			if (GetNewPlanStartDate() == m_plan.StartTime || !m_APWindow.Editing)
 				return;
 
-			//TODO: change planlayer times
-			bool hasUnavailableTypes = false;
 			m_plan.StartTime = GetNewPlanStartDate();
 			PlanManager.Instance.UpdatePlanTime(m_plan);
+			if (m_plan.State != Plan.PlanState.DELETED)
+				foreach (PlanLayer planLayer in m_plan.PlanLayers)
+					planLayer.BaseLayer.UpdatePlanLayerTime(planLayer);
 
-			if (GetNewPlanStartDate() < m_plan.StartTime)
-			{
-				//Moving to the past will only ever add more issues, so no need to check for removal
-				MultiLayerRestrictionIssueCollection resultIssues = new MultiLayerRestrictionIssueCollection();
-				ConstraintManager.Instance.CheckTypeUnavailableConstraints(m_plan, GetNewPlanStartDate(), resultIssues);
-				//RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
-				//IssueManager.Instance.AddIssuesToDeltaIfNew(resultIssues, deltaSet);
-			}
-			else
-			{
-				//Moving the plan to the future requires a full recheck, as we can't filter existing issue for TypeUnavailable ones
-				RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(m_plan, IssueManager.Instance.FindIssueDataForPlan(m_plan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
-			}
-			
+			bool hasUnavailableTypes = false;
+			ConstraintManager.Instance.CheckConstraints(m_plan, out hasUnavailableTypes);		
 			if (hasUnavailableTypes)
 			{
 				//TODO: Show actual unavailable types

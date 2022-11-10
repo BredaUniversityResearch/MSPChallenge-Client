@@ -6,6 +6,7 @@ using System.Collections;
 using UnityEngine.Events;
 using TMPro;
 using Newtonsoft.Json.Linq;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
@@ -284,7 +285,7 @@ namespace MSP2050.Scripts
                         layer.RemovePlanLayer(editingPlan.GetPlanLayerForLayer(layer));
                     }
                     //Get updated issue delta (but don't apply them yet, that'll happen when the batch gets executed
-                    RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.Instance.FindIssueDataForPlan(editingPlan), layersToRemove, GetNewPlanStartDate(), out hasUnavailableTypes);
+                    RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, editingPlan.GetIssueList(), layersToRemove, GetNewPlanStartDate(), out hasUnavailableTypes);
                     if (issuesToSubmit != null)
                     {
                         issuesToSubmit.SubmitToServer(batch);
@@ -373,7 +374,7 @@ namespace MSP2050.Scripts
                     else
                     {
                         //Moving the plan to the future requires a full recheck, as we can't filter existing issue for TypeUnavailable ones
-                        RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, IssueManager.Instance.FindIssueDataForPlan(editingPlan), null, GetNewPlanStartDate(), out hasUnavailableTypes);
+                        RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.GetUpdatedIssueDelta(editingPlan, editingPlan.GetIssueList(), null, GetNewPlanStartDate(), out hasUnavailableTypes);
                         if (issuesToSubmit != null)
                         {
                             issuesToSubmit.SubmitToServer(batch);

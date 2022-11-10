@@ -220,7 +220,7 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_planBackup.m_issues, true);
+			ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_planBackup.m_issues);
 			m_delayedPolicyEffects = PolicyManager.Instance.CalculateEffectsOfEditing(m_currentPlan);
 			if(m_delayedPolicyEffects == 0)
 				SubmitChanges();
@@ -238,7 +238,7 @@ namespace MSP2050.Scripts
 			m_currentPlan.SubmitRequiredApproval(batch);
 
 			//Check issues again and submit according to latest tests. To ensure that changes in other plans while editing this plan get detected as well.
-			RestrictionIssueDeltaSet issuesToSubmit = ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_planBackup.m_issues, true);
+			ConstraintManager.Instance.CheckConstraints(m_currentPlan, out bool hasUnavailableTypes);
 			if (issuesToSubmit != null)
 			{
 				issuesToSubmit.SubmitToServer(batch); 

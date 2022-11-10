@@ -213,6 +213,7 @@ namespace MSP2050.Scripts
 		public string state;
 		public List<SubEntityObject> geometry;
 		public List<int> deleted;
+		public List<PlanIssueObject> issues; //Moved from Update.WarningObject
 	}
 
 	public class ObjectiveObject
@@ -254,7 +255,6 @@ namespace MSP2050.Scripts
 		//Added
 		[JsonConverter(typeof(PolicyPlanUpdateJsonConverter))]
 		public APolicyData[] policies;
-		public List<PlanIssueObject> issues; //Moved from Update.WarningObject
 
 		//Removed
 		//public string type; // energy,fishing,shipping : ex 1,0,1

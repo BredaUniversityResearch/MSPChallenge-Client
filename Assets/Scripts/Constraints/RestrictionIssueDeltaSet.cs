@@ -18,24 +18,27 @@ namespace MSP2050.Scripts
 			removedIssues = new List<PlanIssueObject>();
 		}
 
-		public RestrictionIssueDeltaSet(List<PlanIssueObject> existingIssues, MultiLayerRestrictionIssueCollection newIssues)
+		public RestrictionIssueDeltaSet(List<PlanIssueObject> a_existingIssues, Plan a_plan)
 		{
 			addedIssues = new HashSet<PlanIssueObject>(IssueObjectEqualityComparer.Instance);
-			removedIssues = new List<PlanIssueObject>(existingIssues);
+			removedIssues = new List<PlanIssueObject>(a_existingIssues);
 			
-			foreach(var kvp in newIssues.GetIssues())
+			foreach(PlanLayer planlayer in a_plan.PlanLayers)
 			{
-				foreach (PlanIssueObject issue in kvp.Value)
+				if (planlayer.issues != null)
 				{
-					//New issues and removed issues are different objects (and new ones dont have ids), so find them using the IssueObjectEqualityComparer
-					PlanIssueObject removedIssue = FindRemovedIssue(issue);
-					if (removedIssue != null)
+					foreach (PlanIssueObject issue in planlayer.issues)
 					{
-						removedIssues.Remove(removedIssue);
-					}
-					else
-					{
-						addedIssues.Add(issue);
+						//New issues and removed issues are different objects (and new ones dont have ids), so find them using the IssueObjectEqualityComparer
+						PlanIssueObject removedIssue = FindRemovedIssue(issue);
+						if (removedIssue != null)
+						{
+							removedIssues.Remove(removedIssue);
+						}
+						else
+						{
+							addedIssues.Add(issue);
+						}
 					}
 				}
 			}

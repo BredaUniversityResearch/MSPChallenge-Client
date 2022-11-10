@@ -8,19 +8,28 @@ namespace MSP2050.Scripts
 		private WarningLabel sourceLabel;
 		private WarningLabel destinationLabel;
 
-		public ShippingIssueInstance(ShippingIssueObject issueData)
+		SubEntity m_sourceSubentity;
+		SubEntity m_destinationSubentity;
+
+		public ShippingIssueInstance()
 		{
 			sourceLabel = IssueManager.Instance.CreateWarningLabelInstance();
 			destinationLabel = IssueManager.Instance.CreateWarningLabelInstance();
-
-			SubEntity sourceEntity = LayerManager.Instance.FindSubEntityByPersistentID(issueData.source_geometry_persistent_id);
-			SubEntity destinationEntity = LayerManager.Instance.FindSubEntityByPersistentID(issueData.destination_geometry_persistent_id);
-
-			SetupIssueLabel(sourceLabel, sourceEntity, issueData.message, CreateZoomToEntityCallback(destinationEntity, sourceLabel, destinationLabel));
-			SetupIssueLabel(destinationLabel, destinationEntity, issueData.message, CreateZoomToEntityCallback(sourceEntity, destinationLabel, sourceLabel));
+			sourceLabel.EnableInspectIssueButton(InspectSource);
+			destinationLabel.EnableInspectIssueButton(InspectDestination);
 		}
 
-		private void SetupIssueLabel(WarningLabel targetLabel, SubEntity targetEntity, string text, WarningLabel.InspectIssueCallback onInspectIssue)
+		public void SetIssue(ShippingIssueObject a_issue)
+		{
+			m_sourceSubentity = LayerManager.Instance.FindSubEntityByPersistentID(a_issue.source_geometry_persistent_id);
+			m_destinationSubentity = LayerManager.Instance.FindSubEntityByPersistentID(a_issue.destination_geometry_persistent_id);
+
+			SetupIssueLabel(sourceLabel, m_sourceSubentity, a_issue.message);
+			SetupIssueLabel(destinationLabel, m_destinationSubentity, a_issue.message);
+			SetLabelVisibility(true);
+		}
+
+		private void SetupIssueLabel(WarningLabel targetLabel, SubEntity targetEntity, string text)
 		{
 			if (targetEntity != null)
 			{
@@ -31,7 +40,16 @@ namespace MSP2050.Scripts
 
 			targetLabel.LabelType(ERestrictionIssueType.Warning);
 			targetLabel.boxText.text = text;
-			targetLabel.EnableInspectIssueButton(onInspectIssue);
+		}
+
+		void InspectSource()
+		{
+			CameraManager.Instance.cameraPan.StartAutoPan(m_sourceSubentity.BoundingBox.center, 0.35f);
+		}
+
+		void InspectDestination()
+		{
+			CameraManager.Instance.cameraPan.StartAutoPan(m_sourceSubentity.BoundingBox.center, 0.35f);
 		}
 
 		public override void Destroy()
@@ -40,21 +58,6 @@ namespace MSP2050.Scripts
 				Object.Destroy(sourceLabel.gameObject);
 			if (destinationLabel != null && destinationLabel.gameObject != null)
 				Object.Destroy(destinationLabel.gameObject);
-		}
-
-		private WarningLabel.InspectIssueCallback CreateZoomToEntityCallback(SubEntity targetEntity, WarningLabel sourceLabel, WarningLabel destinationLabel)
-		{
-			WarningLabel.InspectIssueCallback result = null;
-			if (targetEntity != null)
-			{
-				result = () =>
-				{
-					sourceLabel.SetLabelOpenState(false);
-					CameraManager.Instance.cameraPan.StartAutoPan(targetEntity.BoundingBox.center, 0.35f);
-					destinationLabel.SetLabelOpenState(true);
-				};
-			}
-			return result;
 		}
 
 		public override void SetLabelVisibility(bool visibility)

@@ -24,24 +24,13 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public delegate void OnIssueChanged(PlanLayer changedIssueLayer);
+		[SerializeField] WarningLabel warningLabel = null;
+		[SerializeField] GraphicRaycaster issueParentCanvasRaycaster = null;
+		[SerializeField] Transform issueParentTransform = null;
+		[SerializeField] int maxShippingIssues = 30;
 
-		private event OnIssueChanged issueChangedEvent;
-
-		[SerializeField] 
-		private WarningLabel warningLabel = null;
-
-		[SerializeField]
-		private GraphicRaycaster issueParentCanvasRaycaster = null;
-
-		[SerializeField] 
-		private Transform issueParentTransform = null;
-
-		[SerializeField]
-		private int maxShippingIssues = 30;
-
-		private Dictionary<PlanLayer, List<PlanIssueInstance>> planIssuesByLayer = new Dictionary<PlanLayer, List<PlanIssueInstance>>();
-		private Dictionary<int, ShippingIssueInstance> shippingIssueInstances = new Dictionary<int, ShippingIssueInstance>(); 
+		List<PlanIssueInstance> m_issueInstances = new List<PlanIssueInstance>();
+		Dictionary<int, ShippingIssueInstance> m_shippingIssueInstances = new Dictionary<int, ShippingIssueInstance>(); 
 
 		private void OnDestroy()
 		{
@@ -49,180 +38,53 @@ namespace MSP2050.Scripts
 			m_instance = null;
 		}
 
-		public void InitialiseIssuesForPlanLayer(PlanLayer planLayer)
-		{
-			if (planIssuesByLayer.ContainsKey(planLayer))
-			{
-				RemoveIssuesForPlanLayer(planLayer, null);
-			}
-		}
-
 		public WarningLabel CreateWarningLabelInstance()
 		{
 			float scale = GetIssueLabelScale();
-
-			WarningLabel labelInstance = Instantiate(warningLabel);
-			labelInstance.transform.SetParent(issueParentTransform, false);
+			WarningLabel labelInstance = Instantiate(warningLabel, issueParentTransform);
 			labelInstance.transform.localScale = new Vector3(scale, scale, 0);
-
 			return labelInstance;
 		}
 
-		public ERestrictionIssueType GetMaximumSeverity(Plan plan)
+		public void HidePlanIssueInstances()
 		{
-			ERestrictionIssueType maxSeverity = ERestrictionIssueType.None;
-			for (int layerId = 0; layerId < plan.PlanLayers.Count; ++layerId)
+			foreach(PlanIssueInstance issue in m_issueInstances)
 			{
-				PlanLayer layer = plan.PlanLayers[layerId];
-				ERestrictionIssueType layerSeverity = GetMaximumSeverity(layer);
-				if (layerSeverity < maxSeverity)
-				{
-					maxSeverity = layerSeverity;
-				}
+				issue.SetLabelInteractability(false);
 			}
-			return maxSeverity;
 		}
 
-		public ERestrictionIssueType GetMaximumSeverity(PlanLayer planLayer)
+		public void SetIssueInstancesToPlan(Plan a_plan)
 		{
-			List<PlanIssueInstance> issuesForPlan;
-			if (!planIssuesByLayer.TryGetValue(planLayer, out issuesForPlan))
-				return ERestrictionIssueType.None;
-
-			ERestrictionIssueType result = ERestrictionIssueType.None;
-			foreach (PlanIssueInstance issue in issuesForPlan)
+			int nextIssueIndex = 0;
+			if(a_plan.PlanLayers != null)
 			{
-				if (issue.PlanIssueData.type < result)
+				foreach(PlanLayer planlayer in a_plan.PlanLayers)
 				{
-					result = issue.PlanIssueData.type;
-				}
-			}
-
-			return result;
-		}
-
-		public IEnumerable<PlanIssueInstance> FindIssuesForPlan(Plan plan)
-		{
-			List<PlanIssueInstance> result = new List<PlanIssueInstance>(32);
-
-			if (plan != null)
-			{
-				for (int i = 0; i < plan.PlanLayers.Count; ++i)
-				{
-					List<PlanIssueInstance> planLayerIssues;
-					if (planIssuesByLayer.TryGetValue(plan.PlanLayers[i], out planLayerIssues))
+					if(planlayer.issues != null)
 					{
-						result.AddRange(planLayerIssues);
-					}
-				}
-			}
-			return result;
-		}
-
-		public List<PlanIssueObject> FindIssueDataForPlan(Plan plan)
-		{
-			List<PlanIssueObject> result = new List<PlanIssueObject>(32);
-			if (plan != null)
-			{
-				for (int i = 0; i < plan.PlanLayers.Count; ++i)
-				{
-					List<PlanIssueInstance> planLayerIssues;
-					if (planIssuesByLayer.TryGetValue(plan.PlanLayers[i], out planLayerIssues))
-					{
-						for (int j = 0; j < planLayerIssues.Count; ++j)
+						foreach(PlanIssueObject issue in planlayer.issues)
 						{
-							result.Add(planLayerIssues[j].PlanIssueData);
+							if(nextIssueIndex < m_issueInstances.Count)
+							{
+								m_issueInstances[nextIssueIndex].SetIssue(issue);
+							}
+							else
+							{
+								PlanIssueInstance newInstance = new PlanIssueInstance();
+								newInstance.SetIssue(issue);
+								m_issueInstances.Add(newInstance);
+							}
+							nextIssueIndex++;
 						}
 					}
 				}
 			}
-
-			return result;
-		}
-
-		private bool HasError(PlanLayer planLayer)
-		{
-			return GetMaximumSeverity(planLayer) <= ERestrictionIssueType.Error;
-		}
-
-		public bool HasError(Plan plan)
-		{
-			foreach (PlanLayer planLayer in plan.PlanLayers)
+			for(; nextIssueIndex < m_issueInstances.Count; nextIssueIndex++)
 			{
-				if (HasError(planLayer))
-				{
-					return true;
-				}
+				m_issueInstances[nextIssueIndex].SetLabelVisibility(false);
 			}
-			return false;
-		}
-
-		public void DeleteIssuesForPlanLayer(PlanLayer planLayer)
-		{
-			RemoveIssuesForPlanLayer(planLayer, null);
-			planIssuesByLayer.Remove(planLayer);
-		}
-
-		private PlanIssueInstance AddPlanIssue(PlanLayer targetPlanLayer, PlanIssueObject planIssueData, RestrictionIssueDeltaSet deltaSet = null)
-		{
-			string restrictionText = ConstraintManager.Instance.GetRestrictionMessage(planIssueData.restriction_id);
-			PlanIssueInstance planIssueInstance = FindIssueByData(targetPlanLayer, planIssueData);
-			if (planIssueInstance == null)
-			{
-				PlanIssueObject issueData = planIssueData;
-				if (deltaSet != null)
-				{
-					//So... If we add an issue that is a removed issue in the delta set, use the one that is in the delta set.
-					//This will ensure that we use the proper field values (e.g. database_id) instead of nuking those.
-					PlanIssueObject removedIssue = deltaSet.FindRemovedIssue(planIssueData);
-					if (removedIssue != null)
-					{
-						issueData = removedIssue;
-					}
-				}
-
-				planIssueInstance = new PlanIssueInstance(issueData, restrictionText);
-				planIssueInstance.SetLabelVisibility(false);
-				GetOrCreateIssueInstanceListForPlanLayer(targetPlanLayer).Add(planIssueInstance);
-
-				OnIssueLayerChanged(targetPlanLayer);
-				if (deltaSet != null)
-				{
-					deltaSet.IssueAdded(planIssueInstance.PlanIssueData);
-				}
-			}
-
-			return planIssueInstance;
-		}
-
-		private List<PlanIssueInstance> GetOrCreateIssueInstanceListForPlanLayer(PlanLayer planLayer)
-		{
-			List<PlanIssueInstance> result;
-			if (!planIssuesByLayer.TryGetValue(planLayer, out result))
-			{
-				result = new List<PlanIssueInstance>();
-				planIssuesByLayer.Add(planLayer, result);
-			}
-			return result;
-		}
-
-		private PlanIssueInstance FindIssueByData(PlanLayer planLayer, PlanIssueObject planIssueData)
-		{
-			PlanIssueInstance result = null;
-			List<PlanIssueInstance> issuesForPlan;
-			if (planIssuesByLayer.TryGetValue(planLayer, out issuesForPlan))
-			{
-				for (int i = 0; i < issuesForPlan.Count; ++i)
-				{
-					PlanIssueObject rhs = issuesForPlan[i].PlanIssueData;
-					if (rhs.IsSameIssueAs(planIssueData))
-					{
-						result = issuesForPlan[i];
-						break;
-					}
-				}
-			}
-			return result;
+			RescaleIssues();
 		}
 
 		private static float GetIssueLabelScale()
@@ -232,18 +94,14 @@ namespace MSP2050.Scripts
 
 		public void RescaleIssues()
 		{
-			foreach (var kvp in planIssuesByLayer)
-			{
-				RescaleIssueList(kvp.Value);
-			}
-			RescaleIssueList(shippingIssueInstances.Values);
+			RescaleIssueList(m_issueInstances);
+			RescaleIssueList(m_shippingIssueInstances.Values);
 		}
 
 		private void RescaleIssueList<ISSUE_TYPE>(IEnumerable<ISSUE_TYPE> list)
 			where ISSUE_TYPE : IssueInstance
 		{
 			float scale = GetIssueLabelScale();
-			// do a check if the plan has any planlayers active
 			foreach (ISSUE_TYPE issue in list)
 			{
 				if (issue.IsLabelVisible())
@@ -253,214 +111,34 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetIssueVisibility(bool visible)
+		public bool IssueVisibility
 		{
-			issueParentTransform.gameObject.SetActive(visible);
-		}
-
-		public bool GetIssueVisibility()
-		{
-			return issueParentTransform.gameObject.activeSelf;
-		}
-
-		public void HideIssuesForPlan(PlanLayer planLayer)
-		{
-			SetIssueVisibilityForPlanLayer(planLayer, false);
-		}
-
-		public void ShowIssuesForPlan(PlanLayer planLayer)
-		{
-			SetIssueVisibilityForPlanLayer(planLayer, true);
-			RescaleIssues();
-		}
-
-		public void SetIssueVisibilityForPlan(Plan plan, bool visible)
-		{
-			for (int i = 0; i < plan.PlanLayers.Count; ++i)
-			{
-				SetIssueVisibilityForPlanLayer(plan.PlanLayers[i], visible);
-			}
-
-			if (visible)
-			{
-				RescaleIssues();
-			}
-		}
-
-		private void SetIssueVisibilityForPlanLayer(PlanLayer planLayer, bool visible)
-		{
-			List<PlanIssueInstance> issuesForPlan;
-			planIssuesByLayer.TryGetValue(planLayer, out issuesForPlan);
-			if (issuesForPlan != null)
-			{
-				for (int i = 0; i < issuesForPlan.Count; i++)
-				{
-					issuesForPlan[i].SetLabelVisibility(visible);
-				}
-			}
-		}
-
-		public void RemoveIssuesForPlan(Plan plan, RestrictionIssueDeltaSet deltaSet)
-		{
-			for (int i = 0; i < plan.PlanLayers.Count; ++i)
-			{
-				RemoveIssuesForPlanLayer(plan.PlanLayers[i], deltaSet);
-			}
-
-			RemoveIssuesForPlanInRemotePlans(plan, deltaSet);
-		}
-
-		private void DestroyIssuesForPlan(IList<PlanIssueInstance> issueInstances, RestrictionIssueDeltaSet deltaSet)
-		{
-			for (int i = 0; i < issueInstances.Count; i++)
-			{
-				PlanIssueInstance planIssueInstance = issueInstances[i];
-
-				if (deltaSet != null)
-				{
-					deltaSet.IssueRemoved(planIssueInstance.PlanIssueData);
-				}
-
-				planIssueInstance.Destroy();
-			}
-		}
-
-		private void RemoveIssueForPlanIssueObject(PlanLayer targetPlanLayer, PlanIssueObject planIssue)
-		{
-			List<PlanIssueInstance> issuesForPlan;
-			planIssuesByLayer.TryGetValue(targetPlanLayer, out issuesForPlan);
-			if (issuesForPlan != null)
-			{
-				for (int i = issuesForPlan.Count - 1; i >= 0; --i)
-				{
-					PlanIssueInstance planIssueInstance = issuesForPlan[i];
-					if (planIssueInstance.PlanIssueData.issue_database_id == planIssue.issue_database_id)
-					{
-						planIssueInstance.Destroy();
-						issuesForPlan.RemoveAt(i);
-					}
-				}
-			}
-			OnIssueLayerChanged(targetPlanLayer);
-		}
-
-		private void RemoveIssuesForPlanLayer(PlanLayer planLayer, RestrictionIssueDeltaSet deltaSet)
-		{
-			List<PlanIssueInstance> issuesForPlan;
-			planIssuesByLayer.TryGetValue(planLayer, out issuesForPlan);
-			if (issuesForPlan != null)
-			{
-				DestroyIssuesForPlan(issuesForPlan, deltaSet);
-				issuesForPlan.Clear();
-			}
-			OnIssueLayerChanged(planLayer);
-		}
-
-		private void RemoveIssuesForPlanInRemotePlans(Plan sourcePlan, RestrictionIssueDeltaSet deltaSet)
-		{
-			foreach (var kvp in planIssuesByLayer)
-			{
-				if (kvp.Key.Plan == sourcePlan)
-				{
-					continue;
-				}
-
-				for (int issueIndex = kvp.Value.Count - 1; issueIndex >= 0; --issueIndex)
-				{
-					PlanIssueInstance planIssue = kvp.Value[issueIndex];
-					if (planIssue.PlanIssueData.source_plan_id == sourcePlan.ID)
-					{
-						if (deltaSet != null)
-						{
-							deltaSet.IssueRemoved(planIssue.PlanIssueData);
-						}
-						kvp.Value.RemoveAt(issueIndex);
-					}
-				}
-			}
+			set { issueParentTransform.gameObject.SetActive(value); }
+			get { return issueParentTransform.gameObject.activeSelf; }
 		}
 
 		protected void Update()
 		{
 			if (Input.GetMouseButtonDown(0))
 			{
-				foreach (var kvp in planIssuesByLayer)
+				foreach (PlanIssueInstance issue in m_issueInstances)
 				{
-					for (int i = 0; i < kvp.Value.Count; i++)
+					if (issue.IsLabelVisible())
 					{
-						if (kvp.Value[i].IsLabelVisible())
-						{
-							kvp.Value[i].CloseIfNotClickedOn();
-						}
+						issue.CloseIfNotClickedOn();
 					}
 				}
 
-				foreach(var kvp in shippingIssueInstances)
+				foreach(var kvp in m_shippingIssueInstances)
 				{
 					kvp.Value.CloseIfNotClickedOn();
 				}
 			}
 		}
 
-		public void ImportNewIssues(MultiLayerRestrictionIssueCollection issueCollection, RestrictionIssueDeltaSet deltaSet)
+		public void ShowRelevantPlanLayersForIssue(PlanIssueObject planIssueData)
 		{
-			foreach (var issueLayer in issueCollection.GetIssues())
-			{
-				for (int i = 0; i < issueLayer.Value.Count; ++i)
-				{
-					PlanIssueObject planIssue = issueLayer.Value[i];
-					AddPlanIssue(issueLayer.Key, planIssue, deltaSet);
-				}
-			}
-		}
-
-		public void AddIssuesToDeltaIfNew(MultiLayerRestrictionIssueCollection issueCollection, RestrictionIssueDeltaSet deltaSet)
-		{
-			foreach (var issueLayer in issueCollection.GetIssues())
-			{
-				for (int i = 0; i < issueLayer.Value.Count; ++i)
-				{
-					if (FindIssueByData(issueLayer.Key, issueLayer.Value[i]) == null)
-						deltaSet.IssueAdded(issueLayer.Value[i]);
-				}
-			}
-		}
-
-		public void OnPlanIssueReceivedFromServer(PlanIssueObject a_planIssue, PlanLayer a_planLayer)
-		{
-			if (a_planIssue.active)
-			{
-				PlanIssueInstance planIssueInstance = AddPlanIssue(a_planLayer, a_planIssue);
-				//Overwrite the ID we received back from te server to ensure it's up to date. This might be a redundant operation, but it might also not be a redundant operation when the issue is newly created.
-				planIssueInstance.PlanIssueData.issue_database_id = a_planIssue.issue_database_id;
-			}
-			else
-			{
-				RemoveIssueForPlanIssueObject(a_planLayer, a_planIssue);
-			}
-		}
-
-		public void SubscribeToIssueChangedEvent(OnIssueChanged callbackDelegate)
-		{
-			issueChangedEvent += callbackDelegate;
-		}
-
-		public void UnsubscribeFromIssueChangedEvent(OnIssueChanged callbackDelegate)
-		{
-			issueChangedEvent -= callbackDelegate;
-		}
-
-		private void OnIssueLayerChanged(PlanLayer targetPlanLayer)
-		{
-			if (issueChangedEvent != null)
-			{
-				issueChangedEvent(targetPlanLayer);
-			}
-		}
-
-		public void ShowRelevantPlanLayersForIssue(PlanIssueInstance planIssueData)
-		{
-			KeyValuePair<AbstractLayer, AbstractLayer> layerData = ConstraintManager.Instance.GetRestrictionLayersForRestrictionId(planIssueData.PlanIssueData.restriction_id);
+			KeyValuePair<AbstractLayer, AbstractLayer> layerData = ConstraintManager.Instance.GetRestrictionLayersForRestrictionId(planIssueData.restriction_id);
 
 			if (layerData.Key != null)
 			{
@@ -480,33 +158,34 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				if (layer.Toggleable && currentPlan != null)
-				{
-					//Only toggle layers off if they aren't in the current plan.
-					if (currentPlan.PlanLayers.Find(obj => obj.BaseLayer == layer) == null)
-					{
-						LayerManager.Instance.HideLayer(layer);
-					}
-				}
+				//if (layer.Toggleable && currentPlan != null)
+				//{
+				//	//Only toggle layers off if they aren't in the current plan.
+				//	if (currentPlan.PlanLayers.Find(obj => obj.BaseLayer == layer) == null)
+				//	{
+				//		LayerManager.Instance.HideLayer(layer);
+				//	}
+				//}
 			}
 		}
 
 		private void CreateNewShippingIssue(ShippingIssueObject issueObject)
 		{
-			if (shippingIssueInstances.Count < maxShippingIssues)
+			if (m_shippingIssueInstances.Count < maxShippingIssues)
 			{
-				ShippingIssueInstance issueInstance = new ShippingIssueInstance(issueObject);
-				shippingIssueInstances.Add(issueObject.warning_id, issueInstance);
+				ShippingIssueInstance issueInstance = new ShippingIssueInstance();
+				issueInstance.SetIssue(issueObject);
+				m_shippingIssueInstances.Add(issueObject.warning_id, issueInstance);
 			}
 		}
 
 		private void DestroyAllShippingIssues()
 		{
-			foreach(ShippingIssueInstance issueInstance in shippingIssueInstances.Values)
+			foreach(ShippingIssueInstance issueInstance in m_shippingIssueInstances.Values)
 			{
 				issueInstance.Destroy();
 			}
-			shippingIssueInstances.Clear();
+			m_shippingIssueInstances.Clear();
 		}
 
 		public void UpdateShippingIssues(List<ShippingIssueObject> shippingIssues)
@@ -515,12 +194,12 @@ namespace MSP2050.Scripts
 			{
 				ShippingIssueObject issue = shippingIssues[i];
 				ShippingIssueInstance existingInstance;
-				if (shippingIssueInstances.TryGetValue(issue.warning_id, out existingInstance))
+				if (m_shippingIssueInstances.TryGetValue(issue.warning_id, out existingInstance))
 				{
 					if (!issue.active)
 					{
 						existingInstance.Destroy();
-						shippingIssueInstances.Remove(issue.warning_id);
+						m_shippingIssueInstances.Remove(issue.warning_id);
 					}
 				}
 				else if (issue.active)
@@ -539,16 +218,6 @@ namespace MSP2050.Scripts
 			else
 			{
 				Debug.LogError("Parent canvas raycaster not assigned in the IssueManager");
-			}
-		}
-
-		public void SetIssuesForPlan(Plan plan, List<PlanIssueObject> issuesBackup)
-		{
-			RemoveIssuesForPlan(plan, null);
-			foreach (PlanIssueObject planIssue in issuesBackup)
-			{
-				PlanLayer layer = PlanManager.Instance.GetPlanLayer(planIssue.plan_layer_id);
-				AddPlanIssue(layer, planIssue);
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
+using Newtonsoft.Json.Linq;
 
 namespace MSP2050.Scripts
 {
@@ -14,7 +14,6 @@ namespace MSP2050.Scripts
 		public string m_description;
 
 		public List<PlanLayerBackup> m_planLayers;
-		public List<PlanIssueObject> m_issues;
 		public Dictionary<int, EPlanApprovalState> m_approval;
 
 		public PlanBackup(Plan a_plan)
@@ -23,7 +22,6 @@ namespace MSP2050.Scripts
 			m_constructionStartTime = a_plan.ConstructionStartTime;
 			m_name = a_plan.Name;
 			m_description = a_plan.Description;
-			m_issues = IssueManager.Instance.FindIssueDataForPlan(a_plan);
 
 			m_approval = new Dictionary<int, EPlanApprovalState>();
 			foreach (var kvp in a_plan.countryApproval)
@@ -52,8 +50,9 @@ namespace MSP2050.Scripts
 					a_plan.PlanLayers.Add(layerbackup.m_planLayer);
 					if (a_plan.State != Plan.PlanState.DELETED)
 						layerbackup.m_planLayer.BaseLayer.AddPlanLayer(layerbackup.m_planLayer);
-					IssueManager.Instance.InitialiseIssuesForPlanLayer(layerbackup.m_planLayer);
 				}
+				else if(a_plan.State != Plan.PlanState.DELETED)
+					layerbackup.m_planLayer.BaseLayer.UpdatePlanLayerTime(layerbackup.m_planLayer);
 				layerbackup.ResetLayerToBackup();
 			}
 
@@ -62,7 +61,6 @@ namespace MSP2050.Scripts
 			{
 				if (!originalLayers.Contains(a_plan.PlanLayers[i].ID))
 				{
-					PlanManager.Instance.PlanLayerRemoved(a_plan, a_plan.PlanLayers[i]);
 					a_plan.PlanLayers[i].BaseLayer.RemovePlanLayerAndEntities(a_plan.PlanLayers[i]);
 					a_plan.PlanLayers[i].RemoveGameObjects();
 					a_plan.PlanLayers.RemoveAt(i);
@@ -78,7 +76,6 @@ namespace MSP2050.Scripts
 					sub.FinishEditing();
 				}
 			}
-			IssueManager.Instance.SetIssuesForPlan(a_plan, m_issues);
 		}
 
 		public void SubmitChanges(Plan a_plan, BatchRequest a_batch)
@@ -90,13 +87,14 @@ namespace MSP2050.Scripts
 				newLayerIds.Add(planlayer.BaseLayer.ID);
 			}
 
+			//Submit changes or removal to all existing layers
 			foreach (PlanLayerBackup backupLayer in m_planLayers)
 			{
 				oldLayerIds.Add(backupLayer.m_planLayer.BaseLayer.ID);
 				if (!newLayerIds.Contains(backupLayer.m_planLayer.BaseLayer.ID))
 				{
 					//Plan no longer contains layer, submit removal
-					//Removes planlayer from plan and all geom on it
+					//Removes planlayer from plan and all geom and issues on it
 					//Removes all connections, sockets, sources and output for geom on the layer
 					a_plan.SubmitRemovePlanLayer(a_plan.GetPlanLayerForLayer(backupLayer.m_planLayer.BaseLayer), a_batch);
 				}
@@ -150,8 +148,13 @@ namespace MSP2050.Scripts
 							oldAddedSubEntity.SubmitDelete(a_batch);
 						}
 					}
+
+					//Update the IDs of issues if they exist in the backup, submit delta to server
+					backupLayer.UpdateIssueIDsAndSubmitChanges(a_batch);
 				}
 			}
+
+			//Submit new layers
 			foreach (PlanLayer planlayer in a_plan.PlanLayers)
 			{
 				if (!oldLayerIds.Contains(planlayer.BaseLayer.ID))
@@ -166,6 +169,12 @@ namespace MSP2050.Scripts
 					foreach (Entity newAddedEntity in planlayer.GetNewGeometry())
 					{
 						newAddedEntity.GetSubEntity(0).SubmitNew(a_batch);
+					}
+					if (planlayer.issues != null)
+					{
+						JObject dataObject = new JObject();
+						dataObject.Add("added", JToken.FromObject(planlayer.issues));
+						a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
 					}
 				}
 
@@ -184,6 +193,7 @@ namespace MSP2050.Scripts
 		public HashSet<int> m_removedGeometry;
 		public List<SubEntityDataCopy> m_newGeometryData;
 		public List<SubEntity> m_newGeometry;
+		public List<PlanIssueObject> m_issues;
 
 		public PlanLayerBackup(PlanLayer a_planLayer)
 		{
@@ -191,6 +201,7 @@ namespace MSP2050.Scripts
 			m_removedGeometry = new HashSet<int>(a_planLayer.RemovedGeometry);
 			m_newGeometryData = new List<SubEntityDataCopy>(a_planLayer.GetNewGeometryCount());
 			m_newGeometry = new List<SubEntity>(a_planLayer.GetNewGeometryCount());
+			m_issues = new List<PlanIssueObject>(a_planLayer.issues);
 			foreach (Entity entity in a_planLayer.GetNewGeometry())
 			{
 				m_newGeometry.Add(entity.GetSubEntity(0));
@@ -201,6 +212,7 @@ namespace MSP2050.Scripts
 		public void ResetLayerToBackup()
 		{
 			m_planLayer.RemovedGeometry = m_removedGeometry;
+			m_planLayer.issues = m_issues;
 			HashSet<int> originalGeometry = new HashSet<int>();
 			for (int i = 0; i < m_newGeometry.Count; i++)
 			{
@@ -219,6 +231,35 @@ namespace MSP2050.Scripts
 			foreach(SubEntity sub in m_newGeometry)
 			{
 				m_planLayer.AddNewGeometry(sub.Entity);
+			}
+		}
+
+		public void UpdateIssueIDsAndSubmitChanges(BatchRequest a_batch)
+		{
+			if (m_issues == null || m_issues.Count == 0)
+			{ 
+				if(m_planLayer.issues != null || m_planLayer.issues.Count > 0)
+				{
+					//No old issues, submit all new issues
+					JObject dataObject = new JObject();
+					dataObject.Add("added", JToken.FromObject(m_planLayer.issues));
+					a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
+				}
+			}
+			else
+			{
+				List<int> removedIssueIDs = new List<int>();
+				HashSet<PlanIssueObject> newIssues = new HashSet<PlanIssueObject>(m_planLayer.issues, IssueObjectEqualityComparer.Instance);
+				//TODO: calculate delta, update IDs of existing issues
+				foreach(PlanIssueObject issue in m_issues)
+				{
+					if(newIssues.con)
+				}
+
+				JObject dataObject = new JObject();
+				dataObject.Add("added", JToken.FromObject(GetAddedIssues()));
+				dataObject.Add("removed", JToken.FromObject(GetRemovedIssues()));
+				a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
 			}
 		}
 	}
