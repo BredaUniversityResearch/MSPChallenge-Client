@@ -202,5 +202,16 @@ namespace MSP2050.Scripts
 			}
 			return result;
 		}
+
+		public void GetPolicyIssueText(Plan a_plan, List<string> a_issueText)
+		{
+			if (a_plan.m_policies != null)
+			{
+				foreach (var kvp in a_plan.m_policies)
+				{ 
+					kvp.Value.logic.GetIssueText(kvp.Value, a_issueText);
+				}
+			}
+		}
 	}
 }

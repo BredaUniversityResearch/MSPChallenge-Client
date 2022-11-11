@@ -8,6 +8,7 @@ namespace MSP2050.Scripts
 	public class PolicyLogicShipping : APolicyLogic
 	{
 		public const float shippingDisplayScale = 10000; // = 10km
+		bool m_wasShippingPlanBeforeEditing;
 
 		public override void Destroy()
 		{ }
@@ -50,8 +51,7 @@ namespace MSP2050.Scripts
 		}
 
 		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
-		{
-		}
+		{ }
 
 		public override void AddToPlan(Plan a_plan)
 		{

@@ -2,12 +2,14 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace MSP2050.Scripts
 {
 	public class PolicyLogicFishing : APolicyLogic
 	{
-		private FishingDistributionDelta fishingBackup;
+		FishingDistributionDelta m_fishingBackup;
+		bool m_wasFishingPlanBeforeEditing;
 
 		public override void Destroy()
 		{ }
@@ -45,18 +47,49 @@ namespace MSP2050.Scripts
 
 		public override void StartEditingPlan(Plan a_plan) 
 		{
-			fishingBackup = a_plan.fishingDistributionDelta;
-			a_plan.fishingDistributionDelta = a_plan.fishingDistributionDelta.Clone();
+			if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var data))
+			{
+				m_wasFishingPlanBeforeEditing = true;
+				m_fishingBackup = data.fishingDistributionDelta;
+				data.fishingDistributionDelta = data.fishingDistributionDelta.Clone();
+			}
+			else
+			{
+				m_wasFishingPlanBeforeEditing = false;
+			}
 		}
 
 		public override void RestoreBackupForPlan(Plan a_plan) 
 		{
-			a_plan.fishingDistributionDelta = fishingBackup;
+			if (m_wasFishingPlanBeforeEditing)
+			{
+				if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var data))
+				{
+					data.fishingDistributionDelta = m_fishingBackup;
+				}
+			}
+			else
+			{
+				RemoveFromPlan(a_plan);
+			}
 		}
 
 		public override void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch) 
 		{
-			a_plan.fishingDistributionDelta.SubmitToServer(a_plan.GetDataBaseOrBatchIDReference(), a_batch);
+			if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var data))
+			{
+				if (!m_wasFishingPlanBeforeEditing)
+				{ 
+					//TODO: is fishing plan now, submit plan type change?
+				}
+				data.fishingDistributionDelta.SubmitToServer(a_plan.GetDataBaseOrBatchIDReference(), a_batch);
+			}
+			else if(m_wasFishingPlanBeforeEditing)
+			{
+				JObject dataObject = new JObject();
+				dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
+				a_batch.AddRequest(Server.DeleteFishingFromPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			}
 		}
 
 		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
@@ -80,8 +113,7 @@ namespace MSP2050.Scripts
 
 		public override void AddToPlan(Plan a_plan)
 		{
-			throw new NotImplementedException();
-			//TODO
+			a_plan.AddPolicyData(new PolicyPlanDataFishing() { fishingDistributionDelta = new FishingDistributionDelta() });
 		}
 	}
 }

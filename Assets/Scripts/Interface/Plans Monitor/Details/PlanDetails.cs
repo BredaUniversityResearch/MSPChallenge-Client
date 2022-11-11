@@ -49,8 +49,6 @@ namespace MSP2050.Scripts
 		[Header("Tabs")]
 		[SerializeField]
 		private Dictionary<EPlanDetailsTab, PlanDetailsTab> tabs;
-		[SerializeField]
-		PlanDetailsTabLayers layersTab; //Specifically linked because it is referenced often
 		[SerializeField] ToggleGroup tabToggleGroup;
 		private PlanDetailsTab currentTab;
 
@@ -62,7 +60,6 @@ namespace MSP2050.Scripts
 		public static PlanDetails instance;
 		private Plan selectedPlan = null;
 		public Plan SelectedPlan { get { return selectedPlan; } }
-		public static PlanDetailsTabLayers LayersTab => instance.layersTab;
 
 		protected void Awake()
 		{
@@ -333,13 +330,13 @@ namespace MSP2050.Scripts
 
 		void OnPlanLayerIssuesChanged(PlanLayer changedIssueLayer)
 		{
-			if (selectedPlan != null)
-			{
-				if (selectedPlan.PlanLayers.Contains(changedIssueLayer))
-				{
-					((PlanDetailsTabIssues)tabs[EPlanDetailsTab.Issues]).UpdateIssueStatus();
-				}
-			}
+			//if (selectedPlan != null)
+			//{
+			//	if (selectedPlan.PlanLayers.Contains(changedIssueLayer))
+			//	{
+			//		((PlanDetailsTabIssues)tabs[EPlanDetailsTab.Issues]).UpdateIssueStatus();
+			//	}
+			//}
 		}
 	
 		// Call when plan status has changed

@@ -10,7 +10,7 @@ namespace MSP2050.Scripts
 
 		public override bool EvaluateRequirement()
 		{
-			AbstractLayer layer = PlanDetails.LayersTab.CurrentlyEditingBaseLayer;
+			AbstractLayer layer = InterfaceCanvas.Instance.activePlanWindow.CurrentlyEditingBaseLayer;
 			if (layer == null)
 				return false;
 			switch (m_type)

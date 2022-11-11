@@ -44,5 +44,7 @@ namespace MSP2050.Scripts
 			//Overwritten by children that have confirm / cancel buttons
 			return true; 
 		}
+
+		public bool IsOpen => m_contentToggle.IsOn;
 	}
 }

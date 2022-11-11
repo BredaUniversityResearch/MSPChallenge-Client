@@ -141,7 +141,7 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.activePlanWindow.SetViewMode(PlanManager.PlanViewState.All);
 			ignoreRedrawOnViewStateChange = false;
 
-			if(updateLayers)
+			if (updateLayers)
 				LayerManager.Instance.UpdateVisibleLayersToBase();
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.CloseWindow();
@@ -299,7 +299,7 @@ namespace MSP2050.Scripts
 			{
 				Plan plan = plans[i];
 				if (plan.StartTime <= planStartTime ||
-				    (onlyInfluencingPlans && !plan.InInfluencingState))
+					(onlyInfluencingPlans && !plan.InInfluencingState))
 				{
 					continue;
 				}
@@ -328,7 +328,7 @@ namespace MSP2050.Scripts
 				if (planLayer != null)
 				{
 					if (planLayer.IsPersistentIDInNewGeometry(entityPersistentId) ||
-					    planLayer.IsPersistentIDInRemovedGeometry(entityPersistentId))
+						planLayer.IsPersistentIDInRemovedGeometry(entityPersistentId))
 					{
 						result = plan;
 						break;
@@ -375,7 +375,7 @@ namespace MSP2050.Scripts
 
 			if (nameOrDescriptionChanged)
 			{
-				PlanDetails.UpdateNameAndDescription(plan);	
+				PlanDetails.UpdateNameAndDescription(plan);
 			}
 			if (stateChanged)
 			{
@@ -394,7 +394,7 @@ namespace MSP2050.Scripts
 			}
 
 			//Update edit button availability in active plan window
-			if((stateChanged || layersChanged) && planViewing == plan)
+			if ((stateChanged || layersChanged) && planViewing == plan)
 				InterfaceCanvas.Instance.activePlanWindow.UpdateSectionActivity();
 
 			if (timeChanged)
@@ -433,7 +433,7 @@ namespace MSP2050.Scripts
 		public void PlanLockUpdated(Plan plan)
 		{
 			PlansMonitor.SetLockIcon(plan, plan.IsLocked);
-			if(Main.InEditMode && Main.CurrentlyEditingPlan == plan)
+			if (Main.InEditMode && Main.CurrentlyEditingPlan == plan)
 			{
 				PlanDetails.instance.CancelEditingContent();
 				DialogBoxManager.instance.NotificationWindow("Plan Unexpectedly Unlocked", "Plan has been unlocked by an external party. All changes have been discarded.", null);
@@ -447,4 +447,5 @@ namespace MSP2050.Scripts
 					return true;
 			return false;
 		}
+	}
 }

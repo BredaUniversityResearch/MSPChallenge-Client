@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace MSP2050.Scripts
 {
@@ -18,18 +20,30 @@ namespace MSP2050.Scripts
 
 		public PlanBackup(Plan a_plan)
 		{
-			m_startTime = a_plan.StartTime;
-			m_constructionStartTime = a_plan.ConstructionStartTime;
-			m_name = a_plan.Name;
-			m_description = a_plan.Description;
+			if (a_plan == null)
+			{
+				m_startTime = -10000;
+				m_constructionStartTime = -10000;
+				m_name = null;
+				m_description = null;
+				m_approval = new Dictionary<int, EPlanApprovalState>();
+				m_planLayers = new List<PlanLayerBackup>();
+			}
+			else
+			{
+				m_startTime = a_plan.StartTime;
+				m_constructionStartTime = a_plan.ConstructionStartTime;
+				m_name = a_plan.Name;
+				m_description = a_plan.Description;
 
-			m_approval = new Dictionary<int, EPlanApprovalState>();
-			foreach (var kvp in a_plan.countryApproval)
-				m_approval.Add(kvp.Key, kvp.Value);
+				m_approval = new Dictionary<int, EPlanApprovalState>();
+				foreach (var kvp in a_plan.countryApproval)
+					m_approval.Add(kvp.Key, kvp.Value);
 
-			m_planLayers = new List<PlanLayerBackup>(a_plan.PlanLayers.Count);
-			foreach (PlanLayer planlayer in a_plan.PlanLayers)
-				m_planLayers.Add(new PlanLayerBackup(planlayer));
+				m_planLayers = new List<PlanLayerBackup>(a_plan.PlanLayers.Count);
+				foreach (PlanLayer planlayer in a_plan.PlanLayers)
+					m_planLayers.Add(new PlanLayerBackup(planlayer));
+			}
 		}
 
 		public void ResetPlanToBackup(Plan a_plan)
@@ -249,16 +263,29 @@ namespace MSP2050.Scripts
 			else
 			{
 				List<int> removedIssueIDs = new List<int>();
-				HashSet<PlanIssueObject> newIssues = new HashSet<PlanIssueObject>(m_planLayer.issues, IssueObjectEqualityComparer.Instance);
-				//TODO: calculate delta, update IDs of existing issues
-				foreach(PlanIssueObject issue in m_issues)
+				Dictionary<int, PlanIssueObject> newIssues = new Dictionary<int, PlanIssueObject>();
+				foreach (PlanIssueObject issue in m_planLayer.issues)
+					newIssues.Add(issue.GetIssueHash(), issue);
+
+				foreach (PlanIssueObject issue in m_issues)
 				{
-					if(newIssues.con)
+					//Issue hash doesn't take db id into account, so we can use to check for existing
+					int key = issue.GetIssueHash();
+					if (newIssues.TryGetValue(key, out var newIssue))
+					{
+						//Update existing db id, remove from new
+						newIssue.issue_database_id = issue.issue_database_id;
+						newIssues.Remove(key);
+					}
+					else
+					{
+						removedIssueIDs.Add(issue.issue_database_id);
+					}	
 				}
 
 				JObject dataObject = new JObject();
-				dataObject.Add("added", JToken.FromObject(GetAddedIssues()));
-				dataObject.Add("removed", JToken.FromObject(GetRemovedIssues()));
+				dataObject.Add("added", JToken.FromObject(newIssues.Values.ToArray()));
+				dataObject.Add("removed", JToken.FromObject(removedIssueIDs));
 				a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
 			}
 		}

@@ -390,7 +390,7 @@ namespace MSP2050.Scripts
 		public void HideLayer(AbstractLayer layer)
 		{
 			//Layer that is being edited cannot be hidden
-			if (Main.InEditMode && PlanDetails.LayersTab.CurrentlyEditingBaseLayer == layer)
+			if (Main.InEditMode && InterfaceCanvas.Instance.activePlanWindow.CurrentlyEditingBaseLayer == layer)
 				return;
 
 			if (visibleLayers.Contains(layer))

@@ -220,7 +220,6 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			ConstraintManager.Instance.CheckConstraints(m_currentPlan, m_planBackup.m_issues);
 			m_delayedPolicyEffects = PolicyManager.Instance.CalculateEffectsOfEditing(m_currentPlan);
 			if(m_delayedPolicyEffects == 0)
 				SubmitChanges();
@@ -237,22 +236,13 @@ namespace MSP2050.Scripts
 			m_currentPlan.CalculateRequiredApproval();
 			m_currentPlan.SubmitRequiredApproval(batch);
 
-			//Check issues again and submit according to latest tests. To ensure that changes in other plans while editing this plan get detected as well.
+			//Check issues again, to ensure that changes in other plans while editing this plan get detected as well.
 			ConstraintManager.Instance.CheckConstraints(m_currentPlan, out bool hasUnavailableTypes);
-			if (issuesToSubmit != null)
-			{
-				issuesToSubmit.SubmitToServer(batch); 
-			}
 
-			//Submit all layer and geometry changes. Automatically submits corresponding energy_output and connection for geom. 
+			//Submit all layer and geometry changes (including issues).
+			//Automatically submits corresponding energy_output and connection for geom.
+			//Will reset 'edited' on all changed geometry
 			m_planBackup.SubmitChanges(m_currentPlan, batch);
-			foreach(PlanLayer planLayer in m_currentPlan.PlanLayers)
-			{
-				foreach(Entity entity in planLayer.GetNewGeometry())
-				{
-					entity.GetSubEntity(0).FinishEditing();
-				}
-			}
 
 			//Submit policy data after geometry has a batch id
 			PolicyManager.Instance.SubmitChangesToPlan(m_currentPlan, batch);
@@ -401,10 +391,13 @@ namespace MSP2050.Scripts
 			m_planState.SetContent($"Plan state: {m_currentPlan.State.GetDisplayName()}", VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(m_currentPlan.State));
 
 			//Messages
+			//TODO
 
 			//Approval
+			//TODO
 
 			//Issues
+			//TODO
 
 			//Content
 			SetEntriesToPolicies();
@@ -503,6 +496,16 @@ namespace MSP2050.Scripts
 			if(m_delayedPolicyEffects == 0)
 			{
 				SubmitChanges();
+			}
+		}
+
+		public AbstractLayer CurrentlyEditingBaseLayer
+		{
+			get 
+			{
+				if (!Editing || !m_geometryTool.IsOpen)
+					return null;
+				return m_geometryTool.CurrentlyEditingLayer.BaseLayer; 
 			}
 		}
 	}

@@ -268,6 +268,13 @@ namespace MSP2050.Scripts
 			removedCables = null;
 		}
 
+		public override void GetIssueText(APolicyPlanData a_planData, List<string> a_issueText)
+		{ 
+			if(((PolicyPlanDataEnergy)a_planData).energyError)
+			{
+				a_issueText.Add("<color=#FF5454>[Error]</color> The energy distribution has been invalidated and must be recalculated. To do this move the plan to the design state, start editing and accept. Note that editing might change energy cables and distributions to repair the plan, make sure to check these.");
+			}
+		}
 
 		public override bool ShowPolicyToggled(APolicyPlanData a_planData)
 		{
