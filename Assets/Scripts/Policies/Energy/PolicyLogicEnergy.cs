@@ -276,6 +276,16 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public override int GetMaximumIssueSeverityAndCount(APolicyPlanData a_planData, out ERestrictionIssueType a_severity)
+		{
+			if (((PolicyPlanDataEnergy)a_planData).energyError)
+			{
+				a_severity = ERestrictionIssueType.Error;
+				return 1;
+			}
+			else return base.GetMaximumIssueSeverityAndCount(a_planData, out a_severity);
+		}
+
 		public override bool ShowPolicyToggled(APolicyPlanData a_planData)
 		{
 			return ((PolicyPlanDataEnergy)a_planData).altersEnergyDistribution;
@@ -641,6 +651,44 @@ namespace MSP2050.Scripts
 			{
 				energyCableLayerGrey.RestoreInvalidCables(removedCables);
 			}
+		}
+
+		public bool CheckForInvalidCables(Plan a_plan)
+		{
+			foreach (PlanLayer planLayer in a_plan.PlanLayers)
+			{
+				//Check all new geometry in cable layers
+				if (planLayer.BaseLayer.IsEnergyLineLayer() && planLayer.GetNewGeometryCount() > 0)
+				{
+					//Create layer states for energy layers of a marching color, ignoring the cable layer
+					Dictionary<AbstractLayer, LayerState> energyLayerStates = new Dictionary<AbstractLayer, LayerState>();
+					foreach (AbstractLayer energyLayer in PolicyLogicEnergy.Instance.energyLayers)
+						if (energyLayer.greenEnergy == planLayer.BaseLayer.greenEnergy && energyLayer.ID != planLayer.BaseLayer.ID)
+							energyLayerStates.Add(energyLayer, energyLayer.GetLayerStateAtPlan(a_plan));
+
+					foreach (Entity entity in planLayer.GetNewGeometry())
+					{
+						//Check the 2 connections for valid points
+						EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)entity.GetSubEntity(0);
+						foreach (Connection conn in cable.connections)
+						{
+							bool found = false;
+							AbstractLayer targetPointLayer = conn.point.sourcePolygon == null ? conn.point.Entity.Layer : conn.point.sourcePolygon.Entity.Layer;
+							foreach (Entity existingEntity in energyLayerStates[targetPointLayer].baseGeometry)
+							{
+								if (existingEntity.DatabaseID == conn.point.GetDatabaseID())
+								{
+									found = true;
+									break;
+								}
+							}
+							if (!found)
+								return true;
+						}
+					}
+				}
+			}
+			return false;
 		}
 
 		public void AddEnergyPointLayer(PointLayer layer)

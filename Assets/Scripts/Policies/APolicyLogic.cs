@@ -20,6 +20,11 @@ namespace MSP2050.Scripts
 		public virtual bool HasError(APolicyPlanData a_planData) => false;
 		public virtual void GetIssueText(APolicyPlanData a_planData, List<string> a_issueText)
 		{ }
+		public virtual int GetMaximumIssueSeverityAndCount(APolicyPlanData a_planData, out ERestrictionIssueType a_severity)
+		{
+			a_severity = ERestrictionIssueType.None;
+			return 0;
+		}
 
 		//Editing
 		public virtual void StartEditingPlan(Plan a_plan) { }

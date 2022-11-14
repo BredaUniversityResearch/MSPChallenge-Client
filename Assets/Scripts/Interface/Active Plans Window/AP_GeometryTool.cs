@@ -10,6 +10,10 @@ namespace MSP2050.Scripts
 {
 	public class AP_GeometryTool : AP_PopoutWindow
 	{
+		public delegate void EntityTypeChangeCallback(List<EntityType> newTypes);
+		public delegate void TeamChangeCallback(int newTeamID);
+		public delegate void ParameterChangeCallback(EntityPropertyMetaData parameter, string value);
+
 		[Header("Layer types")]
 		[SerializeField] GameObject layerTypeSection;
 		[SerializeField] Transform layerTypeParent;

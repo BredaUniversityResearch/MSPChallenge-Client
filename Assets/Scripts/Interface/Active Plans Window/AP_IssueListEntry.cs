@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
 using static System.Net.Mime.MediaTypeNames;
+using ColourPalette;
 
 namespace MSP2050.Scripts
 {
@@ -12,6 +13,9 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] TextMeshProUGUI m_issueText = null;
 		[SerializeField] Button m_viewIssueButton = null;
+		[SerializeField] ColourAsset m_infoIssueColour;
+		[SerializeField] ColourAsset m_warningIssueColour;
+		[SerializeField] ColourAsset m_errorIssueColour;
 		PlanIssueObject m_issue;
 
 		private void Start()
@@ -26,13 +30,13 @@ namespace MSP2050.Scripts
 			switch (m_issue.type)
 			{
 				case ERestrictionIssueType.Info:
-					m_issueText.text = "<color=#7bd7f6>[Info]</color> " + ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
+					m_issueText.text = $"<color=#{Util.ColorToHex(m_infoIssueColour.GetColour())}>[Info]</color> " + ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
 					break;
 				case ERestrictionIssueType.Warning:
-					m_issueText.text = "<color=#FFFA31>[Warning]</color> " + ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
+					m_issueText.text = $"<color=#{Util.ColorToHex(m_warningIssueColour.GetColour())}>[Warning]</color> " + ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
 					break;
 				case ERestrictionIssueType.Error:
-					m_issueText.text = "<color=#FF5454>[Error]</color> " + ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
+					m_issueText.text = $"<color=#{Util.ColorToHex(m_errorIssueColour.GetColour())}>[Error]</color> " + ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
 					break;
 				default:
 					m_issueText.text = "Unknow issue type " + m_issue.type;

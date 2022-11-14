@@ -37,7 +37,7 @@ namespace MSP2050.Scripts
 			gridNameField.onValueChanged.AddListener((a) => CheckIfChanged());
 			occulusButton.onClick.AddListener(() =>
 			{
-				InterfaceCanvas.Instance.plansMonitor.FadeAndHighlightUntilMouseMove();
+				//TODO: fade UI out until mouse move (was in plansmonitor FadeUntilMouseMove)
 				energyGrid.HighlightSockets();
 				CameraManager.Instance.ZoomToBounds(energyGrid.GetGridRect());
 			});

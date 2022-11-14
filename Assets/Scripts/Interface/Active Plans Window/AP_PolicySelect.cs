@@ -110,6 +110,7 @@ namespace MSP2050.Scripts
 					logic.SetPolicyToggled(m_plan, false);
 				}
 			}
+			//TODO: recalculate issues
 		}
 
 		public override bool MayClose()

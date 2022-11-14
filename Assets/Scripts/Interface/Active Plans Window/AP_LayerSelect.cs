@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using static UnityEditor.Experimental.GraphView.GraphView;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
@@ -52,9 +54,14 @@ namespace MSP2050.Scripts
 					m_subcategoryObjects.Add(layer.SubCategory, subcategory);
 				}
 
-				AP_LayerSelectLayer layerObj = Instantiate(m_subcatgoryPrefab, subcategory.ContentContainer).GetComponent<AP_LayerSelectLayer>();
+				AP_LayerSelectLayer layerObj = Instantiate(m_layerPrefab, subcategory.ContentContainer).GetComponent<AP_LayerSelectLayer>();
 				layerObj.Initialise(layer, OnLayerToggleChanged);
 				m_layerObjects.Add(layer, layerObj);
+			}
+
+			foreach(var kvp in m_layerObjects)
+			{
+				kvp.Value.LoadDependencies(this);
 			}
 		}
 
@@ -69,7 +76,7 @@ namespace MSP2050.Scripts
 			m_ignoreCallback = true;
 			foreach(var kvp in m_layerObjects)
 			{
-				kvp.Value.SetValue(false);
+				kvp.Value.ResetValue();
 			}
 
 			m_originalLayers = new HashSet<AbstractLayer>();
@@ -77,7 +84,6 @@ namespace MSP2050.Scripts
 			{
 				m_originalLayers.Add(pl.BaseLayer);
 				m_layerObjects[pl.BaseLayer].SetValue(true);
-				//TODO: check dependent layers (set non interactable)
 			}
 			m_currentLayers = m_originalLayers;
 			m_ignoreCallback = false;
@@ -92,12 +98,10 @@ namespace MSP2050.Scripts
 			if (a_value)
 			{
 				m_currentLayers.Add(a_layer);
-				//TODO: check dependent layers
 			}
 			else
 			{
 				m_currentLayers.Remove(a_layer);
-				//TODO: check dependent layers
 			}
 		}
 
@@ -109,26 +113,49 @@ namespace MSP2050.Scripts
 
 		public override void ApplyContent()
 		{
-			//TODO: For added layers, check if plan previously contained this layer, if so: readd old planlayer, otherwise create new
-
-			//TODO: For removed layers, check dependencies:
-			if (layer.IsEnergyLayer())
+			HashSet<AbstractLayer> added = m_currentLayers;
+			added.ExceptWith(m_originalLayers);
+			foreach (AbstractLayer addedLayer in added)
 			{
-				energyLayersRemoved = true;
-				if (seperatelyRemoveGreenCables || seperatelyRemoveGreyCables)
+				//TODO: For added layers, check if plan previously contained this layer, if so: readd old planlayer, otherwise create new
+
+			}
+			m_originalLayers.ExceptWith(m_currentLayers); //Contains removed layers now
+
+			bool seperatelyRemoveGreenCables = PolicyLogicEnergy.Instance.energyCableLayerGreen != null && !m_originalLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGreen);
+			bool seperatelyRemoveGreyCables = PolicyLogicEnergy.Instance.energyCableLayerGrey != null && !m_originalLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGrey);
+			Dictionary<int, List<EnergyLineStringSubEntity>> network = null;
+			if (seperatelyRemoveGreenCables)
+				network = PolicyLogicEnergy.Instance.energyCableLayerGreen.GetNodeConnectionsForPlan(m_plan);
+			if (seperatelyRemoveGreyCables)
+				network = PolicyLogicEnergy.Instance.energyCableLayerGrey.GetNodeConnectionsForPlan(m_plan, network);
+
+			foreach (AbstractLayer removedLayer in m_originalLayers)
+			{
+				PlanLayer currentPlanLayer = m_plan.GetPlanLayerForLayer(removedLayer);
+				removedLayer.RemovePlanLayerAndEntities(currentPlanLayer);
+				currentPlanLayer.RemoveGameObjects();
+				m_plan.PlanLayers.Remove(currentPlanLayer);
+
+				//Remove attached cables, if the cable layers were not already being removed
+				if (removedLayer.IsEnergyLayer() && (seperatelyRemoveGreenCables || seperatelyRemoveGreyCables))
 				{
-					PlanLayer currentPlanLayer = a_plan.GetPlanLayerForLayer(layer);
-					for (int i = 0; i < currentPlanLayer.GetNewGeometryCount(); ++i)
+					foreach (Entity entity in currentPlanLayer.GetNewGeometry())
 					{
-						Entity t = currentPlanLayer.GetNewGeometryByIndex(i);
-						SubEntity subEnt = t.GetSubEntity(0);
+						SubEntity subEnt = entity.GetSubEntity(0);
 						if (network.ContainsKey(subEnt.GetDatabaseID()))
+						{
 							foreach (EnergyLineStringSubEntity cable in network[subEnt.GetDatabaseID()])
-								//TODO: just delete as part of plan, don't submit yet
-								cable.SubmitDelete(a_batch);//Connections will be removed up to 4 times
+							{
+								cable.Entity.PlanLayer.RemoveNewGeometry(cable.Entity);
+								cable.RemoveGameObject();
+							}
+						}
 					}
 				}
 			}
+			//TODO: recalculate issues
+			//TODO: needs a plan (layer) redraw
 		}
 
 		public override bool MayClose()
@@ -141,5 +168,9 @@ namespace MSP2050.Scripts
 			return true;
 		}
 
+		public AP_LayerSelectLayer GetLayerObjectForLayer(AbstractLayer a_layer)
+		{
+			return m_layerObjects[a_layer];
+		}
 	}
 }

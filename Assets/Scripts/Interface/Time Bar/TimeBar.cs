@@ -181,7 +181,7 @@ namespace MSP2050.Scripts
 
 			if (openingViewMode)
 			{
-				if(Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
+				if(Main.InEditMode)
 				{
 					DialogBoxManager.instance.NotificationWindow("Editing plan content", "View settings are unavailable while editing a plan's content. Please confirm or cancel your changes before trying again.", null);
 					ignoreActivityCallback = true;

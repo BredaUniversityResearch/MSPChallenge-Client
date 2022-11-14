@@ -33,6 +33,13 @@ namespace MSP2050.Scripts
 			ForceClose(false);
 		}
 
+		public void SetContent(string a_text, Color a_color)
+		{
+			m_nameText.text = a_text;
+			m_icon.color = a_color;
+			gameObject.SetActive(true);
+		}
+
 		public void SetContent(string a_text, Sprite a_icon)
 		{
 			m_nameText.text = a_text;
@@ -43,6 +50,7 @@ namespace MSP2050.Scripts
 		public void SetContent(string a_text)
 		{
 			m_nameText.text = a_text;
+			gameObject.SetActive(true);
 		}
 
 		void OnToggleValueChanged(bool a_value)

@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 		[SerializeField] private InputField valueInput = null;
 		[SerializeField] private TextMeshProUGUI unit = null;
 
-		public ActivePlanWindow.ParameterChangeCallback parameterChangedCallback;
+		public AP_GeometryTool.ParameterChangeCallback parameterChangedCallback;
 		private EntityPropertyMetaData parameter;
 	
 		void Start ()

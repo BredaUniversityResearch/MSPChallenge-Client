@@ -30,8 +30,7 @@ namespace MSP2050.Scripts
 		public GenericWindow layerSelect;
 		public ActiveLayerWindow activeLayers;
 		public ActivePlanWindow activePlanWindow;
-		public PlanWizard planWizard;
-		public PlansMonitor plansMonitor;
+		public PlansList plansList;
 		public LoadingScreen loadingScreen;
 		public UnLoadingScreen unLoadingScreen;
 		public PropertiesWindow propertiesWindow;

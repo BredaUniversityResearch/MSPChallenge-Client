@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ColourPalette;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,10 +9,6 @@ namespace MSP2050.Scripts
 {
 	public class ActivePlanWindow : MonoBehaviour
 	{
-		public delegate void EntityTypeChangeCallback(List<EntityType> newTypes);
-		public delegate void TeamChangeCallback(int newTeamID);
-		public delegate void ParameterChangeCallback(EntityPropertyMetaData parameter, string value);
-
 		[Header("General")]
 		[SerializeField] GenericWindow m_window;
 		[SerializeField] ToggleGroup m_contentToggleGroup;
@@ -43,6 +40,9 @@ namespace MSP2050.Scripts
 		[SerializeField] AP_Communication m_communicationContent;
 		[SerializeField] AP_Approval m_approvalContent;
 		[SerializeField] AP_IssueList m_issuesContent;
+		[SerializeField] ColourAsset m_infoIssueColour;
+		[SerializeField] ColourAsset m_warningIssueColour;
+		[SerializeField] ColourAsset m_errorIssueColour;
 
 		[Header("View mode")]
 		[SerializeField] GameObject m_viewModeSection;
@@ -75,12 +75,13 @@ namespace MSP2050.Scripts
 		private DialogBox m_cancelChangesConfirmationWindow = null;
 		private Plan m_currentPlan;
 		private bool m_editing;
-		private bool m_creatingNew;
+		private enum ECreationStage { None, Setup, Normal }
+		private ECreationStage m_creationStage;
 
 		//Properties
 		public Plan CurrentPlan => m_currentPlan;
 		public bool Editing => m_editing;
-		public bool CreatingNew => m_creatingNew;
+		//public bool CreatingNew => m_creatingNew;
 
 		//Editing backup
 		private PlanBackup m_planBackup;
@@ -156,9 +157,9 @@ namespace MSP2050.Scripts
 
 		void OnCancelButton()
 		{ 
-			if(m_creatingNew)
+			if(m_creationStage != ECreationStage.None)
 			{ 
-
+				//TODO
 			}
 			else if(m_editing)
 			{
@@ -169,7 +170,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		void ForceCancel(bool a_closeWindow)
+		public void ForceCancel(bool a_closeWindow)
 		{
 			if (m_selectedContentToggle != null)
 			{
@@ -274,7 +275,7 @@ namespace MSP2050.Scripts
 		public void OnEditButtonPressed()
 		{
 			Main.Instance.PreventPlanAndTabChange = true;
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 
 			m_currentPlan.AttemptLock(
 				(plan) =>
@@ -284,7 +285,7 @@ namespace MSP2050.Scripts
 				},
 				(plan) => {
 					Main.Instance.PreventPlanAndTabChange = false;
-					PlansMonitor.RefreshPlanButtonInteractablity();
+					InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 				});
 		}
 
@@ -294,14 +295,14 @@ namespace MSP2050.Scripts
 			{
 				//TODO: open in create mode
 				m_editing = true;
-				m_creatingNew = true;
+				m_creationStage = ECreationStage.Setup;
 				m_currentPlan = new Plan();
 			}
 			else
 			{
 				m_currentPlan = plan;
 				m_editing = false;
-				m_creatingNew = false;
+				m_creationStage = ECreationStage.None;
 			}
 			gameObject.SetActive(true);
 			m_countryIndicator.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
@@ -319,15 +320,16 @@ namespace MSP2050.Scripts
 			//Content
 			m_planName.interactable = m_editing;
 			m_planDescription.interactable = m_editing;
-			m_layerSection.SetActive(!m_creatingNew);
-			m_policySection.SetActive(!m_creatingNew);
-			m_communicationSection.SetActive(!m_creatingNew);
+			m_layerSection.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
+			m_policySection.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
+			m_communicationSection.SetActive(m_creationStage == ECreationStage.None);
 			m_viewModeSection.SetActive(!m_editing);
 			m_changeLayersToggle.gameObject.SetActive(m_editing);
 			m_changePoliciesToggle.gameObject.SetActive(m_editing);
-			m_creationTimeSection.SetActive(m_creatingNew);
-			m_planDate.gameObject.SetActive(!m_creatingNew);
+			m_creationTimeSection.SetActive(m_creationStage == ECreationStage.Setup);
+			m_planDate.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
 			m_planState.gameObject.SetActive(!m_editing);
+			m_issues.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
 		}
 
 		void EnterEditMode()
@@ -339,9 +341,7 @@ namespace MSP2050.Scripts
 
 			m_planBackup = new PlanBackup(m_currentPlan);
 			PolicyManager.Instance.StartEditingPlan(m_currentPlan);
-
-			PlansMonitor.RefreshPlanButtonInteractablity();
-			PlansMonitor.instance.plansMonitorToggle.toggle.isOn = false;
+			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 
 			UpdateSectionActivity();
 		}
@@ -357,7 +357,7 @@ namespace MSP2050.Scripts
 			Main.Instance.fsm.ClearUndoRedo();
 			Main.Instance.fsm.StopEditing();
 
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 			LayerManager.Instance.ClearNonReferenceLayers();
 			PlanManager.Instance.ShowPlan(m_currentPlan); //Also refreshed our content & activity
 		}
@@ -391,13 +391,35 @@ namespace MSP2050.Scripts
 			m_planState.SetContent($"Plan state: {m_currentPlan.State.GetDisplayName()}", VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(m_currentPlan.State));
 
 			//Messages
-			//TODO
+			m_communication.SetContent($"See {m_currentPlan.PlanMessages.Count} messages");
 
 			//Approval
-			//TODO
+			if (m_currentPlan.State == Plan.PlanState.APPROVAL)
+				m_approval.SetContent($"Approval required from {m_currentPlan.countryApproval.Count} teams");
+			else
+				m_approval.gameObject.SetActive(false);
 
 			//Issues
-			//TODO
+			int issueCount = m_currentPlan.GetMaximumIssueSeverityAndCount(out var severity);
+			if(issueCount == 0)
+			{
+				m_issues.SetContent("No issues", Color.clear);
+			}
+			else
+			{
+				switch (severity)
+				{
+					case ERestrictionIssueType.Info:
+						m_issues.SetContent($"Plan has {issueCount} issues", m_infoIssueColour.GetColour());
+						break;
+					case ERestrictionIssueType.Warning:
+						m_issues.SetContent($"Plan has {issueCount} issues", m_warningIssueColour.GetColour());
+						break;
+					default:
+						m_issues.SetContent($"Plan has {issueCount} issues", m_errorIssueColour.GetColour());
+						break;
+				}
+			}
 
 			//Content
 			SetEntriesToPolicies();
@@ -455,7 +477,6 @@ namespace MSP2050.Scripts
 			m_ignoreLayerCallback = true;
 			//TODO
 			m_geometryTool.StartEditingLayer(m_currentPlan.PlanLayers[a_layerIndex]);
-			PlanDetails.LayersTab.StartEditingLayer(m_currentPlan.PlanLayers[a_layerIndex]);
 			m_ignoreLayerCallback = false;
 		}
 

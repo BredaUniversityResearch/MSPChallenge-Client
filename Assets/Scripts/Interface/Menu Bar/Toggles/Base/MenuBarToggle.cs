@@ -4,7 +4,7 @@ namespace MSP2050.Scripts
 {
 	public class MenuBarToggle : MonoBehaviour
 	{
-		public enum Selection { Logo, Layers, PlanWizard, ObjectivesMonitor, PlansMonitor, ImpactTool, ActiveLayers, GameMenu };
+		public enum Selection { Logo, Layers, PlanWizard, ObjectivesMonitor, ImpactTool, ActiveLayers, GameMenu };
 
 		[Header("Connects to the correct toggle")]
 		public Selection connectTo;
@@ -34,10 +34,6 @@ namespace MSP2050.Scripts
 						toggle.isOn = false; // Init
 						toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.objectivesMonitor.SetWindowActive(toggle.isOn));
 					}
-					break;
-				case Selection.PlansMonitor:
-					toggle.isOn = InterfaceCanvas.Instance.plansMonitor.gameObject.activeSelf; // Init
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.plansMonitor.gameObject.SetActive(toggle.isOn));
 					break;
 				case Selection.ImpactTool:
 					toggle.isOn = InterfaceCanvas.Instance.impactToolWindow.gameObject.activeSelf;

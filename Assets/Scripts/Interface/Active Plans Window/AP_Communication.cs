@@ -13,6 +13,7 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_messagePrefab;
 		[SerializeField] TMP_InputField m_chatInputField;
 		[SerializeField] Button m_sendButton;
+		[SerializeField] ScrollRect m_messageScrollRect;
 
 		List<AP_CommunicationMessage> m_messageObjects = new List<AP_CommunicationMessage>();
 		int m_nextMessageIndex;
@@ -59,6 +60,10 @@ namespace MSP2050.Scripts
 			{
 				m_messageObjects[i].gameObject.SetActive(false);
 			}
+
+			Canvas.ForceUpdateCanvases();
+			m_messageScrollRect.verticalNormalizedPosition = 0f;
+			Canvas.ForceUpdateCanvases();
 		}
 
 		void SetMessageEntry(PlanMessage a_message)

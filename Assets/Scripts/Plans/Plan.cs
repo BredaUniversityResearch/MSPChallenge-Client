@@ -122,7 +122,6 @@ namespace MSP2050.Scripts
 		private void HandleAttemptLockSuccess(PlanLockAction actionOnSuccess)
 		{
 			LockedBy = SessionManager.Instance.CurrentSessionID;
-			PlanDetails.LockStateChanged(this, IsLocked);
 			PlanManager.Instance.PlanLockUpdated(this);
 			if (actionOnSuccess != null)
 				actionOnSuccess(this);
@@ -154,10 +153,13 @@ namespace MSP2050.Scripts
 
 		public bool HasPolicyErrors()
 		{
-			foreach (var kvp in m_policies)
+			if (m_policies != null)
 			{
-				if (kvp.Value.logic.HasError(kvp.Value))
-					return true;
+				foreach (var kvp in m_policies)
+				{
+					if (kvp.Value.logic.HasError(kvp.Value))
+						return true;
+				}
 			}
 			return false;
 		}
@@ -165,22 +167,11 @@ namespace MSP2050.Scripts
 		public void UpdatePlan(PlanObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
 			//=================================== BASE INFO UPDATE =====================================
-			bool nameOrDescriptionChanged = false, timeChanged = false, stateChanged = false, forceMonitorUpdate = false;
+			bool stateChanged = false;
 			bool inTimelineBefore = ShouldBeVisibleInTimeline;
 
-			//Handle name
-			if (updatedData.name != Name)
-			{
-				Name = updatedData.name;
-				nameOrDescriptionChanged = true;
-			}
-
-			//Handle description
-			if (updatedData.description != Description)
-			{
-				Description = updatedData.description;
-				nameOrDescriptionChanged = true;
-			}
+			Name = updatedData.name;
+			Description = updatedData.description;
 
 			//Handle locks
 			int lockedByUser = -1;
@@ -190,7 +181,6 @@ namespace MSP2050.Scripts
 			{
 				LockedBy = lockedByUser;
 				PlanManager.Instance.PlanLockUpdated(this);
-				PlanDetails.LockStateChanged(this, IsLocked);
 				stateChanged = true;
 			}
 
@@ -204,7 +194,7 @@ namespace MSP2050.Scripts
 					//Cancel editing if we were editing it before
 					if (Main.CurrentlyEditingPlan != null && Main.CurrentlyEditingPlan.ID == updatedData.id)
 					{
-						PlanDetails.instance.CancelEditingContent();
+						InterfaceCanvas.Instance.activePlanWindow.ForceCancel(true);
 
 						if (State == PlanState.DELETED)
 						{
@@ -281,12 +271,7 @@ namespace MSP2050.Scripts
 				if (State != PlanState.DELETED)
 					foreach (PlanLayer planLayer in PlanLayers)
 						planLayer.BaseLayer.UpdatePlanLayerTime(planLayer);
-				timeChanged = true;
 			}
-
-			bool typeChanged = false;
-			bool layersChanged = false;
-			//PlanLayerUpdateTracker planLayerUpdateTracker = new PlanLayerUpdateTracker();
 
 			//Do not update if we have the plan locked, no one could have changed it.
 			//This persists if we stop editing until all data has been sent.
@@ -306,7 +291,6 @@ namespace MSP2050.Scripts
 						if (State != PlanState.DELETED)
 							planLayer.BaseLayer.AddPlanLayer(planLayer);
 						planLayer.DrawGameObjects();
-						layersChanged = true;
 					}
 					else
 					{
@@ -322,7 +306,6 @@ namespace MSP2050.Scripts
 					PlanLayers.Remove(removedPlanLayer);
 					removedPlanLayer.BaseLayer.RemovePlanLayerAndEntities(removedPlanLayer);
 					removedPlanLayer.RemoveGameObjects();
-					layersChanged = true;
 				}
 
 				//Update construction start time
@@ -337,7 +320,7 @@ namespace MSP2050.Scripts
 			}
 
 			LayerManager.Instance.UpdateVisibleLayersFromPlan(this);
-			PlanManager.Instance.UpdatePlanInUI(this, nameOrDescriptionChanged, timeChanged, stateChanged, layersChanged, typeChanged, forceMonitorUpdate, oldStartTime, oldState, inTimelineBefore);
+			PlanManager.Instance.UpdatePlanInUI(this, stateChanged, oldStartTime, inTimelineBefore);
 		}
 
 		public void ReceiveMessage(PlanMessageObject a_message)
@@ -625,44 +608,6 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public bool CheckForInvalidCables()
-		{
-			foreach (PlanLayer planLayer in PlanLayers)
-			{
-				//Check all new geometry in cable layers
-				if (planLayer.BaseLayer.IsEnergyLineLayer() && planLayer.GetNewGeometryCount() > 0)
-				{
-					//Create layer states for energy layers of a marching color, ignoring the cable layer
-					Dictionary<AbstractLayer, LayerState> energyLayerStates = new Dictionary<AbstractLayer, LayerState>();
-					foreach (AbstractLayer energyLayer in PolicyLogicEnergy.Instance.energyLayers)
-						if (energyLayer.greenEnergy == planLayer.BaseLayer.greenEnergy && energyLayer.ID != planLayer.BaseLayer.ID)
-							energyLayerStates.Add(energyLayer, energyLayer.GetLayerStateAtPlan(this));
-
-					foreach (Entity entity in planLayer.GetNewGeometry())
-					{
-						//Check the 2 connections for valid points
-						EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)entity.GetSubEntity(0);
-						foreach (Connection conn in cable.connections)
-						{
-							bool found = false;
-							AbstractLayer targetPointLayer = conn.point.sourcePolygon == null ? conn.point.Entity.Layer : conn.point.sourcePolygon.Entity.Layer;
-							foreach (Entity existingEntity in energyLayerStates[targetPointLayer].baseGeometry)
-							{
-								if (existingEntity.DatabaseID == conn.point.GetDatabaseID())
-								{
-									found = true;
-									break;
-								}
-							}
-							if (!found)
-								return true;
-						}
-					}
-				}
-			}
-			return false;
-		}
-
 		public void ZoomToPlan()
 		{ 
 			if(RectValid())
@@ -720,9 +665,7 @@ namespace MSP2050.Scripts
 		{
 			m_policies.Add(a_data.logic.m_definition.m_name, a_data);
 		}
-
 		
-
 		public string GetDataBaseOrBatchIDReference()
 		{
 			if (ID != -1)
@@ -760,16 +703,39 @@ namespace MSP2050.Scripts
 			return maxSeverity;
 		}
 
-		public List<PlanIssueObject> GetIssueList()
+		public int GetMaximumIssueSeverityAndCount(out ERestrictionIssueType a_severity)
 		{
-			List<PlanIssueObject> result = new List<PlanIssueObject>(32);
+			a_severity = ERestrictionIssueType.None;
+			int count = 0;
+			//ERestrictionIssueType newSeverity;
+			if (m_policies != null)
+			{
+				foreach (var kvp in m_policies)
+				{
+					count += kvp.Value.logic.GetMaximumIssueSeverityAndCount(kvp.Value, out var newSeverity);
+					if(newSeverity < a_severity)
+						a_severity = newSeverity;
+				}
+			}
 
 			foreach (PlanLayer planlayer in PlanLayers)
 			{
-				if(planlayer.issues != null)
-					result.AddRange(planlayer.issues);
+				if (planlayer.issues != null)
+				{
+					count += planlayer.issues.Count;
+					if (a_severity > ERestrictionIssueType.Error)
+					{
+						foreach (PlanIssueObject issue in planlayer.issues)
+						{
+							if (issue.type < a_severity)
+							{
+								a_severity = issue.type;
+							}
+						}
+					}
+				}
 			}
-			return result;
+			return count;
 		}
 
 		#region ServerCommunication

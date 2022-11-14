@@ -27,8 +27,6 @@ namespace MSP2050.Scripts
 			m_planGroupsPerState = new Dictionary<Plan.PlanState, PlansGroupBar>();
 			m_planBarsPerPlan = new Dictionary<Plan, PlanBar>();
 
-			IssueManager.Instance.SubscribeToIssueChangedEvent(OnIssueChanged);
-
 			m_planGroupsPerState.Add(Plan.PlanState.DESIGN, CreatePlansGroup(Plan.PlanState.DESIGN, "Design", "A plan's content (layers and policies) can only be edited in the DESIGN state.\nPlans in DESIGN are not visible in other plans or to other teams."));
 			m_planGroupsPerState.Add(Plan.PlanState.CONSULTATION, CreatePlansGroup(Plan.PlanState.CONSULTATION, "Consultation", "Plans in CONSULTATION are visible in other plans and to other teams.\nUse the CONSULTATION state for early drafts that will need to be discussed with other teams."));
 			m_planGroupsPerState.Add(Plan.PlanState.APPROVAL, CreatePlansGroup(Plan.PlanState.APPROVAL, "Awaiting Approval", "Plans in the APPROVAL state will automatically be set to APPROVED once all required teams have accepted.\nPlans that require approval cannot be manually set to APPROVED, they must go through APPROVAL."));
@@ -56,20 +54,6 @@ namespace MSP2050.Scripts
 				Sort();
 				m_needsSorting = false;
 			}
-		}
-
-		public void OnDestroy()
-		{
-			IssueManager issueManager = IssueManager.Instance;
-			if (issueManager != null)
-			{
-				issueManager.UnsubscribeFromIssueChangedEvent(OnIssueChanged);
-			}
-		}
-
-		private void OnIssueChanged(PlanLayer a_changedIssueLayer)
-		{
-			SetPlanIssues(a_changedIssueLayer.Plan);
 		}
 
 		public void AddPlanToList(Plan a_plan)
@@ -190,29 +174,24 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void UpdatePlan(Plan plan, bool nameChanged, bool timeChanged, bool stateChanged)
+		public void UpdatePlan(Plan plan)
 		{
 			if (m_planBarsPerPlan.TryGetValue(plan, out PlanBar planBar))
 			{
-				if (nameChanged || timeChanged || stateChanged)
-				{
-					planBar.UpdateInfo();
-					m_needsSorting = true;
-				}
-				if (stateChanged)
-				{
-					//Update plan visibility 
-					if (planBar.gameObject.activeSelf)
-					{
-						if (!plan.ShouldBeVisibleInUI)
-							planBar.SetPlanVisibility(false);
-					}
-					else if (plan.ShouldBeVisibleInUI)
-						planBar.SetPlanVisibility(true);
+				planBar.UpdateInfo();
+				m_needsSorting = true;
 
-					//Reparents the planbar to the right group
-					m_planBarsPerPlan[plan].MoveToGroup(m_planGroupsPerState[plan.State]);
+				//Update plan visibility 
+				if (planBar.gameObject.activeSelf)
+				{
+					if (!plan.ShouldBeVisibleInUI)
+						planBar.SetPlanVisibility(false);
 				}
+				else if (plan.ShouldBeVisibleInUI)
+					planBar.SetPlanVisibility(true);
+
+				//Reparents the planbar to the right group
+				m_planBarsPerPlan[plan].MoveToGroup(m_planGroupsPerState[plan.State]);
 
 				planBar.UpdateActionRequired();
 				SetPlanIssues(plan);

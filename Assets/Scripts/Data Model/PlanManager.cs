@@ -368,74 +368,47 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void UpdatePlanInUI(Plan plan, bool nameOrDescriptionChanged, bool timeChanged, bool stateChanged, bool layersChanged, bool typeChanged, bool forceMonitorUpdate, int oldTime, Plan.PlanState oldState, bool inTimelineBefore)
+		public void UpdatePlanInUI(Plan plan, bool stateChanged, int oldTime, bool inTimelineBefore)
 		{
-			bool timeLineUpdated = false;
 			bool inTimelineNow = plan.ShouldBeVisibleInTimeline;
 
-			if (nameOrDescriptionChanged)
-			{
-				PlanDetails.UpdateNameAndDescription(plan);
-			}
 			if (stateChanged)
 			{
 				//Didn't see icon before, should see now
 				if (!inTimelineBefore && inTimelineNow)
 				{
 					OnPlanVisibleInUIEvent(plan);
-					timeLineUpdated = true;
 				}
 				//Saw plan before, shouldn't see now
 				else if (inTimelineBefore && !inTimelineNow)
 				{
 					OnPlanHideInUIEvent(plan, oldTime);
-					timeLineUpdated = true;
 				}
 			}
 
 			//Update edit button availability in active plan window
-			if ((stateChanged || layersChanged) && planViewing == plan)
+			if (planViewing == plan && !Main.InEditMode)
+			{
+				InterfaceCanvas.Instance.activePlanWindow.RefreshContent();
 				InterfaceCanvas.Instance.activePlanWindow.UpdateSectionActivity();
-
-			if (timeChanged)
-			{
-				//Plan didnt change influencing state and should be visible to this client: update
-				if (!timeLineUpdated && inTimelineNow)
-					OnPlanUpdateInUIEvent(plan, oldTime);
-				PlanDetails.ChangeDate(plan);
-				if (planViewing == plan && !Main.InEditMode)
-				{
-					InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
-					LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
-				}
-			}
-			if (stateChanged || timeChanged || nameOrDescriptionChanged || forceMonitorUpdate)
-			{
-				PlansMonitor.UpdatePlan(plan, nameOrDescriptionChanged, timeChanged, stateChanged);
-			}
-
-			//These changes don't require a general update, only plandetails if they are being viewed
-			if (plan == PlanDetails.GetSelectedPlan())
-			{
 				if (!plan.ShouldBeVisibleInUI)
-					PlanDetails.SelectPlan(null);
-				else
 				{
-					if (stateChanged)
-						PlanDetails.UpdateStatus();
-					if (typeChanged)
-						PlanDetails.UpdateTabAvailability();
+					HideCurrentPlan();
 				}
-				PlanDetails.UpdateTabContent();
+				InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
+				LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
 			}
+
+			InterfaceCanvas.Instance.plansList.UpdatePlan(plan);
+			OnPlanUpdateInUIEvent(plan, oldTime);
 		}
 
 		public void PlanLockUpdated(Plan plan)
 		{
-			PlansMonitor.SetLockIcon(plan, plan.IsLocked);
+			InterfaceCanvas.Instance.plansList.UpdatePlan(plan);
 			if (Main.InEditMode && Main.CurrentlyEditingPlan == plan)
 			{
-				PlanDetails.instance.CancelEditingContent();
+				InterfaceCanvas.Instance.activePlanWindow.ForceCancel(true);
 				DialogBoxManager.instance.NotificationWindow("Plan Unexpectedly Unlocked", "Plan has been unlocked by an external party. All changes have been discarded.", null);
 			}
 		}
