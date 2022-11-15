@@ -107,7 +107,7 @@ namespace MSP2050.Scripts
 		{
 			//U wot.
 			updatedItem.SetValue(currentValue);
-			updatedItem.ToText(updatedItem.GetDistributionValue(), PlanManager.Instance.fishingDisplayScale, true);
+			updatedItem.ToText(updatedItem.GetDistributionValue(), SimulationLogicMEL.Instance.fishingDisplayScale, true);
 
 			if ( distributionFillBar != null)
 			{

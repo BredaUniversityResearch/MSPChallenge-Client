@@ -45,15 +45,15 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
+			ToolBar toolbar = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar;
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			ic.ToolbarEnable(true, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
+			toolbar.SetCreateMode(false);
+			toolbar.SetButtonInteractable(FSM.ToolbarInput.Delete, true);
+			//ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
 			if (planLayer.BaseLayer is ShippingLineStringLayer)
 			{
-				ic.ToolbarVisibility(true, FSM.ToolbarInput.ChangeDirection);
-				ic.ToolbarEnable(true, FSM.ToolbarInput.ChangeDirection);
+				toolbar.SetButtonActive(FSM.ToolbarInput.ChangeDirection, true);
+				toolbar.SetButtonInteractable(FSM.ToolbarInput.ChangeDirection, true);
 			}
 			//InterfaceCanvas.SetActivePlanWindowInteractability(true, true);
 

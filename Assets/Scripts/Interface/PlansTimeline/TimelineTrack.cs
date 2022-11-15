@@ -145,10 +145,7 @@ namespace MSP2050.Scripts
 		// Click on a single plan
 		public void InspectPlan(Plan plan)
 		{
-			InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn = true;       
-			//if(!PlanDetails.IsOpen)
-			PlansMonitor.instance.plansMinMax.Maximize();
-			PlanDetails.SelectPlan(plan);
+			PlanManager.Instance.ShowPlan(plan);
 		}
 
 		// Click on a group of plans

@@ -16,7 +16,7 @@ namespace MSP2050.Scripts
 		//State meta
 		public virtual void EnterState(Vector3 currentMousePosition)
 		{
-			InterfaceCanvas.Instance.ToolbarVisibility(false, FSM.ToolbarInput.ChangeDirection);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonActive(FSM.ToolbarInput.ChangeDirection, false);
 		}
 		public virtual void ExitState(Vector3 currentMousePosition) { }
 		public virtual EEditingStateType StateType => EEditingStateType.Other;

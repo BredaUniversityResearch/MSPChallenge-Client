@@ -22,14 +22,14 @@ namespace MSP2050.Scripts
 
 		public override void EnterState(Vector3 currentMousePosition)
 		{
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
 			base.EnterState(currentMousePosition);
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
-			ic.SetActivePlanWindowInteractability(false);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetCreateMode(false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, false);
+			//ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			gt.SetActivePlanWindowInteractability(false);
 
 			PolygonSubEntity hover = baseLayer.GetSubEntityAt(currentMousePosition) as PolygonSubEntity;
 

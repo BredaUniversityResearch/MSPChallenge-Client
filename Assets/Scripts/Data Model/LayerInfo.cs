@@ -189,7 +189,7 @@ namespace MSP2050.Scripts
 		public bool update_visuals { get; set; }
 		public bool update_text { get; set; }
 		public bool update_calculation { get; set; }
-		public InputField.ContentType content_type { get; set; }
+		public TMPro.TMP_InputField.ContentType content_type { get; set; }
 		public ContentValidation content_validation { get; set; }
 		public string unit { get; set; }
 	}

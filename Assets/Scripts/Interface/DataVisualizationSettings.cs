@@ -55,7 +55,7 @@ namespace MSP2050.Scripts
 
 		public List<LODSettings> LODs = new List<LODSettings>();
 
-		[SerializeField] List<DrawModeSettings> DrawModeSettings;
+		public List<DrawModeSettings> DrawModeSettings;
 
 		[SerializeField] ValueConversionCollection valueConversions = null;
 

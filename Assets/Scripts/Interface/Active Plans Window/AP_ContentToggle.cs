@@ -18,7 +18,11 @@ namespace MSP2050.Scripts
 		Action m_onOpenCallback;
 		bool m_ignoreCallback;
 
-		public bool IsOn => m_toggle.isOn;
+		public bool IsOn
+		{ 
+			get { return m_toggle.isOn; }
+			set { m_toggle.isOn = value; }
+		}
 
 		public void Initialise(ActivePlanWindow a_apWindow, AP_PopoutWindow a_popoutWindow, Action a_onOpenCallback = null)
 		{

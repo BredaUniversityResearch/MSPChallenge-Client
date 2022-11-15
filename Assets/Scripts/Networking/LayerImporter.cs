@@ -59,7 +59,7 @@ namespace MSP2050.Scripts
 			}
 
 			InterfaceCanvas.Instance.SetAccent(SessionManager.Instance.CurrentTeamColor);
-			InterfaceCanvas.Instance.activePlanWindow.OnCountriesLoaded();
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.OnCountriesLoaded();
 			
 			if (loadAllLayers)
 			{

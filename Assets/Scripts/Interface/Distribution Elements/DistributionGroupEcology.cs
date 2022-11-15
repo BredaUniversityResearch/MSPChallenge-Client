@@ -20,8 +20,15 @@ namespace MSP2050.Scripts
 
 		public override void ApplySliderValues(Plan plan, int index)
 		{
-			string fleetName = PlanManager.Instance.fishingFleets[index];
-			SetFishingToSliderValues(plan.fishingDistributionDelta, fleetName);
+			string fleetName = SimulationLogicMEL.Instance.fishingFleets[index];
+			if (plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData))
+			{
+				SetFishingToSliderValues(fishingData.fishingDistributionDelta, fleetName);
+			}
+			else
+			{
+				Debug.LogError("Cannot apply slider values to plan without fishing policy");
+			}
 		}
 
 		public override void UpdateDistributionItem(DistributionItem updatedItem, float currentValue)

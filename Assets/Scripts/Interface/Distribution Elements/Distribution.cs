@@ -85,7 +85,7 @@ namespace MSP2050.Scripts
 		{
 			if (groups == null || groups.Count == 0)
 			{
-				foreach (string fishingFleet in PlanManager.Instance.fishingFleets)
+				foreach (string fishingFleet in SimulationLogicMEL.Instance.fishingFleets)
 				{
 					CreateGroup(fishingFleet);
 				}
@@ -93,9 +93,9 @@ namespace MSP2050.Scripts
 
 			if (fishingDistributionBeforePlan != null && planDeltaSet != null)
 			{
-				for (int i = 0; i < PlanManager.Instance.fishingFleets.Count; i++)
+				for (int i = 0; i < SimulationLogicMEL.Instance.fishingFleets.Count; i++)
 				{
-					string fleetName = PlanManager.Instance.fishingFleets[i];
+					string fleetName = SimulationLogicMEL.Instance.fishingFleets[i];
 					Dictionary<int, float> deltaValues = planDeltaSet.FindValuesForFleet(fleetName);
 					Dictionary<int, float> unchangedValues = fishingDistributionBeforePlan.FindValuesForFleet(fleetName);
 					if (unchangedValues != null)
@@ -129,7 +129,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < energyDistribution.Count; i++)
 			{
 				EnergyGrid.GridPlanState state = energyDistribution[i].GetGridPlanStateAtPlan(plan);
-				if (state == EnergyGrid.GridPlanState.Hidden || (!Main.Instance.EditingPlanDetailsContent && state == EnergyGrid.GridPlanState.Normal))
+				if (state == EnergyGrid.GridPlanState.Hidden || (!Main.InEditMode && state == EnergyGrid.GridPlanState.Normal))
 					continue;
 
 				if (j < groups.Count)
@@ -161,8 +161,16 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public void SetFishingToSliderValues(Plan plan)
 		{
-			plan.fishingDistributionDelta.Clear();
-			for (int i = 0; i < PlanManager.Instance.fishingFleets.Count; i++)
+			if (plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData))
+			{
+				fishingData.fishingDistributionDelta.Clear();
+			}
+			else
+			{
+				Debug.LogError("Cannot apply slider values to plan without fishing policy");
+			}
+
+			for (int i = 0; i < SimulationLogicMEL.Instance.fishingFleets.Count; i++)
 			{			
 				groups[i].ApplySliderValues(plan, i);
 			}

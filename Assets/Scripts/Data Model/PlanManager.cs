@@ -360,7 +360,7 @@ namespace MSP2050.Scripts
 			//Show plan if it isnt a hidden plan
 			if (plan.StartTime >= 0 || SessionManager.Instance.AreWeGameMaster)
 			{
-				PlansMonitor.AddPlan(plan);
+				InterfaceCanvas.Instance.plansList.AddPlanToList(plan);
 				if (plan.ShouldBeVisibleInTimeline)
 				{
 					OnPlanVisibleInUIEvent(plan);
@@ -419,6 +419,14 @@ namespace MSP2050.Scripts
 				if (plan.LockedBy == sessionID)
 					return true;
 			return false;
+		}
+
+		public void CreateNewPlanForEditing()
+		{
+			if (Main.InEditMode)
+				return;
+
+			//TODO
 		}
 	}
 }

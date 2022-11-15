@@ -10,10 +10,6 @@ namespace MSP2050.Scripts
 		public Toggle toggle;
 		public TextMeshProUGUI typeName;
 		public Button infoButton;
-		public CustomToggleColorSet textColour;
-		public CustomToggleColorSet toggleColour;
-		public ColourAsset unavailableTextColour;
-		public ColourAsset unavailableToggleColour;
 
 		//Should this toggle be disabled if it's not selected
 		private bool disabledIfNotSelected;
@@ -45,16 +41,6 @@ namespace MSP2050.Scripts
 				disabledIfNotSelected = value;
 				if (!toggle.isOn)
 					toggle.interactable = !disabledIfNotSelected;
-				if (value)
-				{
-					textColour?.LockToColor(unavailableTextColour);
-					toggleColour?.LockToColor(unavailableToggleColour);
-				}
-				else
-				{
-					textColour ?.UnlockColor();
-					toggleColour?.UnlockColor();
-				}
 			}
 		}
 

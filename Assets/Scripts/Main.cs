@@ -189,7 +189,7 @@ namespace MSP2050.Scripts
 
 		public static Plan CurrentlyEditingPlan
 		{
-			get { return PlanDetails.LayersTab.LockedPlan; }
+			get { return InterfaceCanvas.Instance.activePlanWindow.Editing ? InterfaceCanvas.Instance.activePlanWindow.CurrentPlan : null; }
 		}
 
 		public static bool InEditMode

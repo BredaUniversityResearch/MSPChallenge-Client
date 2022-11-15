@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			gameObject.SetActive(SimulationManager.Instance.IsSimulationConfigured(simulationType));
+			gameObject.SetActive(SimulationManager.Instance.TryGetLogic(simulationType.ToString(), out var logic));
 		}
 	}
 }

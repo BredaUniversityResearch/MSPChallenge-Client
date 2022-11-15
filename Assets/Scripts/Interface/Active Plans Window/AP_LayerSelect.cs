@@ -49,7 +49,8 @@ namespace MSP2050.Scripts
 						category.Initialise(LayerManager.Instance.MakeCategoryDisplayString(layer.Category));
 						m_categoryObjects.Add(layer.Category, category);
 					}
-					subcategory = Instantiate(m_subcatgoryPrefab, category.ContentContainer).GetComponent<AP_LayerSelectSubcategory>();
+					subcategory = Instantiate(m_subcatgoryPrefab, m_contentContainer).GetComponent<AP_LayerSelectSubcategory>();
+					subcategory.transform.SetSiblingIndex(category.transform.GetSiblingIndex() + 1);
 					subcategory.Initialise(layer.SubCategory, LayerManager.Instance.GetSubcategoryIcon(layer.SubCategory));
 					m_subcategoryObjects.Add(layer.SubCategory, subcategory);
 				}

@@ -58,7 +58,7 @@ namespace MSP2050.Scripts
 
 		private void ShowGridsForCountry(int teamId)
 		{
-			List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);//Or should this be current month -1
+			List<EnergyGrid> grids = PolicyLogicEnergy.Instance.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);//Or should this be current month -1
 			kpiGroups.SetBarsToGrids(grids, teamId);
 		}
 	}

@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 {
 	public class AP_IssueListEntry : MonoBehaviour
 	{
+		[SerializeField] TextMeshProUGUI m_issueTypeText = null;
 		[SerializeField] TextMeshProUGUI m_issueText = null;
 		[SerializeField] Button m_viewIssueButton = null;
 		[SerializeField] ColourAsset m_infoIssueColour;
@@ -27,16 +28,20 @@ namespace MSP2050.Scripts
 		{
 			m_issue = a_issue;
 			m_viewIssueButton.gameObject.SetActive(true);
+			m_issueText.text = ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
 			switch (m_issue.type)
 			{
 				case ERestrictionIssueType.Info:
-					m_issueText.text = $"<color=#{Util.ColorToHex(m_infoIssueColour.GetColour())}>[Info]</color> " + ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
+					m_issueTypeText.text = "Info";
+					m_issueTypeText.color = m_infoIssueColour.GetColour();
 					break;
 				case ERestrictionIssueType.Warning:
-					m_issueText.text = $"<color=#{Util.ColorToHex(m_warningIssueColour.GetColour())}>[Warning]</color> " + ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
+					m_issueTypeText.text = "Warning";
+					m_issueTypeText.color = m_warningIssueColour.GetColour();
 					break;
 				case ERestrictionIssueType.Error:
-					m_issueText.text = $"<color=#{Util.ColorToHex(m_errorIssueColour.GetColour())}>[Error]</color> " + ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
+					m_issueTypeText.text = "Error";
+					m_issueTypeText.color = m_errorIssueColour.GetColour();
 					break;
 				default:
 					m_issueText.text = "Unknow issue type " + m_issue.type;

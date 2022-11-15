@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 		{
 			// Adding all the layer tabs
 			GenericLayer layerTab = CreateLayerToggle(layer.GetShortName(), true);
-			layerTab.icon.sprite = parentInterface.GetIcon(subcategoryID);
+			//layerTab.icon.sprite = parentInterface.GetIcon(subcategoryID);
 			layerTab.SubCategory = subcategoryID;
 
 

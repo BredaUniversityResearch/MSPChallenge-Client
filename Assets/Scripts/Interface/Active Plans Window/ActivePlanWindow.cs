@@ -28,15 +28,13 @@ namespace MSP2050.Scripts
 		[SerializeField] CustomInputField m_planDescription;
 		[SerializeField] AP_ContentToggle m_planDate;
 		[SerializeField] AP_ContentToggle m_planState;
-		[SerializeField] GameObject m_creationTimeSection;
-		[SerializeField] CustomDropdown m_creationTimeYearDropdown;
-		[SerializeField] CustomDropdown m_creationTimeMonthDropdown;
+		public AP_TimeSelect m_timeSelect;
 
 		[Header("Communication")]
 		[SerializeField] GameObject m_communicationSection;
-		[SerializeField] AP_ContentToggle m_communication;
-		[SerializeField] AP_ContentToggle m_approval;
-		[SerializeField] AP_ContentToggle m_issues;
+		[SerializeField] AP_ContentToggle m_communicationToggle;
+		public AP_ContentToggle m_approvalToggle;
+		public AP_ContentToggle m_issuesToggle;
 		[SerializeField] AP_Communication m_communicationContent;
 		[SerializeField] AP_Approval m_approvalContent;
 		[SerializeField] AP_IssueList m_issuesContent;
@@ -55,7 +53,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_layerParent;
 		[SerializeField] GameObject m_layerPrefab;
 		[SerializeField] AP_ContentToggle m_changeLayersToggle;
-		[SerializeField] AP_GeometryTool m_geometryTool;
+		public AP_GeometryTool m_geometryTool;
 		[SerializeField] AP_LayerSelect m_layerSelect;
 
 		[Header("Policies")]
@@ -91,9 +89,10 @@ namespace MSP2050.Scripts
 		{
 			m_changeLayersToggle.Initialise(this, m_layerSelect);
 			m_changePoliciesToggle.Initialise(this, m_policySelect);
-			m_communication.Initialise(this, m_communicationContent);
-			m_approval.Initialise(this, m_approvalContent);
-			m_issues.Initialise(this, m_issuesContent);
+			m_communicationToggle.Initialise(this, m_communicationContent);
+			m_approvalToggle.Initialise(this, m_approvalContent);
+			m_issuesToggle.Initialise(this, m_issuesContent);
+			m_planDate.Initialise(this, m_timeSelect);
 
 
 			m_viewAllToggle.onValueChanged.AddListener((value) =>
@@ -326,10 +325,9 @@ namespace MSP2050.Scripts
 			m_viewModeSection.SetActive(!m_editing);
 			m_changeLayersToggle.gameObject.SetActive(m_editing);
 			m_changePoliciesToggle.gameObject.SetActive(m_editing);
-			m_creationTimeSection.SetActive(m_creationStage == ECreationStage.Setup);
-			m_planDate.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
+			//m_planDate.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
 			m_planState.gameObject.SetActive(!m_editing);
-			m_issues.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
+			m_issuesToggle.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
 		}
 
 		void EnterEditMode()
@@ -386,37 +384,38 @@ namespace MSP2050.Scripts
 				m_planDate.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after 1 month construction.");
 			else
 				m_planDate.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after {maxConstructionTime} months construction.");
+			//TODO: implementation time text before its set during creation
 
 			//State
 			m_planState.SetContent($"Plan state: {m_currentPlan.State.GetDisplayName()}", VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(m_currentPlan.State));
 
 			//Messages
-			m_communication.SetContent($"See {m_currentPlan.PlanMessages.Count} messages");
+			m_communicationToggle.SetContent($"See {m_currentPlan.PlanMessages.Count} messages");
 
 			//Approval
 			if (m_currentPlan.State == Plan.PlanState.APPROVAL)
-				m_approval.SetContent($"Approval required from {m_currentPlan.countryApproval.Count} teams");
+				m_approvalToggle.SetContent($"Approval required from {m_currentPlan.countryApproval.Count} teams");
 			else
-				m_approval.gameObject.SetActive(false);
+				m_approvalToggle.gameObject.SetActive(false);
 
 			//Issues
 			int issueCount = m_currentPlan.GetMaximumIssueSeverityAndCount(out var severity);
 			if(issueCount == 0)
 			{
-				m_issues.SetContent("No issues", Color.clear);
+				m_issuesToggle.SetContent("No issues", Color.clear);
 			}
 			else
 			{
 				switch (severity)
 				{
 					case ERestrictionIssueType.Info:
-						m_issues.SetContent($"Plan has {issueCount} issues", m_infoIssueColour.GetColour());
+						m_issuesToggle.SetContent($"Plan has {issueCount} issues", m_infoIssueColour.GetColour());
 						break;
 					case ERestrictionIssueType.Warning:
-						m_issues.SetContent($"Plan has {issueCount} issues", m_warningIssueColour.GetColour());
+						m_issuesToggle.SetContent($"Plan has {issueCount} issues", m_warningIssueColour.GetColour());
 						break;
 					default:
-						m_issues.SetContent($"Plan has {issueCount} issues", m_errorIssueColour.GetColour());
+						m_issuesToggle.SetContent($"Plan has {issueCount} issues", m_errorIssueColour.GetColour());
 						break;
 				}
 			}

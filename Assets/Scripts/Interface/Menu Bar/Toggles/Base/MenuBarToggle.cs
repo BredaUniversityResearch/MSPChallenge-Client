@@ -4,7 +4,7 @@ namespace MSP2050.Scripts
 {
 	public class MenuBarToggle : MonoBehaviour
 	{
-		public enum Selection { Logo, Layers, PlanWizard, ObjectivesMonitor, ImpactTool, ActiveLayers, GameMenu };
+		public enum Selection { Logo, Layers, PlansList, ObjectivesMonitor, ImpactTool, ActiveLayers, GameMenu, CreatePlan };
 
 		[Header("Connects to the correct toggle")]
 		public Selection connectTo;
@@ -15,7 +15,8 @@ namespace MSP2050.Scripts
 		{
 			toggle = GetComponent<CustomToggle>();
 
-			switch (connectTo) {
+			switch (connectTo) 
+			{
 				case Selection.Logo:
 					SetRegionButtonCallback();                          
 					break;
@@ -24,13 +25,13 @@ namespace MSP2050.Scripts
 					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerPanel.gameObject.SetActive(toggle.isOn));
 					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerPanel.DisableLayerSelect(toggle.isOn));
 					break;
-				case Selection.PlanWizard:
-					toggle.isOn = InterfaceCanvas.Instance.planWizard.gameObject.activeSelf; // Init
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.planWizard.gameObject.SetActive(toggle.isOn));
-					toggle.onValueChanged.AddListener((bool b) => { if (b) InterfaceCanvas.Instance.planWizard.SetToPlan(null); } );
+				case Selection.PlansList:
+					toggle.isOn = InterfaceCanvas.Instance.plansList.gameObject.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.plansList.gameObject.SetActive(toggle.isOn));
 					break;
 				case Selection.ObjectivesMonitor:
-					if (InterfaceCanvas.Instance.objectivesMonitor) {
+					if (InterfaceCanvas.Instance.objectivesMonitor) 
+					{
 						toggle.isOn = false; // Init
 						toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.objectivesMonitor.SetWindowActive(toggle.isOn));
 					}
@@ -47,6 +48,9 @@ namespace MSP2050.Scripts
 				case Selection.GameMenu:
 					toggle.isOn = InterfaceCanvas.Instance.gameMenu.gameObject.activeSelf; // Init
 					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.gameMenu.gameObject.SetActive(toggle.isOn));
+					break;
+				case Selection.CreatePlan:
+					toggle.onValueChanged.AddListener((b) => PlanManager.Instance.CreateNewPlanForEditing());
 					break;
 			}
 		}

@@ -12,8 +12,8 @@ namespace MSP2050.Scripts
 
 		private const float DOUBLE_CLICK_MAX_INTERVAL = 0.5f;
 
-		public enum ToolbarInput { Create, Edit, Undo, Redo, Delete, Abort, Accept, Cancel, Union, Intersect, Difference, /*Simplify,*/
-			RemoveHoles, FindGaps, SnapPoints, FixInvalid, SelectAll, Recall, ChangeDirection}
+		public enum ToolbarInput { Create, Edit, Undo, Redo, Delete, Recall, ChangeDirection, Abort }//Union, Intersect, Difference, Simplify,
+			//RemoveHoles, FindGaps, SnapPoints, FixInvalid, SelectAll}
 
 		public enum CursorType { Add, Complete, Default, Insert, Move, Invalid, Rescale, ZoomToArea, LayerProbe, Ruler }
 		private CursorType currentCursor = CursorType.Default;
@@ -73,9 +73,9 @@ namespace MSP2050.Scripts
 			SetCursor(CursorType.Default, true);
 
 			//Add change callbacks
-			InterfaceCanvas.Instance.activePlanWindow.typeChangeCallback = EntityTypeChanged;
-			InterfaceCanvas.Instance.activePlanWindow.countryChangeCallback = TeamChanged;
-			InterfaceCanvas.Instance.activePlanWindow.parameterChangeCallback = ParameterChanged;
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_typeChangeCallback = EntityTypeChanged;
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_countryChangeCallback = TeamChanged;
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_parameterChangeCallback = ParameterChanged;
 		}
 
 		public void SetCursor(CursorType cursorType, bool forceRedraw = false)
@@ -186,12 +186,6 @@ namespace MSP2050.Scripts
 
 			switch (toolbarInput)
 			{ 
-				case ToolbarInput.Accept:
-					PlanDetails.instance.changesConfirmButton.onClick.Invoke();
-					break;
-				case ToolbarInput.Cancel:
-					PlanDetails.instance.changesCancelButton.onClick.Invoke();             
-					break;
 				case ToolbarInput.Undo:
 					undo();
 					updateUndoRedoButtonEnabled();               
@@ -200,9 +194,9 @@ namespace MSP2050.Scripts
 					redo();
 					updateUndoRedoButtonEnabled();                
 					break;
-				case ToolbarInput.SnapPoints:
-					SetSnappingEnabled(!snappingEnabled);
-					break;
+				//case ToolbarInput.SnapPoints:
+				//	SetSnappingEnabled(!snappingEnabled);
+				//	break;
 				default:
 					InputReceivingState.HandleToolbarInput(toolbarInput);
 					break;
@@ -278,13 +272,6 @@ namespace MSP2050.Scripts
 			Debug.Log("Undid: " + undo.GetType().Name);
 			undo.Undo(this, out redo);
 			redoStack.Push(redo);
-		}
-
-		private void SingleClearingUndo()
-		{
-			UndoOperation undo = undoStack.Pop();
-			UndoOperation redo;
-			undo.Undo(this, out redo, true);
 		}
 
 		private void redo()

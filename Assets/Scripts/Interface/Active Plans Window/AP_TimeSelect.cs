@@ -48,7 +48,8 @@ namespace MSP2050.Scripts
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
 
 			m_changed = false;
-			UpdateMinAndSetTime(a_content.StartTime);
+			UpdateMinTime();
+			SetImplementationTime(a_content.StartTime);
 			if (SessionManager.Instance.AreWeGameMaster && !TimeManager.Instance.GameStarted)
 			{
 				m_startPlanToggleContainer.SetActive(true);
@@ -109,13 +110,12 @@ namespace MSP2050.Scripts
 		/// Updates the minimum implementation date and sets a target implementatio date right afterwards.
 		/// Avoids double updates that would occur if UpdateMin and SetImplementation time were called seperately.
 		/// </summary>
-		private void UpdateMinAndSetTime(int time)
+		public void UpdateMinTime()
 		{
 			m_minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + (m_plan.StartTime - m_plan.ConstructionStartTime);
 			if (m_finishTime < m_minTimeSelectable)
 				m_finishTime = m_minTimeSelectable;
 			UpdateMinSelectableYear(false);
-			SetImplementationTime(time);
 		}
 
 		private void SetImplementationTime(int time)
