@@ -7,10 +7,6 @@ namespace MSP2050.Scripts
 	public class ToolBar : MonoBehaviour
 	{
 		[SerializeField] Toggle m_createToggle;
-		[SerializeField] Image m_createButtonIcon;
-		[SerializeField] Sprite m_pointCreateSprite;
-		[SerializeField] Sprite m_lineCreateSprite;
-		[SerializeField] Sprite m_polygonCreateSprite;
 		[SerializeField] Button m_undoButton;
 		[SerializeField] Button m_redoButton;
 		[SerializeField] Button m_deleteButton;
@@ -96,22 +92,6 @@ namespace MSP2050.Scripts
 				case FSM.ToolbarInput.ChangeDirection:
 					m_shipDirectionButton.gameObject.SetActive(a_active);
 					break;
-			}
-		}
-
-		public void SetCreateButtonSprite(AbstractLayer layer)
-		{
-			if (layer is PointLayer)
-			{
-				m_createButtonIcon.sprite = m_pointCreateSprite;
-			}
-			else if (layer is PolygonLayer)
-			{
-				m_createButtonIcon.sprite = m_polygonCreateSprite;
-			}
-			else 
-			{
-				m_createButtonIcon.sprite = m_lineCreateSprite;
 			}
 		}
 	}

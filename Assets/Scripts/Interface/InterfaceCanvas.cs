@@ -70,7 +70,6 @@ namespace MSP2050.Scripts
 		public ColourAsset regionColour;
 		public RegionSettingsAsset regionSettings;
 
-
 		[HideInInspector]
 		public LayerInterface layerInterface;
 
@@ -143,72 +142,6 @@ namespace MSP2050.Scripts
 						mat.mainTextureScale = new Vector2(tiling, 1f);
 				}
 			}
-		}
-
-		//TODO: replace all references by using geometrytool directly
-		public void ToolbarEnable(bool enabled, params FSM.ToolbarInput[] buttons)
-		{
-			for (int i = 0; i < ToolbarButtons.Count; i++)
-			{
-				if (buttons.Length <= 0)
-				{
-					toolBar.SetActive(ToolbarButtons[i], enabled);
-				}
-				else
-				{
-					for (int j = 0; j < buttons.Length; j++)
-					{
-						if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == buttons[j])
-						{
-							toolBar.SetActive(ToolbarButtons[i], enabled);
-						}
-					}
-				}
-			}
-		}
-		
-		public static List<EntityType> GetCurrentEntityTypeSelection()
-		{
-			return Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
-		}
-
-		public static int GetCurrentTeamSelection()
-		{
-			return Instance.activePlanWindow.m_geometryTool.SelectedTeam;
-		}
-
-		public void SetActiveplanWindowToSelection(List<List<EntityType>> entityTypes, int team, List<Dictionary<EntityPropertyMetaData, string>> selectedParams)
-		{
-			activePlanWindow.m_geometryTool.SetSelectedEntityTypes(entityTypes);
-			activePlanWindow.m_geometryTool.SetSelectedParameters(selectedParams);
-			if (SessionManager.Instance.AreWeGameMaster)
-			{
-				activePlanWindow.m_geometryTool.SelectedTeam = team;
-			}
-		}
-
-		public void SetTeamAndTypeToBasicIfEmpty()
-		{
-			//TODO: remove and replace with direct call
-			activePlanWindow.m_geometryTool.SetEntityTypeToBasicIfEmpty();
-			if (SessionManager.Instance.AreWeGameMaster)
-				activePlanWindow.m_geometryTool.SetTeamToBasicIfEmpty();
-		}
-
-		public void SetActivePlanWindowInteractability(bool value, bool parameterValue = false)
-		{
-			activePlanWindow.m_geometryTool.SetParameterInteractability(parameterValue);
-			if (!value)
-			{
-				activePlanWindow.m_geometryTool.DeselectAllEntityTypes();
-				if (SessionManager.Instance.AreWeGameMaster)
-					activePlanWindow.m_geometryTool.SelectedTeam = -2;
-			}
-		}
-
-		public void SetActivePlanWindowChangeable(bool value)
-		{
-			activePlanWindow.m_geometryTool.SetObjectChangeInteractable(value);
 		}
 
 		public void TriggerInteractionCallback(string name, string[] tags)

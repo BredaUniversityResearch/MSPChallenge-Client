@@ -9,7 +9,6 @@ namespace MSP2050.Scripts
 	public class AP_Energy : AP_PopoutWindow
 	{
 		[SerializeField] Distribution m_energyDistribution;
-		[SerializeField] GameObject m_contentInfo;
 		[SerializeField] GameObject m_emptyContentOverlay;
 
 		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6175240177295358359
+--- !u!1 &3865908820587647739
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,9 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8169778553413835176}
-  - component: {fileID: 5092725356620546903}
-  - component: {fileID: 3076506002455320676}
+  - component: {fileID: 3007569032822689154}
+  - component: {fileID: 4053326531715610680}
+  - component: {fileID: 1202197027837259993}
   m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
@@ -18,18 +18,18 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &8169778553413835176
+--- !u!224 &3007569032822689154
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6175240177295358359}
+  m_GameObject: {fileID: 3865908820587647739}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 8364667168868111434}
+  m_Father: {fileID: 1545872327854468164}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
@@ -37,28 +37,28 @@ RectTransform:
   m_AnchoredPosition: {x: 16, y: 0}
   m_SizeDelta: {x: 16, y: 16}
   m_Pivot: {x: 0, y: 0.5}
---- !u!222 &5092725356620546903
+--- !u!222 &4053326531715610680
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6175240177295358359}
+  m_GameObject: {fileID: 3865908820587647739}
   m_CullTransparentMesh: 1
---- !u!114 &3076506002455320676
+--- !u!114 &1202197027837259993
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6175240177295358359}
+  m_GameObject: {fileID: 3865908820587647739}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b742792d5f8b2e64e9ce90c5610628fd, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.019607844, g: 0.3647059, b: 0.38823533, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -75,8 +75,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
-  colourAsset: {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
---- !u!1001 &9095374561876879344
+--- !u!1001 &2258568615485054974
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -191,7 +190,7 @@ PrefabInstance:
     - target: {fileID: 2147619490614047447, guid: ac36bf93910b8454dbb87cc5d7d9d5f9,
         type: 3}
       propertyPath: m_text
-      value: 'Plan state: Awaiting approval'
+      value: Last message preview...
       objectReference: {fileID: 0}
     - target: {fileID: 4751041139215304746, guid: ac36bf93910b8454dbb87cc5d7d9d5f9,
         type: 3}
@@ -202,7 +201,7 @@ PrefabInstance:
     - target: {fileID: 6722119732448412170, guid: ac36bf93910b8454dbb87cc5d7d9d5f9,
         type: 3}
       propertyPath: m_Name
-      value: ActiveLayerEntryToggleIcon_PRFB
+      value: ActivePlanContentToggleIcon_PRFB
       objectReference: {fileID: 0}
     - target: {fileID: 8596542416248225985, guid: ac36bf93910b8454dbb87cc5d7d9d5f9,
         type: 3}
@@ -214,11 +213,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: 14
       objectReference: {fileID: 0}
+    - target: {fileID: 9202306013943220068, guid: ac36bf93910b8454dbb87cc5d7d9d5f9,
+        type: 3}
+      propertyPath: m_icon
+      value: 
+      objectReference: {fileID: 1202197027837259993}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ac36bf93910b8454dbb87cc5d7d9d5f9, type: 3}
---- !u!224 &8364667168868111434 stripped
+--- !u!224 &1545872327854468164 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 732967992136709050, guid: ac36bf93910b8454dbb87cc5d7d9d5f9,
     type: 3}
-  m_PrefabInstance: {fileID: 9095374561876879344}
+  m_PrefabInstance: {fileID: 2258568615485054974}
   m_PrefabAsset: {fileID: 0}

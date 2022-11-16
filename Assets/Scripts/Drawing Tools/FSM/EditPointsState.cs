@@ -74,8 +74,6 @@ namespace MSP2050.Scripts
 
 		protected void select(HashSet<PointSubEntity> newSelection, bool keepPreviousSelection)
 		{
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
-
 			if (!keepPreviousSelection)
 			{
 				foreach (PointSubEntity pse in selection)
@@ -97,18 +95,17 @@ namespace MSP2050.Scripts
 				pse.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null);
 			}
 
-			ic.ToolbarEnable(selection.Count > 0, FSM.ToolbarInput.Delete, FSM.ToolbarInput.Abort);
-			ic.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
-			ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, selection.Count > 0);
+			//gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Abort, selection.Count > 0);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, selectedRemovedEntity);
+			gt.SetObjectChangeInteractable(!selectedRemovedEntity);
+
 			//Points have no selecting state, so dropdown interactivity can change while in this state
 			if (selection.Count == 0)
 			{
-				ic.SetActivePlanWindowInteractability(false);
+				gt.SetActivePlanWindowInteractability(false);
 				return;
-			}
-			else
-			{
-				ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
 			}
 
 			UpdateActivePlanWindowToSelection();
@@ -399,9 +396,9 @@ namespace MSP2050.Scripts
 				case FSM.ToolbarInput.Abort:
 					select(new HashSet<PointSubEntity>(), false);
 					break;
-				case FSM.ToolbarInput.SelectAll:
-					select(new HashSet<PointSubEntity>((baseLayer as PointLayer).GetAllSubEntities()), true);
-					break;
+				//case FSM.ToolbarInput.SelectAll:
+				//	select(new HashSet<PointSubEntity>((baseLayer as PointLayer).GetAllSubEntities()), true);
+				//	break;
 				case FSM.ToolbarInput.Recall:
 					undoDeleteForSelection();
 					break;
@@ -538,7 +535,7 @@ namespace MSP2050.Scripts
 				selectedParams.Add(parameters);
 
 			}
-			InterfaceCanvas.Instance.SetActiveplanWindowToSelection(
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
 				selectedParams);

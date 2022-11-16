@@ -13,8 +13,8 @@ namespace MSP2050.Scripts
 		[SerializeField] TextMeshProUGUI m_team;
 		[SerializeField] TextMeshProUGUI m_time;
 		[SerializeField] TextMeshProUGUI m_content;
-		[SerializeField] CustomImage m_background;
-		[SerializeField] CustomImage m_lipImage;
+		//[SerializeField] CustomImage m_background;
+		//[SerializeField] CustomImage m_lipImage;
 		[SerializeField] RectTransform m_lipTransform;
 
 		public void SetToContent(PlanMessage a_message)

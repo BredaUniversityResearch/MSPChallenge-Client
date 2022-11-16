@@ -18,7 +18,6 @@ namespace MSP2050.Scripts
 		public ToolBar m_toolBar;
 
 		[Header("Layer types")]
-		[SerializeField] GameObject m_layerTypeSection;
 		[SerializeField] Transform m_layerTypeParent;
 		[SerializeField] GameObject m_layerTypePrefabSingle;
 		[SerializeField] GameObject m_layerTypePrefabMulti;
@@ -31,7 +30,7 @@ namespace MSP2050.Scripts
 		private bool m_ignoreLayerTypeCallback;//Used to ignore callbacks from above (Main.Instance.StartEditingLayer) and below (ActivePlanLayer.toggle)
 
 		[Header("Country")]
-		[SerializeField] GameObject m_countrySection;
+		[SerializeField] GameObject[] m_countrySections;
 		[SerializeField] Transform m_countryParent;
 		[SerializeField] GameObject m_countryPrefab;
 		[SerializeField] GameObject m_countryPrefabMultiple;
@@ -40,12 +39,12 @@ namespace MSP2050.Scripts
 
 		private Dictionary<int, Toggle> m_countryToggles;
 		private Toggle m_gmCountryToggle, m_multiCountryToggle;
-		private int m_selectedCountry;
+		//private int m_selectedCountry;
 		private bool m_gmSelectable = true;
 		private bool m_ignoreCountryToggleCallback;
 
 		[Header("Parameters")]
-		[SerializeField] GameObject m_parameterSection;
+		[SerializeField] GameObject[] m_parameterSections;
 		[SerializeField] Transform m_parameterParent;
 		[SerializeField] GameObject m_parameterPrefab;
 		public ParameterChangeCallback m_parameterChangeCallback;
@@ -54,10 +53,24 @@ namespace MSP2050.Scripts
 		private Dictionary<EntityPropertyMetaData, string> m_originalParameterValues;
 		private PlanLayer m_m_currentlyEditingLayer;
 
+		private bool m_initialised;
+
 		public PlanLayer CurrentlyEditingLayer => m_m_currentlyEditingLayer;
+
+		void Initialise()
+		{
+			m_initialised = true;
+			if (!SessionManager.Instance.AreWeGameMaster)
+			{
+				foreach (GameObject go in m_countrySections)
+					go.SetActive(false);
+			}
+		}
 
 		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
 		{
+			if (!m_initialised)
+				Initialise();
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
 		}
 
@@ -95,7 +108,6 @@ namespace MSP2050.Scripts
 			//InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
 			InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(a_layer.BaseLayer, true);
 			m_m_currentlyEditingLayer = a_layer;
-			m_toolBar.SetCreateButtonSprite(a_layer.BaseLayer);
 			Main.Instance.fsm.StartEditingLayer(a_layer);
 			LayerManager.Instance.RedrawVisibleLayers();
 
@@ -113,7 +125,7 @@ namespace MSP2050.Scripts
 			//Clear and recreate parameters
 			ClearParameters();
 			if (a_layer.BaseLayer.propertyMetaData == null || a_layer.BaseLayer.propertyMetaData.Count == 0)
-				m_parameterSection.SetActive(false);
+				SetParameterSectionActive(false);
 			else
 			{
 				bool activeParamsOnLayer = false;
@@ -124,9 +136,9 @@ namespace MSP2050.Scripts
 						activeParamsOnLayer = true;
 					}
 				if (activeParamsOnLayer)
-					m_parameterSection.SetActive(true);
+					SetParameterSectionActive(true);
 				else
-					m_parameterSection.SetActive(false);
+					SetParameterSectionActive(false);
 			}
 
 			//Set admin country option available/unavailable
@@ -134,23 +146,17 @@ namespace MSP2050.Scripts
 				GMSelectable = !a_layer.BaseLayer.IsEnergyLayer();
 		}
 
+		void SetParameterSectionActive(bool a_value)
+		{
+			foreach (GameObject go in m_parameterSections)
+				go.SetActive(false);
+		}
+
 		public void SetObjectChangeInteractable(bool a_value)
 		{
 			SetEntityTypeSelectionInteractable(a_value);
 			SetParameterInteractability(a_value, false);
 			SetCountrySelectionInteractable(a_value);
-		}
-
-		public void SetToolbarMode(ToolBar.DrawingMode drawingMode)
-		{
-			if (drawingMode == ToolBar.DrawingMode.Create)
-			{
-				m_toolBar.CreateMode();
-			}
-			else if (drawingMode == ToolBar.DrawingMode.Edit)
-			{
-				m_toolBar.EditMode();
-			}
 		}
 
 		public void SetTeamAndTypeToBasicIfEmpty()
@@ -168,6 +174,16 @@ namespace MSP2050.Scripts
 				DeselectAllEntityTypes();
 				if (SessionManager.Instance.AreWeGameMaster)
 					SelectedTeam = -2;
+			}
+		}
+
+		public void SetToSelection(List<List<EntityType>> entityTypes, int team, List<Dictionary<EntityPropertyMetaData, string>> selectedParams)
+		{
+			SetSelectedEntityTypes(entityTypes);
+			SetSelectedParameters(selectedParams);
+			if (SessionManager.Instance.AreWeGameMaster)
+			{
+				SelectedTeam = team;
 			}
 		}
 

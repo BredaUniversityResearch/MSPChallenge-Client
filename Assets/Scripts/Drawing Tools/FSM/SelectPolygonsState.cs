@@ -145,15 +145,15 @@ namespace MSP2050.Scripts
 				case FSM.ToolbarInput.Create:
 					fsm.SetCurrentState(new StartCreatingPolygonState(fsm, planLayer));
 					break;
-				case FSM.ToolbarInput.FindGaps:
-					baseLayer.CreateInvertedLayer();
-					break;
-				case FSM.ToolbarInput.SelectAll:
-					if (baseLayer.IsEnergyPolyLayer())
-						fsm.SetCurrentState(new EditEnergyPolygonState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
-					else
-						fsm.SetCurrentState(new EditPolygonsState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
-					break;
+				//case FSM.ToolbarInput.FindGaps:
+				//	baseLayer.CreateInvertedLayer();
+				//	break;
+				//case FSM.ToolbarInput.SelectAll:
+				//	if (baseLayer.IsEnergyPolyLayer())
+				//		fsm.SetCurrentState(new EditEnergyPolygonState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
+				//	else
+				//		fsm.SetCurrentState(new EditPolygonsState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
+				//	break;
 			}
 		}
 

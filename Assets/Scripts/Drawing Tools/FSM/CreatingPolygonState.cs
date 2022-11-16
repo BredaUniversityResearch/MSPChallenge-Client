@@ -131,7 +131,7 @@ namespace MSP2050.Scripts
 			//if (subEntity is EnergyPolygonSubEntity)
 			//    (subEntity as EnergyPolygonSubEntity).FinalizePoly();
 
-			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 
 			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
 

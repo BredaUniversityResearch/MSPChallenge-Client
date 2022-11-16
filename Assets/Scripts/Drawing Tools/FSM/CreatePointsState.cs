@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 				fsm.SetCursor(FSM.CursorType.Add);
 				if (!showingToolTip)
 				{
-					List<EntityType> entityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
+					List<EntityType> entityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 					StringBuilder sb = new StringBuilder("Creating: " + entityTypes[0].Name);
 					for (int i = 1; i < entityTypes.Count; i++)
 						sb.Append("\n& " + entityTypes[i].Name);
@@ -73,7 +73,7 @@ namespace MSP2050.Scripts
 		{
 			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
-			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 
 			PointEntity entity = baseLayer.CreateNewPointEntity(finalPosition, selectedType != null ? selectedType : new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
 			baseLayer.activeEntities.Add(entity);

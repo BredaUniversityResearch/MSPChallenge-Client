@@ -18,8 +18,6 @@ namespace MSP2050.Scripts
 		[SerializeField] Image m_noIcon;
 		[SerializeField] Image m_maybeIcon;
 
-		[SerializeField] Image m_backgroundImage;
-
 		bool m_playerCanChangeApproval;
 		Team m_currentTeam;
 		public ApprovalButtonCallback m_approvalButtonCallback;
@@ -47,12 +45,10 @@ namespace MSP2050.Scripts
 			if(SessionManager.Instance.CurrentTeam.ID == a_country.ID)
 			{
 				m_playerCanChangeApproval = true;
-				m_backgroundImage.enabled = true;
 			}
 			else
 			{
 				m_playerCanChangeApproval = SessionManager.Instance.AreWeGameMaster;
-				m_backgroundImage.enabled = false;
 			}
 			SetApprovalState(a_state);
 		}

@@ -307,8 +307,8 @@ namespace MSP2050.Scripts
 
 		private void updateUndoRedoButtonEnabled()
 		{
-			InterfaceCanvas.Instance.ToolbarEnable(undoStack.Count > 0, ToolbarInput.Undo);
-			InterfaceCanvas.Instance.ToolbarEnable(redoStack.Count > 0, ToolbarInput.Redo);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Redo, redoStack.Count > 0);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Undo, undoStack.Count > 0);
 		}
 
 		public FSMState GetCurrentState()

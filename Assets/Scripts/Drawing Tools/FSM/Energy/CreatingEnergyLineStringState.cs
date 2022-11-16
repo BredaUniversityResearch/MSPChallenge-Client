@@ -114,7 +114,7 @@ namespace MSP2050.Scripts
 			point.AddConnection(con);
 
 			//Set entitytype
-			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
 
 			subEntity.restrictionNeedsUpdate = true;

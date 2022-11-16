@@ -15,9 +15,8 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_popoutParent;
 
 		[Header("Buttons")]
-		[SerializeField] GameObject m_editButtonParent;
+		[SerializeField] GameObject m_buttonContainer;
 		[SerializeField] Button m_startEditingButton;
-		[SerializeField] GameObject m_cancelAcceptButtonParent;
 		[SerializeField] Button m_acceptEditButton;
 		[SerializeField] Button m_cancelEditButton;
 		[SerializeField] Button m_zoomToPlanButton;
@@ -26,9 +25,10 @@ namespace MSP2050.Scripts
 		[SerializeField] Image m_countryIndicator;
 		[SerializeField] CustomInputField m_planName;
 		[SerializeField] CustomInputField m_planDescription;
-		[SerializeField] AP_ContentToggle m_planDate;
-		[SerializeField] AP_ContentToggle m_planState;
+		[SerializeField] AP_ContentToggle m_planDateToggle;
+		[SerializeField] AP_ContentToggle m_planStateToggle;
 		public AP_TimeSelect m_timeSelect;
+		[SerializeField] AP_StateSelect m_stateSelect;
 
 		[Header("Communication")]
 		[SerializeField] GameObject m_communicationSection;
@@ -92,7 +92,8 @@ namespace MSP2050.Scripts
 			m_communicationToggle.Initialise(this, m_communicationContent);
 			m_approvalToggle.Initialise(this, m_approvalContent);
 			m_issuesToggle.Initialise(this, m_issuesContent);
-			m_planDate.Initialise(this, m_timeSelect);
+			m_planDateToggle.Initialise(this, m_timeSelect);
+			m_planStateToggle.Initialise(this, m_stateSelect);
 
 
 			m_viewAllToggle.onValueChanged.AddListener((value) =>
@@ -113,10 +114,13 @@ namespace MSP2050.Scripts
 					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Base);
 			});
 
-			m_zoomToPlanButton.onClick.AddListener(() =>
+			if (m_zoomToPlanButton != null)
 			{
-				m_currentPlan.ZoomToPlan();
-			});
+				m_zoomToPlanButton.onClick.AddListener(() =>
+				{
+					m_currentPlan.ZoomToPlan();
+				});
+			}
 
 			m_window.OnAttemptHideWindow = OnAttemptHideWindow;
 			m_startEditingButton.onClick.AddListener(OnEditButtonPressed);
@@ -304,7 +308,8 @@ namespace MSP2050.Scripts
 				m_creationStage = ECreationStage.None;
 			}
 			gameObject.SetActive(true);
-			m_countryIndicator.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
+			if(m_countryIndicator != null)
+				m_countryIndicator.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
 			RefreshContent();
 			UpdateSectionActivity();
 		}
@@ -312,8 +317,13 @@ namespace MSP2050.Scripts
 		public void UpdateSectionActivity()
 		{
 			//Buttons
-			m_editButtonParent.gameObject.SetActive(!m_editing && m_currentPlan != null && m_currentPlan.State == Plan.PlanState.DESIGN && (SessionManager.Instance.AreWeManager || m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID));
-			m_cancelAcceptButtonParent.SetActive(m_editing);
+			bool buttonsActive = m_editing || (m_currentPlan.State == Plan.PlanState.DESIGN && (SessionManager.Instance.AreWeManager || m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID));
+			m_buttonContainer.gameObject.SetActive(buttonsActive);
+			m_startEditingButton.gameObject.SetActive(!m_editing);
+			m_cancelEditButton.gameObject.SetActive(m_editing);
+			m_acceptEditButton.gameObject.SetActive(m_editing);
+
+			//TODO: handle creation setup, replace this, check more elaborate requirements
 			m_acceptEditButton.interactable = !string.IsNullOrEmpty(m_planName.text);
 
 			//Content
@@ -326,7 +336,7 @@ namespace MSP2050.Scripts
 			m_changeLayersToggle.gameObject.SetActive(m_editing);
 			m_changePoliciesToggle.gameObject.SetActive(m_editing);
 			//m_planDate.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
-			m_planState.gameObject.SetActive(!m_editing);
+			m_planStateToggle.gameObject.SetActive(!m_editing);
 			m_issuesToggle.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
 		}
 
@@ -351,7 +361,6 @@ namespace MSP2050.Scripts
 			m_planBackup = null;
 			PolicyManager.Instance.StopEditingPlan(m_currentPlan);
 
-			InterfaceCanvas.Instance.StopEditing();//TODO: remove once toolbar removed
 			Main.Instance.fsm.ClearUndoRedo();
 			Main.Instance.fsm.StopEditing();
 
@@ -379,15 +388,15 @@ namespace MSP2050.Scripts
 					maxConstructionTime = layer.BaseLayer.AssemblyTime;
 			}
 			if (maxConstructionTime == 0)
-				m_planDate.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}. No construction time required.");
+				m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}. No construction time required.");
 			else if (maxConstructionTime == 1)
-				m_planDate.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after 1 month construction.");
+				m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after 1 month construction.");
 			else
-				m_planDate.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after {maxConstructionTime} months construction.");
+				m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after {maxConstructionTime} months construction.");
 			//TODO: implementation time text before its set during creation
 
 			//State
-			m_planState.SetContent($"Plan state: {m_currentPlan.State.GetDisplayName()}", VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(m_currentPlan.State));
+			m_planStateToggle.SetContent($"Plan state: {m_currentPlan.State.GetDisplayName()}", VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(m_currentPlan.State));
 
 			//Messages
 			m_communicationToggle.SetContent($"See {m_currentPlan.PlanMessages.Count} messages");

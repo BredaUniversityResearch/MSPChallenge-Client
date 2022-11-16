@@ -156,9 +156,9 @@ namespace MSP2050.Scripts
 					else
 						fsm.SetCurrentState(new StartCreatingLineStringState(fsm, planLayer));
 					break;
-				case FSM.ToolbarInput.SelectAll:
-					fsm.SetCurrentState(new EditLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>((baseLayer as LineStringLayer).GetAllSubEntities())));
-					break;
+				//case FSM.ToolbarInput.SelectAll:
+				//	fsm.SetCurrentState(new EditLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>((baseLayer as LineStringLayer).GetAllSubEntities())));
+				//	break;
 			}
 		}
 

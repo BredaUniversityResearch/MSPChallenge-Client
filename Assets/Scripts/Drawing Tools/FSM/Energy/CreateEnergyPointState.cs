@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 		{
 			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
-			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			PointEntity entity = baseLayer.CreateNewPointEntity(finalPosition, selectedType != null ? selectedType : new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
 			baseLayer.activeEntities.Add(entity);
 			PointSubEntity subEntity = entity.GetSubEntity(0) as PointSubEntity;

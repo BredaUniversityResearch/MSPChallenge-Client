@@ -79,7 +79,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -96,7 +96,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
-  colourAsset: {fileID: 0}
+  colourAsset: {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
 --- !u!1 &6968218873924932366
 GameObject:
   m_ObjectHideFlags: 0
@@ -782,6 +782,7 @@ GameObject:
   - component: {fileID: 6968218875781686208}
   - component: {fileID: 6968218875781686270}
   - component: {fileID: 9208690298961254869}
+  - component: {fileID: 4707660764301051247}
   m_Layer: 5
   m_Name: AP_CommunicationMessage_PRFB
   m_TagString: Untagged
@@ -842,7 +843,7 @@ MonoBehaviour:
   m_FillCenter: 1
   m_slice: 0
   m_rounding: 12
-  colourAsset: {fileID: 0}
+  colourAsset: {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
 --- !u!114 &6968218875781686270
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -884,3 +885,20 @@ MonoBehaviour:
   m_HorizontalFit: 2
   m_VerticalFit: 2
   m_maxSize: {x: 300, y: 0}
+--- !u!114 &4707660764301051247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6968218875781686267}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6989efd2e8db594a8918e0421be7f10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_sender: {fileID: 6968218875744461183}
+  m_team: {fileID: 6968218874477653503}
+  m_time: {fileID: 6968218873924932369}
+  m_content: {fileID: 6968218875585574126}
+  m_lipTransform: {fileID: 1860710667060581856}

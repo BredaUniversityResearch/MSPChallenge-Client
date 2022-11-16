@@ -50,7 +50,7 @@ namespace MSP2050.Scripts
 				fsm.SetCursor(FSM.CursorType.Add);
 				if (!showingToolTip)
 				{
-					List<EntityType> entityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
+					List<EntityType> entityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 					StringBuilder sb = new StringBuilder("Creating: " + entityTypes[0].Name);
 					for (int i = 1; i < entityTypes.Count; i++)
 						sb.Append("\n& " + entityTypes[i].Name);
@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 
 			LineStringEntity entity = baseLayer.CreateNewLineStringEntity(finalPosition, new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
 			baseLayer.activeEntities.Add(entity);
-			entity.EntityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			entity.EntityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			LineStringSubEntity subEntity = entity.GetSubEntity(0) as LineStringSubEntity;
 
 			entity.DrawGameObjects(baseLayer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
