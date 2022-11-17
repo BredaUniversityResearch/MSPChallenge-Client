@@ -30,6 +30,7 @@ namespace MSP2050.Scripts
 
 		public void CreateUI()
 		{
+			gameObject.SetActive(true);
 			selectedLayerIDs = new List<int>();
 			categoryGroup = new Dictionary<string, GameObject>();
 			areaGroup = new List<string>();

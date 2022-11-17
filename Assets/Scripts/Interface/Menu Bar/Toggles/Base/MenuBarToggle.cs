@@ -4,7 +4,7 @@ namespace MSP2050.Scripts
 {
 	public class MenuBarToggle : MonoBehaviour
 	{
-		public enum Selection { Logo, Layers, PlansList, ObjectivesMonitor, ImpactTool, ActiveLayers, GameMenu, CreatePlan };
+		public enum Selection { Logo, Layers, PlansList, ObjectivesMonitor, ImpactTool, ActiveLayers, GameMenu, CreatePlan, Notifications, MapTools };
 
 		[Header("Connects to the correct toggle")]
 		public Selection connectTo;
@@ -51,6 +51,12 @@ namespace MSP2050.Scripts
 					break;
 				case Selection.CreatePlan:
 					toggle.onValueChanged.AddListener((b) => PlanManager.Instance.CreateNewPlanForEditing());
+					break;
+				case Selection.Notifications:
+					//TODO
+					break;
+				case Selection.MapTools:
+					//TODO
 					break;
 			}
 		}
