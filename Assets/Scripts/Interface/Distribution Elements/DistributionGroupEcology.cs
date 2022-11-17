@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			outlineCol = distributionFillBar.outline.color;
+			//outlineCol = distributionFillBar.outline.color;
 			Initialise();
 		}
 

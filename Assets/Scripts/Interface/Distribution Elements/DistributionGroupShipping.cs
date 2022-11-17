@@ -4,8 +4,6 @@ namespace MSP2050.Scripts
 {
 	public class DistributionGroupShipping: DistributionGroup<DistributionItem>
 	{
-		public TextMeshProUGUI layerType;
-
 		void Start()
 		{
 			Initialise();
@@ -13,15 +11,7 @@ namespace MSP2050.Scripts
 
 		public void SetTitle(string layerName, string entityTypeName)
 		{
-			if (title != null)
-			{
-				title.text = layerName;
-			}
-
-			if (layerType != null)
-			{
-				layerType.text = entityTypeName;
-			}
+			title.text = $"{layerName} ({entityTypeName})";
 		}
 
 		/// <summary>

@@ -19,7 +19,7 @@ namespace MSP2050.Scripts
 		// UI
 		public TextMeshProUGUI title;
 		public RectTransform foldTrans;
-		public Image foldGraphic, changeIndicator;
+		public Image changeIndicator;
 		public Button barButton;
 
 		// Child content
@@ -95,8 +95,6 @@ namespace MSP2050.Scripts
 			item.graphic.color = col;
 			item.SetSliderInteractability(interactable);
 
-			foldGraphic.enabled = true;
-
 			return item;
 		}
 
@@ -150,10 +148,10 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			if (distributionFillBar != null)
-			{
-				distributionFillBar.outline.color = changed ? Color.white : outlineCol;
-			}
+			//if (distributionFillBar != null)
+			//{
+			//	distributionFillBar.outline.color = changed ? Color.white : outlineCol;
+			//}
 
 			if (!changed)
 				changeIndicator.DOFade(0f, 0.2f);
@@ -169,16 +167,13 @@ namespace MSP2050.Scripts
 
 		public void BarPressed()
 		{
-			if (foldGraphic.enabled)
-			{
-				bool newExpanded = !childrenAndLegend.activeSelf;
-				childrenAndLegend.SetActive(newExpanded);
-				//if (legendObject != null)
-				//	legendObject.gameObject.SetActive(childrenAndLegend.activeSelf);
+			bool newExpanded = !childrenAndLegend.activeSelf;
+			childrenAndLegend.SetActive(newExpanded);
+			//if (legendObject != null)
+			//	legendObject.gameObject.SetActive(childrenAndLegend.activeSelf);
 
-				Vector3 rot = foldTrans.eulerAngles;
-				foldTrans.eulerAngles = newExpanded ? new Vector3(rot.x, rot.y, 0f) : new Vector3(rot.x, rot.y, 90f);
-			}
+			Vector3 rot = foldTrans.eulerAngles;
+			foldTrans.eulerAngles = newExpanded ? new Vector3(rot.x, rot.y, 0f) : new Vector3(rot.x, rot.y, 90f);
 		}
 	}
 }

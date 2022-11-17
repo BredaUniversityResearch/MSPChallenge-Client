@@ -5,8 +5,8 @@ namespace MSP2050.Scripts
 {
 	public abstract class AbstractDistributionSlider : MonoBehaviour
 	{
-		[SerializeField]
-		protected Image outline = null;
+		//[SerializeField]
+		//protected Image outline = null;
 		[SerializeField]
 		protected RectTransform oldValueIndicator = null;
 
@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
 	
 		public void MarkAsChanged(bool isChanged)
 		{
-			outline.gameObject.SetActive(isChanged);
+			//outline.gameObject.SetActive(isChanged);
 		}
 
 		public abstract void SetInteractablity(bool value);

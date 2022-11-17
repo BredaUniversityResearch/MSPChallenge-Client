@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 		private GameObject fillPrefab = null;
 		[SerializeField]
 		private Transform contentLocation = null;
-		public Image outline;
+		//public Image outline;
 
 		private List<DistributionFill> fills = new List<DistributionFill>();
 		private bool fillsRequireUpdate = false;
