@@ -40,6 +40,11 @@ namespace MSP2050.Scripts
 		public delegate void OnLayerVisibilityChanged(AbstractLayer a_layer, bool a_visible);
 		public event OnLayerVisibilityChanged m_onLayerVisibilityChanged;
 
+		[HideInInspector] public event Action<AbstractLayer> OnLayerLoaded;
+		[HideInInspector] public event Action<Plan> OnVisibleLayersUpdatedToPlan;
+		[HideInInspector] public event Action OnVisibleLayersUpdatedToBase;
+		[HideInInspector] public event Action<int> OnVisibleLayersUpdatedToTime;
+
 		void Start()
 		{
 			if (singleton != null && singleton != this)

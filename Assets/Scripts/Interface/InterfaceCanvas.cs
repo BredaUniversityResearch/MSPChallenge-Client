@@ -125,21 +125,6 @@ namespace MSP2050.Scripts
 		{
 			Instance.networkingBlocker.SetActive(false);
 		}
-<<<<<<< HEAD
-
-		public void StartEditingLayer(AbstractLayer layer)
-		{
-			ToolbarVisibility(true);
-			toolBar.ShowToolBar(true);
-			ToolbarTitleVisibility(true, FSM.ToolbarInput.Create);
-			ToolbarTitleVisibility(true, FSM.ToolbarInput.Delete);
-			ToolbarVisibility(false, FSM.ToolbarInput.Difference, FSM.ToolbarInput.Intersect, FSM.ToolbarInput.Union);
-			ToolbarTitleVisibility(false, FSM.ToolbarInput.Union);
-			toolBar.SetCreateButtonSprite(layer);
-			ToolbarEnable(true);
-		}
-=======
->>>>>>> MSP-4142
 
 		public static void SetLineMaterialTiling(float tiling)
 		{
