@@ -71,7 +71,7 @@ namespace MSP2050.Scripts
 			polygonEntity.AddSubEntity(subEntity);
 
 			if (SessionManager.Instance.AreWeGameMaster)
-				polygonEntity.Country = InterfaceCanvas.GetCurrentTeamSelection();
+				polygonEntity.Country = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SelectedTeam;
 
 			subEntity.AddPoint(initialPoint);
 			subEntity.AddPoint(initialPoint);

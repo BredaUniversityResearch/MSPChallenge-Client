@@ -20,7 +20,7 @@ namespace MSP2050.Scripts
 			centerPointLayer.EntityTypes.Add(0, new EntityType());
 			centerPointLayer.editingType = EditingType.SourcePolygonPoint;
 			centerPointLayer.greenEnergy = greenEnergy;
-			LayerManager.Instance.AddEnergyPointLayer(centerPointLayer);
+			PolicyLogicEnergy.Instance.AddEnergyPointLayer(centerPointLayer);
 			centerPointLayer.DrawGameObject();
 		}
 

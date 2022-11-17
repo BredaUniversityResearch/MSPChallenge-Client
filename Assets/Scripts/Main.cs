@@ -38,18 +38,15 @@ namespace MSP2050.Scripts
 		[HideInInspector] public bool fsmActive;
 
 		private bool interceptQuit = true;
-		private bool editingPlanDetailsContent = false;
 		private bool preventPlanAndTabChange = false;
 
 		private ProjectionInfo mspCoordinateProjection;
 		private ProjectionInfo geoJSONCoordinateProjection;
 		[HideInInspector] public int currentExpertiseIndex;
-		[HideInInspector] public SELGameClientConfig SelConfig{ get; set; }
-
-		private ESimulationType availableSimulations;
 
 		[HideInInspector] public event Action OnFinishedLoadingLayers; //Called when we finished loading all layers and right before the first tick is requested.
 		[HideInInspector] public event Action OnPostFinishedLoadingLayers;
+		
 
 		protected void Awake()
 		{
@@ -71,10 +68,9 @@ namespace MSP2050.Scripts
 			Application.wantsToQuit += OnApplicationQuit;
 
 			currentExpertiseIndex = PlayerPrefs.GetInt(LoginContentTabLogin.LOGIN_EXPERTISE_INDEX_STR, -1);
-			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
+			
 			if (SessionManager.Instance.MspGlobalData.expertise_definitions != null)
 				InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = true;
-			ParseAvailableSimulations(SessionManager.Instance.MspGlobalData.configured_simulations);
 			InterfaceCanvas.Instance.SetRegionWithName(SessionManager.Instance.MspGlobalData.region);
 
 			if (SessionManager.Instance.MspGlobalData.dependencies != null)
@@ -88,6 +84,14 @@ namespace MSP2050.Scripts
 				else
 					InterfaceCanvas.Instance.ImpactToolGraph.Initialise(HEBData);
 			}
+			ServerCommunication.Instance.DoRequest<PolicySimSettings>(Server.PolicySimSettings(), new NetworkForm(), HandlePolicySimSettingsCallback);
+		}
+
+		private void HandlePolicySimSettingsCallback(PolicySimSettings a_settings)
+		{
+			SimulationManager.Instance.InitialiseSimulations(a_settings.simulation_settings);
+			PolicyManager.Instance.InitialisePolicies(a_settings.policy_settings);
+			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
 		}
 
 		void OnDestroy()
@@ -143,12 +147,8 @@ namespace MSP2050.Scripts
 
 		protected void Update()
 		{
-			if (fsmActive)
-			{
-				fsm.Update();
-			}
+			fsm?.Update();
 			ServerCommunication.Instance.UpdateCommunication();
-
 			MaterialManager.Instance.Update();
 		}
 
@@ -188,18 +188,12 @@ namespace MSP2050.Scripts
 
 		public static Plan CurrentlyEditingPlan
 		{
-			get { return PlanDetails.LayersTab.LockedPlan; }
+			get { return InterfaceCanvas.Instance.activePlanWindow.Editing ? InterfaceCanvas.Instance.activePlanWindow.CurrentPlan : null; }
 		}
 
 		public static bool InEditMode
 		{
 			get { return CurrentlyEditingPlan != null; }
-		}
-
-		public bool EditingPlanDetailsContent
-		{
-			get { return editingPlanDetailsContent; }
-			set { editingPlanDetailsContent = value; }
 		}
 
 		public bool PreventPlanAndTabChange
@@ -215,23 +209,6 @@ namespace MSP2050.Scripts
 			if (PlanManager.Instance.planViewing == null) //This currently shows current and past (through ViewAtTime)
 				return ETextState.Current;
 			return ETextState.View;
-		}
-
-		private void ParseAvailableSimulations(ESimulationType[] configuredSimulations)
-		{
-			availableSimulations = ESimulationType.None;
-			if (configuredSimulations != null)
-			{
-				foreach (ESimulationType simType in configuredSimulations)
-				{
-					availableSimulations |= simType;
-				}
-			}
-		}
-
-		public bool IsSimulationConfigured(ESimulationType simulationType)
-		{
-			return (availableSimulations & simulationType) == simulationType;
 		}
 
 		public void GetRealWorldMousePosition(out double x, out double y)

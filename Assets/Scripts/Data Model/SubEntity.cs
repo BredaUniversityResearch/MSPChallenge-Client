@@ -187,18 +187,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				dataObject.Add("geometry", JsonConvert.SerializeObject(GetLayerObject().geometry));
-				//dataObject.Add("geometry", JToken.FromObject(GetLayerObject().geometry));
 				dataObject.Add("country", Entity.Country);
-				//if (Entity.PlanLayer != null)
-				//{
-				//	dataObject.Add("layer", Entity.PlanLayer.ID);
-				//}
-				//else
-				//{
-				//	dataObject.Add("layer", Entity.Layer.ID);
-				//}
-				//if (persistentID != -1)
-				//	dataObject.Add("persistent", persistentID);
 				dataObject.Add("id", databaseID);
 
 				batch.AddRequest<int>(Server.UpdateGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_UPDATE, handleDatabaseIDResult);
@@ -229,7 +218,6 @@ namespace MSP2050.Scripts
 			JObject dataObject = new JObject();
 
 			dataObject.Add("geometry", JsonConvert.SerializeObject(GetLayerObject().geometry));
-			//dataObject.Add("geometry", JToken.FromObject(GetLayerObject().geometry));
 			dataObject.Add("country", Entity.Country);
 
 			if (persistentID != -1)
@@ -237,8 +225,8 @@ namespace MSP2050.Scripts
 
 			if (Entity.PlanLayer != null)
 			{
-				dataObject.Add("layer", Entity.PlanLayer.ID);
-				dataObject.Add("plan", Entity.PlanLayer.Plan.ID);
+				dataObject.Add("layer", Entity.PlanLayer.GetDataBaseOrBatchIDReference());
+				dataObject.Add("plan", Entity.PlanLayer.Plan.GetDataBaseOrBatchIDReference());
 			}
 			else
 			{
@@ -256,16 +244,7 @@ namespace MSP2050.Scripts
 				{
 					dataObject = new JObject();
 					dataObject.Add("geometry", ((PolygonSubEntity)this).HolesToJSON(i));
-					if (Entity.PlanLayer != null)
-					{
-						dataObject.Add("layer", Entity.PlanLayer.ID);
-						dataObject.Add("plan", Entity.PlanLayer.Plan.ID);
-					}
-					else
-					{
-						dataObject.Add("plan", "");
-						dataObject.Add("layer", Entity.Layer.ID);
-					}
+					dataObject.Add("layer", Entity.PlanLayer.GetDataBaseOrBatchIDReference());
 					dataObject.Add("subtractive", BatchRequest.FormatCallIDReference(Entity.creationBatchCallID)); 
 
 					batch.AddRequest(Server.PostGeometrySub(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);

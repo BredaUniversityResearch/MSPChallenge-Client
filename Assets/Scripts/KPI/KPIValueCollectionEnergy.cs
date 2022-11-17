@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		{
 			//Keep track of layer states so we can use the area of energy layers in KPIs
 			List<LayerState> layerStates = new List<LayerState>();
-			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
             {
                 //Start layer state in previous month so we get the right new and removed geometry
                 LayerState newLayerState = layer.GetLayerStateAtTime(month-1);
@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
                 layerStates.Add(newLayerState);
 			}
 
-			List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
+			List<EnergyGrid> grids = PolicyLogicEnergy.Instance.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
 			CalculateKPIValues(month, gridDataForMonth, grids, layerStates);
 		}
 

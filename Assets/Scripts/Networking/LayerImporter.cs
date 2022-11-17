@@ -59,55 +59,15 @@ namespace MSP2050.Scripts
 			}
 
 			InterfaceCanvas.Instance.SetAccent(SessionManager.Instance.CurrentTeamColor);
-			InterfaceCanvas.Instance.activePlanWindow.OnCountriesLoaded();
-			KPIManager.Instance.CreateEnergyKPIs();
-
-			//MEL config use requires layers to be loaded (for kpi creation)
-			NetworkForm form = new NetworkForm();
-			ServerCommunication.Instance.DoRequest<CELConfig>(Server.GetCELConfig(), form, HandleCELConfigCallback);
-			ServerCommunication.Instance.DoRequest<JObject>(Server.GetMELConfig(), form, HandleMELConfigCallback);
-			ServerCommunication.Instance.DoRequest<SELGameClientConfig>(Server.GetShippingClientConfig(), form, HandleSELClientConfigCallback);
-			ServerCommunication.Instance.DoRequest<KPICategoryDefinition[]>(Server.ShippingKPIConfig(), form, HandleShippingKPIConfig);
-		}
-
-		private void HandleShippingKPIConfig(KPICategoryDefinition[] config)
-		{
-			KPIManager.Instance.CreateShippingKPIBars(config);
-		}
-
-		private void HandleMELConfigCallback(JObject melConfig)
-		{
-			KPIManager.Instance.CreateEcologyKPIs(melConfig);
-			PlanManager.Instance.LoadFishingFleets(melConfig);
-
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.OnCountriesLoaded();
+			
 			if (loadAllLayers)
 			{
 				ImportAllLayers();
 			}
 		}
 
-		private void HandleCELConfigCallback(CELConfig config)
-		{
-			if(config != null)
-			{ 
-				Sprite greenSprite = config.green_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + config.green_centerpoint_sprite);
-				Sprite greySprite = config.grey_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + config.grey_centerpoint_sprite);
-				Color greenColor = Util.HexToColor(config.green_centerpoint_color);
-				Color greyColor = Util.HexToColor(config.grey_centerpoint_color);
-
-				foreach (PointLayer layer in LayerManager.Instance.GetCenterPointLayers())
-				{
-					layer.EntityTypes[0].DrawSettings.PointColor = layer.greenEnergy ? greenColor : greyColor;
-					layer.EntityTypes[0].DrawSettings.PointSprite = layer.greenEnergy ? greenSprite : greySprite;
-					layer.EntityTypes[0].DrawSettings.PointSize = layer.greenEnergy ? config.green_centerpoint_size : config.grey_centerpoint_size;
-				}
-			}
-		}
-
-		private void HandleSELClientConfigCallback(SELGameClientConfig newSelConfig)
-		{
-			Main.Instance.SelConfig = newSelConfig;
-		}
+		
 
 #if UNITY_EDITOR
 		[MenuItem("MSP 2050/Reload layer meta")]
@@ -136,7 +96,7 @@ namespace MSP2050.Scripts
 
 		public void ImportAllLayers()
 		{
-			List<AbstractLayer> layerList = LayerManager.Instance.GetAllValidLayers();
+			List<AbstractLayer> layerList = LayerManager.Instance.GetAllLayers();
 			List<int> layersToLoad = new List<int>(layerList.Count);
 			foreach (AbstractLayer layerToLoad in layerList)
 			{
@@ -267,6 +227,12 @@ namespace MSP2050.Scripts
 			return entityTypes;
 		}
 
+	}
+
+	public class PolicySimSettings
+	{
+		public APolicyData[] policy_settings;
+		public ASimulationData[] simulation_settings;
 	}
 
 	public class GeometryObject

@@ -19,7 +19,7 @@ namespace MSP2050.Scripts
 			: base(entity, geometry, databaseID)
 		{
 			//Base calls initialise
-			LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 		}
 		public override void Initialise()
 		{
@@ -29,9 +29,9 @@ namespace MSP2050.Scripts
 
 		public override void SetDatabaseID(int databaseID)
 		{
-			LayerManager.Instance.RemoveEnergySubEntityReference(databaseID);
+			PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(databaseID);
 			this.databaseID = databaseID;
-			LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 		}
 
 		public override void SubmitNew(BatchRequest batch)
@@ -82,7 +82,7 @@ namespace MSP2050.Scripts
 
 		public override void RestoreDependencies()
 		{
-			LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 
 			//Restore sourcePoint
 			if (sourcePoint != null)

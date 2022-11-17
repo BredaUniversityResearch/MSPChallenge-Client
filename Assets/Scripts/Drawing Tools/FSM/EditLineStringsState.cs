@@ -45,15 +45,15 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
+			ToolBar toolbar = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar;
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			ic.ToolbarEnable(true, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
+			toolbar.SetCreateMode(false);
+			toolbar.SetButtonInteractable(FSM.ToolbarInput.Delete, true);
+			//ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
 			if (planLayer.BaseLayer is ShippingLineStringLayer)
 			{
-				ic.ToolbarVisibility(true, FSM.ToolbarInput.ChangeDirection);
-				ic.ToolbarEnable(true, FSM.ToolbarInput.ChangeDirection);
+				toolbar.SetButtonActive(FSM.ToolbarInput.ChangeDirection, true);
+				toolbar.SetButtonInteractable(FSM.ToolbarInput.ChangeDirection, true);
 			}
 			//InterfaceCanvas.SetActivePlanWindowInteractability(true, true);
 
@@ -69,13 +69,13 @@ namespace MSP2050.Scripts
 			reEnableInsertingPointsPosition = currentMousePosition;
 
 			fsm.SetSnappingEnabled(true);
-			IssueManager.instance.SetIssueInteractability(false);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
 	
 		public void SetSelectedSubEntities(HashSet<LineStringSubEntity> subEntities)
 		{
 			selectedSubEntities = subEntities;
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
 			//Check if this is a line marked for removal, this limits editing and enables recall
 			if (this is EditEnergyLineStringsState)
 				foreach (LineStringSubEntity line in subEntities)
@@ -88,17 +88,17 @@ namespace MSP2050.Scripts
 						foreach (Connection con in energyLine.connections)
 							if (con.point.IsPlannedForRemoval() || !con.point.IsNotShownInPlan())
 								canRecall = false;
-					ic.ToolbarEnable(canRecall, FSM.ToolbarInput.Recall);
+					gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, canRecall);
 					break;
 				}
 			else
 				foreach (LineStringSubEntity line in subEntities)
 				{
 					selectedRemovedEntity = line.IsPlannedForRemoval();
-					ic.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
+					gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, selectedRemovedEntity);
 					break;
 				}
-			ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			gt.SetActivePlanWindowInteractability(!selectedRemovedEntity);
 			foreach (LineStringSubEntity line in subEntities)
 				line.SetInFrontOfLayer(true);
 		}
@@ -234,6 +234,7 @@ namespace MSP2050.Scripts
 			newSubEntity.SetPersistentID(persistentID);
 			newEntity.AddSubEntity(newSubEntity);
 			newSubEntity.SetDataToCopy(dataCopy);
+			newSubEntity.edited = true;
 
 			fsm.AddToUndoStack(new CreateLineStringOperation(newSubEntity, planLayer, UndoOperation.EditMode.Modify, true));
 			newSubEntity.DrawGameObject(baseLayer.LayerGameObject.transform);
@@ -265,6 +266,7 @@ namespace MSP2050.Scripts
 			if (planLayer == subEntity.Entity.PlanLayer)
 			{
 				fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
+				subEntity.edited = true;
 			}
 			else
 			{
@@ -427,8 +429,8 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			InterfaceCanvas.Instance.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
-			InterfaceCanvas.Instance.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, selectedRemovedEntity);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetActivePlanWindowInteractability(!selectedRemovedEntity);
 		}
 
 		private void mergeSelectionBIntoSelectionA(Dictionary<LineStringSubEntity, HashSet<int>> a, Dictionary<LineStringSubEntity, HashSet<int>> b)
@@ -940,12 +942,12 @@ namespace MSP2050.Scripts
 				//case FSM.ToolbarInput.Simplify:
 				//	simplifySelection();
 				//	break;
-				case FSM.ToolbarInput.SelectAll:
-					if (baseLayer.IsEnergyLineLayer())
-						fsm.SetCurrentState(new EditEnergyLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>((baseLayer as LineStringLayer).GetAllSubEntities())));
-					else
-						fsm.SetCurrentState(new EditLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>((baseLayer as LineStringLayer).GetAllSubEntities())));
-					break;
+				//case FSM.ToolbarInput.SelectAll:
+				//	if (baseLayer.IsEnergyLineLayer())
+				//		fsm.SetCurrentState(new EditEnergyLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>((baseLayer as LineStringLayer).GetAllSubEntities())));
+				//	else
+				//		fsm.SetCurrentState(new EditLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>((baseLayer as LineStringLayer).GetAllSubEntities())));
+				//	break;
 				case FSM.ToolbarInput.Recall:
 					undoDeleteForSelection();
 					break;
@@ -1054,7 +1056,7 @@ namespace MSP2050.Scripts
 
 			BoxSelect.HideBoxSelection();
 
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 
 			// make sure the entity type dropdown shows a valid value
 			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());
@@ -1083,7 +1085,7 @@ namespace MSP2050.Scripts
 				selectedParams.Add(parameters);
 			}
 
-			InterfaceCanvas.Instance.SetActiveplanWindowToSelection(
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
 				selectedParams);

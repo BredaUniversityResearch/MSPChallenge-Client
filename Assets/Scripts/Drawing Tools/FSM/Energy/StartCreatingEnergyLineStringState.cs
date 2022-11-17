@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			//All points are non-reference
-			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
 			{
 				if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy)
 				{
@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 		{
 			if (!cursorIsOverUI)
 			{
-				EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(currentPosition);
+				EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(currentPosition);
 				if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
 				{
 					fsm.SetCursor(FSM.CursorType.Invalid);
@@ -57,7 +57,7 @@ namespace MSP2050.Scripts
 					fsm.SetCursor(FSM.CursorType.Add);
 					if (!showingToolTip || !validPointTooltip)
 					{
-						List<EntityType> entityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
+						List<EntityType> entityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 						StringBuilder sb = new StringBuilder("Creating: " + entityTypes[0].Name);
 						for (int i = 1; i < entityTypes.Count; i++)
 							sb.Append("\n& " + entityTypes[i].Name);
@@ -79,14 +79,15 @@ namespace MSP2050.Scripts
 
 		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
 		{        
-			EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(finalPosition);
+			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(finalPosition);
 			if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
 				return;
 
 			LineStringEntity entity = baseLayer.CreateNewEnergyLineStringEntity(point.GetPosition(), new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, point, planLayer);
 			baseLayer.activeEntities.Add(entity);
-			entity.EntityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			entity.EntityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			LineStringSubEntity subEntity = entity.GetSubEntity(0) as LineStringSubEntity;
+			subEntity.edited = true;
 
 			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			fsm.SetCurrentState(new CreatingEnergyLineStringState(fsm, planLayer, subEntity));
@@ -97,7 +98,7 @@ namespace MSP2050.Scripts
 
 		public override void ExitState(Vector3 currentMousePosition)
 		{
-			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { PlanDetails.LayersTab.CurrentlyEditingBaseLayer }, false, true);
+			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { InterfaceCanvas.Instance.activePlanWindow.CurrentlyEditingBaseLayer }, false, true);
 			base.ExitState(currentMousePosition);
 		}
 

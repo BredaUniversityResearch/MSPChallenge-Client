@@ -12,6 +12,7 @@ public class SearchBar : MonoBehaviour
     [SerializeField] TMP_InputField m_inputField;
 
     public Action<string> m_ontextChange;
+    public string Text => m_inputField.text;
 
     void Start()
     {

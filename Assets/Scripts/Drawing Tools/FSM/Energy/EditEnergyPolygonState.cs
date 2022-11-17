@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 
 		public EditEnergyPolygonState(FSM fsm, PlanLayer planLayer, HashSet<PolygonSubEntity> selectedSubEntities) : base(fsm, planLayer, selectedSubEntities)
 		{
-			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? LayerManager.Instance.energyCableLayerGreen.CurrentPlanLayer() : LayerManager.Instance.energyCableLayerGrey.CurrentPlanLayer();
+			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? PolicyLogicEnergy.Instance.energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.energyCableLayerGrey.CurrentPlanLayer();
 		}
 
 		protected override void OnPolygonRemoved(SubEntity removedSubEntity)
@@ -106,7 +106,10 @@ namespace MSP2050.Scripts
 
 				//Create undo operations for cables attached to sourcepoint
 				foreach (Connection con in (subEntity as EnergyPolygonSubEntity).sourcePoint.connections)
+				{ 
 					con.cable.AddModifyLineUndoOperation(fsm);
+					con.cable.edited = true;
+				}
 
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}

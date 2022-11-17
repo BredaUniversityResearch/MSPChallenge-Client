@@ -25,12 +25,10 @@ namespace MSP2050.Scripts
 		[Header("References")]
 		public TimeBar timeBar;
 		public MapScale mapScale;
-		public ToolBar toolBar;
 		public LayerInterface layerInterface;
 		public ActiveLayerWindow activeLayers;
 		public ActivePlanWindow activePlanWindow;
-		public PlanWizard planWizard;
-		public PlansMonitor plansMonitor;
+		public PlansList plansList;
 		public LoadingScreen loadingScreen;
 		public UnLoadingScreen unLoadingScreen;
 		public PropertiesWindow propertiesWindow;
@@ -47,12 +45,12 @@ namespace MSP2050.Scripts
 		[Header("Menu Bar")]
 		public MenuBarLogo menuBarLogo;
 		public MenuBarToggle menuBarLayers;
-		public MenuBarToggle menuBarPlanWizard;
 		public MenuBarToggle menuBarObjectivesMonitor;
-		public MenuBarToggle menuBarPlansMonitor;
 		public MenuBarToggle menuBarImpactTool;
 		public MenuBarToggle menuBarActiveLayers;
 		public MenuBarToggle menuBarGameMenu;
+		public MenuBarToggle menuBarPlansList;
+		public MenuBarToggle menuBarCreatePlan;
 
 		[Header("KPI")]
 		public KPIRoot KPIEcology;
@@ -69,8 +67,6 @@ namespace MSP2050.Scripts
 		public ColourAsset accentColour;
 		public ColourAsset regionColour;
 		public RegionSettingsAsset regionSettings;
-
-		private List<Button> ToolbarButtons = new List<Button>();
 
 		[HideInInspector]
 		public bool ignoreLayerToggleCallback;//If this is true the layer callback labda functions will return immediately
@@ -129,6 +125,7 @@ namespace MSP2050.Scripts
 		{
 			Instance.networkingBlocker.SetActive(false);
 		}
+<<<<<<< HEAD
 
 		public void StartEditingLayer(AbstractLayer layer)
 		{
@@ -141,6 +138,8 @@ namespace MSP2050.Scripts
 			toolBar.SetCreateButtonSprite(layer);
 			ToolbarEnable(true);
 		}
+=======
+>>>>>>> MSP-4142
 
 		public static void SetLineMaterialTiling(float tiling)
 		{
@@ -152,126 +151,6 @@ namespace MSP2050.Scripts
 						mat.mainTextureScale = new Vector2(tiling, 1f);
 				}
 			}
-		}
-
-		public void StopEditing()
-		{
-			ToolbarEnable(false);
-			Instance.toolBar.ShowToolBar(false);
-		}
-		
-		public void ToolbarTitleVisibility(bool enabled, FSM.ToolbarInput button)
-		{
-			for (int i = 0; i < ToolbarButtons.Count; i++)
-			{
-				if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == button)
-				{
-					ToolbarButtons[i].transform.parent.parent.Find("Label").gameObject.SetActive(enabled);
-					ToolbarButtons[i].transform.parent.gameObject.SetActive(enabled);
-				}
-			}
-		}
-
-		public void ToolbarVisibility(bool enabled, params FSM.ToolbarInput[] buttons)
-		{
-			for (int i = 0; i < ToolbarButtons.Count; i++)
-			{
-				if (buttons.Length <= 0)
-				{
-					ToolbarButtons[i].gameObject.SetActive(enabled);
-				}
-				else
-				{
-					for (int j = 0; j < buttons.Length; j++)
-					{
-						if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == buttons[j])
-						{
-							ToolbarButtons[i].gameObject.SetActive(enabled);
-						}
-					}
-				}
-			}
-		}
-
-		public void SetToolbarMode(ToolBar.DrawingMode drawingMode)
-		{
-			if (drawingMode == ToolBar.DrawingMode.Create)
-			{
-				toolBar.CreateMode();
-			}
-			else if (drawingMode == ToolBar.DrawingMode.Edit)
-			{
-				toolBar.EditMode();
-			}
-		}
-
-		public void ToolbarEnable(bool enabled, params FSM.ToolbarInput[] buttons)
-		{
-			for (int i = 0; i < ToolbarButtons.Count; i++)
-			{
-				if (buttons.Length <= 0)
-				{
-					toolBar.SetActive(ToolbarButtons[i], enabled);
-				}
-				else
-				{
-					for (int j = 0; j < buttons.Length; j++)
-					{
-						if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == buttons[j])
-						{
-							toolBar.SetActive(ToolbarButtons[i], enabled);
-						}
-					}
-				}
-			}
-		}
-		
-		public static List<EntityType> GetCurrentEntityTypeSelection()
-		{
-			return Instance.activePlanWindow.GetEntityTypeSelection();
-		}
-
-		public static int GetCurrentTeamSelection()
-		{
-			return Instance.activePlanWindow.SelectedTeam;
-		}
-
-		public void SetActiveplanWindowToSelection(List<List<EntityType>> entityTypes, int team, List<Dictionary<EntityPropertyMetaData, string>> selectedParams)
-		{
-			activePlanWindow.SetSelectedEntityTypes(entityTypes);
-			activePlanWindow.SetSelectedParameters(selectedParams);
-			if (SessionManager.Instance.AreWeGameMaster)
-			{
-				activePlanWindow.SelectedTeam = team;
-			}
-		}
-
-		public void SetTeamAndTypeToBasicIfEmpty()
-		{
-			activePlanWindow.SetEntityTypeToBasicIfEmpty();
-			if (SessionManager.Instance.AreWeGameMaster)
-				activePlanWindow.SetTeamToBasicIfEmpty();
-		}
-
-		public void SetActivePlanWindowInteractability(bool value, bool parameterValue = false)
-		{
-			activePlanWindow.SetParameterInteractability(parameterValue);
-			if (!value)
-			{
-				activePlanWindow.DeselectAllEntityTypes();
-				if (SessionManager.Instance.AreWeGameMaster)
-					activePlanWindow.SelectedTeam = -2;
-			}
-		}
-
-		public void SetActivePlanWindowChangeable(bool value)
-		{
-			activePlanWindow.SetObjectChangeInteractable(value);
-		}
-
-		public void RegisterToolbarButton(Button button)
-		{
-			ToolbarButtons.Add(button);
 		}
 
 		public void TriggerInteractionCallback(string name, string[] tags)

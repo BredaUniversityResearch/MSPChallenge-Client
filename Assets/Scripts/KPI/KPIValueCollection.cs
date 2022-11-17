@@ -71,10 +71,10 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public void ProcessReceivedKPIData(IEnumerable<EcologyKPIObject> receivedKpiData)
+		public void ProcessReceivedKPIData(IEnumerable<KPIObject> receivedKpiData)
 		{
 			int mostRecentMonth = -1;
-			foreach (EcologyKPIObject kpiData in receivedKpiData)
+			foreach (KPIObject kpiData in receivedKpiData)
 			{
 				TryUpdateKPIValue(kpiData);
 				if (kpiData.month > mostRecentMonth)
@@ -107,7 +107,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void TryUpdateKPIValue(EcologyKPIObject kpi)
+		private void TryUpdateKPIValue(KPIObject kpi)
 		{
 			TryUpdateKPIValue(kpi.name, kpi.month, kpi.value);
 		}

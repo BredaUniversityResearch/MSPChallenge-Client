@@ -22,14 +22,14 @@ namespace MSP2050.Scripts
 
 		public override void EnterState(Vector3 currentMousePosition)
 		{
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
 			base.EnterState(currentMousePosition);
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
-			ic.SetActivePlanWindowInteractability(false);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetCreateMode(false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, false);
+			//ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			gt.SetActivePlanWindowInteractability(false);
 
 			PolygonSubEntity hover = baseLayer.GetSubEntityAt(currentMousePosition) as PolygonSubEntity;
 
@@ -145,15 +145,15 @@ namespace MSP2050.Scripts
 				case FSM.ToolbarInput.Create:
 					fsm.SetCurrentState(new StartCreatingPolygonState(fsm, planLayer));
 					break;
-				case FSM.ToolbarInput.FindGaps:
-					baseLayer.CreateInvertedLayer();
-					break;
-				case FSM.ToolbarInput.SelectAll:
-					if (baseLayer.IsEnergyPolyLayer())
-						fsm.SetCurrentState(new EditEnergyPolygonState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
-					else
-						fsm.SetCurrentState(new EditPolygonsState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
-					break;
+				//case FSM.ToolbarInput.FindGaps:
+				//	baseLayer.CreateInvertedLayer();
+				//	break;
+				//case FSM.ToolbarInput.SelectAll:
+				//	if (baseLayer.IsEnergyPolyLayer())
+				//		fsm.SetCurrentState(new EditEnergyPolygonState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
+				//	else
+				//		fsm.SetCurrentState(new EditPolygonsState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
+				//	break;
 			}
 		}
 

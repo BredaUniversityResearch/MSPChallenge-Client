@@ -48,13 +48,14 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			ic.ToolbarEnable(true, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
-			//InterfaceCanvas.SetActivePlanWindowInteractability(true, true);
-			IssueManager.instance.SetIssueInteractability(false);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetCreateMode(false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, true);
+			//ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			gt.SetActivePlanWindowInteractability(true);
+
+			IssueManager.Instance.SetIssueInteractability(false);
 		
 			foreach (PolygonSubEntity pse in selectedSubEntities)
 			{
@@ -421,10 +422,8 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			//InterfaceCanvas.ToolbarEnable(selectedPoints.Count > 0, FSM.ToolbarInput.Delete);
-			//updateRecallAvailability();
-			InterfaceCanvas.Instance.SetActivePlanWindowChangeable(!selectedRemovedEntity);
-			InterfaceCanvas.Instance.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, selectedRemovedEntity);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetActivePlanWindowInteractability(!selectedRemovedEntity);
 		}
 
 		private void mergeSelectionBIntoSelectionA(Dictionary<PolygonSubEntity, HashSet<int>> a, Dictionary<PolygonSubEntity, HashSet<int>> b)
@@ -1035,21 +1034,21 @@ namespace MSP2050.Scripts
 				//simplifySelection();
 				//PolygonOffset();
 				//break;
-				case FSM.ToolbarInput.FixInvalid:
-					//tryFixingInvalidPolygonsInSelection();
-					break;
-				case FSM.ToolbarInput.RemoveHoles:
-					removeHolesFromSelection();
-					break;
-				case FSM.ToolbarInput.FindGaps:
-					baseLayer.CreateInvertedLayer();
-					break;
-				case FSM.ToolbarInput.SelectAll:
-					if (baseLayer.IsEnergyPolyLayer())
-						fsm.SetCurrentState(new EditEnergyPolygonState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
-					else
-						fsm.SetCurrentState(new EditPolygonsState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
-					break;
+				//case FSM.ToolbarInput.FixInvalid:
+				//	//tryFixingInvalidPolygonsInSelection();
+				//	break;
+				//case FSM.ToolbarInput.RemoveHoles:
+				//	removeHolesFromSelection();
+				//	break;
+				//case FSM.ToolbarInput.FindGaps:
+				//	baseLayer.CreateInvertedLayer();
+				//	break;
+				//case FSM.ToolbarInput.SelectAll:
+				//	if (baseLayer.IsEnergyPolyLayer())
+				//		fsm.SetCurrentState(new EditEnergyPolygonState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
+				//	else
+				//		fsm.SetCurrentState(new EditPolygonsState(fsm, planLayer, new HashSet<PolygonSubEntity>((baseLayer as PolygonLayer).GetAllSubEntities())));
+				//	break;
 				case FSM.ToolbarInput.Recall:
 					undoDeleteForSelection();
 					break;
@@ -1184,7 +1183,7 @@ namespace MSP2050.Scripts
 			selectedSourcePoints = new HashSet<EnergyPointSubEntity>();
 
 			BoxSelect.HideBoxSelection();
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 
 			// make sure the entity type dropdown shows a valid value
 			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());
@@ -1205,8 +1204,8 @@ namespace MSP2050.Scripts
 			foreach (PolygonSubEntity poly in subEntities) //Check if this is a polygon marked for removal, this limits editing
 			{
 				selectedRemovedEntity = poly.IsPlannedForRemoval();
-				InterfaceCanvas.Instance.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
-				InterfaceCanvas.Instance.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+				InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, selectedRemovedEntity);
+				InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetActivePlanWindowInteractability(!selectedRemovedEntity);
 				break;
 			}
 			if (this is EditEnergyPolygonState)
@@ -1247,7 +1246,7 @@ namespace MSP2050.Scripts
 				selectedParams.Add(parameters);
 			}
 
-			InterfaceCanvas.Instance.SetActiveplanWindowToSelection(
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
 				selectedParams);

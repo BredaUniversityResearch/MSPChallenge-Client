@@ -20,19 +20,19 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Create);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
-			ic.SetTeamAndTypeToBasicIfEmpty();
-			ic.SetActivePlanWindowInteractability(true);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetCreateMode(true);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, false);
+			//ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			gt.SetTeamAndTypeToBasicIfEmpty();
+			gt.SetActivePlanWindowInteractability(true);
 
 			fsm.SetCursor(FSM.CursorType.Add);
 			fsm.SetSnappingEnabled(true);
 
-			IssueManager.instance.SetIssueInteractability(false);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
 
 		public override void ExitState(Vector3 currentMousePosition)
@@ -40,7 +40,7 @@ namespace MSP2050.Scripts
 			base.ExitState(currentMousePosition);
 			if (showingToolTip)
 				TooltipManager.HideTooltip();
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 		}
 
 		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
@@ -50,7 +50,7 @@ namespace MSP2050.Scripts
 				fsm.SetCursor(FSM.CursorType.Add);
 				if (!showingToolTip)
 				{
-					List<EntityType> entityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
+					List<EntityType> entityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 					StringBuilder sb = new StringBuilder("Creating: " + entityTypes[0].Name);
 					for (int i = 1; i < entityTypes.Count; i++)
 						sb.Append("\n& " + entityTypes[i].Name);
@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 
 			PolygonEntity entity = baseLayer.CreateNewPolygonEntity(finalPosition, new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
 			baseLayer.activeEntities.Add(entity);
-			entity.EntityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			entity.EntityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			PolygonSubEntity subEntity = entity.GetSubEntity(0) as PolygonSubEntity;
 			subEntity.edited = true;
 			fsm.SetCurrentState(new CreatingPolygonState(fsm, subEntity, planLayer));

@@ -22,20 +22,27 @@ namespace MSP2050.Scripts
 		public EnergyLineStringSubEntity(Entity entity, SubEntityObject geometry, int databaseID) : base(entity, geometry, databaseID)
 		{
 			connections = new List<Connection>();
-			LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 			CalculationPropertyUpdated();
 		}
 
 		public override void SetDatabaseID(int databaseID)
 		{
-			LayerManager.Instance.RemoveEnergySubEntityReference(databaseID);
+			PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(databaseID);
 			this.databaseID = databaseID;
-			LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 		}
 
 		public override void SubmitNew(BatchRequest batch)
 		{
 			base.SubmitNew(batch);
+			SubmitAddOrChangeConnection(Server.CreateConnection(), batch);
+		}
+
+		public virtual void SubmitUpdate(BatchRequest batch)
+		{
+			base.SubmitUpdate(batch);
+			SubmitAddOrChangeConnection(Server.UpdateConnection(), batch);
 		}
 
 		public override void SubmitDelete(BatchRequest batch)
@@ -51,6 +58,38 @@ namespace MSP2050.Scripts
 			dataObject = new JObject();
 			dataObject.Add("cable", databaseID);
 			batch.AddRequest(Server.DeleteEnergyConection(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
+		}
+
+		void SubmitAddOrChangeConnection(string a_endPoint, BatchRequest a_batch)
+		{
+			if (connections == null || connections.Count == 0)
+			{
+				Debug.LogError($"Trying to submit a cable with no connections. Cable ID: {GetDatabaseID()}");
+			}
+			else if (connections.Count < 2)
+			{
+				Debug.LogError($"Trying to submit a cable with a missing connection. Cable ID: {GetDatabaseID()}. Existing connection to point with ID: {connections[0].point.GetDatabaseID()}");
+			}
+			else
+			{
+				EnergyPointSubEntity first = null, second = null;
+				foreach (Connection conn in connections)
+				{
+					if (conn.connectedToFirst)
+						first = conn.point;
+					else
+						second = conn.point;
+				}
+
+				Vector2 coordinate = first.GetPosition();
+
+				JObject dataObject = new JObject();
+				dataObject.Add("start", first.GetDataBaseOrBatchIDReference());
+				dataObject.Add("end", second.GetDataBaseOrBatchIDReference());
+				dataObject.Add("cable", GetDataBaseOrBatchIDReference());
+				dataObject.Add("coords", $"[{coordinate.x},{coordinate.y}]");
+				a_batch.AddRequest(a_endPoint, dataObject, BatchRequest.BATCH_GROUP_CONNECTIONS);
+			}
 		}
 
 		public override void SubmitData(BatchRequest batch)
@@ -124,7 +163,7 @@ namespace MSP2050.Scripts
 
 		public override void RestoreDependencies()
 		{
-			LayerManager.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 			foreach (Connection con in connections)
 				con.point.AddConnection(con);
 		}

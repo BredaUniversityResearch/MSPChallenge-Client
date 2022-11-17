@@ -823,24 +823,4 @@ namespace MSP2050.Scripts
 			redo = new ReconnectCableToPoint(newConnection, oldConnection);
 		}
 	}
-
-	public class SwitchLayerOperation : UndoOperation
-	{
-		PlanLayer previousLayer, newLayer;
-
-		public SwitchLayerOperation(PlanLayer previousLayer, PlanLayer newLayer)
-		{
-			this.previousLayer = previousLayer;
-			this.newLayer = newLayer;
-		}
-
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
-		{
-			redo = new SwitchLayerOperation(newLayer, previousLayer);
-			if (!totalUndo)
-			{
-				PlanDetails.LayersTab.StartEditingLayer(previousLayer, true);
-			}
-		}
-	}
 }

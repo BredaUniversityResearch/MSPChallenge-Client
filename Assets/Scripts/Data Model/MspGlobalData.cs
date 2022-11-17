@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 		public string user_region_manager_color;
 		[JsonConverter(typeof(JsonConverterBinaryBool))]
 		public bool user_common_has_password;
-		public ESimulationType[] configured_simulations;
+		//public ESimulationType[] configured_simulations; 
 		public string wiki_base_url;
 		public ExpertiseDefinition[] expertise_definitions;
 		public string windfarm_data_api_url; // https://test-northsea-dot-hydro-engine.appspot.com/get_windfarm_data

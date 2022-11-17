@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 			sourcePower = 0;
 			foreach (GeomIDObject source in gridObject.sources)
 			{
-				EnergyPointSubEntity subEnt = LayerManager.Instance.GetEnergySubEntityByID(source.geometry_id, true) as EnergyPointSubEntity;
+				EnergyPointSubEntity subEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(source.geometry_id, true) as EnergyPointSubEntity;
 				if (subEnt != null)
 				{
 					sources.Add(subEnt);
@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 			sockets = new List<EnergyPointSubEntity>();
 			foreach (GeomIDObject socket in gridObject.sockets)
 			{
-				EnergyPointSubEntity subEnt = LayerManager.Instance.GetEnergySubEntityByID(socket.geometry_id) as EnergyPointSubEntity;
+				EnergyPointSubEntity subEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(socket.geometry_id) as EnergyPointSubEntity;
 				if (subEnt != null)
 				{
 					sockets.Add(subEnt);
@@ -324,7 +324,7 @@ namespace MSP2050.Scripts
 			//Add new grid on server and get databaseID
 			JObject dataObject = new JObject();
 			dataObject.Add("name", name);
-			dataObject.Add("plan", plan.ID);
+			dataObject.Add("plan", plan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("distribution_only", JsonConvert.SerializeObject(distributionOnly));
 			if (persistentID != -1)
 				dataObject.Add("persistent", persistentID);
@@ -342,7 +342,7 @@ namespace MSP2050.Scripts
 		{
 			databaseID = value;
 			databaseIDSet = true;
-			PlanManager.Instance.AddEnergyGrid(this);
+			PolicyLogicEnergy.Instance.AddEnergyGrid(this);
 		}
 
 		public int GetDatabaseID()
@@ -637,10 +637,6 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public GridPlanState GetGridPlanStateAtPlan(Plan targetPlan)
 		{
-			// Check if the grid is relevant at all ======================================
-			//if (!ShouldBeShown)
-			//	return GridPlanState.Hidden;
-
 			// If grid is part of plan, it is sure to be relevant ========================
 			if (targetPlan == plan)
 			{
@@ -651,8 +647,11 @@ namespace MSP2050.Scripts
 			}
 
 			//A previous grid that was removed by geom changes in this plan
-			if (targetPlan.removedGrids != null && targetPlan.removedGrids.Contains(persistentID))
-				return GridPlanState.Removed;
+			if(targetPlan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var energyData))
+			{
+				if (energyData.removedGrids != null && energyData.removedGrids.Contains(persistentID))
+					return GridPlanState.Removed;
+			}
 
 			// Check if the grid is relevant for the plan's country ======================
 			bool countryInGrid = false;
@@ -795,7 +794,7 @@ namespace MSP2050.Scripts
 		public void ShowGridOnMap()
 		{
 			bool green = IsGreen;
-			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
 				if (layer.greenEnergy == green)
 					LayerManager.Instance.ShowLayer(layer);
         

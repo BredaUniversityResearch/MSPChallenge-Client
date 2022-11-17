@@ -17,14 +17,14 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Create);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
-			ic.SetTeamAndTypeToBasicIfEmpty();
-			ic.SetActivePlanWindowInteractability(true);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetCreateMode(true);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, false);
+			//ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			gt.SetTeamAndTypeToBasicIfEmpty();
+			gt.SetActivePlanWindowInteractability(true);
 
 			int pointCount = subEntity.GetPointCount();
 			subEntity.SetPointPosition(pointCount - 1, subEntity.GetPointPosition(pointCount - 2));
@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 			fsm.SetCursor(FSM.CursorType.Add);
 			fsm.SetSnappingEnabled(true);
 
-			IssueManager.instance.SetIssueInteractability(false);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
 
 		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
@@ -119,6 +119,7 @@ namespace MSP2050.Scripts
 
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 
+			subEntity.edited = true;
 			subEntity.AddPoint(finalPosition);
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 			if (subEntity.GetPointCount() > 1)
@@ -131,6 +132,7 @@ namespace MSP2050.Scripts
 		{
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 
+			subEntity.edited = true;
 			subEntity.Entity.EntityTypes = newTypes;
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 
@@ -147,7 +149,7 @@ namespace MSP2050.Scripts
 		{
 			subEntity.RemovePoints(new HashSet<int>() { subEntity.GetPointCount() - 1 });
 
-			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
 
 			subEntity.restrictionNeedsUpdate = true;
@@ -192,7 +194,7 @@ namespace MSP2050.Scripts
 				subEntity.RemoveGameObject();
 			}
 
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 		}
 	}
 }

@@ -8,10 +8,10 @@ namespace MSP2050.Scripts
 
 		[SerializeField] private Image icon = null;
 		[SerializeField] private TextMeshProUGUI nameText = null;
-		[SerializeField] private InputField valueInput = null;
+		[SerializeField] private CustomInputField valueInput = null;
 		[SerializeField] private TextMeshProUGUI unit = null;
 
-		public ActivePlanWindow.ParameterChangeCallback parameterChangedCallback;
+		public AP_GeometryTool.ParameterChangeCallback parameterChangedCallback;
 		private EntityPropertyMetaData parameter;
 	
 		void Start ()

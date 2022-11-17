@@ -12,8 +12,8 @@ namespace MSP2050.Scripts
 
 		private const float DOUBLE_CLICK_MAX_INTERVAL = 0.5f;
 
-		public enum ToolbarInput { Create, Edit, Undo, Redo, Delete, Abort, Accept, Cancel, Union, Intersect, Difference, /*Simplify,*/
-			RemoveHoles, FindGaps, SnapPoints, FixInvalid, SelectAll, Recall, ChangeDirection}
+		public enum ToolbarInput { Create, Edit, Undo, Redo, Delete, Recall, ChangeDirection, Abort }//Union, Intersect, Difference, Simplify,
+			//RemoveHoles, FindGaps, SnapPoints, FixInvalid, SelectAll}
 
 		public enum CursorType { Add, Complete, Default, Insert, Move, Invalid, Rescale, ZoomToArea, LayerProbe, Ruler }
 		private CursorType currentCursor = CursorType.Default;
@@ -73,9 +73,9 @@ namespace MSP2050.Scripts
 			SetCursor(CursorType.Default, true);
 
 			//Add change callbacks
-			InterfaceCanvas.Instance.activePlanWindow.typeChangeCallback = EntityTypeChanged;
-			InterfaceCanvas.Instance.activePlanWindow.countryChangeCallback = TeamChanged;
-			InterfaceCanvas.Instance.activePlanWindow.parameterChangeCallback = ParameterChanged;
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_typeChangeCallback = EntityTypeChanged;
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_countryChangeCallback = TeamChanged;
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_parameterChangeCallback = ParameterChanged;
 		}
 
 		public void SetCursor(CursorType cursorType, bool forceRedraw = false)
@@ -186,12 +186,6 @@ namespace MSP2050.Scripts
 
 			switch (toolbarInput)
 			{ 
-				case ToolbarInput.Accept:
-					PlanDetails.instance.changesConfirmButton.onClick.Invoke();
-					break;
-				case ToolbarInput.Cancel:
-					PlanDetails.instance.changesCancelButton.onClick.Invoke();             
-					break;
 				case ToolbarInput.Undo:
 					undo();
 					updateUndoRedoButtonEnabled();               
@@ -200,9 +194,9 @@ namespace MSP2050.Scripts
 					redo();
 					updateUndoRedoButtonEnabled();                
 					break;
-				case ToolbarInput.SnapPoints:
-					SetSnappingEnabled(!snappingEnabled);
-					break;
+				//case ToolbarInput.SnapPoints:
+				//	SetSnappingEnabled(!snappingEnabled);
+				//	break;
 				default:
 					InputReceivingState.HandleToolbarInput(toolbarInput);
 					break;
@@ -243,180 +237,10 @@ namespace MSP2050.Scripts
 			updateUndoRedoButtonEnabled();
 		}
 
-		private void GetChangedObjects(out HashSet<SubEntity> newSubEntities, out HashSet<SubEntity> modifiedSubEntities, out HashSet<SubEntity> removedSubEntities, out Dictionary<SubEntity, PlanLayer> planRemovalModifiedEntities)
+		public void ClearUndoRedo()
 		{
-			newSubEntities = new HashSet<SubEntity>();
-			modifiedSubEntities = new HashSet<SubEntity>();
-			removedSubEntities = new HashSet<SubEntity>();
-			planRemovalModifiedEntities = new Dictionary<SubEntity, PlanLayer>();
-
-			foreach (UndoOperation operation in undoStack)
-			{
-				SubEntity subEntity = null;
-				if (operation is ISubEntityHolder)
-				{
-					subEntity = (operation as ISubEntityHolder).GetSubEntity();
-				}
-
-				if (operation is RemovePolygonOperation || operation is RemoveLineStringOperation || operation is RemovePointOperation)
-				{
-					removedSubEntities.Add(subEntity);
-					if (subEntity.GetPersistentID() != -1)
-						planRemovalModifiedEntities[subEntity] = (operation as IPlanLayerHolder).GetPlanLayer();
-				}
-				else if (operation is ModifyPolygonOperation || operation is ModifyLineStringOperation || operation is ModifyPointOperation)
-				{
-					if (!removedSubEntities.Contains(subEntity) && !newSubEntities.Contains(subEntity))
-					{
-						modifiedSubEntities.Add(subEntity);
-					}
-				}
-				else if (operation is CreatePolygonOperation ||
-				         operation is CreateLineStringOperation ||
-				         operation is CreatePointOperation)
-				{
-					if (removedSubEntities.Contains(subEntity))
-					{
-						removedSubEntities.Remove(subEntity);
-					}
-					else
-					{
-						newSubEntities.Add(subEntity);
-
-						if (modifiedSubEntities.Contains(subEntity))
-						{
-							modifiedSubEntities.Remove(subEntity);
-						}
-					}
-				}
-				else if (operation is ModifyPolygonRemovalPlanOperation ||
-				         operation is ModifyLineStringRemovalPlanOperation ||
-				         operation is ModifyPointRemovalPlanOperation)
-				{
-					planRemovalModifiedEntities[subEntity] = (operation as IPlanLayerHolder).GetPlanLayer();
-				}
-			}
-		}
-
-		public void SubmitAllChanges(BatchRequest batch)
-		{
-			GetChangedObjects(out var newSubEntities, out var modifiedSubEntities, out var removedSubEntities, out var planRemovalModifiedEntities);
-
-			List<EnergyLineStringSubEntity> addedCables = new List<EnergyLineStringSubEntity>();
-			List<EnergyLineStringSubEntity> updatedCables = new List<EnergyLineStringSubEntity>();
-
-			//This includes both completely new geometry, as well as existing geometry that is newly modified in this plan
-			foreach (SubEntity newSubEntity in newSubEntities)
-			{
-				newSubEntity.SubmitNew(batch);
-				if (newSubEntity is EnergyLineStringSubEntity)//Check for created connections
-					addedCables.Add(newSubEntity as EnergyLineStringSubEntity);
-			}
-
-			//These are only modified subentities that already existed on the planlayer, so just update the content
-			foreach (SubEntity modifiedSubEntity in modifiedSubEntities)
-			{
-				if (modifiedSubEntity is EnergyLineStringSubEntity)//Check for updated connections
-					updatedCables.Add(modifiedSubEntity as EnergyLineStringSubEntity);
-
-				modifiedSubEntity.SubmitUpdate(batch);
-			}
-
-			//These are subentities that used to be added/modified in the plan, but are no longer
-			foreach (SubEntity removedSubEntity in removedSubEntities)
-			{
-				removedSubEntity.SubmitDelete(batch);
-			}
-
-			foreach (KeyValuePair<SubEntity, PlanLayer> kvp in planRemovalModifiedEntities)
-			{
-				if (kvp.Value.RemovedGeometry.Contains(kvp.Key.GetPersistentID()))
-					kvp.Value.SubmitMarkForDeletion(kvp.Key, batch);
-				else
-					kvp.Value.SubmitUnmarkForDeletion(kvp.Key, batch);
-			}
-
-			//Submit connections operation
-			if (addedCables.Count > 0)
-			{
-				SubmitConnections(addedCables, Server.CreateConnection(), batch);
-			}
-			if (updatedCables.Count > 0)
-			{
-				SubmitConnections(updatedCables, Server.UpdateConnection(), batch);
-			}
-		}
-
-		public static void SubmitConnections(List<EnergyLineStringSubEntity> addedCables, string endPoint, BatchRequest batch)
-		{
-			for(int i = 0; i < addedCables.Count; i++)
-			{
-				if (addedCables[i].connections == null || addedCables[i].connections.Count == 0)
-				{
-					Debug.LogError($"Trying to submit a cable with no connections. Cable ID: {addedCables[i].GetDatabaseID()}");
-				}
-				else if (addedCables[i].connections.Count < 2)
-				{
-					Debug.LogError($"Trying to submit a cable with a missing connection. Cable ID: {addedCables[i].GetDatabaseID()}. Existing connection to point with ID: {addedCables[i].connections[0].point.GetDatabaseID()}");
-				}
-				else
-				{
-					EnergyPointSubEntity first = null, second = null;
-					foreach (Connection conn in addedCables[i].connections)
-					{
-						if (conn.connectedToFirst)
-							first = conn.point;
-						else
-							second = conn.point;
-					}
-
-					Vector2 coordinate = first.GetPosition();
-
-					JObject dataObject = new JObject();
-					dataObject.Add("start", first.GetDataBaseOrBatchIDReference());
-					dataObject.Add("end", second.GetDataBaseOrBatchIDReference());
-					dataObject.Add("cable", addedCables[i].GetDataBaseOrBatchIDReference());
-					dataObject.Add("coords", $"[{coordinate.x},{coordinate.y}]");
-					batch.AddRequest(endPoint, dataObject, BatchRequest.BATCH_GROUP_CONNECTIONS);
-				}
-			}		
-		}
-
-		public void ClearUndoRedoAndFinishEditing()
-		{
-			GetChangedObjects(out var newSubEntities, out var modifiedSubEntities, out var removedSubEntities, out var planRemovalModifiedEntities);
-
-			foreach (SubEntity newSubEntity in newSubEntities)
-			{
-				newSubEntity.FinishEditing();
-			}
-
-			foreach (SubEntity modifiedSubEntity in modifiedSubEntities)
-			{
-				modifiedSubEntity.FinishEditing();
-			}
-
-			foreach (SubEntity removedSubEntity in removedSubEntities)
-			{
-				removedSubEntity.FinishEditing();
-			}
-
 			undoStack.Clear();
 			redoStack.Clear();
-			updateUndoRedoButtonEnabled();
-		}
-
-		public void UndoAllAndClearStacks()
-		{
-			while (undoStack.Count > 0)
-			{
-				SingleClearingUndo();
-			}
-
-			undoStack.Clear();
-			redoStack.Clear();
-
-			updateUndoRedoButtonEnabled();
 		}
 
 		public void undo()
@@ -448,13 +272,6 @@ namespace MSP2050.Scripts
 			Debug.Log("Undid: " + undo.GetType().Name);
 			undo.Undo(this, out redo);
 			redoStack.Push(redo);
-		}
-
-		private void SingleClearingUndo()
-		{
-			UndoOperation undo = undoStack.Pop();
-			UndoOperation redo;
-			undo.Undo(this, out redo, true);
 		}
 
 		private void redo()
@@ -490,8 +307,8 @@ namespace MSP2050.Scripts
 
 		private void updateUndoRedoButtonEnabled()
 		{
-			InterfaceCanvas.Instance.ToolbarEnable(undoStack.Count > 0, ToolbarInput.Undo);
-			InterfaceCanvas.Instance.ToolbarEnable(redoStack.Count > 0, ToolbarInput.Redo);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Redo, redoStack.Count > 0);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Undo, undoStack.Count > 0);
 		}
 
 		public FSMState GetCurrentState()

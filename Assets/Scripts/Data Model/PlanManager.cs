@@ -2,6 +2,8 @@
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
+using System;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace MSP2050.Scripts
 {
@@ -21,9 +23,7 @@ namespace MSP2050.Scripts
 		}
 
 		private List<Plan> plans = new List<Plan>();
-		private Dictionary<int, PlanLayer> planLayers = new Dictionary<int, PlanLayer>();
-		private Dictionary<int, EnergyGrid> energyGrids = new Dictionary<int, EnergyGrid>();
-		private HashSet<Plan> unseenPlanChanges = new HashSet<Plan>();
+		public List<Plan> Plans => plans;
 
 		public delegate void PlansEventDelegate(Plan plan);
 		public delegate void PlansUpdateEventDelegate(Plan plan, int oldTime);
@@ -31,20 +31,10 @@ namespace MSP2050.Scripts
 		public event PlansUpdateEventDelegate OnPlanUpdateInUIEvent;
 		public event PlansUpdateEventDelegate OnPlanHideInUIEvent;
 
-		//Fishing
-		[HideInInspector] public List<string> fishingFleets;
-		[HideInInspector] public float initialFishingMapping;
-		[HideInInspector] public float fishingDisplayScale;
-		[HideInInspector] public float shippingDisplayScale = 10000; // = 10km
-		[HideInInspector,CanBeNull] public FishingDistributionDelta initialFishingValues;
-
 		//Viewing & Viewstates
 		[HideInInspector] public PlanViewState planViewState = PlanViewState.All;
 		[HideInInspector] public Plan planViewing;
 		[HideInInspector] public int timeViewing = -1; //Used if planViewing is null. -1 is current time.
-		[HideInInspector] public bool inPlanUIChange;
-		private int planToViewOnUpdate;
-
 		private bool ignoreRedrawOnViewStateChange = false;
 
 		void Start()
@@ -74,10 +64,8 @@ namespace MSP2050.Scripts
 				targetPlan = new Plan(planObject, layerUpdateTimes);
 				AddPlan(targetPlan);
 				PlanAdded(targetPlan);
-				//tracker.CompletedUpdate();
 			}
 
-			RestrictionAreaManager.instance.ProcessReceivedRestrictions(targetPlan, planObject.restriction_settings);
 			return targetPlan;
 		}
 
@@ -126,46 +114,39 @@ namespace MSP2050.Scripts
 
 		public void ShowPlan(Plan plan)
 		{
-			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
+			if (Main.InEditMode)
 				return;
 
 			//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
-			if (planViewing != null)
-			{
-				PlansMonitor.SetViewPlanFrameState(planViewing, false);
-			}
 			planViewing = plan;
 			timeViewing = -1;
-			PlansMonitor.SetViewPlanFrameState(planViewing, true);
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
 			LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(plan);
+			IssueManager.Instance.SetIssueInstancesToPlan(plan);
 		}
 
 		public void HideCurrentPlan(bool updateLayers = true)
 		{
-			if (Main.InEditMode || Main.Instance.EditingPlanDetailsContent)
+			if (Main.InEditMode)
 				return;
 
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
-			if (planViewing != null)
-			{
-				PlansMonitor.SetViewPlanFrameState(planViewing, false);
-			}
 			planViewing = null;
 
 			//Doesnt have to redraw as we'll do so when updating layers to base anyway
 			ignoreRedrawOnViewStateChange = true;
-			InterfaceCanvas.Instance.activePlanWindow.viewAllToggle.isOn = true;
+			InterfaceCanvas.Instance.activePlanWindow.SetViewMode(PlanManager.PlanViewState.All);
 			ignoreRedrawOnViewStateChange = false;
 
-			if(updateLayers)
+			if (updateLayers)
 				LayerManager.Instance.UpdateVisibleLayersToBase();
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.CloseWindow();
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);
+			IssueManager.Instance.HidePlanIssueInstances();
 		}
 
 		public SubEntityPlanState GetSubEntityPlanState(SubEntity subEntity)
@@ -318,7 +299,7 @@ namespace MSP2050.Scripts
 			{
 				Plan plan = plans[i];
 				if (plan.StartTime <= planStartTime ||
-				    (onlyInfluencingPlans && !plan.InInfluencingState))
+					(onlyInfluencingPlans && !plan.InInfluencingState))
 				{
 					continue;
 				}
@@ -347,7 +328,7 @@ namespace MSP2050.Scripts
 				if (planLayer != null)
 				{
 					if (planLayer.IsPersistentIDInNewGeometry(entityPersistentId) ||
-					    planLayer.IsPersistentIDInRemovedGeometry(entityPersistentId))
+						planLayer.IsPersistentIDInRemovedGeometry(entityPersistentId))
 					{
 						result = plan;
 						break;
@@ -357,38 +338,6 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public PlanLayer GetPlanLayer(int ID)
-		{
-			if (planLayers.ContainsKey(ID))
-				return planLayers[ID];
-			else
-				return null;
-		}
-
-		public bool RemovePlanLayer(PlanLayer planLayer)
-		{
-			return planLayers.Remove(planLayer.ID);
-		}
-
-		public void AddEnergyGrid(EnergyGrid energyGrid)
-		{
-			energyGrids[energyGrid.GetDatabaseID()] = energyGrid;
-		}
-
-		public EnergyGrid GetEnergyGrid(int ID)
-		{
-			if (!energyGrids.ContainsKey(ID))
-			{
-				Debug.LogError("Retrieving on non-existing key: " + ID);
-				Debug.LogError("Keys available: " + string.Join(", ", energyGrids.Keys));
-			}
-			return energyGrids[ID];
-		}
-
-		public bool RemoveEnergyGridr(EnergyGrid energyGrid)
-		{
-			return energyGrids.Remove(energyGrid.GetDatabaseID());
-		}
 
 		/// <summary>
 		/// Called whenever a new month starts
@@ -397,171 +346,10 @@ namespace MSP2050.Scripts
 		public void MonthTick(int newMonth)
 		{
 			//Advance time on layers (merging approved ones) 
-			foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
+			foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
 				layer.AdvanceTimeTo(newMonth);
 		}
 
-		/// <summary>
-		/// Returns a list of energy grids that are active right before the given plan would be implemented.
-		/// </summary>
-		/// <param name="plan"> Plan before which grids are calced </param>
-		/// <param name="removedGridIds"> Persistent IDs of grids that have been removed in at this plan's point</param>
-		/// <param name="includePlanItself"> Is the given plan included </param>
-		/// <param name="forDisplaying"> Is the given plan included even if it's in design</param>
-		/// <returns></returns>
-		public List<EnergyGrid> GetEnergyGridsBeforePlan(Plan plan, out HashSet<int> removedGridIds, EnergyGrid.GridColor color, bool includePlanItself = false, bool forDisplaying = false)
-		{
-			List<EnergyGrid> result = new List<EnergyGrid>();
-			removedGridIds = new HashSet<int>();
-			HashSet<int> ignoredGridIds = new HashSet<int>();
-			HashSet<int> previousGridIDsLookingFor = new HashSet<int>();
-
-			//Find the index of the given plan
-			int planIndex = 0;
-			for (; planIndex < plans.Count; planIndex++)
-				if (plans[planIndex] == plan)
-					break;
-
-			//Handle plan itself if conditions are met
-			if (includePlanItself && plan.energyPlan && plan.energyGrids != null && (plan.InInfluencingState || (forDisplaying && plan.State == Plan.PlanState.DESIGN)))
-			{
-				foreach (EnergyGrid grid in plan.energyGrids)
-				{
-					if (!grid.MatchesColor(color))
-						continue;
-					if (grid.persistentID == -1 || (!removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
-					{
-						result.Add(grid);
-						ignoredGridIds.Add(grid.persistentID);
-					}
-				}
-				removedGridIds.UnionWith(plans[planIndex].removedGrids);
-				if (forDisplaying)
-					previousGridIDsLookingFor = new HashSet<int>(plans[planIndex].removedGrids);
-			}
-
-			//Add all grids whose persistentID is not in ignoredgrids
-			for (int i = planIndex - 1; i >= 0; i--)
-			{
-				if (plans[i].energyPlan && plans[i].InInfluencingState)
-				{
-					foreach (EnergyGrid grid in plans[i].energyGrids)
-					{
-						if (!grid.MatchesColor(color))
-							continue;
-						if (previousGridIDsLookingFor.Contains(grid.persistentID))
-						{
-							//If we were looking for this persis ID, add it even if in ignored or removed
-							result.Add(grid);
-							ignoredGridIds.Add(grid.persistentID);
-							previousGridIDsLookingFor.Remove(grid.persistentID);
-						}
-						else if (grid.persistentID == -1 || (!removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
-						{
-							result.Add(grid);
-							ignoredGridIds.Add(grid.persistentID);
-						}
-					}
-					removedGridIds.UnionWith(plans[i].removedGrids);
-				}
-			}
-
-			return result;
-		}
-
-		public List<EnergyGrid> GetEnergyGridsBeforePlan(Plan plan, EnergyGrid.GridColor color, bool includePlanItself = false, bool forDisplaying = false)
-		{
-			HashSet<int> ignoredGridIds;
-			return GetEnergyGridsBeforePlan(plan, out ignoredGridIds, color, includePlanItself, forDisplaying);
-		}
-
-		public List<EnergyGrid> GetEnergyGridsAtTime(int time, EnergyGrid.GridColor color)
-		{
-			if (plans.Count == 0)
-			{
-				return new List<EnergyGrid>(0);
-			}
-
-			for (int i = 0; i < plans.Count; i++)
-				if (plans[i].StartTime > time)
-					return GetEnergyGridsBeforePlan(plans[i], color);
-
-			return GetEnergyGridsBeforePlan(plans[plans.Count - 1], color, true);
-		}
-
-		private void SetInitialFishingValuesFromPlans()
-		{
-			if (initialFishingValues != null)
-			{
-				return; // already set.
-			}
-			foreach (Plan plan in plans)
-			{
-				if (plan.fishingDistributionDelta == null)
-				{
-					continue;
-				}
-				foreach (KeyValuePair<string, Dictionary<int, float>> values in plan.fishingDistributionDelta.GetValuesByFleet())
-				{
-					var fleetName = values.Key;
-					if (initialFishingValues != null && initialFishingValues.HasFinishingValue(fleetName))
-					{
-						continue; // already there, skip it
-					}
-					// gonna set fishing values, make sure initialFishingValues is initialised. Assuming a fleet always has values
-					if (initialFishingValues == null)
-					{
-						initialFishingValues = new FishingDistributionDelta();
-					}
-					foreach (var item in values.Value)
-					{
-						initialFishingValues.SetFishingValue(fleetName, item.Key, item.Value); // add it the initial value
-					}
-				}
-			}
-		}
-
-		public FishingDistributionSet GetFishingDistributionForPreviousPlan(Plan referencePlan)
-		{
-			SetInitialFishingValuesFromPlans();
-			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
-			foreach(Plan plan in plans)
-			{
-				if (plan.ID == referencePlan.ID)
-				{
-					break;
-				}
-				else
-				{
-					if (plan.ecologyPlan && plan.fishingDistributionDelta != null)
-					{
-						result.ApplyValues(plan.fishingDistributionDelta);
-					}
-				}
-			}
-
-			return result;
-		}
-
-		public FishingDistributionSet GetFishingDistributionAtTime(int timeMonth)
-		{
-			SetInitialFishingValuesFromPlans();
-			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
-			foreach (Plan plan in plans)
-			{
-				if (plan.StartTime > timeMonth)
-				{
-					break;
-				}
-
-				if (plan.State == Plan.PlanState.IMPLEMENTED && plan.ecologyPlan && plan.fishingDistributionDelta != null)
-				{
-					result.ApplyValues(plan.fishingDistributionDelta);
-				}
-			}
-
-			return result;
-		}
 
 		/////////////////////////////////////////
 		// EVENT HANDLERS, MOSTLY FOR UI STUFF //
@@ -569,94 +357,58 @@ namespace MSP2050.Scripts
 
 		private void PlanAdded(Plan plan)
 		{
-			//Add planLayers to manager, but don't add to UI individually (done in a batch by plan)
-			foreach (PlanLayer planLayer in plan.PlanLayers)
-				PlanLayerAdded(plan, planLayer, false);
-
 			//Show plan if it isnt a hidden plan
 			if (plan.StartTime >= 0 || SessionManager.Instance.AreWeGameMaster)
 			{
-				PlansMonitor.AddPlan(plan);
+				InterfaceCanvas.Instance.plansList.AddPlanToList(plan);
 				if (plan.ShouldBeVisibleInTimeline)
 				{
-					SetPlanUnseenChanges(plan, true);
 					OnPlanVisibleInUIEvent(plan);
 				}
 			}
 		}
 
-		public void UpdatePlanInUI(Plan plan, bool nameOrDescriptionChanged, bool timeChanged, bool stateChanged, bool layersChanged, bool typeChanged, bool forceMonitorUpdate, int oldTime, Plan.PlanState oldState, bool inTimelineBefore)
+		public void UpdatePlanInUI(Plan plan, bool stateChanged, int oldTime, bool inTimelineBefore)
 		{
-			bool timeLineUpdated = false;
 			bool inTimelineNow = plan.ShouldBeVisibleInTimeline;
 
-			if (nameOrDescriptionChanged)
-			{
-				PlanDetails.UpdateNameAndDescription(plan);
-				if (planViewing == plan && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
-					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();			
-			}
 			if (stateChanged)
 			{
 				//Didn't see icon before, should see now
 				if (!inTimelineBefore && inTimelineNow)
 				{
 					OnPlanVisibleInUIEvent(plan);
-					timeLineUpdated = true;
 				}
 				//Saw plan before, shouldn't see now
 				else if (inTimelineBefore && !inTimelineNow)
 				{
 					OnPlanHideInUIEvent(plan, oldTime);
-					timeLineUpdated = true;
 				}
 			}
 
 			//Update edit button availability in active plan window
-			if((stateChanged || layersChanged) && planViewing == plan)
-				InterfaceCanvas.Instance.activePlanWindow.UpdateEditButtonActivity();
-
-			if (timeChanged)
+			if (planViewing == plan && !Main.InEditMode)
 			{
-				//Plan didnt change influencing state and should be visible to this client: update
-				if (!timeLineUpdated && inTimelineNow)
-					OnPlanUpdateInUIEvent(plan, oldTime);
-				PlanDetails.ChangeDate(plan);
-				if (planViewing == plan && !Main.InEditMode && !Main.Instance.EditingPlanDetailsContent)
-				{
-					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();							
-					InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
-					LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
-				}
-			}
-			if (stateChanged || timeChanged || nameOrDescriptionChanged || forceMonitorUpdate)
-			{
-				PlansMonitor.UpdatePlan(plan, nameOrDescriptionChanged, timeChanged, stateChanged);
-				SetPlanUnseenChanges(plan, plan.ShouldBeVisibleInUI);
-			}
-
-			//These changes don't require a general update, only plandetails if they are being viewed
-			if (plan == PlanDetails.GetSelectedPlan())
-			{
+				InterfaceCanvas.Instance.activePlanWindow.RefreshContent();
+				InterfaceCanvas.Instance.activePlanWindow.UpdateSectionActivity();
 				if (!plan.ShouldBeVisibleInUI)
-					PlanDetails.SelectPlan(null);
-				else
 				{
-					if (stateChanged)
-						PlanDetails.UpdateStatus();
-					if (typeChanged)
-						PlanDetails.UpdateTabAvailability();
+					HideCurrentPlan();
 				}
-				PlanDetails.UpdateTabContent();
+				InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
+				LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
 			}
+
+			InterfaceCanvas.Instance.plansList.UpdatePlan(plan);
+			OnPlanUpdateInUIEvent(plan, oldTime);
 		}
 
 		public void PlanLockUpdated(Plan plan)
 		{
-			PlansMonitor.SetLockIcon(plan, plan.IsLocked);
-			if((Main.InEditMode && Main.CurrentlyEditingPlan == plan) || (Main.Instance.EditingPlanDetailsContent && PlanDetails.GetSelectedPlan() == plan))
+			InterfaceCanvas.Instance.plansList.UpdatePlan(plan);
+			if (Main.InEditMode && Main.CurrentlyEditingPlan == plan)
 			{
-				PlanDetails.instance.CancelEditingContent();
+				InterfaceCanvas.Instance.activePlanWindow.ForceCancel(true);
 				DialogBoxManager.instance.NotificationWindow("Plan Unexpectedly Unlocked", "Plan has been unlocked by an external party. All changes have been discarded.", null);
 			}
 		}
@@ -669,103 +421,12 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public void SetPlanUnseenChanges(Plan plan, bool unseenChanges)
+		public void CreateNewPlanForEditing()
 		{
-			if (unseenChanges)
-			{
-				//Check if viewing in plansdetails
-				if (PlanDetails.IsOpen && PlanDetails.GetSelectedPlan() == plan)
-					return;
-
-				if(!unseenPlanChanges.Contains(plan))
-					unseenPlanChanges.Add(plan);
-				PlansMonitor.SetPlanUnseenChanges(plan, unseenChanges);
-				PlansMonitor.SetUnseenChangesCounter(unseenPlanChanges.Count);
-			}
-			else
-			{
-				if (unseenPlanChanges.Contains(plan))
-					unseenPlanChanges.Remove(plan);
-				PlansMonitor.SetPlanUnseenChanges(plan, unseenChanges);
-				PlansMonitor.SetUnseenChangesCounter(unseenPlanChanges.Count);
-			}
-		}
-
-		public void PlanLayerAdded(Plan plan, PlanLayer addedLayer, bool addToUI = true)
-		{
-			planLayers[addedLayer.ID] = addedLayer;
-			IssueManager.instance.InitialiseIssuesForPlanLayer(addedLayer);
-			if (addToUI)
-				PlansMonitor.AddPlanLayer(plan, addedLayer);
-
-			//Sets entities active and redraws if the layer is visible
-			//LayerManager.Instance.UpdateLayerToPlan(addedLayer.BaseLayer, plan, plan == planViewing);
-		}
-
-		public void PlanLayerRemoved(Plan plan, PlanLayer removedLayer)
-		{
-			PlansMonitor.RemovePlanLayer(plan, removedLayer);
-			IssueManager.instance.DeleteIssuesForPlanLayer(removedLayer);
-			//HidePlanLayer(removedLayer);
-			RemovePlanLayer(removedLayer);
-		}
-
-		public void LoadFishingFleets(JObject melConfig)
-		{
-			fishingFleets = new List<string>();
-			try
-			{
-				JEnumerable<JToken> results = melConfig["fishing"].Children();
-				foreach (JToken token in results)
-					fishingFleets.Add(token.ToObject<FishingFleet>().name);
-				initialFishingMapping = melConfig["initialFishingMapping"].ToObject<float>();
-				fishingDisplayScale = melConfig["fishingDisplayScale"].ToObject<float>();
-			}
-			catch
-			{
-				Debug.Log("Fishing fleets json does not match expected format.");
-			}
-
-			initialFishingValues = null;
-		}
-
-		public void ViewPlanWithIDWhenReceived(int targetPlanID)
-		{
-			bool found = false;
-			foreach (Plan plan in plans)
-			{
-				if (plan.ID == targetPlanID)
-				{
-					found = true;
-					ShowPlan(plan);
-					PlanDetails.SelectPlan(plan);
-				}
-			}
-
-			if(!found)
-				planToViewOnUpdate = targetPlanID;
-		}
-
-		public void CheckIfExpectedplanReceived()
-		{
-			if (planToViewOnUpdate == -1)
+			if (Main.InEditMode)
 				return;
 
-			foreach (Plan plan in plans)
-			{
-				if (plan.ID == planToViewOnUpdate)
-				{
-					planToViewOnUpdate = -1;
-					ShowPlan(plan);
-					PlanDetails.SelectPlan(plan);
-				}
-			}
+			//TODO
 		}
-	}
-
-	public class FishingFleet
-	{
-		public string name;
-		public float scalar;
 	}
 }

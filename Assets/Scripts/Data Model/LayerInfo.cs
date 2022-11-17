@@ -58,6 +58,11 @@ namespace MSP2050.Scripts
 				layer.versionNr = layerMeta[i].layer_filecreationtime;
 				LayerManager.Instance.AddLayer(layer);
 			}
+			//Load dependencies after all layers have been added to the layer manager
+			foreach(LayerMeta meta in layerMeta)
+			{
+				LayerManager.Instance.GetLayerByID(meta.layer_id).LoadDependencies(meta);
+			}
 
 			return layerMeta;
 		}
@@ -146,6 +151,7 @@ namespace MSP2050.Scripts
 		public LayerTextInfoObject layer_text_info { get; set; }
 		[JsonConverter(typeof(JsonConverterLayerType))]
 		public Dictionary<int, EntityTypeValues> layer_type { get; set; }
+		public int[] layer_dependencies { get; set; }
 		public string layer_category { get; set; }
 		public string layer_subcategory { get; set; }
 		public ELayerKPICategory layer_kpi_category { get; set; }
@@ -183,7 +189,7 @@ namespace MSP2050.Scripts
 		public bool update_visuals { get; set; }
 		public bool update_text { get; set; }
 		public bool update_calculation { get; set; }
-		public InputField.ContentType content_type { get; set; }
+		public TMPro.TMP_InputField.ContentType content_type { get; set; }
 		public ContentValidation content_validation { get; set; }
 		public string unit { get; set; }
 	}

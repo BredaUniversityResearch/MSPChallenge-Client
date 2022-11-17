@@ -315,7 +315,7 @@ namespace MSP2050.Scripts
 			{
 				if (gameState != PlanningState.Setup)
 					PlanManager.Instance.MonthTick(month);
-				PlanWizard.UpdateMinSelectableTime();
+				InterfaceCanvas.Instance.activePlanWindow.m_timeSelect.UpdateMinTime();
 
 				if (OnCurrentMonthChanged != null)
 				{
@@ -351,7 +351,7 @@ namespace MSP2050.Scripts
 				}
 				else if (gameState == PlanningState.End)
 				{
-					InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = false;
+					InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = false;
 				}
 
 				//Old state left
@@ -372,16 +372,16 @@ namespace MSP2050.Scripts
 		private void OnSetupPhaseStarted()
 		{
 			if (!SessionManager.Instance.AreWeGameMaster)
-				InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = false;
+				InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = false;
 		}
 
 		private void OnSetupPhaseEnded()
 		{
-			InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = true;
+			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = true;
 			//Update plans once the setup state is left, so we don't have to wait for month 1 
 			TimeManagerWindow.instance.eraDivision.gameObject.SetActive(false);
 			PlanManager.Instance.MonthTick(month);
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 			SetupStateExited();
 		}
 
@@ -389,20 +389,18 @@ namespace MSP2050.Scripts
 		{
 			ScreenBorderGradient.instance.SetEnabled(true);
 			ScrollingTextBand.instance.SetEnabled(true);
-			InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = false;
+			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = false;
 			SimulationStateEntered();
-			PlanDetails.UpdateStatus();
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 		}
 
 		private void OnSimulationPhaseEnded()
 		{
 			ScreenBorderGradient.instance.SetEnabled(false);
 			ScrollingTextBand.instance.SetEnabled(false);
-			InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = true;
+			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = true;
 			SimulationStateExited();
-			PlanDetails.UpdateStatus();
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 		}
 
 		public static void SetGameState(string state)

@@ -131,7 +131,7 @@ namespace MSP2050.Scripts
 
 			//form.AddField("settings", settingsToSubmit);
 
-			dataObject.Add("plan_id", referencePlan.ID);
+			dataObject.Add("plan_id", referencePlan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("settings", JToken.FromObject(settingsToSubmit));
 
 			batch.AddRequest(Server.SetPlanRestrictionAreas(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);

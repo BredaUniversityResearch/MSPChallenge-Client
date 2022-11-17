@@ -36,11 +36,13 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete, FSM.ToolbarInput.Recall, FSM.ToolbarInput.Abort);
-			ic.SetActivePlanWindowInteractability(false);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetCreateMode(false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, false);
+			//ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			gt.SetActivePlanWindowInteractability(false);
 
 			PointSubEntity hover = baseLayer.GetPointAt(currentMousePosition);
 
@@ -52,7 +54,7 @@ namespace MSP2050.Scripts
 			previousHover = hover;
 
 			fsm.SetSnappingEnabled(true);
-			IssueManager.instance.SetIssueInteractability(false);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
 
 		public override void LeftClick(Vector3 worldPosition)
@@ -72,8 +74,6 @@ namespace MSP2050.Scripts
 
 		protected void select(HashSet<PointSubEntity> newSelection, bool keepPreviousSelection)
 		{
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
-
 			if (!keepPreviousSelection)
 			{
 				foreach (PointSubEntity pse in selection)
@@ -95,18 +95,17 @@ namespace MSP2050.Scripts
 				pse.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null);
 			}
 
-			ic.ToolbarEnable(selection.Count > 0, FSM.ToolbarInput.Delete, FSM.ToolbarInput.Abort);
-			ic.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
-			ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, selection.Count > 0);
+			//gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Abort, selection.Count > 0);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, selectedRemovedEntity);
+			gt.SetObjectChangeInteractable(!selectedRemovedEntity);
+
 			//Points have no selecting state, so dropdown interactivity can change while in this state
 			if (selection.Count == 0)
 			{
-				ic.SetActivePlanWindowInteractability(false);
+				gt.SetActivePlanWindowInteractability(false);
 				return;
-			}
-			else
-			{
-				ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
 			}
 
 			UpdateActivePlanWindowToSelection();
@@ -158,6 +157,7 @@ namespace MSP2050.Scripts
 			newEntity.Country = country;
 			PointSubEntity newSubEntity = newEntity.GetSubEntity(0) as PointSubEntity;
 			newSubEntity.SetPersistentID(persistentID);
+			newSubEntity.edited = true;
 			fsm.AddToUndoStack(new CreatePointOperation(newSubEntity, planLayer, true));
 			newSubEntity.DrawGameObject(baseLayer.LayerGameObject.transform);
 			return newSubEntity;
@@ -184,6 +184,7 @@ namespace MSP2050.Scripts
 			if (subEntity.Entity.PlanLayer == planLayer)
 			{
 				fsm.AddToUndoStack(new ModifyPointOperation(subEntity, planLayer, subEntity.GetDataCopy()));
+				subEntity.edited = true;
 			}
 			else
 			{
@@ -395,9 +396,9 @@ namespace MSP2050.Scripts
 				case FSM.ToolbarInput.Abort:
 					select(new HashSet<PointSubEntity>(), false);
 					break;
-				case FSM.ToolbarInput.SelectAll:
-					select(new HashSet<PointSubEntity>((baseLayer as PointLayer).GetAllSubEntities()), true);
-					break;
+				//case FSM.ToolbarInput.SelectAll:
+				//	select(new HashSet<PointSubEntity>((baseLayer as PointLayer).GetAllSubEntities()), true);
+				//	break;
 				case FSM.ToolbarInput.Recall:
 					undoDeleteForSelection();
 					break;
@@ -506,7 +507,7 @@ namespace MSP2050.Scripts
 			selection = new HashSet<PointSubEntity>();
 
 			BoxSelect.HideBoxSelection();
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 
 			// make sure the entity type dropdown shows a valid value
 			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());
@@ -534,7 +535,7 @@ namespace MSP2050.Scripts
 				selectedParams.Add(parameters);
 
 			}
-			InterfaceCanvas.Instance.SetActiveplanWindowToSelection(
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
 				selectedParams);

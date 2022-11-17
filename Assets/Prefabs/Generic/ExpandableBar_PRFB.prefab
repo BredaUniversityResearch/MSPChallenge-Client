@@ -170,7 +170,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8661408688441885046
 RectTransform:
   m_ObjectHideFlags: 0
@@ -185,10 +185,10 @@ RectTransform:
   m_Father: {fileID: 1626965342446529714}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 8, y: -26}
+  m_SizeDelta: {x: 16, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5628650899082665600
 MonoBehaviour:
@@ -365,7 +365,19 @@ MonoBehaviour:
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 5608941086892548463}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_IsOn: 0
   m_onRightClick:
     m_PersistentCalls:
@@ -426,7 +438,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
-    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+    - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -486,7 +498,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
-    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+    - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []

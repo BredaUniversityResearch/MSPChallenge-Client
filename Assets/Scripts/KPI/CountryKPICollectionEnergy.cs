@@ -25,13 +25,13 @@ namespace MSP2050.Scripts
             }
         }
 
-        public void ProcessReceivedKPIEnergyData(EnergyKPIObject[] updateData)
+        public void ProcessReceivedKPIEnergyData(KPIObjectEnergy[] updateData)
         {
             // <month, <grid_id, grid_data>>
             Dictionary<int, Dictionary<int, GridActualAndWasted>> parsedUpdateData = new Dictionary<int, Dictionary<int, GridActualAndWasted>>();
 
             //Parse data into a more convenient format.
-            foreach (EnergyKPIObject data in updateData)
+            foreach (KPIObjectEnergy data in updateData)
             {
                 Dictionary<int, GridActualAndWasted> monthData;
                 if (parsedUpdateData.TryGetValue(data.month, out monthData))
@@ -88,7 +88,7 @@ namespace MSP2050.Scripts
         {
             foreach (KeyValuePair<int, GridActualAndWasted> gridData in gridDataForMonth)
             {
-                EnergyGrid associatedGrid = PlanManager.Instance.GetEnergyGrid(gridData.Key);
+                EnergyGrid associatedGrid = PolicyLogicEnergy.Instance.GetEnergyGrid(gridData.Key);
                 gridData.Value.wasted = associatedGrid.AvailablePower - gridData.Value.totalReceived;
 
                 //Make socket power negative if it has been sent

@@ -43,6 +43,7 @@ namespace MSP2050.Scripts
 		public bool Optimized { get; protected set; }
 		public EditingType editingType;
 		public bool greenEnergy;
+		public AbstractLayer[] Dependencies { get; protected set; }
 
 		//PLANS
 		public List<PlanLayer> planLayers;
@@ -135,15 +136,15 @@ namespace MSP2050.Scripts
 					break;
 				case "transformer":
 					editingType = EditingType.Transformer;
-					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
+					PolicyLogicEnergy.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "socket":
 					editingType = EditingType.Socket;
-					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
+					PolicyLogicEnergy.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "sourcepoint":
 					editingType = EditingType.SourcePoint;
-					LayerManager.Instance.AddEnergyPointLayer(this as PointLayer);
+					PolicyLogicEnergy.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "sourcepolygon":
 					editingType = EditingType.SourcePolygon;
@@ -173,6 +174,18 @@ namespace MSP2050.Scripts
 			//    InterfaceCanvas.instance.activeLayers.AddLayer(this);
 		}
 
+		public void LoadDependencies(LayerMeta layerMeta)
+		{
+			if(layerMeta.layer_dependencies != null)
+			{
+				Dependencies = new AbstractLayer[layerMeta.layer_dependencies.Length];
+				for(int i = 0; i < layerMeta.layer_dependencies.Length; i++)
+				{
+					Dependencies[i] = LayerManager.Instance.GetLayerByID(layerMeta.layer_dependencies[i]);
+				}
+			}
+		}
+
 		//FUNCTIONS
 		public abstract void Initialise();
 		public abstract bool IsEnergyPointLayer();
@@ -180,7 +193,6 @@ namespace MSP2050.Scripts
 		public abstract bool IsEnergyPolyLayer();
 		public abstract bool IsEnergyLayer();
 		public abstract void LoadLayerObjects(List<SubEntityObject> layerObjects);
-		//public abstract void TransformAllEntities(float scale, Vector3 translate);
 		public abstract List<EntityType> GetEntityTypesByKeys(params int[] keys);
 		public abstract EntityType GetEntityTypeByKey(int key);
 		public abstract EntityType GetEntityTypeByName(string name);

@@ -80,7 +80,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SubmitToServer(int planId, BatchRequest batch)
+		public void SubmitToServer(string planId, BatchRequest batch)
 		{
 			List<FishingObject> valuesToSubmit = new List<FishingObject>(32);
 

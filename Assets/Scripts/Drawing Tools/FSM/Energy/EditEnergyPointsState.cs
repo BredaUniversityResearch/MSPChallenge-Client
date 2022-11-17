@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 
 		public EditEnergyPointsState(FSM fsm, PlanLayer planLayer) : base(fsm, planLayer)
 		{
-			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? LayerManager.Instance.energyCableLayerGreen.CurrentPlanLayer() : LayerManager.Instance.energyCableLayerGrey.CurrentPlanLayer();
+			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? PolicyLogicEnergy.Instance.energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.energyCableLayerGrey.CurrentPlanLayer();
 		}
 
 		protected override void deleteSelection()
@@ -144,10 +144,14 @@ namespace MSP2050.Scripts
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 
 				fsm.AddToUndoStack(new ModifyEnergyPointOperation(subEntity, planLayer, subEntity.GetDataCopy()));
+				subEntity.edited = true;
 
 				//Create undo operations for attached cables
 				foreach (Connection con in (subEntity as EnergyPointSubEntity).connections)
+				{
 					con.cable.AddModifyLineUndoOperation(fsm);
+					con.cable.edited = true;
+				}
 
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}

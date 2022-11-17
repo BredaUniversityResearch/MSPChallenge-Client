@@ -17,11 +17,11 @@ namespace MSP2050.Scripts
 		public readonly bool UpateVisuals;
 		public readonly bool UpateText;
 		public readonly bool UpateCalculation;
-		public readonly InputField.ContentType ContentType;
+		public readonly TMPro.TMP_InputField.ContentType ContentType;
 		public readonly LayerInfoPropertiesObject.ContentValidation ContentValidation;
 		public readonly string Unit;
 
-		public EntityPropertyMetaData(string propertyName, bool enabled, bool editable, string displayName, string spriteName, string defaultValue, bool updateVisuals, bool updateText, bool updateCalculation, InputField.ContentType contentType, LayerInfoPropertiesObject.ContentValidation contentValidation, string unit)
+		public EntityPropertyMetaData(string propertyName, bool enabled, bool editable, string displayName, string spriteName, string defaultValue, bool updateVisuals, bool updateText, bool updateCalculation, TMPro.TMP_InputField.ContentType contentType, LayerInfoPropertiesObject.ContentValidation contentValidation, string unit)
 		{
 			PropertyName = propertyName;
 			Enabled = enabled;

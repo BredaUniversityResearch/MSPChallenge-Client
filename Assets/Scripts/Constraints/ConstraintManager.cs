@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace MSP2050.Scripts
 {
@@ -11,7 +12,7 @@ namespace MSP2050.Scripts
 		private enum EConstraintSatisfyRule
 		{
 			All, //All checked geometry must satisfy the constraint, and we will emit an issue for all that does not.
-			Any	//If any checked geometry satisfies the constraint we will not emit an issue, only if no geometry satisfies the rule an issue will be created.
+			Any //If any checked geometry satisfies the constraint we will not emit an issue, only if no geometry satisfies the rule an issue will be created.
 		};
 
 		/// <summary>
@@ -50,7 +51,7 @@ namespace MSP2050.Scripts
 
 		private class RestrictionQueryCache
 		{
-			private Dictionary<HashCode, List<SubEntity>> cachedTargets = new Dictionary<HashCode, List<SubEntity>>(HashCodeEqualityComparer.Instance); 
+			private Dictionary<HashCode, List<SubEntity>> cachedTargets = new Dictionary<HashCode, List<SubEntity>>(HashCodeEqualityComparer.Instance);
 
 			public void AddCachedEntry(HashCode entryHash, List<SubEntity> entries)
 			{
@@ -201,75 +202,39 @@ namespace MSP2050.Scripts
 
 		private ConstraintTarget FindTypeUnavailableConstraint(AbstractLayer targetLayer, EntityType targetEntityType)
 		{
-			ConstraintSource source = new ConstraintSource {entityType = targetEntityType, layer = targetLayer};
+			ConstraintSource source = new ConstraintSource { entityType = targetEntityType, layer = targetLayer };
 
 			ConstraintTarget target;
 			typeUnavailableConstraint.TryGetValue(source, out target);
 			return target;
 		}
 
-		/// <summary>
-		/// Check constraints against any future plans
-		/// </summary>
-		public RestrictionIssueDeltaSet CheckConstraints(Plan plan, List<PlanIssueObject> existingIssues, bool notifyUserOfExternalIssues, List<AbstractLayer> layersToIgnore = null)
+		public void CheckConstraints(Plan plan, out bool hasUnavailableTypes)
 		{
 			RestrictionQueryCache cache = new RestrictionQueryCache();
-			MultiLayerRestrictionIssueCollection issueCollection = new MultiLayerRestrictionIssueCollection();
-			RestrictionIssueDeltaSet deltaSet = new RestrictionIssueDeltaSet();
 
-			if (existingIssues != null)
-			{
-				deltaSet.AddRemovedIssues(existingIssues);
-			}
-
-			// Replace all the issues 
-			IssueManager.instance.RemoveIssuesForPlan(plan, existingIssues == null? deltaSet : null);
-
-			// check against all future plan layers and past baselayers
 			foreach (PlanLayer planLayer in plan.PlanLayers)
 			{
-				if (layersToIgnore != null && layersToIgnore.Contains(planLayer.BaseLayer))
-					continue; 
+				//Clear current issues
+				if (planLayer.issues != null)
+				{
+					if (planLayer.issues.Count > 0)
+						planLayer.issues.Clear();
+				}
+				else
+					planLayer.issues = new List<PlanIssueObject>();
 
-				CheckRestrictionsForLayer(cache, plan, planLayer, true, issueCollection);
-
-				//For now don't check for future restrictions. This currently puts issues in plans that are in approved, which is undesired. Scheduled for a rework.
-				//CheckRestrictionsForFuture(cache, planLayer, plan, issueCollection);
+				CheckRestrictionsForLayer(cache, plan, planLayer, true);
 			}
 
-			CheckTypeUnavailableConstraints(plan, plan.StartTime, issueCollection);
+			hasUnavailableTypes = CheckTypeUnavailableConstraints(plan, plan.StartTime);
 
 			//Send the issues to the issue manager.
-			IssueManager.instance.ImportNewIssues(issueCollection, deltaSet);
-			IssueManager.instance.SetIssueVisibilityForPlan(plan, true);
-
-			if (notifyUserOfExternalIssues)
-			{
-				NotifyUserOfExternalIssues(plan, issueCollection);
-			}
-
-			return deltaSet;
+			//IssueManager.Instance.ImportNewIssues(issueCollection, deltaSet);
+			//IssueManager.Instance.SetIssueVisibilityForPlan(plan, true);
 		}
 
-		public RestrictionIssueDeltaSet GetUpdatedIssueDelta(Plan plan, List<PlanIssueObject> existingIssues, List<AbstractLayer> layersToIgnore, int newPlanStartTime, out bool hasUnavailableTypes)
-		{
-			RestrictionQueryCache cache = new RestrictionQueryCache();
-			MultiLayerRestrictionIssueCollection newIssues = new MultiLayerRestrictionIssueCollection();
-
-			foreach (PlanLayer planLayer in plan.PlanLayers)
-			{
-				if (layersToIgnore != null && layersToIgnore.Contains(planLayer.BaseLayer))
-					continue;
-
-				CheckRestrictionsForLayer(cache, plan, planLayer, true, newIssues);
-			}
-
-			hasUnavailableTypes = CheckTypeUnavailableConstraints(plan, newPlanStartTime, newIssues);
-			
-			return new RestrictionIssueDeltaSet(existingIssues, newIssues);
-		}
-
-		public bool CheckTypeUnavailableConstraints(Plan plan, int implementationDate, MultiLayerRestrictionIssueCollection issueCollection)
+		public bool CheckTypeUnavailableConstraints(Plan plan, int implementationDate)
 		{
 			bool result = false;
 			foreach (PlanLayer layer in plan.PlanLayers)
@@ -296,7 +261,7 @@ namespace MSP2050.Scripts
 								ConstraintTarget issueConstraint = FindTypeUnavailableConstraint(layer.BaseLayer, type);
 								if (issueConstraint != null)
 								{
-									issueCollection.AddIssue(plan, layer, issueLocation, issueConstraint);
+									layer.issues.Add(new PlanIssueObject(issueConstraint.issueType, issueLocation.x, issueLocation.y, layer.BaseLayer.ID, issueConstraint.constraintId));
 									result = true;
 								}
 							}
@@ -307,91 +272,30 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		private void NotifyUserOfExternalIssues(Plan currentPlan, MultiLayerRestrictionIssueCollection issueCollection)
-		{
-			List<Plan> externalPlans = new List<Plan>();
-			foreach (var kvp in issueCollection.GetIssues())
-			{
-				if (kvp.Key.Plan != currentPlan && !externalPlans.Contains(kvp.Key.Plan))
-				{
-					externalPlans.Add(kvp.Key.Plan);
-				}
-			}
+		//private void NotifyUserOfExternalIssues(Plan currentPlan, MultiLayerRestrictionIssueCollection issueCollection)
+		//{
+		//	List<Plan> externalPlans = new List<Plan>();
+		//	foreach (var kvp in issueCollection.GetIssues())
+		//	{
+		//		if (kvp.Key.Plan != currentPlan && !externalPlans.Contains(kvp.Key.Plan))
+		//		{
+		//			externalPlans.Add(kvp.Key.Plan);
+		//		}
+		//	}
 
-			if (externalPlans.Count > 0)
-			{
-				StringBuilder notificationText = new StringBuilder(256);
-				notificationText.Append("The accepted changes have created issues in the following plans:\n\n");
-				for (int i = 0; i < externalPlans.Count; ++i)
-				{
-					notificationText.Append("<color=#").Append(Util.ColorToHex(SessionManager.Instance.GetTeamByTeamID(externalPlans[i].Country).color)).Append(">");
-					notificationText.Append(" - ").Append(externalPlans[i].Name).Append("\n");
-					notificationText.Append("</color>");
-				}
-				DialogBoxManager.instance.NotificationWindow("Issues in other plans", notificationText.ToString(), () => { });
-			}
-		}
-
-		private class FuturePlanEntityEntry
-		{
-			public SubEntity subEntity;
-			public int checkUntilMonth;
-		};
-
-		/// <summary>
-		/// Check restrictions against future plans, including layers and types
-		/// </summary>
-		private void CheckRestrictionsForFutureLayerAndType(RestrictionQueryCache cache, PlanLayer checkingThisPlanLayer, EntityType checkingThisEntityType, Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection)
-		{
-			//get all the future geometry of this plan and add it to the source subentities
-			List<FuturePlanEntityEntry> entityEntries = BuildFuturePlanEntityList(cache, checkingThisPlan, checkingThisPlanLayer, checkingThisEntityType);
-
-			//Future checks are the other way around. We check the target against te source, so we need to find all inclusion constraints that have the layer and type as targets.
-			List<KeyValuePair<ConstraintSource, ConstraintTarget>> constraintsToCheck = FindConstraintsForTarget(inclusions, checkingThisPlanLayer.BaseLayer, checkingThisEntityType); 
-			CheckFutureConstraints(checkingThisPlan, resultIssueCollection, entityEntries, constraintsToCheck, EConstraintType.Inclusion);
-
-			List<KeyValuePair<ConstraintSource, ConstraintTarget>> exclusionConstraintsToCheck = FindConstraintsForTarget(exclusions, checkingThisPlanLayer.BaseLayer, checkingThisEntityType);
-			CheckFutureConstraints(checkingThisPlan, resultIssueCollection, entityEntries, exclusionConstraintsToCheck, EConstraintType.Exclusion);
-		}
-
-		private void CheckFutureConstraints(Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection, List<FuturePlanEntityEntry> entityEntries, List<KeyValuePair<ConstraintSource, ConstraintTarget>> constraintsToCheck, EConstraintType constraintType)
-		{
-			for (int i = 0; i < constraintsToCheck.Count; i++)
-			{
-				KeyValuePair<ConstraintSource, ConstraintTarget> target = constraintsToCheck[i];
-
-				//Get all the plan layers for the constraint sources
-				List<PlanLayer> relevantFuturePlanLayers = PlanManager.Instance.GetPlanLayersForBaseLayerFrom(target.Key.layer, checkingThisPlan.StartTime, true);
-				if (relevantFuturePlanLayers.Count == 0)
-				{
-					continue;
-				}
-
-				for (int entryId = 0; entryId < entityEntries.Count; ++entryId)
-				{
-					FuturePlanEntityEntry entry = entityEntries[entryId];
-					ConstraintChecks.DoCheck check;
-					EConstraintSatisfyRule satisfyRule;
-					if (constraintType == EConstraintType.Inclusion) 
-					{
-						check = ConstraintChecks.PickCorrectInclusionCheckType(target.Key.layer, target.Value.layer);
-						satisfyRule = EConstraintSatisfyRule.All;
-					}
-					else if (constraintType == EConstraintType.Exclusion)
-					{
-						check = ConstraintChecks.PickCorrectExclusionCheckType(target.Key.layer, target.Value.layer);
-						satisfyRule = EConstraintSatisfyRule.Any;
-					}
-					else
-					{
-						Debug.LogError("Invalid constraint type for constraint check " + constraintType);
-						return;
-					}
-
-					CheckFutureConstraintForPlanEntity(entry, checkingThisPlan, target.Value, check, satisfyRule, relevantFuturePlanLayers, resultIssueCollection);
-				}
-			}
-		}
+		//	if (externalPlans.Count > 0)
+		//	{
+		//		StringBuilder notificationText = new StringBuilder(256);
+		//		notificationText.Append("The accepted changes have created issues in the following plans:\n\n");
+		//		for (int i = 0; i < externalPlans.Count; ++i)
+		//		{
+		//			notificationText.Append("<color=#").Append(Util.ColorToHex(SessionManager.Instance.GetTeamByTeamID(externalPlans[i].Country).color)).Append(">");
+		//			notificationText.Append(" - ").Append(externalPlans[i].Name).Append("\n");
+		//			notificationText.Append("</color>");
+		//		}
+		//		DialogBoxManager.instance.NotificationWindow("Issues in other plans", notificationText.ToString(), () => { });
+		//	}
+		//}
 
 		private List<KeyValuePair<ConstraintSource, ConstraintTarget>> FindConstraintsForTarget(Dictionary<ConstraintSource, List<ConstraintTarget>> constraintCollection, AbstractLayer targetBaseLayer, EntityType targetEntityType)
 		{
@@ -407,50 +311,7 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		private List<FuturePlanEntityEntry> BuildFuturePlanEntityList(RestrictionQueryCache cache, Plan plan, PlanLayer checkingThisPlanLayer, EntityType checkingThisEntityType)
-		{
-			List<SubEntity> sourceObjects = GetAllSubentitiesOfType(cache, checkingThisPlanLayer, checkingThisEntityType);
-
-			List<FuturePlanEntityEntry> result = new List<FuturePlanEntityEntry>(sourceObjects.Count);
-			//For each subentity try to figure out the time of the first plan that changes it.
-			for (int subEntityId = 0; subEntityId < sourceObjects.Count; ++subEntityId)
-			{
-				SubEntity subEntity = sourceObjects[subEntityId];
-				int changeTime = SessionManager.Instance.MspGlobalData.session_end_month;
-				Plan firstPlanChangingGeometry = PlanManager.Instance.FindFirstPlanChangingGeometry(plan.StartTime, subEntity.Entity.PersistentID, checkingThisPlanLayer.BaseLayer);
-				if (firstPlanChangingGeometry != null)
-				{
-					changeTime = firstPlanChangingGeometry.StartTime;
-				}
-
-				FuturePlanEntityEntry entry = new FuturePlanEntityEntry()
-				{
-					subEntity = subEntity,
-					checkUntilMonth = changeTime,
-				};
-				result.Add(entry);
-			}
-			return result;
-		}
-
-		/// <summary>
-		/// Check restrictions against future plans
-		/// </summary>
-		/// <param name="cache"></param>
-		/// <param name="checkingThisPlanLayer"></param>
-		/// <param name="plan"></param>
-		private void CheckRestrictionsForFuture(RestrictionQueryCache cache, PlanLayer checkingThisPlanLayer, Plan plan, MultiLayerRestrictionIssueCollection resultIssueCollection)
-		{
-			// check if the type is set to null (This will check all types)
-			CheckRestrictionsForFutureLayerAndType(cache, checkingThisPlanLayer, null, plan, resultIssueCollection);
-			foreach (var kvp in checkingThisPlanLayer.BaseLayer.EntityTypes)
-			{
-				//check each type individually
-				CheckRestrictionsForFutureLayerAndType(cache, checkingThisPlanLayer, kvp.Value, plan, resultIssueCollection);
-			}
-		}
-
-		private void CheckRestrictionsForLayerAndType(RestrictionQueryCache cache, Plan checkingThisPlan, PlanLayer planLayer, EntityType checkingThisEntityType, bool checkOnlyPlanEntities, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		private void CheckRestrictionsForLayerAndType(RestrictionQueryCache cache, Plan checkingThisPlan, PlanLayer planLayer, EntityType checkingThisEntityType, bool checkOnlyPlanEntities)
 		{
 			ConstraintSource tmpSource = new ConstraintSource
 			{
@@ -474,7 +335,7 @@ namespace MSP2050.Scripts
 				foreach (ConstraintTarget target in targets)
 				{
 					// do the check
-					CheckConstraint(cache, sourceObjects, target, ConstraintChecks.PickCorrectInclusionCheckType(planLayer.BaseLayer, target.layer), EConstraintSatisfyRule.All, planLayer, checkingThisPlan, resultIssueCollection);
+					CheckConstraint(cache, sourceObjects, target, ConstraintChecks.PickCorrectInclusionCheckType(planLayer.BaseLayer, target.layer), EConstraintSatisfyRule.All, planLayer, checkingThisPlan);
 				}
 			}
 
@@ -483,21 +344,21 @@ namespace MSP2050.Scripts
 				List<ConstraintTarget> targets = exclusions[tmpSource];
 				foreach (ConstraintTarget target in targets)
 				{
-					CheckConstraint(cache, sourceObjects, target, ConstraintChecks.PickCorrectExclusionCheckType(planLayer.BaseLayer, target.layer), EConstraintSatisfyRule.Any, planLayer, checkingThisPlan, resultIssueCollection);
+					CheckConstraint(cache, sourceObjects, target, ConstraintChecks.PickCorrectExclusionCheckType(planLayer.BaseLayer, target.layer), EConstraintSatisfyRule.Any, planLayer, checkingThisPlan);
 				}
 			}
 		}
 
-		private void CheckRestrictionsForLayer(RestrictionQueryCache cache, Plan checkingThisPlan, PlanLayer planLayer, bool checkOnlyPlanEntities, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		private void CheckRestrictionsForLayer(RestrictionQueryCache cache, Plan checkingThisPlan, PlanLayer planLayer, bool checkOnlyPlanEntities)
 		{
-			CheckRestrictionsForLayerAndType(cache, checkingThisPlan, planLayer, null, checkOnlyPlanEntities, resultIssueCollection);
+			CheckRestrictionsForLayerAndType(cache, checkingThisPlan, planLayer, null, checkOnlyPlanEntities);
 			foreach (var kvp in planLayer.BaseLayer.EntityTypes)
 			{
-				CheckRestrictionsForLayerAndType(cache, checkingThisPlan, planLayer, kvp.Value, checkOnlyPlanEntities, resultIssueCollection);
+				CheckRestrictionsForLayerAndType(cache, checkingThisPlan, planLayer, kvp.Value, checkOnlyPlanEntities);
 			}
 		}
 
-		private void CheckConstraint(RestrictionQueryCache cache, List<SubEntity> sourceObjects, ConstraintTarget target, ConstraintChecks.DoCheck check, EConstraintSatisfyRule satisfactionRule, PlanLayer planLayer, Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		private void CheckConstraint(RestrictionQueryCache cache, List<SubEntity> sourceObjects, ConstraintTarget target, ConstraintChecks.DoCheck check, EConstraintSatisfyRule satisfactionRule, PlanLayer planLayer, Plan checkingThisPlan)
 		{
 			if (check == null)
 			{
@@ -521,7 +382,7 @@ namespace MSP2050.Scripts
 						{
 							if (satisfactionRule == EConstraintSatisfyRule.All)
 							{
-								resultIssueCollection.AddIssue(checkingThisPlan, planLayer, issueLocation, target);
+								planLayer.issues.Add(new PlanIssueObject(target.issueType, issueLocation.x, issueLocation.y, planLayer.BaseLayer.ID, target.constraintId));
 							}
 						}
 						else if (satisfactionRule == EConstraintSatisfyRule.Any)
@@ -534,52 +395,7 @@ namespace MSP2050.Scripts
 
 				if (satisfactionRule == EConstraintSatisfyRule.Any && anySatisfies == false)
 				{
-					resultIssueCollection.AddIssue(checkingThisPlan, planLayer, a.BoundingBox.center, target);
-				}
-			}
-		}
-
-		private void CheckFutureConstraintForPlanEntity(FuturePlanEntityEntry entityEntry, Plan checkingThisPlan, ConstraintTarget target, ConstraintChecks.DoCheck check, EConstraintSatisfyRule satisfyRule, IList<PlanLayer> relevantFutureLayers, MultiLayerRestrictionIssueCollection resultIssueCollection)
-		{
-			for (int i = 0; i < relevantFutureLayers.Count; ++i)
-			{
-				PlanLayer futureLayer = relevantFutureLayers[i];
-				if (futureLayer.Plan.StartTime > entityEntry.checkUntilMonth)
-				{
-					//Plan layer is outside of our checking time.
-					continue;
-				}
-
-				for (int newGeometryId = 0; newGeometryId < futureLayer.GetNewGeometryCount(); ++newGeometryId)
-				{
-					bool anySatisfies = false;
-
-					Entity newGeometry = futureLayer.GetNewGeometryByIndex(newGeometryId);
-					if (target.entityType == null || newGeometry.EntityTypes.Contains(target.entityType))
-					{
-						for (int subEntityId = 0; subEntityId < newGeometry.GetSubEntityCount(); ++subEntityId)
-						{
-							SubEntity targetSubEntity = newGeometry.GetSubEntity(subEntityId);
-							Vector3 issueLocation;
-							if (check.Invoke(entityEntry.subEntity, targetSubEntity, target, futureLayer, checkingThisPlan, out issueLocation))
-							{
-								if (satisfyRule == EConstraintSatisfyRule.All)
-								{
-									resultIssueCollection.AddIssue(checkingThisPlan, futureLayer, issueLocation, target);
-								}
-							}
-							else if (satisfyRule == EConstraintSatisfyRule.Any)
-							{
-								anySatisfies = true;
-								break;
-							}
-						}
-					}
-
-					if (satisfyRule == EConstraintSatisfyRule.Any && anySatisfies == false)
-					{
-						resultIssueCollection.AddIssue(checkingThisPlan, futureLayer, newGeometry.GetSubEntity(0).BoundingBox.center, target);
-					}
+					planLayer.issues.Add(new PlanIssueObject(target.issueType, a.BoundingBox.center.x, a.BoundingBox.center.y, planLayer.BaseLayer.ID, target.constraintId));
 				}
 			}
 		}
@@ -754,5 +570,160 @@ namespace MSP2050.Scripts
 				return new KeyValuePair<AbstractLayer, AbstractLayer>(null, null);
 			}
 		}
+
+		#region FutureConstraints
+		//All the code in this region is to check future plans for constraints that are affected by this one. This is undesired as we don't want to invalidate plans that may have been approved.
+		//If this is desired in the future, this code can be used
+
+		//private List<FuturePlanEntityEntry> BuildFuturePlanEntityList(RestrictionQueryCache cache, Plan plan, PlanLayer checkingThisPlanLayer, EntityType checkingThisEntityType)
+		//{
+		//	List<SubEntity> sourceObjects = GetAllSubentitiesOfType(cache, checkingThisPlanLayer, checkingThisEntityType);
+
+		//	List<FuturePlanEntityEntry> result = new List<FuturePlanEntityEntry>(sourceObjects.Count);
+		//	//For each subentity try to figure out the time of the first plan that changes it.
+		//	for (int subEntityId = 0; subEntityId < sourceObjects.Count; ++subEntityId)
+		//	{
+		//		SubEntity subEntity = sourceObjects[subEntityId];
+		//		int changeTime = SessionManager.Instance.MspGlobalData.session_end_month;
+		//		Plan firstPlanChangingGeometry = PlanManager.Instance.FindFirstPlanChangingGeometry(plan.StartTime, subEntity.Entity.PersistentID, checkingThisPlanLayer.BaseLayer);
+		//		if (firstPlanChangingGeometry != null)
+		//		{
+		//			changeTime = firstPlanChangingGeometry.StartTime;
+		//		}
+
+		//		FuturePlanEntityEntry entry = new FuturePlanEntityEntry()
+		//		{
+		//			subEntity = subEntity,
+		//			checkUntilMonth = changeTime,
+		//		};
+		//		result.Add(entry);
+		//	}
+		//	return result;
+		//}
+
+		///// <summary>
+		///// Check restrictions against future plans
+		///// </summary>
+		///// <param name="cache"></param>
+		///// <param name="checkingThisPlanLayer"></param>
+		///// <param name="plan"></param>
+		//private void CheckRestrictionsForFuture(RestrictionQueryCache cache, PlanLayer checkingThisPlanLayer, Plan plan, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		//{
+		//	// check if the type is set to null (This will check all types)
+		//	CheckRestrictionsForFutureLayerAndType(cache, checkingThisPlanLayer, null, plan, resultIssueCollection);
+		//	foreach (var kvp in checkingThisPlanLayer.BaseLayer.EntityTypes)
+		//	{
+		//		//check each type individually
+		//		CheckRestrictionsForFutureLayerAndType(cache, checkingThisPlanLayer, kvp.Value, plan, resultIssueCollection);
+		//	}
+		//}
+
+		//private class FuturePlanEntityEntry
+		//{
+		//	public SubEntity subEntity;
+		//	public int checkUntilMonth;
+		//};
+
+		///// <summary>
+		///// Check restrictions against future plans, including layers and types
+		///// </summary>
+		//private void CheckRestrictionsForFutureLayerAndType(RestrictionQueryCache cache, PlanLayer checkingThisPlanLayer, EntityType checkingThisEntityType, Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		//{
+		//	//get all the future geometry of this plan and add it to the source subentities
+		//	List<FuturePlanEntityEntry> entityEntries = BuildFuturePlanEntityList(cache, checkingThisPlan, checkingThisPlanLayer, checkingThisEntityType);
+
+		//	//Future checks are the other way around. We check the target against te source, so we need to find all inclusion constraints that have the layer and type as targets.
+		//	List<KeyValuePair<ConstraintSource, ConstraintTarget>> constraintsToCheck = FindConstraintsForTarget(inclusions, checkingThisPlanLayer.BaseLayer, checkingThisEntityType);
+		//	CheckFutureConstraints(checkingThisPlan, resultIssueCollection, entityEntries, constraintsToCheck, EConstraintType.Inclusion);
+
+		//	List<KeyValuePair<ConstraintSource, ConstraintTarget>> exclusionConstraintsToCheck = FindConstraintsForTarget(exclusions, checkingThisPlanLayer.BaseLayer, checkingThisEntityType);
+		//	CheckFutureConstraints(checkingThisPlan, resultIssueCollection, entityEntries, exclusionConstraintsToCheck, EConstraintType.Exclusion);
+		//}
+
+		//private void CheckFutureConstraints(Plan checkingThisPlan, MultiLayerRestrictionIssueCollection resultIssueCollection, List<FuturePlanEntityEntry> entityEntries, List<KeyValuePair<ConstraintSource, ConstraintTarget>> constraintsToCheck, EConstraintType constraintType)
+		//{
+		//	for (int i = 0; i < constraintsToCheck.Count; i++)
+		//	{
+		//		KeyValuePair<ConstraintSource, ConstraintTarget> target = constraintsToCheck[i];
+
+		//		//Get all the plan layers for the constraint sources
+		//		List<PlanLayer> relevantFuturePlanLayers = PlanManager.Instance.GetPlanLayersForBaseLayerFrom(target.Key.layer, checkingThisPlan.StartTime, true);
+		//		if (relevantFuturePlanLayers.Count == 0)
+		//		{
+		//			continue;
+		//		}
+
+		//		for (int entryId = 0; entryId < entityEntries.Count; ++entryId)
+		//		{
+		//			FuturePlanEntityEntry entry = entityEntries[entryId];
+		//			ConstraintChecks.DoCheck check;
+		//			EConstraintSatisfyRule satisfyRule;
+		//			if (constraintType == EConstraintType.Inclusion)
+		//			{
+		//				check = ConstraintChecks.PickCorrectInclusionCheckType(target.Key.layer, target.Value.layer);
+		//				satisfyRule = EConstraintSatisfyRule.All;
+		//			}
+		//			else if (constraintType == EConstraintType.Exclusion)
+		//			{
+		//				check = ConstraintChecks.PickCorrectExclusionCheckType(target.Key.layer, target.Value.layer);
+		//				satisfyRule = EConstraintSatisfyRule.Any;
+		//			}
+		//			else
+		//			{
+		//				Debug.LogError("Invalid constraint type for constraint check " + constraintType);
+		//				return;
+		//			}
+
+		//			CheckFutureConstraintForPlanEntity(entry, checkingThisPlan, target.Value, check, satisfyRule, relevantFuturePlanLayers, resultIssueCollection);
+		//		}
+		//	}
+		//}
+
+		//private void CheckFutureConstraintForPlanEntity(FuturePlanEntityEntry entityEntry, Plan checkingThisPlan, ConstraintTarget target, ConstraintChecks.DoCheck check, EConstraintSatisfyRule satisfyRule, IList<PlanLayer> relevantFutureLayers, MultiLayerRestrictionIssueCollection resultIssueCollection)
+		//{
+		//	for (int i = 0; i < relevantFutureLayers.Count; ++i)
+		//	{
+		//		PlanLayer futureLayer = relevantFutureLayers[i];
+		//		if (futureLayer.Plan.StartTime > entityEntry.checkUntilMonth)
+		//		{
+		//			//Plan layer is outside of our checking time.
+		//			continue;
+		//		}
+
+		//		for (int newGeometryId = 0; newGeometryId < futureLayer.GetNewGeometryCount(); ++newGeometryId)
+		//		{
+		//			bool anySatisfies = false;
+
+		//			Entity newGeometry = futureLayer.GetNewGeometryByIndex(newGeometryId);
+		//			if (target.entityType == null || newGeometry.EntityTypes.Contains(target.entityType))
+		//			{
+		//				for (int subEntityId = 0; subEntityId < newGeometry.GetSubEntityCount(); ++subEntityId)
+		//				{
+		//					SubEntity targetSubEntity = newGeometry.GetSubEntity(subEntityId);
+		//					Vector3 issueLocation;
+		//					if (check.Invoke(entityEntry.subEntity, targetSubEntity, target, futureLayer, checkingThisPlan, out issueLocation))
+		//					{
+		//						if (satisfyRule == EConstraintSatisfyRule.All)
+		//						{
+		//							resultIssueCollection.AddIssue(futureLayer, issueLocation, target);
+		//						}
+		//					}
+		//					else if (satisfyRule == EConstraintSatisfyRule.Any)
+		//					{
+		//						anySatisfies = true;
+		//						break;
+		//					}
+		//				}
+		//			}
+
+		//			if (satisfyRule == EConstraintSatisfyRule.Any && anySatisfies == false)
+		//			{
+		//				resultIssueCollection.AddIssue(futureLayer, newGeometry.GetSubEntity(0).BoundingBox.center, target);
+		//			}
+		//		}
+		//	}
+		//}
+
+		#endregion
 	}
 }
