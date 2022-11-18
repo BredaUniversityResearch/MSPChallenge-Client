@@ -199,6 +199,20 @@ namespace MSP2050.Scripts
 				}
 			}
 		}
+
+		public bool TryGetOriginalPlanLayerFor(AbstractLayer a_layer, out PlanLayer a_planLayer)
+		{
+			foreach(PlanLayerBackup backup in m_planLayers)
+			{
+				if (backup.m_planLayer.BaseLayer == a_layer)
+				{
+					a_planLayer = backup.m_planLayer;
+					return true;
+				}
+			}
+			a_planLayer = null;
+			return false;
+		}
 	}
 
 	public class PlanLayerBackup

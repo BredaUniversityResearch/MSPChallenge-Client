@@ -47,7 +47,11 @@ namespace MSP2050.Scripts
 
 		public override void StartEditingPlan(Plan a_plan) 
 		{
-			if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var data))
+			if(a_plan == null)
+			{
+				m_wasFishingPlanBeforeEditing = false;
+			}
+			else if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var data))
 			{
 				m_wasFishingPlanBeforeEditing = true;
 				m_fishingBackup = data.fishingDistributionDelta;

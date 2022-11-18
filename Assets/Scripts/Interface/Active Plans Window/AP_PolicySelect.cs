@@ -110,7 +110,8 @@ namespace MSP2050.Scripts
 					logic.SetPolicyToggled(m_plan, false);
 				}
 			}
-			//TODO: recalculate issues
+			ConstraintManager.Instance.CheckConstraints(m_plan, out bool hasUnavailableTypes);
+			m_APWindow.RefreshContent();
 		}
 
 		public override bool MayClose()

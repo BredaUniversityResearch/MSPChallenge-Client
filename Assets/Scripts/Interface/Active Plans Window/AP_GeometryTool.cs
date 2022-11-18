@@ -103,7 +103,7 @@ namespace MSP2050.Scripts
 			LayerManager.Instance.ShowLayer(a_layer.BaseLayer);
 			Main.Instance.fsm.SetInterruptState(null);
 
-			//TODO: assumes the window always closes between layer edits (&OnDisable is called), check this
+			//TODO CHECK: assumes the window always closes between layer edits (&OnDisable is called), check this
 
 			//InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
 			InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(a_layer.BaseLayer, true);
@@ -303,7 +303,7 @@ namespace MSP2050.Scripts
 					}
 					for (int a = 0; a < count; a++)
 					{
-						//TODO: this can be greatly optimized if entity types are sorted by key, current worst case: selectedTypes.count * selectedTypes[0].count^2
+						//TODO OPTIM: this can be greatly optimized if entity types are sorted by key, current worst case: selectedTypes.count * selectedTypes[0].count^2
 						if (!selectedTypes[i].Contains(selectedTypes[0][a]))
 						{
 							identical = false;

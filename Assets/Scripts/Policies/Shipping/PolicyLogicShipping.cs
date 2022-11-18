@@ -37,7 +37,19 @@ namespace MSP2050.Scripts
 
 		public override void StartEditingPlan(Plan a_plan)
 		{
-			//TODO: store backup
+			if (a_plan == null)
+			{
+				m_wasShippingPlanBeforeEditing = false;
+			}
+			else if (a_plan.TryGetPolicyData<PolicyPlanDataShipping>(PolicyManager.SHIPPING_POLICY_NAME, out var data))
+			{
+				//TODO: store backup
+				m_wasShippingPlanBeforeEditing = true;
+			}
+			else
+			{
+				m_wasShippingPlanBeforeEditing = false;
+			}
 		}
 
 		public override void RestoreBackupForPlan(Plan a_plan)

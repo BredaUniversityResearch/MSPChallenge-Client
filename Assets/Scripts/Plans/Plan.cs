@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using static UnityEditor.Experimental.GraphView.GraphView;
+using static UnityEngine.PlayerLoop.Initialization;
 
 namespace MSP2050.Scripts
 {
@@ -38,6 +39,8 @@ namespace MSP2050.Scripts
 		{
 			State = Plan.PlanState.DESIGN;
 			Country = SessionManager.Instance.CurrentUserTeamID;
+			ConstructionStartTime = -100;
+			StartTime = -100;
 		}
 
 		public Plan(PlanObject planObject, Dictionary<AbstractLayer, int> layerUpdateTimes)
@@ -353,6 +356,14 @@ namespace MSP2050.Scripts
 					return planLayer;
 
 			return null;
+		}
+
+		public void AddNewPlanLayerFor(AbstractLayer a_layer)
+		{
+			PlanLayer planLayer = new PlanLayer(this, a_layer);
+			PlanLayers.Add(planLayer);
+			planLayer.BaseLayer.AddPlanLayer(planLayer);
+			planLayer.DrawGameObjects();
 		}
 
 		public PlanLayer getPlanLayerForID(int planLayerID)

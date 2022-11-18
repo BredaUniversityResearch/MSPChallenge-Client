@@ -114,34 +114,45 @@ namespace MSP2050.Scripts
 
 		public override void ApplyContent()
 		{
-			HashSet<AbstractLayer> added = m_currentLayers;
+			HashSet<AbstractLayer> added = new HashSet<AbstractLayer>(m_currentLayers);
 			added.ExceptWith(m_originalLayers);
 			foreach (AbstractLayer addedLayer in added)
 			{
-				//TODO: For added layers, check if plan previously contained this layer, if so: readd old planlayer, otherwise create new
-
+				//For added layers, check if plan previously contained this layer, if so: readd old planlayer to maintain ID, otherwise create new
+				if(m_APWindow.PlanBackup.TryGetOriginalPlanLayerFor(addedLayer, out PlanLayer existingPlanLayer))
+				{
+					m_plan.PlanLayers.Add(existingPlanLayer);
+					existingPlanLayer.ClearContent();
+					existingPlanLayer.DrawGameObjects();
+					addedLayer.AddPlanLayer(existingPlanLayer);
+				}
+				else
+				{
+					m_plan.AddNewPlanLayerFor(addedLayer);
+				}
 			}
-			m_originalLayers.ExceptWith(m_currentLayers); //Contains removed layers now
+			HashSet<AbstractLayer> removed = new HashSet<AbstractLayer>(m_originalLayers);
+			removed.ExceptWith(m_currentLayers);
 
-			bool seperatelyRemoveGreenCables = PolicyLogicEnergy.Instance.energyCableLayerGreen != null && !m_originalLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGreen);
-			bool seperatelyRemoveGreyCables = PolicyLogicEnergy.Instance.energyCableLayerGrey != null && !m_originalLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGrey);
+			bool seperatelyRemoveGreenCables = PolicyLogicEnergy.Instance.energyCableLayerGreen != null && !removed.Contains(PolicyLogicEnergy.Instance.energyCableLayerGreen);
+			bool seperatelyRemoveGreyCables = PolicyLogicEnergy.Instance.energyCableLayerGrey != null && !removed.Contains(PolicyLogicEnergy.Instance.energyCableLayerGrey);
 			Dictionary<int, List<EnergyLineStringSubEntity>> network = null;
 			if (seperatelyRemoveGreenCables)
 				network = PolicyLogicEnergy.Instance.energyCableLayerGreen.GetNodeConnectionsForPlan(m_plan);
 			if (seperatelyRemoveGreyCables)
 				network = PolicyLogicEnergy.Instance.energyCableLayerGrey.GetNodeConnectionsForPlan(m_plan, network);
 
-			foreach (AbstractLayer removedLayer in m_originalLayers)
+			foreach (AbstractLayer removedLayer in removed)
 			{
-				PlanLayer currentPlanLayer = m_plan.GetPlanLayerForLayer(removedLayer);
-				removedLayer.RemovePlanLayerAndEntities(currentPlanLayer);
-				currentPlanLayer.RemoveGameObjects();
-				m_plan.PlanLayers.Remove(currentPlanLayer);
+				PlanLayer removedPlanLayer = m_plan.GetPlanLayerForLayer(removedLayer);
+				removedLayer.RemovePlanLayerAndEntities(removedPlanLayer);
+				removedPlanLayer.RemoveGameObjects();
+				m_plan.PlanLayers.Remove(removedPlanLayer);
 
 				//Remove attached cables, if the cable layers were not already being removed
 				if (removedLayer.IsEnergyLayer() && (seperatelyRemoveGreenCables || seperatelyRemoveGreyCables))
 				{
-					foreach (Entity entity in currentPlanLayer.GetNewGeometry())
+					foreach (Entity entity in removedPlanLayer.GetNewGeometry())
 					{
 						SubEntity subEnt = entity.GetSubEntity(0);
 						if (network.ContainsKey(subEnt.GetDatabaseID()))
@@ -155,8 +166,31 @@ namespace MSP2050.Scripts
 					}
 				}
 			}
-			//TODO: recalculate issues
-			//TODO: needs a plan (layer) redraw
+
+			//Update energy policy data
+			bool hadEnergyLayers = PolicyLogicEnergy.Instance.energyCableLayerGreen != null && m_originalLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGreen) ||
+				PolicyLogicEnergy.Instance.energyCableLayerGrey != null && m_originalLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGrey);
+			bool hasEnergyLayers = PolicyLogicEnergy.Instance.energyCableLayerGreen != null && m_currentLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGreen) ||
+				PolicyLogicEnergy.Instance.energyCableLayerGrey != null && m_currentLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGrey);
+			if(hadEnergyLayers && !hasEnergyLayers)
+			{ 
+				if(m_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data) && !data.altersEnergyDistribution)
+				{
+					//Energy layers removed and no energy policy selected, remove from plan
+					PolicyLogicEnergy.Instance.RemoveFromPlan(m_plan);
+				}
+			}
+			else if(!hadEnergyLayers && hasEnergyLayers)
+			{
+				if (!m_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
+				{
+					//Energy layers added and no energy policy selected, add to pan
+					PolicyLogicEnergy.Instance.AddToPlan(m_plan);
+				}
+			}
+			ConstraintManager.Instance.CheckConstraints(m_plan, out bool hasUnavailableTypes);
+			LayerManager.Instance.UpdateVisibleLayersToPlan(m_plan);
+			m_APWindow.RefreshContent();
 		}
 
 		public override bool MayClose()

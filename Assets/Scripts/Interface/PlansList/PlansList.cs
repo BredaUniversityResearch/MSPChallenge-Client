@@ -277,7 +277,7 @@ namespace MSP2050.Scripts
 
 		private void RefreshPlanBarInteractablity(Plan a_planRepresenting, PlanBar a_planBar)
 		{
-			a_planBar.SetPlanBarToggleInteractability(!Main.InEditMode && !Main.Instance.PreventPlanAndTabChange);
+			a_planBar.SetPlanBarToggleInteractability(!Main.InEditMode && !Main.Instance.PreventPlanChange);
 		}
 
 		int ComparePlanByCountry(Plan a_plan1, Plan a_plan2)

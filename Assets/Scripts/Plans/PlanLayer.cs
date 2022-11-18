@@ -20,7 +20,7 @@ namespace MSP2050.Scripts
 		public HashSet<int> RemovedGeometry; //Indexed by persistent ID
 		public List<PlanIssueObject> issues;
 
-		public string State { get; private set; }
+		//public string State { get; private set; }
     
 		bool isEnabled = false;
 		public bool updating = false;
@@ -29,7 +29,7 @@ namespace MSP2050.Scripts
 		{
 			Plan = plan;
 			BaseLayer = LayerManager.Instance.GetLayerByID(layerObject.original);
-			State = layerObject.state;
+			//State = layerObject.state;
 			ID = layerObject.layerid;
 			issues = layerObject.issues;
 
@@ -64,6 +64,20 @@ namespace MSP2050.Scripts
 			{
 				layerUpdateTimes.Add(BaseLayer, plan.StartTime);
 			}
+		}
+
+		public PlanLayer(Plan a_plan, AbstractLayer a_baseLayer)
+		{
+			Plan = a_plan;
+			BaseLayer = a_baseLayer;
+			ClearContent();
+		}
+
+		public void ClearContent()
+		{
+			RemovedGeometry = new HashSet<int>();
+			newGeometry = new List<Entity>();
+			issues = new List<PlanIssueObject>();
 		}
 
 		private SubEntity getSubentityOfNewGeometry(int ID)

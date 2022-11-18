@@ -88,6 +88,9 @@ namespace MSP2050.Scripts
 					"This plan contains entity types that are not yet available at the new implementation time.",
 					null, "Confirm");
 			}
+
+			m_APWindow.RefreshContent();
+			m_APWindow.RefreshSectionActivity();
 		}
 
 		public override bool MayClose()

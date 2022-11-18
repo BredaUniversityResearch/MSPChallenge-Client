@@ -37,6 +37,8 @@ namespace MSP2050.Scripts
 		public GameObject networkingBlocker;
 		public GenericWindow impactToolWindow;
 		public HEBGraph.HEBGraph ImpactToolGraph;
+		public NotificationWindow notificationWindow;
+		public GameObject mapToolsWindow;
 
 		[Header("Game Menu")]
 		public GameMenu gameMenu;

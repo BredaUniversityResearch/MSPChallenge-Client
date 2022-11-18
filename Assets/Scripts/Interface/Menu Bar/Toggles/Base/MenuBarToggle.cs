@@ -50,13 +50,15 @@ namespace MSP2050.Scripts
 					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.gameMenu.gameObject.SetActive(toggle.isOn));
 					break;
 				case Selection.CreatePlan:
-					toggle.onValueChanged.AddListener((b) => PlanManager.Instance.CreateNewPlanForEditing());
+					toggle.onValueChanged.AddListener((b) => PlanManager.Instance.BeginPlanCreation());
 					break;
 				case Selection.Notifications:
-					//TODO
+					toggle.isOn = InterfaceCanvas.Instance.notificationWindow.gameObject.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.notificationWindow.gameObject.SetActive(toggle.isOn));
 					break;
 				case Selection.MapTools:
-					//TODO
+					toggle.isOn = InterfaceCanvas.Instance.mapToolsWindow.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.mapToolsWindow.SetActive(toggle.isOn));
 					break;
 			}
 		}

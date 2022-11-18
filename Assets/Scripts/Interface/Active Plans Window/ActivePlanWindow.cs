@@ -67,23 +67,23 @@ namespace MSP2050.Scripts
 		private Dictionary<string, AP_ContentToggle> m_policyToggles = new Dictionary<string, AP_ContentToggle>(); //popouts can be reached through toggles
 		private AP_ContentToggle m_selectedContentToggle;
 
-		private bool m_ignoreLayerCallback;
+		private bool m_ignoreContentCallback;
 
 		//General
 		private DialogBox m_cancelChangesConfirmationWindow = null;
 		private Plan m_currentPlan;
 		private bool m_editing;
-		private enum ECreationStage { None, Setup, Normal }
+		private enum ECreationStage { None, Setup, Content }
 		private ECreationStage m_creationStage;
-
-		//Properties
-		public Plan CurrentPlan => m_currentPlan;
-		public bool Editing => m_editing;
-		//public bool CreatingNew => m_creatingNew;
 
 		//Editing backup
 		private PlanBackup m_planBackup;
 		private int m_delayedPolicyEffects;
+
+		//Properties
+		public Plan CurrentPlan => m_currentPlan;
+		public bool Editing => m_editing;
+		public PlanBackup PlanBackup => m_planBackup;
 
 		void Awake()
 		{
@@ -126,6 +126,11 @@ namespace MSP2050.Scripts
 			m_startEditingButton.onClick.AddListener(OnEditButtonPressed);
 			m_acceptEditButton.onClick.AddListener(OnAcceptButton);
 			m_cancelEditButton.onClick.AddListener(OnCancelButton);
+			m_planName.onValueChanged.AddListener((s) =>
+			{ 
+				if(!m_ignoreContentCallback)
+					RefreshSectionActivity(); 
+			});
 
 			//create policy popouts and toggles
 			foreach (var kvp in PolicyManager.Instance.PolicyLogic)
@@ -159,17 +164,13 @@ namespace MSP2050.Scripts
 		}
 
 		void OnCancelButton()
-		{ 
-			if(m_creationStage != ECreationStage.None)
-			{ 
-				//TODO
-			}
-			else if(m_editing)
+		{
+			if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
 			{
-				if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
-				{
+				if (m_creationStage == ECreationStage.None)
 					m_cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "All changes made to the plan will be lost. Are you sure you want to cancel?", null, () => ForceCancel(false));
-				}
+				else
+					m_cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "The new plan you are currently editing will be deleted. Are you sure you want to cancel?", null, () => ForceCancel(true));
 			}
 		}
 
@@ -180,11 +181,23 @@ namespace MSP2050.Scripts
 				m_selectedContentToggle.ForceClose(false);
 			}
 
-			m_planBackup.ResetPlanToBackup(m_currentPlan);
-			PolicyManager.Instance.RestoreBackupForPlan(m_currentPlan);
-			Main.Instance.fsm.ClearUndoRedo();
-			LayerManager.Instance.UpdateVisibleLayersToPlan(m_currentPlan);
-			m_currentPlan.AttemptUnlock();
+			if (m_creationStage == ECreationStage.None)
+			{
+				m_planBackup.ResetPlanToBackup(m_currentPlan);
+				PolicyManager.Instance.RestoreBackupForPlan(m_currentPlan);
+				Main.Instance.fsm.ClearUndoRedo();
+				LayerManager.Instance.UpdateVisibleLayersToPlan(m_currentPlan);
+				m_currentPlan.AttemptUnlock();
+			}
+			else if(m_creationStage == ECreationStage.Content)
+			{
+				PlanManager.Instance.RemovePlan(m_currentPlan);
+				foreach(PlanLayer planLayer in m_currentPlan.PlanLayers)
+				{
+					planLayer.BaseLayer.RemovePlanLayer(planLayer);
+					planLayer.RemoveGameObjects();
+				}
+			}
 
 			if (a_closeWindow)
 			{
@@ -201,8 +214,19 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			InterfaceCanvas.ShowNetworkingBlocker();
-			CalculateEffectsOfEditing();
+			if (m_creationStage == ECreationStage.Setup)
+			{
+				PlanManager.Instance.AddPlan(m_currentPlan);
+				LayerManager.Instance.UpdateVisibleLayersToPlan(m_currentPlan);
+				m_creationStage = ECreationStage.Content;
+				RefreshSectionActivity();
+				RefreshContent();
+			}
+			else
+			{
+				InterfaceCanvas.ShowNetworkingBlocker();
+				CalculateEffectsOfEditing();
+			}
 		}
 
 		/// <summary>
@@ -233,7 +257,8 @@ namespace MSP2050.Scripts
 		{
 			BatchRequest batch = new BatchRequest(true);
 
-			if (m_currentPlan.ID == -1)
+			//Newly created plans are not locked
+			if (m_creationStage != ECreationStage.None)
 				m_currentPlan.SendPlanCreation(batch);
 
 			//Calculate and submit the countries this plan requires approval from
@@ -258,7 +283,7 @@ namespace MSP2050.Scripts
 			m_currentPlan.SubmitName(batch);
 			m_currentPlan.SubmitPlanDate(batch);
 
-			if(m_currentPlan.ID != -1)
+			if(m_creationStage == ECreationStage.None)
 				m_currentPlan.AttemptUnlock(batch);
 			batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
 		}
@@ -277,29 +302,30 @@ namespace MSP2050.Scripts
 
 		public void OnEditButtonPressed()
 		{
-			Main.Instance.PreventPlanAndTabChange = true;
+			Main.Instance.PreventPlanChange = true;
 			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 
 			m_currentPlan.AttemptLock(
 				(plan) =>
 				{
-					Main.Instance.PreventPlanAndTabChange = false;
+					Main.Instance.PreventPlanChange = false;
 					EnterEditMode();
 				},
 				(plan) => {
-					Main.Instance.PreventPlanAndTabChange = false;
+					Main.Instance.PreventPlanChange = false;
 					InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 				});
 		}
 
 		public void SetToPlan(Plan plan)
 		{
+			gameObject.SetActive(true);
 			if(plan == null)
 			{
-				//TODO: open in create mode
-				m_editing = true;
+				//Open in create new mode
 				m_creationStage = ECreationStage.Setup;
 				m_currentPlan = new Plan();
+				EnterEditMode();
 			}
 			else
 			{
@@ -307,14 +333,13 @@ namespace MSP2050.Scripts
 				m_editing = false;
 				m_creationStage = ECreationStage.None;
 			}
-			gameObject.SetActive(true);
 			if(m_countryIndicator != null)
-				m_countryIndicator.color = SessionManager.Instance.FindTeamByID(plan.Country).color;
+				m_countryIndicator.color = SessionManager.Instance.FindTeamByID(m_currentPlan.Country).color;
 			RefreshContent();
-			UpdateSectionActivity();
+			RefreshSectionActivity();
 		}
 
-		public void UpdateSectionActivity()
+		public void RefreshSectionActivity()
 		{
 			//Buttons
 			bool buttonsActive = m_editing || (m_currentPlan.State == Plan.PlanState.DESIGN && (SessionManager.Instance.AreWeManager || m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID));
@@ -322,22 +347,19 @@ namespace MSP2050.Scripts
 			m_startEditingButton.gameObject.SetActive(!m_editing);
 			m_cancelEditButton.gameObject.SetActive(m_editing);
 			m_acceptEditButton.gameObject.SetActive(m_editing);
-
-			//TODO: handle creation setup, replace this, check more elaborate requirements
-			m_acceptEditButton.interactable = !string.IsNullOrEmpty(m_planName.text);
+			m_acceptEditButton.interactable = !string.IsNullOrEmpty(m_planName.text) && m_currentPlan.ConstructionStartTime >= TimeManager.Instance.GetCurrentMonth();
 
 			//Content
 			m_planName.interactable = m_editing;
 			m_planDescription.interactable = m_editing;
-			m_layerSection.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
-			m_policySection.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
+			m_layerSection.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Content);
+			m_policySection.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Content);
 			m_communicationSection.SetActive(m_creationStage == ECreationStage.None);
 			m_viewModeSection.SetActive(!m_editing);
 			m_changeLayersToggle.gameObject.SetActive(m_editing);
 			m_changePoliciesToggle.gameObject.SetActive(m_editing);
-			//m_planDate.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
 			m_planStateToggle.gameObject.SetActive(!m_editing);
-			m_issuesToggle.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Normal);
+			m_issuesToggle.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Content);
 		}
 
 		void EnterEditMode()
@@ -347,11 +369,14 @@ namespace MSP2050.Scripts
 			if (!m_viewAllToggle.isOn)
 				m_viewAllToggle.isOn = true;
 
-			m_planBackup = new PlanBackup(m_currentPlan);
+			if(m_creationStage == ECreationStage.Setup)
+				m_planBackup = new PlanBackup(null);
+			else
+				m_planBackup = new PlanBackup(m_currentPlan);
 			PolicyManager.Instance.StartEditingPlan(m_currentPlan);
 			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 
-			UpdateSectionActivity();
+			RefreshSectionActivity();
 		}
 
 		void ExitEditMode()
@@ -377,23 +402,31 @@ namespace MSP2050.Scripts
 		public void RefreshContent()
 		{
 			//Info
+			m_ignoreContentCallback = true;
 			m_planName.text = m_currentPlan.Name;
 			m_planDescription.text = m_currentPlan.Description;
+			m_ignoreContentCallback = false;
 
 			//Time
-			int maxConstructionTime = 0;
-			foreach(PlanLayer layer in m_currentPlan.PlanLayers)
+			if (m_creationStage == ECreationStage.Setup && m_currentPlan.StartTime < -50)
 			{
-				if (layer.BaseLayer.AssemblyTime > maxConstructionTime)
-					maxConstructionTime = layer.BaseLayer.AssemblyTime;
+				m_planDateToggle.SetContent($"Set implementation time");
 			}
-			if (maxConstructionTime == 0)
-				m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}. No construction time required.");
-			else if (maxConstructionTime == 1)
-				m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after 1 month construction.");
 			else
-				m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after {maxConstructionTime} months construction.");
-			//TODO: implementation time text before its set during creation
+			{
+				int maxConstructionTime = 0;
+				foreach (PlanLayer layer in m_currentPlan.PlanLayers)
+				{
+					if (layer.BaseLayer.AssemblyTime > maxConstructionTime)
+						maxConstructionTime = layer.BaseLayer.AssemblyTime;
+				}
+				if (maxConstructionTime == 0)
+					m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}. No construction time required");
+				else if (maxConstructionTime == 1)
+					m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after 1 month construction");
+				else
+					m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after {maxConstructionTime} months construction");
+			}
 
 			//State
 			m_planStateToggle.SetContent($"Plan state: {m_currentPlan.State.GetDisplayName()}", VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(m_currentPlan.State));
@@ -409,7 +442,7 @@ namespace MSP2050.Scripts
 
 			//Issues
 			int issueCount = m_currentPlan.GetMaximumIssueSeverityAndCount(out var severity);
-			if(issueCount == 0)
+			if (issueCount == 0)
 			{
 				m_issuesToggle.SetContent("No issues", Color.clear);
 			}
@@ -478,14 +511,13 @@ namespace MSP2050.Scripts
 		void OnLayerContentToggled(int a_layerIndex)
 		{
 			//Ignore if we just set the planlayer to active
-			if (m_ignoreLayerCallback)
+			if (m_ignoreContentCallback)
 				return;
 
 			//Ignore callback from Main.Instance.StartEditingLayer
-			m_ignoreLayerCallback = true;
-			//TODO
+			m_ignoreContentCallback = true;
 			m_geometryTool.StartEditingLayer(m_currentPlan.PlanLayers[a_layerIndex]);
-			m_ignoreLayerCallback = false;
+			m_ignoreContentCallback = false;
 		}
 
 		public void SetViewMode(PlanManager.PlanViewState a_viewMode)

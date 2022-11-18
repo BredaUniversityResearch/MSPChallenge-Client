@@ -87,6 +87,11 @@ namespace MSP2050.Scripts
 			plans.Add(newPlan);
 		}
 
+		public void RemovePlan(Plan a_plan)
+		{
+			plans.Remove(a_plan);
+		}
+
 		public void UpdatePlanTime(Plan updatedPlan)
 		{
 			plans.Remove(updatedPlan);
@@ -390,7 +395,7 @@ namespace MSP2050.Scripts
 			if (planViewing == plan && !Main.InEditMode)
 			{
 				InterfaceCanvas.Instance.activePlanWindow.RefreshContent();
-				InterfaceCanvas.Instance.activePlanWindow.UpdateSectionActivity();
+				InterfaceCanvas.Instance.activePlanWindow.RefreshSectionActivity();
 				if (!plan.ShouldBeVisibleInUI)
 				{
 					HideCurrentPlan();
@@ -421,12 +426,16 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public void CreateNewPlanForEditing()
+		public void BeginPlanCreation()
 		{
-			if (Main.InEditMode)
+			if (Main.InEditMode || Main.Instance.PreventPlanChange)
 				return;
 
-			//TODO
+			if(planViewing != null)
+				HideCurrentPlan();
+			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(null);
 		}
+
+		
 	}
 }

@@ -122,7 +122,11 @@ namespace MSP2050.Scripts
 
 		public override void StartEditingPlan(Plan a_plan)
 		{
-			if(a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
+			if (a_plan == null)
+			{
+				m_wasEnergyPlanBeforeEditing = false;
+			}
+			else if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
 			{ 
 				m_wasEnergyPlanBeforeEditing = true;
 				energyGridBackup = data.energyGrids;
@@ -298,7 +302,9 @@ namespace MSP2050.Scripts
 				energyData.altersEnergyDistribution = a_value;
 				if(!a_value)
 				{
-					//TODO: if no energy layers, remove energy policy data
+					//if no energy layers in plan, remove energy policy data
+					if(a_plan.GetPlanLayerForLayer(energyCableLayerGreen) == null && a_plan.GetPlanLayerForLayer(energyCableLayerGrey) == null)
+						RemoveFromPlan(a_plan);
 				}
 			}
 			else if(a_value)

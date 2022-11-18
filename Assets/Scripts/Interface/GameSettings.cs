@@ -188,7 +188,7 @@ namespace MSP2050.Scripts
 				{
 					Canvas currentCanvas = GameObject.FindObjectOfType<Canvas>();
 					if (currentCanvas != null)
-						currentCanvas.scaleFactor = (scale+1f)/4f;//TODO: changed for testing
+						currentCanvas.scaleFactor = (scale+1f)/4f;
 					RoundingManager.SetUIScale((int)scale);
 				}
 				if(save)

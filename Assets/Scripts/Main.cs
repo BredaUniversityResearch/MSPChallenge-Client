@@ -38,7 +38,7 @@ namespace MSP2050.Scripts
 		[HideInInspector] public bool fsmActive;
 
 		private bool interceptQuit = true;
-		private bool preventPlanAndTabChange = false;
+		private bool preventPlanChange = false;
 
 		private ProjectionInfo mspCoordinateProjection;
 		private ProjectionInfo geoJSONCoordinateProjection;
@@ -196,10 +196,10 @@ namespace MSP2050.Scripts
 			get { return CurrentlyEditingPlan != null; }
 		}
 
-		public bool PreventPlanAndTabChange
+		public bool PreventPlanChange
 		{
-			get { return preventPlanAndTabChange; }
-			set { preventPlanAndTabChange = value; }
+			get { return preventPlanChange; }
+			set { preventPlanChange = value; }
 		}
 
 		public static ETextState GetTextState()
