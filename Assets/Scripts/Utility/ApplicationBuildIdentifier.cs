@@ -96,7 +96,20 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 	public void GetUCBManifest()
 	{
 		UnityCloudBuildManifest manifest = UnityCloudBuildManifest.Load();
-
+		if (manifest == null)
+		{
+			UnityEngine.Debug.LogError("Could not load UnityCloudBuildManifest.");
+#if !UNITY_CLOUD_BUILD
+			var manifestBasePath = System.IO.Path.Combine(
+				Application.dataPath, "UnityCloud" + System.IO.Path.DirectorySeparatorChar + "Resources");
+			var manifestFilePath = System.IO.Path.Combine(manifestBasePath, "UnityCloudBuildManifest.json");
+			UnityEngine.Debug.Assert(System.IO.File.Exists(manifestFilePath));
+			var localManifestFilePath = System.IO.Path.Combine(manifestBasePath, "UnityCloudBuildManifest.json.txt");
+			System.IO.File.WriteAllText(localManifestFilePath, System.IO.File.ReadAllText(manifestFilePath));
+			UnityEngine.Debug.Log("Written local file: " + localManifestFilePath + ". Please restart the game once more.");
+#endif
+			return;
+		}
 		gitTag = manifest.buildNumber;
 		buildTime = manifest.buildStartTime;
 		hasInformation = true;
