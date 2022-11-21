@@ -151,7 +151,7 @@ namespace MSP2050.Scripts
 
 		public void AcceptStatus(PlanState newState)
 		{
-			//TODO: show blocking overlay so user can't change selected plan
+			InterfaceCanvas.ShowNetworkingBlocker();
 			//Lock plan, if successful, change state
 			m_plan.AttemptLock((changedPlan) =>
 			{
@@ -179,7 +179,7 @@ namespace MSP2050.Scripts
 							//Create notification window
 							DialogBoxManager.instance.NotificationWindow("Invalid energy plan", "Another plan changed state while this plan was being edited, invalidating this plan. Edit this plan to fix the error.", null);
 							PolicyLogicEnergy.Instance.SubmitEnergyError(changedPlan, true, false, batch);
-							batch.ExecuteBatch(null, null);
+							batch.ExecuteBatch(HideBlocker, HideBlocker);
 							return;
 						}
 
@@ -199,7 +199,7 @@ namespace MSP2050.Scripts
 							else
 							{
 								DialogBoxManager.instance.NotificationWindow("Invalid energy plan", "Another plan changed state while this plan was being edited, invalidating this plan. Edit this plan to fix the error.", null);
-								batch.ExecuteBatch(null, null);
+								batch.ExecuteBatch(HideBlocker, HideBlocker);
 							}
 						});
 					}
@@ -214,9 +214,20 @@ namespace MSP2050.Scripts
 				{
 					changedPlan.SendMessage("Changed the plans status to: " + newState.GetDisplayName(), batch);
 					changedPlan.SubmitState(newState, batch);
-					batch.ExecuteBatch(null, null);
+					batch.ExecuteBatch(HideBlocker, SubmissionFailure);
 				}
 			}, null);
+		}
+
+		void HideBlocker(BatchRequest a_batch)
+		{
+			InterfaceCanvas.HideNetworkingBlocker();
+		}
+
+		void SubmissionFailure(BatchRequest a_batch)
+		{ 
+			InterfaceCanvas.HideNetworkingBlocker();
+			DialogBoxManager.instance.NotificationWindow("Submitting state failed", "There was an error when submitting the plan's state change to the server. Please try again or see the error log for more information.", null);
 		}
 
 		private void CreatePlanChangeConfirmPopup(int[] planErrorsIDs, Plan plan, PlanState targetState, BatchRequest batch)
@@ -226,7 +237,7 @@ namespace MSP2050.Scripts
 				//No plans with errors, set new state
 				plan.SendMessage("Changed the plans status to: " + targetState.GetDisplayName(), batch);
 				plan.SubmitState(targetState, batch);
-				batch.ExecuteBatch(null, null);
+				batch.ExecuteBatch(HideBlocker, HideBlocker);
 			}
 			else
 			{
@@ -251,13 +262,13 @@ namespace MSP2050.Scripts
 				string description = notificationText.ToString();
 				UnityEngine.Events.UnityAction lb = new UnityEngine.Events.UnityAction(() =>
 				{
-					batchRequest.ExecuteBatch(null, null);
+					batchRequest.ExecuteBatch(HideBlocker, HideBlocker); //Only calls unlock
 				});
 				UnityEngine.Events.UnityAction rb = new UnityEngine.Events.UnityAction(() =>
 				{
 					plan.SendMessage("Changed the plans status to: " + targetState.GetDisplayName(), batch);
 					plan.SubmitState(targetState, batchRequest);
-					batchRequest.ExecuteBatch(null, null);
+					batchRequest.ExecuteBatch(HideBlocker, SubmissionFailure);
 				});
 				DialogBoxManager.instance.ConfirmationWindow("Energy error warning", description, lb, rb);
 			}

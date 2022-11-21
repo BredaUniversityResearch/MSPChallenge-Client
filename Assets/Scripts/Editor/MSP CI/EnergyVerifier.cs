@@ -42,7 +42,7 @@ public class EnergyVerifierObj : MonoBehaviour
 
 	public void VerifyEnergy()
 	{
-		if (PolicyLogicEnergy.Instance.energySubEntities == null || PolicyLogicEnergy.Instance.energySubEntities.Count == 0)
+		if (PolicyLogicEnergy.Instance.m_energySubEntities == null || PolicyLogicEnergy.Instance.m_energySubEntities.Count == 0)
 		{
 			Debug.Log("No energy objects found");
 			Destroy(gameObject);
@@ -61,7 +61,7 @@ public class EnergyVerifierObj : MonoBehaviour
 
 		HashSet<int> socketIDs = new HashSet<int>(); //DB ids of all sockets active at the current time
 
-		foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
+		foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 		{
 			LayerManager.Instance.ShowLayer(layer);
 			layer.ResetEnergyConnections();
@@ -73,23 +73,23 @@ public class EnergyVerifierObj : MonoBehaviour
 		}
 
 		//Have the cable layer activate all connections that are present in the current state, required for later grid checks
-		if (PolicyLogicEnergy.Instance.energyCableLayerGreen != null)
-			PolicyLogicEnergy.Instance.energyCableLayerGreen.ActivateCableLayerConnections();
-		if (PolicyLogicEnergy.Instance.energyCableLayerGrey != null)
-			PolicyLogicEnergy.Instance.energyCableLayerGrey.ActivateCableLayerConnections();
+		if (PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null)
+			PolicyLogicEnergy.Instance.m_energyCableLayerGreen.ActivateCableLayerConnections();
+		if (PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null)
+			PolicyLogicEnergy.Instance.m_energyCableLayerGrey.ActivateCableLayerConnections();
 
 		List<EnergyGrid> currentGrids = PolicyLogicEnergy.Instance.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);
 
 		//CABLE CONNECTIONS =================================================================================================
 		Debug.Log("Beginning cable connection check.");
 		//Check if all cables have 2 connections
-		if (PolicyLogicEnergy.Instance.energyCableLayerGreen != null)
+		if (PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null)
 		{
-			errors += CheckCables(PolicyLogicEnergy.Instance.energyCableLayerGreen);
+			errors += CheckCables(PolicyLogicEnergy.Instance.m_energyCableLayerGreen);
 		}
-		if (PolicyLogicEnergy.Instance.energyCableLayerGrey != null)
+		if (PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null)
 		{
-			errors += CheckCables(PolicyLogicEnergy.Instance.energyCableLayerGrey);
+			errors += CheckCables(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);
 		}
 		Debug.Log($"Cable connection check complete, {errors} errors found.");
 		errors = 0;
@@ -202,7 +202,7 @@ public class EnergyVerifierObj : MonoBehaviour
 		Debug.Log("Beginning capacity check.");
 		//Check of all energy subentities have their capacity stored on the server
 		List<int> ids = new List<int>();
-		foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
+		foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 		{
 			foreach (SubEntity sub in layer.GetActiveSubEntities())
 			{

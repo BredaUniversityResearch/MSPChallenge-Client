@@ -794,7 +794,7 @@ namespace MSP2050.Scripts
 		public void ShowGridOnMap()
 		{
 			bool green = IsGreen;
-			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 				if (layer.greenEnergy == green)
 					LayerManager.Instance.ShowLayer(layer);
         

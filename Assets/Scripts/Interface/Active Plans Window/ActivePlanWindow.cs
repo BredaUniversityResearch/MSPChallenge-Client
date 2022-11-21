@@ -266,7 +266,7 @@ namespace MSP2050.Scripts
 			m_currentPlan.SubmitRequiredApproval(batch);
 
 			//Check issues again, to ensure that changes in other plans while editing this plan get detected as well.
-			ConstraintManager.Instance.CheckConstraints(m_currentPlan, out bool hasUnavailableTypes);
+			ConstraintManager.Instance.CheckConstraints(m_currentPlan, out var unavailableTypeNames);
 
 			//Submit all layer and geometry changes (including issues).
 			//Automatically submits corresponding energy_output and connection for geom.

@@ -118,7 +118,6 @@ namespace MSP2050.Scripts
 		}
 
 
-		//Todo EEZLayers should be replaced by Teritorial waters, but this requires extra steps
 		public void PopulateAllCountryIDs()
 		{
 			if (EEZLayer == null)

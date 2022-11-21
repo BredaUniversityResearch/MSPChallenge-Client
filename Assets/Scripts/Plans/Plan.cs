@@ -672,6 +672,11 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
+		public void SetPolicyData(APolicyPlanData a_data)
+		{
+			m_policies[a_data.logic.name] = a_data;
+		}
+
 		public void AddPolicyData(APolicyPlanData a_data)
 		{
 			m_policies.Add(a_data.logic.m_definition.m_name, a_data);

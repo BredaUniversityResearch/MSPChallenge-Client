@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 			if (cable.connections[0].point.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 			{
 				//All points except sourcepoints are non-reference
-				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
+				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 				{
 					if (layer.greenEnergy == cable.Entity.Layer.greenEnergy &&
 					    (layer.editingType == AbstractLayer.EditingType.Socket ||
@@ -26,7 +26,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				//All points are non-reference
-				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
+				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 				{
 					if (layer.greenEnergy == cable.Entity.Layer.greenEnergy)
 					{

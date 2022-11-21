@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
 using System.Reactive.Joins;
+using System.Text;
 
 namespace MSP2050.Scripts
 {
@@ -20,7 +21,6 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_startPlanToggleContainer;
 
 		bool m_initialised;
-		bool m_changed = false; //TODO: if min time above current time, this isnt set properly
 		int m_finishTime; //In game time (0-479)
 		int m_minTimeSelectable = 10000; 
 		int m_finishMonth;//0-11
@@ -47,7 +47,6 @@ namespace MSP2050.Scripts
 				Initialise();
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
 
-			m_changed = false;
 			UpdateMinTime();
 			SetImplementationTime(a_content.StartTime);
 			if (SessionManager.Instance.AreWeGameMaster && !TimeManager.Instance.GameStarted)
@@ -79,14 +78,17 @@ namespace MSP2050.Scripts
 				foreach (PlanLayer planLayer in m_plan.PlanLayers)
 					planLayer.BaseLayer.UpdatePlanLayerTime(planLayer);
 
-			bool hasUnavailableTypes = false;
-			ConstraintManager.Instance.CheckConstraints(m_plan, out hasUnavailableTypes);		
-			if (hasUnavailableTypes)
+			ConstraintManager.Instance.CheckConstraints(m_plan, out var unavailableTypeNames);		
+			if (unavailableTypeNames.Count > 0)
 			{
-				//TODO: Show actual unavailable types
-				DialogBoxManager.instance.NotificationWindow("Unavailable types",
-					"This plan contains entity types that are not yet available at the new implementation time.",
-					null, "Confirm");
+				StringBuilder sb = new StringBuilder("This plan contains the following entity types that are not yet available at the new implementation time: ");
+				for (int i = 0; i < unavailableTypeNames.Count -1; i++)
+				{
+					sb.Append(unavailableTypeNames[i]);
+					sb.Append(", ");
+				}
+				sb.Append(unavailableTypeNames[unavailableTypeNames.Count - 1]);
+				DialogBoxManager.instance.NotificationWindow("Unavailable types", sb.ToString(), null, "Confirm");
 			}
 
 			m_APWindow.RefreshContent();
@@ -95,7 +97,7 @@ namespace MSP2050.Scripts
 
 		public override bool MayClose()
 		{
-			if (m_changed)
+			if (m_finishTime != GetNewPlanStartDate())
 			{
 				DialogBoxManager.instance.ConfirmationWindow("Discard time change", "Are you sure you want to return to the plan's previous implementation time?", null, m_contentToggle.ForceClose);
 				return false;
@@ -218,7 +220,6 @@ namespace MSP2050.Scripts
 		{
 			if (!m_ignoreTimeUICallback)
 			{
-				m_changed = true;
 				m_finishYear = value + m_minYearSelectable;
 				m_finishTime = m_finishYear * 12 + m_finishMonth;
 				UpdateMinSelectableMonth();
@@ -229,7 +230,6 @@ namespace MSP2050.Scripts
 		{
 			if (!m_ignoreTimeUICallback)
 			{
-				m_changed = true;
 				m_finishMonth = value + m_minMonthSelectable;
 				m_finishTime = m_finishYear * 12 + m_finishMonth;
 			}

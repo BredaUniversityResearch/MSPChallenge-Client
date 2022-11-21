@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			//All points are non-reference
-			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 			{
 				if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy)
 				{

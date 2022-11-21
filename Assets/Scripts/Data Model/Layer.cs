@@ -1119,13 +1119,12 @@ namespace MSP2050.Scripts
 
 		/// <summary>
 		/// Should be called on socket layer.
-		/// Returns a list of all grids for the current state. 
+		/// Returns a list of all updated/new grids for the given plan. 
 		/// Grids will have the same name, persisID and distribution if they existed in the given previousEnergyPlan.
 		/// Grids that will be there after the plan are removed from removedGrids.
 		/// </summary>
-		public override List<EnergyGrid> DetermineGrids(Plan plan, List<EnergyGrid> gridsInPlanPreviously, List<EnergyGrid> gridsBeforePlan, HashSet<int> removedGridsBefore, out HashSet<int> removedGridsAfter)
+		public override List<EnergyGrid> DetermineChangedGridsInPlan(Plan plan, List<EnergyGrid> gridsInPlanPreviously, List<EnergyGrid> gridsBeforePlan, HashSet<int> removedGrids)
 		{
-			removedGridsAfter = new HashSet<int>(removedGridsBefore);
 			if (editingType != EditingType.Socket)
 			{
 				return null;
@@ -1182,8 +1181,8 @@ namespace MSP2050.Scripts
 									if (oldGrid.DatabaseIDSet())
 										newGrid.SetDatabaseID(oldGrid.GetDatabaseID());
 									newGrid.persistentID = oldGrid.persistentID;
-									if (removedGridsAfter.Contains(oldGrid.persistentID))
-										removedGridsAfter.Remove(oldGrid.persistentID);
+									if (removedGrids.Contains(oldGrid.persistentID))
+										removedGrids.Remove(oldGrid.persistentID);
 									newGrid.CalculateInitialDistribution(oldGrid);
 									result.Add(newGrid);
 								}
@@ -1214,8 +1213,8 @@ namespace MSP2050.Scripts
 								if (identicalGridFound)
 								{
 									//Oldgrid is still present, remove its ID from removed IDs
-									if (removedGridsAfter.Contains(oldGrid.persistentID))
-										removedGridsAfter.Remove(oldGrid.persistentID);
+									if (removedGrids.Contains(oldGrid.persistentID))
+										removedGrids.Remove(oldGrid.persistentID);
 								}							
 								else	//Grids are not sourcewise identical, so take over values from previous one
 								{
@@ -1237,12 +1236,12 @@ namespace MSP2050.Scripts
 					{
 						if (!initialDistributionSet)
 							newGrid.CalculateInitialDistribution();
-						else if (removedGridsAfter.Contains(newGrid.persistentID))
-							removedGridsAfter.Remove(newGrid.persistentID);
+						else if (removedGrids.Contains(newGrid.persistentID))
+							removedGrids.Remove(newGrid.persistentID);
 						result.Add(newGrid);
 					}
-					else if (removedGridsAfter.Contains(newGrid.persistentID))
-						removedGridsAfter.Remove(newGrid.persistentID);
+					else if (removedGrids.Contains(newGrid.persistentID))
+						removedGrids.Remove(newGrid.persistentID);
 				}
 			}
 			return result;

@@ -134,13 +134,13 @@ namespace MSP2050.Scripts
 			HashSet<AbstractLayer> removed = new HashSet<AbstractLayer>(m_originalLayers);
 			removed.ExceptWith(m_currentLayers);
 
-			bool seperatelyRemoveGreenCables = PolicyLogicEnergy.Instance.energyCableLayerGreen != null && !removed.Contains(PolicyLogicEnergy.Instance.energyCableLayerGreen);
-			bool seperatelyRemoveGreyCables = PolicyLogicEnergy.Instance.energyCableLayerGrey != null && !removed.Contains(PolicyLogicEnergy.Instance.energyCableLayerGrey);
+			bool seperatelyRemoveGreenCables = PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null && !removed.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGreen);
+			bool seperatelyRemoveGreyCables = PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null && !removed.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);
 			Dictionary<int, List<EnergyLineStringSubEntity>> network = null;
 			if (seperatelyRemoveGreenCables)
-				network = PolicyLogicEnergy.Instance.energyCableLayerGreen.GetNodeConnectionsForPlan(m_plan);
+				network = PolicyLogicEnergy.Instance.m_energyCableLayerGreen.GetNodeConnectionsForPlan(m_plan);
 			if (seperatelyRemoveGreyCables)
-				network = PolicyLogicEnergy.Instance.energyCableLayerGrey.GetNodeConnectionsForPlan(m_plan, network);
+				network = PolicyLogicEnergy.Instance.m_energyCableLayerGrey.GetNodeConnectionsForPlan(m_plan, network);
 
 			foreach (AbstractLayer removedLayer in removed)
 			{
@@ -168,10 +168,10 @@ namespace MSP2050.Scripts
 			}
 
 			//Update energy policy data
-			bool hadEnergyLayers = PolicyLogicEnergy.Instance.energyCableLayerGreen != null && m_originalLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGreen) ||
-				PolicyLogicEnergy.Instance.energyCableLayerGrey != null && m_originalLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGrey);
-			bool hasEnergyLayers = PolicyLogicEnergy.Instance.energyCableLayerGreen != null && m_currentLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGreen) ||
-				PolicyLogicEnergy.Instance.energyCableLayerGrey != null && m_currentLayers.Contains(PolicyLogicEnergy.Instance.energyCableLayerGrey);
+			bool hadEnergyLayers = PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null && m_originalLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGreen) ||
+				PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null && m_originalLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);
+			bool hasEnergyLayers = PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null && m_currentLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGreen) ||
+				PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null && m_currentLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);
 			if(hadEnergyLayers && !hasEnergyLayers)
 			{ 
 				if(m_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data) && !data.altersEnergyDistribution)
@@ -188,7 +188,7 @@ namespace MSP2050.Scripts
 					PolicyLogicEnergy.Instance.AddToPlan(m_plan);
 				}
 			}
-			ConstraintManager.Instance.CheckConstraints(m_plan, out bool hasUnavailableTypes);
+			ConstraintManager.Instance.CheckConstraints(m_plan, out var unavailableTypeNames);
 			LayerManager.Instance.UpdateVisibleLayersToPlan(m_plan);
 			m_APWindow.RefreshContent();
 		}

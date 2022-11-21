@@ -209,7 +209,7 @@ namespace MSP2050.Scripts
 			return target;
 		}
 
-		public void CheckConstraints(Plan plan, out bool hasUnavailableTypes)
+		public void CheckConstraints(Plan plan, out List<string> unavailableTypeNames)
 		{
 			RestrictionQueryCache cache = new RestrictionQueryCache();
 
@@ -227,16 +227,16 @@ namespace MSP2050.Scripts
 				CheckRestrictionsForLayer(cache, plan, planLayer, true);
 			}
 
-			hasUnavailableTypes = CheckTypeUnavailableConstraints(plan, plan.StartTime);
+			unavailableTypeNames = CheckTypeUnavailableConstraints(plan, plan.StartTime);
 
 			//Send the issues to the issue manager.
 			//IssueManager.Instance.ImportNewIssues(issueCollection, deltaSet);
 			//IssueManager.Instance.SetIssueVisibilityForPlan(plan, true);
 		}
 
-		public bool CheckTypeUnavailableConstraints(Plan plan, int implementationDate)
+		public List<string> CheckTypeUnavailableConstraints(Plan plan, int implementationDate)
 		{
-			bool result = false;
+			List<string> result = new List<string>();
 			foreach (PlanLayer layer in plan.PlanLayers)
 			{
 				bool checkEntityTypes = false;
@@ -262,7 +262,7 @@ namespace MSP2050.Scripts
 								if (issueConstraint != null)
 								{
 									layer.issues.Add(new PlanIssueObject(issueConstraint.issueType, issueLocation.x, issueLocation.y, layer.BaseLayer.ID, issueConstraint.constraintId));
-									result = true;
+									result.Add(type.Name);
 								}
 							}
 						}

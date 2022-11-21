@@ -261,7 +261,7 @@ namespace MSP2050.Scripts
 		public abstract LayerState GetLayerStateAtPlan(Plan plan);
 		public abstract LayerState GetLayerStateAtTime(int month, Plan treatAsInfluencingState = null);
 		public abstract LayerState GetLayerStateAtIndex(int planIndex);
-		public abstract List<EnergyGrid> DetermineGrids(Plan plan, List<EnergyGrid> gridsInPlanPreviously, List<EnergyGrid> gridsBeforePlan, HashSet<int> removedGridsBefore, out HashSet<int> removedGridsAfter);
+		public abstract List<EnergyGrid> DetermineChangedGridsInPlan(Plan plan, List<EnergyGrid> gridsInPlanPreviously, List<EnergyGrid> gridsBeforePlan, HashSet<int> removedGrids);
 		public abstract void ActivateCableLayerConnections();
 		public abstract void ResetEnergyConnections();
 		public abstract void ResetCurrentGrids();

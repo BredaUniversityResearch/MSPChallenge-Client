@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using static MSP2050.Scripts.Plan;
 
 namespace MSP2050.Scripts
 {
@@ -96,8 +98,7 @@ namespace MSP2050.Scripts
 		public void ImportGlobalData()
 		{
 			NetworkForm form = new NetworkForm();
-			ServerCommunication.Instance.DoRequest<MspGlobalData>(Server.GetGlobalData(), form, HandleGlobalData);
-			//TODO: handle import failed
+			ServerCommunication.Instance.DoRequest<MspGlobalData>(Server.GetGlobalData(), form, HandleGlobalData, HandleDataLoadFailure);
 		}
 
 		public void HandleGlobalData(MspGlobalData data)
@@ -106,8 +107,20 @@ namespace MSP2050.Scripts
 
 			NetworkForm form = new NetworkForm();
 			form.AddField("name", data.countries);
-			ServerCommunication.Instance.DoRequest<LayerMeta>(Server.LayerMetaByName(), form, LoadTeams);
-			//TODO: handle import failed
+			ServerCommunication.Instance.DoRequest<LayerMeta>(Server.LayerMetaByName(), form, LoadTeams, HandleDataLoadFailure);
+		}
+
+		private void HandleDataLoadFailure(ARequest request, string message)
+		{
+			if (request.retriesRemaining > 0)
+			{
+				Debug.Log($"Request failed with message: {message}.. Retrying {request.retriesRemaining} more times.");
+				ServerCommunication.Instance.RetryRequest(request);
+			}
+			else
+			{
+				DialogBoxManager.instance.NotificationWindow("Load failed", "The session could not be loaded. Getting global data or layer meta failed. You will be returned to the server login screen.", () => { SceneManager.LoadScene(0); });
+			}
 		}
 
 		public void LoadTeams(LayerMeta eezMeta)

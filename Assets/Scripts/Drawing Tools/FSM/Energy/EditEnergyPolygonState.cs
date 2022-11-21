@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 
 		public EditEnergyPolygonState(FSM fsm, PlanLayer planLayer, HashSet<PolygonSubEntity> selectedSubEntities) : base(fsm, planLayer, selectedSubEntities)
 		{
-			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? PolicyLogicEnergy.Instance.energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.energyCableLayerGrey.CurrentPlanLayer();
+			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? PolicyLogicEnergy.Instance.m_energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.m_energyCableLayerGrey.CurrentPlanLayer();
 		}
 
 		protected override void OnPolygonRemoved(SubEntity removedSubEntity)

@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 
 		public EditEnergyPointsState(FSM fsm, PlanLayer planLayer) : base(fsm, planLayer)
 		{
-			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? PolicyLogicEnergy.Instance.energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.energyCableLayerGrey.CurrentPlanLayer();
+			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? PolicyLogicEnergy.Instance.m_energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.m_energyCableLayerGrey.CurrentPlanLayer();
 		}
 
 		protected override void deleteSelection()

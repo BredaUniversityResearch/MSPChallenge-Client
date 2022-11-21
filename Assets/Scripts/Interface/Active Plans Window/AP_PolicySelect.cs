@@ -110,7 +110,7 @@ namespace MSP2050.Scripts
 					logic.SetPolicyToggled(m_plan, false);
 				}
 			}
-			ConstraintManager.Instance.CheckConstraints(m_plan, out bool hasUnavailableTypes);
+			ConstraintManager.Instance.CheckConstraints(m_plan, out var unavailableTypeNames);
 			m_APWindow.RefreshContent();
 		}
 

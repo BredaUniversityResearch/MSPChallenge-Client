@@ -11,8 +11,6 @@ namespace MSP2050.Scripts
 		FishingDistributionDelta m_fishingBackup;
 		bool m_wasFishingPlanBeforeEditing;
 
-		public override void Destroy()
-		{ }
 
 		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage)
 		{
@@ -71,6 +69,10 @@ namespace MSP2050.Scripts
 				{
 					data.fishingDistributionDelta = m_fishingBackup;
 				}
+				else
+				{
+					a_plan.AddPolicyData(new PolicyPlanDataFishing() { fishingDistributionDelta = m_fishingBackup });
+				}
 			}
 			else
 			{
@@ -82,10 +84,6 @@ namespace MSP2050.Scripts
 		{
 			if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var data))
 			{
-				if (!m_wasFishingPlanBeforeEditing)
-				{ 
-					//TODO: is fishing plan now, submit plan type change?
-				}
 				data.fishingDistributionDelta.SubmitToServer(a_plan.GetDataBaseOrBatchIDReference(), a_batch);
 			}
 			else if(m_wasFishingPlanBeforeEditing)

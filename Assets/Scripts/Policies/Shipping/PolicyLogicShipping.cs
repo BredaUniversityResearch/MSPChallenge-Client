@@ -10,8 +10,6 @@ namespace MSP2050.Scripts
 		public const float shippingDisplayScale = 10000; // = 10km
 		bool m_wasShippingPlanBeforeEditing;
 
-		public override void Destroy()
-		{ }
 
 		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage) 
 		{

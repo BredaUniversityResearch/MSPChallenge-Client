@@ -90,10 +90,5 @@ namespace MSP2050.Scripts
 				return lineStringSubEntities[0].LineLengthKm * Mathf.Max(GetCurrentRestrictionSize(), 0.25f);
 			//TODO: optimize this so it no longer uses the polygon area, but one only based on restriction size and length
 		}
-
-		//public override float GetInvestmentCost()
-		//{
-		//	return Util.GetLineStringLength(lineStringSubEntities[0].GetPoints()) * EntityTypes[0].investmentCost;
-		//}
 	}
 }

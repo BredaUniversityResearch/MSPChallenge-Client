@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		{
 			//Keep track of layer states so we can use the area of energy layers in KPIs
 			List<LayerState> layerStates = new List<LayerState>();
-			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.energyLayers)
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
             {
                 //Start layer state in previous month so we get the right new and removed geometry
                 LayerState newLayerState = layer.GetLayerStateAtTime(month-1);
