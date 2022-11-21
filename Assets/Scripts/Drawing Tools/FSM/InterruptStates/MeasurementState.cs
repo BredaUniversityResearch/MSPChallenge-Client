@@ -28,9 +28,9 @@ namespace MSP2050.Scripts
 		float segmentHeight = 2.0f;
 		float currentScale = 0.0f;
 
-		MapScaleToolButton stateToggle;
+		CustomToggle stateToggle;
 
-		public MeasurementState(FSM fsm, MapScaleToolButton stateToggle) : base(fsm)
+		public MeasurementState(FSM fsm, CustomToggle stateToggle) : base(fsm)
 		{
 			this.stateToggle = stateToggle;
 		}
@@ -63,7 +63,7 @@ namespace MSP2050.Scripts
 			measureText.characterSize = 1.0f;
 			measureText.fontSize = 40;
 			measureText.color = Color.black;
-			stateToggle.SetSelected(true);
+			stateToggle.isOn = true;
 		}
 
 		public override void ExitState(Vector3 currentMousePosition)
@@ -73,7 +73,7 @@ namespace MSP2050.Scripts
 			MonoBehaviour.Destroy(textObjectsParent);
 			base.ExitState(currentMousePosition);
 			fsm.SetCursor(previousCursorType);
-			stateToggle.SetSelected(false);
+			stateToggle.isOn = false;
 		}
 
 		public override void StartedDragging(Vector3 dragStartPosition, Vector3 currentPosition)

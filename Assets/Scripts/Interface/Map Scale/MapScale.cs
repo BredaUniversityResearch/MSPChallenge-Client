@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
-	public class MapScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+	public class MapScale : MonoBehaviour
 	{
 		[Header("Info Display")]
 		[SerializeField]
@@ -23,32 +23,16 @@ namespace MSP2050.Scripts
 		[SerializeField]
 		private TextMeshProUGUI zoomText = null;
 
-		[Header("Buttons")]
-		[SerializeField]
-		private RectTransform expandButtonLabel = null;
-		[SerializeField]
-		private Image expandButtonBorder = null;
-		[SerializeField]
-		private AnimationCurve openAnimationCurve = null;
-		[SerializeField]
-		private float animationDuration = 0.2f;
-		[SerializeField]
-		private float closeDelay = 0.2f;
-
 		[Header("Button references")]
-		[SerializeField]
-		private MapScaleToolButton zoomToAreaButton = null;
-		[SerializeField]
-		private MapScaleToolButton layerProbeButton = null;
-		[SerializeField]
-		private MapScaleToolButton rulerButton = null;
-		[SerializeField]
-		private MapScaleToolButton issueVisibilityButton = null;
+		[SerializeField] CustomToggle zoomToAreaButton = null;
+		[SerializeField] CustomToggle layerProbeButton = null;
+		[SerializeField] CustomToggle rulerButton = null;
+		[SerializeField] CustomButton zoomInButton = null;
+		[SerializeField] CustomButton zoomOutButton = null;
+		[SerializeField] CustomButton zoomAllOutButton = null;
 
-		private bool animationActive, opening, pointerOnObject;
-		private float animationProgress = 1f, timeSincePointOnObject, xPositionTarget;
-		private Vector2 labelOriginalPosition;
-		private Color originalLabelBorderColor;
+		//[SerializeField]
+		//private MapScaleToolButton issueVisibilityButton = null;
 
 		//Size of the currently loaded play area scaled by Main.SCALE.
 		private Vector2 currentScaledWorldAreaSize = Vector2.one;
@@ -56,53 +40,22 @@ namespace MSP2050.Scripts
 		public void Awake()
 		{
 			Main.Instance.OnFinishedLoadingLayers += OnDoneImportingLayers;
-			labelOriginalPosition = expandButtonLabel.localPosition;
-			xPositionTarget = labelOriginalPosition .x - (GetComponent<RectTransform>().sizeDelta.x - expandButtonLabel.sizeDelta.x);
-			originalLabelBorderColor = expandButtonBorder.color;
 
-			zoomToAreaButton.button.onClick.AddListener(ZoomToAreaClicked);
-			layerProbeButton.button.onClick.AddListener(LayerProbeClicked);
-			rulerButton.button.onClick.AddListener(RulerClicked);
-			issueVisibilityButton.button.onClick.AddListener(IssueVisibilityClicked);
-			issueVisibilityButton.SetSelected(IssueManager.Instance.IssueVisibility);
-		}
+			zoomToAreaButton.onValueChanged.AddListener(ZoomToAreaClicked);
+			layerProbeButton.onValueChanged.AddListener(LayerProbeClicked);
+			rulerButton.onValueChanged.AddListener(RulerClicked);
+            zoomInButton.onClick.AddListener(ZoomIn);
+            zoomOutButton.onClick.AddListener(ZoomOut);
+            zoomAllOutButton.onClick.AddListener(ZoomAllTheWayOut);
+            //issueVisibilityButton.button.onClick.AddListener(IssueVisibilityClicked);
+            //issueVisibilityButton.SetSelected(IssueManager.Instance.IssueVisibility);
+        }
 
 		private void Update()
 		{
-			double x, y;
-			Main.Instance.GetRealWorldMousePosition(out x, out y);
+			Main.Instance.GetRealWorldMousePosition(out double x, out double y);
 			xCoordinateText.text = ((float)x).FormatAsCoordinateText();
 			yCoordinateText.text = ((float)y).FormatAsCoordinateText();
-			
-			if (animationActive)
-			{
-				if (opening && !pointerOnObject)
-				{
-					timeSincePointOnObject += Time.deltaTime;
-					if (timeSincePointOnObject > closeDelay)
-					{
-						opening = false;
-						animationProgress = 1f - animationProgress;
-						expandButtonBorder.color = originalLabelBorderColor;
-					}
-				}
-				animationProgress += Time.deltaTime / animationDuration;
-				float newX = 0f;
-				if (animationProgress >= 1f)
-				{
-					newX = opening ? xPositionTarget : labelOriginalPosition.x;
-					animationProgress = 1f;
-
-					//Only stop being active if we were closing
-					if(!opening)
-						animationActive = false;
-				}
-				else if (opening)
-					newX = Mathf.Lerp(labelOriginalPosition.x, xPositionTarget, openAnimationCurve.Evaluate(animationProgress));
-				else
-					newX = Mathf.Lerp(xPositionTarget, labelOriginalPosition.x, openAnimationCurve.Evaluate(animationProgress));
-				expandButtonLabel.localPosition = new Vector3(newX, labelOriginalPosition.y);
-			}
 		}
 		
 		private void OnDoneImportingLayers()
@@ -176,24 +129,6 @@ namespace MSP2050.Scripts
 			return area;
 		}
 
-		public void OnPointerEnter(PointerEventData eventData)
-		{
-			//If we were closing before, inverse the progress
-			if(!opening)
-				animationProgress = 1f - animationProgress;
-			opening = true;
-			animationActive = true;
-			pointerOnObject = true;
-			expandButtonBorder.color = SessionManager.Instance.CurrentTeamColor;
-		}
-
-		public void OnPointerExit(PointerEventData eventData)
-		{
-			//Only indicate the pointer has left the object, will start closing after a delay
-			pointerOnObject = false;
-			timeSincePointOnObject = 0;
-		}
-
 		public float GameToRealWorldScale
 		{
 			//Shouldnt matter if we use X or Y, as scale is uniform
@@ -213,9 +148,9 @@ namespace MSP2050.Scripts
 			CameraManager.Instance.cameraZoom.SetZoomLevel(CameraManager.Instance.cameraZoom.currentZoom + 0.05f);
 		}
 
-		public void ZoomToAreaClicked()
+		public void ZoomToAreaClicked(bool a_value)
 		{
-			if (!zoomToAreaButton.selected)
+			if (a_value)
 				Main.Instance.InterruptFSMState((fsm) => new ZoomToAreaState(fsm, zoomToAreaButton));
 			else
 				Main.Instance.CancelFSMInterruptState();
@@ -227,17 +162,17 @@ namespace MSP2050.Scripts
 			CameraManager.Instance.cameraZoom.SetZoomLevel(1f);
 		}
 
-		public void LayerProbeClicked()
+		public void LayerProbeClicked(bool a_value)
 		{
-			if (!layerProbeButton.selected)
+			if (a_value)
 				Main.Instance.InterruptFSMState((fsm) => new LayerProbeState(fsm, layerProbeButton));
 			else
 				Main.Instance.CancelFSMInterruptState();
 		}
 
-		public void RulerClicked()
+		public void RulerClicked(bool a_value)
 		{
-			if (!rulerButton.selected)
+			if (a_value)
 				Main.Instance.InterruptFSMState((fsm) => new MeasurementState(fsm, rulerButton));
 			else
 				Main.Instance.CancelFSMInterruptState();
@@ -245,9 +180,9 @@ namespace MSP2050.Scripts
 
 		public void IssueVisibilityClicked()
 		{
-			bool oldVisibility = issueVisibilityButton.selected;
-			issueVisibilityButton.SetSelected(!oldVisibility);
-			IssueManager.Instance.IssueVisibility = !oldVisibility;
+			//bool oldVisibility = issueVisibilityButton.selected;
+			//issueVisibilityButton.SetSelected(!oldVisibility);
+			//IssueManager.Instance.IssueVisibility = !oldVisibility;
 		}
 
 		public void ShowHideGrid()
