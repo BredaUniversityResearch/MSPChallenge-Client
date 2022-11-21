@@ -6,9 +6,9 @@ namespace MSP2050.Scripts
 	public class LayerProbeState : FSMState
 	{
 		FSM.CursorType previousCursorType;
-		MapScaleToolButton stateToggle;
+        CustomToggle stateToggle;
 
-		public LayerProbeState(FSM fsm, MapScaleToolButton stateToggle) : base(fsm)
+		public LayerProbeState(FSM fsm, CustomToggle stateToggle) : base(fsm)
 		{
 			this.stateToggle = stateToggle;
 		}
@@ -20,14 +20,14 @@ namespace MSP2050.Scripts
 			//Cache previous cursor & Set cursor
 			previousCursorType = fsm.CurrentCursorType;
 			fsm.SetCursor(FSM.CursorType.LayerProbe);
-			stateToggle.SetSelected(true);
+			stateToggle.isOn = true;
 		}
 
 		public override void ExitState(Vector3 currentMousePosition)
 		{
 			base.ExitState(currentMousePosition);
 			fsm.SetCursor(previousCursorType);
-			stateToggle.SetSelected(false);
+			stateToggle.isOn = false;
 		}
 
 		public override void LeftMouseButtonDown(Vector3 position)

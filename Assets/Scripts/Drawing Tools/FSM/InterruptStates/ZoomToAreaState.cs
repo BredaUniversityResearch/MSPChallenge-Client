@@ -5,9 +5,9 @@ namespace MSP2050.Scripts
 	public class ZoomToAreaState : FSMState
 	{
 		FSM.CursorType previousCursorType;
-		MapScaleToolButton stateToggle;
+        CustomToggle stateToggle;
 
-		public ZoomToAreaState(FSM fsm, MapScaleToolButton mapScaleToolButton) : base(fsm)
+		public ZoomToAreaState(FSM fsm, CustomToggle mapScaleToolButton) : base(fsm)
 		{
 			this.stateToggle = mapScaleToolButton;
 		}
@@ -19,15 +19,15 @@ namespace MSP2050.Scripts
 			//Cache previous cursor & Set cursor
 			previousCursorType = fsm.CurrentCursorType;
 			fsm.SetCursor(FSM.CursorType.ZoomToArea);
-			stateToggle.SetSelected(true);
-		}
+			stateToggle.isOn = true;
+        }
 
 		public override void ExitState(Vector3 currentMousePosition)
 		{
 			base.ExitState(currentMousePosition);
 			BoxSelect.HideBoxSelection();
 			fsm.SetCursor(previousCursorType);
-			stateToggle.SetSelected(false);
+			stateToggle.isOn = false;
 		}
 
 		public override void StartedDragging(Vector3 dragStartPosition, Vector3 currentPosition)
