@@ -756,10 +756,10 @@ namespace MSP2050.Scripts
 		List<int> GetGridsRemovedFromPlanSinceBackup(PolicyPlanDataEnergy a_data)
 		{
 			List<int> result = new List<int>();
-			if (m_energyGridBackup == null)
+			if (m_backup.energyGrids == null)
 				return result;
 			bool found;
-			foreach (EnergyGrid oldGrid in m_energyGridBackup)
+			foreach (EnergyGrid oldGrid in m_backup.energyGrids)
 			{
 				found = false;
 				foreach (EnergyGrid newGrid in a_data.energyGrids)
