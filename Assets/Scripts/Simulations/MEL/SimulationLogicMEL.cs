@@ -90,9 +90,8 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			//Todo move this to it's own MonoBehaviour and trigger this OnMonthAdvanced.
-			KPIRoot ecologyKPIRoot = InterfaceCanvas.Instance.KPIEcology;
-			ecologyKPIRoot.groups.SetBarsToFishing(GetFishingDistributionAtTime(a_mostRecentMonth));
+			//Todo move this to it's own MonoBehaviour and trigger this OnMonthAdvanced?
+			InterfaceCanvas.Instance.KPIEcology.groups.SetBarsToFishing(GetFishingDistributionAtTime(a_mostRecentMonth));
 		}
 
 		public void LoadFishingFleets(JObject melConfig)

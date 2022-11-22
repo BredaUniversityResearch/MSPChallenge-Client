@@ -23,6 +23,11 @@ namespace MSP2050.Scripts
 		{
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
 
+			RefreshContent(a_content);
+		}
+
+		void RefreshContent(Plan a_content)
+		{
 			int nextIndex = 0;
 
 			//Set entries
@@ -50,51 +55,71 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void ApprovalChangedCountry(Team team, EPlanApprovalState newApproval)
+		public void ApprovalChangedCountry(Team a_team, EPlanApprovalState a_newApproval)
 		{
+			Team cachedTeam = a_team;
+			InterfaceCanvas.ShowNetworkingBlocker();
 			m_plan.AttemptLock((changedPlan) =>
 			{
 				BatchRequest batch = new BatchRequest();
 				m_plan.AttemptUnlock(batch);
 
 				int planId = m_plan.ID;
-				if (newApproval == EPlanApprovalState.Disapproved)
+				if (a_newApproval == EPlanApprovalState.Disapproved)
 				{
-					if (team.ID == SessionManager.Instance.CurrentUserTeamID)
+					if (cachedTeam.ID == SessionManager.Instance.CurrentUserTeamID)
 						m_plan.SendMessage("Disapproved the plan.", batch);
 					else
-						m_plan.SendMessage("Disapproved the plan for <color=#" + Util.ColorToHex(team.color) + ">" + team.name + "</color>.", batch);
+						m_plan.SendMessage("Disapproved the plan for <color=#" + Util.ColorToHex(cachedTeam.color) + ">" + cachedTeam.name + "</color>.", batch);
 
-					SubmitApprovalState(newApproval, team, batch);
+					SubmitApprovalState(a_newApproval, cachedTeam, batch);
 
 				}
-				else if (newApproval == EPlanApprovalState.Maybe)
+				else if (a_newApproval == EPlanApprovalState.Maybe)
 				{
-					if (team.ID == SessionManager.Instance.CurrentUserTeamID)
+					if (cachedTeam.ID == SessionManager.Instance.CurrentUserTeamID)
 						m_plan.SendMessage("Retracted the previous approval state.", batch);
 					else
-						m_plan.SendMessage("Retracted the previous approval state for <color=#" + Util.ColorToHex(team.color) + ">" + team.name + "</color>.", batch);
+						m_plan.SendMessage("Retracted the previous approval state for <color=#" + Util.ColorToHex(cachedTeam.color) + ">" + cachedTeam.name + "</color>.", batch);
 
-					SubmitApprovalState(newApproval, team, batch);
+					SubmitApprovalState(a_newApproval, cachedTeam, batch);
 				}
 				else
 				{
-					if (team.ID == SessionManager.Instance.CurrentUserTeamID)
+					if (cachedTeam.ID == SessionManager.Instance.CurrentUserTeamID)
 						m_plan.SendMessage("Approved the plan.", batch);
 					else
-						m_plan.SendMessage("Approved the plan for <color=#" + Util.ColorToHex(team.color) + ">" + team.name + "</color>.", batch);
+						m_plan.SendMessage("Approved the plan for <color=#" + Util.ColorToHex(cachedTeam.color) + ">" + cachedTeam.name + "</color>.", batch);
 
 					//Set approval immediately so we can check for completion
-					m_plan.countryApproval[team.ID] = EPlanApprovalState.Approved;
+					m_plan.countryApproval[cachedTeam.ID] = EPlanApprovalState.Approved;
 					if (m_plan.HasApproval())
 					{
 						m_plan.SubmitState(Plan.PlanState.APPROVED, batch);
 					}
 					else
-						SubmitApprovalState(EPlanApprovalState.Approved, team, batch);
+						SubmitApprovalState(EPlanApprovalState.Approved, cachedTeam, batch);
 				}
-				batch.ExecuteBatch(null, null);
-			}, null);
+				batch.ExecuteBatch(HandleSubmissionSuccess, HandleSubmissionFailure);
+			}, 
+			(_) =>
+			{
+				InterfaceCanvas.HideNetworkingBlocker();
+				RefreshContent(m_plan);
+			});
+		}
+
+		void HandleSubmissionSuccess(BatchRequest batch)
+		{
+			RefreshContent(m_plan);
+			InterfaceCanvas.HideNetworkingBlocker();
+		}
+
+		void HandleSubmissionFailure(BatchRequest batch)
+		{
+			RefreshContent(m_plan);
+			InterfaceCanvas.HideNetworkingBlocker();
+			DialogBoxManager.instance.NotificationWindow("Submitting approval failed", "There was an error when submitting your approval to the server. Please try again or see the error log for more information.", null);
 		}
 
 		void SubmitApprovalState(EPlanApprovalState state, Team country, BatchRequest batch)

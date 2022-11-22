@@ -9,5 +9,8 @@ namespace MSP2050.Scripts
 		public HashSet<int> removedGrids;
 		public bool altersEnergyDistribution;
 		public bool energyError;
+
+		public PolicyPlanDataEnergy(APolicyLogic a_logic) : base(a_logic)
+		{ }
 	}
 }

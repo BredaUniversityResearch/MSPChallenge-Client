@@ -72,9 +72,8 @@ namespace MSP2050.Scripts
 		//General
 		private DialogBox m_cancelChangesConfirmationWindow = null;
 		private Plan m_currentPlan;
-		private bool m_editing;
-		private enum ECreationStage { None, Setup, Content }
-		private ECreationStage m_creationStage;
+		private enum EInteractionMode { View, EditExisting, SetupNew, EditNew, RestoreArchived }
+		private EInteractionMode m_interactionMode;
 
 		//Editing backup
 		private PlanBackup m_planBackup;
@@ -82,7 +81,7 @@ namespace MSP2050.Scripts
 
 		//Properties
 		public Plan CurrentPlan => m_currentPlan;
-		public bool Editing => m_editing;
+		public bool Editing => m_interactionMode != EInteractionMode.View;
 		public PlanBackup PlanBackup => m_planBackup;
 
 		void Awake()
@@ -147,7 +146,7 @@ namespace MSP2050.Scripts
 
 		private bool OnAttemptHideWindow()
 		{
-			if (m_editing)
+			if (m_interactionMode != EInteractionMode.View && m_interactionMode != EInteractionMode.RestoreArchived)
 			{
 				if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
 				{
@@ -167,7 +166,7 @@ namespace MSP2050.Scripts
 		{
 			if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
 			{
-				if (m_creationStage == ECreationStage.None)
+				if (m_interactionMode == EInteractionMode.EditExisting)
 					m_cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "All changes made to the plan will be lost. Are you sure you want to cancel?", null, () => ForceCancel(false));
 				else
 					m_cancelChangesConfirmationWindow = DialogBoxManager.instance.ConfirmationWindow("Cancel changes", "The new plan you are currently editing will be deleted. Are you sure you want to cancel?", null, () => ForceCancel(true));
@@ -181,7 +180,7 @@ namespace MSP2050.Scripts
 				m_selectedContentToggle.ForceClose(false);
 			}
 
-			if (m_creationStage == ECreationStage.None)
+			if (m_interactionMode == EInteractionMode.EditExisting)
 			{
 				m_planBackup.ResetPlanToBackup(m_currentPlan);
 				PolicyManager.Instance.RestoreBackupForPlan(m_currentPlan);
@@ -189,7 +188,7 @@ namespace MSP2050.Scripts
 				LayerManager.Instance.UpdateVisibleLayersToPlan(m_currentPlan);
 				m_currentPlan.AttemptUnlock();
 			}
-			else if(m_creationStage == ECreationStage.Content)
+			else if(m_interactionMode == EInteractionMode.EditNew)
 			{
 				PlanManager.Instance.RemovePlan(m_currentPlan);
 				foreach(PlanLayer planLayer in m_currentPlan.PlanLayers)
@@ -197,6 +196,13 @@ namespace MSP2050.Scripts
 					planLayer.BaseLayer.RemovePlanLayer(planLayer);
 					planLayer.RemoveGameObjects();
 				}
+			}
+			else if (m_interactionMode == EInteractionMode.RestoreArchived)
+			{
+				m_currentPlan.StartTime = m_planBackup.m_startTime;
+				m_currentPlan.Name = m_planBackup.m_name;
+				m_currentPlan.State = Plan.PlanState.DELETED;
+				m_currentPlan.AttemptUnlock();
 			}
 
 			if (a_closeWindow)
@@ -214,13 +220,18 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			if (m_creationStage == ECreationStage.Setup)
+			if (m_interactionMode == EInteractionMode.SetupNew)
 			{
 				PlanManager.Instance.AddPlan(m_currentPlan);
 				LayerManager.Instance.UpdateVisibleLayersToPlan(m_currentPlan);
-				m_creationStage = ECreationStage.Content;
+				m_interactionMode = EInteractionMode.EditNew;
 				RefreshSectionActivity();
 				RefreshContent();
+			}
+			else if(m_interactionMode == EInteractionMode.RestoreArchived)
+			{
+				InterfaceCanvas.ShowNetworkingBlocker();
+				SubmitRestoration();
 			}
 			else
 			{
@@ -258,7 +269,7 @@ namespace MSP2050.Scripts
 			BatchRequest batch = new BatchRequest(true);
 
 			//Newly created plans are not locked
-			if (m_creationStage != ECreationStage.None)
+			if (m_interactionMode != EInteractionMode.EditExisting)
 				m_currentPlan.SendPlanCreation(batch);
 
 			//Calculate and submit the countries this plan requires approval from
@@ -283,8 +294,22 @@ namespace MSP2050.Scripts
 			m_currentPlan.SubmitName(batch);
 			m_currentPlan.SubmitPlanDate(batch);
 
-			if(m_creationStage == ECreationStage.None)
+			if(m_interactionMode == EInteractionMode.EditExisting)
 				m_currentPlan.AttemptUnlock(batch);
+			batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
+		}
+
+		void SubmitRestoration()
+		{
+			BatchRequest batch = new BatchRequest(true);
+			m_currentPlan.Description = m_planDescription.text;
+			m_currentPlan.Name = m_planName.text;
+			m_currentPlan.SendMessage("Restored the plans status to: " + Plan.PlanState.DESIGN.GetDisplayName(), batch);
+			m_currentPlan.SubmitState(Plan.PlanState.DESIGN, batch);
+			m_currentPlan.SubmitDescription(batch);
+			m_currentPlan.SubmitName(batch);
+			m_currentPlan.SubmitPlanDate(batch);
+			m_currentPlan.AttemptUnlock(batch);
 			batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
 		}
 
@@ -309,6 +334,7 @@ namespace MSP2050.Scripts
 				(plan) =>
 				{
 					Main.Instance.PreventPlanChange = false;
+					m_interactionMode = EInteractionMode.EditExisting;
 					EnterEditMode();
 				},
 				(plan) => {
@@ -320,18 +346,23 @@ namespace MSP2050.Scripts
 		public void SetToPlan(Plan plan)
 		{
 			gameObject.SetActive(true);
-			if(plan == null)
+			if (plan == null)
 			{
 				//Open in create new mode
-				m_creationStage = ECreationStage.Setup;
+				m_interactionMode = EInteractionMode.SetupNew;
 				m_currentPlan = new Plan();
+				EnterEditMode();
+			}
+			else if (plan.State == Plan.PlanState.DELETED)
+			{
+				m_currentPlan = plan;
+				m_interactionMode = EInteractionMode.RestoreArchived;
 				EnterEditMode();
 			}
 			else
 			{
 				m_currentPlan = plan;
-				m_editing = false;
-				m_creationStage = ECreationStage.None;
+				m_interactionMode = EInteractionMode.View;
 			}
 			if(m_countryIndicator != null)
 				m_countryIndicator.color = SessionManager.Instance.FindTeamByID(m_currentPlan.Country).color;
@@ -342,34 +373,32 @@ namespace MSP2050.Scripts
 		public void RefreshSectionActivity()
 		{
 			//Buttons
-			bool buttonsActive = m_editing || (m_currentPlan.State == Plan.PlanState.DESIGN && (SessionManager.Instance.AreWeManager || m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID));
+			bool buttonsActive = Editing || (m_currentPlan.State == Plan.PlanState.DESIGN && (SessionManager.Instance.AreWeManager || m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID));
 			m_buttonContainer.gameObject.SetActive(buttonsActive);
-			m_startEditingButton.gameObject.SetActive(!m_editing);
-			m_cancelEditButton.gameObject.SetActive(m_editing);
-			m_acceptEditButton.gameObject.SetActive(m_editing);
+			m_startEditingButton.gameObject.SetActive(!Editing);
+			m_cancelEditButton.gameObject.SetActive(Editing);
+			m_acceptEditButton.gameObject.SetActive(Editing);
 			m_acceptEditButton.interactable = !string.IsNullOrEmpty(m_planName.text) && m_currentPlan.ConstructionStartTime >= TimeManager.Instance.GetCurrentMonth();
 
 			//Content
-			m_planName.interactable = m_editing;
-			m_planDescription.interactable = m_editing;
-			m_layerSection.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Content);
-			m_policySection.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Content);
-			m_communicationSection.SetActive(m_creationStage == ECreationStage.None);
-			m_viewModeSection.SetActive(!m_editing);
-			m_changeLayersToggle.gameObject.SetActive(m_editing);
-			m_changePoliciesToggle.gameObject.SetActive(m_editing);
-			m_planStateToggle.gameObject.SetActive(!m_editing);
-			m_issuesToggle.gameObject.SetActive(m_creationStage == ECreationStage.None || m_creationStage == ECreationStage.Content);
+			m_planName.interactable = Editing;
+			m_planDescription.interactable = Editing;
+			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_communicationSection.SetActive(m_interactionMode == EInteractionMode.EditExisting);
+			m_viewModeSection.SetActive(!Editing);
+			m_changeLayersToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_changePoliciesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_planStateToggle.gameObject.SetActive(!Editing);
+			m_issuesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 		}
 
 		void EnterEditMode()
 		{
-			m_editing = true;
-
 			if (!m_viewAllToggle.isOn)
 				m_viewAllToggle.isOn = true;
 
-			if(m_creationStage == ECreationStage.Setup)
+			if(m_interactionMode == EInteractionMode.SetupNew)
 				m_planBackup = new PlanBackup(null);
 			else
 				m_planBackup = new PlanBackup(m_currentPlan);
@@ -381,7 +410,7 @@ namespace MSP2050.Scripts
 
 		void ExitEditMode()
 		{
-			m_editing = false;
+			m_interactionMode = EInteractionMode.View;
 
 			m_planBackup = null;
 			PolicyManager.Instance.StopEditingPlan(m_currentPlan);
@@ -408,7 +437,7 @@ namespace MSP2050.Scripts
 			m_ignoreContentCallback = false;
 
 			//Time
-			if (m_creationStage == ECreationStage.Setup && m_currentPlan.StartTime < -50)
+			if (m_interactionMode == EInteractionMode.SetupNew && m_currentPlan.StartTime < -50)
 			{
 				m_planDateToggle.SetContent($"Set implementation time");
 			}

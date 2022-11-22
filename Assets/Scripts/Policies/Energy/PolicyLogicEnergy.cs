@@ -68,9 +68,8 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					a_plan.AddPolicyData(new PolicyPlanDataEnergy()
+					a_plan.AddPolicyData(new PolicyPlanDataEnergy(this)
 					{
-						logic = this,
 						altersEnergyDistribution = updateData.alters_energy_distribution,
 						energyError = updateData.energy_error == "1"
 					});
@@ -109,8 +108,7 @@ namespace MSP2050.Scripts
 
 		void AddToPlan(Plan a_plan, bool a_altersEnergyDistribution)
 		{
-			a_plan.AddPolicyData(new PolicyPlanDataEnergy() { 
-				logic = this, 
+			a_plan.AddPolicyData(new PolicyPlanDataEnergy(this) { 
 				altersEnergyDistribution = a_altersEnergyDistribution,
 				energyGrids = new List<EnergyGrid>(),
 				removedGrids = new HashSet<int>()
@@ -134,13 +132,12 @@ namespace MSP2050.Scripts
 			else if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
 			{ 
 				m_wasEnergyPlanBeforeEditing = true;
-				m_backup = new PolicyPlanDataEnergy()
+				m_backup = new PolicyPlanDataEnergy(this)
 				{
 					energyGrids = data.energyGrids,
 					removedGrids = data.removedGrids,
 					altersEnergyDistribution = data.altersEnergyDistribution,
-					energyError = data.energyError,
-					logic = data.logic
+					energyError = data.energyError
 				};
 			
 				//Reset plan's grids

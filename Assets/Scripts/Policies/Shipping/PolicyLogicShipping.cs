@@ -9,16 +9,16 @@ namespace MSP2050.Scripts
 	{
 		public const float shippingDisplayScale = 10000; // = 10km
 		bool m_wasShippingPlanBeforeEditing;
-
+		List<RestrictionAreaObject> m_backup;
 
 		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage) 
 		{
 			if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
 			{
 				PolicyUpdateShippingPlan data = (PolicyUpdateShippingPlan)a_data;
-				RestrictionAreaManager.instance.ProcessReceivedRestrictions(a_plan, data.restriction_settings);
+				RestrictionAreaManager.instance.SetRestrictionsToObject(a_plan, data.restriction_settings);
 				if (!a_plan.m_policies.ContainsKey(PolicyManager.SHIPPING_POLICY_NAME))
-					a_plan.m_policies.Add(PolicyManager.SHIPPING_POLICY_NAME, new PolicyPlanDataShipping());
+					a_plan.m_policies.Add(PolicyManager.SHIPPING_POLICY_NAME, new PolicyPlanDataShipping(this));
 			}
 		}
 
@@ -26,7 +26,9 @@ namespace MSP2050.Scripts
 		{ }
 
 		public override void StopEditingPlan(Plan a_plan) 
-		{ }
+		{
+			m_backup = null;
+		}
 
 		public override void RemoveFromPlan(Plan a_plan)
 		{
@@ -41,7 +43,7 @@ namespace MSP2050.Scripts
 			}
 			else if (a_plan.TryGetPolicyData<PolicyPlanDataShipping>(PolicyManager.SHIPPING_POLICY_NAME, out var data))
 			{
-				//TODO: store backup
+				m_backup = RestrictionAreaManager.instance.GatherSettingsForPlan(a_plan);
 				m_wasShippingPlanBeforeEditing = true;
 			}
 			else
@@ -52,7 +54,7 @@ namespace MSP2050.Scripts
 
 		public override void RestoreBackupForPlan(Plan a_plan)
 		{
-			//TODO
+			RestrictionAreaManager.instance.SetRestrictionsToObject(a_plan, m_backup);
 		}
 
 		public override void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch)
@@ -61,12 +63,13 @@ namespace MSP2050.Scripts
 		}
 
 		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
-		{ }
+		{ 
+			//TODO CHECK: is it possible to change restriction size for other teams, if so: should it require approval?
+		}
 
 		public override void AddToPlan(Plan a_plan)
 		{
-			throw new NotImplementedException();
-			//TODO
+			a_plan.AddPolicyData(new PolicyPlanDataShipping(this));
 		}
 	}
 }

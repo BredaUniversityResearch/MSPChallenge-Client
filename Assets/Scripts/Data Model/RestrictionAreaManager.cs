@@ -8,10 +8,10 @@ namespace MSP2050.Scripts
 	/// </summary>
 	public class RestrictionAreaManager
 	{
-		private static RestrictionAreaManager ms_RestrictionAreaManager = new RestrictionAreaManager();
+		private static RestrictionAreaManager m_RestrictionAreaManager = new RestrictionAreaManager();
 		public static RestrictionAreaManager instance
 		{
-			get { return ms_RestrictionAreaManager; }
+			get { return m_RestrictionAreaManager; }
 		}
 
 		private class EntityTypeRestrictionSettings
@@ -129,15 +129,13 @@ namespace MSP2050.Scripts
 			List<RestrictionAreaObject> settingsToSubmit = GatherSettingsForPlan(referencePlan);
 			JObject dataObject = new JObject();
 
-			//form.AddField("settings", settingsToSubmit);
-
 			dataObject.Add("plan_id", referencePlan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("settings", JToken.FromObject(settingsToSubmit));
 
 			batch.AddRequest(Server.SetPlanRestrictionAreas(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 	
-		private List<RestrictionAreaObject> GatherSettingsForPlan(Plan referencePlan)
+		public List<RestrictionAreaObject> GatherSettingsForPlan(Plan referencePlan)
 		{
 			List<RestrictionAreaObject> result = new List<RestrictionAreaObject>(64);
 
@@ -178,11 +176,10 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void ProcessReceivedRestrictions(Plan targetPlan, RestrictionAreaObject[] planObjectRestrictionSettings)
+		public void SetRestrictionsToObject(Plan targetPlan, IEnumerable<RestrictionAreaObject> planObjectRestrictionSettings)
 		{
-			for (int i = 0; i < planObjectRestrictionSettings.Length; ++i)
+			foreach(RestrictionAreaObject restrictionObj in planObjectRestrictionSettings)
 			{
-				RestrictionAreaObject restrictionObj = planObjectRestrictionSettings[i];
 				AbstractLayer targetLayer = LayerManager.Instance.GetLayerByID(restrictionObj.layer_id);
 				EntityType targetType = targetLayer.GetEntityTypeByKey(restrictionObj.entity_type_id);
 				SetRestrictionAreaSetting(targetPlan, targetType, new RestrictionAreaSetting(restrictionObj.team_id, restrictionObj.restriction_size));

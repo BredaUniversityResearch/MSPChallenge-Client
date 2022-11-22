@@ -122,15 +122,58 @@ namespace MSP2050.Scripts
 			if (Main.InEditMode)
 				return;
 
-			//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
-			planViewing = plan;
-			timeViewing = -1;
-			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
-			LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
-			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(plan);
-			IssueManager.Instance.SetIssueInstancesToPlan(plan);
+			if (plan.State == Plan.PlanState.DELETED)
+			{
+				//Ask if player wants to return plan to design (and change time if required)
+				Plan targetPlan = plan; //cache plan for callbacks
+				if(plan.RequiresTimeChange)
+				{
+					DialogBoxManager.instance.NotificationWindow("Restore archived plan",
+						"The selected plan has been archived and its construction start time has passed. To restore the plan, change its implementation date.",
+						() => ShowArchivedPlan(targetPlan));
+				}
+				else
+				{
+					DialogBoxManager.instance.ConfirmationWindow("Restore archived plan",
+						"The selected plan has been archived. Would you like to restore the plan to the Design state?",
+						() => { }, () => ShowArchivedPlan(targetPlan));
+				}
+			}
+			else
+			{
+				//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
+				InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
+				planViewing = plan;
+				timeViewing = -1;
+				InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
+				LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
+				InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
+				InterfaceCanvas.Instance.activePlanWindow.SetToPlan(plan);
+				IssueManager.Instance.SetIssueInstancesToPlan(plan);
+			}
+		}
+
+		void ShowArchivedPlan(Plan a_plan)
+		{
+			InterfaceCanvas.ShowNetworkingBlocker();
+			a_plan.AttemptLock((lockedPlan) =>
+			{
+				if (lockedPlan.RequiresTimeChange)
+				{
+					InterfaceCanvas.HideNetworkingBlocker();
+					InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
+					planViewing = lockedPlan;
+					timeViewing = -1;
+					InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);//Needs to be done before redraw
+					LayerManager.Instance.UpdateVisibleLayersToBase();
+					InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
+					InterfaceCanvas.Instance.activePlanWindow.SetToPlan(lockedPlan);
+				}
+				else
+				{
+					AP_StateSelect.SubmitPlanRecovery(lockedPlan);
+				}
+			}, null);
 		}
 
 		public void HideCurrentPlan(bool updateLayers = true)

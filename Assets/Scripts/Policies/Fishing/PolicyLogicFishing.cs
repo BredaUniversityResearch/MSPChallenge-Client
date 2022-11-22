@@ -23,9 +23,8 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					a_plan.AddPolicyData(new PolicyPlanDataFishing()
+					a_plan.AddPolicyData(new PolicyPlanDataFishing(this)
 					{
-						logic = this,
 						fishingDistributionDelta = updateData.fishing != null ? new FishingDistributionDelta(updateData.fishing) : new FishingDistributionDelta() //If null, it cant pick the right constructor automatically
 					});
 				}
@@ -71,7 +70,7 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					a_plan.AddPolicyData(new PolicyPlanDataFishing() { fishingDistributionDelta = m_fishingBackup });
+					a_plan.AddPolicyData(new PolicyPlanDataFishing(this) { fishingDistributionDelta = m_fishingBackup });
 				}
 			}
 			else
@@ -115,7 +114,7 @@ namespace MSP2050.Scripts
 
 		public override void AddToPlan(Plan a_plan)
 		{
-			a_plan.AddPolicyData(new PolicyPlanDataFishing() { fishingDistributionDelta = new FishingDistributionDelta() });
+			a_plan.AddPolicyData(new PolicyPlanDataFishing(this) { fishingDistributionDelta = new FishingDistributionDelta() });
 		}
 	}
 }

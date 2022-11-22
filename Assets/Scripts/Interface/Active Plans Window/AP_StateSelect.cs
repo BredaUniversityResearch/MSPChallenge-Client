@@ -221,10 +221,11 @@ namespace MSP2050.Scripts
 
 		void HideBlocker(BatchRequest a_batch)
 		{
+			m_contentToggle.ForceClose(false);
 			InterfaceCanvas.HideNetworkingBlocker();
 		}
 
-		void SubmissionFailure(BatchRequest a_batch)
+		static void SubmissionFailure(BatchRequest a_batch)
 		{ 
 			InterfaceCanvas.HideNetworkingBlocker();
 			DialogBoxManager.instance.NotificationWindow("Submitting state failed", "There was an error when submitting the plan's state change to the server. Please try again or see the error log for more information.", null);
@@ -272,6 +273,16 @@ namespace MSP2050.Scripts
 				});
 				DialogBoxManager.instance.ConfirmationWindow("Energy error warning", description, lb, rb);
 			}
+		}
+
+		public static void SubmitPlanRecovery(Plan a_plan)
+		{
+			InterfaceCanvas.ShowNetworkingBlocker();
+			BatchRequest batch = new BatchRequest();
+			a_plan.AttemptUnlock(batch);
+			a_plan.SendMessage("Restored the plans status to: " + PlanState.DESIGN.GetDisplayName(), batch);
+			a_plan.SubmitState(PlanState.DESIGN, batch);
+			batch.ExecuteBatch((_) => { InterfaceCanvas.HideNetworkingBlocker(); }, SubmissionFailure);
 		}
 	}
 }
