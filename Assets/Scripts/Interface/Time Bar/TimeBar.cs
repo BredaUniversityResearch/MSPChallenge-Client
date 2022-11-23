@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static MSP2050.Scripts.TimeManager;
 
 namespace MSP2050.Scripts
 {
@@ -28,61 +29,51 @@ namespace MSP2050.Scripts
 		public RectTransform eraMarkerLocation;
 		public List<TimeBarEraMarker> markers = new List<TimeBarEraMarker>();
 
-		[SerializeField, Header("General")]
-		GameObject simulationTimeContentTop;
-		[SerializeField]
-		TextMeshProUGUI simulationTimeText;
-		[SerializeField]
-		RectTransform simulationTimeIndicatorTop;
-		[SerializeField]
-		RectTransform viewingTimeIndicatorBottom;
-		//[SerializeField]
-		//ToggleGroup viewModeToggleGroup;
-		[SerializeField]
-		Image expandedBackground;
-		[SerializeField]
-		VerticalLayoutGroup layoutGroup;
+		[Header("General")]
+		[SerializeField] GameObject simulationTimeContentTop;
+		[SerializeField] TextMeshProUGUI simulationTimeText;
+		[SerializeField] RectTransform simulationTimeIndicatorTop;
+		[SerializeField] RectTransform viewingTimeIndicatorBottom;
+		//[SerializeField] ToggleGroup viewModeToggleGroup;
+		[SerializeField] Image expandedBackground;
+		[SerializeField] VerticalLayoutGroup layoutGroup;
 
 		//View time
-		[SerializeField, Header("View Time")]
-		Toggle viewTimeToggle;
-		[SerializeField]
-		GameObject viewTimeContentBottom;
-		[SerializeField]
-		TMP_Dropdown viewTimeMonthDropdown;
-		[SerializeField]
-		TMP_Dropdown viewTimeYearDropdown;
+		[Header("View Time")]
+		[SerializeField] Toggle viewTimeToggle;
+		[SerializeField] GameObject viewTimeContentBottom;
+		[SerializeField] TMP_Dropdown viewTimeMonthDropdown;
+		[SerializeField] TMP_Dropdown viewTimeYearDropdown;
 
 		//View difference
-		[SerializeField, Header("View Difference")]
-		Toggle viewDifferenceToggle;
-		[SerializeField]
-		GameObject viewDifferenceContentTop;
-		[SerializeField]
-		GameObject viewDifferenceContentBottom;
-		[SerializeField]
-		RectTransform viewDifferenceIndicatorTop;
-		[SerializeField]
-		RectTransform viewDifferenceIndicatorBottom;
-		[SerializeField]
-		TMP_Dropdown viewDifferenceMonthDropdown0;
-		[SerializeField]
-		TMP_Dropdown viewDifferenceYearDropdown0;
-		[SerializeField]
-		TMP_Dropdown viewDifferenceMonthDropdown1;
-		[SerializeField]
-		TMP_Dropdown viewDifferenceYearDropdown1;
+		//[Header("View Difference")]
+		//[SerializeField] Toggle viewDifferenceToggle;
+		//[SerializeField] GameObject viewDifferenceContentTop;
+		//[SerializeField] GameObject viewDifferenceContentBottom;
+		//[SerializeField] RectTransform viewDifferenceIndicatorTop;
+		//[SerializeField] RectTransform viewDifferenceIndicatorBottom;
+		//[SerializeField] TMP_Dropdown viewDifferenceMonthDropdown0;
+		//[SerializeField] TMP_Dropdown viewDifferenceYearDropdown0;
+		//[SerializeField] TMP_Dropdown viewDifferenceMonthDropdown1;
+		//[SerializeField] TMP_Dropdown viewDifferenceYearDropdown1;
 
 		//View plan
-		[SerializeField, Header("View Plan")]
-		GameObject planViewingContentBottom;
-		[SerializeField]
-		TextMeshProUGUI planViewingText;
+		[Header("View Plan")]
+		[SerializeField] GameObject planViewingContentBottom;
+		[SerializeField] TextMeshProUGUI planViewingText;
+
+		//Planning time
+		[Header("Planning State and Time")]
+		[SerializeField] CustomButton timeManagerButton;
+		[SerializeField] TextMeshProUGUI stateText;
+		[SerializeField] TextMeshProUGUI timeText;
+		[SerializeField] AddTooltip toolTip;
+		PlanningState planningState;
 
 		//Indices selected in dropdowns
 		int selectedMonthView, selectedYearView = 0;
-		int selectedMonthDiff0, selectedYearDiff0 = 0;
-		int selectedMonthDiff1, selectedYearDiff1 = 0;
+		//int selectedMonthDiff0, selectedYearDiff0 = 0;
+		//int selectedMonthDiff1, selectedYearDiff1 = 0;
 
 		int maxSelectableMonth = 0;
 		int maxSelectableYear = 0;
@@ -101,24 +92,26 @@ namespace MSP2050.Scripts
 				else
 					SetViewMode(WorldViewMode.Normal, true);
 			});
-			viewDifferenceToggle.onValueChanged.AddListener((b) =>
-			{
-				if (b)
-					SetViewMode(WorldViewMode.Difference, true);
-				else
-					SetViewMode(WorldViewMode.Normal, true);
-			});
+			//viewDifferenceToggle.onValueChanged.AddListener((b) =>
+			//{
+			//	if (b)
+			//		SetViewMode(WorldViewMode.Difference, true);
+			//	else
+			//		SetViewMode(WorldViewMode.Normal, true);
+			//});
 
 			viewTimeMonthDropdown.onValueChanged.AddListener(ViewingMonthDropdownChanged);
 			viewTimeYearDropdown.onValueChanged.AddListener(ViewingYearDropdownChanged);
 
-			viewDifferenceMonthDropdown0.onValueChanged.AddListener((v) => DifferenceMonthDropdownChanged(v, 0));
-			viewDifferenceYearDropdown0.onValueChanged.AddListener((v) => DifferencedYearDropdownChanged(v, 0));
+			//viewDifferenceMonthDropdown0.onValueChanged.AddListener((v) => DifferenceMonthDropdownChanged(v, 0));
+			//viewDifferenceYearDropdown0.onValueChanged.AddListener((v) => DifferencedYearDropdownChanged(v, 0));
 
-			viewDifferenceMonthDropdown1.onValueChanged.AddListener((v) => DifferenceMonthDropdownChanged(v, 1));
-			viewDifferenceYearDropdown1.onValueChanged.AddListener((v) => DifferencedYearDropdownChanged(v, 1));
+			//viewDifferenceMonthDropdown1.onValueChanged.AddListener((v) => DifferenceMonthDropdownChanged(v, 1));
+			//viewDifferenceYearDropdown1.onValueChanged.AddListener((v) => DifferencedYearDropdownChanged(v, 1));
 
 			TimeManager.Instance.OnCurrentMonthChanged += OnMonthChanged;
+			timeManagerButton.interactable = SessionManager.Instance.AreWeGameMaster;
+			toolTip.enabled = SessionManager.Instance.AreWeGameMaster;
 		}
 		
 		private void OnMonthChanged(int oldCurrentMonth, int newCurrentMonth)
@@ -206,7 +199,7 @@ namespace MSP2050.Scripts
 
 			ignoreActivityCallback = true;
 			viewTimeToggle.isOn = mode == WorldViewMode.Time;
-			viewDifferenceToggle.isOn = mode == WorldViewMode.Difference;
+			//viewDifferenceToggle.isOn = mode == WorldViewMode.Difference;
 			ignoreActivityCallback = false;
 		}
 
@@ -239,23 +232,23 @@ namespace MSP2050.Scripts
 						PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.All, false);
 					break;
 				case WorldViewMode.Difference:
-					viewDifferenceContentBottom.SetActive(active);
-					viewDifferenceContentTop.SetActive(active);
-					viewDifferenceIndicatorBottom.gameObject.SetActive(active);
-					viewDifferenceIndicatorTop.gameObject.SetActive(active);
-					if (active)
-					{
-						if (updateWorldView)
-						{
-							//TODO FEATURE: if difference view is added
-							UpdateWorldViewingDifference();
-						}
-					}
-					else
-					{
-						//TODO FEATURE: if difference view is added
-					}
-					break;
+					//viewDifferenceContentBottom.SetActive(active);
+					//viewDifferenceContentTop.SetActive(active);
+					//viewDifferenceIndicatorBottom.gameObject.SetActive(active);
+					//viewDifferenceIndicatorTop.gameObject.SetActive(active);
+					//if (active)
+					//{
+					//	if (updateWorldView)
+					//	{
+					//		//TODO FEATURE: if difference view is added
+					//		UpdateWorldViewingDifference();
+					//	}
+					//}
+					//else
+					//{
+					//	//TODO FEATURE: if difference view is added
+					//}
+					//break;
 				case WorldViewMode.Normal:
 					collapsedDate.gameObject.SetActive(active);
 					layoutGroup.spacing = active ? 0 : 20f;
@@ -295,8 +288,8 @@ namespace MSP2050.Scripts
 
 			//Set selectable years
 			SetYearDropdownOptions(viewTimeYearDropdown, maxSelectableYear, selectedYearView);
-			SetYearDropdownOptions(viewDifferenceYearDropdown0, maxSelectableYear, selectedYearDiff0);
-			SetYearDropdownOptions(viewDifferenceYearDropdown1, maxSelectableYear, selectedYearDiff1);
+			//SetYearDropdownOptions(viewDifferenceYearDropdown0, maxSelectableYear, selectedYearDiff0);
+			//SetYearDropdownOptions(viewDifferenceYearDropdown1, maxSelectableYear, selectedYearDiff1);
 
 			//Set selectable month to all or maxSelectable month depending on selected year
 			if (selectedYearView == maxSelectableYear)
@@ -304,15 +297,15 @@ namespace MSP2050.Scripts
 			else
 				SetMonthDropdownOptions(viewTimeMonthDropdown, 11, selectedMonthView);
 
-			if (selectedYearDiff0 == maxSelectableYear)
-				SetMonthDropdownOptions(viewDifferenceMonthDropdown0, maxSelectableMonth, selectedMonthDiff0);
-			else
-				SetMonthDropdownOptions(viewDifferenceMonthDropdown0, 11, selectedMonthDiff0);
+			//if (selectedYearDiff0 == maxSelectableYear)
+			//	SetMonthDropdownOptions(viewDifferenceMonthDropdown0, maxSelectableMonth, selectedMonthDiff0);
+			//else
+			//	SetMonthDropdownOptions(viewDifferenceMonthDropdown0, 11, selectedMonthDiff0);
 
-			if (selectedYearDiff1 == maxSelectableYear)
-				SetMonthDropdownOptions(viewDifferenceMonthDropdown1, maxSelectableMonth, selectedMonthDiff1);
-			else
-				SetMonthDropdownOptions(viewDifferenceMonthDropdown1, 11, selectedMonthDiff1);
+			//if (selectedYearDiff1 == maxSelectableYear)
+			//	SetMonthDropdownOptions(viewDifferenceMonthDropdown1, maxSelectableMonth, selectedMonthDiff1);
+			//else
+			//	SetMonthDropdownOptions(viewDifferenceMonthDropdown1, 11, selectedMonthDiff1);
 		}
 
 		void SetYearDropdownOptions(TMP_Dropdown dropdown, int year, int selectedIndex)
@@ -342,32 +335,32 @@ namespace MSP2050.Scripts
 				UpdateWorldViewingTime();
 		}
 
-		void DifferenceMonthDropdownChanged(int newValue, int dropdownID)
-		{
-			if (dropdownID == 0)
-			{
-				selectedMonthDiff0 = newValue;
-			}
-			else
-			{
-				selectedMonthDiff1 = newValue;
-			}
-			if (!ignoreActivityCallback)
-				UpdateWorldViewingDifference();
-		}
+		//void DifferenceMonthDropdownChanged(int newValue, int dropdownID)
+		//{
+		//	if (dropdownID == 0)
+		//	{
+		//		selectedMonthDiff0 = newValue;
+		//	}
+		//	else
+		//	{
+		//		selectedMonthDiff1 = newValue;
+		//	}
+		//	if (!ignoreActivityCallback)
+		//		UpdateWorldViewingDifference();
+		//}
 
 		void ViewingYearDropdownChanged(int newValue)
 		{
 			UpdateYearDropdown(newValue, ref selectedMonthView, ref selectedYearView, viewTimeMonthDropdown, UpdateWorldViewingTime);
 		}
 
-		void DifferencedYearDropdownChanged(int newValue, int dropdownID)
-		{
-			if (dropdownID == 0)
-				UpdateYearDropdown(newValue, ref selectedMonthDiff0, ref selectedYearDiff0, viewDifferenceMonthDropdown0, UpdateWorldViewingDifference);
-			else
-				UpdateYearDropdown(newValue, ref selectedMonthDiff1, ref selectedYearDiff1, viewDifferenceMonthDropdown1, UpdateWorldViewingDifference);
-		}
+		//void DifferencedYearDropdownChanged(int newValue, int dropdownID)
+		//{
+		//	if (dropdownID == 0)
+		//		UpdateYearDropdown(newValue, ref selectedMonthDiff0, ref selectedYearDiff0, viewDifferenceMonthDropdown0, UpdateWorldViewingDifference);
+		//	else
+		//		UpdateYearDropdown(newValue, ref selectedMonthDiff1, ref selectedYearDiff1, viewDifferenceMonthDropdown1, UpdateWorldViewingDifference);
+		//}
 
 		void UpdateYearDropdown(int newValue, ref int selectedMonth, ref int selectedYear, TMP_Dropdown monthDropdown, Action changeCallback)
 		{
@@ -397,26 +390,26 @@ namespace MSP2050.Scripts
 			PlanManager.Instance.ShowWorldAt(time);
 		}
 
-		void UpdateWorldViewingDifference()
-		{
-			int time0 = selectedMonthDiff0 + selectedYearDiff0 * 12;
-			int time1 = selectedMonthDiff1 + selectedYearDiff1 * 12;
+		//void UpdateWorldViewingDifference()
+		//{
+		//	int time0 = selectedMonthDiff0 + selectedYearDiff0 * 12;
+		//	int time1 = selectedMonthDiff1 + selectedYearDiff1 * 12;
 
-			if (time0 == time1)
-				Debug.LogError("Trying to view the difference between 2 identiocal times.");
-			else if (time0 < time1)
-			{
-				UpdateIndicator(viewDifferenceIndicatorTop, time0);
-				UpdateIndicator(viewDifferenceIndicatorBottom, time1);
-				//TODO FEATURE: if difference view is added
-			}
-			else
-			{
-				UpdateIndicator(viewDifferenceIndicatorTop, time1);
-				UpdateIndicator(viewDifferenceIndicatorBottom, time0);
-				//TODO FEATURE: if difference view is added
-			}
-		}
+		//	if (time0 == time1)
+		//		Debug.LogError("Trying to view the difference between 2 identiocal times.");
+		//	else if (time0 < time1)
+		//	{
+		//		UpdateIndicator(viewDifferenceIndicatorTop, time0);
+		//		UpdateIndicator(viewDifferenceIndicatorBottom, time1);
+		//		//TODO FEATURE: if difference view is added
+		//	}
+		//	else
+		//	{
+		//		UpdateIndicator(viewDifferenceIndicatorTop, time1);
+		//		UpdateIndicator(viewDifferenceIndicatorBottom, time0);
+		//		//TODO FEATURE: if difference view is added
+		//	}
+		//}
 
 		void UpdateIndicator(RectTransform indicator, int month)
 		{
@@ -429,6 +422,62 @@ namespace MSP2050.Scripts
 		bool isViewingPlan
 		{
 			get { return viewMode == WorldViewMode.Plan && PlanManager.Instance.planViewing != null; }
+		}
+
+		public void SetState(PlanningState a_newState)
+		{
+			planningState = a_newState;
+			switch (a_newState)
+			{
+				case TimeManager.PlanningState.Setup:
+					stateText.text = "Setup";
+					break;
+				case TimeManager.PlanningState.Play:
+					stateText.text = "Planning";
+					break;
+				case TimeManager.PlanningState.FastForward:
+					stateText.text = "Fast Forward";
+					break;
+				case TimeManager.PlanningState.Simulation:
+					stateText.text = "Simulating";
+					break;
+				case TimeManager.PlanningState.Pause:
+					stateText.text = "Paused";
+					break;
+				case TimeManager.PlanningState.End:
+					stateText.text = "End";
+					break;
+			}
+
+		}
+
+		public void SetCatchingUp(bool a_value)
+		{
+			if (a_value && planningState == TimeManager.PlanningState.Play)
+			{
+				stateText.text = "Calculating";
+			}
+			else
+			{
+				SetState(planningState);
+			}
+		}
+
+		public void SetTimeRemaining(TimeSpan a_newTime)
+		{
+
+			if (a_newTime.Ticks > TimeSpan.TicksPerDay)
+			{
+				timeText.text = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}", a_newTime.Days, a_newTime.Hours, a_newTime.Minutes, a_newTime.Seconds);
+			}
+			else if (a_newTime.Ticks < TimeSpan.TicksPerHour)
+			{
+				timeText.text = string.Format("{0:D1}:{1:D2}", a_newTime.Minutes, a_newTime.Seconds);
+			}
+			else if (a_newTime.Ticks < TimeSpan.TicksPerDay)
+			{
+				timeText.text = string.Format("{0:D1}:{1:D2}:{2:D2}", a_newTime.Hours, a_newTime.Minutes, a_newTime.Seconds);
+			}
 		}
 	}
 }

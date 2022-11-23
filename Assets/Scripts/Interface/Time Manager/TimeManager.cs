@@ -44,7 +44,7 @@ namespace MSP2050.Scripts
 			}
 
 			m_timeLeftElapsed += Time.deltaTime;
-			EraHUD.instance.TimeRemaining = TimeSpan.FromSeconds(Math.Max(timeLeft - (int)m_timeLeftElapsed, 0));
+			TimeBar.instance.SetTimeRemaining(TimeSpan.FromSeconds(Math.Max(timeLeft - (int)m_timeLeftElapsed, 0)));
 		}
 
 		void Start()
@@ -101,7 +101,7 @@ namespace MSP2050.Scripts
 					TimeSpan newTimeSpan = TimeSpan.FromSeconds(newEraTime);
 					if (!GameStarted)
 					{
-						EraHUD.instance.TimeRemaining = newTimeSpan;
+						TimeBar.instance.SetTimeRemaining(newTimeSpan);
 						TimeManagerWindow.instance.timeline.eraBlocks[era].SetDurationUI(newTimeSpan);
 					}
 				}
@@ -132,16 +132,16 @@ namespace MSP2050.Scripts
 				{
 					if (newTimeLeft < 0)
 					{
-						EraHUD.instance.CatchingUp = true;
+						TimeBar.instance.SetCatchingUp(true);
 					}
 					else
 					{
 						if (timeLeft < 0)
-							EraHUD.instance.CatchingUp = false;
+							TimeBar.instance.SetCatchingUp(false);
 						TimeSpan newTimeSpan = TimeSpan.FromSeconds(newTimeLeft);
 						if (GameStarted)
 						{
-							EraHUD.instance.TimeRemaining = newTimeSpan;
+							TimeBar.instance.SetTimeRemaining(newTimeSpan);
 							TimeManagerWindow.instance.timeline.eraBlocks[era].SetDurationUI(newTimeSpan);
 						}
 					}
@@ -326,7 +326,7 @@ namespace MSP2050.Scripts
 			//State change
 			if (gameState != prevState)
 			{
-				EraHUD.instance.State = gameState;
+				TimeBar.instance.SetState(gameState);
 				//New state entered
 				if (gameState == PlanningState.Setup)
 				{
