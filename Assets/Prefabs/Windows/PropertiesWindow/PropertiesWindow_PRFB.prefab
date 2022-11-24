@@ -76,11 +76,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entryLocation: {fileID: 6910445763538312619}
-  genericEntryPrefab: {fileID: 3193058653669799032, guid: f336d1ba6f5ce414f9dcdbeb522a9981,
+  genericEntryPrefab: {fileID: 5566591151394099376, guid: 6edda00d8d8ec5142985404930245e99,
     type: 3}
-  genericEntryIconPrefab: {fileID: 9162030520682463523, guid: 468191718e2b073499ac63081f1ea472,
+  genericEntryIconPrefab: {fileID: 3193058653669799032, guid: f336d1ba6f5ce414f9dcdbeb522a9981,
     type: 3}
-  genericEntryButtonPrefab: {fileID: 1145780579782399682, guid: baa630635c181794bb29e51ccc6f266b,
+  genericEntryButtonPrefab: {fileID: 146138306738567649, guid: cd0071394a4486e47b147598971fbdd3,
     type: 3}
 --- !u!1 &7050787483360104438
 GameObject:
@@ -284,6 +284,11 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 2518649935862838332, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
+      propertyPath: entryLocation
+      value: 
+      objectReference: {fileID: 4919348136172586572}
+    - target: {fileID: 2518649935862838332, guid: 009ead492220acf428f85ad21089e353,
+        type: 3}
       propertyPath: genericEntryPrefab
       value: 
       objectReference: {fileID: 5566591151394099376, guid: 6edda00d8d8ec5142985404930245e99,
@@ -292,13 +297,13 @@ PrefabInstance:
         type: 3}
       propertyPath: genericEntryIconPrefab
       value: 
-      objectReference: {fileID: 9162030520682463523, guid: 468191718e2b073499ac63081f1ea472,
+      objectReference: {fileID: 3193058653669799032, guid: f336d1ba6f5ce414f9dcdbeb522a9981,
         type: 3}
     - target: {fileID: 2518649935862838332, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
       propertyPath: genericEntryButtonPrefab
       value: 
-      objectReference: {fileID: 1145780579782399682, guid: baa630635c181794bb29e51ccc6f266b,
+      objectReference: {fileID: 146138306738567649, guid: cd0071394a4486e47b147598971fbdd3,
         type: 3}
     - target: {fileID: 4709271110330009064, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
@@ -393,6 +398,12 @@ PrefabInstance:
         type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 009ead492220acf428f85ad21089e353, type: 3}
+--- !u!224 &4919348136172586572 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8661408688441885046, guid: 009ead492220acf428f85ad21089e353,
+    type: 3}
+  m_PrefabInstance: {fileID: 4356819631231698746}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5615836329200736026
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -521,19 +532,19 @@ PrefabInstance:
         type: 3}
       propertyPath: genericEntryPrefab
       value: 
-      objectReference: {fileID: 146138306738567649, guid: cd0071394a4486e47b147598971fbdd3,
+      objectReference: {fileID: 5566591151394099376, guid: 6edda00d8d8ec5142985404930245e99,
         type: 3}
     - target: {fileID: 2518649935862838332, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
       propertyPath: genericEntryIconPrefab
       value: 
-      objectReference: {fileID: 9162030520682463523, guid: 468191718e2b073499ac63081f1ea472,
+      objectReference: {fileID: 3193058653669799032, guid: f336d1ba6f5ce414f9dcdbeb522a9981,
         type: 3}
     - target: {fileID: 2518649935862838332, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
       propertyPath: genericEntryButtonPrefab
       value: 
-      objectReference: {fileID: 1145780579782399682, guid: baa630635c181794bb29e51ccc6f266b,
+      objectReference: {fileID: 146138306738567649, guid: cd0071394a4486e47b147598971fbdd3,
         type: 3}
     - target: {fileID: 4598918589744673113, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
@@ -772,7 +783,8 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8729093412384697370, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8134522629814488115, guid: 009ead492220acf428f85ad21089e353, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 009ead492220acf428f85ad21089e353, type: 3}
 --- !u!1001 &5695310061748127818
 PrefabInstance:
@@ -900,6 +912,11 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 2518649935862838332, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
+      propertyPath: entryLocation
+      value: 
+      objectReference: {fileID: 3979580205050825020}
+    - target: {fileID: 2518649935862838332, guid: 009ead492220acf428f85ad21089e353,
+        type: 3}
       propertyPath: genericEntryPrefab
       value: 
       objectReference: {fileID: 5566591151394099376, guid: 6edda00d8d8ec5142985404930245e99,
@@ -908,13 +925,13 @@ PrefabInstance:
         type: 3}
       propertyPath: genericEntryIconPrefab
       value: 
-      objectReference: {fileID: 9162030520682463523, guid: 468191718e2b073499ac63081f1ea472,
+      objectReference: {fileID: 3193058653669799032, guid: f336d1ba6f5ce414f9dcdbeb522a9981,
         type: 3}
     - target: {fileID: 2518649935862838332, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
       propertyPath: genericEntryButtonPrefab
       value: 
-      objectReference: {fileID: 1145780579782399682, guid: baa630635c181794bb29e51ccc6f266b,
+      objectReference: {fileID: 146138306738567649, guid: cd0071394a4486e47b147598971fbdd3,
         type: 3}
     - target: {fileID: 4598918589744673113, guid: 009ead492220acf428f85ad21089e353,
         type: 3}
@@ -1115,6 +1132,12 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 8134522629814488115, guid: 009ead492220acf428f85ad21089e353, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 009ead492220acf428f85ad21089e353, type: 3}
+--- !u!224 &3979580205050825020 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8661408688441885046, guid: 009ead492220acf428f85ad21089e353,
+    type: 3}
+  m_PrefabInstance: {fileID: 5695310061748127818}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8103011401941236491
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -12,8 +12,6 @@ namespace MSP2050.Scripts
 		public GameObject genericEntryPrefab;
 		public GameObject genericEntryIconPrefab;
 		public GameObject genericEntryButtonPrefab;
-    
-		private List<GenericEntry> genericEntry = new List<GenericEntry>();
 
 		private PrefabObjectPool genericEntryPool;
 		private PrefabObjectPool genericEntryIconPool;
@@ -41,8 +39,6 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public void DestroyGenericEntry(GenericEntry entry)
 		{
-			genericEntry.Remove(entry);
-
 			PrefabObjectPoolTracker tracker = entry.gameObject.GetComponent<PrefabObjectPoolTracker>();
 			if (tracker != null)
 			{
@@ -56,93 +52,26 @@ namespace MSP2050.Scripts
 
 		public void DestroyAllContent()
 		{
-			for (int i = genericEntry.Count - 1; i >= 0; --i)
-			{
-				DestroyGenericEntry(genericEntry[i]);
-			}
-
-			if (genericEntry.Count > 0)
-			{
-				Debug.LogError("Incomplete destruction of generic content");
-			}
+			genericEntryPool.ReleaseAll();
 		}
 
-		/// <summary>
-		/// Create a new entry
-		/// </summary>
-		public GenericEntry CreateEntry<T>(string name, T param)
+		public GenericEntry CreateEntry(string name, string content)
 		{
-			// Instantiate prefab
-			GameObject go = genericEntryPool.Get();
-
-			// Store component
-			GenericEntry entry = go.GetComponent<GenericEntry>();
-
-			// Add to list
-			genericEntry.Add(entry);
-
-			// Assign parent
-			go.transform.SetParent(entryLocation, false);
-
-			if(typeof(T) == typeof(Texture) || typeof(T) == typeof(RenderTexture))
-			{
-				entry.PropertyImage<T>(name, param);
-			}
-			else
-			{
-				entry.PropertyLabel<T>(name, param);
-			}
-
-			go.SetActive(true);
-
+			GenericEntry entry = genericEntryPool.Get().GetComponent<GenericEntry>();
+			entry.SetContent(name, content);
+			return entry;
+		}
+		public GenericEntry CreateEntry(string name, string content, Sprite icon, Color color)
+		{
+			GenericEntry entry = genericEntryPool.Get().GetComponent<GenericEntry>();
+			entry.SetContent(name, content, icon, color);
 			return entry;
 		}
 
-		/// <summary>
-		/// Create a new entry
-		/// </summary>
-		public GenericEntry CreateEntry<T>(string name, T param, Sprite icon, Color color)
+		public GenericEntry CreateEntry(string name, string content, UnityAction buttonCallBack)
 		{
-			// Instantiate prefab
-			GameObject go = genericEntryIconPool.Get();
-
-			// Store component
-			GenericEntryIcon entry = go.GetComponent<GenericEntryIcon>();
-
-			// Add to list
-			genericEntry.Add(entry);
-
-			// Assign parent
-			go.transform.SetParent(entryLocation, false);
-
-			// Is this an editable property?
-			entry.PropertyLabel<T>(name, param, icon, color);
-
-			go.SetActive(true);
-
-			return entry;
-		}
-
-		/// <summary>
-		/// Create a new entry with button and given callback
-		/// </summary>
-		public GenericEntry CreateEntry<T>(string name, T param, UnityAction buttonCallBack)
-		{
-			// Instantiate prefab
-			GameObject go = genericEntryButtonPool.Get();
-
-			// Store component
-			GenericEntry entry = go.GetComponent<GenericEntry>();
-
-			// Add to list
-			genericEntry.Add(entry);
-
-			// Assign parent
-			go.transform.SetParent(entryLocation, false);
-			entry.PropertyLabel<T>(name, param, buttonCallBack);
-
-			go.SetActive(true);
-
+			GenericEntry entry = genericEntryPool.Get().GetComponent<GenericEntry>();
+			entry.SetContent(name, content, buttonCallBack);
 			return entry;
 		}
 	}
