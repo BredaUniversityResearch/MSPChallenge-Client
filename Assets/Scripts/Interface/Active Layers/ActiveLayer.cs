@@ -7,78 +7,130 @@ namespace MSP2050.Scripts
 {
 	public class ActiveLayer : MonoBehaviour {
 
-		public TextMeshProUGUI layerName;
-		public CustomToggle visibilityToggle;
-		public CustomToggle expandToggle;
-		public CustomToggle layerTextToggle;
-		public CustomToggle pinToggle;//TODO: make work
-		public CustomButton closeButton;
-		public Transform contentLocation;
-		
+		[SerializeField] TextMeshProUGUI m_layerName;
+		[SerializeField] CustomToggle m_visibilityToggle;
+		[SerializeField] CustomToggle m_expandToggle;
+		[SerializeField] CustomToggle m_layerTextToggle;
+		[SerializeField] CustomToggle m_pinToggle;//TODO: make work
+		[SerializeField] CustomButton m_closeButton;
 	
 		[Header("Prefabs")]
-		public GameObject entityTypeEntryPrefab;
+		[SerializeField] GameObject m_entityTypeEntryPrefab;
+		[SerializeField] Transform m_contentLocation;
 		
-		[HideInInspector] public AbstractLayer layerRepresenting;
+		AbstractLayer m_layerRepresenting;
 
 		private void Start()
 		{
-			expandToggle.onValueChanged.AddListener((b) => SetExpanded(b));
-		}
-
-		public void ShowCloseButton(bool show)
-		{
-			closeButton.gameObject.SetActive(show);
-		}
-
-		public void SetLayerRepresenting(AbstractLayer layer, bool forceTextHidden)
-		{
-			layerRepresenting = layer;
-			layerName.text = string.IsNullOrEmpty(layer.ShortName) ? layer.FileName : layer.ShortName;
-			foreach (EntityType entityType in layerRepresenting.GetEntityTypesSortedByKey())
-			{
-				ActiveLayerEntityType mapKey = Instantiate(entityTypeEntryPrefab, contentLocation).GetComponent<ActiveLayerEntityType>();
-				mapKey.SetContent(layerRepresenting, entityType);
-			}
-			if (layerRepresenting.textInfo == null)
-			{
-				layerTextToggle.gameObject.SetActive(false);
-			}
-			else
-			{
-				if (forceTextHidden && layer.LayerTextVisible)
-					layer.LayerTextVisible = false;
-				layerTextToggle.isOn = layer.LayerTextVisible;
-				layerTextToggle.onValueChanged.AddListener((value) =>
-				{
-					layerRepresenting.LayerTextVisible = value;
-					InterfaceCanvas.Instance.activeLayers.TextShowingChanged(value);
-				});
-			}
-		}
-
-		public void SetExpanded(bool value)
-		{
-			if (contentLocation.gameObject.activeInHierarchy == value)
-				return;
-
-			contentLocation.gameObject.SetActive(value);
-			InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(value);
-		}
-
-		public void SetVisibilityLocked(bool value)
-		{
-			visibilityToggle.interactable = !value;
+			m_expandToggle.onValueChanged.AddListener((b) => SetExpanded(b));
+			LayerManager.Instance.m_onLayerVisibilityChanged += OnLayerVisibilityChanged;
+			m_pinToggle.onValueChanged.AddListener(m_visibilityToggle.gameObject.SetActive);
+			m_visibilityToggle.onValueChanged.AddListener(OnVisibilityToggleChanged);
+			m_closeButton.onClick.AddListener(OnCloseButtonPressed);
 		}
 
 		public void Destroy()
 		{
-			if (contentLocation.gameObject.activeInHierarchy)
+			if (m_contentLocation.gameObject.activeInHierarchy)
 			{
 				InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(false);
 				InterfaceCanvas.Instance.activeLayers.TextShowingChanged(false);
 			}
+			LayerManager.Instance.m_onLayerVisibilityChanged -= OnLayerVisibilityChanged;
 			Destroy(gameObject);
+		}
+
+		public void SetLayerRepresenting(AbstractLayer a_layer, bool a_forceTextHidden)
+		{
+			m_layerRepresenting = a_layer;
+			m_visibilityToggle.isOn = true;
+			m_layerName.text = string.IsNullOrEmpty(a_layer.ShortName) ? a_layer.FileName : a_layer.ShortName;
+			foreach (EntityType entityType in m_layerRepresenting.GetEntityTypesSortedByKey())
+			{
+				ActiveLayerEntityType mapKey = Instantiate(m_entityTypeEntryPrefab, m_contentLocation).GetComponent<ActiveLayerEntityType>();
+				mapKey.SetContent(m_layerRepresenting, entityType);
+			}
+			if (m_layerRepresenting.textInfo == null)
+			{
+				m_layerTextToggle.gameObject.SetActive(false);
+			}
+			else
+			{
+				if (a_forceTextHidden && a_layer.LayerTextVisible)
+					a_layer.LayerTextVisible = false;
+				m_layerTextToggle.isOn = a_layer.LayerTextVisible;
+				m_layerTextToggle.onValueChanged.AddListener((value) =>
+				{
+					m_layerRepresenting.LayerTextVisible = value;
+					InterfaceCanvas.Instance.activeLayers.TextShowingChanged(value);
+				});
+			}
+		}
+		void OnVisibilityToggleChanged(bool a_value)
+		{
+			if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
+				return;
+
+			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
+			if (a_value)
+			{
+				LayerManager.Instance.ShowLayer(m_layerRepresenting);
+			}
+			else
+			{
+				LayerManager.Instance.HideLayer(m_layerRepresenting);
+			}
+			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
+		}
+
+		void OnCloseButtonPressed()
+		{
+			if (PlanManager.Instance.planViewing == null || !PlanManager.Instance.planViewing.IsLayerpartOfPlan(m_layerRepresenting))
+			{
+				InterfaceCanvas.Instance.activeLayers.RemoveLayer(m_layerRepresenting);
+				LayerManager.Instance.HideLayer(m_layerRepresenting);
+			}
+		}
+
+		public void SetExpanded(bool a_value)
+		{
+			if (m_contentLocation.gameObject.activeInHierarchy == a_value)
+				return;
+
+			m_contentLocation.gameObject.SetActive(a_value);
+			InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(a_value);
+		}
+
+		public void SetTextActive(bool a_active)
+		{
+			m_layerTextToggle.isOn = a_active;
+		}
+
+		public void SetVisible()
+		{
+			m_visibilityToggle.isOn = true;
+		}
+
+		public void SetVisibilityLocked(bool a_value)
+		{
+			m_visibilityToggle.interactable = !a_value;
+		}
+		
+		void OnLayerVisibilityChanged(AbstractLayer a_layer, bool a_visible)
+		{
+			if (!gameObject.activeSelf || a_layer != m_layerRepresenting || InterfaceCanvas.Instance.ignoreLayerToggleCallback)
+				return;
+
+			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
+			if(m_pinToggle.isOn)
+			{
+				m_visibilityToggle.isOn = a_visible;
+			}
+			else if(!m_visibilityToggle)
+			{
+				InterfaceCanvas.Instance.activeLayers.RemoveLayer(m_layerRepresenting);
+			}
+			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 		}
 	}
 }

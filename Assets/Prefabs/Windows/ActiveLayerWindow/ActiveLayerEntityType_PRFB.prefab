@@ -251,7 +251,7 @@ GameObject:
   - component: {fileID: 8230274677407283955}
   - component: {fileID: 7177889944554762851}
   m_Layer: 5
-  m_Name: ActiveLayerMapKey_PRFB
+  m_Name: ActiveLayerEntityType_PRFB
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -292,16 +292,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acb2ca09fcf50ba4087796c26e7f9461, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barToggle: {fileID: 0}
-  label: {fileID: 7212233824223510222}
-  pointKey: {fileID: 8230274691786631271}
-  outlineKey: {fileID: 8230274691930314675}
-  visibilityImage: {fileID: 0}
-  lineKey: {fileID: 8230075302912701751}
-  areaKey: {fileID: 8230274675968369195}
-  visibleSprite: {fileID: 21300000, guid: 51b8cad63953a6f4197f2332ef5dc244, type: 3}
-  invisibleSprite: {fileID: 21300000, guid: 1c574655223861947892a99e7b2373af, type: 3}
-  ID: 0
+  m_label: {fileID: 7212233824223510222}
+  m_pointKey: {fileID: 8230274691786631271}
+  m_lineKey: {fileID: 8230075302912701751}
+  m_areaKey: {fileID: 8230274675968369195}
+  m_outlineKey: {fileID: 8230274691930314675}
 --- !u!114 &7177889944554762851
 MonoBehaviour:
   m_ObjectHideFlags: 0

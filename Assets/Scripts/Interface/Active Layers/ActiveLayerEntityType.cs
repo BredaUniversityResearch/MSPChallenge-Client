@@ -6,11 +6,11 @@ namespace MSP2050.Scripts
 {
 	public class ActiveLayerEntityType : MonoBehaviour
 	{
-		[HideInInspector] TextMeshProUGUI m_label;
-		[HideInInspector] Image m_pointKey;
-		[HideInInspector] Image m_lineKey;
-		[HideInInspector] RawImage m_areaKey;
-		[HideInInspector] Image m_outlineKey;
+		[SerializeField] TextMeshProUGUI m_label;
+		[SerializeField] Image m_pointKey;
+		[SerializeField] Image m_lineKey;
+		[SerializeField] RawImage m_areaKey;
+		[SerializeField] Image m_outlineKey;
 
 		public void SetContent(AbstractLayer a_layer, EntityType a_entityType)
 		{

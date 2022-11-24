@@ -329,7 +329,7 @@ namespace MSP2050.Scripts
 				}
 				else if (Main.Instance.LayerSelectedForCurrentExpertise(layer.FileName))
 				{
-					InterfaceCanvas.Instance.activeLayers.AddLayer(layer, false);
+					InterfaceCanvas.Instance.activeLayers.AddLayer(layer);
 				}
 
 				layer.Loaded = true;
