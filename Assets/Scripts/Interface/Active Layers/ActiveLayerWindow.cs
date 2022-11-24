@@ -5,28 +5,24 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MSP2050.Scripts
 {
 	public class ActiveLayerWindow : MonoBehaviour
 	{
-		[Header("Children")]
-		public Transform contentLocation;
-		public Object activeLayerPrefab;
+		[Header("Prefabs")]
+		[HideInInspector] Transform contentLocation;
+		[HideInInspector] GameObject activeLayerPrefab;
 
 		[Header("Buttons")]
-		public CustomButton clearAllButton;
-		public CustomButton collapseAllButton;
-		public CustomButton showHideTextButton;
-		public TextMeshProUGUI collapseAllButtonText, showHideTextText;
-		public Image showHideTextIcon;
-		public Sprite hideTextSprite, showTextSprite;
+		[HideInInspector] CustomButton clearAllButton;
+		[HideInInspector] CustomButton collapseAllButton;
+		[HideInInspector] CustomButton showHideTextButton;
+		[HideInInspector] TextMeshProUGUI collapseAllButtonText;
+		[HideInInspector] TextMeshProUGUI showHideTextText;
 
 		[Header("Other")]
-		public ResizeHandle resizeHandle;
-		public ScrollRect contentScrollRect;
-		public LayoutElement rescaleLayoutElement;
+		[HideInInspector] ScrollRect contentScrollRect;
 
 		private Dictionary<AbstractLayer, ActiveLayer> activeLayers = new Dictionary<AbstractLayer, ActiveLayer>();
 		private int expandedLayers = 0;
@@ -89,9 +85,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				GameObject go = Instantiate(activeLayerPrefab) as GameObject;
-				go.transform.SetParent(contentLocation, false);
-				ActiveLayer activeLayer = go.GetComponent<ActiveLayer>();
+				ActiveLayer activeLayer = Instantiate(activeLayerPrefab, contentLocation).GetComponent<ActiveLayer>();
 				activeLayer.SetLayerRepresenting(layer, allTextHidden);
 				activeLayer.visibilityToggle.isOn = addEnabled;
 				activeLayers.Add(layer, activeLayer);
@@ -103,17 +97,6 @@ namespace MSP2050.Scripts
 						RemoveLayer(activeLayer.layerRepresenting);
 					}
 				});
-
-				if (!String.IsNullOrEmpty(activeLayer.layerRepresenting.Media))
-				{
-					activeLayer.infoButton.onClick.AddListener(() =>
-					{
-						string mediaUrl = MediaUrl.Parse(activeLayer.layerRepresenting.Media);
-						InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl);
-					});
-				}
-				else
-					activeLayer.infoButton.gameObject.SetActive(false);
 
 				activeLayer.visibilityToggle.onValueChanged.AddListener((value) =>
 				{
@@ -198,7 +181,6 @@ namespace MSP2050.Scripts
 			{
 				allTextHidden = value;
 				showHideTextText.text = allTextHidden ? "Show all" : "Hide all";
-				showHideTextIcon.sprite = allTextHidden ? hideTextSprite : showTextSprite;
 			}
 			get
 			{

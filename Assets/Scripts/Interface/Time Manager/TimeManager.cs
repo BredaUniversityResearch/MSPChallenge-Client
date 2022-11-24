@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 					for (int i = 0; i < ERA_COUNT; i++)
 					{
 						TimeManagerWindow.instance.eraDivision.SetEraSimulationDivision(i, division);
-						TimeBar.instance.markers[i].eraSimMarker.rectTransform.sizeDelta = new Vector2((TimeBar.instance.eraMarkerLocation.rect.width / (float)ERA_COUNT) * division, 4f);
+						TimeBar.instance.eraMarkers[i].eraSimMarker.rectTransform.sizeDelta = new Vector2((TimeBar.instance.eraMarkerParent.rect.width / (float)ERA_COUNT) * division, 4f);
 					}
 					TimeManagerWindow.instance.eraDivision.SetSliderValue(newGameTime / 12);
 					eraGameTime = newGameTime;

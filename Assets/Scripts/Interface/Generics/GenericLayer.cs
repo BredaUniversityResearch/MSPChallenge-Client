@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
 		public GameObject mapKeyPrefab;
 
 		[Header("Content")]
-		public List<MapKey> mapKeyContent = new List<MapKey>();
+		public List<ActiveLayerEntityType> mapKeyContent = new List<ActiveLayerEntityType>();
 
 		//void Start()
 		//{
@@ -62,9 +62,9 @@ namespace MSP2050.Scripts
 			CreateKey();
 		}
 
-		public MapKey CreateMapKey(Color col, string label)
+		public ActiveLayerEntityType CreateMapKey(Color col, string label)
 		{
-			MapKey key = CreateKey();
+			ActiveLayerEntityType key = CreateKey();
 
 			key.areaKey.color = col;
 			key.lineKey.color = col;
@@ -74,9 +74,9 @@ namespace MSP2050.Scripts
 			return key;
 		}
 
-		public MapKey CreateMapKey(Color col, string label, Texture2D pattern)
+		public ActiveLayerEntityType CreateMapKey(Color col, string label, Texture2D pattern)
 		{
-			MapKey key = CreateKey();
+			ActiveLayerEntityType key = CreateKey();
 
 			key.areaKey.texture = pattern;
 			key.areaKey.color = col;
@@ -101,16 +101,16 @@ namespace MSP2050.Scripts
 		}
 
 
-		private MapKey CreateKey()
+		private ActiveLayerEntityType CreateKey()
 		{
 			// Instantiate prefab
 			GameObject go = Instantiate(mapKeyPrefab);
 
 			// Store component
-			MapKey content = go.GetComponent<MapKey>();
+			ActiveLayerEntityType content = go.GetComponent<ActiveLayerEntityType>();
 
 			// Add to list
-			mapKeyContent.Add(go.GetComponent<MapKey>());
+			mapKeyContent.Add(go.GetComponent<ActiveLayerEntityType>());
 
 			// Assign parent
 			go.transform.SetParent(contentLocation, false);
