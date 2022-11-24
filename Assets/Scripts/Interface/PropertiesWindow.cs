@@ -153,6 +153,8 @@ namespace MSP2050.Scripts
 			if (Main.IsDeveloper)
 			{
 				debugInfoParent.gameObject.SetActive(true);
+
+				//GameObject contentContainer = debugInfoParent.transform.GetChild(1).gameObject;
 				debugInfoParent.DestroyAllContent();
 				debugInfoParent.Initialise();
 				AddEntry(debugInfoParent, "MSP ID", subEntity.GetMspID());
@@ -187,170 +189,30 @@ namespace MSP2050.Scripts
 				position.z));
 		}
 
-		//private void SetupVideoWindowButton(GenericWindow window, string layerName, Entity entity)
-		//{
-		//	bool hasVideo = PropertyWindowVideoAssigner.instance.HasVideo(layerName);
-		//	window.ShowEditButton(hasVideo);
-		//	if (hasVideo)
-		//	{
-		//		Image editBtnImage = window.editButton.gameObject.transform.parent.Find("Icon").GetComponent<Image>();
-
-		//		editBtnImage.sprite = InterfaceCanvas.instance.playLSpr;
-		//		window.editButton.onClick.AddListener(() =>
-		//		{
-		//			if (videoWindow != null)
-		//			{
-		//				editBtnImage.sprite = InterfaceCanvas.instance.playRSpr;
-		//				videoWindow.Destroy();
-		//			}
-		//			else
-		//			{
-		//				editBtnImage.sprite = InterfaceCanvas.instance.playLSpr;
-		//				videoWindow = CreateVideoWindow(window, layerName, "VideoWindow", new Vector2(PROPERTY_WINDOW_WIDTH, PROPERTY_WINDOW_DEFAULT_HEIGHT), new Vector2(600.0f, 300.0f), entity);
-		//			}
-		//		});
-
-		//		Create3DScene(layerName, window, PROPERTY_WINDOW_DEFAULT_HEIGHT, entity);
-		//		CreateVideoWindow(layerName, window, PROPERTY_WINDOW_DEFAULT_HEIGHT, PROPERTY_WINDOW_WIDTH, entity);
-		//	}
-		//}
-
-		//GenericWindow CreateVideoWindow(GenericWindow window, string videoName, string windowName, Vector2 windowSize, Vector2 resizeSize, Entity entity)
-		//{
-		//	MovieTexture tMovieTex = new MovieTexture();
-		//	if (PropertyWindowVideoAssigner.instance.GetVideo(videoName, ref tMovieTex))
-		//	{
-		//		GenericWindow tVideoWindow = InterfaceCanvas.GetInterfaceCanvas().CreateGenericWindow(windowName);
-		//		if (tVideoWindow.gameObject.GetComponent<VerticalLayoutGroup>())
-		//		{
-		//			MonoBehaviour.DestroyImmediate(tVideoWindow.gameObject.GetComponent<VerticalLayoutGroup>());
-		//			tVideoWindow.gameObject.AddComponent<HorizontalLayoutGroup>();
-		//		}
-
-		//		tVideoWindow.ShowEditButton(true);
-		//		tVideoWindow.editButton.gameObject.transform.parent.Find("Icon").GetComponent<Image>().sprite = InterfaceCanvas.instance.cameraSpr;
-		//		//Resize property Window
-		//		tVideoWindow.editButton.onClick.AddListener(() =>
-		//		{
-		//			tVideoWindow.Destroy();
-		//			videoWindow = CreateVideoWindow(window, videoName, windowName, resizeSize, windowSize, entity);
-		//		});
-
-		//		tVideoWindow.transform.SetParent(window.transform, false);
-		//		//videoWindow.transform.position = position + Vector3.up * 600.0f + Vector3.right * windowWidth;
-		//		if (tVideoWindow.GetComponent<Draggable>())
-		//		{
-		//			tVideoWindow.GetComponent<Draggable>().enabled = false;
-		//		}
-
-		//		GenericContent Window3D = tVideoWindow.CreateContentWindow(false);
-		//		Window3D.SetPrefHeight(windowSize.y);
-		//		GenericEntry Window3DEntry = AddEntry(Window3D, "", tMovieTex);
-		//		Window3DEntry.gameObject.GetComponentInParent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.Unconstrained;
-
-		//		VerticalLayoutGroup tVerticalLayout = Window3DEntry.gameObject.GetComponentInParent<VerticalLayoutGroup>();
-		//		tVerticalLayout.childForceExpandWidth = true;
-		//		tVerticalLayout.childForceExpandHeight = true;
-		//		tVerticalLayout.childAlignment = TextAnchor.MiddleCenter;
-		//		LayoutElement tLayoutElement = Window3DEntry.transform.GetComponent<LayoutElement>();
-		//		tLayoutElement.minWidth = windowSize.x; //windowHeight;
-		//		tLayoutElement.minHeight = windowSize.y; //windowHeight;
-		//		tMovieTex.loop = true;
-		//		tMovieTex.Play();
-
-		//		return tVideoWindow;
-		//	}
-		//	return null;
-		//}
-
 		public void Close()
 		{
 			gameObject.SetActive(false);
 		}
 
-		private void closeWindowDelegate(Entity entity)
-		{
-			//Delete created rendertexture
-			SceneCaptureManager.instance.CloseSceneRenderer(entity.Layer.GetShortName());
-
-		}
-
 		private GenericEntry AddEntry(GenericContent content, string entryName, string entryContent, Sprite icon, Color color)
 		{
-			GenericEntry entry = content.CreateEntry<string>(entryName, entryContent, icon, color);
+			GenericEntry entry = content.CreateEntry(entryName, entryContent, icon, color);
 
 			return entry;
 		}
 
 		private GenericEntry AddEntry(GenericContent content, string entryName, string entryContent)
 		{
-			GenericEntry entry = content.CreateEntry<string>(entryName, entryContent);
-
-			return entry;
-		}
-
-		private GenericEntry AddEntry(GenericContent content, string entryName, Texture entryContent)
-		{
-			GenericEntry entry = content.CreateEntry<Texture>(entryName, entryContent);
+			GenericEntry entry = content.CreateEntry(entryName, entryContent);
 
 			return entry;
 		}
 
 		private GenericEntry AddEntry(GenericContent content, string entryName, string entryContent, UnityAction callBack)
 		{
-			GenericEntry entry = content.CreateEntry<string>(entryName, entryContent, callBack);
+			GenericEntry entry = content.CreateEntry(entryName, entryContent, callBack);
 
 			return entry;
 		}
-
-		//private void Create3DScene(string windowName, GenericWindow window, float windowHeight, Entity entity)
-		//{
-		//	//Creates a 3D scene window in the top of the window
-		//	RenderTexture tTex = new RenderTexture(400, 400, 16, RenderTextureFormat.ARGB32);
-		//	if (SceneCaptureManager.instance.OpenSceneRenderer(windowName, ref tTex))
-		//	{
-		//		GenericContent Window3D = window.CreateContentWindow(false);
-		//		Window3D.SetPrefHeight(windowHeight);
-
-		//		GenericEntry Window3DEntry = AddEntry(Window3D, "", tTex);
-		//		Window3DEntry.gameObject.GetComponentInParent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.Unconstrained;
-		//		VerticalLayoutGroup tVerticalLayout = Window3DEntry.gameObject.GetComponentInParent<VerticalLayoutGroup>();
-		//		tVerticalLayout.childForceExpandWidth = false;
-		//		tVerticalLayout.childForceExpandHeight = false;
-		//		tVerticalLayout.childAlignment = TextAnchor.MiddleCenter;
-		//		LayoutElement tLayoutElement = Window3DEntry.transform.GetComponent<LayoutElement>();
-		//		tLayoutElement.minWidth = windowHeight;
-		//	}
-		//}
-
-		//private void CreateVideoWindow(string windowName, GenericWindow window, float windowHeight, float windowWidth, Entity entity)
-		//{
-		//	if (displayVideoInNewWindow)
-		//	{
-		//		videoWindow = CreateVideoWindow(window, windowName, "VideoWindow", new Vector2(PROPERTY_WINDOW_WIDTH, PROPERTY_WINDOW_DEFAULT_HEIGHT), new Vector2(600.0f, 300.0f), entity);
-		//	}
-		//	else
-		//	{
-		//		//Creates a video window in the top of the window
-		//		MovieTexture tMovieTex = new MovieTexture();
-		//		if (PropertyWindowVideoAssigner.instance.GetVideo(windowName, ref tMovieTex))
-		//		{
-		//			GenericContent Window3D = window.CreateContentWindow(false);
-		//			Window3D.SetPrefHeight(windowHeight);
-
-		//			GenericEntry Window3DEntry = AddEntry(Window3D, "", tMovieTex);
-		//			Window3DEntry.gameObject.GetComponentInParent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.Unconstrained;
-		//			VerticalLayoutGroup tVerticalLayout = Window3DEntry.gameObject.GetComponentInParent<VerticalLayoutGroup>();
-		//			tVerticalLayout.childForceExpandWidth = false;
-		//			tVerticalLayout.childForceExpandHeight = false;
-		//			tVerticalLayout.childAlignment = TextAnchor.MiddleCenter;
-		//			LayoutElement tLayoutElement = Window3DEntry.transform.GetComponent<LayoutElement>();
-		//			tLayoutElement.minWidth = windowWidth; //windowHeight;
-
-		//			tMovieTex.loop = true;
-		//			tMovieTex.Play();
-		//		}
-		//	}
-		//}
 	}
 }

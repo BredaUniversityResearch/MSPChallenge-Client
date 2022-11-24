@@ -94,5 +94,16 @@ namespace MSP2050.Scripts
 				inactiveList.Push(result);
 			}
 		}
+
+		public void ReleaseAll()
+        {
+			foreach(GameObject go in activeContainer)
+            {
+				go.SetActive(false);
+				go.transform.SetParent(inactiveContainer, false);
+				inactiveList.Push(go);
+			}
+			activeList.Clear();
+		}
 	}
 }
