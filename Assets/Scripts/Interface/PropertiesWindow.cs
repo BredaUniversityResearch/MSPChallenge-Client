@@ -153,6 +153,8 @@ namespace MSP2050.Scripts
 			if (Main.IsDeveloper)
 			{
 				debugInfoParent.gameObject.SetActive(true);
+
+				//GameObject contentContainer = debugInfoParent.transform.GetChild(1).gameObject;
 				debugInfoParent.DestroyAllContent();
 				debugInfoParent.Initialise();
 				AddEntry(debugInfoParent, "MSP ID", subEntity.GetMspID());
@@ -272,7 +274,6 @@ namespace MSP2050.Scripts
 		{
 			//Delete created rendertexture
 			SceneCaptureManager.instance.CloseSceneRenderer(entity.Layer.GetShortName());
-
 		}
 
 		private GenericEntry AddEntry(GenericContent content, string entryName, string entryContent, Sprite icon, Color color)

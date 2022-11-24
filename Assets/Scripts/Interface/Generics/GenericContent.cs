@@ -12,10 +12,8 @@ namespace MSP2050.Scripts
 		public GameObject genericEntryPrefab;
 		public GameObject genericEntryIconPrefab;
 		public GameObject genericEntryButtonPrefab;
-		public GameObject genericLayerPrefab;
     
 		private List<GenericEntry> genericEntry = new List<GenericEntry>();
-		private List<GenericLayer> genericLayer = new List<GenericLayer>();
 
 		private PrefabObjectPool genericEntryPool;
 		private PrefabObjectPool genericEntryIconPool;
@@ -56,15 +54,6 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		/// <summary>
-		/// Remove from list and destroy a content window entry
-		/// </summary>
-		public void DestroyGenericLayer(GenericLayer layer)
-		{
-			genericLayer.Remove(layer);
-			Destroy(layer.gameObject);
-		}
-
 		public void DestroyAllContent()
 		{
 			for (int i = genericEntry.Count - 1; i >= 0; --i)
@@ -72,12 +61,7 @@ namespace MSP2050.Scripts
 				DestroyGenericEntry(genericEntry[i]);
 			}
 
-			for (int i = genericLayer.Count - 1; i >= 0; --i)
-			{
-				DestroyGenericLayer(genericLayer[i]);
-			}
-
-			if (genericEntry.Count > 0 || genericLayer.Count > 0)
+			if (genericEntry.Count > 0)
 			{
 				Debug.LogError("Incomplete destruction of generic content");
 			}
@@ -160,29 +144,6 @@ namespace MSP2050.Scripts
 			go.SetActive(true);
 
 			return entry;
-		}
-
-		/// <summary>
-		/// Create a new layer
-		/// </summary>
-		public GenericLayer CreateLayer(string name, bool editable, bool closeable = false)
-		{
-			// Instantiate prefab
-			GameObject go = Instantiate(genericLayerPrefab);
-
-			// Store component
-			GenericLayer layer = go.GetComponent<GenericLayer>();
-
-			// Add to list
-			genericLayer.Add(layer);
-
-			// Assign parent
-			go.transform.SetParent(entryLocation, false);
-
-			// Set name
-			layer.SetTitle(name);
-
-			return layer;
 		}
 	}
 }
