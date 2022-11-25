@@ -74,6 +74,7 @@ namespace MSP2050.Scripts
 		private Plan m_currentPlan;
 		private enum EInteractionMode { View, EditExisting, SetupNew, EditNew, RestoreArchived }
 		private EInteractionMode m_interactionMode;
+		private bool m_initialised;
 
 		//Editing backup
 		private PlanBackup m_planBackup;
@@ -84,8 +85,10 @@ namespace MSP2050.Scripts
 		public bool Editing => m_interactionMode != EInteractionMode.View;
 		public PlanBackup PlanBackup => m_planBackup;
 
-		void Awake()
+		void Initialise()
 		{
+			m_initialised = true;
+
 			m_changeLayersToggle.Initialise(this, m_layerSelect);
 			m_changePoliciesToggle.Initialise(this, m_policySelect);
 			m_communicationToggle.Initialise(this, m_communicationContent);
@@ -345,6 +348,9 @@ namespace MSP2050.Scripts
 
 		public void SetToPlan(Plan plan)
 		{
+			if (!m_initialised)
+				Initialise();
+
 			gameObject.SetActive(true);
 			if (plan == null)
 			{

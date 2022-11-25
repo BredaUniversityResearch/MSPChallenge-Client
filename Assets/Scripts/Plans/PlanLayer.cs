@@ -19,8 +19,6 @@ namespace MSP2050.Scripts
 		private List<Entity> newGeometry; //Object
 		public HashSet<int> RemovedGeometry; //Indexed by persistent ID
 		public List<PlanIssueObject> issues;
-
-		//public string State { get; private set; }
     
 		bool isEnabled = false;
 		public bool updating = false;
