@@ -5,64 +5,60 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MSP2050.Scripts
 {
 	public class ActiveLayerWindow : MonoBehaviour
 	{
-		[Header("Children")]
-		public Transform contentLocation;
-		public Object activeLayerPrefab;
+		[Header("Prefabs")]
+		[SerializeField] Transform m_contentLocation;
+		[SerializeField] GameObject m_activeLayerPrefab;
 
 		[Header("Buttons")]
-		public CustomButton clearAllButton;
-		public CustomButton collapseAllButton;
-		public CustomButton showHideTextButton;
-		public TextMeshProUGUI collapseAllButtonText, showHideTextText;
-		public Image showHideTextIcon;
-		public Sprite hideTextSprite, showTextSprite;
+		[SerializeField] CustomButton m_clearAllButton;
+		[SerializeField] CustomButton m_collapseAllButton;
+		[SerializeField] CustomButton m_showHideTextButton;
+		[SerializeField] TextMeshProUGUI m_collapseAllButtonText;
+		[SerializeField] TextMeshProUGUI m_showHideTextText;
 
 		[Header("Other")]
-		public ResizeHandle resizeHandle;
-		public ScrollRect contentScrollRect;
-		public LayoutElement rescaleLayoutElement;
+		[SerializeField] ScrollRect m_contentScrollRect;
 
-		private Dictionary<AbstractLayer, ActiveLayer> activeLayers = new Dictionary<AbstractLayer, ActiveLayer>();
-		private int expandedLayers = 0;
-		private bool allTextHidden;
+		private Dictionary<AbstractLayer, ActiveLayer> m_activeLayers = new Dictionary<AbstractLayer, ActiveLayer>();
+		private int m_expandedLayers = 0;
+		private bool m_allTextHidden;
 
 		private void Start()
 		{
-			collapseAllButton.onClick.AddListener(() =>
+			m_collapseAllButton.onClick.AddListener(() =>
 			{
-				if (expandedLayers == 0)
+				if (m_expandedLayers == 0)
 				{
-					foreach (KeyValuePair<AbstractLayer, ActiveLayer> kvp in activeLayers)
+					foreach (KeyValuePair<AbstractLayer, ActiveLayer> kvp in m_activeLayers)
 						kvp.Value.SetExpanded(true);
 				}
 				else
 				{
-					foreach (KeyValuePair<AbstractLayer, ActiveLayer> kvp in activeLayers)
+					foreach (KeyValuePair<AbstractLayer, ActiveLayer> kvp in m_activeLayers)
 						kvp.Value.SetExpanded(false);
-					contentScrollRect.verticalNormalizedPosition = 1f;
+					m_contentScrollRect.verticalNormalizedPosition = 1f;
 				}
 			});
 
-			clearAllButton.onClick.AddListener(ClearAllActiveLayers);
+			m_clearAllButton.onClick.AddListener(ClearAllActiveLayers);
 
-			showHideTextButton.onClick.AddListener(() =>
+			m_showHideTextButton.onClick.AddListener(() =>
 			{
-				if (allTextHidden)
+				if (m_allTextHidden)
 				{
-					foreach (KeyValuePair<AbstractLayer, ActiveLayer> kvp in activeLayers)
-						kvp.Value.layerTextToggle.isOn = true;
+					foreach (KeyValuePair<AbstractLayer, ActiveLayer> kvp in m_activeLayers)
+						kvp.Value.SetTextActive(true);
 					AllTextHidden = false;
 				}
 				else
 				{
-					foreach (KeyValuePair<AbstractLayer, ActiveLayer> kvp in activeLayers)
-						kvp.Value.layerTextToggle.isOn = false;
+					foreach (KeyValuePair<AbstractLayer, ActiveLayer> kvp in m_activeLayers)
+						kvp.Value.SetTextActive(false);
 					AllTextHidden = true;
 				}
 			});
@@ -70,99 +66,47 @@ namespace MSP2050.Scripts
 
 		private void OnDisable()
 		{
-			if (InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn)
-			{
-				InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = false;
-			}
+			InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = false;
 		}
 
-		public void AddLayer(AbstractLayer layer, bool addEnabled = true)
+		public void AddLayer(AbstractLayer layer)
 		{
-			if (activeLayers.ContainsKey(layer))
+			if (m_activeLayers.TryGetValue(layer, out var existingActiveLayer))
 			{
-				if (activeLayers[layer] && activeLayers[layer].gameObject)
-				{
-					activeLayers[layer].gameObject.SetActive(true);
-					if(addEnabled)
-						activeLayers[layer].visibilityToggle.isOn = true;
-				}
+				existingActiveLayer.SetVisible();
 			}
 			else
 			{
-				GameObject go = Instantiate(activeLayerPrefab) as GameObject;
-				go.transform.SetParent(contentLocation, false);
-				ActiveLayer activeLayer = go.GetComponent<ActiveLayer>();
-				activeLayer.SetLayerRepresenting(layer, allTextHidden);
-				activeLayer.visibilityToggle.isOn = addEnabled;
-				activeLayers.Add(layer, activeLayer);
-				activeLayer.closeButton.onClick.AddListener(() => 
-				{
-					if (PlanManager.Instance.planViewing == null || !PlanManager.Instance.planViewing.IsLayerpartOfPlan(activeLayer.layerRepresenting))
-					{
-						LayerManager.Instance.HideLayer(activeLayer.layerRepresenting);
-						RemoveLayer(activeLayer.layerRepresenting);
-					}
-				});
-
-				if (!String.IsNullOrEmpty(activeLayer.layerRepresenting.Media))
-				{
-					activeLayer.infoButton.onClick.AddListener(() =>
-					{
-						string mediaUrl = MediaUrl.Parse(activeLayer.layerRepresenting.Media);
-						InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl);
-					});
-				}
-				else
-					activeLayer.infoButton.gameObject.SetActive(false);
-
-				activeLayer.visibilityToggle.onValueChanged.AddListener((value) =>
-				{
-					if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
-						return;
-
-					InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
-					if (value)
-					{
-						LayerManager.Instance.ShowLayer(activeLayer.layerRepresenting);
-					}
-					else
-					{
-						LayerManager.Instance.HideLayer(activeLayer.layerRepresenting);
-					}
-					InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
-				});
+				ActiveLayer activeLayer = Instantiate(m_activeLayerPrefab, m_contentLocation).GetComponent<ActiveLayer>();
+				activeLayer.SetLayerRepresenting(layer, m_allTextHidden);
+				m_activeLayers.Add(layer, activeLayer);
 			}
 		}
 
 		public void RemoveLayer(AbstractLayer layer)
 		{
-			if (activeLayers.ContainsKey(layer))
+			if (m_activeLayers.TryGetValue(layer, out var activeLayer))
 			{
-				activeLayers[layer].Destroy();
-				activeLayers.Remove(layer);
+				activeLayer.Destroy();
+				m_activeLayers.Remove(layer);
 			}
-		}
-
-		public void ToggleLayer(AbstractLayer layer, bool value)
-		{
-			activeLayers[layer].visibilityToggle.isOn = value;
 		}
 
 		public void SetLayerVisibilityLocked(AbstractLayer layer, bool value)
 		{
-			if(activeLayers.TryGetValue(layer, out var result))
+			if(m_activeLayers.TryGetValue(layer, out var result))
 				result.SetVisibilityLocked(value);
 		}
 
 		public void ClearAllActiveLayers()
 		{
 			StartCoroutine(CoroutineHideAllVisibleLayers());
-			contentScrollRect.verticalNormalizedPosition = 1f;
+			m_contentScrollRect.verticalNormalizedPosition = 1f;
 		}
 
 		private IEnumerator CoroutineHideAllVisibleLayers()
 		{
-			List<AbstractLayer> layers = activeLayers.Keys.ToList();
+			List<AbstractLayer> layers = m_activeLayers.Keys.ToList();
 			Plan currentPlan = PlanManager.Instance.planViewing;
 			foreach(AbstractLayer layer in layers)
 			{
@@ -180,10 +124,10 @@ namespace MSP2050.Scripts
 		public void LayerExpansionChanged(bool expanded)
 		{
 			if (expanded)
-				expandedLayers++;
+				m_expandedLayers++;
 			else
-				expandedLayers--;
-			collapseAllButtonText.text = expandedLayers == 0 ? "Expand all" : "Collapse all";
+				m_expandedLayers--;
+			m_collapseAllButtonText.text = m_expandedLayers == 0 ? "Expand all" : "Collapse all";
 		}
 
 		public void TextShowingChanged(bool showing)
@@ -196,13 +140,12 @@ namespace MSP2050.Scripts
 		{
 			private set
 			{
-				allTextHidden = value;
-				showHideTextText.text = allTextHidden ? "Show all" : "Hide all";
-				showHideTextIcon.sprite = allTextHidden ? hideTextSprite : showTextSprite;
+				m_allTextHidden = value;
+				m_showHideTextText.text = m_allTextHidden ? "Show all" : "Hide all";
 			}
 			get
 			{
-				return allTextHidden;
+				return m_allTextHidden;
 			}
 		}
 	}

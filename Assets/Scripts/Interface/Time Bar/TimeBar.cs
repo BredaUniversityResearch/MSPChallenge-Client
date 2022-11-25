@@ -21,45 +21,30 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		[Header("Layout")]
+		[SerializeField] LayoutElement windowLayout;
+		[SerializeField] float collapsedHeight;
+		[SerializeField] float expandedHeight;
+
 		//Timeline
 		[Header("Timeline")]
-		public TextMeshProUGUI collapsedDate;
+		public TextMeshProUGUI currentDateText;
 		public Image fill;
 		public TimeBarEraMarker eraMarkerPrefab;
-		public RectTransform eraMarkerLocation;
-		public List<TimeBarEraMarker> markers = new List<TimeBarEraMarker>();
-
-		[Header("General")]
-		[SerializeField] GameObject simulationTimeContentTop;
-		[SerializeField] TextMeshProUGUI simulationTimeText;
-		[SerializeField] RectTransform simulationTimeIndicatorTop;
+		public RectTransform eraMarkerParent;
+		[HideInInspector] public List<TimeBarEraMarker> eraMarkers = new List<TimeBarEraMarker>();
 		[SerializeField] RectTransform viewingTimeIndicatorBottom;
-		//[SerializeField] ToggleGroup viewModeToggleGroup;
-		[SerializeField] Image expandedBackground;
-		[SerializeField] VerticalLayoutGroup layoutGroup;
 
 		//View time
 		[Header("View Time")]
+		[SerializeField] GameObject viewTimeSection;
 		[SerializeField] Toggle viewTimeToggle;
-		[SerializeField] GameObject viewTimeContentBottom;
 		[SerializeField] TMP_Dropdown viewTimeMonthDropdown;
-		[SerializeField] TMP_Dropdown viewTimeYearDropdown;
-
-		//View difference
-		//[Header("View Difference")]
-		//[SerializeField] Toggle viewDifferenceToggle;
-		//[SerializeField] GameObject viewDifferenceContentTop;
-		//[SerializeField] GameObject viewDifferenceContentBottom;
-		//[SerializeField] RectTransform viewDifferenceIndicatorTop;
-		//[SerializeField] RectTransform viewDifferenceIndicatorBottom;
-		//[SerializeField] TMP_Dropdown viewDifferenceMonthDropdown0;
-		//[SerializeField] TMP_Dropdown viewDifferenceYearDropdown0;
-		//[SerializeField] TMP_Dropdown viewDifferenceMonthDropdown1;
-		//[SerializeField] TMP_Dropdown viewDifferenceYearDropdown1;
+		[SerializeField] TMP_Dropdown viewTimeYearDropdown; 
 
 		//View plan
 		[Header("View Plan")]
-		[SerializeField] GameObject planViewingContentBottom;
+		[SerializeField] GameObject viewPlanSection;
 		[SerializeField] TextMeshProUGUI planViewingText;
 
 		//Planning time
@@ -70,11 +55,7 @@ namespace MSP2050.Scripts
 		[SerializeField] AddTooltip toolTip;
 		PlanningState planningState;
 
-		//Indices selected in dropdowns
-		int selectedMonthView, selectedYearView = 0;
-		//int selectedMonthDiff0, selectedYearDiff0 = 0;
-		//int selectedMonthDiff1, selectedYearDiff1 = 0;
-
+		int selectedMonthView, selectedYearView = 0; 
 		int maxSelectableMonth = 0;
 		int maxSelectableYear = 0;
 		bool ignoreActivityCallback = false;
@@ -91,24 +72,10 @@ namespace MSP2050.Scripts
 					SetViewMode(WorldViewMode.Time, true);
 				else
 					SetViewMode(WorldViewMode.Normal, true);
-			});
-			//viewDifferenceToggle.onValueChanged.AddListener((b) =>
-			//{
-			//	if (b)
-			//		SetViewMode(WorldViewMode.Difference, true);
-			//	else
-			//		SetViewMode(WorldViewMode.Normal, true);
-			//});
+			}); 
 
 			viewTimeMonthDropdown.onValueChanged.AddListener(ViewingMonthDropdownChanged);
-			viewTimeYearDropdown.onValueChanged.AddListener(ViewingYearDropdownChanged);
-
-			//viewDifferenceMonthDropdown0.onValueChanged.AddListener((v) => DifferenceMonthDropdownChanged(v, 0));
-			//viewDifferenceYearDropdown0.onValueChanged.AddListener((v) => DifferencedYearDropdownChanged(v, 0));
-
-			//viewDifferenceMonthDropdown1.onValueChanged.AddListener((v) => DifferenceMonthDropdownChanged(v, 1));
-			//viewDifferenceYearDropdown1.onValueChanged.AddListener((v) => DifferencedYearDropdownChanged(v, 1));
-
+			viewTimeYearDropdown.onValueChanged.AddListener(ViewingYearDropdownChanged); 
 			TimeManager.Instance.OnCurrentMonthChanged += OnMonthChanged;
 			timeManagerButton.interactable = SessionManager.Instance.AreWeGameMaster;
 			toolTip.enabled = SessionManager.Instance.AreWeGameMaster;
@@ -128,27 +95,23 @@ namespace MSP2050.Scripts
 		{
 			for (int i = 0; i < MspGlobalData.num_eras; i++)
 			{
-				TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerLocation, false);
-				markers.Add(marker);
+				TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerParent, false);
+				eraMarkers.Add(marker);
 			}
 		}
 
-		/// <summary>
-		/// Set the date
-		/// </summary>
 		public void SetDate(int month)
 		{
 			if (!TimeManager.Instance.GameStarted)
 			{
-				simulationTimeText.text =
-					planViewingText.text =
-						collapsedDate.text = "";
+				planViewingText.text = "";
+				currentDateText.text = "";
 				return;
 			}
 
 			fill.fillAmount = (float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
-			collapsedDate.text = simulationTimeText.text = Util.MonthToText(month);
-			UpdateIndicator(simulationTimeIndicatorTop, month);
+			currentDateText.text = Util.MonthToText(month);
+			UpdateIndicator(viewingTimeIndicatorBottom, month);
 
 			if (isViewingPlan)
 			{
@@ -170,7 +133,7 @@ namespace MSP2050.Scripts
 			if (mode == viewMode || ignoreActivityCallback)
 				return;
 
-			bool openingViewMode = viewMode == WorldViewMode.Plan || viewMode == WorldViewMode.Normal && (mode == WorldViewMode.Difference || mode == WorldViewMode.Time);
+			bool openingViewMode = viewMode == WorldViewMode.Plan || viewMode == WorldViewMode.Normal && mode == WorldViewMode.Time;
 
 			if (openingViewMode)
 			{
@@ -198,8 +161,7 @@ namespace MSP2050.Scripts
 			SetViewModeElementsActive(viewMode, true, updateWorldView);
 
 			ignoreActivityCallback = true;
-			viewTimeToggle.isOn = mode == WorldViewMode.Time;
-			//viewDifferenceToggle.isOn = mode == WorldViewMode.Difference;
+			viewTimeToggle.isOn = mode == WorldViewMode.Time; 
 			ignoreActivityCallback = false;
 		}
 
@@ -208,18 +170,12 @@ namespace MSP2050.Scripts
 			switch(mode)
 			{
 				case WorldViewMode.Plan:
-					simulationTimeContentTop.SetActive(active);
-					planViewingContentBottom.SetActive(active);
-					simulationTimeIndicatorTop.gameObject.SetActive(active);
-					viewingTimeIndicatorBottom.gameObject.SetActive(active);
+					viewPlanSection.SetActive(active);
 					if (active)
 						UpdatePlanViewing();
 					break;
 				case WorldViewMode.Time:
-					simulationTimeContentTop.SetActive(active);
-					viewTimeContentBottom.SetActive(active);
-					simulationTimeIndicatorTop.gameObject.SetActive(active);
-					viewingTimeIndicatorBottom.gameObject.SetActive(active);
+					viewTimeSection.SetActive(active);
 					if (active)
 					{
 						PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Time, false);
@@ -231,28 +187,9 @@ namespace MSP2050.Scripts
 					else
 						PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.All, false);
 					break;
-				case WorldViewMode.Difference:
-					//viewDifferenceContentBottom.SetActive(active);
-					//viewDifferenceContentTop.SetActive(active);
-					//viewDifferenceIndicatorBottom.gameObject.SetActive(active);
-					//viewDifferenceIndicatorTop.gameObject.SetActive(active);
-					//if (active)
-					//{
-					//	if (updateWorldView)
-					//	{
-					//		//TODO FEATURE: if difference view is added
-					//		UpdateWorldViewingDifference();
-					//	}
-					//}
-					//else
-					//{
-					//	//TODO FEATURE: if difference view is added
-					//}
-					//break;
 				case WorldViewMode.Normal:
-					collapsedDate.gameObject.SetActive(active);
-					layoutGroup.spacing = active ? 0 : 20f;
-					expandedBackground.gameObject.SetActive(!active);
+					windowLayout.preferredHeight = active ? collapsedHeight : expandedHeight;
+					viewingTimeIndicatorBottom.gameObject.SetActive(!active);
 					if (active && updateWorldView)
 					{
 						PlanManager.Instance.ShowWorldAt(-1);
@@ -263,11 +200,11 @@ namespace MSP2050.Scripts
 
 		public TimeBarEraMarker CreateEraMarker(int month)
 		{
-			TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerLocation, false);
-			markers.Add(marker);
+			TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerParent, false);
+			eraMarkers.Add(marker);
 
 			// Set position based on month
-			float posX = ((month + 120) / (float)SessionManager.Instance.MspGlobalData.session_end_month) * eraMarkerLocation.rect.width;
+			float posX = ((month + 120) / (float)SessionManager.Instance.MspGlobalData.session_end_month) * eraMarkerParent.rect.width;
 			marker.thisRectTrans.anchoredPosition = new Vector2(posX, marker.thisRectTrans.anchoredPosition.y);
 
 			return marker;
@@ -287,25 +224,13 @@ namespace MSP2050.Scripts
 			maxSelectableYear = (currentMonth - maxSelectableMonth) / 12;
 
 			//Set selectable years
-			SetYearDropdownOptions(viewTimeYearDropdown, maxSelectableYear, selectedYearView);
-			//SetYearDropdownOptions(viewDifferenceYearDropdown0, maxSelectableYear, selectedYearDiff0);
-			//SetYearDropdownOptions(viewDifferenceYearDropdown1, maxSelectableYear, selectedYearDiff1);
+			SetYearDropdownOptions(viewTimeYearDropdown, maxSelectableYear, selectedYearView); 
 
 			//Set selectable month to all or maxSelectable month depending on selected year
 			if (selectedYearView == maxSelectableYear)
 				SetMonthDropdownOptions(viewTimeMonthDropdown, maxSelectableMonth, selectedMonthView);
 			else
-				SetMonthDropdownOptions(viewTimeMonthDropdown, 11, selectedMonthView);
-
-			//if (selectedYearDiff0 == maxSelectableYear)
-			//	SetMonthDropdownOptions(viewDifferenceMonthDropdown0, maxSelectableMonth, selectedMonthDiff0);
-			//else
-			//	SetMonthDropdownOptions(viewDifferenceMonthDropdown0, 11, selectedMonthDiff0);
-
-			//if (selectedYearDiff1 == maxSelectableYear)
-			//	SetMonthDropdownOptions(viewDifferenceMonthDropdown1, maxSelectableMonth, selectedMonthDiff1);
-			//else
-			//	SetMonthDropdownOptions(viewDifferenceMonthDropdown1, 11, selectedMonthDiff1);
+				SetMonthDropdownOptions(viewTimeMonthDropdown, 11, selectedMonthView); 
 		}
 
 		void SetYearDropdownOptions(TMP_Dropdown dropdown, int year, int selectedIndex)
@@ -333,35 +258,11 @@ namespace MSP2050.Scripts
 			selectedMonthView = newValue;
 			if (!ignoreActivityCallback)
 				UpdateWorldViewingTime();
-		}
-
-		//void DifferenceMonthDropdownChanged(int newValue, int dropdownID)
-		//{
-		//	if (dropdownID == 0)
-		//	{
-		//		selectedMonthDiff0 = newValue;
-		//	}
-		//	else
-		//	{
-		//		selectedMonthDiff1 = newValue;
-		//	}
-		//	if (!ignoreActivityCallback)
-		//		UpdateWorldViewingDifference();
-		//}
-
+		} 
 		void ViewingYearDropdownChanged(int newValue)
 		{
 			UpdateYearDropdown(newValue, ref selectedMonthView, ref selectedYearView, viewTimeMonthDropdown, UpdateWorldViewingTime);
-		}
-
-		//void DifferencedYearDropdownChanged(int newValue, int dropdownID)
-		//{
-		//	if (dropdownID == 0)
-		//		UpdateYearDropdown(newValue, ref selectedMonthDiff0, ref selectedYearDiff0, viewDifferenceMonthDropdown0, UpdateWorldViewingDifference);
-		//	else
-		//		UpdateYearDropdown(newValue, ref selectedMonthDiff1, ref selectedYearDiff1, viewDifferenceMonthDropdown1, UpdateWorldViewingDifference);
-		//}
-
+		} 
 		void UpdateYearDropdown(int newValue, ref int selectedMonth, ref int selectedYear, TMP_Dropdown monthDropdown, Action changeCallback)
 		{
 			if (newValue == maxSelectableYear)
@@ -388,28 +289,7 @@ namespace MSP2050.Scripts
 			int time = selectedMonthView + selectedYearView * 12;
 			UpdateIndicator(viewingTimeIndicatorBottom, time);
 			PlanManager.Instance.ShowWorldAt(time);
-		}
-
-		//void UpdateWorldViewingDifference()
-		//{
-		//	int time0 = selectedMonthDiff0 + selectedYearDiff0 * 12;
-		//	int time1 = selectedMonthDiff1 + selectedYearDiff1 * 12;
-
-		//	if (time0 == time1)
-		//		Debug.LogError("Trying to view the difference between 2 identiocal times.");
-		//	else if (time0 < time1)
-		//	{
-		//		UpdateIndicator(viewDifferenceIndicatorTop, time0);
-		//		UpdateIndicator(viewDifferenceIndicatorBottom, time1);
-		//		//TODO FEATURE: if difference view is added
-		//	}
-		//	else
-		//	{
-		//		UpdateIndicator(viewDifferenceIndicatorTop, time1);
-		//		UpdateIndicator(viewDifferenceIndicatorBottom, time0);
-		//		//TODO FEATURE: if difference view is added
-		//	}
-		//}
+		} 
 
 		void UpdateIndicator(RectTransform indicator, int month)
 		{

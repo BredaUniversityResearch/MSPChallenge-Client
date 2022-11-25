@@ -14,9 +14,6 @@ namespace MSP2050.Scripts
 		[SerializeField]
 		private RectTransform notificationContainer = null;
 
-        [SerializeField]
-        private TextMeshProUGUI notificationAmount = null;
-
         private void Awake()
 		{
             gameObject.SetActive(false);
@@ -42,7 +39,6 @@ namespace MSP2050.Scripts
 
 			element.InitializeForData(data);
             gameObject.SetActive(true);
-            notificationAmount.text = notificationsByIdentifier.Count.ToString();
 
         }
 
@@ -53,13 +49,6 @@ namespace MSP2050.Scripts
 			{
 				notificationsByIdentifier.Remove(identifier);
 				Destroy(entry.gameObject);
-
-				if (notificationsByIdentifier.Count == 0)
-				{
-                    gameObject.SetActive(false);
-				}
-                else
-                    notificationAmount.text = notificationsByIdentifier.Count.ToString();
             }
 		}
 	}
