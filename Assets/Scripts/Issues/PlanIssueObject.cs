@@ -20,8 +20,6 @@ namespace MSP2050.Scripts
 		public bool active { get; set; }
 		public float x { get; set; }
 		public float y { get; set; }
-		//public int source_plan_id { get; set; } //The plan that caused this issue.
-		public int base_layer_id { get; set; } //The base layer this issue applies to.
 		public int restriction_id { get; set; }
 
 		public PlanIssueObject()
@@ -35,7 +33,6 @@ namespace MSP2050.Scripts
 			type = restrictionType;
 			this.x = (float)Math.Round(x, 2);
 			this.y = (float)Math.Round(y, 2);
-			base_layer_id = baseLayerId;
 			restriction_id = restrictionId;
 		}
 
@@ -49,26 +46,13 @@ namespace MSP2050.Scripts
 			//Idk why but inserting a const float with a value of 0.001f becomes 0 so I'm just adding the literal values in here.
 			return Mathf.Abs(x - other.x) < 0.01f &&
 			       Mathf.Abs(y - other.y) < 0.01f &&
-				   base_layer_id == other.base_layer_id &&
 			       restriction_id == other.restriction_id &&
 			       type == other.type;
 		}
 
 		public int GetIssueHash()
 		{
-			if (base_layer_id >= 1 << 16)
-			{
-				UnityEngine.Debug.LogWarning("GetIssueHash has issues. planLayerId >= 1<<16 {0}" + base_layer_id);
-			}
-			if (base_layer_id >= 1 << 16)
-			{
-				UnityEngine.Debug.LogWarning("GetIssueHash has issues. sourcePlanId >= 1<<16 {0}" + base_layer_id);
-			}
-
-			int planAndPlanLayer = base_layer_id << 16; //Assuming planLayerId < 65k
-			int restrictionAndType = restriction_id | (int)type << 16;
-
-			return x.GetHashCode() ^ y.GetHashCode() ^ planAndPlanLayer ^ restrictionAndType;
+			return x.GetHashCode() ^ y.GetHashCode() ^ (restriction_id | (int)type << 16);
 		}
 	}
 

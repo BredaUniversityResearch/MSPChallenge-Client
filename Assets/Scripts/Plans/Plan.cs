@@ -378,6 +378,7 @@ namespace MSP2050.Scripts
 		public void SendPlanCreation(BatchRequest a_batch)
 		{
 			JObject dataObject = new JObject();
+			dataObject.Add("country", Country);
 			creationBatchCallID = a_batch.AddRequest<int>(Server.PostPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CREATE, HandleDatabaseIDResult);
 		}
 
