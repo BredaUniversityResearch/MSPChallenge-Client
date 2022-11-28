@@ -52,7 +52,7 @@ namespace MSP2050.Scripts
 			m_simulationDefinitions.Add(a_simulation.m_name, a_simulation);
 		}
 
-		public void InitialiseSimulations(ASimulationData[] a_simulationSettings)
+		public void InitialiseSimulations(List<ASimulationData> a_simulationSettings)
 		{
 			//Register built in simulations
 			m_simulationDefinitions.Add(MEL_SIM_NAME, new SimulationDefinition { m_name = MEL_SIM_NAME, m_updateType = typeof(SimulationUpdateMEL), m_logicType = typeof(SimulationLogicMEL) });
@@ -91,7 +91,7 @@ namespace MSP2050.Scripts
 			return m_simulationSettings.TryGetValue(a_name, out a_settings);
 		}
 
-		public void RunGeneralUpdate(ASimulationData[] a_data)
+		public void RunGeneralUpdate(List<ASimulationData> a_data)
 		{
 			foreach (ASimulationData data in a_data)
 			{

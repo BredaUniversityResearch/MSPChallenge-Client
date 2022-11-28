@@ -229,8 +229,9 @@ namespace MSP2050.Scripts
 	public class PolicySimSettings
 	{
 		[JsonConverter(typeof(PolicySettingsJsonConverter))]
-		public APolicyData[] policy_settings;
-		public ASimulationData[] simulation_settings;
+		public List<APolicyData> policy_settings;
+		[JsonConverter(typeof(SimulationSettingsJsonConverter))]
+		public List<ASimulationData> simulation_settings;
 	}
 
 	public class GeometryObject

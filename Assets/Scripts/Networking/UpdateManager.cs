@@ -254,7 +254,7 @@ namespace MSP2050.Scripts
 
 		//Added
 		[JsonConverter(typeof(PolicyPlanUpdateJsonConverter))]
-		public APolicyData[] policies;
+		public List<APolicyData> policies;
 
 		//Removed
 		//public string type; // energy,fishing,shipping : ex 1,0,1
@@ -307,9 +307,9 @@ namespace MSP2050.Scripts
 
 		//Added
 		[JsonConverter(typeof(PolicyUpdateJsonConverter))]
-		public APolicyData[] policy_updates;
+		public List<APolicyData> policy_updates;
 		[JsonConverter(typeof(SimulationUpdateJsonConverter))]
-		public ASimulationData[] simulation_updates;
+		public List<ASimulationData> simulation_updates;
 
 		//Removed
 		//public KPIObject kpi;

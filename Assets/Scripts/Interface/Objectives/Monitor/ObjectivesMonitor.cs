@@ -37,7 +37,7 @@ namespace MSP2050.Scripts
 		private ECompletionStateFilter completionFilterState = ECompletionStateFilter.AnyState;
 
 		public MenuBarToggle objectivesToggle;
-		public ToolbarCounter objectivesToggleCounter;
+		//public ToolbarCounter objectivesToggleCounter;
 
 		private void Start()
 		{
@@ -97,10 +97,10 @@ namespace MSP2050.Scripts
 					CreateObjective(objectiveDetails);
 				}
 
-				if (!gameObject.activeSelf)
-				{
-					objectivesToggleCounter?.AddValue();
-				}
+				//if (!gameObject.activeSelf)
+				//{
+				//	objectivesToggleCounter?.AddValue();
+				//}
 			}
 
 			FilterObjectives();

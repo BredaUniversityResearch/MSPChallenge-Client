@@ -82,7 +82,7 @@ namespace MSP2050.Scripts
 			});
 		}
 
-		public void InitialisePolicies(APolicyData[] a_policySettings)
+		public void InitialisePolicies(List<APolicyData> a_policySettings)
 		{
 			//Create logic instances
 			foreach (APolicyData data in a_policySettings)
@@ -116,7 +116,7 @@ namespace MSP2050.Scripts
 			return m_policySettings.TryGetValue(a_name, out a_settings);
 		}
 
-		public void RunPlanUpdate(APolicyData[] a_data, Plan a_plan, APolicyLogic.EPolicyUpdateStage a_stage)
+		public void RunPlanUpdate(List<APolicyData> a_data, Plan a_plan, APolicyLogic.EPolicyUpdateStage a_stage)
 		{
 			if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
 			{
@@ -157,7 +157,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void RunGeneralUpdate(APolicyData[] a_data, APolicyLogic.EPolicyUpdateStage a_stage)
+		public void RunGeneralUpdate(List<APolicyData> a_data, APolicyLogic.EPolicyUpdateStage a_stage)
 		{
 			foreach (APolicyData data in a_data)
 			{
