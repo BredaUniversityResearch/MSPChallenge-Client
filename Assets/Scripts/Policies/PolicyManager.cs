@@ -53,29 +53,37 @@ namespace MSP2050.Scripts
 			m_policyDefinitions.Add(a_policy.m_name, a_policy);
 		}
 
-		public void InitialisePolicies(APolicyData[] a_policySettings)
+		public void RegisterBuiltInPolicies()
 		{
-			//Register built in policies
-			m_policyDefinitions.Add(ENERGY_POLICY_NAME, new PolicyDefinition { m_name = ENERGY_POLICY_NAME, 
-				m_displayName = "Energy Distribution", 
-				m_planUpdateType = typeof(PolicyUpdateEnergyPlan), 
-				m_updateType = typeof(PolicyUpdateEnergy), 
+			m_policyDefinitions.Add(ENERGY_POLICY_NAME, new PolicyDefinition
+			{
+				m_name = ENERGY_POLICY_NAME,
+				m_displayName = "Energy Distribution",
+				m_planUpdateType = typeof(PolicyUpdateEnergyPlan),
+				m_updateType = typeof(PolicyUpdateEnergy),
 				m_logicType = typeof(PolicySettingsEnergy),
 				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyEnergy_PRFB")
 			});
-			m_policyDefinitions.Add(FISHING_POLICY_NAME, new PolicyDefinition { m_name = FISHING_POLICY_NAME,
+			m_policyDefinitions.Add(FISHING_POLICY_NAME, new PolicyDefinition
+			{
+				m_name = FISHING_POLICY_NAME,
 				m_displayName = "Fishing Effort",
 				m_planUpdateType = typeof(PolicyUpdateFishingPlan),
 				m_logicType = typeof(PolicyLogicFishing),
 				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyFishing_PRFB")
 			});
-			m_policyDefinitions.Add(SHIPPING_POLICY_NAME, new PolicyDefinition { m_name = SHIPPING_POLICY_NAME,
+			m_policyDefinitions.Add(SHIPPING_POLICY_NAME, new PolicyDefinition
+			{
+				m_name = SHIPPING_POLICY_NAME,
 				m_displayName = "Shipping Restriction Zones",
 				m_planUpdateType = typeof(PolicyUpdateShippingPlan),
 				m_logicType = typeof(PolicyLogicShipping),
 				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyShipping_PRFB")
 			});
+		}
 
+		public void InitialisePolicies(APolicyData[] a_policySettings)
+		{
 			//Create logic instances
 			foreach (APolicyData data in a_policySettings)
 			{

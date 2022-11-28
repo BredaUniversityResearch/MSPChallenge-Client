@@ -84,6 +84,7 @@ namespace MSP2050.Scripts
 				else
 					InterfaceCanvas.Instance.ImpactToolGraph.Initialise(HEBData);
 			}
+			PolicyManager.Instance.RegisterBuiltInPolicies();
 			ServerCommunication.Instance.DoRequest<PolicySimSettings>(Server.PolicySimSettings(), new NetworkForm(), HandlePolicySimSettingsCallback);
 		}
 
