@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -231,6 +232,7 @@ namespace MSP2050.Scripts
 
 	public class PolicySimSettings
 	{
+		[JsonConverter(typeof(PolicySettingsJsonConverter))]
 		public APolicyData[] policy_settings;
 		public ASimulationData[] simulation_settings;
 	}
