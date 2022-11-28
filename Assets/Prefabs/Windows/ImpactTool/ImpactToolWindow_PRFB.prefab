@@ -289,69 +289,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 01010b00000063006f006c006f0072004e006f0072006d0061006c002f00000000012900000043006f006c006f0075007200500061006c0065007400740065002e0043006f006e007300740043006f006c006f00750072002c0020004d0053005000320030003500300050006c007500670069006e007300000000000301080000006d005f0063006f006c006f00750072002f01000000012900000055006e0069007400790045006e00670069006e0065002e0043006f006c006f0072002c00200055006e0069007400790045006e00670069006e0065002e0043006f00720065004d006f00640075006c0065002000000000200000000020000000002000000000050501010d00000063006f006c006f007200530065006c00650063007400650064003000000000010000000301080000006d005f0063006f006c006f00750072003001000000200000000020000000002000000000208b8a8a3e05050b010e00000063006f006c006f00720048006900670068006c006900670068007400000000002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 698601c76a654b7499f23c79e54b4d2e, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 7
-      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
-    - Name: m_colour
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: colorSelected
-      Entry: 7
-      Data: 1|ColourPalette.ConstColour, MSP2050Plugins
-    - Name: m_colour
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0.270588249
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: colorHighlight
-      Entry: 10
-      Data: 0
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 1911139127688441283}
   highlightIfOn: 0
@@ -370,8 +316,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010d00000063006f006c006f007200530065006c0065006300740065006400010000002d010e00000063006f006c006f00720048006900670068006c0069006700680074002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
     - {fileID: 11400000, guid: dbe24502a18c5e546a327941d209c921, type: 2}
@@ -379,19 +325,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorSelected
-      Entry: 10
-      Data: 1
-    - Name: colorHighlight
-      Entry: 6
-      Data: 
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 1699962821866525462}
   highlightIfOn: 0
@@ -1722,22 +1656,21 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 2821108150654248627, guid: 1b9bb8548dc6ffe448bc596198b31dd2,
-        type: 3}
-    - target: {fileID: 2821108150654248627, guid: 1b9bb8548dc6ffe448bc596198b31dd2,
-        type: 3}
-      propertyPath: serializationData.SerializedFormat
-      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2821108150654248627, guid: 1b9bb8548dc6ffe448bc596198b31dd2,
         type: 3}
-      propertyPath: serializationData.SerializedBytes.Array.size
+      propertyPath: serializationData.SerializedFormat
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2821108150654248627, guid: 1b9bb8548dc6ffe448bc596198b31dd2,
         type: 3}
+      propertyPath: serializationData.SerializedBytes.Array.size
+      value: 1018
+      objectReference: {fileID: 0}
+    - target: {fileID: 2821108150654248627, guid: 1b9bb8548dc6ffe448bc596198b31dd2,
+        type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 60
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2821108150654248627, guid: 1b9bb8548dc6ffe448bc596198b31dd2,
         type: 3}
@@ -4363,8 +4296,7 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 1101998165243983064, guid: e6aa4a326cbdad14481853ad36944f8a,
-        type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 3652869524993439764, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_text
@@ -4411,8 +4343,7 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 4645963240997653620, guid: e6aa4a326cbdad14481853ad36944f8a,
-        type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 4858312313731649905, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: dragHandle
@@ -4431,7 +4362,7 @@ PrefabInstance:
     - target: {fileID: 5825348606581607995, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_Name
-      value: ImpactToolWindow
+      value: ImpactToolWindow_PRFB
       objectReference: {fileID: 0}
     - target: {fileID: 5825348606581607995, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
@@ -4592,12 +4523,31 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
-        type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: serializationData.PrefabModifications.Array.size
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: serializationData.SerializedBytes.Array.data[346]
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: serializationData.SerializedBytes.Array.data[347]
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: serializationData.SerializedBytes.Array.data[348]
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: serializationData.SerializedBytes.Array.data[349]
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}

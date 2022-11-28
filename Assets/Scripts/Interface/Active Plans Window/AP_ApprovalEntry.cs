@@ -14,9 +14,9 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_noButton;
 		[SerializeField] Button m_maybeButton;
 
-		[SerializeField] Image m_yesIcon;
-		[SerializeField] Image m_noIcon;
-		[SerializeField] Image m_maybeIcon;
+		[SerializeField] Graphic m_yesIcon;
+		[SerializeField] Graphic m_noIcon;
+		[SerializeField] Graphic m_maybeIcon;
 
 		bool m_playerCanChangeApproval;
 		Team m_currentTeam;
