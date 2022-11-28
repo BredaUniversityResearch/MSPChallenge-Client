@@ -100,7 +100,8 @@ namespace MSP2050.Scripts
 			Toggleable = layerMeta.layer_toggleable;
 			ActiveOnStart = layerMeta.layer_active_on_start || Main.Instance.LayerVisibleForCurrentExpertise(layerMeta.layer_name);
 			greenEnergy = layerMeta.layer_green == 1;
-			Optimized = !Selectable && !Editable && !Toggleable && ActiveOnStart;
+			//TODO CHECK: If this turns out to have no impact (country layer) remove the layer optimization code
+			//Optimized = !Selectable && !Editable && !Toggleable && ActiveOnStart;
 
 			ParseEntityPropertyMetaData(layerMeta.layer_info_properties);
 			EntityTypes = ParseEntityTypes(layerMeta.layer_type);
