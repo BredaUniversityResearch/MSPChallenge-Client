@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using UnityEngine;
 
 namespace MSP2050.Scripts
 {
@@ -21,14 +17,14 @@ namespace MSP2050.Scripts
 
 		private bool loadAllLayers = false;
 
-		public bool IsCurrentlyImportingLayers 
-		{ 
-			get; 
-			private set; 
+		public bool IsCurrentlyImportingLayers
+		{
+			get;
+			private set;
 		}
 
 		public LayerImporter(LayerPickerUI layerPickerUI)
-		{ 
+		{
 			this.layerPickerUI = layerPickerUI;
 
 			if (!Main.IsDeveloper)
@@ -61,14 +57,14 @@ namespace MSP2050.Scripts
 
 			InterfaceCanvas.Instance.SetAccent(SessionManager.Instance.CurrentTeamColor);
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.OnCountriesLoaded();
-			
+
 			if (loadAllLayers)
 			{
 				ImportAllLayers();
 			}
 		}
 
-		
+
 
 #if UNITY_EDITOR
 		[MenuItem("MSP 2050/Reload layer meta")]
@@ -110,7 +106,7 @@ namespace MSP2050.Scripts
 		{
 			// only allow a single request during loading of layers, to minimize the load on the server - think of multiple clients starting simultaneously
 			ServerCommunication.maxRequests = 1;
-			
+
 
 			IsCurrentlyImportingLayers = true;
 
@@ -145,7 +141,7 @@ namespace MSP2050.Scripts
 			List<SubEntityObject> objects = new List<SubEntityObject>();
 			SubEntityObject entityObject = new SubEntityObject();
 
-			//Convert all the entity types to a 
+			//Convert all the entity types to a
 			StringBuilder typeIdString = new StringBuilder(64);
 			foreach (int entityTypeId in layer.EntityTypes.Keys)
 			{

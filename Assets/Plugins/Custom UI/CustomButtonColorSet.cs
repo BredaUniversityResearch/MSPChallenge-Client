@@ -8,7 +8,7 @@ using ColourPalette;
 [RequireComponent(typeof(CustomButton))]
 public class CustomButtonColorSet : SerializedMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public List<Graphic> targetGraphics = null;
+    public List<Graphic> targetGraphics = new List<Graphic>();
     public IColourContainer colorNormal = new ConstColour(Color.white);
     public bool useHighlightColor;
     [ShowIf("useHighlightColor")]
@@ -125,10 +125,17 @@ public class CustomButtonColorSet : SerializedMonoBehaviour, IPointerEnterHandle
 
     void SetGraphicSetToColor(IColourContainer colourAsset)
     {
-	    if (colorLocked)
+        if (colorLocked)
 		    return;
         foreach (Graphic g in targetGraphics)
+        {
+            if (null == g)
+            {
+                Debug.LogError("Missing graphic");
+                continue;
+            }
             g.color = colourAsset.GetColour();
+        }
     }
 
     void SubscribeToAssetChange()
