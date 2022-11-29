@@ -12,7 +12,7 @@ namespace MSP2050.Scripts
 		public TextMeshProUGUI simulationText;
 		public Slider slider;
 		public Transform notchParent;
-		public GameObject notchPrefab;
+		public GameObject yearMarkerPrefab;
 
 		int days, hours, minutes;
 	
@@ -30,7 +30,7 @@ namespace MSP2050.Scripts
 			slider.maxValue = yearsPerEra;
 			for (int i = 0; i < yearsPerEra; i++)
 			{
-				Instantiate(notchPrefab, notchParent);
+				Instantiate(yearMarkerPrefab, notchParent);
 			}
 		}
 

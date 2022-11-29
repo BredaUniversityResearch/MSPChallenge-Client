@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 3647162386074884829}
   - component: {fileID: 465081272298084961}
   - component: {fileID: 2544591403115408611}
-  - component: {fileID: 2090564005402013105}
   - component: {fileID: 4372846731260633234}
   m_Layer: 5
   m_Name: MonthChangeButton
@@ -95,62 +94,6 @@ MonoBehaviour:
   m_onRightClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &2090564005402013105
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2765081666042875024}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e05f750d797a9294f8ef07fd42a83ad6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects:
-    - {fileID: 11400000, guid: 8ab68d4d46d5cb348a23876628103058, type: 2}
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 7
-      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
-    - Name: m_colour
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: colorHighlight
-      Entry: 10
-      Data: 0
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
-  targetGraphics:
-  - {fileID: 0}
-  useHighlightColor: 1
-  useDisabledColor: 0
 --- !u!114 &4372846731260633234
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,25 +107,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000002d010e00000063006f006c006f00720048006900670068006c0069006700680074000b010d00000063006f006c006f007200440069007300610062006c006500640001000000
     ReferencedUnityObjects:
-    - {fileID: 11400000, guid: a4b951e863d8ad740bc98f7f693e1708, type: 2}
-    - {fileID: 11400000, guid: a6ede42dae57b834bb43ce76254e7be7, type: 2}
+    - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
+    - {fileID: 11400000, guid: 0a7ffe14bb8c0574a922aa33cdfbb7e8, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorHighlight
-      Entry: 6
-      Data: 
-    - Name: colorDisabled
-      Entry: 10
-      Data: 1
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 855383160280203744}
   useHighlightColor: 0

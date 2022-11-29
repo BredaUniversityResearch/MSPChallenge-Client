@@ -17,6 +17,7 @@ namespace MSP2050.Scripts
         [SerializeField] private Transform m_layerParent;
         [SerializeField] private GameObject m_layerSelectWindow;
 		[SerializeField] private ToggleGroup m_subcategoryToggleGroup;
+		[SerializeField] SearchBar m_searchBar;
 
         // To get which layer corresponds to which genericLayer
         private Dictionary<string, LayerCategoryBar> m_categories = new Dictionary<string, LayerCategoryBar>();
@@ -36,14 +37,6 @@ namespace MSP2050.Scripts
 
 			SetIcons();
 		}
-
-        public void DisableLayerSelect(bool b)
-        {
-            if (!b)
-            {
-                gameObject.SetActive(false);
-			}
-        }
 
         private void OnDisable()
         {
@@ -78,6 +71,7 @@ namespace MSP2050.Scripts
 			{
 				string subCategoryName = LayerManager.Instance.MakeCategoryDisplayString(layer.SubCategory);
 				LayerSubCategoryBar newSubcategory = Instantiate(m_subcategoryPrefab, categoryBar.ContentParent).GetComponent<LayerSubCategoryBar>();
+				m_subCategories.Add(layer.SubCategory, newSubcategory);
 				newSubcategory.SetContent(subCategoryName, layer.SubCategory, GetIcon(layer.SubCategory), OnSubcategoryClick, m_subcategoryToggleGroup);
 			}
 		}
@@ -91,7 +85,7 @@ namespace MSP2050.Scripts
 				int activeBars = 0;
 				for(int i = 0; i < layers.Count; i++)
 				{
-					if (!layers[i].Toggleable && !Main.IsDeveloper)
+					if (layers[i].Toggleable || Main.IsDeveloper)
 					{
 						if (activeBars < m_toggleBars.Count)
 						{

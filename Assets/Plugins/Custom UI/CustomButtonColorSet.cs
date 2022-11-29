@@ -131,7 +131,7 @@ public class CustomButtonColorSet : SerializedMonoBehaviour, IPointerEnterHandle
         {
             if (null == g)
             {
-                Debug.LogError("Missing graphic");
+                Debug.LogError("Missing graphic: " + gameObject.name);
                 continue;
             }
             g.color = colourAsset.GetColour();

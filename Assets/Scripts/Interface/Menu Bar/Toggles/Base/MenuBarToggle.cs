@@ -23,7 +23,6 @@ namespace MSP2050.Scripts
 				case Selection.Layers:
 					toggle.isOn = InterfaceCanvas.Instance.layerInterface.gameObject.activeSelf; // Init
 					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerInterface.gameObject.SetActive(toggle.isOn));
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerInterface.DisableLayerSelect(toggle.isOn));
 					break;
 				case Selection.PlansList:
 					toggle.isOn = InterfaceCanvas.Instance.plansList.gameObject.activeSelf; // Init

@@ -110,7 +110,11 @@ namespace MSP2050.Scripts
 			{
 				return geometryKPIs.GetKPIForCountry(a_countryId);
 			}
-			return m_simulationLogic[a_targetSimulation].GetKPIValuesForCountry(a_countryId);
+			if (m_simulationLogic.TryGetValue(a_targetSimulation, out var logic))
+			{
+				return logic.GetKPIValuesForCountry(a_countryId);
+			}
+			return null;
 		}
 
 		private void CreateGeometryKPI()

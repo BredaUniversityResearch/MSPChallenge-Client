@@ -44,6 +44,7 @@ namespace MSP2050.Scripts
 			m_sortingDropdown.onValueChanged.AddListener(OnSortingDropdownChange);
 
 			m_searchbar.m_ontextChange = OnSearchBarValueChanged;
+			gameObject.SetActive(false);
 		}
 
 		public void LateUpdate()
