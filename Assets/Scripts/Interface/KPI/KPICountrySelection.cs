@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 		[SerializeField]
 		private Button button = null;
 		[SerializeField]
-		private Image image = null;
+		private Graphic image = null;
 		[SerializeField]
 		private Image selectedOverlay = null;
 

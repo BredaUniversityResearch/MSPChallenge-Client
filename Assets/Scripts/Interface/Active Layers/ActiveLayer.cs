@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 		[SerializeField] CustomToggle m_visibilityToggle;
 		[SerializeField] CustomToggle m_expandToggle;
 		[SerializeField] CustomToggle m_layerTextToggle;
-		[SerializeField] CustomToggle m_pinToggle;//TODO: make work
+		[SerializeField] CustomToggle m_pinToggle;
 		[SerializeField] CustomButton m_closeButton;
 	
 		[Header("Prefabs")]

@@ -85,13 +85,14 @@ namespace MSP2050.Scripts
 					InterfaceCanvas.Instance.ImpactToolGraph.Initialise(HEBData);
 			}
 			PolicyManager.Instance.RegisterBuiltInPolicies();
+			SimulationManager.Instance.RegisterBuiltInSimulations();
 			ServerCommunication.Instance.DoRequest<PolicySimSettings>(Server.PolicySimSettings(), new NetworkForm(), HandlePolicySimSettingsCallback);
 		}
 
 		private void HandlePolicySimSettingsCallback(PolicySimSettings a_settings)
 		{
-			SimulationManager.Instance.InitialiseSimulations(a_settings.simulation_settings);
 			PolicyManager.Instance.InitialisePolicies(a_settings.policy_settings);
+			//SimulationManager.Instance.InitialiseSimulations(a_settings.simulation_settings);
 			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
 		}
 

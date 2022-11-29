@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -228,10 +229,13 @@ namespace MSP2050.Scripts
 
 	public class PolicySimSettings
 	{
-		[JsonConverter(typeof(PolicySettingsJsonConverter))]
+		[JsonProperty(ItemConverterType = typeof(PolicySettingsJsonConverter))]
 		public List<APolicyData> policy_settings;
-		[JsonConverter(typeof(SimulationSettingsJsonConverter))]
+		[JsonProperty(ItemConverterType = typeof(SimulationSettingsJsonConverter))]
 		public List<ASimulationData> simulation_settings;
+
+		//public JArray policy_settings;
+		//public JArray simulation_settings;
 	}
 
 	public class GeometryObject

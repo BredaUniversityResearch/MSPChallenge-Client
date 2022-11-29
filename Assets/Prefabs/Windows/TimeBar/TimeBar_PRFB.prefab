@@ -1235,6 +1235,7 @@ GameObject:
   - component: {fileID: 2655029443762409038}
   - component: {fileID: 7402410869961233929}
   - component: {fileID: 333491642166740774}
+  - component: {fileID: 6666647321222515992}
   m_Layer: 5
   m_Name: TimeBar_PRFB
   m_TagString: Untagged
@@ -1316,7 +1317,7 @@ MonoBehaviour:
   m_PreferredWidth: 350
   m_PreferredHeight: 48
   m_FlexibleWidth: 1
-  m_FlexibleHeight: 1
+  m_FlexibleHeight: -1
   m_LayoutPriority: 1
 --- !u!114 &7402410869961233929
 MonoBehaviour:
@@ -1355,6 +1356,14 @@ MonoBehaviour:
   m_slice: 4
   m_rounding: 12
   colourAsset: {fileID: 11400000, guid: 1ea719e6c83876a4281a33b7807cae54, type: 2}
+--- !u!222 &6666647321222515992
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2688086987126864344}
+  m_CullTransparentMesh: 1
 --- !u!1 &2688086988075533594
 GameObject:
   m_ObjectHideFlags: 0

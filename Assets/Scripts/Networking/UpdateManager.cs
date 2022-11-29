@@ -253,7 +253,7 @@ namespace MSP2050.Scripts
 		public List<ApprovalObject> votes;
 
 		//Added
-		[JsonConverter(typeof(PolicyPlanUpdateJsonConverter))]
+		[JsonProperty(ItemConverterType = typeof(PolicyPlanUpdateJsonConverter))]
 		public List<APolicyData> policies;
 
 		//Removed
@@ -306,9 +306,9 @@ namespace MSP2050.Scripts
 		public double update_time; //Timestamp received from the server at which this update was accurate.
 
 		//Added
-		[JsonConverter(typeof(PolicyUpdateJsonConverter))]
+		[JsonProperty(ItemConverterType = typeof(PolicyUpdateJsonConverter))]
 		public List<APolicyData> policy_updates;
-		[JsonConverter(typeof(SimulationUpdateJsonConverter))]
+		[JsonProperty(ItemConverterType = typeof(SimulationUpdateJsonConverter))]
 		public List<ASimulationData> simulation_updates;
 
 		//Removed

@@ -52,13 +52,15 @@ namespace MSP2050.Scripts
 			m_simulationDefinitions.Add(a_simulation.m_name, a_simulation);
 		}
 
-		public void InitialiseSimulations(List<ASimulationData> a_simulationSettings)
+		public void RegisterBuiltInSimulations()
 		{
-			//Register built in simulations
 			m_simulationDefinitions.Add(MEL_SIM_NAME, new SimulationDefinition { m_name = MEL_SIM_NAME, m_updateType = typeof(SimulationUpdateMEL), m_logicType = typeof(SimulationLogicMEL) });
 			m_simulationDefinitions.Add(CEL_SIM_NAME, new SimulationDefinition { m_name = CEL_SIM_NAME, m_updateType = typeof(SimulationUpdateCEL), m_logicType = typeof(SimulationLogicCEL) });
 			m_simulationDefinitions.Add(SEL_SIM_NAME, new SimulationDefinition { m_name = SEL_SIM_NAME, m_updateType = typeof(SimulationUpdateSEL), m_logicType = typeof(SimulationLogicSEL) });
+		}
 
+		public void InitialiseSimulations(List<ASimulationData> a_simulationSettings)
+		{
 			//Create logic instances
 			foreach (ASimulationData data in a_simulationSettings)
 			{
