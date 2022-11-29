@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 		public const double SCALE_DOUBLE = 1000.0;
 		public const string FIRST_TIME_KEY = "FirstTimePlaying";
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
 		public static bool IsDeveloper = true;
 #else
     public static bool IsDeveloper = false;
@@ -46,7 +46,7 @@ namespace MSP2050.Scripts
 
 		[HideInInspector] public event Action OnFinishedLoadingLayers; //Called when we finished loading all layers and right before the first tick is requested.
 		[HideInInspector] public event Action OnPostFinishedLoadingLayers;
-		
+
 
 		protected void Awake()
 		{
@@ -56,7 +56,7 @@ namespace MSP2050.Scripts
 				singleton = this;
 
 			System.Threading.Thread.CurrentThread.CurrentCulture = Localisation.NumberFormatting;
-        
+
 			//Setup projection parameters for later conversion
 			mspCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs");
 			geoJSONCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
@@ -68,7 +68,7 @@ namespace MSP2050.Scripts
 			Application.wantsToQuit += OnApplicationQuit;
 
 			currentExpertiseIndex = PlayerPrefs.GetInt(LoginContentTabLogin.LOGIN_EXPERTISE_INDEX_STR, -1);
-			
+
 			if (SessionManager.Instance.MspGlobalData.expertise_definitions != null)
 				InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = true;
 			InterfaceCanvas.Instance.SetRegionWithName(SessionManager.Instance.MspGlobalData.region);
@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 		private void HandlePolicySimSettingsCallback(PolicySimSettings a_settings)
 		{
 			PolicyManager.Instance.InitialisePolicies(a_settings.policy_settings);
-			//SimulationManager.Instance.InitialiseSimulations(a_settings.simulation_settings);
+			SimulationManager.Instance.InitialiseSimulations(a_settings.simulation_settings);
 			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
 		}
 
@@ -133,7 +133,7 @@ namespace MSP2050.Scripts
 		}
 
 		public static void QuitGame()
-		{       
+		{
 			if (Instance != null)
 			{
 				NetworkForm form = new NetworkForm();
@@ -223,7 +223,7 @@ namespace MSP2050.Scripts
 			x = (double)position.x * SCALE_DOUBLE;
 			y = (double)position.y * SCALE_DOUBLE;
 		}
-    
+
 		public FSM.CursorType CursorType
 		{
 			get { return fsm.CurrentCursorType; }

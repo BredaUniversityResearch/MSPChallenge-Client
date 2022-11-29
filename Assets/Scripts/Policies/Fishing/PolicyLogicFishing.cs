@@ -39,7 +39,7 @@ namespace MSP2050.Scripts
 
 		public override void RemoveFromPlan(Plan a_plan)
 		{
-			a_plan.m_policies.Remove(PolicyManager.FISHING_POLICY_NAME);
+			a_plan.Policies.Remove(PolicyManager.FISHING_POLICY_NAME);
 		}
 
 		public override void StartEditingPlan(Plan a_plan) 

@@ -54,9 +54,9 @@ namespace MSP2050.Scripts
 
 		public void RegisterBuiltInSimulations()
 		{
-			m_simulationDefinitions.Add(MEL_SIM_NAME, new SimulationDefinition { m_name = MEL_SIM_NAME, m_updateType = typeof(SimulationUpdateMEL), m_logicType = typeof(SimulationLogicMEL) });
-			m_simulationDefinitions.Add(CEL_SIM_NAME, new SimulationDefinition { m_name = CEL_SIM_NAME, m_updateType = typeof(SimulationUpdateCEL), m_logicType = typeof(SimulationLogicCEL) });
-			m_simulationDefinitions.Add(SEL_SIM_NAME, new SimulationDefinition { m_name = SEL_SIM_NAME, m_updateType = typeof(SimulationUpdateSEL), m_logicType = typeof(SimulationLogicSEL) });
+			m_simulationDefinitions.Add(MEL_SIM_NAME, new SimulationDefinition { m_name = MEL_SIM_NAME, m_updateType = typeof(SimulationUpdateMEL), m_logicType = typeof(SimulationLogicMEL), m_settingsType = typeof(SimulationSettingsMEL)});
+			m_simulationDefinitions.Add(CEL_SIM_NAME, new SimulationDefinition { m_name = CEL_SIM_NAME, m_updateType = typeof(SimulationUpdateCEL), m_logicType = typeof(SimulationLogicCEL), m_settingsType = typeof(SimulationSettingsCEL) });
+			m_simulationDefinitions.Add(SEL_SIM_NAME, new SimulationDefinition { m_name = SEL_SIM_NAME, m_updateType = typeof(SimulationUpdateSEL), m_logicType = typeof(SimulationLogicSEL), m_settingsType = typeof(SimulationSettingsSEL) });
 		}
 
 		public void InitialiseSimulations(List<ASimulationData> a_simulationSettings)

@@ -17,8 +17,8 @@ namespace MSP2050.Scripts
 			{
 				PolicyUpdateShippingPlan data = (PolicyUpdateShippingPlan)a_data;
 				RestrictionAreaManager.instance.SetRestrictionsToObject(a_plan, data.restriction_settings);
-				if (!a_plan.m_policies.ContainsKey(PolicyManager.SHIPPING_POLICY_NAME))
-					a_plan.m_policies.Add(PolicyManager.SHIPPING_POLICY_NAME, new PolicyPlanDataShipping(this));
+				if (!a_plan.Policies.ContainsKey(PolicyManager.SHIPPING_POLICY_NAME))
+					a_plan.Policies.Add(PolicyManager.SHIPPING_POLICY_NAME, new PolicyPlanDataShipping(this));
 			}
 		}
 
@@ -32,7 +32,7 @@ namespace MSP2050.Scripts
 
 		public override void RemoveFromPlan(Plan a_plan)
 		{
-			a_plan.m_policies.Remove(PolicyManager.SHIPPING_POLICY_NAME);
+			a_plan.Policies.Remove(PolicyManager.SHIPPING_POLICY_NAME);
 		}
 
 		public override void StartEditingPlan(Plan a_plan)

@@ -129,9 +129,9 @@ namespace MSP2050.Scripts
 			m_acceptEditButton.onClick.AddListener(OnAcceptButton);
 			m_cancelEditButton.onClick.AddListener(OnCancelButton);
 			m_planName.onValueChanged.AddListener((s) =>
-			{ 
+			{
 				if(!m_ignoreContentCallback)
-					RefreshSectionActivity(); 
+					RefreshSectionActivity();
 			});
 
 			//create policy popouts and toggles
@@ -508,9 +508,9 @@ namespace MSP2050.Scripts
 			{
 				kvp.Value.gameObject.SetActive(false);
 			}
-			if(m_currentPlan.m_policies != null)
+			if(m_currentPlan.Policies != null)
 			{
-				foreach(var kvp in m_currentPlan.m_policies)
+				foreach(var kvp in m_currentPlan.Policies)
 				{
 					m_policyToggles[kvp.Key].gameObject.SetActive(true);
 				}
@@ -597,11 +597,11 @@ namespace MSP2050.Scripts
 
 		public AbstractLayer CurrentlyEditingBaseLayer
 		{
-			get 
+			get
 			{
 				if (!Editing || !m_geometryTool.IsOpen)
 					return null;
-				return m_geometryTool.CurrentlyEditingLayer.BaseLayer; 
+				return m_geometryTool.CurrentlyEditingLayer.BaseLayer;
 			}
 		}
 	}

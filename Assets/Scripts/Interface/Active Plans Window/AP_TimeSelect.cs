@@ -22,11 +22,11 @@ namespace MSP2050.Scripts
 
 		bool m_initialised;
 		int m_finishTime; //In game time (0-479)
-		int m_minTimeSelectable = 10000; 
+		int m_minTimeSelectable = 10000;
 		int m_finishMonth;//0-11
-		int m_minMonthSelectable; 
+		int m_minMonthSelectable;
 		int m_finishYear; //0-39
-		int m_minYearSelectable;  
+		int m_minYearSelectable;
 		bool m_ignoreTimeUICallback;
 		bool m_dropDownsFilled;
 
@@ -78,7 +78,7 @@ namespace MSP2050.Scripts
 				foreach (PlanLayer planLayer in m_plan.PlanLayers)
 					planLayer.BaseLayer.UpdatePlanLayerTime(planLayer);
 
-			ConstraintManager.Instance.CheckConstraints(m_plan, out var unavailableTypeNames);		
+			ConstraintManager.Instance.CheckConstraints(m_plan, out var unavailableTypeNames);
 			if (unavailableTypeNames.Count > 0)
 			{
 				StringBuilder sb = new StringBuilder("This plan contains the following entity types that are not yet available at the new implementation time: ");
@@ -117,10 +117,13 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public void UpdateMinTime()
 		{
-			m_minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + (m_plan.StartTime - m_plan.ConstructionStartTime);
-			if (m_finishTime < m_minTimeSelectable)
-				m_finishTime = m_minTimeSelectable;
-			UpdateMinSelectableYear(false);
+			if (m_plan != null)
+			{
+				m_minTimeSelectable = TimeManager.Instance.GetCurrentMonth() + 1 + (m_plan.StartTime - m_plan.ConstructionStartTime);
+				if (m_finishTime < m_minTimeSelectable)
+					m_finishTime = m_minTimeSelectable;
+				UpdateMinSelectableYear(false);
+			}
 		}
 
 		private void SetImplementationTime(int time)

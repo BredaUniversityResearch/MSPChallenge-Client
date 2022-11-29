@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 
 		public override void RemoveFromPlan(Plan a_plan)
 		{
-			a_plan.m_policies.Remove(PolicyManager.ENERGY_POLICY_NAME);
+			a_plan.Policies.Remove(PolicyManager.ENERGY_POLICY_NAME);
 		}
 
 		public override void StartEditingPlan(Plan a_plan)
@@ -165,7 +165,7 @@ namespace MSP2050.Scripts
 
 		public override bool CalculateEffectsOfEditing(Plan a_plan) 
 		{
-			if (a_plan.m_policies.ContainsKey(PolicyManager.ENERGY_POLICY_NAME) && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
+			if (a_plan.Policies.ContainsKey(PolicyManager.ENERGY_POLICY_NAME) && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
 			{
 				int nextTempID = -1;
 				Dictionary<int, SubEntity> energyEntities = new Dictionary<int, SubEntity>();

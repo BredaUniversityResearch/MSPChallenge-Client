@@ -67,7 +67,7 @@ namespace MSP2050.Scripts
 				layers.Add(null);
 			}
 			layers[layer.ID] = layer;
-			
+
 			if (layer.FileName == SessionManager.Instance.MspGlobalData.countries)
 				EEZLayer = layer as PolygonLayer;
 			if(m_subcategoryToLayers.TryGetValue(layer.SubCategory, out var entry))
@@ -282,7 +282,16 @@ namespace MSP2050.Scripts
 
 		public List<AbstractLayer> GetAllLayers()
 		{
-			return layers;
+			List<AbstractLayer> result = new List<AbstractLayer>();
+			foreach (AbstractLayer layer in layers)
+			{
+				if (layer != null)
+				{
+					result.Add(layer);
+				}
+			}
+
+			return result;
 		}
 
 		public List<AbstractLayer> GetAllLayersOfGroup(string group)
@@ -437,7 +446,7 @@ namespace MSP2050.Scripts
 				visibleLayerIndexByType[layer.GetType()] = layerIndex;
 			}
 		}
-					
+
 		/// <summary>
 		/// Sets entities in visible layers active to plan and shows layers in the plan that were not visible.
 		/// </summary>
@@ -625,7 +634,7 @@ namespace MSP2050.Scripts
 				return;
 
 			//Only update if already visible
-			foreach (PlanLayer layer in plan.PlanLayers)		
+			foreach (PlanLayer layer in plan.PlanLayers)
 				if (visibleLayers.Contains(layer.BaseLayer))
 					layer.BaseLayer.SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
 		}
@@ -659,7 +668,7 @@ namespace MSP2050.Scripts
 			}
 			else if (redrawNewLayers)
 			{
-				foreach (AbstractLayer layer in nonReferenceLayers)              
+				foreach (AbstractLayer layer in nonReferenceLayers)
 					layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
 		}
