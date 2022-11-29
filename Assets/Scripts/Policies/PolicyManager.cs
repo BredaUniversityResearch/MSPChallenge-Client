@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 				m_displayName = "Energy Distribution",
 				m_planUpdateType = typeof(PolicyUpdateEnergyPlan),
 				m_updateType = typeof(PolicyUpdateEnergy),
-				m_logicType = typeof(PolicySettingsEnergy),
+				m_logicType = typeof(PolicyLogicEnergy),
 				m_settingsType = typeof(APolicyData),
 				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyEnergy_PRFB")
 			});
@@ -124,7 +124,8 @@ namespace MSP2050.Scripts
 			if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
 			{
 				HashSet<string> existingPolicies = new HashSet<string>();
-				foreach (var kvp in a_plan.m_policies)
+
+				foreach (var kvp in a_plan.Policies)
 				{
 					existingPolicies.Add(kvp.Key);
 				}
@@ -172,7 +173,7 @@ namespace MSP2050.Scripts
 		}
 
 		public void StartEditingPlan(Plan a_plan)
-		{ 
+		{
 			foreach(var kvp in m_policyLogic)
 			{
 				kvp.Value.StartEditingPlan(a_plan);
@@ -216,10 +217,10 @@ namespace MSP2050.Scripts
 
 		public void GetPolicyIssueText(Plan a_plan, List<string> a_issueText)
 		{
-			if (a_plan.m_policies != null)
+			if (a_plan.Policies != null)
 			{
-				foreach (var kvp in a_plan.m_policies)
-				{ 
+				foreach (var kvp in a_plan.Policies)
+				{
 					kvp.Value.logic.GetIssueText(kvp.Value, a_issueText);
 				}
 			}

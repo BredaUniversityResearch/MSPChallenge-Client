@@ -159,7 +159,7 @@ namespace MSP2050.Scripts
 				BatchRequest batch = new BatchRequest();
 				changedPlan.AttemptUnlock(batch);
 
-				if (changedPlan.m_policies.ContainsKey(PolicyManager.ENERGY_POLICY_NAME))
+				if (changedPlan.Policies.ContainsKey(PolicyManager.ENERGY_POLICY_NAME))
 				{
 					if (changedPlan.InInfluencingState && !newState.IsInfluencingState())
 					{

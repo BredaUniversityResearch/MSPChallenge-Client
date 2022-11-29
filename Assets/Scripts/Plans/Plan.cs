@@ -26,7 +26,8 @@ namespace MSP2050.Scripts
 
 		public List<PlanLayer> PlanLayers { get; private set; }
 		public Dictionary<int, EPlanApprovalState> countryApproval;
-		public Dictionary<string, APolicyPlanData> m_policies { get; private set; } //These are PolicyPlanData
+		private Dictionary<string, APolicyPlanData> m_policies = new Dictionary<string, APolicyPlanData>();
+		public Dictionary<string, APolicyPlanData> Policies => m_policies;
 
 		public List<PlanMessage> PlanMessages { get; private set; }
 		private static HashSet<int> m_receivedPlanMessages = new HashSet<int>();
@@ -156,9 +157,9 @@ namespace MSP2050.Scripts
 
 		public bool HasPolicyErrors()
 		{
-			if (m_policies != null)
+			if (Policies != null)
 			{
-				foreach (var kvp in m_policies)
+				foreach (var kvp in Policies)
 				{
 					if (kvp.Value.logic.HasError(kvp.Value))
 						return true;
@@ -411,7 +412,7 @@ namespace MSP2050.Scripts
 
 			return result;
 		}
-		
+
 		public void CalculateRequiredApproval()
 		{
 			bool requireAMApproval = false;
@@ -455,7 +456,7 @@ namespace MSP2050.Scripts
 				countryApproval.Add(SessionManager.AM_ID, EPlanApprovalState.Maybe);
 
 			//Check required approval for policies
-			foreach(var kvp in m_policies)
+			foreach(var kvp in Policies)
 			{
 				kvp.Value.logic.GetRequiredApproval(kvp.Value, this, countryApproval, ref requiredApprovalLevel);
 			}
@@ -621,7 +622,7 @@ namespace MSP2050.Scripts
 		}
 
 		public void ZoomToPlan()
-		{ 
+		{
 			if(RectValid())
 				CameraManager.Instance.ZoomToBounds(GetPlanRect());
 		}
@@ -659,12 +660,12 @@ namespace MSP2050.Scripts
 					max = Vector3.Max(max, subEntity.BoundingBox.max);
 				}
 			}
-			return new Rect(min, max - min); 
+			return new Rect(min, max - min);
 		}
 
 		public bool TryGetPolicyData<T>(string a_policyType, out T a_result) where T : APolicyPlanData
 		{
-			if(m_policies.TryGetValue(a_policyType, out var temp))
+			if(Policies.TryGetValue(a_policyType, out var temp))
 			{
 				a_result = (T)temp;
 				return true;
@@ -675,14 +676,14 @@ namespace MSP2050.Scripts
 
 		public void SetPolicyData(APolicyPlanData a_data)
 		{
-			m_policies[a_data.logic.name] = a_data;
+			Policies[a_data.logic.name] = a_data;
 		}
 
 		public void AddPolicyData(APolicyPlanData a_data)
 		{
-			m_policies.Add(a_data.logic.m_definition.m_name, a_data);
+			Policies.Add(a_data.logic.m_definition.m_name, a_data);
 		}
-		
+
 		public string GetDataBaseOrBatchIDReference()
 		{
 			if (ID != -1)
@@ -725,9 +726,9 @@ namespace MSP2050.Scripts
 			a_severity = ERestrictionIssueType.None;
 			int count = 0;
 			//ERestrictionIssueType newSeverity;
-			if (m_policies != null)
+			if (Policies != null)
 			{
-				foreach (var kvp in m_policies)
+				foreach (var kvp in Policies)
 				{
 					count += kvp.Value.logic.GetMaximumIssueSeverityAndCount(kvp.Value, out var newSeverity);
 					if(newSeverity < a_severity)

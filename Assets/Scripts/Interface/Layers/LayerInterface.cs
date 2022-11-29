@@ -33,7 +33,7 @@ namespace MSP2050.Scripts
 
 			// This is for the menu bar toggle so that it acts correctly
 			m_menuLayerToggle.GetComponent<Toggle>().isOn = true;
-		
+
 			SetIcons();
 		}
 
@@ -88,7 +88,7 @@ namespace MSP2050.Scripts
 			{
 				m_layerSelectWindow.SetActive(true);
 				List<AbstractLayer> layers = LayerManager.Instance.GetLayersInSubcategory(a_subcategory);
-				int activeBars = 0; 
+				int activeBars = 0;
 				for(int i = 0; i < layers.Count; i++)
 				{
 					if (!layers[i].Toggleable && !Main.IsDeveloper)
@@ -120,7 +120,7 @@ namespace MSP2050.Scripts
 			{
 				return result;
 			}
-			return m_categoryIcons["nothing"];
+			return null;
 		}
 
 		private void SetIcons()

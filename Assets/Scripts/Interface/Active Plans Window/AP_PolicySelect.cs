@@ -59,7 +59,7 @@ namespace MSP2050.Scripts
 			}
 
 			m_originalPolicies = new HashSet<string>();
-			foreach (var kvp in a_content.m_policies)
+			foreach (var kvp in a_content.Policies)
 			{
 				m_originalPolicies.Add(kvp.Key);
 				if(PolicyManager.Instance.TryGetLogic(kvp.Key, out var logic) && logic.ShowPolicyToggled(kvp.Value))

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public abstract class PolicyUpdateEnergyPlan : APolicyData
+	public class PolicyUpdateEnergyPlan : APolicyData
 	{
 		public bool alters_energy_distribution;
 		public List<GridObject> grids;
@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 	public class CountryExpectedObject
 	{
 		public int country_id;
-		public long expected; //Expected WHAT? Cows? Apples? 
+		public long expected; //Expected WHAT? Cows? Apples?
 	}
 	public class GeomIDObject
 	{
