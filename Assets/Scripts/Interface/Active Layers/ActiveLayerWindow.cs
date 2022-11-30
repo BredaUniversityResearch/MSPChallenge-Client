@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace MSP2050.Scripts
 {
@@ -30,6 +31,14 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
+			LayerManager.Instance.m_onLayerVisibilityChanged += OnLayerVisibilityChanged;
+			foreach(AbstractLayer layer in LayerManager.Instance.GetVisibleLayers())
+			{
+				ActiveLayer activeLayer = Instantiate(m_activeLayerPrefab, m_contentLocation).GetComponent<ActiveLayer>();
+				activeLayer.SetLayerRepresenting(layer, m_allTextHidden);
+				m_activeLayers.Add(layer, activeLayer);
+			}
+
 			m_collapseAllButton.onClick.AddListener(() =>
 			{
 				if (m_expandedLayers == 0)
@@ -69,18 +78,25 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = false;
 		}
 
-		public void AddLayer(AbstractLayer layer)
+		void OnLayerVisibilityChanged(AbstractLayer a_layer, bool a_visible)
 		{
-			if (m_activeLayers.TryGetValue(layer, out var existingActiveLayer))
+			if(m_activeLayers.TryGetValue(a_layer, out ActiveLayer activeLayer))
 			{
-				existingActiveLayer.SetVisible();
+				activeLayer.OnLayerVisibilityChanged(a_visible);
 			}
 			else
 			{
-				ActiveLayer activeLayer = Instantiate(m_activeLayerPrefab, m_contentLocation).GetComponent<ActiveLayer>();
-				activeLayer.SetLayerRepresenting(layer, m_allTextHidden);
-				m_activeLayers.Add(layer, activeLayer);
+				ActiveLayer newActiveLayer = Instantiate(m_activeLayerPrefab, m_contentLocation).GetComponent<ActiveLayer>();
+				newActiveLayer.SetLayerRepresenting(a_layer, m_allTextHidden);
+				m_activeLayers.Add(a_layer, newActiveLayer);
 			}
+		}
+
+		public void AddPinnedInvisibleLayer(AbstractLayer a_layer)
+		{
+			ActiveLayer newActiveLayer = Instantiate(m_activeLayerPrefab, m_contentLocation).GetComponent<ActiveLayer>();
+			newActiveLayer.SetLayerRepresenting(a_layer, m_allTextHidden, true);
+			m_activeLayers.Add(a_layer, newActiveLayer);
 		}
 
 		public void RemoveLayer(AbstractLayer layer)

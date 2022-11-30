@@ -167,6 +167,7 @@ GameObject:
   - component: {fileID: 7243398488396448234}
   - component: {fileID: 8832214055035939618}
   - component: {fileID: 7160835527942378301}
+  - component: {fileID: 8993600153937834702}
   m_Layer: 5
   m_Name: GameMenuButton_PRFB
   m_TagString: Untagged
@@ -274,8 +275,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010e00000063006f006c006f00720048006900670068006c006900670068007400010000002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 4543826e4143d5940b21e081f0e727d9, type: 2}
     - {fileID: 11400000, guid: f60f649dcdfc7ca4883981ac12c67ef5, type: 2}
@@ -283,16 +284,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorHighlight
-      Entry: 10
-      Data: 1
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 7160835527942378301}
   useHighlightColor: 1
@@ -320,3 +312,11 @@ MonoBehaviour:
   m_FillCenter: 1
   m_slice: 0
   m_rounding: 16
+--- !u!222 &8993600153937834702
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 806178337442459908}
+  m_CullTransparentMesh: 1

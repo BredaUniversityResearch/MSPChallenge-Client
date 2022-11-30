@@ -16,8 +16,10 @@ namespace MSP2050.Scripts
         [SerializeField] private Transform m_categoryParent;
         [SerializeField] private Transform m_layerParent;
         [SerializeField] private GameObject m_layerSelectWindow;
+        [SerializeField] private TextMeshProUGUI m_layerSelectCategoryText;
 		[SerializeField] private ToggleGroup m_subcategoryToggleGroup;
-		[SerializeField] SearchBar m_searchBar;
+		[SerializeField] Transform m_searchBarContainer;
+		[SerializeField] SearchBar m_searchBar; //TODO: make work
 
         // To get which layer corresponds to which genericLayer
         private Dictionary<string, LayerCategoryBar> m_categories = new Dictionary<string, LayerCategoryBar>();
@@ -74,6 +76,7 @@ namespace MSP2050.Scripts
 				m_subCategories.Add(layer.SubCategory, newSubcategory);
 				newSubcategory.SetContent(subCategoryName, layer.SubCategory, GetIcon(layer.SubCategory), OnSubcategoryClick, m_subcategoryToggleGroup);
 			}
+			m_searchBarContainer.SetAsLastSibling();
 		}
 
 		void OnSubcategoryClick(bool a_value, string a_subcategory)
@@ -81,6 +84,7 @@ namespace MSP2050.Scripts
 			if (a_value)
 			{
 				m_layerSelectWindow.SetActive(true);
+				m_layerSelectCategoryText.text = LayerManager.Instance.MakeCategoryDisplayString(a_subcategory);
 				List<AbstractLayer> layers = LayerManager.Instance.GetLayersInSubcategory(a_subcategory);
 				int activeBars = 0;
 				for(int i = 0; i < layers.Count; i++)
@@ -105,6 +109,10 @@ namespace MSP2050.Scripts
 				{
 					m_toggleBars[activeBars].gameObject.SetActive(false);
 				}
+			}
+			else
+			{
+				m_layerSelectWindow.SetActive(false);
 			}
 		}
 
@@ -134,21 +142,15 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		//public void OnShowLayer(AbstractLayer layer)
-		//{
-		//	SetToggle(layer, true);
-		//	InterfaceCanvas.Instance.activeLayers.AddLayer(layer);
-		//}
-
-		//public void OnHideLayer(AbstractLayer layer)
-		//{
-		//	SetToggle(layer, false);
-		//	InterfaceCanvas.Instance.activeLayers.ToggleLayer(layer, false);
-		//}
-
 		public void SetLayerVisibilityLock(AbstractLayer layer, bool value)
 		{
 			InterfaceCanvas.Instance.activeLayers.SetLayerVisibilityLocked(layer, value);
+		}
+
+		//Called from layer select window close button
+		public void ForceSubcategoriesClosed()
+		{
+			m_subcategoryToggleGroup.SetAllTogglesOff();
 		}
 	}
 }

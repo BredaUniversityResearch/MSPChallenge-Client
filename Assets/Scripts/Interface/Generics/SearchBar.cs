@@ -18,7 +18,8 @@ public class SearchBar : MonoBehaviour
     {
         m_inputField.onValueChanged.AddListener(OnTextChange);
         m_clearButton.onClick.AddListener(ResetText);
-    }
+        ResetText();
+	}
 
     void ResetText()
 	{

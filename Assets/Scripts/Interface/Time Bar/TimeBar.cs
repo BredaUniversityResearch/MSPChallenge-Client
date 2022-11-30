@@ -105,7 +105,7 @@ namespace MSP2050.Scripts
 			if (!TimeManager.Instance.GameStarted)
 			{
 				planViewingText.text = "";
-				currentDateText.text = "";
+				currentDateText.text = Util.MonthToText(month);
 				return;
 			}
 

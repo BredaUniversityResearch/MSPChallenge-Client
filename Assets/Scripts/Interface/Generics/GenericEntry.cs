@@ -27,7 +27,8 @@ namespace MSP2050.Scripts
 		{
 			gameObject.SetActive(true);
 			label.text = name;
-			value.text = valueText;
+			if(value != null)
+				value.text = valueText;
 			valueButton.onClick.AddListener(callBack);
 		}
 
@@ -35,7 +36,8 @@ namespace MSP2050.Scripts
 		{
 			gameObject.SetActive(true);
 			label.text = name;
-			value.text = valueText;
+			if (value != null)
+				value.text = valueText;
 			iconImage.sprite = icon;
 			iconImage.color = color;
 		}

@@ -90,7 +90,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			//Todo move this to it's own MonoBehaviour and trigger this OnMonthAdvanced?
+			//TODO move this to it's own MonoBehaviour and trigger this OnMonthAdvanced?
 			InterfaceCanvas.Instance.KPIEcology.groups.SetBarsToFishing(GetFishingDistributionAtTime(a_mostRecentMonth));
 		}
 

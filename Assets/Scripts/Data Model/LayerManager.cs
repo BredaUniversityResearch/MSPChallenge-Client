@@ -338,7 +338,7 @@ namespace MSP2050.Scripts
 				}
 				else if (Main.Instance.LayerSelectedForCurrentExpertise(layer.FileName))
 				{
-					InterfaceCanvas.Instance.activeLayers.AddLayer(layer);
+					InterfaceCanvas.Instance.activeLayers.AddPinnedInvisibleLayer(layer);
 				}
 
 				layer.Loaded = true;
@@ -357,7 +357,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void ShowLayer(AbstractLayer layer, bool shownInUI = true, bool toggleValuePlanMonitor = true)
+		public void ShowLayer(AbstractLayer layer)
 		{
 			bool needsUpdateAndRedraw = false;
 			foreach (EntityType entityType in layer.EntityTypes.Values)
@@ -382,10 +382,9 @@ namespace MSP2050.Scripts
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 				layer.UpdateScale(CameraManager.Instance.gameCamera);
 
-				if (shownInUI && layer.Toggleable)
+				if (layer.Toggleable)
 				{
 					//Show in Layer Select and Active Layers
-					//InterfaceCanvas.Instance.layerInterface.OnShowLayer(layer);
 					if (m_onLayerVisibilityChanged != null)
 						m_onLayerVisibilityChanged.Invoke(layer, true);
 				}
@@ -426,7 +425,6 @@ namespace MSP2050.Scripts
 				//hide in Layer Select and Active Layers
 				if (m_onLayerVisibilityChanged != null)
 					m_onLayerVisibilityChanged.Invoke(layer, false);
-				//InterfaceCanvas.Instance.layerInterface.OnHideLayer(layer);
 			}
 
 			UpdateVisibleLayerIndexForAllTypes();

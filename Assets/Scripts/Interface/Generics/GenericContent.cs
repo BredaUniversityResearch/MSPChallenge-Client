@@ -13,9 +13,9 @@ namespace MSP2050.Scripts
 		public GameObject genericEntryIconPrefab;
 		public GameObject genericEntryButtonPrefab;
 
-		private PrefabObjectPool genericEntryPool;
-		private PrefabObjectPool genericEntryIconPool;
-		private PrefabObjectPool genericEntryButtonPool;
+		private PrefabObjectPool<GenericEntry> genericEntryPool;
+		private PrefabObjectPool<GenericEntry> genericEntryIconPool;
+		private PrefabObjectPool<GenericEntry> genericEntryButtonPool;
 		bool initialised = false;
 
 		private void Awake()
@@ -29,48 +29,34 @@ namespace MSP2050.Scripts
 				return;
 
 			initialised = true;
-			genericEntryPool = PrefabObjectPool.Create(gameObject, genericEntryPrefab, entryLocation, transform);
-			genericEntryIconPool = PrefabObjectPool.Create(gameObject, genericEntryIconPrefab, entryLocation, transform);
-			genericEntryButtonPool = PrefabObjectPool.Create(gameObject, genericEntryButtonPrefab, entryLocation, transform);
-		}
-
-		/// <summary>
-		/// Remove from list and destroy a content window entry
-		/// </summary>
-		public void DestroyGenericEntry(GenericEntry entry)
-		{
-			PrefabObjectPoolTracker tracker = entry.gameObject.GetComponent<PrefabObjectPoolTracker>();
-			if (tracker != null)
-			{
-				tracker.OwningPool.Release(entry.gameObject);
-			}
-			else
-			{
-				Destroy(entry.gameObject);
-			}
+			genericEntryPool = new PrefabObjectPool<GenericEntry>(genericEntryPrefab, entryLocation);
+			genericEntryIconPool = new PrefabObjectPool<GenericEntry>(genericEntryIconPrefab, entryLocation);
+			genericEntryButtonPool = new PrefabObjectPool<GenericEntry>(genericEntryButtonPrefab, entryLocation);
 		}
 
 		public void DestroyAllContent()
 		{
 			genericEntryPool.ReleaseAll();
+			genericEntryIconPool.ReleaseAll();
+			genericEntryButtonPool.ReleaseAll();
 		}
 
 		public GenericEntry CreateEntry(string name, string content)
 		{
-			GenericEntry entry = genericEntryPool.Get().GetComponent<GenericEntry>();
+			GenericEntry entry = genericEntryPool.Get();
 			entry.SetContent(name, content);
 			return entry;
 		}
 		public GenericEntry CreateEntry(string name, string content, Sprite icon, Color color)
 		{
-			GenericEntry entry = genericEntryPool.Get().GetComponent<GenericEntry>();
+			GenericEntry entry = genericEntryIconPool.Get();
 			entry.SetContent(name, content, icon, color);
 			return entry;
 		}
 
 		public GenericEntry CreateEntry(string name, string content, UnityAction buttonCallBack)
 		{
-			GenericEntry entry = genericEntryPool.Get().GetComponent<GenericEntry>();
+			GenericEntry entry = genericEntryButtonPool.Get();
 			entry.SetContent(name, content, buttonCallBack);
 			return entry;
 		}

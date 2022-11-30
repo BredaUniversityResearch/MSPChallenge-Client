@@ -23,7 +23,6 @@ namespace MSP2050.Scripts
 		private void Start()
 		{
 			m_expandToggle.onValueChanged.AddListener((b) => SetExpanded(b));
-			LayerManager.Instance.m_onLayerVisibilityChanged += OnLayerVisibilityChanged;
 			m_pinToggle.onValueChanged.AddListener(m_visibilityToggle.gameObject.SetActive);
 			m_visibilityToggle.onValueChanged.AddListener(OnVisibilityToggleChanged);
 			m_closeButton.onClick.AddListener(OnCloseButtonPressed);
@@ -36,14 +35,14 @@ namespace MSP2050.Scripts
 				InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(false);
 				InterfaceCanvas.Instance.activeLayers.TextShowingChanged(false);
 			}
-			LayerManager.Instance.m_onLayerVisibilityChanged -= OnLayerVisibilityChanged;
 			Destroy(gameObject);
 		}
 
-		public void SetLayerRepresenting(AbstractLayer a_layer, bool a_forceTextHidden)
+		public void SetLayerRepresenting(AbstractLayer a_layer, bool a_forceTextHidden, bool a_pinnedInvisible = false)
 		{
 			m_layerRepresenting = a_layer;
-			m_visibilityToggle.isOn = true;
+			m_visibilityToggle.isOn = !a_pinnedInvisible;
+			m_pinToggle.isOn = a_pinnedInvisible;
 			m_layerName.text = string.IsNullOrEmpty(a_layer.ShortName) ? a_layer.FileName : a_layer.ShortName;
 			foreach (EntityType entityType in m_layerRepresenting.GetEntityTypesSortedByKey())
 			{
@@ -66,6 +65,7 @@ namespace MSP2050.Scripts
 				});
 			}
 		}
+
 		void OnVisibilityToggleChanged(bool a_value)
 		{
 			if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
@@ -106,19 +106,14 @@ namespace MSP2050.Scripts
 			m_layerTextToggle.isOn = a_active;
 		}
 
-		public void SetVisible()
-		{
-			m_visibilityToggle.isOn = true;
-		}
-
 		public void SetVisibilityLocked(bool a_value)
 		{
 			m_visibilityToggle.interactable = !a_value;
 		}
 		
-		void OnLayerVisibilityChanged(AbstractLayer a_layer, bool a_visible)
+		public void OnLayerVisibilityChanged(bool a_visible)
 		{
-			if (!gameObject.activeSelf || a_layer != m_layerRepresenting || InterfaceCanvas.Instance.ignoreLayerToggleCallback)
+			if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
 				return;
 
 			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;

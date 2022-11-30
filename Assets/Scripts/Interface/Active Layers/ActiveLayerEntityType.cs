@@ -49,8 +49,8 @@ namespace MSP2050.Scripts
 			else if (a_layer.GetGeoType() == LayerManager.GeoType.line)
 			{
 				m_areaKey.transform.parent.parent.gameObject.SetActive(false);
-				m_lineKey.transform.parent.gameObject.SetActive(true);
-				m_pointKey.transform.parent.gameObject.SetActive(false);
+				m_lineKey.transform.gameObject.SetActive(true);
+				m_pointKey.transform.gameObject.SetActive(false);
 				m_outlineKey.transform.gameObject.SetActive(false);
 				m_lineKey.color = color;
 				m_lineKey.sprite = InterfaceCanvas.Instance.activeLayerLineSprites[(int)a_entityType.DrawSettings.LinePatternType];
@@ -58,8 +58,8 @@ namespace MSP2050.Scripts
 			else if (a_layer.GetGeoType() == LayerManager.GeoType.point)
 			{
 				m_areaKey.transform.parent.parent.gameObject.SetActive(false);
-				m_lineKey.transform.parent.gameObject.SetActive(false);
-				m_pointKey.transform.parent.gameObject.SetActive(true);
+				m_lineKey.transform.gameObject.SetActive(false);
+				m_pointKey.transform.gameObject.SetActive(true);
 				m_outlineKey.transform.gameObject.SetActive(false);
 				m_pointKey.sprite = a_entityType.DrawSettings.PointSprite;
 				m_pointKey.color = color;

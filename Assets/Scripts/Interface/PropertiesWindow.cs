@@ -36,7 +36,7 @@ namespace MSP2050.Scripts
 
 		public void ShowPropertiesWindow(SubEntity subEntity, Vector3 worldSamplePosition, Vector3 windowPosition)
 		{
-			bool reposition = !gameObject.activeInHierarchy;
+			bool reposition = !gameObject.activeSelf;
 			gameObject.SetActive(true);
 
 			//Setup data
@@ -49,32 +49,32 @@ namespace MSP2050.Scripts
 			baseDataParent.DestroyAllContent();
 
 			Team team = SessionManager.Instance.FindTeamByID(entity.Country);
-			AddEntry(baseDataParent, "Name", entity.name, countryIcon, team == null ? Color.white : team.color);
-			AddEntry(baseDataParent, "X", (subEntity.BoundingBox.center.x * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
-			AddEntry(baseDataParent, "Y", (subEntity.BoundingBox.center.y * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
+			baseDataParent.CreateEntry("Name", entity.name, countryIcon, team == null ? Color.white : team.color);
+			baseDataParent.CreateEntry("X", (subEntity.BoundingBox.center.x * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
+			baseDataParent.CreateEntry("Y", (subEntity.BoundingBox.center.y * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
 
 			//Geometry type specific base data
 			if (entity.Layer.GetGeoType() == LayerManager.GeoType.polygon)
 			{
 				PolygonSubEntity polygonEntity = (PolygonSubEntity)subEntity;
-				AddEntry(baseDataParent, "Area", polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>", areaIcon, Color.white);
-				AddEntry(baseDataParent, "Points", polygonEntity.GetTotalPointCount().ToString(), pointsIcon, Color.white);
+				baseDataParent.CreateEntry("Area", polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>", areaIcon, Color.white);
+				baseDataParent.CreateEntry("Points", polygonEntity.GetTotalPointCount().ToString(), pointsIcon, Color.white);
 			}
 			else if (entity.Layer.GetGeoType() == LayerManager.GeoType.line)
 			{
 				LineStringSubEntity lineEntity = (LineStringSubEntity)subEntity;
-				AddEntry(baseDataParent, "Length", lineEntity.LineLengthKm.ToString("0.00") + " km", areaIcon, Color.white);
-				AddEntry(baseDataParent, "Points", lineEntity.GetPointCount().ToString(), pointsIcon, Color.white);
+				baseDataParent.CreateEntry("Length", lineEntity.LineLengthKm.ToString("0.00") + " km", areaIcon, Color.white);
+				baseDataParent.CreateEntry("Points", lineEntity.GetPointCount().ToString(), pointsIcon, Color.white);
 			}
 			if (entity.Layer.IsEnergyLayer())
 			{
 				IEnergyDataHolder data = (IEnergyDataHolder)subEntity;
-				AddEntry(baseDataParent, "Max Capacity", valueConversionCollection.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString(), capacityIcon, Color.white);
-				AddEntry(baseDataParent, "Used Capacity", valueConversionCollection.ConvertUnit(data.UsedCapacity, ValueConversionCollection.UNIT_WATT).FormatAsString(), usedCapacityIcon, Color.white);
+				baseDataParent.CreateEntry("Max Capacity", valueConversionCollection.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString(), capacityIcon, Color.white);
+				baseDataParent.CreateEntry("Used Capacity", valueConversionCollection.ConvertUnit(data.UsedCapacity, ValueConversionCollection.UNIT_WATT).FormatAsString(), usedCapacityIcon, Color.white);
 				if(data.CurrentGrid == null)
-					AddEntry(baseDataParent, "Last Run Grid", data.LastRunGrid == null ? "-" : data.LastRunGrid.name, gridIcon, Color.white);
+					baseDataParent.CreateEntry("Last Run Grid", data.LastRunGrid == null ? "-" : data.LastRunGrid.name, gridIcon, Color.white);
 				else
-					AddEntry(baseDataParent, "Current Grid", data.CurrentGrid.name, gridIcon, Color.white);
+					baseDataParent.CreateEntry("Current Grid", data.CurrentGrid.name, gridIcon, Color.white);
 			}
 
 			//Entity type information
@@ -107,8 +107,7 @@ namespace MSP2050.Scripts
 				if (!string.IsNullOrEmpty(entityTypes[i].media))
 				{
 					var iCopy = i;
-					AddEntry(
-						entityTypeParent,
+						entityTypeParent.CreateEntry(
 						entityTypes[i].Name,
 						entryContent,
 						() =>
@@ -123,14 +122,13 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					AddEntry(entityTypeParent, entityTypes[i].Name, entryContent);
+					entityTypeParent.CreateEntry(entityTypes[i].Name, entryContent);
 				}
 			}
 
 			//Other information
 			otherInfoParent.DestroyAllContent();
 			otherInfoParent.Initialise();
-			genericEntries = new List<GenericEntry>();
 			if (entity.metaData.Count > 0)
 			{
 				otherInfoParent.gameObject.SetActive(true);
@@ -142,7 +140,7 @@ namespace MSP2050.Scripts
 					{
 						string propertyDisplayName = (propertyMeta != null && !string.IsNullOrEmpty(propertyMeta.DisplayName)) ? propertyMeta.DisplayName : kvp.Key;
 						string value = propertyMeta != null && !string.IsNullOrEmpty(propertyMeta.Unit) ? entity.GetMetaData(kvp.Key) + " " + propertyMeta.Unit : entity.GetMetaData(kvp.Key);
-						genericEntries.Add(AddEntry(otherInfoParent, propertyDisplayName, value));
+						otherInfoParent.CreateEntry(propertyDisplayName, value);
 					}
 				}
 			}
@@ -157,12 +155,12 @@ namespace MSP2050.Scripts
 				//GameObject contentContainer = debugInfoParent.transform.GetChild(1).gameObject;
 				debugInfoParent.DestroyAllContent();
 				debugInfoParent.Initialise();
-				AddEntry(debugInfoParent, "MSP ID", subEntity.GetMspID());
-				AddEntry(debugInfoParent, "Persistent ID", subEntity.GetPersistentID().ToString());
-				AddEntry(debugInfoParent, "Database ID", subEntity.GetDatabaseID().ToString());
+				debugInfoParent.CreateEntry("MSP ID", subEntity.GetMspID());
+				debugInfoParent.CreateEntry("Persistent ID", subEntity.GetPersistentID().ToString());
+				debugInfoParent.CreateEntry("Database ID", subEntity.GetDatabaseID().ToString());
 				if (rasterValue != null)
 				{
-					AddEntry(debugInfoParent, "Raster value", rasterValue.ToString());	
+					debugInfoParent.CreateEntry("Raster value", rasterValue.ToString());	
 				}
 			}
 			else
@@ -192,27 +190,6 @@ namespace MSP2050.Scripts
 		public void Close()
 		{
 			gameObject.SetActive(false);
-		}
-
-		private GenericEntry AddEntry(GenericContent content, string entryName, string entryContent, Sprite icon, Color color)
-		{
-			GenericEntry entry = content.CreateEntry(entryName, entryContent, icon, color);
-
-			return entry;
-		}
-
-		private GenericEntry AddEntry(GenericContent content, string entryName, string entryContent)
-		{
-			GenericEntry entry = content.CreateEntry(entryName, entryContent);
-
-			return entry;
-		}
-
-		private GenericEntry AddEntry(GenericContent content, string entryName, string entryContent, UnityAction callBack)
-		{
-			GenericEntry entry = content.CreateEntry(entryName, entryContent, callBack);
-
-			return entry;
 		}
 	}
 }
