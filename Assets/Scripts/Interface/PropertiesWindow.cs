@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 			//Setup data
 			Entity entity = subEntity.Entity;
 			windowName.text = entity.Layer.GetShortName();
-			layerIcon.sprite = InterfaceCanvas.Instance.layerInterface.GetIcon(entity.Layer.SubCategory);
+			layerIcon.sprite = LayerManager.Instance.GetSubcategoryIcon(entity.Layer.SubCategory);
 
 			//Base data
 			baseDataParent.Initialise();

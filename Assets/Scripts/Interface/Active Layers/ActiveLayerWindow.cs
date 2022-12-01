@@ -129,7 +129,6 @@ namespace MSP2050.Scripts
 				if (layer.Toggleable && (currentPlan == null || !currentPlan.IsLayerpartOfPlan(layer)))
 				{
 					LayerManager.Instance.HideLayer(layer);
-					RemoveLayer(layer);
 					yield return 0;
 				}
 			}

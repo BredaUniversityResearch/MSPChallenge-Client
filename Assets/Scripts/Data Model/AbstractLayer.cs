@@ -98,6 +98,8 @@ namespace MSP2050.Scripts
 			Selectable = layerMeta.layer_selectable;
 			Editable = layerMeta.layer_editable;
 			Toggleable = layerMeta.layer_toggleable;
+			if (layerMeta.layer_name.StartsWith("_PLAYAREA"))//For some reason the playarea is set to toggleable
+				Toggleable = false;
 			ActiveOnStart = layerMeta.layer_active_on_start || Main.Instance.LayerVisibleForCurrentExpertise(layerMeta.layer_name);
 			greenEnergy = layerMeta.layer_green == 1;
 			//TODO CHECK: If this turns out to have no impact (country layer) remove the layer optimization code
@@ -160,19 +162,15 @@ namespace MSP2050.Scripts
 				{
 					ValueConversionCollection valueConversions = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 					IEnergyDataHolder data = (IEnergyDataHolder)subent;
-					//return data.Capacity.ToString();
 					return valueConversions.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString();
 				});
 				presetProperties.Add("UsedCapacity", (subent) =>
 				{
 					ValueConversionCollection valueConversions = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 					IEnergyDataHolder data = (IEnergyDataHolder)subent;
-					//return data.UsedCapacity.ToString() + " / " + data.Capacity.ToString();
 					return valueConversions.ConvertUnit(data.UsedCapacity, ValueConversionCollection.UNIT_WATT).FormatAsString() + " / " + valueConversions.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString();
 				});
 			}
-			//if (Main.Instance.LayerSelectedForCurrentExpertise(layerMeta.layer_name))
-			//    InterfaceCanvas.instance.activeLayers.AddLayer(this);
 		}
 
 		public void LoadDependencies(LayerMeta layerMeta)

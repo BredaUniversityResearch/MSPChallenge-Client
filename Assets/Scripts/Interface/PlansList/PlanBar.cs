@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using ColourPalette;
+using System;
 
 namespace MSP2050.Scripts
 {
@@ -147,12 +148,12 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				m_hiddenByFilter = m_plan.Name.Contains(a_filter);
+				m_hiddenByFilter = m_plan.Name.IndexOf(a_filter, StringComparison.OrdinalIgnoreCase) >= 0;
 				if(!m_hiddenByFilter)
 				{
 					foreach(PlanLayer pl in m_plan.PlanLayers)
 					{
-						m_hiddenByFilter = pl.BaseLayer.ShortName.Contains(a_filter);
+						m_hiddenByFilter = pl.BaseLayer.ShortName.IndexOf(a_filter, StringComparison.OrdinalIgnoreCase) >= 0;
 						if (m_hiddenByFilter)
 							break;
 					}

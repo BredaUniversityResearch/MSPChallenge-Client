@@ -13,6 +13,7 @@ namespace MSP2050.Scripts
 		[SerializeField] AddTooltip m_tooltip;
 
 		AbstractLayer m_layer;
+		bool m_ignoreToggleCallback;
 
 		private void Start()
 		{
@@ -32,25 +33,25 @@ namespace MSP2050.Scripts
 
 		void OnToggleChanged(bool a_value)
 		{
-			if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
+			if (m_ignoreToggleCallback)
 				return;
 
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
+			m_ignoreToggleCallback = true;
 			if (a_value)
 				LayerManager.Instance.ShowLayer(m_layer);
 			else
 				LayerManager.Instance.HideLayer(m_layer);
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
+			m_ignoreToggleCallback = false;
 		}
 
 		void OnLayerVisibilityChanged(AbstractLayer a_layer, bool a_visible)
 		{
-			if (!gameObject.activeSelf || a_layer != m_layer || InterfaceCanvas.Instance.ignoreLayerToggleCallback)
+			if (!gameObject.activeSelf || a_layer != m_layer || m_ignoreToggleCallback)
 				return;
 
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
+			m_ignoreToggleCallback = true;
 			m_toggle.isOn = a_visible;
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
+			m_ignoreToggleCallback = false;
 		}
 	}
 }

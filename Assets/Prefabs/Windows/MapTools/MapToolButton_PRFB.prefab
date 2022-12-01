@@ -90,6 +90,7 @@ GameObject:
   - component: {fileID: 1712287561355981486}
   - component: {fileID: 3478825113535298268}
   - component: {fileID: 5139566668550501121}
+  - component: {fileID: 8326747624221454990}
   m_Layer: 5
   m_Name: MapToolButton_PRFB
   m_TagString: Untagged
@@ -192,7 +193,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 5139566668550501121}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -278,3 +279,11 @@ MonoBehaviour:
   m_FillCenter: 1
   m_slice: 0
   m_rounding: 4
+--- !u!222 &8326747624221454990
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6950578024711575511}
+  m_CullTransparentMesh: 1

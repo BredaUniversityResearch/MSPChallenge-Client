@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6823374847517118259}
   - component: {fileID: 3145587251373189683}
   - component: {fileID: 780453837902743421}
+  - component: {fileID: 8249476525401704377}
   m_Layer: 5
   m_Name: Toggle
   m_TagString: Untagged
@@ -33,10 +34,10 @@ RectTransform:
   m_Father: {fileID: 6356268705058638818}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 12, y: 0}
-  m_SizeDelta: {x: 16, y: 16}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &3145587251373189683
 CanvasRenderer:
@@ -78,6 +79,26 @@ MonoBehaviour:
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
   colourAsset: {fileID: 11400000, guid: e059de7d05d519647b5f945149105ad6, type: 2}
+--- !u!114 &8249476525401704377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1141101115533786078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: 16
+  m_MinHeight: 16
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &1947543826719797138
 GameObject:
   m_ObjectHideFlags: 0
@@ -95,6 +116,7 @@ GameObject:
   - component: {fileID: 6161001010669240716}
   - component: {fileID: 2697405569479591588}
   - component: {fileID: 445312522236505768}
+  - component: {fileID: 1099988447117470344}
   m_Layer: 5
   m_Name: LayerToggleBar_PRFB
   m_TagString: Untagged
@@ -121,7 +143,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 16}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &4720635891697069290
 CanvasRenderer:
@@ -243,69 +265,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 01010b00000063006f006c006f0072004e006f0072006d0061006c002f00000000012900000043006f006c006f0075007200500061006c0065007400740065002e0043006f006e007300740043006f006c006f00750072002c0020004d0053005000320030003500300050006c007500670069006e007300000000000301080000006d005f0063006f006c006f00750072002f01000000012900000055006e0069007400790045006e00670069006e0065002e0043006f006c006f0072002c00200055006e0069007400790045006e00670069006e0065002e0043006f00720065004d006f00640075006c0065002000000000200000000020000000002000000000050501010d00000063006f006c006f007200530065006c00650063007400650064003000000000010000000301080000006d005f0063006f006c006f00750072003001000000200000000020000000002000000000200000000005050b010e00000063006f006c006f00720048006900670068006c006900670068007400000000002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: e059de7d05d519647b5f945149105ad6, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 7
-      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
-    - Name: m_colour
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: colorSelected
-      Entry: 7
-      Data: 1|ColourPalette.ConstColour, MSP2050Plugins
-    - Name: m_colour
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: colorHighlight
-      Entry: 10
-      Data: 0
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 4727009012607967054}
   highlightIfOn: 1
@@ -340,9 +308,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
   m_MinWidth: -1
-  m_MinHeight: -1
+  m_MinHeight: 16
   m_PreferredWidth: -1
-  m_PreferredHeight: 24
+  m_PreferredHeight: -1
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -361,6 +329,32 @@ MonoBehaviour:
   m_toggle: {fileID: 4683271199349181387}
   m_name: {fileID: 6224207717157733568}
   m_tooltip: {fileID: 6161001010669240716}
+--- !u!114 &1099988447117470344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1947543826719797138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 16
+    m_Right: 16
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 12
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &2863670005769554589
 GameObject:
   m_ObjectHideFlags: 0
@@ -394,10 +388,10 @@ RectTransform:
   m_Father: {fileID: 6356268705058638818}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 40, y: 0}
-  m_SizeDelta: {x: 150, y: 15}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &602754265017634457
 CanvasRenderer:
@@ -475,15 +469,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 12
-  m_fontSizeBase: 12
+  m_fontSize: 13
+  m_fontSizeBase: 13
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -491,7 +485,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 3
   m_linkedTextComponent: {fileID: 0}

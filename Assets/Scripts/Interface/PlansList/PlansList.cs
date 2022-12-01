@@ -37,7 +37,7 @@ namespace MSP2050.Scripts
 			List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
 			foreach(EPlanSorting sorting in (EPlanSorting[])Enum.GetValues(typeof(EPlanSorting)))
 			{
-				options.Add(new TMP_Dropdown.OptionData(sorting.ToString()));
+				options.Add(new TMP_Dropdown.OptionData("Sort by " + sorting.ToString()));
 			}
 			m_sortingDropdown.ClearOptions();
 			m_sortingDropdown.AddOptions(options);

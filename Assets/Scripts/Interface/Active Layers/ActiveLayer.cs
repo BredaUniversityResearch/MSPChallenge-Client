@@ -19,11 +19,12 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_contentLocation;
 		
 		AbstractLayer m_layerRepresenting;
+		bool m_ignoreToggleCallback;
 
 		private void Start()
 		{
 			m_expandToggle.onValueChanged.AddListener((b) => SetExpanded(b));
-			m_pinToggle.onValueChanged.AddListener(m_visibilityToggle.gameObject.SetActive);
+			m_pinToggle.onValueChanged.AddListener(OnPinToggleChanged);
 			m_visibilityToggle.onValueChanged.AddListener(OnVisibilityToggleChanged);
 			m_closeButton.onClick.AddListener(OnCloseButtonPressed);
 		}
@@ -66,12 +67,18 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		void OnPinToggleChanged(bool a_value)
+		{
+			m_visibilityToggle.gameObject.SetActive(a_value);
+			m_closeButton.gameObject.SetActive(!a_value);
+		}
+
 		void OnVisibilityToggleChanged(bool a_value)
 		{
-			if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
+			if (m_ignoreToggleCallback)
 				return;
 
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
+			m_ignoreToggleCallback = true;
 			if (a_value)
 			{
 				LayerManager.Instance.ShowLayer(m_layerRepresenting);
@@ -80,7 +87,7 @@ namespace MSP2050.Scripts
 			{
 				LayerManager.Instance.HideLayer(m_layerRepresenting);
 			}
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
+			m_ignoreToggleCallback = false;
 		}
 
 		void OnCloseButtonPressed()
@@ -110,22 +117,22 @@ namespace MSP2050.Scripts
 		{
 			m_visibilityToggle.interactable = !a_value;
 		}
-		
+
 		public void OnLayerVisibilityChanged(bool a_visible)
 		{
-			if (InterfaceCanvas.Instance.ignoreLayerToggleCallback)
+			if (m_ignoreToggleCallback)
 				return;
 
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
-			if(m_pinToggle.isOn)
+			m_ignoreToggleCallback = true;
+			if (m_pinToggle.isOn)
 			{
 				m_visibilityToggle.isOn = a_visible;
 			}
-			else if(!m_visibilityToggle)
+			else if (!a_visible)
 			{
 				InterfaceCanvas.Instance.activeLayers.RemoveLayer(m_layerRepresenting);
 			}
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
+			m_ignoreToggleCallback = false;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using TMPro;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,20 +7,36 @@ namespace MSP2050.Scripts
 {
 	public class LayerProbeEntry : MonoBehaviour {
 
-		[SerializeField]
-		TextMeshProUGUI layerNameText = null;
-		[SerializeField]
-		TextMeshProUGUI geomNameText = null;
-		[SerializeField]
-		Image layerIcon = null;
-		public CustomButton barButton;
+		[SerializeField] TextMeshProUGUI m_layerNameText;
+		[SerializeField] TextMeshProUGUI m_geomNameText;
+		[SerializeField] Image m_layerIcon;
+		[SerializeField] CustomButton m_barButton;
 
-		public void SetToSubEntity(SubEntity sub)
+		Action<SubEntity> m_callback;
+		SubEntity m_subEntity;
+
+		private void Start()
 		{
-			layerNameText.text = sub.Entity.Layer.ShortName;
-			string geomName = sub.Entity.name;
-			geomNameText.text = string.IsNullOrEmpty(geomName) ? "Unnamed" : geomName;
-			layerIcon.sprite = InterfaceCanvas.Instance.layerInterface.GetIcon(sub.Entity.Layer.SubCategory);		
+			m_barButton.onClick.AddListener(OnButtonClick);
+		}
+
+		void OnButtonClick()
+		{
+			m_callback.Invoke(m_subEntity);
+		}
+
+		public void Initialise(Action<SubEntity> a_callback)
+		{
+			m_callback = a_callback;
+		}
+
+		public void SetToSubEntity(SubEntity a_subEntity)
+		{
+			m_subEntity = a_subEntity;
+			m_layerNameText.text = a_subEntity.Entity.Layer.ShortName;
+			string geomName = a_subEntity.Entity.name;
+			m_geomNameText.text = string.IsNullOrEmpty(geomName) ? "Unnamed" : geomName;
+			m_layerIcon.sprite = LayerManager.Instance.GetSubcategoryIcon(a_subEntity.Entity.Layer.SubCategory);		
 		}
 	}
 }

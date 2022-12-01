@@ -396,20 +396,6 @@ namespace MSP2050.Scripts
 			UpdateVisibleLayerIndexForAllTypes();
 		}
 
-		public void HideAllVisibleLayers()
-		{
-			//We need a copy since we will be modifying the collection
-			List<AbstractLayer> list = new List<AbstractLayer>(visibleLayers);
-			for (int i = 0; i < list.Count; ++i)
-			{
-				AbstractLayer layer = list[i];
-				if (layer.Toggleable)
-				{
-					HideLayer(layer);
-				}
-			}
-		}
-
 		public void HideLayer(AbstractLayer layer)
 		{
 			//Layer that is being edited cannot be hidden
@@ -423,8 +409,11 @@ namespace MSP2050.Scripts
 				layer.LayerHidden();
 
 				//hide in Layer Select and Active Layers
-				if (m_onLayerVisibilityChanged != null)
-					m_onLayerVisibilityChanged.Invoke(layer, false);
+				if (layer.Toggleable)
+				{
+					if (m_onLayerVisibilityChanged != null)
+						m_onLayerVisibilityChanged.Invoke(layer, false);
+				}
 			}
 
 			UpdateVisibleLayerIndexForAllTypes();
