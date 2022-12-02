@@ -78,12 +78,14 @@ namespace MSP2050.Scripts
 				//Offset the first and last labels
 				if (i == 0)
 				{
-					label.localPosition = new Vector3(label.sizeDelta.x / 2f, label.localPosition.y);
+					//label.localPosition = new Vector3(label.sizeDelta.x / 2f, label.localPosition.y);
+					label.anchoredPosition = new Vector3(label.sizeDelta.x / 2f, 0);
 				}
 				else if (i == numLabels - 1 && (label.anchorMax.x > 0.98f))
 				{
 					//Only offset the last label if the label would show at roughly the end point.
-					label.localPosition = new Vector3(-label.sizeDelta.x / 2f, label.localPosition.y);
+					//label.localPosition = new Vector3(label.sizeDelta.x / 2f, label.localPosition.y);
+					label.anchoredPosition = new Vector3(-label.sizeDelta.x / 2f, 0);
 				}
 			}
 
