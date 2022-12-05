@@ -78,6 +78,7 @@ namespace MSP2050.Scripts
 			viewTimeYearDropdown.onValueChanged.AddListener(ViewingYearDropdownChanged); 
 			TimeManager.Instance.OnCurrentMonthChanged += OnMonthChanged;
 			timeManagerButton.interactable = SessionManager.Instance.AreWeGameMaster;
+			timeManagerButton.onClick.AddListener(() => TimeManagerWindow.instance.gameObject.SetActive(true));
 			toolTip.enabled = SessionManager.Instance.AreWeGameMaster;
 		}
 		

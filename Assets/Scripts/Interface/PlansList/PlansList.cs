@@ -144,6 +144,10 @@ namespace MSP2050.Scripts
 						++uiPlanIndex;
 					}
 				}
+				foreach(var kvp in m_planGroupsPerState)
+				{
+					kvp.Value.CheckEmpty();
+				}
 			}
 			else if (m_currentSorting == EPlanSorting.Time)
 			{
@@ -197,11 +201,6 @@ namespace MSP2050.Scripts
 				planBar.UpdateActionRequired();
 				SetPlanIssues(plan);
 			}
-		}
-
-		public void SetPlanBarToggleState(Plan a_plan, bool a_state)
-		{
-			m_planBarsPerPlan[a_plan].SetPlanBarToggleValue(a_state);
 		}
 
 		private void SetPlanIssues(Plan a_plan)

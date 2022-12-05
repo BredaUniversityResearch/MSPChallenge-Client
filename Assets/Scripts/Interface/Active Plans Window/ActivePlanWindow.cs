@@ -389,6 +389,7 @@ namespace MSP2050.Scripts
 			//Content
 			m_planName.interactable = Editing;
 			m_planDescription.interactable = Editing;
+			m_planDescription.gameObject.SetActive(!string.IsNullOrEmpty(m_currentPlan.Description) || Editing);
 			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_communicationSection.SetActive(m_interactionMode == EInteractionMode.EditExisting);

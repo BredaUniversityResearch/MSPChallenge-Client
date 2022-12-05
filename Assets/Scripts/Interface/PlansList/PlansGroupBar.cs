@@ -15,6 +15,11 @@ namespace MSP2050.Scripts
 
 		public Transform ContentParent => m_contentContainer;
 
+		private void Start()
+		{
+			m_expandToggle.onValueChanged.AddListener(m_contentContainer.gameObject.SetActive);
+		}
+
 		public void SetContent(string a_title, string a_tooltip, Sprite a_icon)
 		{
 			m_title.text = a_title;
@@ -23,11 +28,20 @@ namespace MSP2050.Scripts
 				m_icon.sprite = a_icon;
 			else
 				m_icon.gameObject.SetActive(false);
+			m_emptyEntry.SetActive(true);
 		}
 
 		public void CheckEmpty()
 		{
-			m_emptyEntry.SetActive(m_contentContainer.childCount == 0);
+			for(int i = 1; i < m_contentContainer.childCount; i++)
+			{
+				if(m_contentContainer.GetChild(i).gameObject.activeSelf)
+				{
+					m_emptyEntry.SetActive(false);
+					return;
+				}
+			}
+			m_emptyEntry.SetActive(true);
 		}
 
 		public void SetExpanded(bool a_value)

@@ -42,6 +42,8 @@ namespace MSP2050.Scripts
 			Country = SessionManager.Instance.CurrentUserTeamID;
 			ConstructionStartTime = -100;
 			StartTime = -100;
+			LockedBy = -1;
+			PlanMessages = new List<PlanMessage>();
 		}
 
 		public Plan(PlanObject planObject, Dictionary<AbstractLayer, int> layerUpdateTimes)

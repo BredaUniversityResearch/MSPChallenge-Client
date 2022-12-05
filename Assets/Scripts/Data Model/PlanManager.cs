@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 using System;
 using static UnityEditor.Experimental.GraphView.GraphView;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
@@ -30,6 +31,7 @@ namespace MSP2050.Scripts
 		public event PlansEventDelegate OnPlanVisibleInUIEvent;
 		public event PlansUpdateEventDelegate OnPlanUpdateInUIEvent;
 		public event PlansUpdateEventDelegate OnPlanHideInUIEvent;
+		public event PlansEventDelegate OnViewingPlanChanged;
 
 		//Viewing & Viewstates
 		[HideInInspector] public PlanViewState planViewState = PlanViewState.All;
@@ -122,6 +124,7 @@ namespace MSP2050.Scripts
 			if (Main.InEditMode)
 				return;
 
+
 			if (plan.State == Plan.PlanState.DELETED)
 			{
 				//Ask if player wants to return plan to design (and change time if required)
@@ -142,14 +145,13 @@ namespace MSP2050.Scripts
 			else
 			{
 				//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
-				InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 				planViewing = plan;
 				timeViewing = -1;
 				InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
 				LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
-				InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 				InterfaceCanvas.Instance.activePlanWindow.SetToPlan(plan);
 				IssueManager.Instance.SetIssueInstancesToPlan(plan);
+				OnViewingPlanChanged.Invoke(plan);
 			}
 		}
 
@@ -161,13 +163,12 @@ namespace MSP2050.Scripts
 				if (lockedPlan.RequiresTimeChange)
 				{
 					InterfaceCanvas.HideNetworkingBlocker();
-					InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 					planViewing = lockedPlan;
 					timeViewing = -1;
 					InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);//Needs to be done before redraw
 					LayerManager.Instance.UpdateVisibleLayersToBase();
-					InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 					InterfaceCanvas.Instance.activePlanWindow.SetToPlan(lockedPlan);
+					OnViewingPlanChanged.Invoke(lockedPlan);
 				}
 				else
 				{
@@ -181,7 +182,6 @@ namespace MSP2050.Scripts
 			if (Main.InEditMode)
 				return;
 
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = true;
 			planViewing = null;
 
 			//Doesnt have to redraw as we'll do so when updating layers to base anyway
@@ -191,10 +191,11 @@ namespace MSP2050.Scripts
 
 			if (updateLayers)
 				LayerManager.Instance.UpdateVisibleLayersToBase();
-			InterfaceCanvas.Instance.ignoreLayerToggleCallback = false;
 			InterfaceCanvas.Instance.activePlanWindow.CloseWindow();
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);
 			IssueManager.Instance.HidePlanIssueInstances();
+
+			OnViewingPlanChanged.Invoke(null);
 		}
 
 		public SubEntityPlanState GetSubEntityPlanState(SubEntity subEntity)

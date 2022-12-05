@@ -9,8 +9,14 @@ namespace MSP2050.Scripts
 {
 	public class PlanBar : MonoBehaviour
 	{
-		[SerializeField] Image m_lockIcon;
+		//[SerializeField] Image m_lockIcon;
 		[SerializeField] Image m_countryIcon;
+		[SerializeField] RectTransform m_countryIconRect;
+		[SerializeField] Sprite m_regularCountrySprite;
+		[SerializeField] Sprite m_lockedCountrySprite;
+		[SerializeField] float m_lockedCountrySize;
+		[SerializeField] float m_regularCountrySize;
+
 		[SerializeField] Image m_actionRequiredIcon;
 		[SerializeField] Image m_stateIcon;
 		[SerializeField] TextMeshProUGUI m_title;
@@ -29,17 +35,26 @@ namespace MSP2050.Scripts
 
 		public void Initialise(Plan a_plan)
 		{
-			UpdateInfo();
 			this.m_plan = a_plan;
-
+			UpdateInfo();
 			m_barToggle.onValueChanged.AddListener((b) =>
 			{
-				if (!m_ignoreBarCallback && b)
+				if (!m_ignoreBarCallback)
 				{
-					PlanManager.Instance.ShowPlan(a_plan);
+					if(b)
+						PlanManager.Instance.ShowPlan(a_plan);
+					else
+						PlanManager.Instance.HideCurrentPlan();
+
 				}
 			});
+			PlanManager.Instance.OnViewingPlanChanged += OnViewedPlanChanged;
 			UpdateActionRequired();
+		}
+
+		private void OnDestroy()
+		{
+			PlanManager.Instance.OnViewingPlanChanged -= OnViewedPlanChanged;
 		}
 
 		public void UpdateInfo()
@@ -47,6 +62,7 @@ namespace MSP2050.Scripts
 			m_title.text = m_plan.Name;
 			m_date.text = Util.MonthToText(m_plan.StartTime, true);
 			m_countryIcon.color = SessionManager.Instance.GetTeamByTeamID(m_plan.Country).color;
+			m_stateIcon.sprite = VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(m_plan.State);
 		}
 
 		public void UpdateActionRequired()
@@ -105,11 +121,20 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetPlanBarToggleValue(bool a_value)
+		void OnViewedPlanChanged(Plan a_newPlan)
 		{
-			m_ignoreBarCallback = true;
-			m_barToggle.isOn = a_value;
-			m_ignoreBarCallback = false;
+			if(m_barToggle.isOn && a_newPlan != m_plan)
+			{
+				m_ignoreBarCallback = true;
+				m_barToggle.isOn = false;
+				m_ignoreBarCallback = false;
+			}
+			else if(a_newPlan == m_plan)
+			{
+				m_ignoreBarCallback = true;
+				m_barToggle.isOn = true;
+				m_ignoreBarCallback = false;
+			}
 		}
 
 		public void SetPlanBarToggleInteractability(bool a_value)
@@ -119,7 +144,8 @@ namespace MSP2050.Scripts
 
 		public void SetLockActive(bool a_value)
 		{
-			m_lockIcon.gameObject.SetActive(true);
+			m_countryIcon.sprite = a_value ? m_lockedCountrySprite : m_regularCountrySprite;
+			m_countryIconRect.sizeDelta = a_value ? new Vector2(m_lockedCountrySize, m_lockedCountrySize) : new Vector2(m_regularCountrySize, m_regularCountrySize);
 		}
 
 		public void MoveToGroup(PlansGroupBar a_group)
