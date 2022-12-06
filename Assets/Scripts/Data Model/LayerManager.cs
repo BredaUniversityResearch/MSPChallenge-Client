@@ -39,6 +39,7 @@ namespace MSP2050.Scripts
 
 		public delegate void OnLayerVisibilityChanged(AbstractLayer a_layer, bool a_visible);
 		public event OnLayerVisibilityChanged m_onLayerVisibilityChanged;
+		public event OnLayerVisibilityChanged m_onLayerVisibilityLockChanged;
 
 		[HideInInspector] public event Action<AbstractLayer> OnLayerLoaded;
 		[HideInInspector] public event Action<Plan> OnVisibleLayersUpdatedToPlan;
@@ -394,6 +395,11 @@ namespace MSP2050.Scripts
 				layer.SetActiveToCurrentPlanAndRedraw();
 
 			UpdateVisibleLayerIndexForAllTypes();
+		}
+
+		public void SetLayerVisibilityLock(AbstractLayer a_layer, bool a_locked)
+		{
+			m_onLayerVisibilityLockChanged.Invoke(a_layer, a_locked);
 		}
 
 		public void HideLayer(AbstractLayer layer)

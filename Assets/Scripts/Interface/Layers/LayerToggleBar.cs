@@ -19,6 +19,7 @@ namespace MSP2050.Scripts
 		{
 			m_toggle.onValueChanged.AddListener(OnToggleChanged);
 			LayerManager.Instance.m_onLayerVisibilityChanged += OnLayerVisibilityChanged;
+			LayerManager.Instance.m_onLayerVisibilityLockChanged += OnLayerVisibilityLockChanged;
 		}
 
 		public void SetContent(AbstractLayer a_layer)
@@ -52,6 +53,14 @@ namespace MSP2050.Scripts
 			m_ignoreToggleCallback = true;
 			m_toggle.isOn = a_visible;
 			m_ignoreToggleCallback = false;
+		}
+
+		void OnLayerVisibilityLockChanged(AbstractLayer a_layer, bool a_locked)
+		{
+			if (a_layer == m_layer)
+			{
+				m_toggle.interactable = a_locked;
+			}
 		}
 	}
 }

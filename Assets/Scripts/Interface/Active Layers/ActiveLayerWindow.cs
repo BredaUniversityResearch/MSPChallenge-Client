@@ -108,12 +108,6 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetLayerVisibilityLocked(AbstractLayer layer, bool value)
-		{
-			if(m_activeLayers.TryGetValue(layer, out var result))
-				result.SetVisibilityLocked(value);
-		}
-
 		public void ClearAllActiveLayers()
 		{
 			StartCoroutine(CoroutineHideAllVisibleLayers());

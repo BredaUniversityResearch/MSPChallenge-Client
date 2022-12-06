@@ -78,7 +78,7 @@ namespace MSP2050.Scripts
 		{
 			if (m_m_currentlyEditingLayer != null)
 			{
-				InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(m_m_currentlyEditingLayer.BaseLayer, false);
+				LayerManager.Instance.SetLayerVisibilityLock(m_m_currentlyEditingLayer.BaseLayer, false);
 			}
 			Main.Instance.fsm.ClearUndoRedo();
 			m_m_currentlyEditingLayer = null;
@@ -106,7 +106,7 @@ namespace MSP2050.Scripts
 			//TODO CHECK: assumes the window always closes between layer edits (&OnDisable is called), check this
 
 			//InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
-			InterfaceCanvas.Instance.layerInterface.SetLayerVisibilityLock(a_layer.BaseLayer, true);
+			LayerManager.Instance.SetLayerVisibilityLock(a_layer.BaseLayer, true);
 			m_m_currentlyEditingLayer = a_layer;
 			Main.Instance.fsm.StartEditingLayer(a_layer);
 			LayerManager.Instance.RedrawVisibleLayers();

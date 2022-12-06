@@ -9,6 +9,9 @@ namespace MSP2050.Scripts
 {
 	public class GenericWindow : MonoBehaviour
 	{
+		const float BORDER_OFFSET = 16f;
+		const float LEFT_OFFSET = 64f;
+
 		public RectTransform windowTransform;
 		public LayoutElement contentLayout;
 		public TextMeshProUGUI title;
@@ -23,9 +26,6 @@ namespace MSP2050.Scripts
 
 		[Header("Prefabs")]
 		public GameObject modalBackgroundPrefab;
-
-		public delegate void CloseWindow();
-		public CloseWindow CloseWindowDelegate = null;
 
 		public delegate bool AttemptHideWindowDelegate();
 		private AttemptHideWindowDelegate onAttemptHideWindowDelegate;
@@ -166,7 +166,7 @@ namespace MSP2050.Scripts
 				float target = corners[1].y - (data.position.y - handleRect.sizeDelta.y * 0.5f);
 				float max = corners[1].y;
 				//float max = corners[1].y  + Screen.height * 0.5f - containerSize;
-				contentLayout.preferredHeight = Mathf.Max(0, Mathf.Min(target, max) - containerSize) / scale;
+				contentLayout.preferredHeight = Mathf.Max(0, Mathf.Min(target, max, Screen.height) - containerSize) / scale;
 			}
 
 			//Horizontal
@@ -176,7 +176,7 @@ namespace MSP2050.Scripts
 				float target = -(corners[1].x - (data.position.x /*- handleRect.sizeDelta.x * 0.5f*/));
 				float max = Screen.width - corners[1].x;
 				//float max = corners[1].x + Screen.width * 0.5f  - containerSize;
-				contentLayout.preferredWidth = Mathf.Max(0, Mathf.Min(target, max) - containerSize) / scale;
+				contentLayout.preferredWidth = Mathf.Max(0, Mathf.Min(target, max, Screen.width) - containerSize) / scale;
 			}
 
 			if(secondaryResizeHandlers != null)
@@ -204,11 +204,7 @@ namespace MSP2050.Scripts
 			{
 				//Force rebuild the layout so the position update will be correct.
 				LayoutRebuilder.ForceRebuildLayoutImmediate(windowTransform);
-
-				transform.position = new Vector3(
-					Mathf.Clamp(transform.position.x, 0f, Screen.width - (windowTransform.rect.width * scale)),
-					Mathf.Clamp(transform.position.y, (windowTransform.rect.height * scale), Screen.height - (41f * scale)),
-					transform.position.z);
+				LimitPosition();
 			}
 
 			if (secondaryResizeHandlers != null)
@@ -224,12 +220,7 @@ namespace MSP2050.Scripts
 		public void HandleDrag(PointerEventData eventData, RectTransform handleRect)
 		{
 			transform.position += (Vector3)eventData.delta;
-
-			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-			transform.position = new Vector3(
-				Mathf.Clamp(transform.position.x, 0f, Screen.width - (windowTransform.rect.width * scale)),
-				Mathf.Clamp(transform.position.y, (windowTransform.rect.height * scale), Screen.height - (41f * scale)),
-				transform.position.z);
+			LimitPosition();
 		}
 
 		public IEnumerator LimitPositionEndFrame()
@@ -242,8 +233,8 @@ namespace MSP2050.Scripts
 		{
 			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
 			transform.position = new Vector3(
-				Mathf.Clamp(transform.position.x, 0f, Screen.width - (windowTransform.rect.width * scale)),
-				Mathf.Clamp(transform.position.y, (windowTransform.rect.height * scale), Screen.height - (41f * scale)),
+				Mathf.Clamp(transform.position.x, LEFT_OFFSET * scale, Screen.width - ((windowTransform.rect.width + BORDER_OFFSET) * scale)),
+				Mathf.Clamp(transform.position.y, ((windowTransform.rect.height + BORDER_OFFSET) * scale), Screen.height - (BORDER_OFFSET * scale)),
 				transform.position.z);
 		}
 

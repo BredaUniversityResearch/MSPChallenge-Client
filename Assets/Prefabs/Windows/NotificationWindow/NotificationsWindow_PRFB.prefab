@@ -540,7 +540,7 @@ MonoBehaviour:
   m_PreferredWidth: -1
   m_PreferredHeight: -1
   m_FlexibleWidth: 1
-  m_FlexibleHeight: 1
+  m_FlexibleHeight: -1
   m_LayoutPriority: 1
 --- !u!114 &6596570286461496140
 MonoBehaviour:
@@ -579,7 +579,7 @@ GameObject:
   - component: {fileID: 4858312313731649905}
   - component: {fileID: 1101998165243983064}
   - component: {fileID: 805029008550942415}
-  - component: {fileID: 8540991187245882636}
+  - component: {fileID: 2162255365176097030}
   m_Layer: 5
   m_Name: NotificationsWindow_PRFB
   m_TagString: Untagged
@@ -607,7 +607,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: -41}
-  m_SizeDelta: {x: 200, y: 0}
+  m_SizeDelta: {x: 200, y: 587.1}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &5855036135437844373
 MonoBehaviour:
@@ -648,7 +648,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   windowTransform: {fileID: 6039196129985789459}
-  contentLayout: {fileID: 6336532179708197428}
+  contentLayout: {fileID: 2162255365176097030}
   title: {fileID: 3652869524993439764}
   shouldCenter: 0
   exitButton: {fileID: 4114593782919656793}
@@ -696,8 +696,7 @@ MonoBehaviour:
   notificationEntryPrefab: {fileID: 1112923846968882, guid: 1a9c323880b3d614caec9a1c675f3ba4,
     type: 3}
   notificationContainer: {fileID: 6496123365016967105}
-  notificationAmount: {fileID: 0}
---- !u!114 &8540991187245882636
+--- !u!114 &2162255365176097030
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -706,11 +705,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 5825348606581607995}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_HorizontalFit: 0
-  m_VerticalFit: 2
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 100
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 0
+  m_LayoutPriority: 1
 --- !u!1 &6458752967876495786
 GameObject:
   m_ObjectHideFlags: 0
@@ -794,9 +799,9 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 555.1
+  m_PreferredHeight: -1
   m_FlexibleWidth: -1
-  m_FlexibleHeight: -1
+  m_FlexibleHeight: 1
   m_LayoutPriority: 1
 --- !u!114 &1351615285392167704
 MonoBehaviour:
@@ -811,7 +816,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.54901963}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.69803923}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1123,6 +1128,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ContentScrollView_PRFB
+      objectReference: {fileID: 0}
+    - target: {fileID: 7558096004504590775, guid: e0b6668735221754692c2da8e160f44b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8586600552041660309, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}

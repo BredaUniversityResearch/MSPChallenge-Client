@@ -28,9 +28,12 @@ namespace MSP2050.Scripts
 		{
 			int yearsPerEra = SessionManager.Instance.MspGlobalData.YearsPerEra;
 			slider.maxValue = yearsPerEra;
-			for (int i = 0; i < yearsPerEra; i++)
+			for (int i = 1; i < yearsPerEra; i++)
 			{
-				Instantiate(yearMarkerPrefab, notchParent);
+				RectTransform rect = Instantiate(yearMarkerPrefab, notchParent).GetComponent<RectTransform>();
+				float xPos = (float)i / yearsPerEra;
+				rect.anchorMin = new Vector2(xPos, 0f);
+				rect.anchorMax = new Vector2(xPos, 1f);
 			}
 		}
 

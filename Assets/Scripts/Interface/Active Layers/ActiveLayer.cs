@@ -36,6 +36,7 @@ namespace MSP2050.Scripts
 				InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(false);
 				InterfaceCanvas.Instance.activeLayers.TextShowingChanged(false);
 			}
+			LayerManager.Instance.m_onLayerVisibilityLockChanged -= OnLayerVisibilityLockChanged;
 			Destroy(gameObject);
 		}
 
@@ -45,6 +46,7 @@ namespace MSP2050.Scripts
 			m_visibilityToggle.isOn = !a_pinnedInvisible;
 			m_pinToggle.isOn = a_pinnedInvisible;
 			m_layerName.text = string.IsNullOrEmpty(a_layer.ShortName) ? a_layer.FileName : a_layer.ShortName;
+			LayerManager.Instance.m_onLayerVisibilityLockChanged += OnLayerVisibilityLockChanged;
 			foreach (EntityType entityType in m_layerRepresenting.GetEntityTypesSortedByKey())
 			{
 				ActiveLayerEntityType mapKey = Instantiate(m_entityTypeEntryPrefab, m_contentLocation).GetComponent<ActiveLayerEntityType>();
@@ -113,11 +115,6 @@ namespace MSP2050.Scripts
 			m_layerTextToggle.isOn = a_active;
 		}
 
-		public void SetVisibilityLocked(bool a_value)
-		{
-			m_visibilityToggle.interactable = !a_value;
-		}
-
 		public void OnLayerVisibilityChanged(bool a_visible)
 		{
 			if (m_ignoreToggleCallback)
@@ -133,6 +130,15 @@ namespace MSP2050.Scripts
 				InterfaceCanvas.Instance.activeLayers.RemoveLayer(m_layerRepresenting);
 			}
 			m_ignoreToggleCallback = false;
+		}
+
+		void OnLayerVisibilityLockChanged(AbstractLayer a_layer, bool a_locked)
+		{
+			if (a_layer == m_layerRepresenting)
+			{
+				m_visibilityToggle.interactable = !a_locked;
+				m_closeButton.interactable = !a_locked;
+			}
 		}
 	}
 }

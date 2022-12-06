@@ -14,12 +14,12 @@ namespace MSP2050.Scripts
         [SerializeField] private GameObject m_layerPrefab;
 
         [SerializeField] private Transform m_categoryParent;
+        [SerializeField] private VerticalLayoutGroup m_categoryLayoutGroup;
         [SerializeField] private Transform m_layerParent;
         [SerializeField] private GameObject m_layerSelectWindow;
         [SerializeField] private TextMeshProUGUI m_layerSelectCategoryText;
 		[SerializeField] private ToggleGroup m_subcategoryToggleGroup;
-		//[SerializeField] Transform m_searchBarContainer;
-		[SerializeField] SearchBar m_searchBar; //TODO: make work
+		[SerializeField] SearchBar m_searchBar; 
 
         private Dictionary<string, LayerCategoryBar> m_categories = new Dictionary<string, LayerCategoryBar>();
 		private Dictionary<string, LayerSubCategoryBar> m_subCategories = new Dictionary<string, LayerSubCategoryBar>();
@@ -109,6 +109,8 @@ namespace MSP2050.Scripts
 				{
 					bar.gameObject.SetActive(false);
 				}
+				m_categoryLayoutGroup.spacing = 0;
+				m_categoryLayoutGroup.padding = new RectOffset(0,0,0,0);
 			}
 			else
 			{
@@ -131,14 +133,9 @@ namespace MSP2050.Scripts
 				{
 					m_toggleBars[activeBars].gameObject.SetActive(false);
 				}
-				//m_searchBarContainer.SetAsLastSibling();
+				m_categoryLayoutGroup.spacing = 6f;
+				m_categoryLayoutGroup.padding = new RectOffset(0, 0, 6, 6);
 			}
-		}
-
-		public void SetLayerVisibilityLock(AbstractLayer layer, bool value)
-		{
-			InterfaceCanvas.Instance.activeLayers.SetLayerVisibilityLocked(layer, value);
-			//TODO: lock layer visibility in layerselect
 		}
 
 		//Called from layer select window close button
