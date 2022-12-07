@@ -150,7 +150,7 @@ namespace MSP2050.Scripts
 			private set
 			{
 				m_allTextHidden = value;
-				m_showHideTextText.text = m_allTextHidden ? "Show all" : "Hide all";
+				m_showHideTextText.text = m_allTextHidden ? "Show text" : "Hide text";
 			}
 			get
 			{

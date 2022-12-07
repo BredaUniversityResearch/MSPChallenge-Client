@@ -44,6 +44,7 @@ namespace MSP2050.Scripts
 			StartTime = -100;
 			LockedBy = -1;
 			PlanMessages = new List<PlanMessage>();
+			PlanLayers = new List<PlanLayer>();
 		}
 
 		public Plan(PlanObject planObject, Dictionary<AbstractLayer, int> layerUpdateTimes)

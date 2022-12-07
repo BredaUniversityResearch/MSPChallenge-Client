@@ -51,11 +51,11 @@ namespace MSP2050.Scripts
 
 		private Dictionary<EntityPropertyMetaData, ActivePlanParameter> m_parameters;
 		private Dictionary<EntityPropertyMetaData, string> m_originalParameterValues;
-		private PlanLayer m_m_currentlyEditingLayer;
+		private PlanLayer m_currentlyEditingLayer;
 
 		private bool m_initialised;
 
-		public PlanLayer CurrentlyEditingLayer => m_m_currentlyEditingLayer;
+		public PlanLayer CurrentlyEditingLayer => m_currentlyEditingLayer;
 
 		void Initialise()
 		{
@@ -76,12 +76,12 @@ namespace MSP2050.Scripts
 
 		private void OnDisable()
 		{
-			if (m_m_currentlyEditingLayer != null)
+			if (m_currentlyEditingLayer != null)
 			{
-				LayerManager.Instance.SetLayerVisibilityLock(m_m_currentlyEditingLayer.BaseLayer, false);
+				LayerManager.Instance.SetLayerVisibilityLock(m_currentlyEditingLayer.BaseLayer, false);
 			}
 			Main.Instance.fsm.ClearUndoRedo();
-			m_m_currentlyEditingLayer = null;
+			m_currentlyEditingLayer = null;
 		}
 
 		public void OnCountriesLoaded()
@@ -99,19 +99,13 @@ namespace MSP2050.Scripts
 		{
 			//==== General layer setup ==== 
 
+			Main.Instance.fsm.SetInterruptState(null);
 			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { a_layer.BaseLayer }, false, true);
 			LayerManager.Instance.ShowLayer(a_layer.BaseLayer);
-			Main.Instance.fsm.SetInterruptState(null);
-
-			//TODO CHECK: assumes the window always closes between layer edits (&OnDisable is called), check this
-
-			//InterfaceCanvas.Instance.activePlanWindow.StartEditingLayer(layer);
 			LayerManager.Instance.SetLayerVisibilityLock(a_layer.BaseLayer, true);
-			m_m_currentlyEditingLayer = a_layer;
-			Main.Instance.fsm.StartEditingLayer(a_layer);
 			LayerManager.Instance.RedrawVisibleLayers();
 
-			//==== Window content ==== 
+			//TODO CHECK: assumes the window always closes between layer edits (&OnDisable is called), check this
 
 			//Clear and recreate layer types
 			m_multiType = a_layer.BaseLayer.MultiTypeSelect;
@@ -144,6 +138,9 @@ namespace MSP2050.Scripts
 			//Set admin country option available/unavailable
 			if (SessionManager.Instance.AreWeGameMaster)
 				GMSelectable = !a_layer.BaseLayer.IsEnergyLayer();
+
+			m_currentlyEditingLayer = a_layer;
+			Main.Instance.fsm.StartEditingLayer(a_layer); //Should be called after content set
 		}
 
 		void SetParameterSectionActive(bool a_value)

@@ -644,6 +644,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 077236d9d6c88d44a939ecfd2aaffe55, type: 3}
+--- !u!114 &366973507051814853 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4005835379231324616, guid: 077236d9d6c88d44a939ecfd2aaffe55,
+    type: 3}
+  m_PrefabInstance: {fileID: 3639003574157641229}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28ed5bb1157339546ae37fd9cdf8a163, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &4661375805445242811
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -677,6 +689,22 @@ PrefabInstance:
       propertyPath: m_text
       value: Communication
       objectReference: {fileID: 0}
+    - target: {fileID: 4645963240997653620, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 4645963240997653620, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+    - target: {fileID: 4858312313731649905, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: resizeHandle
+      value: 
+      objectReference: {fileID: 366973507051814853}
+    - target: {fileID: 4858312313731649905, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: contentLayout
+      value: 
+      objectReference: {fileID: 6475520215095421313}
     - target: {fileID: 5825348606581607995, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_Name
@@ -863,6 +891,26 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 4661375805445242811}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6475520215095421313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1181987268638077312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: 400
+  m_MinHeight: 200
+  m_PreferredWidth: -1
+  m_PreferredHeight: 250
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 0
+  m_LayoutPriority: 1
 --- !u!114 &8455618876686049906
 MonoBehaviour:
   m_ObjectHideFlags: 0

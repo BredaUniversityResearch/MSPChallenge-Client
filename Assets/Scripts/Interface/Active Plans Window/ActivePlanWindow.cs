@@ -72,7 +72,7 @@ namespace MSP2050.Scripts
 		//General
 		private DialogBox m_cancelChangesConfirmationWindow = null;
 		private Plan m_currentPlan;
-		private enum EInteractionMode { View, EditExisting, SetupNew, EditNew, RestoreArchived }
+		public enum EInteractionMode { View, EditExisting, SetupNew, EditNew, RestoreArchived }
 		private EInteractionMode m_interactionMode;
 		private bool m_initialised;
 
@@ -83,6 +83,7 @@ namespace MSP2050.Scripts
 		//Properties
 		public Plan CurrentPlan => m_currentPlan;
 		public bool Editing => m_interactionMode != EInteractionMode.View;
+		public EInteractionMode InteractionMode => m_interactionMode;
 		public PlanBackup PlanBackup => m_planBackup;
 
 		void Initialise()
@@ -130,8 +131,18 @@ namespace MSP2050.Scripts
 			m_cancelEditButton.onClick.AddListener(OnCancelButton);
 			m_planName.onValueChanged.AddListener((s) =>
 			{
-				if(!m_ignoreContentCallback)
+				if (!m_ignoreContentCallback)
+				{
+					m_currentPlan.Name = s;
 					RefreshSectionActivity();
+				}
+			});
+			m_planDescription.onValueChanged.AddListener((s) =>
+			{
+				if (!m_ignoreContentCallback)
+				{
+					m_currentPlan.Description = s;
+				}
 			});
 
 			//create policy popouts and toggles
@@ -226,9 +237,8 @@ namespace MSP2050.Scripts
 			if (m_interactionMode == EInteractionMode.SetupNew)
 			{
 				PlanManager.Instance.AddPlan(m_currentPlan);
-				LayerManager.Instance.UpdateVisibleLayersToPlan(m_currentPlan);
+				PlanManager.Instance.ForceSetPlanViewing(m_currentPlan);
 				m_interactionMode = EInteractionMode.EditNew;
-				RefreshSectionActivity();
 				RefreshContent();
 			}
 			else if(m_interactionMode == EInteractionMode.RestoreArchived)
@@ -373,7 +383,6 @@ namespace MSP2050.Scripts
 			if(m_countryIndicator != null)
 				m_countryIndicator.color = SessionManager.Instance.FindTeamByID(m_currentPlan.Country).color;
 			RefreshContent();
-			RefreshSectionActivity();
 		}
 
 		public void RefreshSectionActivity()
@@ -501,6 +510,7 @@ namespace MSP2050.Scripts
 			//Content
 			SetEntriesToPolicies();
 			SetEntriesToLayers();
+			RefreshSectionActivity();
 		}
 
 		private void SetEntriesToPolicies()

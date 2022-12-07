@@ -20,7 +20,6 @@ namespace MSP2050.Scripts
 		bool m_initialised;
 		bool m_changed;
 		bool m_ignoreCallback;
-		HashSet<AbstractLayer> m_originalLayers;
 		HashSet<AbstractLayer> m_currentLayers;
 		Dictionary<AbstractLayer, AP_LayerSelectLayer> m_layerObjects;
 		Dictionary<string, AP_LayerSelectSubcategory> m_subcategoryObjects;
@@ -40,7 +39,7 @@ namespace MSP2050.Scripts
 			foreach(AbstractLayer layer in LayerManager.Instance.GetAllLayers())
 			{
 				AP_LayerSelectSubcategory subcategory;
-				if (!m_subcategoryObjects.TryGetValue(layer.Category, out subcategory))
+				if (!m_subcategoryObjects.TryGetValue(layer.SubCategory, out subcategory))
 				{
 					AP_LayerSelectCategory category;
 					if (!m_categoryObjects.TryGetValue(layer.Category, out category))
@@ -51,7 +50,7 @@ namespace MSP2050.Scripts
 					}
 					subcategory = Instantiate(m_subcatgoryPrefab, m_contentContainer).GetComponent<AP_LayerSelectSubcategory>();
 					subcategory.transform.SetSiblingIndex(category.transform.GetSiblingIndex() + 1);
-					subcategory.Initialise(layer.SubCategory, LayerManager.Instance.GetSubcategoryIcon(layer.SubCategory));
+					subcategory.Initialise(LayerManager.Instance.MakeCategoryDisplayString(layer.SubCategory), LayerManager.Instance.GetSubcategoryIcon(layer.SubCategory));
 					m_subcategoryObjects.Add(layer.SubCategory, subcategory);
 				}
 
@@ -80,13 +79,12 @@ namespace MSP2050.Scripts
 				kvp.Value.ResetValue();
 			}
 
-			m_originalLayers = new HashSet<AbstractLayer>();
+			m_currentLayers = new HashSet<AbstractLayer>();
 			foreach(PlanLayer pl in a_content.PlanLayers)
 			{
-				m_originalLayers.Add(pl.BaseLayer);
+				m_currentLayers.Add(pl.BaseLayer);
 				m_layerObjects[pl.BaseLayer].SetValue(true);
 			}
-			m_currentLayers = m_originalLayers;
 			m_ignoreCallback = false;
 		}
 
@@ -109,13 +107,19 @@ namespace MSP2050.Scripts
 		void OnAccept()
 		{
 			m_contentToggle.ForceClose(true); //applies content
-			m_APWindow.RefreshContent();
 		}
 
 		public override void ApplyContent()
 		{
+			HashSet<AbstractLayer> originalLayers = new HashSet<AbstractLayer>();
+			foreach (PlanLayer pl in m_plan.PlanLayers)
+			{
+				originalLayers.Add(pl.BaseLayer);
+				m_layerObjects[pl.BaseLayer].SetValue(true);
+			}
+
 			HashSet<AbstractLayer> added = new HashSet<AbstractLayer>(m_currentLayers);
-			added.ExceptWith(m_originalLayers);
+			added.ExceptWith(originalLayers);
 			foreach (AbstractLayer addedLayer in added)
 			{
 				//For added layers, check if plan previously contained this layer, if so: readd old planlayer to maintain ID, otherwise create new
@@ -125,14 +129,16 @@ namespace MSP2050.Scripts
 					existingPlanLayer.ClearContent();
 					existingPlanLayer.DrawGameObjects();
 					addedLayer.AddPlanLayer(existingPlanLayer);
+					addedLayer.SetEntitiesActiveUpTo(m_plan);
 				}
 				else
 				{
 					m_plan.AddNewPlanLayerFor(addedLayer);
+					addedLayer.SetEntitiesActiveUpTo(m_plan);
 				}
 			}
-			HashSet<AbstractLayer> removed = new HashSet<AbstractLayer>(m_originalLayers);
-			removed.ExceptWith(m_currentLayers);
+			HashSet<AbstractLayer> removed = new HashSet<AbstractLayer>(originalLayers);
+			originalLayers.ExceptWith(m_currentLayers);
 
 			bool seperatelyRemoveGreenCables = PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null && !removed.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGreen);
 			bool seperatelyRemoveGreyCables = PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null && !removed.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);
@@ -168,8 +174,8 @@ namespace MSP2050.Scripts
 			}
 
 			//Update energy policy data
-			bool hadEnergyLayers = PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null && m_originalLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGreen) ||
-				PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null && m_originalLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);
+			bool hadEnergyLayers = PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null && originalLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGreen) ||
+				PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null && originalLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);
 			bool hasEnergyLayers = PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null && m_currentLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGreen) ||
 				PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null && m_currentLayers.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);
 			if(hadEnergyLayers && !hasEnergyLayers)

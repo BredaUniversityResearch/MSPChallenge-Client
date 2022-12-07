@@ -19,6 +19,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_cancelButton;
 		[SerializeField] Toggle m_startPlanToggle;
 		[SerializeField] GameObject m_startPlanToggleContainer;
+		[SerializeField] TextMeshProUGUI m_constructionText;
 
 		bool m_initialised;
 		int m_finishTime; //In game time (0-479)
@@ -59,12 +60,27 @@ namespace MSP2050.Scripts
 				m_startPlanToggleContainer.SetActive(false);
 				m_startPlanToggle.isOn = false;
 			}
+
+			if(a_APWindow.InteractionMode == ActivePlanWindow.EInteractionMode.SetupNew)
+			{
+				m_constructionText.gameObject.SetActive(false);
+			}
+			else
+			{
+				m_constructionText.gameObject.SetActive(false);
+				int constructionTime = a_content.StartTime - a_content.ConstructionStartTime;
+				if (constructionTime == 0)
+					m_constructionText.text = "No construction time required";
+				else if (constructionTime == 1)
+					m_constructionText.text = "After 1 month construction";
+				else
+					m_constructionText.text = $"After {constructionTime} months construction";
+			}
 		}
 
 		void OnAccept()
 		{
 			m_contentToggle.ForceClose(true); //applies content
-			m_APWindow.RefreshContent();
 		}
 
 		public override void ApplyContent()
@@ -72,7 +88,9 @@ namespace MSP2050.Scripts
 			if (GetNewPlanStartDate() == m_plan.StartTime || !m_APWindow.Editing)
 				return;
 
+			int constructionTime = m_plan.StartTime - m_plan.ConstructionStartTime;
 			m_plan.StartTime = GetNewPlanStartDate();
+			m_plan.ConstructionStartTime = m_plan.StartTime - constructionTime;
 			PlanManager.Instance.UpdatePlanTime(m_plan);
 			if (m_plan.State != Plan.PlanState.DELETED)
 				foreach (PlanLayer planLayer in m_plan.PlanLayers)
@@ -92,7 +110,6 @@ namespace MSP2050.Scripts
 			}
 
 			m_APWindow.RefreshContent();
-			m_APWindow.RefreshSectionActivity();
 		}
 
 		public override bool MayClose()

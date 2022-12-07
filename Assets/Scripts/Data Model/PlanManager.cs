@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 using static UnityEditor.Experimental.GraphView.GraphView;
 using System.Reactive.Joins;
+using System.Numerics;
 
 namespace MSP2050.Scripts
 {
@@ -439,7 +440,6 @@ namespace MSP2050.Scripts
 			if (planViewing == plan && !Main.InEditMode)
 			{
 				InterfaceCanvas.Instance.activePlanWindow.RefreshContent();
-				InterfaceCanvas.Instance.activePlanWindow.RefreshSectionActivity();
 				if (!plan.ShouldBeVisibleInUI)
 				{
 					HideCurrentPlan();
@@ -474,12 +474,20 @@ namespace MSP2050.Scripts
 		{
 			if (Main.InEditMode || Main.Instance.PreventPlanChange)
 				return;
-
 			if(planViewing != null)
 				HideCurrentPlan();
 			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(null);
 		}
 
+		public void ForceSetPlanViewing(Plan a_plan)
+		{
+			planViewing = a_plan;
+			timeViewing = -1;
+			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
+			LayerManager.Instance.UpdateVisibleLayersToPlan(a_plan);
+			IssueManager.Instance.SetIssueInstancesToPlan(a_plan);
+			OnViewingPlanChanged.Invoke(a_plan);
+		}
 		
 	}
 }

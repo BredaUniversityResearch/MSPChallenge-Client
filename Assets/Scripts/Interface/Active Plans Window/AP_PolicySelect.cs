@@ -88,7 +88,6 @@ namespace MSP2050.Scripts
 		void OnAccept()
 		{
 			m_contentToggle.ForceClose(true); //applies content
-			m_APWindow.RefreshContent();
 		}
 
 		public override void ApplyContent()

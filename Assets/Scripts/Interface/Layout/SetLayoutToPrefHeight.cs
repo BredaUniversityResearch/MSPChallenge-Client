@@ -7,7 +7,8 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] private LayoutGroup m_targetGroup = null;
 		[SerializeField] private LayoutElement m_targetElement = null;
-
+		[SerializeField] private float m_maxHeight = 10000f;
+		
 		private float oldHeight;
 
 		void Awake()
@@ -17,7 +18,7 @@ namespace MSP2050.Scripts
 
 		void Update()
 		{
-			float newHeight = m_targetGroup.preferredHeight;
+			float newHeight = Mathf.Min(m_maxHeight, m_targetGroup.preferredHeight);
 			if (!Mathf.Approximately(newHeight, oldHeight))
 			{
 				m_targetElement.preferredHeight = newHeight;
