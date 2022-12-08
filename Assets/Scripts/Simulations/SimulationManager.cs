@@ -28,6 +28,12 @@ namespace MSP2050.Scripts
 
 		private CountryKPICollectionGeometry geometryKPIs = new CountryKPICollectionGeometry();
 
+		public delegate void SimulationsInitialisedCallback();
+		public event SimulationsInitialisedCallback m_onSimulationsInitialised;
+
+		private bool m_initialised;
+		public bool Initialised => m_initialised;
+
 		void Start()
 		{
 			if (singleton != null && singleton != this)
@@ -76,6 +82,12 @@ namespace MSP2050.Scripts
 					Debug.LogError("Simulation settings received from the server for a simulation without definition: " + data.simulation_type);
 				}
 			}
+			if (m_onSimulationsInitialised != null)
+			{
+				m_onSimulationsInitialised.Invoke();
+				m_onSimulationsInitialised = null;
+			}
+			m_initialised = true;
 		}
 
 		public bool TryGetDefinition(string a_name, out SimulationDefinition a_definition)

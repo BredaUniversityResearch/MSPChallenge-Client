@@ -27,12 +27,12 @@ namespace MSP2050.Scripts
 			m_planGroupsPerState = new Dictionary<Plan.PlanState, PlansGroupBar>();
 			m_planBarsPerPlan = new Dictionary<Plan, PlanBar>();
 
-			m_planGroupsPerState.Add(Plan.PlanState.DESIGN, CreatePlansGroup(Plan.PlanState.DESIGN, "Design", "A plan's content (layers and policies) can only be edited in the DESIGN state.\nPlans in DESIGN are not visible in other plans or to other teams."));
-			m_planGroupsPerState.Add(Plan.PlanState.CONSULTATION, CreatePlansGroup(Plan.PlanState.CONSULTATION, "Consultation", "Plans in CONSULTATION are visible in other plans and to other teams.\nUse the CONSULTATION state for early drafts that will need to be discussed with other teams."));
-			m_planGroupsPerState.Add(Plan.PlanState.APPROVAL, CreatePlansGroup(Plan.PlanState.APPROVAL, "Awaiting Approval", "Plans in the APPROVAL state will automatically be set to APPROVED once all required teams have accepted.\nPlans that require approval cannot be manually set to APPROVED, they must go through APPROVAL."));
-			m_planGroupsPerState.Add(Plan.PlanState.APPROVED, CreatePlansGroup(Plan.PlanState.APPROVED, "Approved", "Plans in the APPROVED state will be implemented when their implementation time is reached."));
-			m_planGroupsPerState.Add(Plan.PlanState.IMPLEMENTED, CreatePlansGroup(Plan.PlanState.IMPLEMENTED, "Implemented", "IMPLEMENTED plans have had their proposed changes applied to the world."));
 			m_planGroupsPerState.Add(Plan.PlanState.DELETED, CreatePlansGroup(Plan.PlanState.DELETED, "Archived", "When a plan's implementation time is reached and it is not in APPROVED or it has issues, it will automatically be ARCHIVED.\nIf an ARCHIVED plan's implementation time has passed, it must be updated before it can be set back to another state."));
+			m_planGroupsPerState.Add(Plan.PlanState.IMPLEMENTED, CreatePlansGroup(Plan.PlanState.IMPLEMENTED, "Implemented", "IMPLEMENTED plans have had their proposed changes applied to the world."));
+			m_planGroupsPerState.Add(Plan.PlanState.APPROVED, CreatePlansGroup(Plan.PlanState.APPROVED, "Approved", "Plans in the APPROVED state will be implemented when their implementation time is reached."));
+			m_planGroupsPerState.Add(Plan.PlanState.APPROVAL, CreatePlansGroup(Plan.PlanState.APPROVAL, "Awaiting Approval", "Plans in the APPROVAL state will automatically be set to APPROVED once all required teams have accepted.\nPlans that require approval cannot be manually set to APPROVED, they must go through APPROVAL."));
+			m_planGroupsPerState.Add(Plan.PlanState.CONSULTATION, CreatePlansGroup(Plan.PlanState.CONSULTATION, "Consultation", "Plans in CONSULTATION are visible in other plans and to other teams.\nUse the CONSULTATION state for early drafts that will need to be discussed with other teams."));
+			m_planGroupsPerState.Add(Plan.PlanState.DESIGN, CreatePlansGroup(Plan.PlanState.DESIGN, "Design", "A plan's content (layers and policies) can only be edited in the DESIGN state.\nPlans in DESIGN are not visible in other plans or to other teams."));
 
 			List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
 			foreach(EPlanSorting sorting in (EPlanSorting[])Enum.GetValues(typeof(EPlanSorting)))
@@ -153,7 +153,7 @@ namespace MSP2050.Scripts
 			{
 				//Plans manager list is already sorted by time, so just use that order
 				int uiPlanIndex = 0;
-				for (int i = 0; i < PlanManager.Instance.GetPlanCount(); i++)
+				for (int i = PlanManager.Instance.GetPlanCount()-1; i >= 0; i--)
 				{
 					Plan planInstance = PlanManager.Instance.GetPlanAtIndex(i);
 					if (m_planBarsPerPlan.TryGetValue(planInstance, out PlanBar planBar))
@@ -282,7 +282,7 @@ namespace MSP2050.Scripts
 
 		int ComparePlanByCountry(Plan a_plan1, Plan a_plan2)
 		{
-			return a_plan1.Country.CompareTo(a_plan2.Country);
+			return a_plan2.Country.CompareTo(a_plan1.Country);
 		}
 	}
 }

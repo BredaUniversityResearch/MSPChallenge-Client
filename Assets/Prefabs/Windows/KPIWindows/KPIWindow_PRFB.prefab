@@ -1268,7 +1268,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.54901963}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.69803923}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1866,6 +1866,7 @@ GameObject:
   - component: {fileID: 8917808390786993773}
   - component: {fileID: 7633353343096949567}
   - component: {fileID: 2722490146150411926}
+  - component: {fileID: 4934278971575636586}
   m_Layer: 5
   m_Name: KPIWindow_PRFB
   m_TagString: Untagged
@@ -1981,6 +1982,18 @@ MonoBehaviour:
   m_tags:
   - Window
   m_registerReference: 1
+--- !u!114 &4934278971575636586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8814921688998810741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7665d2336c2467e42b361e9aca9d1604, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &980790081767105328
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2570,6 +2583,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -9
       objectReference: {fileID: 0}
+    - target: {fileID: 4408078630079889020, guid: 77d59e170fb78754383571eb1b611c6e,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.69803923
+      objectReference: {fileID: 0}
     - target: {fileID: 4455876323178426056, guid: 77d59e170fb78754383571eb1b611c6e,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -2910,12 +2928,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 77d59e170fb78754383571eb1b611c6e, type: 3}
---- !u!224 &6949424458808396353 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5936218773980606048, guid: 77d59e170fb78754383571eb1b611c6e,
-    type: 3}
-  m_PrefabInstance: {fileID: 3607663950804673569}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &7251587105017158993 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6247107528885811568, guid: 77d59e170fb78754383571eb1b611c6e,
@@ -2940,6 +2952,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &6949424458808396353 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 5936218773980606048, guid: 77d59e170fb78754383571eb1b611c6e,
+    type: 3}
+  m_PrefabInstance: {fileID: 3607663950804673569}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4393238206365997251
 PrefabInstance:
   m_ObjectHideFlags: 0

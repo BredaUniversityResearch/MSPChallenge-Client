@@ -30,6 +30,12 @@ namespace MSP2050.Scripts
 
 		public Dictionary<string, APolicyLogic> PolicyLogic => m_policyLogic;
 
+		public delegate void PoliciesInitialisedCallback();
+		public event PoliciesInitialisedCallback m_onPoliciesInitialised;
+
+		private bool m_initialised;
+		public bool Initialised => m_initialised;
+
 		void Start()
 		{
 			if (singleton != null && singleton != this)
@@ -102,6 +108,12 @@ namespace MSP2050.Scripts
 					Debug.LogError("Policy settings received from the server for a policy without definition: " + data.policy_type);
 				}
 			}
+			if (m_onPoliciesInitialised != null)
+			{
+				m_onPoliciesInitialised.Invoke();
+				m_onPoliciesInitialised = null;
+			}
+			m_initialised = true;
 		}
 
 		public bool TryGetDefinition(string a_name, out PolicyDefinition a_definition)
