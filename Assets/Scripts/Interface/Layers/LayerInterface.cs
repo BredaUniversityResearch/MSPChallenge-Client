@@ -133,8 +133,8 @@ namespace MSP2050.Scripts
 				{
 					m_toggleBars[activeBars].gameObject.SetActive(false);
 				}
-				m_categoryLayoutGroup.spacing = 6f;
-				m_categoryLayoutGroup.padding = new RectOffset(0, 0, 6, 6);
+				m_categoryLayoutGroup.spacing = 8f;
+				m_categoryLayoutGroup.padding = new RectOffset(0, 0, 8, 8);
 			}
 		}
 

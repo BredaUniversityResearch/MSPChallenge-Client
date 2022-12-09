@@ -136,7 +136,7 @@ namespace MSP2050.Scripts
 				m_expandedLayers++;
 			else
 				m_expandedLayers--;
-			m_collapseAllButtonText.text = m_expandedLayers == 0 ? "Expand all" : "Collapse all";
+			m_collapseAllButtonText.text = m_expandedLayers == 0 ? "Expand" : "Collapse";
 		}
 
 		public void TextShowingChanged(bool showing)

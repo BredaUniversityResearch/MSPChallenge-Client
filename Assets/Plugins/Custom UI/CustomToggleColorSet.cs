@@ -17,7 +17,11 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
     public bool useHighlightColor;
     [ShowIf("useHighlightColor")]
     public IColourContainer colorHighlight;
-    public bool useDisabledColor;
+	[ShowIf("useHighlightColor")]
+	public bool separateSelectedHighlight;
+	[ShowIf("separateSelectedHighlight")]
+	public IColourContainer colorSelectedHighlight;
+	public bool useDisabledColor;
     [ShowIf("useDisabledColor")]
     public IColourContainer colorDisabled;
 
@@ -36,8 +40,13 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
             SetGraphicSetToColor(toggle.isOn ? colorSelected : colorNormal);
         toggle.onValueChanged.AddListener((value) =>
         {
-            if (!UseDisabledColor && (!highlightIfOn || !(Highlight && pointerOnToggle)))
-                SetGraphicsToNormal();
+            if (!UseDisabledColor)
+            {
+                if (!highlightIfOn || !(Highlight && pointerOnToggle))
+                    SetGraphicsToNormal();
+                else if(highlightIfOn && separateSelectedHighlight && useHighlightColor && pointerOnToggle)
+                    SetGraphicsToHighlight(value);
+            }
         });
         toggle.interactabilityChangeCallback += HandleInteractabilityChange;
     }
@@ -67,7 +76,7 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
         {
             //No longer disabled, set to previous color
             if (pointerOnToggle && Highlight)
-                SetGraphicsToHighlight();
+                SetGraphicsToHighlight(toggle.isOn);
             else
                 SetGraphicsToNormal();
         }
@@ -81,7 +90,7 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
     {
         pointerOnToggle = true;
         if (Highlight && (highlightIfOn || !toggle.isOn) && toggle.interactable)
-            SetGraphicsToHighlight();
+            SetGraphicsToHighlight(toggle.isOn);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -105,7 +114,7 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
 		    if (UseDisabledColor)
 			    SetGraphicsToDisabled();
 		    if (Highlight && pointerOnToggle && (highlightIfOn || !toggle.isOn))
-			    SetGraphicsToHighlight();
+			    SetGraphicsToHighlight(toggle.isOn);
 		    else
 			    SetGraphicsToNormal();
 	    }
@@ -116,9 +125,12 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
         SetGraphicSetToColor(toggle.isOn ? colorSelected : colorNormal);
     }
 
-    void SetGraphicsToHighlight()
+    void SetGraphicsToHighlight(bool toggleOn)
     {
-        SetGraphicSetToColor(colorHighlight);
+        if(separateSelectedHighlight && toggleOn)
+            SetGraphicSetToColor(colorSelectedHighlight);
+        else
+            SetGraphicSetToColor(colorHighlight);
     }
 
     void SetGraphicsToDisabled()
@@ -141,7 +153,9 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
             colorNormal?.SubscribeToChanges(OnNormalColourAssetChanged);
             if (useHighlightColor)
                 colorHighlight?.SubscribeToChanges(OnHighlightColourAssetChanged);
-            if (useDisabledColor)
+			if (separateSelectedHighlight)
+				colorSelectedHighlight?.SubscribeToChanges(OnHighlightColourAssetChanged);
+			if (useDisabledColor)
                 colorDisabled?.SubscribeToChanges(OnDisabledColourAssetChanged);
         }
     }
@@ -153,7 +167,9 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
             colorNormal?.UnSubscribeFromChanges(OnNormalColourAssetChanged);
             if (useHighlightColor)
                 colorHighlight?.UnSubscribeFromChanges(OnHighlightColourAssetChanged);
-            if (useDisabledColor)
+			if (separateSelectedHighlight)
+				colorSelectedHighlight?.UnSubscribeFromChanges(OnHighlightColourAssetChanged);
+			if (useDisabledColor)
                 colorDisabled?.UnSubscribeFromChanges(OnDisabledColourAssetChanged);
         }
     }
@@ -173,7 +189,7 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
     void OnHighlightColourAssetChanged(Color newColour)
     {
         if (Highlight && pointerOnToggle && (highlightIfOn || !toggle.isOn) && !UseDisabledColor)
-            SetGraphicsToHighlight();
+            SetGraphicsToHighlight(toggle.isOn);
     }
 
     void OnDisabledColourAssetChanged(Color newColour)

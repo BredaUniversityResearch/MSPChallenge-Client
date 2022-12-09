@@ -203,8 +203,9 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
-    - {fileID: 11400000, guid: 698601c76a654b7499f23c79e54b4d2e, type: 2}
-    - {fileID: 11400000, guid: c730a0031d5e82c4db4573a575b055a8, type: 2}
+    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+    - {fileID: 11400000, guid: dbe24502a18c5e546a327941d209c921, type: 2}
+    - {fileID: 11400000, guid: f60f649dcdfc7ca4883981ac12c67ef5, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -218,7 +219,10 @@ MonoBehaviour:
       Data: 1
     - Name: colorHighlight
       Entry: 10
-      Data: 0
+      Data: 2
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
@@ -226,6 +230,7 @@ MonoBehaviour:
   - {fileID: 7565167662045001102}
   highlightIfOn: 0
   useHighlightColor: 1
+  separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!114 &967733195525104036
 MonoBehaviour:
@@ -243,8 +248,8 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
-    - {fileID: 11400000, guid: c730a0031d5e82c4db4573a575b055a8, type: 2}
-    - {fileID: 11400000, guid: 698601c76a654b7499f23c79e54b4d2e, type: 2}
+    - {fileID: 11400000, guid: dbe24502a18c5e546a327941d209c921, type: 2}
+    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -280,13 +285,17 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 10
       Data: 1
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
   targetGraphics:
   - {fileID: 2476958227474783768}
   highlightIfOn: 0
-  useHighlightColor: 1
+  useHighlightColor: 0
+  separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!1 &7653357105177667495
 GameObject:
