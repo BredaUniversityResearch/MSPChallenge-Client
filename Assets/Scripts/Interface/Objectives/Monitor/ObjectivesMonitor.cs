@@ -36,9 +36,6 @@ namespace MSP2050.Scripts
 
 		private ECompletionStateFilter completionFilterState = ECompletionStateFilter.AnyState;
 
-		public MenuBarToggle objectivesToggle;
-		//public ToolbarCounter objectivesToggleCounter;
-
 		private void Start()
 		{
 			SetWindowActive(false); //Hide the window immediately. We can't set the state to disabled in the editor since we need all the constructors to run (including Awake & Start)
@@ -67,9 +64,9 @@ namespace MSP2050.Scripts
 
 		private void OnDisable()
 		{
-			if (objectivesToggle.toggle.isOn)
+			if (InterfaceCanvas.Instance.menuBarObjectivesMonitor.toggle.isOn)
 			{
-				objectivesToggle.toggle.isOn = false;
+				InterfaceCanvas.Instance.menuBarObjectivesMonitor.toggle.isOn = false;
 			}
 		}
 

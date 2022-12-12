@@ -83,7 +83,9 @@ namespace MSP2050.Scripts
 				host = m_serverAddress.text.Trim(' ', '\r', '\n', '\t');
 				PlayerPrefs.SetString(LOGIN_SERVER_ADRESS, host);
 			}
-			
+			else
+				PlayerPrefs.SetString(LOGIN_SERVER_ADRESS, "");
+
 			//Sessions from server address
 			WWWForm form = new WWWForm();
 			form.AddField("visibility", 0);

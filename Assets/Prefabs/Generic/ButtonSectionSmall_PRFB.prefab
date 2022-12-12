@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3214816034162069130}
   - component: {fileID: 4181733094132012782}
-  - component: {fileID: 5454330167233999811}
+  - component: {fileID: 5457554818549551197}
   m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
@@ -45,7 +45,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1231367175506834241}
   m_CullTransparentMesh: 1
---- !u!114 &5454330167233999811
+--- !u!114 &5457554818549551197
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,11 +54,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1231367175506834241}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b742792d5f8b2e64e9ce90c5610628fd, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.019607844, g: 0.3647059, b: 0.38823533, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -75,7 +75,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
-  colourAsset: {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
 --- !u!1 &4682123934913304077
 GameObject:
   m_ObjectHideFlags: 0
@@ -165,6 +164,7 @@ GameObject:
   - component: {fileID: 8068598660715374995}
   - component: {fileID: 180794204372111559}
   - component: {fileID: 8562765357892128093}
+  - component: {fileID: 1476665919565303925}
   m_Layer: 5
   m_Name: LeftButton
   m_TagString: Untagged
@@ -264,8 +264,7 @@ MonoBehaviour:
     SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
-    - {fileID: 11400000, guid: 698601c76a654b7499f23c79e54b4d2e, type: 2}
-    - {fileID: 11400000, guid: e059de7d05d519647b5f945149105ad6, type: 2}
+    - {fileID: 11400000, guid: fc49e36aa257a8e45b5d4b8d4a02850e, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -275,11 +274,11 @@ MonoBehaviour:
       Entry: 10
       Data: 0
     - Name: colorHighlight
-      Entry: 10
-      Data: 1
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 10
-      Data: 2
+      Data: 1
   targetGraphics:
   - {fileID: 8562765357892128093}
   useHighlightColor: 1
@@ -307,6 +306,42 @@ MonoBehaviour:
   m_FillCenter: 1
   m_slice: 0
   m_rounding: 12
+--- !u!114 &1476665919565303925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5484696522692366873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e05f750d797a9294f8ef07fd42a83ad6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+    - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 10
+      Data: 0
+    - Name: colorHighlight
+      Entry: 6
+      Data: 
+    - Name: colorDisabled
+      Entry: 10
+      Data: 1
+  targetGraphics:
+  - {fileID: 15268566133334696}
+  useHighlightColor: 0
+  useDisabledColor: 1
 --- !u!1 &6220388463485158119
 GameObject:
   m_ObjectHideFlags: 0
@@ -320,6 +355,7 @@ GameObject:
   - component: {fileID: 2023113379254053917}
   - component: {fileID: 2595369402285059177}
   - component: {fileID: 2061123439095655760}
+  - component: {fileID: 3476042339933503715}
   m_Layer: 5
   m_Name: RightButton
   m_TagString: Untagged
@@ -419,8 +455,7 @@ MonoBehaviour:
     SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
-    - {fileID: 11400000, guid: 698601c76a654b7499f23c79e54b4d2e, type: 2}
-    - {fileID: 11400000, guid: e059de7d05d519647b5f945149105ad6, type: 2}
+    - {fileID: 11400000, guid: fc49e36aa257a8e45b5d4b8d4a02850e, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -430,11 +465,11 @@ MonoBehaviour:
       Entry: 10
       Data: 0
     - Name: colorHighlight
-      Entry: 10
-      Data: 1
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 10
-      Data: 2
+      Data: 1
   targetGraphics:
   - {fileID: 2061123439095655760}
   useHighlightColor: 1
@@ -462,6 +497,42 @@ MonoBehaviour:
   m_FillCenter: 1
   m_slice: 0
   m_rounding: 12
+--- !u!114 &3476042339933503715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6220388463485158119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e05f750d797a9294f8ef07fd42a83ad6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+    - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 10
+      Data: 0
+    - Name: colorHighlight
+      Entry: 6
+      Data: 
+    - Name: colorDisabled
+      Entry: 10
+      Data: 1
+  targetGraphics:
+  - {fileID: 5457554818549551197}
+  useHighlightColor: 0
+  useDisabledColor: 1
 --- !u!1 &7427747024889662433
 GameObject:
   m_ObjectHideFlags: 0
@@ -531,7 +602,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7028837206209526857}
   - component: {fileID: 1837567584325528871}
-  - component: {fileID: 3068641285332972340}
+  - component: {fileID: 15268566133334696}
   m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
@@ -556,7 +627,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 16, y: 16}
+  m_SizeDelta: {x: 12, y: 12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1837567584325528871
 CanvasRenderer:
@@ -566,7 +637,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8892322745985085715}
   m_CullTransparentMesh: 1
---- !u!114 &3068641285332972340
+--- !u!114 &15268566133334696
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -575,18 +646,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 8892322745985085715}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b742792d5f8b2e64e9ce90c5610628fd, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.019607844, g: 0.3647059, b: 0.38823533, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: cf68b4b3dbffd8348adcfaf0775d4814, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ca3e4cce450ee18459ccc858d2e419b8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -596,4 +667,3 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
-  colourAsset: {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}

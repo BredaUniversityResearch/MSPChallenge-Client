@@ -27,6 +27,11 @@ namespace MSP2050.Scripts
 			PlayerNotifications.OnRemoveNotification -= OnRemoveNotification;
 		}
 
+		private void OnDisable()
+		{
+			InterfaceCanvas.Instance.menuBarNotifications.toggle.isOn = false;
+		}
+
 		private void OnAddNewNotification(NotificationData data)
 		{
 			NotificationEntryElement element;

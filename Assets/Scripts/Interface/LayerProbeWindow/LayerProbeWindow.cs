@@ -52,13 +52,7 @@ namespace MSP2050.Scripts
 		IEnumerator RepositionOnFrameEnd(Vector3 position)
 		{
 			yield return new WaitForEndOfFrame();
-
-			Rect rect = window.windowTransform.rect;
-			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-			window.SetPosition(new Vector3(
-				Mathf.Clamp(position.x / scale, 0f, (Screen.width - (rect.width * scale)) / scale),
-				Mathf.Clamp(position.y / scale, (-Screen.height + (rect.height * scale)) / scale, 0f),
-				position.z));
+			window.SetPosition(new Vector2(position.x, position.y));
 		}
 	}
 }

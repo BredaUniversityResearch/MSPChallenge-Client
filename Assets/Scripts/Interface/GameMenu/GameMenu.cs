@@ -27,7 +27,6 @@ namespace MSP2050.Scripts
 			continueGame.onClick.AddListener(delegate () { gameObject.SetActive(false); });
 			credits.onClick.AddListener(delegate () 
 			{
-				float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
 				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow("https://community.mspchallenge.info/wiki/Credits");
 				thisGenericWindow.Hide();
 			});

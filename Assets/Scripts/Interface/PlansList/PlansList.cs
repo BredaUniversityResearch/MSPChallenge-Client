@@ -57,6 +57,11 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		private void OnDisable()
+		{
+			InterfaceCanvas.Instance.menuBarPlansList.toggle.isOn = false;
+		}
+
 		public void AddPlanToList(Plan a_plan)
 		{
 			PlanBar planBar = Instantiate(m_planBarPrefab, GetparentForState(a_plan.State)).GetComponent<PlanBar>();
@@ -108,7 +113,7 @@ namespace MSP2050.Scripts
 			}
 			m_currentSorting = (EPlanSorting)a_newValue;
 
-			if(m_currentSorting == EPlanSorting.State)
+			if (m_currentSorting == EPlanSorting.State)
 			{
 				//Reparent to state bars and enable bars
 				foreach (var kvp in m_planBarsPerPlan)
@@ -119,6 +124,13 @@ namespace MSP2050.Scripts
 				{
 					kvp.Value.gameObject.SetActive(true);
 				}
+				VerticalLayoutGroup layout = m_contentParent.GetComponent<VerticalLayoutGroup>();
+				layout.padding = new RectOffset(0, 0, 4, 4);
+			}
+			else
+			{
+				VerticalLayoutGroup layout = m_contentParent.GetComponent<VerticalLayoutGroup>();
+				layout.padding = new RectOffset(0, 0, 0, 0);
 			}
 			m_needsSorting = true;
 		}
