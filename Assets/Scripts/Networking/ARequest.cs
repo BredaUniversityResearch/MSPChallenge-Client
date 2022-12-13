@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
-using GeoJSON.Net.Feature;
-using JetBrains.Annotations;
+using System.Text.RegularExpressions;
+using Codice.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -20,14 +20,44 @@ namespace MSP2050.Scripts
 		public bool expectMSPResultFormat = true;
 		public int timeoutLevel = 1;
 
+		private static bool m_XDebugJsonLoaded;
+		private static JToken m_TriggerXdebugUrlRegEx;
+
 		public ARequest(string url, System.Action<ARequest, string> failureCallback, int retriesRemaining)
 		{
-			Url = url;
+			UriBuilder uriBuilder = new UriBuilder(url);
+			NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
+			AddXdebugTriggerToQueryByUrl(url, query);
+			uriBuilder.Query = query.ToString();
+			Url = uriBuilder.ToString();
 			this.failureCallback = failureCallback;
 			this.retriesRemaining = retriesRemaining;
 		}
 		public abstract void ProcessPayload(JToken payload);
 		public abstract void CreateRequest(Dictionary<string, string> defaultHeaders);
+
+		// to enable xdebug based on debug url regex
+		private static void AddXdebugTriggerToQueryByUrl(string url, NameValueCollection query)
+		{
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+			LoadXDebugJson();
+			Regex r = new Regex(m_TriggerXdebugUrlRegEx.ToString());
+			Match m = r.Match(url);
+			if (!m.Success) return;
+			query["XDEBUG_TRIGGER"] = "msp-client";
+#endif
+		}
+
+		private static void LoadXDebugJson()
+		{
+			if (m_XDebugJsonLoaded) return;
+			m_XDebugJsonLoaded = true;
+			var jsonFilePath = System.IO.Path.Combine(Application.dataPath, "xdebug.json");
+			if (!System.IO.File.Exists(jsonFilePath)) return;
+			var json = System.IO.File.ReadAllText(jsonFilePath);
+			JObject o = JObject.Parse(json);
+			m_TriggerXdebugUrlRegEx = o.GetValue("TriggerXDebugUrlRegEx");
+		}
 	}
 
 	public abstract class Request<T> : ARequest
