@@ -34,7 +34,6 @@ namespace MSP2050.Scripts
 
 		[SerializeField]
 		private ValueConversionCollection valueConversionCollection = null;
-		//public Text yearly;
 
 		private float startingValue = 0.0f;
 		public float CurrentValue
@@ -42,9 +41,6 @@ namespace MSP2050.Scripts
 			get;
 			private set;
 		}
-
-		private Color barCol;
-		private ColorBlock toggleColBlock;
 
 		private Action<bool> onBarExpandedStateToggled;
 
@@ -67,7 +63,6 @@ namespace MSP2050.Scripts
 
 			actual.UpdateValue(convertedValue);
 			CurrentValue = val;
-			//lastActual = currentValue;
 
 			string changePercentage = KPIValue.FormatRelativePercentage(startingValue, val);
 			actual.UpdateTooltip(changePercentage);

@@ -42,8 +42,6 @@ namespace MSP2050.Scripts
 		[SerializeField]
 		private KPIValueProceduralColorScheme colorScheme = null;
 
-		//[SerializeField] private bool initialiseAfterLayerLoad;
-
 		private Dictionary<string, KPIBar> kpiBarsByValueName = new Dictionary<string, KPIBar>(16); //Also includes the categories
 		private Dictionary<string, KPIBar> kpiCategoriesByCategoryName = new Dictionary<string, KPIBar>(8);
 		private Stack<KPIBar> inactiveKpiBarsPool = new Stack<KPIBar>(16);
