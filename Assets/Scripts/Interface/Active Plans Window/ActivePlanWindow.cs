@@ -55,6 +55,7 @@ namespace MSP2050.Scripts
 		[SerializeField] AP_ContentToggle m_changeLayersToggle;
 		public AP_GeometryTool m_geometryTool;
 		[SerializeField] AP_LayerSelect m_layerSelect;
+		[SerializeField] GameObject m_noLayersEntry;
 
 		[Header("Policies")]
 		[SerializeField] GameObject m_policySection;
@@ -62,6 +63,7 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_policyPrefab;
 		[SerializeField] AP_ContentToggle m_changePoliciesToggle;
 		[SerializeField] AP_PolicySelect m_policySelect;
+		[SerializeField] GameObject m_noPoliciesEntry;
 
 		private List<AP_ContentToggle> m_layerToggles = new List<AP_ContentToggle>();
 		private Dictionary<string, AP_ContentToggle> m_policyToggles = new Dictionary<string, AP_ContentToggle>(); //popouts can be reached through toggles
@@ -393,7 +395,7 @@ namespace MSP2050.Scripts
 			m_startEditingButton.gameObject.SetActive(!Editing);
 			m_cancelEditButton.gameObject.SetActive(Editing);
 			m_acceptEditButton.gameObject.SetActive(Editing);
-			m_acceptEditButton.interactable = !string.IsNullOrEmpty(m_planName.text) && m_currentPlan.ConstructionStartTime >= TimeManager.Instance.GetCurrentMonth();
+			m_acceptEditButton.interactable = !string.IsNullOrEmpty(m_planName.text) && (m_currentPlan.ConstructionStartTime >= TimeManager.Instance.GetCurrentMonth() || m_currentPlan.StartTime == -1);
 
 			//Content
 			m_planName.interactable = Editing;
@@ -519,12 +521,17 @@ namespace MSP2050.Scripts
 			{
 				kvp.Value.gameObject.SetActive(false);
 			}
-			if(m_currentPlan.Policies != null)
+			if (m_currentPlan.Policies != null)
 			{
-				foreach(var kvp in m_currentPlan.Policies)
+				foreach (var kvp in m_currentPlan.Policies)
 				{
 					m_policyToggles[kvp.Key].gameObject.SetActive(true);
 				}
+				m_noPoliciesEntry.SetActive(m_currentPlan.Policies.Count == 0);
+			}
+			else
+			{ 
+				m_noPoliciesEntry.SetActive(false);
 			}
 		}
 
@@ -542,7 +549,7 @@ namespace MSP2050.Scripts
 			{
 				m_layerToggles[i].gameObject.SetActive(false);
 			}
-			m_changeLayersToggle.transform.SetAsLastSibling();
+			m_noLayersEntry.SetActive(m_currentPlan.PlanLayers.Count == 0);
 		}
 
 		private void CreateLayerEntry(PlanLayer layer)
