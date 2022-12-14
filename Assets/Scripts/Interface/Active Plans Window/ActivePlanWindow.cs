@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static Codice.CM.WorkspaceServer.WorkspaceTreeDataStore;
 using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace MSP2050.Scripts
@@ -220,6 +221,8 @@ namespace MSP2050.Scripts
 				m_currentPlan.State = Plan.PlanState.DELETED;
 				m_currentPlan.AttemptUnlock();
 			}
+			if (m_interactionMode != EInteractionMode.View)
+				ExitEditMode();
 
 			if (a_closeWindow)
 			{
@@ -408,7 +411,14 @@ namespace MSP2050.Scripts
 			m_changeLayersToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_changePoliciesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_planStateToggle.gameObject.SetActive(!Editing);
+			m_planStateToggle.SetInteractable(m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID || SessionManager.Instance.AreWeManager);
 			m_issuesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_planDateToggle.SetInteractable(Editing);
+
+			foreach(var toggle in m_layerToggles)
+			{
+				toggle.SetInteractable(Editing);
+			}
 		}
 
 		void EnterEditMode()

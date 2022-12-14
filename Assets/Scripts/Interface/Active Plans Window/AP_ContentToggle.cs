@@ -110,5 +110,10 @@ namespace MSP2050.Scripts
 		{
 			ForceClose(false);
 		}
+
+		public void SetInteractable(bool a_value)
+		{
+			m_toggle.interactable = a_value;
+		}
 	}
 }

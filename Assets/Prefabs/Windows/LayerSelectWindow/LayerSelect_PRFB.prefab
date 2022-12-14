@@ -423,7 +423,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
+    SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects: []
     SerializedBytesString: 
@@ -775,14 +775,65 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
-    SerializedBytes: 01010b00000063006f006c006f0072004e006f0072006d0061006c002f00000000012900000043006f006c006f0075007200500061006c0065007400740065002e0043006f006e007300740043006f006c006f00750072002c0020004d0053005000320030003500300050006c007500670069006e007300000000000301080000006d005f0063006f006c006f00750072002f01000000012900000055006e0069007400790045006e00670069006e0065002e0043006f006c006f0072002c00200055006e0069007400790045006e00670069006e0065002e0043006f00720065004d006f00640075006c006500200000803f200000803f200000803f2000000000050501010e00000063006f006c006f00720048006900670068006c0069006700680074003000000000010000000301080000006d005f0063006f006c006f00750072003001000000200000000020000000002000000000209998983e05052d010d00000063006f006c006f007200440069007300610062006c0065006400
+    SerializedFormat: 2
+    SerializedBytes: 
     ReferencedUnityObjects: []
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 7
+      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
+    - Name: m_colour
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: colorHighlight
+      Entry: 7
+      Data: 1|ColourPalette.ConstColour, MSP2050Plugins
+    - Name: m_colour
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0.298039228
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: colorDisabled
+      Entry: 6
+      Data: 
   targetGraphics:
   - {fileID: 6717001609931804795}
   useHighlightColor: 1
@@ -1146,12 +1197,12 @@ PrefabInstance:
     - target: {fileID: 3432982951939769677, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3432982951939769677, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3432982951939769677, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
@@ -1161,17 +1212,17 @@ PrefabInstance:
     - target: {fileID: 4143690487913963358, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
       propertyPath: m_Spacing
-      value: 8
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4143690487913963358, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
       propertyPath: m_Padding.m_Top
-      value: 8
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4143690487913963358, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
       propertyPath: m_Padding.m_Bottom
-      value: 8
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 5896837634762038341, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
@@ -1301,7 +1352,7 @@ PrefabInstance:
     - target: {fileID: 7558096004504590775, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8586600552041660309, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}

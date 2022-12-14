@@ -14,6 +14,7 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] CustomDropdown m_statusDropdown;
 		[SerializeField] TextMeshProUGUI m_infoText;
+		[SerializeField] GameObject m_buttonSection;
 		[SerializeField] Button m_confirmButton;
 		[SerializeField] Button m_cancelButton;
 
@@ -31,48 +32,38 @@ namespace MSP2050.Scripts
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
 
 			m_statusDropdown.interactable = false;
+			m_statusDropdown.captionText.text = a_content.State.GetDisplayName();
 
 			//If simulation, disable all changeable UI elements
 			if (TimeManager.Instance.CurrentState == TimeManager.PlanningState.Simulation)
 			{
-				m_statusDropdown.interactable = false;
-				m_statusDropdown.captionText.text = a_content.State.GetDisplayName();
 				m_infoText.gameObject.SetActive(true);
+				m_buttonSection.SetActive(false);
 				m_infoText.text = "Plan details cannot be changed while the game is in simulation mode. Please wait for the simulation to end.";
 			}
-			else if(a_APWindow.Editing)
+			else if (a_APWindow.Editing)
 			{
-				m_statusDropdown.interactable = false;
-				m_statusDropdown.captionText.text = a_content.State.GetDisplayName();
 				m_infoText.gameObject.SetActive(true);
+				m_buttonSection.SetActive(false);
 				m_infoText.text = "The plan's state cannot be changed in edit mode. Finish editing before changing the plan's state.";
 			}
 			else if (m_plan.RequiresTimeChange)
 			{
-				m_statusDropdown.interactable = false;
-				m_statusDropdown.captionText.text = a_content.State.GetDisplayName();
 				m_infoText.gameObject.SetActive(true);
+				m_buttonSection.SetActive(false);
 				m_infoText.text = "The plan's construction start time has passed. To restore the plan, change its implementation date.";
 			}
-			else
+			else if (a_content.State == Plan.PlanState.IMPLEMENTED)
 			{
-				m_infoText.gameObject.SetActive(false);
-				//If state is implemented, nothing needs to be updated
-				if (a_content.State != Plan.PlanState.IMPLEMENTED)
-				{
-					//If owner/manager
-					if (a_content.Country == SessionManager.Instance.CurrentUserTeamID || SessionManager.Instance.AreWeManager)
-					{
-						m_statusDropdown.interactable = true;
-						SetStatusDropdownOptions();
-					}
-					else
-						m_statusDropdown.captionText.text = "State: " + a_content.State.GetDisplayName();
-				}
-				else
-				{
-					m_statusDropdown.captionText.text = "State: Implemented";
-				}
+				m_infoText.gameObject.SetActive(true);
+				m_buttonSection.SetActive(false);
+				m_infoText.text = "Implemented plans cannot change state.";
+			}
+			else
+			{ 
+				m_statusDropdown.interactable = true;
+				SetStatusDropdownOptions();
+				m_buttonSection.SetActive(true);
 			}
 		}
 

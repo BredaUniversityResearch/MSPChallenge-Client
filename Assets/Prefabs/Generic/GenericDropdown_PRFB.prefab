@@ -179,7 +179,6 @@ GameObject:
   - component: {fileID: 3208969871719099134}
   - component: {fileID: 3208969871719099132}
   - component: {fileID: 2070144053885492827}
-  - component: {fileID: 4439433096896852454}
   m_Layer: 5
   m_Name: Label
   m_TagString: Untagged
@@ -304,24 +303,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &4439433096896852454
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3208969871719099135}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef4c00f50fb0be243a14fabcb408cd5d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  colourAsset: {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
-  graphics:
-  - {fileID: 2070144053885492827}
-  colourChanged:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &3208969871722071303
 GameObject:
   m_ObjectHideFlags: 0
@@ -1042,6 +1023,7 @@ GameObject:
   - component: {fileID: 3208969872467482187}
   - component: {fileID: 4855886903234662578}
   - component: {fileID: 6624741877933124392}
+  - component: {fileID: 7803730437285772840}
   - component: {fileID: 5698800383367055587}
   - component: {fileID: 625726439436133368}
   m_Layer: 5
@@ -1153,6 +1135,7 @@ MonoBehaviour:
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
     - {fileID: 11400000, guid: 86ed3f28ceb93f746af1ec12ed3d9a57, type: 2}
+    - {fileID: 11400000, guid: fc49e36aa257a8e45b5d4b8d4a02850e, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -1165,12 +1148,48 @@ MonoBehaviour:
       Entry: 10
       Data: 1
     - Name: colorDisabled
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 2
   targetGraphics:
   - {fileID: 5698800383367055587}
   useHighlightColor: 1
-  useDisabledColor: 0
+  useDisabledColor: 1
+--- !u!114 &7803730437285772840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3208969872467482192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d853cf14a001c764a8dc01e4542b7c34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+    - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 10
+      Data: 0
+    - Name: colorHighlight
+      Entry: 6
+      Data: 
+    - Name: colorDisabled
+      Entry: 10
+      Data: 1
+  targetGraphics:
+  - {fileID: 2070144053885492827}
+  useHighlightColor: 0
+  useDisabledColor: 1
 --- !u!114 &5698800383367055587
 MonoBehaviour:
   m_ObjectHideFlags: 0

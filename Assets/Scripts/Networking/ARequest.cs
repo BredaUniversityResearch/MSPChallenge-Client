@@ -41,6 +41,7 @@ namespace MSP2050.Scripts
 		{
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
 			LoadXDebugJson();
+			if (m_TriggerXdebugUrlRegEx == null) return;
 			Regex r = new Regex(m_TriggerXdebugUrlRegEx.ToString());
 			Match m = r.Match(url);
 			if (!m.Success) return;

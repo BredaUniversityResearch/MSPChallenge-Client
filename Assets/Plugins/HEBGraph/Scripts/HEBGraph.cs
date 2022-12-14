@@ -14,7 +14,6 @@ namespace HEBGraph
 	{
 		const float GROUP_BG_SPACING = 0.1f;
 
-		[SerializeField] TextAsset m_HEBConfigFile;
 		[SerializeField] GameObject m_entryPrefab;
 		[SerializeField] Transform m_entryParent;
 		[SerializeField] GameObject m_groupTextPrefab, m_groupTextPrefabDown;
