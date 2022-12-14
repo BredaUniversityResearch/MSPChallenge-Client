@@ -230,7 +230,8 @@ namespace MSP2050.Scripts
 			{
 				foreach (KPICategory category in collection.GetCategories())
 				{
-					KPIBar categoryBar = CreateKPIBar(categoryPrefab, GetTargetContainerForCategory(category), category);
+                    //TODO: create expandable bar for category, store it
+					KPIBar categoryBar = CreateKPIBar(categoryPrefab, GetTargetContainerForCategory(category), category); //Create this inside expandable bar (as totals)
 
 					KPICategory categoryLocal = category;
 					categoryBar.SetBarExpandedStateChangedCallback((expandedState) => OnKPICategoryToggled(categoryLocal, categoryBar));
