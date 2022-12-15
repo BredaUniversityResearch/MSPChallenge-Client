@@ -45,6 +45,6 @@ namespace MSP2050.Scripts
 			return true; 
 		}
 
-		public bool IsOpen => m_contentToggle.IsOn;
+		public bool IsOpen => gameObject.activeSelf;
 	}
 }

@@ -225,6 +225,9 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 10
       Data: 0
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
@@ -232,6 +235,7 @@ MonoBehaviour:
   - {fileID: 7563844890674664831}
   highlightIfOn: 1
   useHighlightColor: 1
+  separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!114 &3847515262131097416
 MonoBehaviour:
@@ -359,7 +363,7 @@ MonoBehaviour:
   m_charWidthMaxAdj: 0
   m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 3
+  m_overflowMode: 1
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1

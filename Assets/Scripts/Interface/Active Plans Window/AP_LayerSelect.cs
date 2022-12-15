@@ -38,6 +38,9 @@ namespace MSP2050.Scripts
 
 			foreach(AbstractLayer layer in LayerManager.Instance.GetAllLayers())
 			{
+				if (!layer.Editable)
+					continue;
+
 				AP_LayerSelectSubcategory subcategory;
 				if (!m_subcategoryObjects.TryGetValue(layer.SubCategory, out subcategory))
 				{

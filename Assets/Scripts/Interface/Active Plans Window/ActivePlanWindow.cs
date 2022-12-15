@@ -222,7 +222,7 @@ namespace MSP2050.Scripts
 				m_currentPlan.AttemptUnlock();
 			}
 			if (m_interactionMode != EInteractionMode.View)
-				ExitEditMode();
+				ExitEditMode(!a_closeWindow);
 
 			if (a_closeWindow)
 			{
@@ -334,7 +334,7 @@ namespace MSP2050.Scripts
 		void HandleChangesSubmissionSuccess(BatchRequest batch)
 		{
 			InterfaceCanvas.HideNetworkingBlocker();
-			ExitEditMode();
+			ExitEditMode(true);
 		}
 
 		void HandleChangesSubmissionFailure(BatchRequest batch)
@@ -436,7 +436,7 @@ namespace MSP2050.Scripts
 			RefreshSectionActivity();
 		}
 
-		void ExitEditMode()
+		void ExitEditMode(bool a_windowStaysOpen)
 		{
 			m_interactionMode = EInteractionMode.View;
 
@@ -448,7 +448,8 @@ namespace MSP2050.Scripts
 
 			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 			LayerManager.Instance.ClearNonReferenceLayers();
-			PlanManager.Instance.ShowPlan(m_currentPlan); //Also refreshed our content & activity
+			if(a_windowStaysOpen)
+				PlanManager.Instance.ShowPlan(m_currentPlan); //Also refreshed our content & activity
 		}
 
 		public void CloseWindow()

@@ -387,7 +387,7 @@ namespace MSP2050.Scripts
 			JObject dataObject = new JObject();
 			dataObject.Add("id", Plan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("layerid", BaseLayer.ID);
-			creationBatchCallID = batch.AddRequest<int>(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE, HandleDatabaseIDResult);
+			creationBatchCallID = batch.AddRequest<int>(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_LAYER_ADD, HandleDatabaseIDResult);
 		}
 		void HandleDatabaseIDResult(int a_result)
 		{

@@ -190,6 +190,7 @@ namespace MSP2050.Scripts
 						dataObject.Add("added", JToken.FromObject(planlayer.issues));
 						dataObject.Add("plan", planlayer.Plan.GetDataBaseOrBatchIDReference());
 						dataObject.Add("planlayer_id", planlayer.GetDataBaseOrBatchIDReference());
+						dataObject.Add("removed", JToken.FromObject(new int[0]));
 						a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
 					}
 				}
@@ -275,6 +276,7 @@ namespace MSP2050.Scripts
 					dataObject.Add("plan", m_planLayer.Plan.GetDataBaseOrBatchIDReference());
 					dataObject.Add("planlayer_id", m_planLayer.GetDataBaseOrBatchIDReference());
 					dataObject.Add("added", JToken.FromObject(m_planLayer.issues));
+					dataObject.Add("removed", JToken.FromObject(new int[0]));
 					a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
 				}
 			}

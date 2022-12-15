@@ -1,4 +1,5 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -69,24 +70,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < numLabels; ++i)
 			{
 				int year = SessionManager.Instance.MspGlobalData.start + (labelSpacingInYears * i);
-				RectTransform label = CreateYearLabel(year.ToString());
-
-				float percentage = (float)i / (desiredSubdivisions);
-				label.anchorMin = new Vector2(percentage, label.anchorMin.y);
-				label.anchorMax = new Vector2(percentage, label.anchorMax.y);
-
-				//Offset the first and last labels
-				if (i == 0)
-				{
-					//label.localPosition = new Vector3(label.sizeDelta.x / 2f, label.localPosition.y);
-					label.anchoredPosition = new Vector3(label.sizeDelta.x / 2f, 0);
-				}
-				else if (i == numLabels - 1 && (label.anchorMax.x > 0.98f))
-				{
-					//Only offset the last label if the label would show at roughly the end point.
-					//label.localPosition = new Vector3(label.sizeDelta.x / 2f, label.localPosition.y);
-					label.anchoredPosition = new Vector3(-label.sizeDelta.x / 2f, 0);
-				}
+				CreateYearLabel(year.ToString(), i / desiredSubdivisions);
 			}
 
 			if (monthSelectorSlider != null)
@@ -100,16 +84,31 @@ namespace MSP2050.Scripts
 			SetLatestAvailableMonth(TimeManager.Instance.GetCurrentMonth());
 		}
 
-		private RectTransform CreateYearLabel(string labelText)
+		private void CreateYearLabel(string labelText, float xAnchorPos)
 		{
 			GameObject label = Instantiate(markedYearPrefab, transform);
-			Text labelTextComponent = label.GetComponent<Text>();
+			TextMeshProUGUI labelTextComponent = label.GetComponentInChildren<TextMeshProUGUI>();
 			if (labelTextComponent != null)
 			{
 				labelTextComponent.text = labelText;
+				if(xAnchorPos < 0.01f)
+				{
+					RectTransform textRect = labelTextComponent.GetComponent<RectTransform>();
+					textRect.pivot = new Vector2(0f, 0f);
+					textRect.anchoredPosition = new Vector2(-4f, 0f);
+					labelTextComponent.alignment = TextAlignmentOptions.MidlineLeft;
+				}
+				else if(xAnchorPos > 0.99f)
+				{
+					RectTransform textRect = labelTextComponent.GetComponent<RectTransform>();
+					textRect.pivot = new Vector2(1f, 0f);
+					textRect.anchoredPosition = new Vector2(4f, 0f);
+					labelTextComponent.alignment = TextAlignmentOptions.MidlineRight;
+				}
 			}
-
-			return label.GetComponent<RectTransform>();
+			RectTransform labelRect = label.GetComponent<RectTransform>();
+			labelRect.anchorMin = new Vector2(xAnchorPos, labelRect.anchorMin.y);
+			labelRect.anchorMax = new Vector2(xAnchorPos, labelRect.anchorMax.y);
 		}
 
 		private void OnSliderValueChanged(float newMonthValue)

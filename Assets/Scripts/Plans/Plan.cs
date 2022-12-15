@@ -810,7 +810,7 @@ namespace MSP2050.Scripts
 			JObject dataObject = new JObject();
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("name", Name);
-			batch.AddRequest(Server.RenamePlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			batch.AddRequest(Server.RenamePlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public void SubmitPlanDate(BatchRequest batch)
@@ -821,19 +821,11 @@ namespace MSP2050.Scripts
 			batch.AddRequest(Server.ChangePlanDate(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
-		public void SubmitAddNewPlanLayer(AbstractLayer layer, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("id", GetDataBaseOrBatchIDReference());
-			dataObject.Add("layerid", layer.ID);
-			batch.AddRequest(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-		}
-
 		public void SubmitRemovePlanLayer(PlanLayer planLayerToRemove, BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("id", planLayerToRemove.ID);
-			batch.AddRequest(Server.DeletePlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			batch.AddRequest(Server.DeletePlanLayer(), dataObject, BatchRequest.BATCH_GROUP_LAYER_REMOVE);
 		}
 
 		public void SubmitRequiredApproval(BatchRequest batch)

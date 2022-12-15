@@ -260,7 +260,7 @@ namespace MSP2050.Scripts
 			return "api/plan/DeleteLayer";
 		}
 
-		public static string RenamePlanLayer()
+		public static string RenamePlan()
 		{
 			return "api/plan/Name";
 		}
