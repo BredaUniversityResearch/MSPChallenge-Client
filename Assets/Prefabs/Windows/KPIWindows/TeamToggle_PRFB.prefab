@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2088544321061846555}
   - component: {fileID: 7227528448511846836}
-  - component: {fileID: 7938159958419477356}
+  - component: {fileID: 5225271991192793127}
   m_Layer: 5
   m_Name: ToggleCheckmark
   m_TagString: Untagged
@@ -32,10 +32,10 @@ RectTransform:
   m_Father: {fileID: 3140089330242471038}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 10, y: 10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7227528448511846836
 CanvasRenderer:
@@ -45,7 +45,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1036093421238108882}
   m_CullTransparentMesh: 1
---- !u!114 &7938159958419477356
+--- !u!114 &5225271991192793127
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1094db60e5f780243bab8e0cca231eaa, type: 3}
+  m_Sprite: {fileID: 21300000, guid: aee7bdd16cf4b9f4bbf7694b7fe4a8a8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
-  colourAsset: {fileID: 0}
+  colourAsset: {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
 --- !u!1 &6491765478366444840
 GameObject:
   m_ObjectHideFlags: 0
@@ -157,9 +157,9 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 0
-  m_TargetGraphic: {fileID: 2271676718236349605}
+  m_TargetGraphic: {fileID: 0}
   toggleTransition: 1
-  graphic: {fileID: 2271676718236349605}
+  graphic: {fileID: 0}
   m_Group: {fileID: 0}
   onValueChanged:
     m_PersistentCalls:
@@ -221,13 +221,17 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 10
       Data: 1
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
   targetGraphics:
-  - {fileID: 2271676718236349605}
+  - {fileID: 1610497027333095734}
   highlightIfOn: 0
   useHighlightColor: 1
+  separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!114 &1765315028522428001
 MonoBehaviour:
@@ -267,7 +271,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8129512091234702761}
   - component: {fileID: 594621894229886419}
-  - component: {fileID: 2271676718236349605}
+  - component: {fileID: 1610497027333095734}
   m_Layer: 5
   m_Name: ToggleBackground
   m_TagString: Untagged
@@ -302,7 +306,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7973700164481952585}
   m_CullTransparentMesh: 1
---- !u!114 &2271676718236349605
+--- !u!114 &1610497027333095734
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -311,25 +315,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 7973700164481952585}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b742792d5f8b2e64e9ce90c5610628fd, type: 3}
+  m_Script: {fileID: 11500000, guid: 941889c74250fc341ae9e200240219a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e1f0b4fefd54bab4fbf3d5341a2ad2ed, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
   m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
-  colourAsset: {fileID: 0}
+  m_slice: 0
+  m_rounding: 4

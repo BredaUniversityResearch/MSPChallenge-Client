@@ -88,7 +88,7 @@ namespace MSP2050.Scripts
 		public void FoldIcon(bool dir)
 		{
 			RectTransform rectTrans = (RectTransform)foldIcon.transform;
-			float rotation = (dir) ? 0f : 90f;
+			float rotation = (dir) ? -90f : 0f;
 			rectTrans.DORotate(new Vector3(rectTrans.rotation.x, rectTrans.rotation.y, rotation), 0.1f);
 		}
 

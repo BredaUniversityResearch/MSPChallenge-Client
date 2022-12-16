@@ -302,6 +302,9 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 10
       Data: 0
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
@@ -309,6 +312,7 @@ MonoBehaviour:
   - {fileID: 428419985680841458}
   highlightIfOn: 1
   useHighlightColor: 1
+  separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!114 &5337914625926596075
 MonoBehaviour:
@@ -362,6 +366,9 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 6
       Data: 
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
@@ -369,6 +376,7 @@ MonoBehaviour:
   - {fileID: 2568681831020224609}
   highlightIfOn: 0
   useHighlightColor: 0
+  separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!114 &4434713709905023744
 MonoBehaviour:
@@ -422,6 +430,9 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 6
       Data: 
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
@@ -429,6 +440,7 @@ MonoBehaviour:
   - {fileID: 8057568613878360222}
   highlightIfOn: 0
   useHighlightColor: 0
+  separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!1 &3490512127360812620
 GameObject:
@@ -879,7 +891,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f71e1e6efd2e97b44a39d6511ee189c2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f4b622fc6c71b094bb739f9da787a45a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

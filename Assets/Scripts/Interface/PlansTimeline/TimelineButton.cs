@@ -2,19 +2,20 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TMPro;
 
 namespace MSP2050.Scripts
 {
 	public class TimelineButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 	{
-		public int month;
-		private TimelineTrack track;
+		[HideInInspector] public int month;
 		public Button button;
 		public RectTransform rect;
 		public LayoutElement layout;
 		public Image large, multiplPlansIcon;
-		public Animator anim;
-		public Text monthNameText; //Only used for inspect buttons
+		public TextMeshProUGUI monthNameText; //Only used for inspect buttons
+
+		private TimelineTrack track;
 
 		public List<Plan> plans { get; private set; }
 

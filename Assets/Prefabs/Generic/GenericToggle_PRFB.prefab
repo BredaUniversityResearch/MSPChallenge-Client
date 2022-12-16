@@ -80,7 +80,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 7439173029994619122}
   toggleTransition: 1
   graphic: {fileID: 6798749505740292855}
   m_Group: {fileID: 0}
@@ -162,6 +162,9 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 10
       Data: 1
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
@@ -169,6 +172,7 @@ MonoBehaviour:
   - {fileID: 7439173029994619122}
   highlightIfOn: 1
   useHighlightColor: 1
+  separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!1 &8437332867641911553
 GameObject:
@@ -202,10 +206,10 @@ RectTransform:
   m_Father: {fileID: 1080280467024096436}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -4, y: -4}
+  m_SizeDelta: {x: 10, y: 10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2886520478152142019
 CanvasRenderer:
@@ -235,7 +239,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f71e1e6efd2e97b44a39d6511ee189c2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: aee7bdd16cf4b9f4bbf7694b7fe4a8a8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
