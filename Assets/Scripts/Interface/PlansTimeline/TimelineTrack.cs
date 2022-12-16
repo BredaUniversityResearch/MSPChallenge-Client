@@ -10,7 +10,6 @@ namespace MSP2050.Scripts
 		public GameObject buttonPrefab, inspectButtonPrefab;
 		public Dictionary<int, TimelineButton> timelineButtons = new Dictionary<int, TimelineButton>(); 
 		public RectTransform buttonLocation;
-		public Animator anim;
 		public  PlansTimeline timeline;
 
 		private RectTransform rect;
@@ -154,7 +153,6 @@ namespace MSP2050.Scripts
 			timeline.trackCoverButton.gameObject.SetActive(true);
 
 			timeline.IsolateButtonGroup(true);
-			anim.SetBool("Show", true);
 			inspectingGroup = true;
 
 			plansToInspect.Sort();
@@ -173,7 +171,6 @@ namespace MSP2050.Scripts
 			timeline.inspectingYearText.text = "";
 			inspectingGroup = false;
 			timeline.IsolateButtonGroup(false);
-			anim.SetBool("Show", false);
 			//Ignores the first child as thats the text
 			for (int i = 1; i < timeline.groupButtonLocation.childCount; i++)
 			{

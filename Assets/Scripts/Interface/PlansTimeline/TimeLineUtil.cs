@@ -7,11 +7,10 @@ namespace MSP2050.Scripts
 	public class TimeLineUtil : MonoBehaviour {
 
 		public GameObject spacerPrefab;
-		public GameObject seasonPrefab;
 		public GameObject yearPrefab;
 		public GameObject markedYearPrefab;
 		public int markedYearInterval;
-		public List<Transform> yearMarkers;
+		[HideInInspector] public List<Transform> yearMarkers;
 
 		private void Awake()
 		{

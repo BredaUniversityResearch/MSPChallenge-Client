@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 //using NUnit.Framework;
 
@@ -26,9 +27,7 @@ namespace MSP2050.Scripts
 		public RectTransform groupButtonLocation;
 		public RectTransform trackCover;
 		public Button trackCoverButton;
-		public Text inspectingYearText;
-
-		public LayoutElement timelineGridLayout;
+		public TextMeshProUGUI inspectingYearText;
 
 		private Dictionary<int, int> teamTrackID;
 
@@ -37,7 +36,6 @@ namespace MSP2050.Scripts
 
 		protected void Awake()
 		{
-			timelineGridLayout.minHeight = 0.0f;
 			trackLocation.sizeDelta = new Vector2(trackLocation.sizeDelta.x, 1f);
 			dateMarkerGraphic.uvRect = new Rect(0f, 0f, 1f, 1f);
 			tracks = new List<TimelineTrack>(16);
@@ -66,7 +64,6 @@ namespace MSP2050.Scripts
 				CreateTrack(kvp.Value.color);
 				teamTrackID.Add(kvp.Key, tracks.Count - 1);
 			}
-			timelineGridLayout.minHeight = 16f * tracks.Count;
 		}
 
 		private void OnAddNewPlan(Plan plan)
@@ -116,8 +113,6 @@ namespace MSP2050.Scripts
 
 		public void IsolateButtonGroup(bool dir)
 		{
-			trackLocation.GetComponent<VerticalLayoutGroup>().enabled = !dir;
-
 			if (dir)
 			{
 				trackCover.SetAsLastSibling();
