@@ -80,8 +80,11 @@ namespace MSP2050.Scripts
 		public void UpdatetrackEventFor(Plan plan, int oldTime)
 		{
 			int year = oldTime - (oldTime % 12);
-			if (timelineButtons[year].RemovePlan(plan))
-				timelineButtons.Remove(year);
+			if (timelineButtons.TryGetValue(year, out var button)) //Newly created plans might not be in timeline
+			{
+				if(button.RemovePlan(plan))
+					timelineButtons.Remove(year);
+			}
 			if(plan.ShouldBeVisibleInUI)
 				RegisterEvent(plan);
 		}

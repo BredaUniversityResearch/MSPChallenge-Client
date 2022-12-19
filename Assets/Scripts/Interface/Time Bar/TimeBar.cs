@@ -29,10 +29,10 @@ namespace MSP2050.Scripts
 		//Timeline
 		[Header("Timeline")]
 		public TextMeshProUGUI currentDateText;
-		public Image fill;
-		public TimeBarEraMarker eraMarkerPrefab;
+		public RectTransform fill;
+		public GameObject eraMarkerPrefab;
+		public GameObject spacerPrefab;
 		public RectTransform eraMarkerParent;
-		[HideInInspector] public List<TimeBarEraMarker> eraMarkers = new List<TimeBarEraMarker>();
 		[SerializeField] RectTransform viewingTimeIndicatorBottom;
 
 		//View time
@@ -94,10 +94,12 @@ namespace MSP2050.Scripts
 
 		void CreateEraMarkers()
 		{
-			for (int i = 0; i < MspGlobalData.num_eras; i++)
+			for (int i = 1; i < MspGlobalData.num_eras; i++)
 			{
-				TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerParent, false);
-				eraMarkers.Add(marker);
+				RectTransform rect =  Instantiate(eraMarkerPrefab, eraMarkerParent, false).GetComponent<RectTransform>();
+				float t = (float)i / MspGlobalData.num_eras;
+				rect.anchorMin = new Vector2(t, 0f);
+				rect.anchorMax = new Vector2(t, 1f);
 			}
 		}
 
@@ -110,7 +112,8 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			fill.fillAmount = (float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
+			fill.anchorMax = new Vector2((float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month, 1f);
+			//fill.fillAmount = (float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
 			currentDateText.text = Util.MonthToText(month);
 			UpdateIndicator(viewingTimeIndicatorBottom, month);
 
@@ -199,17 +202,17 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public TimeBarEraMarker CreateEraMarker(int month)
-		{
-			TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerParent, false);
-			eraMarkers.Add(marker);
+		//public TimeBarEraMarker CreateEraMarker(int month)
+		//{
+		//	TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerParent, false);
+		//	eraMarkers.Add(marker);
 
-			// Set position based on month
-			float posX = ((month + 120) / (float)SessionManager.Instance.MspGlobalData.session_end_month) * eraMarkerParent.rect.width;
-			marker.thisRectTrans.anchoredPosition = new Vector2(posX, marker.thisRectTrans.anchoredPosition.y);
+		//	// Set position based on month
+		//	float posX = ((month + 120) / (float)SessionManager.Instance.MspGlobalData.session_end_month) * eraMarkerParent.rect.width;
+		//	marker.thisRectTrans.anchoredPosition = new Vector2(posX, marker.thisRectTrans.anchoredPosition.y);
 
-			return marker;
-		}
+		//	return marker;
+		//}
 
 		public void ViewCurrentTime()
 		{

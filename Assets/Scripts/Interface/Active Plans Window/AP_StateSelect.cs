@@ -63,6 +63,7 @@ namespace MSP2050.Scripts
 			{ 
 				m_statusDropdown.interactable = true;
 				SetStatusDropdownOptions();
+				m_infoText.gameObject.SetActive(false);
 				m_buttonSection.SetActive(true);
 			}
 		}
