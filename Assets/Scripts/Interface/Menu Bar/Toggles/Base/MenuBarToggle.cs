@@ -1,14 +1,18 @@
-﻿using UnityEngine;
+﻿using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace MSP2050.Scripts
 {
 	public class MenuBarToggle : MonoBehaviour
 	{
-		public enum Selection { Logo, Layers, PlansList, ObjectivesMonitor, ImpactTool, ActiveLayers, GameMenu, CreatePlan, Notifications, MapTools };
+		public enum Selection { Logo, Layers, PlansList, ObjectivesMonitor, ImpactTool, ActiveLayers, GameMenu, CreatePlan, Notifications, MapTools, Other };
 
 		[Header("Connects to the correct toggle")]
 		public Selection connectTo;
-	
+
+		[ShowIf("connectTo", Selection.Other)]
+		public GameObject otherWindow;
+
 		public CustomToggle toggle;
 
 		void Start()
@@ -58,6 +62,10 @@ namespace MSP2050.Scripts
 				case Selection.MapTools:
 					toggle.isOn = InterfaceCanvas.Instance.mapToolsWindow.activeSelf; // Init
 					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.mapToolsWindow.SetActive(toggle.isOn));
+					break;
+				case Selection.Other:
+					toggle.isOn = otherWindow.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => otherWindow.SetActive(toggle.isOn));
 					break;
 			}
 		}
