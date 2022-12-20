@@ -33,10 +33,10 @@ RectTransform:
   m_Father: {fileID: 4912417116465227139}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 250, y: -7.9}
-  m_SizeDelta: {x: 500, y: 15.8}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &255503352
 CanvasRenderer:
@@ -179,6 +179,12 @@ PrefabInstance:
       propertyPath: m_text
       value: Energy distribution
       objectReference: {fileID: 0}
+    - target: {fileID: 4645963240997653620, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 4645963240997653620, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
     - target: {fileID: 5825348606581607995, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_Name
@@ -313,6 +319,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_PreferredHeight
       value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 6596570286461496140, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.9607843
+      objectReference: {fileID: 0}
+    - target: {fileID: 6596570286461496140, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.9607843
+      objectReference: {fileID: 0}
+    - target: {fileID: 6596570286461496140, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.9607843
       objectReference: {fileID: 0}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
@@ -553,12 +574,17 @@ PrefabInstance:
     - target: {fileID: 4143690487913963358, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
       propertyPath: m_Padding.m_Top
-      value: 0
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4143690487913963358, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
       propertyPath: m_Padding.m_Right
       value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 4143690487913963358, guid: e0b6668735221754692c2da8e160f44b,
+        type: 3}
+      propertyPath: m_Padding.m_Bottom
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 5896837634762038341, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
@@ -684,6 +710,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ContentScrollView_PRFB
+      objectReference: {fileID: 0}
+    - target: {fileID: 7558096004504590775, guid: e0b6668735221754692c2da8e160f44b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8586600552041660309, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}

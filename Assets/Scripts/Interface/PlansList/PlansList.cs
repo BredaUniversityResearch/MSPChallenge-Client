@@ -296,5 +296,10 @@ namespace MSP2050.Scripts
 		{
 			return a_plan2.Country.CompareTo(a_plan1.Country);
 		}
+
+		public bool ContainsPlan(Plan a_plan)
+		{
+			return m_planBarsPerPlan.ContainsKey(a_plan);
+		}
 	}
 }

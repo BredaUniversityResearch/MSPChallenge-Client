@@ -61,12 +61,14 @@ namespace MSP2050.Scripts
 			if (targetPlan != null)
 			{
 				targetPlan.UpdatePlan(planObject, layerUpdateTimes);
+				if(!InterfaceCanvas.Instance.plansList.ContainsPlan(targetPlan))
+					AddPlanToUI(targetPlan);
 			}
 			else
 			{
 				targetPlan = new Plan(planObject, layerUpdateTimes);
 				AddPlan(targetPlan);
-				PlanAdded(targetPlan);
+				AddPlanToUI(targetPlan);
 			}
 
 			return targetPlan;
@@ -405,7 +407,7 @@ namespace MSP2050.Scripts
 		// EVENT HANDLERS, MOSTLY FOR UI STUFF //
 		/////////////////////////////////////////
 
-		private void PlanAdded(Plan plan)
+		private void AddPlanToUI(Plan plan)
 		{
 			//Show plan if it isnt a hidden plan
 			if (plan.StartTime >= 0 || SessionManager.Instance.AreWeGameMaster)

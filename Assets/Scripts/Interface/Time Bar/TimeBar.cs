@@ -105,7 +105,7 @@ namespace MSP2050.Scripts
 
 		public void SetDate(int month)
 		{
-			if (!TimeManager.Instance.GameStarted)
+			if (!TimeManager.Instance.GameStarted && !isViewingPlan)
 			{
 				planViewingText.text = "";
 				currentDateText.text = Util.MonthToText(month);
@@ -134,8 +134,14 @@ namespace MSP2050.Scripts
 
 		public void SetViewMode(WorldViewMode mode, bool updateWorldView)
 		{
-			if (mode == viewMode || ignoreActivityCallback)
+			if (ignoreActivityCallback)
 				return;
+			if(mode == viewMode)
+			{
+				if (mode == WorldViewMode.Plan)
+					UpdatePlanViewing();
+				return;
+			}
 
 			bool openingViewMode = viewMode == WorldViewMode.Plan || viewMode == WorldViewMode.Normal && mode == WorldViewMode.Time;
 
