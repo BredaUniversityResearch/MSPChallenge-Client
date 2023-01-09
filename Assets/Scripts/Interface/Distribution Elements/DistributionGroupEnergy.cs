@@ -1,180 +1,191 @@
 ﻿using System;
 using System.Collections.Generic;
-using DG.Tweening;
+using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 namespace MSP2050.Scripts
 {
-	public class DistributionGroupEnergy : DistributionGroup<DistributionItemEnergy>
+	public class DistributionGroupEnergy : MonoBehaviour
 	{
-		[Header("Energy Specific")]
-		//public DistributionEnergySources energySources;
-		public Image stateIndicator;
-		public Sprite addedSprite, removedSprite, changedSprite, greenEnergyIcon, greyEnergyIcon;
-		public CustomInputField gridNameField;
-		public Transform productionIconParent;
-		public GameObject productionIconPrefab;
-		public Image greenGreyEnergyImage;
-		public TextMeshProUGUI totalPower;
-		public CustomButton occulusButton;
+		[Title("Header")]
+		[SerializeField] Toggle m_headerToggleBar;
+		[SerializeField] Image m_changeStateImage;
+		[SerializeField] CustomInputField m_gridNameField;
+		[SerializeField] CustomButton m_viewGridButton;
+		[SerializeField] Sprite m_addedSprite, m_removedSprite, m_changedSprite, m_greenEnergySprite, m_greyEnergySprite;
+		[SerializeField] Image m_greenGreyEnergyImage;
+		[SerializeField] TextMeshProUGUI m_totalPowerText;
 
-		[SerializeField]
-		private ValueConversionCollection valueConversionCollection = null;
+		[SerializeField] ValueConversionCollection valueConversionCollection = null;
 
-		private Dictionary<int, GameObject> productionIcons;
+		[Title("Content")]
+		[SerializeField] Transform m_teamBallParent;
+		[SerializeField] GameObject m_teamBallPrefab;
+		[SerializeField] Transform m_productionEntryParent;
+		[SerializeField] GameObject m_productionEntryPrefab;
+		[SerializeField] Transform m_socketEntryParent;
+		[SerializeField] GameObject m_socketEntryPrefab;
 
-		[HideInInspector]   public long sourcePower;
-		[HideInInspector]   public EnergyGrid energyGrid;
-		private EnergyGrid.GridPlanState originalGridState;
-		private long socketMaximum;
-		private HashSet<int> producingCountries;
-		private bool ignoreDistributionUpdate = false;
+		List<DistributionEnergyProductionEntry> m_productionEntries = new List<DistributionEnergyProductionEntry>();
+		List<DistributionEnergySocketEntry> m_socketEntries = new List<DistributionEnergySocketEntry>();
+		List<Image> m_teamBallEntries = new List<Image>();
+
+		long m_totalSourcePower;
+		long allSocketMaximum;
+		EnergyGrid m_energyGrid;
+		EnergyGrid.GridPlanState originalGridState;
+		bool ignoreDistributionUpdate = false;
+		bool changed;
+		bool interactable = false;
 
 		private void Start()
 		{
-			gridNameField.onValueChanged.AddListener((a) => CheckIfChanged());
-			occulusButton.onClick.AddListener(() =>
+			m_gridNameField.onValueChanged.AddListener((a) => CheckIfChanged());
+			m_viewGridButton.onClick.AddListener(() =>
 			{
 				//TODO: fade UI out until mouse move (was in plansmonitor FadeUntilMouseMove)
-				energyGrid.HighlightSockets();
-				CameraManager.Instance.ZoomToBounds(energyGrid.GetGridRect());
+				m_energyGrid.HighlightSockets();
+				CameraManager.Instance.ZoomToBounds(m_energyGrid.GetGridRect());
 			});
-			Initialise();
 		}
 
-		public override void ApplySliderValues(Plan plan, int index)
+		public void ApplySliderValues(Plan plan)
 		{
-			foreach (DistributionItem item in items)
+			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
 			{
-				if (item.changed)
+				if (entry.Changed)
 				{
-					if (energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
-						energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(energyGrid, plan);
-					energyGrid.energyDistribution.distribution[item.Country].expected = item.GetDistributionValueLong();
+					if (m_energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
+						m_energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(m_energyGrid, plan);
+					m_energyGrid.energyDistribution.distribution[entry.Team.ID].expected = entry.CurrentValue;
 				}
 			}
-			if (gridNameField.text != energyGrid.name)
+			if (m_gridNameField.text != m_energyGrid.name)
 			{
-				if (energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
+				if (m_energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
 				{
-					energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(energyGrid, plan);
-					energyGrid.name = gridNameField.text;
+					m_energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(m_energyGrid, plan);
+					m_energyGrid.name = m_gridNameField.text;
 				}
 				else
 				{
-					energyGrid.name = gridNameField.text;
-					energyGrid.SetName(gridNameField.text);
+					m_energyGrid.name = m_gridNameField.text;
+					m_energyGrid.SetName(m_gridNameField.text);
 				}
 			}
 		}
 
-		public override void SetName(string name)
+		public void SetName(string name)
 		{
-			gridNameField.text = name;
+			m_gridNameField.text = name;
 		}
 
-		public override void SetSliderValues(EnergyGrid grid, EnergyGrid.GridPlanState state)
+		public void SetGrid(EnergyGrid grid, EnergyGrid.GridPlanState state, ToggleGroup a_toggleGroup)
 		{
-			energyGrid = grid;
+			m_headerToggleBar.group = a_toggleGroup;
+			m_energyGrid = grid;
 			originalGridState = state;
-			socketMaximum = grid.maxCountryCapacity;
-			sourcePower = 0;
-			greenGreyEnergyImage.sprite = grid.IsGreen ? greenEnergyIcon : greyEnergyIcon; 
-			gridNameField.interactable = (state != EnergyGrid.GridPlanState.Removed);
+			allSocketMaximum = grid.maxCountryCapacity;
+			m_totalSourcePower = 0;
+			m_greenGreyEnergyImage.sprite = grid.IsGreen ? m_greenEnergySprite : m_greyEnergySprite; 
+			m_gridNameField.interactable = (state != EnergyGrid.GridPlanState.Removed);
 			SetName(grid.name);
 
-			//Reset production icons if we already existed
-			distributionFillBar.DestroyAllFills();
-			if(productionIcons != null)
-				foreach (KeyValuePair<int, GameObject> pair in productionIcons)
-					Destroy(pair.Value);
+			int nextProductionEntryIndex = 0;
+			int nextSocketEntryIndex = 0;
+			int nextTeamBallIndex = 0;
 
-			//Recreate collections
-			productionIcons = new Dictionary<int, GameObject>();
-			producingCountries = new HashSet<int>();
-			Dictionary<int, string> socketNames = grid.GetSocketNamesPerCountry();
-
-			//Create items for all countries and set the socket limits
 			ignoreDistributionUpdate = true; //Ignore distr updates while creating (it sorts, messing up order)
-			int i = 0;
 			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in grid.energyDistribution.distribution)
 			{
-				DistributionItemEnergy item = null;
+				Team team = SessionManager.Instance.GetTeamByTeamID(kvp.Key);
 
-				//Create new or use existing
-				if (i < items.Count)
+				//Socket entry
+				if (kvp.Value.maximum > 0)
 				{
-					item = (DistributionItemEnergy)items[i];
-					item.graphic.color = SessionManager.Instance.GetTeamByTeamID(kvp.Key).color;
-					item.Country = kvp.Key;
+					if (nextSocketEntryIndex < m_socketEntries.Count)
+					{
+						 m_socketEntries[nextSocketEntryIndex].SetContent(team, kvp.Value.maximum, allSocketMaximum, kvp.Value.expected, this, interactable);
+					}
+					else
+					{
+						DistributionEnergySocketEntry socketEntry = Instantiate(m_socketEntryPrefab, m_socketEntryParent).GetComponent<DistributionEnergySocketEntry>();
+						m_socketEntries.Add(socketEntry);
+						socketEntry.SetContent(team, kvp.Value.maximum, allSocketMaximum, kvp.Value.expected, this, interactable);
+					}
+					nextSocketEntryIndex++;
+				}
+
+				//Source production entry
+				if(kvp.Value.sourceInput > 0)
+				{
+					if (nextProductionEntryIndex < m_productionEntries.Count)
+					{
+						m_productionEntries[nextProductionEntryIndex].SetContent(team, valueConversionCollection.ConvertUnit(kvp.Value.sourceInput, ValueConversionCollection.UNIT_WATT).FormatAsString());
+					}
+					else
+					{
+						DistributionEnergyProductionEntry productionEntry = Instantiate(m_productionEntryPrefab, m_productionEntryParent).GetComponent<DistributionEnergyProductionEntry>();
+						m_productionEntries.Add(productionEntry);
+						productionEntry.SetContent(team, valueConversionCollection.ConvertUnit(kvp.Value.sourceInput, ValueConversionCollection.UNIT_WATT).FormatAsString());
+					}
+					m_totalSourcePower += kvp.Value.sourceInput;
+					nextProductionEntryIndex++;
+				}
+
+				//Team ball
+				if (nextTeamBallIndex < m_teamBallEntries.Count)
+				{
+					m_teamBallEntries[nextTeamBallIndex].color = team.color;
+					m_teamBallEntries[nextTeamBallIndex].gameObject.SetActive(true);
 				}
 				else
 				{
-					item = CreateItem(kvp.Key);
+					Image teamBall = Instantiate(m_teamBallPrefab, m_teamBallParent).GetComponent<Image>();
+					m_teamBallEntries.Add(teamBall);
+					teamBall.color = team.color;
 				}
-
-				//Disable interactivity for removed grids
-				//item.SetSliderInteractability(interactable);
-
-				//Set socket maximum
-				item.SetMaximum(socketMaximum);
-				item.SetItemSocketMaximum(kvp.Value.maximum);
-				item.SetAvailableRange(-kvp.Value.maximum, kvp.Value.maximum);
-
-				//Set socket names
-				if (socketNames.ContainsKey(kvp.Key))
-				{
-					string shortname = socketNames[kvp.Key];
-					if (shortname.Length > 16)
-						shortname = shortname.Substring(0, 16) + "...";
-					item.SetValueText(shortname);
-					item.SetValueTooltip(socketNames[kvp.Key]);
-				}
-				else
-					item.SetValueText("None");
-
-				//Set country source input
-				sourcePower += kvp.Value.sourceInput;
-				item.productionText.text = valueConversionCollection.ConvertUnit(kvp.Value.sourceInput, ValueConversionCollection.UNIT_WATT).FormatAsString();
-				if (kvp.Value.sourceInput != 0)
-				{
-					producingCountries.Add(kvp.Key);
-					SetCountryProductionIcon(kvp.Key, true);
-				}
-
-				//Set initial expected value
-				item.SetOldValue(kvp.Value.expected);
-				item.SetValue(kvp.Value.expected);
-				i++;
+				nextTeamBallIndex++;
 			}
-
-			//Remove unused items
-			for (int j = items.Count - 1; j >= i; j--)
-			{
-				Destroy(items[j].gameObject);
-				items.RemoveAt(j);
-			}
-
 			ignoreDistributionUpdate = false;
+
+			//Disable unused items
+			for (int i = nextProductionEntryIndex; i < m_productionEntries.Count; i++)
+			{
+				m_productionEntries[i].gameObject.SetActive(false);
+			}
+			for (int i = nextSocketEntryIndex; i < m_socketEntries.Count; i++)
+			{
+				m_socketEntries[i].gameObject.SetActive(false);
+			}
+			for (int i = nextTeamBallIndex; i < m_teamBallEntries.Count; i++)
+			{
+				m_teamBallEntries[i].gameObject.SetActive(false);
+			}
+
 			UpdateStateIndicator(false, true);
 			UpdateEntireDistribution();
-			SortItems();
+			gameObject.SetActive(true);
 		}
 
 		private void UpdateStateIndicator(bool hasChanged, bool force = false)
 		{
+			if (m_changeStateImage == null)
+				return;
+
 			if (originalGridState == EnergyGrid.GridPlanState.Normal)
 			{
 				if (hasChanged)
 				{
-					stateIndicator.gameObject.SetActive(true);
-					stateIndicator.sprite = changedSprite;
+					m_changeStateImage.gameObject.SetActive(true);
+					m_changeStateImage.sprite = m_changedSprite;
 				}
 				else
 				{
-					stateIndicator.gameObject.SetActive(false);
+					m_changeStateImage.gameObject.SetActive(false);
 				}
 			}
 			else if (force)
@@ -182,152 +193,91 @@ namespace MSP2050.Scripts
 				switch (originalGridState)
 				{
 					case EnergyGrid.GridPlanState.Added:
-						stateIndicator.gameObject.SetActive(true);
-						stateIndicator.sprite = addedSprite;
+						m_changeStateImage.gameObject.SetActive(true);
+						m_changeStateImage.sprite = m_addedSprite;
 						break;
 					case EnergyGrid.GridPlanState.Removed:
-						stateIndicator.gameObject.SetActive(true);
-						stateIndicator.sprite = removedSprite;
+						m_changeStateImage.gameObject.SetActive(true);
+						m_changeStateImage.sprite = m_removedSprite;
 						break;
 					case EnergyGrid.GridPlanState.Changed:
-						stateIndicator.gameObject.SetActive(true);
-						stateIndicator.sprite = changedSprite;
+						m_changeStateImage.gameObject.SetActive(true);
+						m_changeStateImage.sprite = m_changedSprite;
 						break;
 				}
 			}
 		}
 
-		protected override bool CheckIfChanged()
+		bool CheckIfChanged()
 		{
 			changed = false;
-			for (int i = 0; i < items.Count; i++)
+			foreach(var socketEntry in m_socketEntries)
 			{
-				if (items[i].changed)
+				if(socketEntry.Changed)
 				{
 					changed = true;
-					changeIndicator.DOFade(1f, 0.2f);
 					break;
 				}
-
-				changed = changed || gridNameField.text != energyGrid.name;
-
-				UpdateStateIndicator(changed);
-
-				if (!changed)
-					changeIndicator.DOFade(0f, 0.2f);
 			}
+			changed = changed || m_gridNameField.text != m_energyGrid.name;
+			UpdateStateIndicator(changed);
 			return changed;
 		}
 
-		public override void SetSliderInteractability(bool value)
+		public void SetInteractability(bool value)
 		{
 			interactable = originalGridState != EnergyGrid.GridPlanState.Removed && value;
-			foreach (DistributionItem item in items)
+			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
 			{
-				item.SetSliderInteractability(interactable);
+				entry.SetInteractability(interactable);
 			}
-			if (gridNameField != null)
+			if (m_gridNameField != null)
 			{
-				gridNameField.interactable = interactable;
+				m_gridNameField.interactable = interactable;
 			}
 		}
 
-		public override void UpdateDistributionItem(DistributionItem updatedItem, float val)
-		{
-			UpdateEntireDistribution();
-		}
-
-		public override void UpdateEntireDistribution()
+		public void UpdateEntireDistribution()
 		{
 			if (ignoreDistributionUpdate)
 				return;
 
 			//Total input
 			long totalInput = 0;
-			foreach (DistributionItemEnergy entry in items)
+			long totalOutput = 0;
+			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
 			{
-				if (entry.GetDistributionValueLong() <= 0)
+				if (entry.CurrentValue < 0)
 				{
-					totalInput += Math.Abs(entry.GetDistributionValueLong());
-				}
-			}
-			totalInput += sourcePower;
-			totalPower.text = valueConversionCollection.ConvertUnit(totalInput, ValueConversionCollection.UNIT_WATT).FormatAsString();
-
-			//Remaining
-			long remaining = totalInput;
-			foreach (DistributionItemEnergy entry in items)
-			{
-				if (entry.GetDistributionValueLong() > 0)
-				{
-					remaining -= Math.Abs(entry.GetDistributionValueLong());
-				}
-			}
-
-			// Output max with given slider value
-			foreach (DistributionItemEnergy entry in items)
-			{
-				//Min of socketmax and currentvalue+remaining
-				entry.SetAvailableMaximum(entry.GetDistributionValueLong() + remaining);
-
-				// Text
-				entry.ToText(entry.GetDistributionValueLong(), 1f);
-			}
-
-			// New output max after slider value was applied (setting available range also clamps values)
-			foreach (DistributionItemEnergy entry in items)
-			{
-				//Min of socketmax and currentvalue+remaining
-				entry.SetAvailableMaximum(entry.GetDistributionValueLong() + remaining);
-			}
-
-			// Output fills and send icons
-			foreach (DistributionItemEnergy entry in items)
-			{
-				// Input
-				if (entry.GetDistributionValueLong() < 0)
-				{
-					SetCountryProductionIcon(entry.Country, true);
-					distributionFillBar.SetFill(entry.Country, 0);
-				}
-				// Output
-				else if (entry.GetDistributionValueLong() > 0)
-				{
-					SetCountryProductionIcon(entry.Country, false);
-					distributionFillBar.SetFill(entry.Country, entry.GetDistributionValueLong());
-				}
-				// Neither
-				else if (entry.GetDistributionValueLong() == socketMaximum)
-				{
-					SetCountryProductionIcon(entry.Country, false);
-					distributionFillBar.SetFill(entry.Country, 0.0f);
-				}
-			}
-
-			// Empty fill
-			distributionFillBar.CreateEmptyFill(totalInput, false);
-
-			CheckIfChanged();
-			distributionFillBar.SortFills();
-		}
-
-		void SetCountryProductionIcon(int country, bool on)
-		{
-			bool exists = productionIcons.ContainsKey(country);
-			if (on)
-			{
-				if (!exists)
-				{
-					GameObject temp = Instantiate(productionIconPrefab);
-					temp.GetComponent<Image>().color = SessionManager.Instance.GetTeamByTeamID(country).color;
-					temp.transform.SetParent(productionIconParent);
-					productionIcons.Add(country, temp);
+					totalInput -= entry.CurrentValue; //Is a negative value
 				}
 				else
-					productionIcons[country].SetActive(true);
+					totalOutput += entry.CurrentValue;
 			}
-			else if(exists && !producingCountries.Contains(country))
-				productionIcons[country].SetActive(false);
+			totalInput += m_totalSourcePower;
+			m_totalPowerText.text = valueConversionCollection.ConvertUnit(totalInput, ValueConversionCollection.UNIT_WATT).FormatAsString();
+
+			//Update sliders with new remaining power
+			long remaining = totalInput-totalOutput;
+			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
+			{
+				entry.SetRemainingPower(remaining);
+			}
+
+			//If remaining was negative, sliders will automatically be reduced to fit, so recalculate output and update once (there won't be changes this time)
+			totalOutput = 0;
+			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
+			{
+				if (entry.CurrentValue > 0)
+					totalOutput += entry.CurrentValue;
+			}
+			remaining = totalInput - totalOutput;
+
+			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
+			{
+				entry.SetRemainingPower(remaining);
+			}
+			CheckIfChanged();
 		}
 	}
 }

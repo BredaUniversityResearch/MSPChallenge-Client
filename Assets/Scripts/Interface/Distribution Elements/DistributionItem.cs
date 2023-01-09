@@ -8,22 +8,15 @@ namespace MSP2050.Scripts
 	{
 		public const float SNAP_RANGE = 0.01f;
 
-		[SerializeField]
-		protected AbstractDistributionSlider slider = null;
+		public Image m_teamBubble;
+		[SerializeField] private TextMeshProUGUI valueText = null;
+		[SerializeField] private CustomInputField valueTextInput = null;
+		[SerializeField] protected DistributionSlider slider = null;
+		[SerializeField] protected string valueTextFormat = "{0}";
+
 		[HideInInspector] public bool changed;
-		public Image graphic;
-		public AbstractDistributionGroup group;
+		[HideInInspector] public AbstractDistributionGroup group;
 
-		[SerializeField]
-		private TextMeshProUGUI valueText = null;
-
-		[SerializeField]
-		private CustomInputField valueTextInput = null;
-
-		[SerializeField]
-		protected string valueTextFormat = "{0}";
-
-		private Color barCol;
 		private bool initialised = false;
 
 		public virtual void Initialise()
@@ -110,13 +103,13 @@ namespace MSP2050.Scripts
 			{
 				valueText.fontStyle = FontStyles.Bold;
 				changed = true;
-				slider.MarkAsChanged(true);
+				//slider.MarkAsChanged(true);
 			}
 			else
 			{
 				valueText.fontStyle = FontStyles.Normal;
 				changed = false;
-				slider.MarkAsChanged(false);
+				//slider.MarkAsChanged(false);
 			}
 		}
 
@@ -145,19 +138,9 @@ namespace MSP2050.Scripts
 			slider.SetOldValue(oldValue);
 		}
 
-		public void SetMinimum(float minValue)
-		{
-			slider.MinValue = minValue;
-		}
-
 		public void SetMaximum(float maxValue)
 		{
 			slider.MaxValue = maxValue;
-		}
-
-		public virtual long GetDistributionValueLong()
-		{
-			return slider.ValueLong;
 		}
 	}
 }

@@ -5,9 +5,6 @@ namespace MSP2050.Scripts
 {
 	public abstract class AbstractDistributionGroup : MonoBehaviour
 	{
-		[HideInInspector] public Distribution parent;
-
-		public abstract void UpdateEntireDistribution();
 		public abstract void UpdateDistributionItem(DistributionItem updatedItem, float currentValue);
 
 		public abstract void ApplySliderValues(Plan plan, int index);

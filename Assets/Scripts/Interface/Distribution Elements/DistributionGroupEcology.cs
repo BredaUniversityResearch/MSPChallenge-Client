@@ -10,7 +10,7 @@ namespace MSP2050.Scripts
 
 		[Header("Ecology Specific")]
 		[SerializeField]
-		private TextMeshProUGUI distributionTitle = null;
+		private TextMeshProUGUI effortText = null;
 
 		private void Start()
 		{
@@ -86,7 +86,7 @@ namespace MSP2050.Scripts
 				totalSum += memberItemValue;
 			}
 
-			distributionTitle.text = string.Format(TITLE_FORMAT, Mathf.Clamp01(totalSum) * 100.0f);
+			effortText.text = string.Format(TITLE_FORMAT, Mathf.Clamp01(totalSum) * 100.0f);
 		}
 
 		private void SetFishingToSliderValues(FishingDistributionDelta distribution, string fleetName)
@@ -118,7 +118,7 @@ namespace MSP2050.Scripts
 					else
 					{
 						Color col = SessionManager.Instance.GetTeamByTeamID(kvp.Key).color;
-						item.graphic.color = col;
+						item.m_teamBubble.color = col;
 						item.Country = kvp.Key;
 					}
 				}

@@ -1,39 +1,18 @@
 ﻿using System.Collections.Generic;
-using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
-	/// <summary>
-	/// This class manages the items layed out vertically for energy and ecology
-	/// GroupDistribution is used to manage the distribution fills that shows the distribution ratio
-	/// EnergySources is energy specific and shows how much energy is being generated from within the grid per country
-	/// DistributionItem are the items layed out vertically with the exception of PlanWizardEnergySources
-	/// A DistributionItem can have a regular slider (0 - 1) or a centered slider (-1 - 1) depending on what reference is set in the inspector
-	/// </summary>
 	public class DistributionGroup<T> : AbstractDistributionGroup where T : DistributionItem
 	{
-		[Header("General")]
-		// UI
-		public TextMeshProUGUI title;
-		public RectTransform foldTrans;
-		public Image changeIndicator;
-		public Button barButton;
+		//public Image changeIndicator;
+		[SerializeField] protected TextMeshProUGUI title;
+		[SerializeField] protected Transform distributionItemLocation;
+		[SerializeField] protected GameObject itemPrefab;
+		[SerializeField] protected DistributionFillBar distributionFillBar;
 
-		// Child content
-		public GameObject childrenAndLegend;
-		public Transform distributionItemLocation;
-
-		// References
-		public DistributionFillBar distributionFillBar;
-
-		[Header("Prefabs")]
-		public GameObject itemPrefab;
-		//public Transform legendObject;
-
-		//Private/Protected
 		protected bool changed;
 		protected Color outlineCol;
 		protected bool interactable = false;
@@ -45,7 +24,6 @@ namespace MSP2050.Scripts
 			if (initialised)
 				return;
 			initialised = true;
-			barButton.onClick.AddListener(BarPressed);
 		}
 
 		public DistributionItem FindDistributionItemByCountryId(int countryId)
@@ -66,7 +44,7 @@ namespace MSP2050.Scripts
 		}
 
 		/// <summary>
-		/// Create an item that can hold a (centered) slider
+		/// Create an item that can hold a slider
 		/// </summary>
 		public T CreateItem(int country, float maxValue)
 		{
@@ -78,7 +56,7 @@ namespace MSP2050.Scripts
 		}
 
 		/// <summary>
-		/// Create an item that can hold a (centered) slider
+		/// Create an item that can hold a slider
 		/// </summary>
 		public T CreateItem(int country)
 		{
@@ -92,7 +70,7 @@ namespace MSP2050.Scripts
 			// Set values
 			item.group = this;
 			item.Country = country;
-			item.graphic.color = col;
+			item.m_teamBubble.color = col;
 			item.SetSliderInteractability(interactable);
 
 			return item;
@@ -116,12 +94,6 @@ namespace MSP2050.Scripts
 		}
 
 		/// <summary>
-		/// Update the entire slider distribution
-		/// </summary>
-		public override void UpdateEntireDistribution()
-		{ }
-
-		/// <summary>
 		/// Sorts the (vertical) items based on color
 		/// </summary>
 		public virtual void SortItems()
@@ -143,7 +115,7 @@ namespace MSP2050.Scripts
 				if (items[i].changed)
 				{
 					changed = true;
-					changeIndicator.DOFade(1f, 0.2f);
+					//changeIndicator.DOFade(1f, 0.2f);
 					break;
 				}
 			}
@@ -153,8 +125,8 @@ namespace MSP2050.Scripts
 			//	distributionFillBar.outline.color = changed ? Color.white : outlineCol;
 			//}
 
-			if (!changed)
-				changeIndicator.DOFade(0f, 0.2f);
+			//if (!changed)
+			//	changeIndicator.DOFade(0f, 0.2f);
 			return changed;
 		}
 
@@ -163,17 +135,6 @@ namespace MSP2050.Scripts
 			interactable = value;
 			foreach (DistributionItem item in items)
 				item.SetSliderInteractability(value);
-		}
-
-		public void BarPressed()
-		{
-			bool newExpanded = !childrenAndLegend.activeSelf;
-			childrenAndLegend.SetActive(newExpanded);
-			//if (legendObject != null)
-			//	legendObject.gameObject.SetActive(childrenAndLegend.activeSelf);
-
-			Vector3 rot = foldTrans.eulerAngles;
-			foldTrans.eulerAngles = newExpanded ? new Vector3(rot.x, rot.y, 0f) : new Vector3(rot.x, rot.y, 90f);
 		}
 	}
 }

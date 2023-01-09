@@ -4,21 +4,7 @@ using UnityEngine;
 namespace MSP2050.Scripts
 {
 	public class Distribution : MonoBehaviour
-	{
-		/*  Distribution structure:
-     *  
-     *  Distribution
-     *      X DistributionGroup (for every fleet/grid)
-     *          1-2 DistributionFillBar (2 for energy, 1 for others)
-     *              X DistributionFill (for every relevant country)
-     *          X DistributionItem (for every relevant country)
-     *              1 DistributionSlider OR 1 DistributionSliderCentered
-     *          0-1 DistributionEnergySources (energy only)
-     */
-
-		public enum Expertise { Layers, Shipping, Energy, Ecology }
-		public Expertise expertise;
-	
+	{	
 		[Header("Prefabs")]
 		public GameObject groupPrefab;
 		public Transform contentLocation;
@@ -26,22 +12,6 @@ namespace MSP2050.Scripts
 		public int NumberGroups => groups == null ? 0 : groups.Count;
 
 		bool interactable = false;
-
-		void Start()
-		{
-			// Demo
-			switch (expertise)
-			{
-				case Expertise.Layers:
-					break;
-				case Expertise.Shipping:
-					break;
-				case Expertise.Energy:
-					break;
-				case Expertise.Ecology:
-					break;
-			}
-		}
 
 		public AbstractDistributionGroup CreateGroup(string groupName)
 		{
@@ -52,8 +22,6 @@ namespace MSP2050.Scripts
 			go.transform.SetParent(contentLocation, false);
 
 			group.SetName(groupName);
-			group.parent = this;
-
 			return group;
 		}
 

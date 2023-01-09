@@ -308,6 +308,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ContentScrollView_PRFB
       objectReference: {fileID: 0}
+    - target: {fileID: 7558096004504590775, guid: e0b6668735221754692c2da8e160f44b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8586600552041660309, guid: e0b6668735221754692c2da8e160f44b,
         type: 3}
       propertyPath: m_SizeDelta.y
@@ -463,6 +468,12 @@ PrefabInstance:
       propertyPath: m_text
       value: Fishing efforts
       objectReference: {fileID: 0}
+    - target: {fileID: 4645963240997653620, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 4645963240997653620, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
     - target: {fileID: 5825348606581607995, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_Name
@@ -598,6 +609,21 @@ PrefabInstance:
       propertyPath: m_PreferredHeight
       value: 200
       objectReference: {fileID: 0}
+    - target: {fileID: 6596570286461496140, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.9607843
+      objectReference: {fileID: 0}
+    - target: {fileID: 6596570286461496140, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.9607843
+      objectReference: {fileID: 0}
+    - target: {fileID: 6596570286461496140, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.9607843
+      objectReference: {fileID: 0}
     - target: {fileID: 7885560571245591014, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -666,8 +692,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6a216091707de2498dcbae600aa8b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  expertise: 3
-  groupPrefab: {fileID: 1000013022860624, guid: a1d9c740845cf5e4d93897f33cde2f9d,
+  groupPrefab: {fileID: 7517566631536496370, guid: db9a6962c43ab8a4d8a60f10681bb5de,
     type: 3}
   contentLocation: {fileID: 8525123590459529810}
 --- !u!114 &8459855993901377425
@@ -696,5 +721,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6868c0be7108954d8a493b1fc108913, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_energyDistribution: {fileID: 0}
+  m_energyDistributionGroupPrefab: {fileID: 0}
+  m_groupParent: {fileID: 0}
   m_emptyContentOverlay: {fileID: 0}
+  m_toggleGroup: {fileID: 0}

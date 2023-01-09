@@ -3,14 +3,22 @@ using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
-	public class DistributionSlider : AbstractDistributionSlider/*, IPointerDownHandler, IDragHandler*/
+	public class DistributionSlider : MonoBehaviour
 	{
+		[SerializeField] protected RectTransform oldValueIndicator = null;
+		[SerializeField] protected DistributionItem parent = null;
+		[SerializeField] Slider valueSlider;
+
 		private InterpolatedValueMapping sliderValueMapping = new InterpolatedValueMapping();
-		public Slider valueSlider;
     
-		private float oldValue = 0.0f;
-		private float oldRemappedNormalizedValue = 0.0f;	//The old unchanged value remapped to be in 'slider space'
-		public override float Value
+		[HideInInspector] public bool ignoreSliderCallback;
+		float oldValue = 0.0f;
+		float oldRemappedNormalizedValue = 0.0f;	//The old unchanged value remapped to be in 'slider space'
+		Vector2 availableRange = new Vector2(float.MinValue, float.MaxValue);
+		float minValue = 0.0f;
+		float maxValue = 1.0f;
+
+		public float Value
 		{
 			get
 			{
@@ -19,17 +27,15 @@ namespace MSP2050.Scripts
 			set
 			{
 				valueSlider.normalizedValue = sliderValueMapping.InverseMap(value, true);
-				//OnSliderValueChanged(value, false);
 			}
 		}
 
-		public override float GetNormalizedSliderValue()
+		public float GetNormalizedSliderValue()
 		{
 			return valueSlider.normalizedValue;
 		}
 
-		private float minValue = 0.0f;
-		public override float MinValue
+		public float MinValue
 		{
 			get
 			{
@@ -42,8 +48,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private float maxValue = 1.0f;
-		public override float MaxValue
+		public float MaxValue
 		{
 			get
 			{
@@ -56,8 +61,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private Vector2 availableRange = new Vector2(float.MinValue, float.MaxValue);
-		public override Vector2 AvailableRange
+		public Vector2 AvailableRange
 		{
 			get { return availableRange; }
 			set
@@ -66,17 +70,17 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override bool IsChanged()
+		public bool IsChanged()
 		{
 			return valueSlider.interactable && valueSlider.normalizedValue != oldRemappedNormalizedValue;
 		}
 
-		public override  void SetInteractablity(bool value)
+		public void SetInteractablity(bool value)
 		{
 			valueSlider.interactable = value;
 		}
 
-		public override void SetOldValue(float value)
+		public void SetOldValue(float value)
 		{
 			oldValue = value;
 			UpdateOldValueIndicatorPosition();
@@ -87,36 +91,7 @@ namespace MSP2050.Scripts
 			valueSlider.onValueChanged.AddListener(OnSliderValueChanged);
 		}
 
-		//public void OnPointerDown(PointerEventData eventData)
-		//{
-		//	if (valueSlider.interactable)
-		//	{
-		//		RectTransform rt = valueSlider.GetComponent<RectTransform>();
-		//		float newVal = Value;
-		//		if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, eventData.position, null, out Vector2 result))
-		//		{
-		//			newVal = sliderValueMapping.Map(result.x / rt.sizeDelta.x);
-		//		}
-		//		OnSliderValueChanged(newVal, true);
-		//	}
-		//}
-
-		////We're using these onDrag and OnPointerDown handlers here instead of the OnValueChanged callback because the distribution groups will change the values as well which caused stack overflows.
-		//public void OnDrag(PointerEventData eventData)
-		//{
-		//	if (valueSlider.interactable)
-		//	{
-		//		RectTransform rt = valueSlider.GetComponent<RectTransform>();
-		//		float newVal = Value;
-		//		if (RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, eventData.position, null, out Vector2 result))
-		//		{
-		//			newVal = sliderValueMapping.Map(result.x / rt.sizeDelta.x);
-		//		}
-		//		OnSliderValueChanged(newVal, true);
-		//	}
-		//}
-
-		protected void OnSliderValueChanged(float newValue/*, bool fromUserInteraction*/)
+		void OnSliderValueChanged(float newValue)
 		{
 			if (valueSlider.interactable)
 			{
@@ -173,26 +148,6 @@ namespace MSP2050.Scripts
 			sliderValueMapping.Add(1.0f, maxValue);
 
 			UpdateOldValueIndicatorPosition();
-		}
-
-		public override void SetOldValue(long value)
-		{
-			throw new System.NotImplementedException();
-		}
-
-		public override void SetAvailableRangeLong(long min, long max)
-		{
-			throw new System.NotImplementedException();
-		}
-
-		public override void SetAvailableMaximumLong(long max)
-		{
-			throw new System.NotImplementedException();
-		}
-
-		public override void UpdateNewValueFill()
-		{
-			throw new System.NotImplementedException();
 		}
 	}
 }
