@@ -16,35 +16,17 @@ namespace MSP2050.Scripts
 		private class KPIColorChangedEvent : UnityEvent<KPIValue, Color>
 		{
 		}
+		[SerializeField] string m_targetSimulation;
+		[SerializeField] RectTransform m_contentParent = null;
+		[SerializeField] GameObject m_groupPrefab = null;
+		[SerializeField] GameObject m_entryPrefab = null;
 
-		[SerializeField]
-		private RectTransform targetContainer = null;
-
-		[SerializeField, Tooltip("OPTIONAL: Animations that might be linked to the KPI category. Sets the \"Expanded\" flag when one or more categories are open")]
-		private Animator animator = null;
-
-		[SerializeField]
-		private string targetCategory;
-
-		[SerializeField]
-		private GameObject categoryPrefab = null;
-		[SerializeField]
-		private GameObject valuePrefab = null;
-
-		[SerializeField] private bool showGraphToggle = true;
-
-		[SerializeField]
-		private KPIValueToggledEvent onKPIValueToggled = null;
-
-		[SerializeField]
-		private KPIColorChangedEvent onKPIColorChanged = null;
-
-		[SerializeField]
-		private KPIValueProceduralColorScheme colorScheme = null;
+		[SerializeField] KPIValueToggledEvent onKPIValueToggled = null;
+		[SerializeField] KPIColorChangedEvent onKPIColorChanged = null;
+		[SerializeField] KPIValueProceduralColorScheme m_colorScheme = null;
 
 		private Dictionary<string, KPIBar> kpiBarsByValueName = new Dictionary<string, KPIBar>(16); //Also includes the categories
-		private Dictionary<string, KPIBar> kpiCategoriesByCategoryName = new Dictionary<string, KPIBar>(8);
-		private Stack<KPIBar> inactiveKpiBarsPool = new Stack<KPIBar>(16);
+		private Dictionary<string, KPIGroupDisplay> kpiCategoriesByCategoryName = new Dictionary<string, KPIGroupDisplay>(8);
 		private KPIValueCollection targetCollection = null;
 		private int targetTeamId = -1;
 
@@ -80,7 +62,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			KPIValueCollection collection = SimulationManager.Instance.GetKPIValuesForCategory(targetCategory, targetTeamId);
+			KPIValueCollection collection = SimulationManager.Instance.GetKPIValuesForSimulation(m_targetSimulation, targetTeamId);
 
 			if (collection != null)
 			{
@@ -127,7 +109,7 @@ namespace MSP2050.Scripts
 				}
 	
 				targetTeamId = teamId;
-				SetTargetCollection(SimulationManager.Instance.GetKPIValuesForCategory(targetCategory, targetTeamId));
+				SetTargetCollection(SimulationManager.Instance.GetKPIValuesForSimulation(m_targetSimulation, targetTeamId));
 
 				if (targetCollection != null)
 				{
@@ -191,10 +173,11 @@ namespace MSP2050.Scripts
 				KPIBar bar;
 				if (!kpiBarsByValueName.TryGetValue(value.name, out bar))
 				{
-					if (kpiCategoriesByCategoryName.TryGetValue(value.owningCategoryName, out KPIBar categoryBar))
-					{
-						bar = CreateKPIBar(valuePrefab, categoryBar.childContainer.transform, value);
-					}
+					//if (kpiCategoriesByCategoryName.TryGetValue(value.owningCategoryName, out KPIBar categoryBar))
+					//{
+					//	bar = CreateKPIBar(m_entryPrefab, categoryBar.childContainer.transform, value);
+					//}
+					Debug.LogError("Could not find KPI bar " + value.name);
 				}
 
 				if (bar != null)
@@ -212,10 +195,8 @@ namespace MSP2050.Scripts
 			{
 				if (kpiBarsByValueName.TryGetValue(valueToRemove, out KPIBar bar))
 				{
-					bar.gameObject.SetActive(false);
-					bar.graphToggle.onValueChanged.RemoveAllListeners();
-					inactiveKpiBarsPool.Push(bar);
 					kpiBarsByValueName.Remove(valueToRemove);
+					Destroy(bar.gameObject);
 				}
 				else
 				{
@@ -230,71 +211,33 @@ namespace MSP2050.Scripts
 			{
 				foreach (KPICategory category in collection.GetCategories())
 				{
-                    //TODO: create expandable bar for category, store it
-					KPIBar categoryBar = CreateKPIBar(categoryPrefab, GetTargetContainerForCategory(category), category); //Create this inside expandable bar (as totals)
+					KPIGroupDisplay kpiGroup = Instantiate(m_groupPrefab, GetTargetContainerForCategory(category)).GetComponent<KPIGroupDisplay>();
+					kpiGroup.SetName(category.displayName);
 
 					KPICategory categoryLocal = category;
-					categoryBar.SetBarExpandedStateChangedCallback((expandedState) => OnKPICategoryToggled(categoryLocal, categoryBar));
 
-					kpiCategoriesByCategoryName.Add(category.name, categoryBar);
+					kpiCategoriesByCategoryName.Add(category.name, kpiGroup);
 
 					foreach (KPIValue value in category.GetChildValues())
 					{
-						CreateKPIBar(valuePrefab, categoryBar.childContainer.transform, value);
+						CreateKPIBar(m_entryPrefab, kpiGroup.EntryParent, value);
 					}
+					CreateKPIBar(m_entryPrefab, kpiGroup.EntryParent, category);
+					kpiGroup.PositionSeparator();
 				}
 			}
 		}
 
 		protected virtual RectTransform GetTargetContainerForCategory(KPICategory category)
 		{
-			return targetContainer;
-		}
-
-		private void OnKPICategoryToggled(KPICategory category, KPIBar categoryBar)
-		{
-			foreach (KPIValue childValue in category.GetChildValues())
-			{
-				KPIBar childBar;
-				if (kpiBarsByValueName.TryGetValue(childValue.name, out childBar))
-				{
-					childBar.graphToggle.isOn = false;
-				}
-			}
-
-			CheckAnimationExpandedState();
+			return m_contentParent;
 		}
 
 		private KPIBar CreateKPIBar(GameObject prefab, Transform parent, KPIValue value)
 		{
-			KPIBar kpiBar = null;
-			if (inactiveKpiBarsPool.Count == 0)
-			{
-				GameObject categoryObject = Instantiate(prefab, parent);
-				kpiBar = categoryObject.GetComponent<KPIBar>();
-			}
-			else
-			{
-				kpiBar = inactiveKpiBarsPool.Pop();
-				kpiBar.transform.SetParent(parent, false);
-				kpiBar.transform.SetAsLastSibling();
-				kpiBar.gameObject.SetActive(true);
-			}
-
-			kpiBar.ValueName = value.name;
-			kpiBar.title.text = value.displayName;
-			kpiBar.unit = value.unit;
-			if (showGraphToggle)
-			{
-				kpiBar.graphToggle.onValueChanged.AddListener((isOn) => { ToggleGraph(isOn, kpiBar); });
-			}
-			else
-			{
-				kpiBar.graphToggle.gameObject.SetActive(false);
-			}
-		
+			KPIBar kpiBar = Instantiate(prefab, parent).GetComponent<KPIBar>();
+			kpiBar.SetContent(value, ToggleGraph);
 			kpiBarsByValueName.Add(value.name, kpiBar);
-
 			return kpiBar;
 		}
 
@@ -330,7 +273,7 @@ namespace MSP2050.Scripts
 			KPICategory category = targetCollection.FindCategoryByName(targetValue.owningCategoryName);
 			if (category != null && category.kpiValueColorScheme == EKPIValueColorScheme.ProceduralColor)
 			{
-				graphColor = colorScheme.GetColor(context);
+				graphColor = m_colorScheme.GetColor(context);
 			}
 			else
 			{
@@ -340,28 +283,16 @@ namespace MSP2050.Scripts
 			return graphColor;
 		}
 
-		public void ResetContent()
-		{
-			foreach (KPIBar bar in kpiBarsByValueName.Values)
-			{
-				if (bar.isParent)
-				{
-					bar.SetExpandedState(false);
-				}
-			}
-		}
-
 		private List<string> GetActiveToggledValues()
 		{
 			List<string> result = new List<string>(16);
 			foreach (KPIBar value in kpiBarsByValueName.Values)
 			{
-				if (value.graphToggle.isOn)
+				if (value.GraphToggled)
 				{
 					result.Add(value.ValueName);
 				}
 			}
-
 			return result;
 		}
 
@@ -370,9 +301,9 @@ namespace MSP2050.Scripts
 			List<string> result = new List<string>(16);
 			foreach (KPIBar value in kpiBarsByValueName.Values)
 			{
-				if (value.graphToggle.isOn)
+				if (value.GraphToggled)
 				{
-					value.graphToggle.isOn = false;
+					value.SetGraphToggled(false);
 					result.Add(value.ValueName);
 				}
 			}
@@ -387,29 +318,7 @@ namespace MSP2050.Scripts
 				KPIBar bar;
 				if (kpiBarsByValueName.TryGetValue(valueName, out bar))
 				{
-					bar.graphToggle.isOn = true;
-				}
-			}
-		}
-
-		private void CheckAnimationExpandedState()
-		{
-			if (animator != null)
-			{
-				foreach (KPIBar bar in kpiBarsByValueName.Values)
-				{
-					if (bar.isParent)
-					{
-						if (bar.isExpanded)
-						{
-							animator.SetBool("Expand", true);
-							break;
-						}
-						else
-						{
-							animator.SetBool("Expand", false);
-						}
-					}
+					bar.SetGraphToggled(true);
 				}
 			}
 		}

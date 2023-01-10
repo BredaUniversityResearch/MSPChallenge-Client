@@ -567,7 +567,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2563065792727253096}
   - component: {fileID: 2563065792727253092}
-  - component: {fileID: 2563065792727253095}
   - component: {fileID: 2563065792727253094}
   - component: {fileID: 2563065792727253097}
   m_Layer: 5
@@ -624,33 +623,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &2563065792727253095
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2563065792727253099}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d434be82a9fde4b44b37987e9c4a6ecb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  title: {fileID: 9107406914984344505}
-  teamColour: {fileID: 0}
-  barToggle: {fileID: 4369616888443688788}
-  graphToggle: {fileID: 0}
-  childContainer: {fileID: 2563065791876851236}
-  otherObjectEnabledOnExpand: {fileID: 0}
-  foldIcon: {fileID: 2563065792897955091}
-  isParent: 1
-  isExpanded: 0
-  unit: 
-  usesKPIValueColor: 1
-  start: {fileID: 0}
-  actual: {fileID: 0}
-  valueConversionCollection: {fileID: 11400000, guid: ebec7967c1d7c1e48ad0639bd71ae354,
-    type: 2}
 --- !u!114 &2563065792727253094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -683,33 +655,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 245ea1dff60274740962b8dd111b6e3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetContainer: {fileID: 2563065791876851237}
-  animator: {fileID: 0}
-  targetCategory: 3
-  categoryPrefab: {fileID: 1000012607935712, guid: 3e0a8038e45b0b84483c3dbe868078b0,
+  m_targetSimulation: 
+  m_contentParent: {fileID: 2563065791876851237}
+  m_groupPrefab: {fileID: 4711062811031468813, guid: 9c9dd673b94524244b3d36b7637adeb6,
     type: 3}
-  valuePrefab: {fileID: 1000012275274472, guid: 4a58cd8b5dad46f44ba4d978c31b0872,
+  m_entryPrefab: {fileID: 6469236568657695072, guid: 21c0b2c038a610445b2caeae55611d9f,
     type: 3}
-  showGraphToggle: 1
   onKPIValueToggled:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: ToggleGraph
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   onKPIColorChanged:
     m_PersistentCalls:
       m_Calls: []
-  colorScheme: {fileID: 0}
+  m_colorScheme: {fileID: 11400000, guid: 0f0ada32546682c4bab947c97dc276db, type: 2}
 --- !u!1 &2563065792897955090
 GameObject:
   m_ObjectHideFlags: 0
@@ -911,7 +869,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a3f7a37d198a004caca302b533b3e3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  countryButtonPrefab: {fileID: 1799367640148430, guid: 65e547364ccf3aa4c9042f899b32737e,
+  countryButtonPrefab: {fileID: 6491765478366444840, guid: 70ae10152df05954abfcf7a1f41ebfcd,
     type: 3}
   targetContainer: {fileID: 2563065793023437975}
   allowMultipleSelected: 0
