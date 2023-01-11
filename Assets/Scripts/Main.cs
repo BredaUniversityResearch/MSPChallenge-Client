@@ -47,6 +47,9 @@ namespace MSP2050.Scripts
 		[HideInInspector] public event Action OnFinishedLoadingLayers; //Called when we finished loading all layers and right before the first tick is requested.
 		[HideInInspector] public event Action OnPostFinishedLoadingLayers;
 
+		bool m_gameLoaded;
+		public bool GameLoaded => m_gameLoaded;
+
 
 		protected void Awake()
 		{
@@ -174,6 +177,7 @@ namespace MSP2050.Scripts
 			StartCoroutine(UpdateManager.Instance.GetFirstUpdate());
 
 			ConstraintManager.Instance.LoadRestrictions();
+			m_gameLoaded = true;
 		}
 
 		public void FirstUpdateTickComplete()

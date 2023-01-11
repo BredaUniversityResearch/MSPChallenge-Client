@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 		[Header("References")]
 		[SerializeField] TextMeshProUGUI m_title;
 		[SerializeField] Toggle m_graphToggle;
+		[SerializeField] Image m_graphColourDisplay;
 
 		[Header("Values")]
 		[SerializeField] KPIValueDisplay m_start = null;
@@ -21,7 +22,7 @@ namespace MSP2050.Scripts
 		Action<bool, KPIBar> m_barToggleCallback;
 
 		public string ValueName => m_currentValue.name;
-		public bool GraphToggled => m_graphToggle.isOn;
+		public bool GraphToggled => m_graphToggle != null && m_graphToggle.isOn;
 
 		void Start()
 		{
@@ -73,7 +74,7 @@ namespace MSP2050.Scripts
 		public void SetDisplayedGraphColor(Color graphColor)
 		{
 			m_title.color = graphColor;
-			m_graphToggle.graphic.color = graphColor;
+			m_graphColourDisplay.color = graphColor;
 		}
 
 		public void SetGraphToggled(bool a_value)
