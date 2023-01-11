@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public class KPIGroups : MonoBehaviour
+	public class KPIOtherValueArea : MonoBehaviour
 	{
 		[Header("Prefabs")]
 		public GameObject barPrefab;

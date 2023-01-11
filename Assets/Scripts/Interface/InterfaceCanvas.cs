@@ -56,7 +56,7 @@ namespace MSP2050.Scripts
 		public MenuBarToggle menuBarNotifications;
 
 		[Header("KPI")]
-		public KPIRoot KPIEcology;
+		public  KPIOtherValueArea KPIEcologyGroups;
 
 		[Header("Objectives")]
 		public ObjectivesMonitor objectivesMonitor;

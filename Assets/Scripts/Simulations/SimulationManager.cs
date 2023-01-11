@@ -116,7 +116,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public KPIValueCollection GetKPIValuesForCategory(string a_targetSimulation, int a_countryId = -1)
+		public KPIValueCollection GetKPIValuesForSimulation(string a_targetSimulation, int a_countryId = -1)
 		{
 			if(string.IsNullOrEmpty(a_targetSimulation))
 			{

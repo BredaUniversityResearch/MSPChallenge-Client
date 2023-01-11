@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 224000010523686000}
   - component: {fileID: 114000014158135154}
   - component: {fileID: 114000013307148534}
+  - component: {fileID: 265948106100277448}
   m_Layer: 5
   m_Name: KPI Group Bar (Ecology)
   m_TagString: Untagged
@@ -143,8 +144,8 @@ MonoBehaviour:
     m_Bottom: 0
   m_ChildAlignment: 3
   m_Spacing: 1
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
@@ -176,6 +177,26 @@ MonoBehaviour:
   contentLocation: {fileID: 224000013493351386}
   valueConversionCollection: {fileID: 11400000, guid: ebec7967c1d7c1e48ad0639bd71ae354,
     type: 2}
+--- !u!114 &265948106100277448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000010135941804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 0
+  m_LayoutPriority: 1
 --- !u!1 &1000011219957892
 GameObject:
   m_ObjectHideFlags: 0
@@ -1466,6 +1487,9 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 10
       Data: 1
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
@@ -1473,4 +1497,5 @@ MonoBehaviour:
   - {fileID: 114000014079342502}
   highlightIfOn: 1
   useHighlightColor: 1
+  separateSelectedHighlight: 0
   useDisabledColor: 0

@@ -579,7 +579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a3f7a37d198a004caca302b533b3e3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  countryButtonPrefab: {fileID: 1799367640148430, guid: 65e547364ccf3aa4c9042f899b32737e,
+  countryButtonPrefab: {fileID: 6491765478366444840, guid: 70ae10152df05954abfcf7a1f41ebfcd,
     type: 3}
   targetContainer: {fileID: 228226949}
   allowMultipleSelected: 0
@@ -8684,8 +8684,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: m_targetSimulation
+      value: SEL
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
@@ -8704,6 +8719,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: GraphColorChanged
       objectReference: {fileID: 0}
@@ -8714,7 +8734,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MSP2050.Scripts.KPIGraphDisplay, MSP2050
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253099, guid: 69adbbcdf56eb75429fa588a3056e928,
@@ -9502,8 +9532,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: m_targetSimulation
+      value: CEL
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
@@ -9522,6 +9567,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: GraphColorChanged
       objectReference: {fileID: 0}
@@ -9532,7 +9582,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MSP2050.Scripts.KPIGraphDisplay, MSP2050
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253099, guid: 69adbbcdf56eb75429fa588a3056e928,
@@ -10321,8 +10381,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: m_targetSimulation
+      value: MEL
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
@@ -10341,6 +10416,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: GraphColorChanged
       objectReference: {fileID: 0}
@@ -10351,7 +10431,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MSP2050.Scripts.KPIGraphDisplay, MSP2050
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253099, guid: 69adbbcdf56eb75429fa588a3056e928,
@@ -12432,6 +12522,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1518451166}
@@ -12447,12 +12547,32 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: GraphColorChanged
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
         type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ToggleGraph
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: MSP2050.Scripts.KPIGraphDisplay, MSP2050
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
       propertyPath: onKPIColorChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 2563065792727253097, guid: 69adbbcdf56eb75429fa588a3056e928,
+        type: 3}
+      propertyPath: onKPIValueToggled.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 2563065792727253099, guid: 69adbbcdf56eb75429fa588a3056e928,
