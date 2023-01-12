@@ -7,99 +7,69 @@ namespace MSP2050.Scripts
 	public class KPIOtherValueArea : MonoBehaviour
 	{
 		[Header("Prefabs")]
-		public GameObject barPrefab;
-		public Transform contentLocation;
-		private Dictionary<string, KPIGroupBar> bars = new Dictionary<string, KPIGroupBar>();
+		public GameObject m_entryPrefab;
+		public Transform m_entryParent;
+
+		private Dictionary<string, KPIGroupBar> m_entries = new Dictionary<string, KPIGroupBar>();
     
-		private void Start()
+		private void CreateBarForGrid(EnergyGrid a_grid, int a_country)
 		{
-			StartCoroutine(ResizeLayout());
-		}
-    
-		private void CreateBarForGrid(EnergyGrid grid, int country)
-		{
-			GameObject go = Instantiate(barPrefab);
-			KPIGroupBar bar = go.GetComponent<KPIGroupBar>();
-			bars.Add(grid.GetDatabaseID().ToString(), bar);
-			go.transform.SetParent(contentLocation, false);
-
-			bar.title.text = grid.name;
-
-			//set actual grid data
-			bar.SetToEnergyValues(grid, country);
-
+			KPIGroupBar bar = Instantiate(m_entryPrefab, m_entryParent).GetComponent<KPIGroupBar>();
+			m_entries.Add(a_grid.GetDatabaseID().ToString(), bar);
+			bar.SetToEnergyValues(a_grid, a_country, a_grid.name);
 		}
 
-		private void UpdateBarForFishing(string name, Dictionary<int, float> values)
+		private void UpdateBarForFishing(string a_name, Dictionary<int, float> a_values)
 		{
-			KPIGroupBar bar;
-			if (bars.TryGetValue(name, out bar))
+			if (m_entries.TryGetValue(a_name, out var bar))
 			{
-				bar.UpdateFishingValues(values);
+				bar.UpdateFishingValues(a_values, a_name);
 			}
 			else
 			{
-				CreateBarForFishing(name, values);
+				CreateBarForFishing(a_name, a_values);
 			}
 		}
 
-		private void CreateBarForFishing(string name, Dictionary<int, float> values)
+		private void CreateBarForFishing(string a_name, Dictionary<int, float> a_values)
 		{
-			GameObject go = Instantiate(barPrefab);
-			KPIGroupBar bar = go.GetComponent<KPIGroupBar>();
-			bars.Add(name, bar);
-			go.transform.SetParent(contentLocation, false);
-
-			bar.title.text = name;
-
-			//set actual fishing data
-			bar.UpdateFishingValues(values);
+			KPIGroupBar bar = Instantiate(m_entryPrefab, m_entryParent).GetComponent<KPIGroupBar>();
+			m_entries.Add(a_name, bar);
+			bar.UpdateFishingValues(a_values, a_name);
 		}
 
 		private void ClearBars()
 		{
-			foreach (KPIGroupBar bar in bars.Values)
+			foreach (KPIGroupBar bar in m_entries.Values)
 			{
 				Destroy(bar.gameObject);
 			}
 
-			bars.Clear();
+			m_entries.Clear();
 		}
 
-		public void SetBarsToGrids(List<EnergyGrid> grids, int country)
+		public void SetBarsToGrids(List<EnergyGrid> a_grids, int a_country)
 		{
 			ClearBars();
 			//Checks if grid is more than just a socket, is relevant for our country
-			if (grids != null)
+			if (a_grids != null)
 			{
-				foreach (EnergyGrid grid in grids)
+				foreach (EnergyGrid grid in a_grids)
 				{
-					if (grid.ShouldBeShown && grid.CountryHasSocketInGrid(country))
+					if (grid.ShouldBeShown && grid.CountryHasSocketInGrid(a_country))
 					{
-						CreateBarForGrid(grid, country);
+						CreateBarForGrid(grid, a_country);
 					}
 				}
 			}
 		}
 
-		public void SetBarsToFishing(FishingDistributionSet distributionDelta)
+		public void SetBarsToFishing(FishingDistributionSet a_distributionDelta)
 		{
-			foreach (KeyValuePair<string, Dictionary<int, float>> kvp in distributionDelta.GetValues())
+			foreach (KeyValuePair<string, Dictionary<int, float>> kvp in a_distributionDelta.GetValues())
 			{
 				UpdateBarForFishing(kvp.Key, kvp.Value);
 			}
-		}
-
-	
-		// Resizes the content of the scroll rect
-		IEnumerator ResizeLayout()
-		{
-			yield return new WaitForEndOfFrame();
-
-			//layoutSizeRefitter.ignoreLayout = false;
-			//LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)layoutSizeRefitter.transform);
-			//Canvas.ForceUpdateCanvases();
-			//layoutSizeRefitter.ignoreLayout = true;
 		}
 	}
 }

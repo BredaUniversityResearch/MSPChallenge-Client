@@ -8,63 +8,46 @@ namespace MSP2050.Scripts
 	public class KPIGroupBar : MonoBehaviour
 	{
 		[Header("References")]
-		public TextMeshProUGUI title;
-		public TextMeshProUGUI barValueText;
-		public GameObject childContainer;
-		public RectTransform foldTrans;
-		public Image foldGraphic;
-		public Image groupCountryImage;
-		public Toggle barToggle;
+		[SerializeField] TextMeshProUGUI m_title;
+		[SerializeField] TextMeshProUGUI m_barValueText;
 
-		[SerializeField]
-		private DistributionFillBar input = null;
-		public Button occulusButton;
+		[SerializeField] ValueConversionCollection m_valueConversionCollection = null;
+		[SerializeField] DistributionFillBar m_fillBar = null;
+		[SerializeField] Button m_viewButton;
 
 		[Header("Prefabs")]
-		public GameObject itemPrefab;
-		public GameObject countryIconPrefab;
-		public Transform contentLocation;
+		[SerializeField] GameObject m_itemPrefab;
+		[SerializeField] Transform m_itemParent;
+		[SerializeField] GameObject m_countryBallPrefab;
+		[SerializeField] Transform m_countryBallParent;
 
-		[Header("ValueConverter")]
-		[SerializeField]
-		private ValueConversionCollection valueConversionCollection = null;
+		private List<KPIGroupBarItem> m_items = new List<KPIGroupBarItem>();
 
-		private List<KPIGroupBarItem> items = new List<KPIGroupBarItem>();
-
-		private void Awake()
-		{
-			barToggle.onValueChanged.AddListener(SetExpandedInternal);
-		}
-
-		private KPIGroupBarItem CreateItem(int teamID, float val, string valueText)
+		private KPIGroupBarItem CreateItem(int a_teamID, float a_val, string a_valueText)
 		{
 			Color col;
-			if (teamID < 0)
+			if (a_teamID < 0)
 				col = Color.white;
 			else
-				col = SessionManager.Instance.GetTeamByTeamID(teamID).color;
+				col = SessionManager.Instance.GetTeamByTeamID(a_teamID).color;
 
 			// Generate item
-			GameObject go = Instantiate(itemPrefab);
-			KPIGroupBarItem item = go.GetComponent<KPIGroupBarItem>();
-			items.Add(item);
-			go.transform.SetParent(contentLocation, false);
+			KPIGroupBarItem item = Instantiate(m_itemPrefab, m_itemParent).GetComponent<KPIGroupBarItem>();
+			m_items.Add(item);
 
 			// Set values
 			item.teamGraphic.color = col;
-			item.team = teamID;
-			UpdateItem(item, val, valueText);
-
-			foldGraphic.enabled = true;
+			item.team = a_teamID;
+			UpdateItem(item, a_val, a_valueText);
 			return item;
 		}
 
-		private KPIGroupBarItem CreateItem(int teamID, float val, bool createFillWeights = true)
+		private KPIGroupBarItem CreateItem(int a_teamID, float a_val, bool a_createFillWeights = true)
 		{
-			KPIGroupBarItem item = CreateItem(teamID, val, val.Abbreviated());
+			KPIGroupBarItem item = CreateItem(a_teamID, a_val, a_val.Abbreviated());
 
 			// Create fill
-			if (createFillWeights)
+			if (a_createFillWeights)
 			{
 				CalculateEcologyFillWeights();
 			}
@@ -72,107 +55,97 @@ namespace MSP2050.Scripts
 			return item;
 		}
 
-		private void UpdateItem(KPIGroupBarItem item, float value, string valueText)
+		private void UpdateItem(KPIGroupBarItem a_item, float a_value, string a_valueText)
 		{
-			item.value = value;
-			item.numbers.text = valueText;
+			a_item.value = a_value;
+			a_item.numbers.text = a_valueText;
 
-			if (input != null)
+			if (m_fillBar != null)
 			{
-				input.SetFill(item.team, value);
+				m_fillBar.SetFill(a_item.team, a_value);
 			}
 		}
 
-		private KPIGroupBarItem CreateEnergyItem(string title, string valueText)
+		private KPIGroupBarItem CreateEnergyItem(string a_title, string a_valueText)
 		{
 			// Generate item
-			GameObject go = Instantiate(itemPrefab);
-			KPIGroupBarItem item = go.GetComponent<KPIGroupBarItem>();
-			items.Add(item);
-			go.transform.SetParent(childContainer.transform, false);
+			KPIGroupBarItem item = Instantiate(m_itemPrefab, m_itemParent.transform).GetComponent<KPIGroupBarItem>();
+			m_items.Add(item);
 
 			// Set values
 			item.teamGraphic.gameObject.SetActive(false);
-			item.numbers.text = valueText;
-			item.title.text = title;
-
-			foldGraphic.enabled = true;
+			item.numbers.text = a_valueText;
+			item.title.text = a_title;
 			return item;
 		}
 
-		private KPIGroupBarItem CreateEnergyItem(int teamID, string valueText)
+		private KPIGroupBarItem CreateEnergyItem(int a_teamID, string a_valueText)
 		{
 			// Generate item
-			GameObject go = Instantiate(itemPrefab);
+			GameObject go = Instantiate(m_itemPrefab);
 			KPIGroupBarItem item = go.GetComponent<KPIGroupBarItem>();
-			items.Add(item);
-			go.transform.SetParent(childContainer.transform, false);
+			m_items.Add(item);
+			go.transform.SetParent(m_itemParent.transform, false);
 
 			// Set values
-			item.teamGraphic.color = SessionManager.Instance.GetTeamByTeamID(teamID).color;
-			item.numbers.text = valueText;
+			item.teamGraphic.color = SessionManager.Instance.GetTeamByTeamID(a_teamID).color;
+			item.numbers.text = a_valueText;
 			item.title.gameObject.SetActive(false);
-
-			foldGraphic.enabled = true;
 			return item;
 		}
 
-		private KPIGroupBarItem SetItemAtIndexTo(int index, string title, string valueText)
+		private KPIGroupBarItem SetItemAtIndexTo(int a_index, string a_title, string a_valueText)
 		{
-			if (items.Count <= index)
-				return CreateEnergyItem(title, valueText);
+			if (m_items.Count <= a_index)
+				return CreateEnergyItem(a_title, a_valueText);
 
 			// Set item to values
-			KPIGroupBarItem item = items[index];
-			item.numbers.text = valueText;
-			item.title.text = title;
+			KPIGroupBarItem item = m_items[a_index];
+			item.numbers.text = a_valueText;
+			item.title.text = a_title;
 			item.title.gameObject.SetActive(true);
 			item.teamGraphic.gameObject.SetActive(false);
-
-			foldGraphic.enabled = true;
 			return item;
 		}
 
-		private KPIGroupBarItem SetItemAtIndexTo(int index, int teamID, string valueText)
+		private KPIGroupBarItem SetItemAtIndexTo(int a_index, int a_teamID, string a_valueText)
 		{
-			if (items.Count <= index)
-				return CreateEnergyItem(teamID, valueText);
+			if (m_items.Count <= a_index)
+				return CreateEnergyItem(a_teamID, a_valueText);
 
 			// Set item to values
-			KPIGroupBarItem item = items[index];
-			item.teamGraphic.color = SessionManager.Instance.GetTeamByTeamID(teamID).color;
-			item.numbers.text = valueText;
+			KPIGroupBarItem item = m_items[a_index];
+			item.teamGraphic.color = SessionManager.Instance.GetTeamByTeamID(a_teamID).color;
+			item.numbers.text = a_valueText;
 			item.title.gameObject.SetActive(false);
 			item.teamGraphic.gameObject.SetActive(true);
-
-			foldGraphic.enabled = true;
 			return item;
 		}
 
-		public void DestroyItem(KPIGroupBarItem item)
+		public void DestroyItem(KPIGroupBarItem a_item)
 		{
 			// Ecology
-			if (input != null)
+			if (m_fillBar != null)
 			{
-				input.DestroyFill(item.team);
+				m_fillBar.DestroyFill(a_item.team);
 			}
 
-			items.Remove(item);
-			Destroy(item.gameObject);
+			m_items.Remove(a_item);
+			Destroy(a_item.gameObject);
 
-			if (items.Count <= 0)
-			{
+			//if (m_items.Count <= 0)
+			//{
 
-				foldGraphic.enabled = false;
-				SetExpanded(false);
-			}
+			//	foldGraphic.enabled = false;
+			//	SetExpanded(false);
+			//}
 		}
 
 		public void CalculateEcologyFillWeights()
 		{
-			for (int i = 0; i < items.Count; i++)
+			for (int i = 0; i < m_items.Count; i++)
 			{
-				input.SetFill(items[i].team, items[i].value);
+				m_fillBar.SetFill(m_items[i].team, m_items[i].value);
 			}
 
 			SortItems();
@@ -181,14 +154,14 @@ namespace MSP2050.Scripts
 
 		public void SortItems()
 		{
-			for (int i = 0; i < items.Count; i++)
+			for (int i = 0; i < m_items.Count; i++)
 			{
 				int siblingIndex = 0;
 				foreach (Team team in SessionManager.Instance.GetTeams())
 				{
-					if (items[i].teamGraphic.color == team.color)
+					if (m_items[i].teamGraphic.color == team.color)
 					{
-						items[i].transform.SetSiblingIndex(siblingIndex);
+						m_items[i].transform.SetSiblingIndex(siblingIndex);
 					}
 					++siblingIndex;
 				}
@@ -197,36 +170,14 @@ namespace MSP2050.Scripts
 
 		private void SortFills()
 		{
-			input.SortFills();
+			m_fillBar.SortFills();
 		}
 
-		private void SetExpandedInternal(bool expanded)
+		public void UpdateFishingValues(Dictionary<int, float> a_values, string a_name)
 		{
-			childContainer.SetActive(expanded);
-			Vector3 rot = foldTrans.eulerAngles;
-			foldTrans.eulerAngles = expanded ? new Vector3(rot.x, rot.y, 0f) : new Vector3(rot.x, rot.y, 90f);
-		}
-
-		public void SetExpanded(bool expanded)
-		{
-			barToggle.isOn = expanded;
-		}
-
-		private float MaxOutputEcology()
-		{
-			float maxOutput = 0f;
-			for (int i = 0; i < items.Count; i++)
+			foreach (KeyValuePair<int, float> kvp in a_values)
 			{
-				maxOutput += items[i].value;
-			}
-			return maxOutput;
-		}
-
-		public void UpdateFishingValues(Dictionary<int, float> values)
-		{
-			foreach (KeyValuePair<int, float> kvp in values)
-			{
-				KPIGroupBarItem item = items.Find(obj => obj.team == kvp.Key);
+				KPIGroupBarItem item = m_items.Find(obj => obj.team == kvp.Key);
 				if (item == null)
 				{
 					CreateItem(kvp.Key, kvp.Value);
@@ -237,27 +188,26 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			input.CreateEmptyFill(FishingDistributionDelta.MAX_SUMMED_FISHING_VALUE, true);
+			m_fillBar.CreateEmptyFill(FishingDistributionDelta.MAX_SUMMED_FISHING_VALUE, true);
 		}
 
-		public void SetToEnergyValues(EnergyGrid grid, int country)
+		public void SetToEnergyValues(EnergyGrid a_grid, int a_country, string a_name)
 		{
-			occulusButton.onClick.RemoveAllListeners();
-			occulusButton.onClick.AddListener(() => grid.ShowGridOnMap());
-			GameObject dots = contentLocation.GetChild(0).gameObject;
-			groupCountryImage.color = SessionManager.Instance.GetTeamByTeamID(country).color;
+			m_viewButton.onClick.RemoveAllListeners();
+			m_viewButton.onClick.AddListener(() => a_grid.ShowGridOnMap());
+			GameObject dots = m_countryBallParent.GetChild(0).gameObject;
 			int numberCountryIcons = 0;
 			float totalUsedPower = 0;
 			int nextItemIndex = 0;
 
-			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in grid.energyDistribution.distribution)
+			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in a_grid.energyDistribution.distribution)
 			{
-				if (grid.actualAndWasted == null)
+				if (a_grid.actualAndWasted == null)
 					continue;
 				float target = kvp.Value.expected;
-				float received = grid.actualAndWasted.socketActual.ContainsKey(kvp.Key) ? grid.actualAndWasted.socketActual[kvp.Key] : 0;
+				float received = a_grid.actualAndWasted.socketActual.ContainsKey(kvp.Key) ? a_grid.actualAndWasted.socketActual[kvp.Key] : 0;
 
-				if (kvp.Key == country)
+				if (kvp.Key == a_country)
 				{
 					//Our team, put it in the group bar
 					string formatString;
@@ -270,8 +220,8 @@ namespace MSP2050.Scripts
 						formatString = "Got {0} / {1} target";
 						totalUsedPower += received;
 					}
-					barValueText.text = string.Format(formatString, valueConversionCollection.ConvertUnit(received, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
-						valueConversionCollection.ConvertUnit(target, ValueConversionCollection.UNIT_WATT).FormatAsString());
+					m_barValueText.text = string.Format(formatString, m_valueConversionCollection.ConvertUnit(received, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
+						m_valueConversionCollection.ConvertUnit(target, ValueConversionCollection.UNIT_WATT).FormatAsString());
 				}
 				else
 				{
@@ -289,34 +239,33 @@ namespace MSP2050.Scripts
 						totalUsedPower += received;
 					}
 
-					SetItemAtIndexTo(nextItemIndex, kvp.Key, string.Format(formatString, valueConversionCollection.ConvertUnit(received, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
-						valueConversionCollection.ConvertUnit(target, ValueConversionCollection.UNIT_WATT).FormatAsString()));
+					SetItemAtIndexTo(nextItemIndex, kvp.Key, string.Format(formatString, m_valueConversionCollection.ConvertUnit(received, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
+						m_valueConversionCollection.ConvertUnit(target, ValueConversionCollection.UNIT_WATT).FormatAsString()));
 					nextItemIndex++;
 			
 					//Create group distribution icons for countries
 					if (numberCountryIcons < 3)
 					{
-						Image temp = Instantiate(countryIconPrefab).GetComponent<Image>();
+						Image temp = Instantiate(m_countryBallPrefab, m_countryBallParent).GetComponent<Image>();
 						temp.color = SessionManager.Instance.GetTeamByTeamID(kvp.Key).color;
-						temp.transform.SetParent(contentLocation);
 					}
 					numberCountryIcons++;
 				}
 			}
 
 			//Create summary
-			SetItemAtIndexTo(nextItemIndex, "Total  ", string.Format("Used {0} / {1} ({2})", valueConversionCollection.ConvertUnit(totalUsedPower, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
-				valueConversionCollection.ConvertUnit(grid.AvailablePower, ValueConversionCollection.UNIT_WATT).FormatAsString(), (totalUsedPower / (float)grid.AvailablePower).ToString("P1")));
+			SetItemAtIndexTo(nextItemIndex, "Total  ", string.Format("Used {0} / {1} ({2})", m_valueConversionCollection.ConvertUnit(totalUsedPower, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
+				m_valueConversionCollection.ConvertUnit(a_grid.AvailablePower, ValueConversionCollection.UNIT_WATT).FormatAsString(), (totalUsedPower / (float)a_grid.AvailablePower).ToString("P1")));
 			nextItemIndex++;
 
 			//Clear unused items
-			for (int i = nextItemIndex; i < items.Count; i++)
-				Destroy(items[i]);
-			items.RemoveRange(nextItemIndex, items.Count - nextItemIndex);
+			for (int i = nextItemIndex; i < m_items.Count; i++)
+				Destroy(m_items[i]);
+			m_items.RemoveRange(nextItemIndex, m_items.Count - nextItemIndex);
 
 			dots.SetActive(numberCountryIcons > 3);
 			dots.transform.SetAsLastSibling();
-			contentLocation.gameObject.SetActive(numberCountryIcons > 0);
+			m_countryBallParent.gameObject.SetActive(numberCountryIcons > 0);
 		}
 	}
 }
