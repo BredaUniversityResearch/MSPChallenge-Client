@@ -53,6 +53,7 @@ pipeline {
 
 					echo "Buld App..."
 					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -buildTarget "%buildTarget%" -customBuildPath "%CD%\\%outputFolder%\\" -customBuildName %BUILD_NAME% -executeMethod BuildCommand.PerformBuilds'
+
 				}
 			}
 		}
