@@ -6,7 +6,7 @@ namespace MSP2050.Scripts
 	public class KPIEnergyGridDisplay: MonoBehaviour
 	{
 		[SerializeField]
-		private KPIGroups kpiGroups = null;
+		private KPIOtherValueArea kpiGroups = null;
 
 		private int targetTeamId = -1;
 		private KPIValueCollection targetKPICollection = null;
@@ -30,7 +30,7 @@ namespace MSP2050.Scripts
 				targetKPICollection.OnKPIValuesUpdated -= OnTargetCollectionValuesUpdated;
 			}
 
-			targetKPICollection = SimulationManager.Instance.GetKPIValuesForCategory(SimulationManager.CEL_SIM_NAME, targetTeamId);
+			targetKPICollection = SimulationManager.Instance.GetKPIValuesForSimulation(SimulationManager.CEL_SIM_NAME, targetTeamId);
 
 			if (targetKPICollection != null)
 			{
