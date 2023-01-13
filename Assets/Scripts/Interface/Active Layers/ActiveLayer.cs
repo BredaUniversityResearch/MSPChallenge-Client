@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 
 		public void Destroy()
 		{
-			if (m_contentLocation.gameObject.activeInHierarchy)
+			if (m_expandToggle.isOn)
 			{
 				InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(false);
 				InterfaceCanvas.Instance.activeLayers.TextShowingChanged(false);
@@ -103,9 +103,12 @@ namespace MSP2050.Scripts
 
 		public void SetExpanded(bool a_value)
 		{
-			if (m_contentLocation.gameObject.activeInHierarchy == a_value)
+			if (m_ignoreToggleCallback)
 				return;
 
+			m_ignoreToggleCallback = true;
+			m_expandToggle.isOn = a_value;
+			m_ignoreToggleCallback = false;
 			m_contentLocation.gameObject.SetActive(a_value);
 			InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(a_value);
 		}

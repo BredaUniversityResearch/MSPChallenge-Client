@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -180,22 +181,34 @@ namespace MSP2050.Scripts
 				KPIBar bar;
 				if (!kpiBarsByValueName.TryGetValue(value.name, out bar))
 				{
-					//if (kpiCategoriesByCategoryName.TryGetValue(value.owningCategoryName, out KPIBar categoryBar))
-					//{
-					//	bar = CreateKPIBar(m_entryPrefab, categoryBar.childContainer.transform, value);
-					//}
-					Debug.LogError("Could not find KPI bar " + value.name);
+					if (kpiCategoriesByCategoryName.TryGetValue(value.owningCategoryName, out KPIGroupDisplay group))
+					{
+						bar = CreateKPIBar(m_entryPrefab, group.EntryParent, value);
+					}
+					else
+					{
+						Debug.LogWarning("Tried updating KPI Value " + value.name + " but a KPI bar could not be found for the value and the category has no group entry");
+					}
 				}
 
-				if (bar != null)
+				bar.SetStartValue((float)value.GetKpiValueForMonth(0));
+				bar.SetActual((float)value.GetKpiValueForMonth(month), value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId);
+			}
+
+			foreach (KPICategory category in valueCollection.GetCategories()) //Categories also have entries
+			{
+				valuesToRemove.Remove(category.name);
+
+				KPIBar bar;
+				KPIGroupDisplay group = kpiCategoriesByCategoryName[category.name];
+				if (!kpiBarsByValueName.TryGetValue(category.name, out bar))
 				{
-					bar.SetStartValue((float)value.GetKpiValueForMonth(0));
-					bar.SetActual((float)value.GetKpiValueForMonth(month), value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId);
+					bar = CreateKPIBar(m_entryPrefab, group.EntryParent, category);
 				}
-				else
-				{
-					Debug.LogWarning("Tried updating KPI Value " + value.name + " but a KPI bar could not be created for the value?");
-				}
+				bar.SetStartValue((float)category.GetKpiValueForMonth(0));
+				bar.SetActual((float)category.GetKpiValueForMonth(month), category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId);
+				bar.transform.SetAsLastSibling();
+				group.PositionSeparator();
 			}
 
 			foreach (string valueToRemove in valuesToRemove)
@@ -220,8 +233,6 @@ namespace MSP2050.Scripts
 				{
 					KPIGroupDisplay kpiGroup = Instantiate(m_groupPrefab, GetTargetContainerForCategory(category)).GetComponent<KPIGroupDisplay>();
 					kpiGroup.SetName(category.displayName);
-
-					KPICategory categoryLocal = category;
 
 					kpiCategoriesByCategoryName.Add(category.name, kpiGroup);
 

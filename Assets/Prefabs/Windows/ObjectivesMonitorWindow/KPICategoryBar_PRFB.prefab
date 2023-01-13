@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4608395697822541404}
   - component: {fileID: 4608395697822541403}
   - component: {fileID: 4608395697822541402}
+  - component: {fileID: 3829540694417316809}
   m_Layer: 5
   m_Name: CountrySelectionBar
   m_TagString: Untagged
@@ -105,11 +106,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a3f7a37d198a004caca302b533b3e3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  countryButtonPrefab: {fileID: 6491765478366444840, guid: 70ae10152df05954abfcf7a1f41ebfcd,
+  m_countryButtonPrefab: {fileID: 6491765478366444840, guid: 70ae10152df05954abfcf7a1f41ebfcd,
     type: 3}
-  targetContainer: {fileID: 4608395697822541401}
-  allowMultipleSelected: 0
-  addAllButton: 1
+  m_countryButtonParent: {fileID: 4608395697822541401}
+  m_toggleGroup: {fileID: 3829540694417316809}
+  m_addAllButton: 1
   onTeamSelectionChanged:
     m_PersistentCalls:
       m_Calls:
@@ -125,6 +126,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3829540694417316809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4608395697822541400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AllowSwitchOff: 0
 --- !u!1001 &4555712646425350642
 PrefabInstance:
   m_ObjectHideFlags: 0

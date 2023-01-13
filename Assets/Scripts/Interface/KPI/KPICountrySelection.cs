@@ -6,26 +6,23 @@ namespace MSP2050.Scripts
 {
 	public class KPICountrySelection : MonoBehaviour
 	{
-		[SerializeField]
-		private Button button = null;
-		[SerializeField]
-		private Graphic image = null;
-		[SerializeField]
-		private Image selectedOverlay = null;
+		[SerializeField] Toggle m_toggle = null;
+		[SerializeField] Graphic m_teamImage = null;
 
-		public void SetSelected(bool isSelected)
+		public void SetSelected(bool a_isSelected)
 		{
-			selectedOverlay.gameObject.SetActive(isSelected);
+			m_toggle.isOn = a_isSelected;
 		}
 
-		public void SetTeamColor(Color teamColor)
+		public void SetTeamColor(Color a_teamColor, ToggleGroup a_group)
 		{
-			image.color = teamColor;
+			m_teamImage.color = a_teamColor;
+			m_toggle.group = a_group;
 		}
 
-		public void SetOnClickHandler(UnityAction callback)
+		public void SetToggleChangeHandler(UnityAction<bool> a_callback)
 		{
-			button.onClick.AddListener(callback);
+			m_toggle.onValueChanged.AddListener(a_callback);
 		}
 	}
 }

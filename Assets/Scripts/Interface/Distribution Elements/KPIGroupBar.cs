@@ -175,12 +175,13 @@ namespace MSP2050.Scripts
 
 		public void UpdateFishingValues(Dictionary<int, float> a_values, string a_name)
 		{
+			m_title.text = a_name;
 			foreach (KeyValuePair<int, float> kvp in a_values)
 			{
 				KPIGroupBarItem item = m_items.Find(obj => obj.team == kvp.Key);
 				if (item == null)
 				{
-					CreateItem(kvp.Key, kvp.Value);
+					CreateItem(kvp.Key, kvp.Value, a_name);
 				}
 				else
 				{
@@ -193,6 +194,7 @@ namespace MSP2050.Scripts
 
 		public void SetToEnergyValues(EnergyGrid a_grid, int a_country, string a_name)
 		{
+			m_title.text = a_name;
 			m_viewButton.onClick.RemoveAllListeners();
 			m_viewButton.onClick.AddListener(() => a_grid.ShowGridOnMap());
 			GameObject dots = m_countryBallParent.GetChild(0).gameObject;

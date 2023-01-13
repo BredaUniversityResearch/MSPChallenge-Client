@@ -7,6 +7,7 @@ namespace MSP2050.Scripts
 	public class ActiveLayerEntityType : MonoBehaviour
 	{
 		[SerializeField] TextMeshProUGUI m_label;
+		[SerializeField] Image m_background;
 		[SerializeField] Image m_pointKey;
 		[SerializeField] Image m_lineKey;
 		[SerializeField] RawImage m_areaKey;
@@ -39,34 +40,44 @@ namespace MSP2050.Scripts
 
 			if (a_layer.GetGeoType() == LayerManager.GeoType.polygon)
 			{
+				//m_background.gameObject.SetActive(true);
+				m_pointKey.gameObject.SetActive(false);
+				m_lineKey.gameObject.SetActive(false);
+				m_areaKey.gameObject.SetActive(true);
+				m_outlineKey.gameObject.SetActive(true);
 				m_areaKey.texture = pattern;
 				m_areaKey.color = color;
-				m_outlineKey.transform.gameObject.SetActive(true);
 				Color outlineColor = a_entityType.DrawSettings.LineColor;
 				outlineColor.a = 1.0f; //Force Alpha to 1 as it is with the outline line rendering.
 				m_outlineKey.color = outlineColor;
 			}
 			else if (a_layer.GetGeoType() == LayerManager.GeoType.line)
 			{
-				m_areaKey.transform.parent.parent.gameObject.SetActive(false);
-				m_lineKey.transform.gameObject.SetActive(true);
-				m_pointKey.transform.gameObject.SetActive(false);
-				m_outlineKey.transform.gameObject.SetActive(false);
+				//m_background.gameObject.SetActive(true);
+				m_areaKey.gameObject.SetActive(false);
+				m_lineKey.gameObject.SetActive(true);
+				m_pointKey.gameObject.SetActive(false);
+				m_outlineKey.gameObject.SetActive(false);
 				m_lineKey.color = color;
 				m_lineKey.sprite = InterfaceCanvas.Instance.activeLayerLineSprites[(int)a_entityType.DrawSettings.LinePatternType];
 			}
 			else if (a_layer.GetGeoType() == LayerManager.GeoType.point)
 			{
-				m_areaKey.transform.parent.parent.gameObject.SetActive(false);
-				m_lineKey.transform.gameObject.SetActive(false);
-				m_pointKey.transform.gameObject.SetActive(true);
-				m_outlineKey.transform.gameObject.SetActive(false);
+				//m_background.gameObject.SetActive(false);
+				m_areaKey.gameObject.SetActive(false);
+				m_lineKey.gameObject.SetActive(false);
+				m_pointKey.gameObject.SetActive(true);
+				m_outlineKey.gameObject.SetActive(false);
 				m_pointKey.sprite = a_entityType.DrawSettings.PointSprite;
 				m_pointKey.color = color;
 			}
 			else
 			{
-				m_outlineKey.transform.gameObject.SetActive(false);
+				//m_background.gameObject.SetActive(true);
+				m_pointKey.gameObject.SetActive(false);
+				m_lineKey.gameObject.SetActive(false);
+				m_areaKey.gameObject.SetActive(true);
+				m_outlineKey.gameObject.SetActive(false);
 				m_areaKey.color = color;
 				m_areaKey.texture = pattern;
 			}

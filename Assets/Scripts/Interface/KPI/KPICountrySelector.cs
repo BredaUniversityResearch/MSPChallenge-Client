@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
@@ -9,24 +10,16 @@ namespace MSP2050.Scripts
 	{
 		[Serializable]
 		public class OnTeamSelectionChangedDelegate : UnityEvent<int>
-		{
-		}
+		{ }
 
-		[SerializeField]
-		private GameObject countryButtonPrefab = null;
-
-		[SerializeField]
-		private RectTransform targetContainer = null;
-
-		[SerializeField]
-		private bool allowMultipleSelected = false;
-
-		[SerializeField]
-		private bool addAllButton = false;
+		[SerializeField] GameObject m_countryButtonPrefab = null;
+		[SerializeField] RectTransform m_countryButtonParent = null;
+		[SerializeField] ToggleGroup m_toggleGroup;
+		[SerializeField] bool m_addAllButton = false;
 
 		public OnTeamSelectionChangedDelegate onTeamSelectionChanged = null;
 
-		private Dictionary<int, KPICountrySelection> buttonsByTeam = new Dictionary<int, KPICountrySelection>(16);
+		//private Dictionary<int, KPICountrySelection> m_buttonsByTeam = new Dictionary<int, KPICountrySelection>(16);
 		private HashSet<int> currentSelectedTeam = new HashSet<int>();
 
 		private void Start()
@@ -37,87 +30,53 @@ namespace MSP2050.Scripts
 		private void InitializeButtons()
 		{
 			Team currentTeam = SessionManager.Instance.CurrentTeam;
+			m_toggleGroup.allowSwitchOff = true;
 
 			foreach (Team team in SessionManager.Instance.GetTeams())
 			{
 				if (team.IsManager)
 					continue;
-				KPICountrySelection button = Instantiate(countryButtonPrefab, targetContainer).GetComponent<KPICountrySelection>();
-				button.SetTeamColor(team.color);
+				KPICountrySelection button = Instantiate(m_countryButtonPrefab, m_countryButtonParent).GetComponent<KPICountrySelection>();
+				button.SetTeamColor(team.color, m_toggleGroup);
 				int teamId = team.ID;
-				button.SetOnClickHandler(() => SelectTeam(teamId));
+				button.SetToggleChangeHandler((b) => OnToggleChanged(b, teamId));
 
-				buttonsByTeam.Add(teamId, button);
-
-				if (/*allowMultipleSelected ||*/ 
-				    (teamId == currentTeam.ID || (currentTeam.IsManager && currentSelectedTeam.Count == 0)))
+				//m_buttonsByTeam.Add(teamId, button);
+				if (teamId == currentTeam.ID || (currentTeam.IsManager && currentSelectedTeam.Count == 0))
 				{
-					SelectTeam(teamId);
+					button.SetSelected(true);
 				}
 			}
-			if (addAllButton)
+			if (m_addAllButton)
 			{
-				KPICountrySelection button = Instantiate(countryButtonPrefab, targetContainer).GetComponent<KPICountrySelection>();
-				button.SetTeamColor(Color.white);
-				button.SetOnClickHandler(() => SelectTeam(0));
-				buttonsByTeam.Add(0, button);
+				KPICountrySelection button = Instantiate(m_countryButtonPrefab, m_countryButtonParent).GetComponent<KPICountrySelection>();
+				button.SetTeamColor(Color.white, m_toggleGroup);
+				button.SetToggleChangeHandler((b) => OnToggleChanged(b, 0));
+				//m_buttonsByTeam.Add(0, button);
 			}
+			m_toggleGroup.allowSwitchOff = false;
 		}
 
-		private void SelectTeam(int newTeamId)
+		private void OnToggleChanged(bool a_selected, int a_teamId)
 		{
-			if (!allowMultipleSelected)
+			if (a_selected)
 			{
-				DeselectAll();
-				Select(newTeamId);
+				currentSelectedTeam.Add(a_teamId);
 			}
 			else
 			{
-				ToggleSelection(newTeamId);
+				currentSelectedTeam.Remove(a_teamId);
 			}
 
 			if (onTeamSelectionChanged != null)
 			{
-				onTeamSelectionChanged.Invoke(newTeamId);
-			}
-		}
-
-		private void Select(int newTeamId)
-		{
-			if (!currentSelectedTeam.Contains(newTeamId))
-			{
-				currentSelectedTeam.Add(newTeamId);
-				buttonsByTeam[newTeamId].SetSelected(true);
-			}
-		}
-
-		private void DeselectAll()
-		{
-			foreach (int selected in currentSelectedTeam)
-			{
-				buttonsByTeam[selected].SetSelected(false);
-			}
-
-			currentSelectedTeam.Clear();
-		}
-
-		private void ToggleSelection(int teamId)
-		{
-			if (currentSelectedTeam.Contains(teamId))
-			{
-				buttonsByTeam[teamId].SetSelected(false);
-				currentSelectedTeam.Remove(teamId);
-			}
-			else
-			{
-				buttonsByTeam[teamId].SetSelected(true);
-				currentSelectedTeam.Add(teamId);
+				onTeamSelectionChanged.Invoke(a_teamId);
 			}
 		}
 
 		public bool IsEnabled(int teamId)
 		{
-			return currentSelectedTeam.Contains(teamId) || (addAllButton && currentSelectedTeam.Contains(0));
+			return currentSelectedTeam.Contains(teamId) || (m_addAllButton && currentSelectedTeam.Contains(0));
 		}
 	}
 }
