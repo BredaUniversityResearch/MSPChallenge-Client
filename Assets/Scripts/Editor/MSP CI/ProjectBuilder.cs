@@ -37,6 +37,14 @@ class ProjectBuilder
             throw new Exception("BuildPlayer failure: " + res);
         }
     }
+	
+	private static void TestBuildJenkins()
+	{
+		List<string> scenes = FindEnabledEditorScenes();
+		var outputDir = GetArg("-customBuildPath");
+		//BuildTarget buildTarget = GetArg("-buildTarget");
+		BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, BuildOptions.None);
+	}
 
     [MenuItem("MSP 2050/Build project")]
     public static void MyBuild()
@@ -51,6 +59,19 @@ class ProjectBuilder
             BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/Windows_Dev/msp_dev.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.Development);
         }
     }
+	
+	private static string GetArg(string name)
+	{
+		var args = System.Environment.GetCommandLineArgs();
+		for (int i = 0; i < args.Length; i++)
+		{
+			if (args[i] == name && args.Length > i + 1)
+			{
+				return args[i + 1];
+			}
+		}
+		return null;
+	}
 
     //private static void PreBuild()
     //{

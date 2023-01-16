@@ -12,7 +12,7 @@ pipeline {
         UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2020.3.31f1\\Editor\\Unity.exe"
 
         // Unity Build params
-        BUILD_NAME = "Windows-${currentBuild.number}"
+        BUILD_NAME = "Windows-${currentBuild.number}.exe"
         String buildTarget = "Win64"
         String outputFolder = "CurrentBuild"
 
