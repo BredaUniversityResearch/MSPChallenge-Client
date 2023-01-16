@@ -40,7 +40,11 @@ namespace MSP2050.Scripts
 				Destroy(this);
 			else
 				singleton = this;
-			Main.Instance.OnFinishedLoadingLayers += CreateGeometryKPI;
+
+			if (Main.Instance.GameLoaded)
+				CreateGeometryKPI();
+			else
+				Main.Instance.OnFinishedLoadingLayers += CreateGeometryKPI;
 		}
 
 		void OnDestroy()

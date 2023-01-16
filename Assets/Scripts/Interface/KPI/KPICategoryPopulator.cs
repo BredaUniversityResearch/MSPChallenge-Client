@@ -22,8 +22,7 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_groupPrefab = null;
 		[SerializeField] GameObject m_entryPrefab = null;
 
-		[SerializeField] KPIValueToggledEvent onKPIValueToggled = null;
-		[SerializeField] KPIColorChangedEvent onKPIColorChanged = null;
+		[SerializeField] KPIGraphDisplay m_graphDisplay;
 		[SerializeField] KPIValueProceduralColorScheme m_colorScheme = null;
 
 		private Dictionary<string, KPIBar> kpiBarsByValueName = new Dictionary<string, KPIBar>(16); //Also includes the categories
@@ -42,13 +41,8 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				Main.Instance.OnPostFinishedLoadingLayers += OnGameFinishedLoading;	
+				Main.Instance.OnPostFinishedLoadingLayers += Initialise;	
 			}
-		}
-
-		private void OnGameFinishedLoading()
-		{
-			Initialise();
 		}
 
 		private void Initialise()
@@ -269,7 +263,10 @@ namespace MSP2050.Scripts
 				targetBar.SetDisplayedGraphColor(graphColor);
 			}
 
-			onKPIValueToggled.Invoke(targetValue, isOnState);
+			if(m_graphDisplay != null)
+			{
+				m_graphDisplay.ToggleGraph(targetValue, isOnState);
+			}
 
 			KPIValueProceduralColorScheme.Context context = new KPIValueProceduralColorScheme.Context();
 			foreach (string toggledKPIValue in GetActiveToggledValues())
@@ -280,8 +277,15 @@ namespace MSP2050.Scripts
 				{
 					kpiBar.SetDisplayedGraphColor(newColor);
 				}
+				else
+				{ 
+					Debug.LogError("No KPI bar found for value: " + value.name);
+				}
 
-				onKPIColorChanged.Invoke(value, newColor);
+				if (m_graphDisplay != null)
+				{
+					m_graphDisplay.GraphColorChanged(value, newColor);
+				}
 			}
 		}
 

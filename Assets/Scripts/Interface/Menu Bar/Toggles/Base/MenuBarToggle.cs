@@ -36,7 +36,7 @@ namespace MSP2050.Scripts
 					if (InterfaceCanvas.Instance.objectivesMonitor) 
 					{
 						toggle.isOn = false; // Init
-						toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.objectivesMonitor.SetWindowActive(toggle.isOn));
+						toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.objectivesMonitor.gameObject.SetActive(toggle.isOn));
 					}
 					break;
 				case Selection.ImpactTool:

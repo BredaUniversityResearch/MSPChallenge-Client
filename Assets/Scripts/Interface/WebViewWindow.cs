@@ -12,10 +12,10 @@ namespace MSP2050.Scripts
 		string currentURL;
 		bool editing;
 
-		private void Start()
-		{
-			gameObject.SetActive(false);
-		}
+		//private void Start()
+		//{
+		//	gameObject.SetActive(false);
+		//}
 
 		public void CreateWebViewWindow(string URL)
 		{

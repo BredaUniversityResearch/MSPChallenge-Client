@@ -6,92 +6,67 @@ namespace MSP2050.Scripts
 {
 	public class NewObjectiveWindow : MonoBehaviour
 	{
-		private static NewObjectiveWindow singleton;
+		[SerializeField] GenericWindow thisGenericWindow = null;
+		[SerializeField] Button acceptObjectiveButton = null;
+		[SerializeField] TextMeshProUGUI errorMessageDisplay = null;
 
-		public static NewObjectiveWindow instance
-		{
-			get
-			{
-				if (singleton == null)
-					singleton = (NewObjectiveWindow)FindObjectOfType(typeof(NewObjectiveWindow));
-				return singleton;
-			}
-		}
-
-		[SerializeField]
-		private GenericWindow thisGenericWindow = null;
-
-		[SerializeField]
-		public ObjectivePanel objectivePanel;
-
-		// Validation
-		private bool validateTitle;
-		private bool validateTaskCount;
-		private bool validateTaskCategory;
-		private bool validateTaskValue;
-
-		[SerializeField]
-		private Button acceptObjectiveButton = null;
-		[SerializeField]
-		private TextMeshProUGUI errorMessageDisplay = null;
+		[Header("Content links")]
+		[SerializeField] CustomInputField title = null;
+		[SerializeField] CustomInputField description = null;
+		[SerializeField] EraDropdown deadline = null;
+		[SerializeField] CountryDropdown countryDropdown = null;
 
 		public void Awake()
 		{
-			//CreateSectors();
 			acceptObjectiveButton.interactable = false;
-			objectivePanel.SetValidateAction(SetObjectiveValid);
-			acceptObjectiveButton.onClick.AddListener(CreateNewObjective);
-		}
-
-		void OnEnable()
-		{
-			thisGenericWindow.CenterWindow();
-
+			countryDropdown.gameObject.SetActive(SessionManager.Instance.AreWeManager);
+			title.onValueChanged.AddListener((s) => SetObjectiveValid());
+			description.onValueChanged.AddListener((s) => SetObjectiveValid());
 		}
 
 		public void CreateNewObjective()
 		{
-			// Block used for interface
-			string title = objectivePanel.Title;
-			string description = objectivePanel.Description;
-			int deadlineMonth = objectivePanel.DeadlineYear;
-			int appliesToCountry = objectivePanel.TargetCountry;
-
 			NetworkForm form = new NetworkForm();
-			form.AddField("country", appliesToCountry);
-			form.AddField("title", title);
-			form.AddField("description", description);
-			form.AddField("deadline", deadlineMonth);
+			form.AddField("country", SessionManager.Instance.AreWeManager ? countryDropdown.GetSelectedCountryId() : SessionManager.Instance.CurrentUserTeamID);
+			form.AddField("title", title.text);
+			form.AddField("description", description.text);
+			form.AddField("deadline", deadline.GetSelectedMonth());
 			ServerCommunication.Instance.DoRequest(Server.SendObjective(), form);
 			gameObject.SetActive(false);
 		}
 
-		public void CloneObjective(ObjectiveDetails objectiveDetails)
+		public void OpenToNewObjective()
 		{
-			// Clone objective info
-			objectivePanel.SetFromObjectiveDetails(objectiveDetails);
+			gameObject.SetActive(true);
+			thisGenericWindow.CenterWindow();
+			title.text = "";
+			description.text = "";
+			deadline.Reset();
+			countryDropdown.Reset();
 		}
 
-		private void SetObjectiveValid(bool titleValid, bool descriptionValid, bool eraValid, bool countryValid)
+		public void CloneObjective(ObjectiveDetails objectiveDetails)
 		{
-			if (!titleValid)
+			gameObject.SetActive(true);
+			title.text = objectiveDetails.title;
+			description.text = objectiveDetails.description;
+			deadline.SetSelectedMonth(objectiveDetails.deadlineMonth);
+			countryDropdown.SetSelectedCountryId(objectiveDetails.appliesToCountry);
+		}
+
+		private void SetObjectiveValid()
+		{
+			acceptObjectiveButton.interactable = true;
+			if (string.IsNullOrEmpty(title.text))
 			{
 				errorMessageDisplay.text = "The objective is missing a title";
+				acceptObjectiveButton.interactable = false;
 			}
-			else if (!descriptionValid)
+			else if (string.IsNullOrEmpty(description.text))
 			{
 				errorMessageDisplay.text = "The objective is missing a description";
+				acceptObjectiveButton.interactable = false;
 			}
-			else if (!eraValid)
-			{
-				errorMessageDisplay.text = "Please select a valid era deadline";
-			}
-			else if (!countryValid)
-			{
-				errorMessageDisplay.text = "The selected country is invalid";
-			}
-
-			acceptObjectiveButton.interactable = titleValid && descriptionValid && eraValid && countryValid;
 			errorMessageDisplay.gameObject.SetActive(!acceptObjectiveButton.interactable);
 		}
 	}

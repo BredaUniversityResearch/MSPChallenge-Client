@@ -1,101 +1,86 @@
-﻿using DG.Tweening;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
-	public class MonitorObjective : Objective
+	public class MonitorObjective : MonoBehaviour
 	{
-		private ObjectivesMonitor owningMonitor = null;
-		private ObjectiveDetails objectiveDetails = null;
-		public ObjectiveDetails ObjectiveDetails
+		[Header("Info")]
+		[SerializeField] TextMeshProUGUI title;
+		[SerializeField] TextMeshProUGUI summary;
+		[SerializeField] TextMeshProUGUI date;
+		[SerializeField] Image countryImage;
+		[SerializeField] Toggle completedToggle = null; //GM / AM
+		[SerializeField] TextMeshProUGUI completedLabel = null;     //All other clients that don't have permission to change the completed state.
+		[SerializeField] Button cloneButton;
+		[SerializeField] Button deleteButton;
+
+		public int TeamId
 		{
-			get
-			{
-				return objectiveDetails;
-			}
+			get;
+			private set;
 		}
 
-		[Header("Rect")]
-		public RectTransform thisRect;
-		public RectTransform parentRect;
-
-		[Header("Bar UI")]
-		public Toggle toggle;
-		[SerializeField]
-		private Toggle completedToggle = null; //GM / AM
-		[SerializeField]
-		private TextMeshProUGUI completedLabel = null;		//All other clients that don't have permission to change the completed state.
-
-		public Image foldIcon, country;
-		public TextMeshProUGUI date;
+		public ObjectiveDetails ObjectiveDetails
+		{
+			get;
+			private set;
+		}
     
-		private bool pulsePending;
+		private ObjectivesMonitor objectivesMonitor = null;
 
 		private void Awake()
 		{
-			parentRect = (RectTransform)transform.parent.transform;
-
 			bool isManager = SessionManager.Instance.CurrentTeam.IsManager;
 			if (isManager)
 			{
 				completedToggle.onValueChanged.AddListener(OnCompletedChanged);
 			}
 			completedToggle.gameObject.SetActive(isManager);
-			//completedLabel.gameObject.SetActive(!isManager);
+
+			deleteButton.onClick.AddListener(DeleteObjective);
+			cloneButton.onClick.AddListener(CloneObjectiveAsNew);
 		}
 
-		public void SetOwner(ObjectivesMonitor owner)
+		public void SetObjectiveDetails(ObjectiveDetails details, ObjectivesMonitor owner)
 		{
-			owningMonitor = owner;
-		}
+			objectivesMonitor = owner;
+			title.text = details.title;
+			summary.text = details.description;
+			TeamId = details.appliesToCountry;
 
-		public override void SetObjectiveDetails(ObjectiveDetails details)
-		{
-			base.SetObjectiveDetails(details);
-			objectiveDetails = details;
+			ObjectiveDetails = details;
 			completedToggle.isOn = details.completed;
 			completedLabel.text = details.completed ? "Completed" : "In progress";
 
 			date.text = Util.MonthToYearText(details.deadlineMonth);
 			Team team = SessionManager.Instance.FindTeamByID(details.appliesToCountry);
-			country.color = (team != null)? team.color : Color.white;
+			countryImage.color = (team != null)? team.color : Color.white;
 		}
 
 		private void OnCompletedChanged(bool newCompletedState)
 		{
-			if (newCompletedState != objectiveDetails.completed)
+			if (newCompletedState != ObjectiveDetails.completed)
 			{
-				objectiveDetails.completed = newCompletedState;
+				ObjectiveDetails.completed = newCompletedState;
 				NetworkForm form = new NetworkForm();
-				form.AddField("objective_id", objectiveDetails.objectiveId);
+				form.AddField("objective_id", ObjectiveDetails.objectiveId);
 				form.AddField("completed", newCompletedState ? 1 : 0);
 				ServerCommunication.Instance.DoRequest(Server.SetObjectiveCompleted(), form);
 			}
 
-			owningMonitor.OnObjectiveUIStateChanged();
+			objectivesMonitor.OnObjectiveUIStateChanged();
 		}
 
-		//Used as a callback from the Unity Editor.
 		public void CloneObjectiveAsNew()
 		{
-			InterfaceCanvas.Instance.newObjectiveWindow.gameObject.SetActive(true);
-			InterfaceCanvas.Instance.newObjectiveWindow.CloneObjective(objectiveDetails);
+			objectivesMonitor.CopyObjective(ObjectiveDetails);
 		}
 
-		//Used as a callback from the Unity Editor.
-		public void FoldIcon(bool dir)
-		{
-			RectTransform rectTrans = (RectTransform)foldIcon.transform;
-			float rotation = (dir) ? -90f : 0f;
-			rectTrans.DORotate(new Vector3(rectTrans.rotation.x, rectTrans.rotation.y, rotation), 0.1f);
-		}
-
-		//Used as a callback from the Unity Editor.
 		public void DeleteObjective()
 		{
-			DialogBoxManager.instance.ConfirmationWindow("Confirm Action", "Are you sure you want to delete this objective?", () => { }, () => { DeleteObjectiveInternal(objectiveDetails.objectiveId); });
+			DialogBoxManager.instance.ConfirmationWindow("Confirm Action", "Are you sure you want to delete this objective?", () => { }, (UnityEngine.Events.UnityAction)(() => { DeleteObjectiveInternal((int)this.ObjectiveDetails.objectiveId); }));
 		}
 
 		private void DeleteObjectiveInternal(int objectiveId)
@@ -105,66 +90,20 @@ namespace MSP2050.Scripts
 			ServerCommunication.Instance.DoRequest(Server.DeleteObjective(), form);
 
 			//Remove the objective from the UI immediately.
-			owningMonitor.RemoveObjectiveFromUI(this);
+			objectivesMonitor.RemoveObjectiveFromUI(this);
 		}
 
-		public void FocusObjective()
+		public void CopyObjectiveDataFrom(MonitorObjective other)
 		{
-			// Open the objectives monitor and display the menu bar button as active
-			ObjectivesMonitor objectivesMonitor = InterfaceCanvas.Instance.objectivesMonitor;
-
-			if (!InterfaceCanvas.Instance.objectivesMonitor.gameObject.activeSelf)
+			if (title != null && other.title != null)
 			{
-				MenuBarToggle menuBarObjectivesMonitor = InterfaceCanvas.Instance.menuBarObjectivesMonitor;
-
-				objectivesMonitor.gameObject.SetActive(true);
-				menuBarObjectivesMonitor.toggle.isOn = true;
+				title.text = other.title.text;
 			}
-
-			// Show objectives of this color
-			//if (!allCountries.gameObject.activeSelf)
-			//{
-			//	objectivesMonitor.filterToggles[TeamId].toggle.isOn = true;
-			//}
-
-			// Tween to position and pulse
-			RectTransform monitorRect = InterfaceCanvas.Instance.objectivesMonitor.thisRect;
-			GameObject raycastBlocker = InterfaceCanvas.Instance.objectivesMonitor.raycastBlocker;
-
-			LayoutRebuilder.ForceRebuildLayoutImmediate(monitorRect);
-			Canvas.ForceUpdateCanvases();
-
-			if (thisRect.anchoredPosition.y != -parentRect.anchoredPosition.y)
+			if (summary != null && other.summary != null)
 			{
-				raycastBlocker.SetActive(true);
-
-				Sequence seq = DOTween.Sequence();
-
-				seq.Append(parentRect.DOAnchorPos(new Vector2(parentRect.anchoredPosition.x, -thisRect.anchoredPosition.y), 1f));
-				seq.AppendCallback(() => toggle.isOn = true);
-				seq.AppendCallback(() => PulseHeader());
-				seq.AppendCallback(() => raycastBlocker.SetActive(false));
-
-				pulsePending = true;
+				summary.text = other.summary.text;
 			}
-			else
-			{
-				pulsePending = true;
-				PulseHeader();
-			}
-		}
-
-		private void PulseHeader(float duration = 1f)
-		{
-			if (pulsePending)
-			{
-				InterfaceCanvas.Instance.objectivesMonitor.raycastBlocker.SetActive(true);
-				Color defaultCol = toggle.targetGraphic.color;
-				toggle.targetGraphic.color = Color.white;
-				toggle.targetGraphic.DOBlendableColor(defaultCol, duration)
-					.OnComplete(() => InterfaceCanvas.Instance.objectivesMonitor.raycastBlocker.SetActive(false));
-				pulsePending = false;
-			}
+			TeamId = other.TeamId;
 		}
 	}
 }

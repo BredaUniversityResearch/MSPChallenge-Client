@@ -37,8 +37,11 @@ namespace MSP2050.Scripts
 				m_description = a_plan.Description;
 
 				m_approval = new Dictionary<int, EPlanApprovalState>();
-				foreach (var kvp in a_plan.countryApproval)
-					m_approval.Add(kvp.Key, kvp.Value);
+				if (a_plan.countryApproval != null)
+				{
+					foreach (var kvp in a_plan.countryApproval)
+						m_approval.Add(kvp.Key, kvp.Value);
+				}
 
 				m_planLayers = new List<PlanLayerBackup>(a_plan.PlanLayers.Count);
 				foreach (PlanLayer planlayer in a_plan.PlanLayers)

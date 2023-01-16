@@ -89,7 +89,7 @@ namespace MSP2050.Scripts
 			m_energyGrid = grid;
 			originalGridState = state;
 			allSocketMaximum = grid.maxCountryCapacity;
-			m_totalSourcePower = 0;
+			m_totalSourcePower = grid.sourcePower;
 			m_greenGreyEnergyImage.sprite = grid.IsGreen ? m_greenEnergySprite : m_greyEnergySprite; 
 			m_gridNameField.interactable = (state != EnergyGrid.GridPlanState.Removed);
 			SetName(grid.name);
@@ -132,7 +132,7 @@ namespace MSP2050.Scripts
 						m_productionEntries.Add(productionEntry);
 						productionEntry.SetContent(team, valueConversionCollection.ConvertUnit(kvp.Value.sourceInput, ValueConversionCollection.UNIT_WATT).FormatAsString());
 					}
-					m_totalSourcePower += kvp.Value.sourceInput;
+					//m_totalSourcePower += kvp.Value.sourceInput;
 					nextProductionEntryIndex++;
 				}
 

@@ -39,7 +39,10 @@ namespace MSP2050.Scripts
 
 		public void Awake()
 		{
-			Main.Instance.OnFinishedLoadingLayers += OnDoneImportingLayers;
+			if (Main.Instance.GameLoaded)
+				OnDoneImportingLayers();
+			else
+				Main.Instance.OnFinishedLoadingLayers += OnDoneImportingLayers;
 
 			zoomToAreaButton.onValueChanged.AddListener(ZoomToAreaClicked);
 			layerProbeButton.onValueChanged.AddListener(LayerProbeClicked);
@@ -49,6 +52,7 @@ namespace MSP2050.Scripts
             zoomAllOutButton.onClick.AddListener(ZoomAllTheWayOut);
             //issueVisibilityButton.button.onClick.AddListener(IssueVisibilityClicked);
             //issueVisibilityButton.SetSelected(IssueManager.Instance.IssueVisibility);
+			gameObject.SetActive(false);
         }
 
 		private void Update()
@@ -58,7 +62,7 @@ namespace MSP2050.Scripts
 			yCoordinateText.text = ((float)y).FormatAsCoordinateText();
 		}
 		
-		private void OnDoneImportingLayers()
+		public void OnDoneImportingLayers()
 		{
 			AbstractLayer layer = LayerManager.Instance.FindFirstLayerContainingName("_PLAYAREA");
 			if (layer == null)

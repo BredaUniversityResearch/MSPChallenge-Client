@@ -185,9 +185,10 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.loadingScreen.OnFinishedLoading();
 			StartCoroutine(UpdateManager.Instance.GetUpdates());
 
+			//TODO: Reenable when tutorial working
 			if (!PlayerPrefs.HasKey(FIRST_TIME_KEY))
 			{
-				TutorialManager.Instance.StartTutorial(Resources.Load<TutorialData>("MainTutorialData"));
+				//TutorialManager.Instance.StartTutorial(Resources.Load<TutorialData>("MainTutorialData"));
 				PlayerPrefs.SetInt(FIRST_TIME_KEY, 1);
 			}
 		}

@@ -31,7 +31,10 @@ namespace MSP2050.Scripts
 
 		public void Start()
 		{
-			Main.Instance.OnFinishedLoadingLayers += OptimizeLayers;
+			if (Main.Instance.GameLoaded)
+				OptimizeLayers();
+			else
+				Main.Instance.OnFinishedLoadingLayers += OptimizeLayers;
 		}
 
 		public void Update()

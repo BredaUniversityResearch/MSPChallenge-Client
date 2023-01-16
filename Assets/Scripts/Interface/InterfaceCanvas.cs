@@ -60,7 +60,6 @@ namespace MSP2050.Scripts
 
 		[Header("Objectives")]
 		public ObjectivesMonitor objectivesMonitor;
-		public NewObjectiveWindow newObjectiveWindow;
 
 		[Header("LineMaterials")]
 		public Material[] lineMaterials;

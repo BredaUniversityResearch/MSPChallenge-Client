@@ -94,9 +94,12 @@ namespace MSP2050.Scripts
 
 		private void UpdateOldValueIndicatorPosition()
 		{
-			float x = (float)((double)m_oldValue / (double)m_maxValue);
-			m_oldValueIndicator.anchorMin = new Vector2(x, 0.0f);
-			m_oldValueIndicator.anchorMax = new Vector2(x, 1.0f);
+			if (m_oldValueIndicator != null)
+			{
+				float x = (float)((double)m_oldValue / (double)m_maxValue);
+				m_oldValueIndicator.anchorMin = new Vector2(x, 0.0f);
+				m_oldValueIndicator.anchorMax = new Vector2(x, 1.0f);
+			}
 		}
 
 		void OnSliderRangeChanged()
