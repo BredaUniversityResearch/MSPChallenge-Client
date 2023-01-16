@@ -29,7 +29,13 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 }
 #endif
 
-	void Awake()
+    public static void UpdateBuildInformation(UnityManifest manifest)
+    {
+        manifest.SetGitTag(UpdateTag());
+        manifest.SetBuildTime(UpdateTime());
+    }
+
+    void Awake()
 	{
 		if (singleton != null && singleton != this)
 		{
@@ -42,7 +48,8 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 			DontDestroyOnLoad(gameObject);
 		}
 
-		singleton.GetUCBManifest();
+        //singleton.GetUCBManifest();
+        singleton.GetManifest();
 	}
 
 	public static string UpdateTime()
@@ -92,15 +99,23 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 		return gitTag;
 	}
 
+    public void GetManifest()
+    {
+        UnityManifest manifest = UnityManifest.Load();
 
-	public void GetUCBManifest()
+        gitTag = manifest.buildNumber;
+        buildTime = manifest.buildStartTime;
+        hasInformation = true;
+    }
+
+	/*public void GetUCBManifest()
 	{
 		UnityCloudBuildManifest manifest = UnityCloudBuildManifest.Load();
 
 		gitTag = manifest.buildNumber;
 		buildTime = manifest.buildStartTime;
 		hasInformation = true;
-	}
+	}*/
 
 	public string GetBuildTime()
     {
