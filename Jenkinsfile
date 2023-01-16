@@ -12,7 +12,7 @@ pipeline {
         UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2020.3.31f1\\Editor\\Unity.exe"
 
         // Unity Build params
-        BUILD_NAME = "Windows-${currentBuild.number}"
+        BUILD_NAME = "Windows-${currentBuild.number}.exe"
         String buildTarget = "Win64"
         String outputFolder = "CurrentBuild"
 
@@ -51,14 +51,14 @@ pipeline {
 					bat 'mkdir %outputFolder%'
 
 					echo "Buld App..."
-					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -buildTarget "%buildTarget%" -customBuildPath "%CD%\\%outputFolder%\\" -customBuildName %BUILD_NAME% -executeMethod ProjectBuilder.GenericBuild'
+					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -buildTarget "%buildTarget%" -customBuildPath "%CD%\\%outputFolder%\\%BUILD_NAME%" -customBuildName %BUILD_NAME% -executeMethod ProjectBuilder.TestBuildJenkins'
 				}
 			}
 		}
 	}
 	post {
         	always {
-					//bat '''RMDIR %outputFolder%'''
+					bat '''RMDIR %outputFolder%'''
             		slackSend color: COLOR_MAP[currentBuild.currentResult],
                 	message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}"
         	}
