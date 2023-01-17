@@ -39,8 +39,11 @@ pipeline {
 	stages {
         	stage('Clone Script') {
             		steps {
-						checkout scm
-						bat '''git submodule update --recursive --init'''
+						//checkout scm
+						bat '''git clone git@github.com:BredaUniversityResearch/MSPChallenge-Client.git
+							cd MSPChallenge-Client 
+							git submodule update --recursive --init
+							git checkout JenkinsTest'''
        		 	}
 		}
 		
