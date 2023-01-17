@@ -89,7 +89,7 @@ namespace MSP2050.Scripts
 			form.AddField("visibility", 0);
 
             if (!ApplicationBuildIdentifier.Instance.GetHasInformation())
-                ApplicationBuildIdentifier.Instance.GetUCBManifest();
+                ApplicationBuildIdentifier.Instance.GetManifest();
 
             form.AddField("client_timestamp", ApplicationBuildIdentifier.Instance.GetBuildTime());
 

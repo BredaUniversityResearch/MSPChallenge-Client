@@ -415,7 +415,7 @@ namespace MSP2050.Scripts
 			}
 
 			if (!ApplicationBuildIdentifier.Instance.GetHasInformation())
-				ApplicationBuildIdentifier.Instance.GetUCBManifest();
+				ApplicationBuildIdentifier.Instance.GetManifest();
 
 			form.AddField("build_timestamp", ApplicationBuildIdentifier.Instance.GetBuildTime());
 

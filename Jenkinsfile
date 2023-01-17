@@ -12,8 +12,8 @@ pipeline {
         UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2020.3.31f1\\Editor\\Unity.exe"
 
         // Unity Build params
-        BUILD_NAME = "Windows-${currentBuild.number}"
-        String buildTarget = "Win64"
+        BUILD_NAME = "Windows-${currentBuild.number}.exe"
+        String buildTarget = "StandaloneWindows64"
         String outputFolder = "CurrentBuild"
 
         //PARAMETERS DATA
@@ -39,9 +39,8 @@ pipeline {
 	stages {
         	stage('Clone Script') {
             		steps {
-                		checkout scm
-						bat '''git submodule init
-							git submodule update'''
+						checkout scm
+						bat '''git submodule update --recursive --init'''
        		 	}
 		}
 		
@@ -52,14 +51,14 @@ pipeline {
 					bat 'mkdir %outputFolder%'
 
 					echo "Buld App..."
-					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -buildTarget "%buildTarget%" -customBuildPath "%CD%\\%outputFolder%\\" -customBuildName %BUILD_NAME% -executeMethod BuildCommand.PerformBuilds'
+					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -buildTarget "%buildTarget%" -customBuildPath "%CD%\\%outputFolder%\\%BUILD_NAME%" -customBuildName %BUILD_NAME% -executeMethod ProjectBuilder.TestBuildJenkins'
 				}
 			}
 		}
 	}
 	post {
         	always {
-					bat '''RMDIR "./CurrentBuild"'''
+					bat '''RMDIR %outputFolder%'''
             		slackSend color: COLOR_MAP[currentBuild.currentResult],
                 	message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}"
         	}
