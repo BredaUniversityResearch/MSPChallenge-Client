@@ -39,8 +39,17 @@ pipeline {
 	stages {
         	stage('Clone Script') {
             		steps {
+						echo "Cloning the branch commit"
 						checkout scm
-						bat '''git submodule update --recursive --init'''
+						echo "Cloning the private plugins"
+						withCredentials([sshUserPrivateKey(credentialsId: 'CradleBuildMachine',  keyFileVariable: 'CradleBuildMachine')]) {
+							bat '''git submodule update --init --recursive'''
+						}						
+						//bat '''cd Assets/Plugins
+						//	rmdir /s /q ./PrivatePlugins
+						//	git clone -b main git@github.com:BredaUniversityResearch/MSPChallenge-PrivatePlugins.git'''
+						//bat	'''git submodule update --recursive --init'''
+						//	git checkout JenkinsTest'''
        		 	}
 		}
 		

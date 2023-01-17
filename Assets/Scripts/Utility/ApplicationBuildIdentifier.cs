@@ -52,11 +52,6 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
         singleton.GetManifest();
 	}
 
-    private void Start()
-    {
-		TestMe();
-    }
-
     public static string UpdateTime()
 	{
 		string buildTime = System.DateTime.Now.ToString("u", CultureInfo.InvariantCulture);
