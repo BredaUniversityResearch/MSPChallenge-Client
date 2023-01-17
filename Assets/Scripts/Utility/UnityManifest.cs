@@ -17,8 +17,14 @@ public class UnityManifest
 
     public static UnityManifest Load()
     {
-        var manifest = (TextAsset)Resources.Load("Manifest/UnityManifest.json");
+        TextAsset manifest = Resources.Load<TextAsset>("Manifest/UnityManifest");
         return manifest == null ? null : JsonUtility.FromJson<UnityManifest>(manifest.text);
+    }
+
+    public void Save()
+    {
+        string jsonString = JsonUtility.ToJson(this, true);
+        System.IO.File.WriteAllText(Application.dataPath + "/Resources/Manifest/UnityManifest.json", jsonString);
     }
 
     public string GetBuildTime()
@@ -39,12 +45,6 @@ public class UnityManifest
     public void SetGitTag(string value)
     {
         buildNumber = value;
-    }
-
-    public void Write()
-    {
-        string jsonString = JsonUtility.ToJson(this, true);
-        //System.IO.File.WriteAllText(Application.persistentDataPath + ".json", );
     }
 
 }

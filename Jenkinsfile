@@ -48,7 +48,7 @@ pipeline {
 			steps {
 				script {
 					echo "create Application output folder..."
-					bat 'mkdir %outputFolder%'
+					//bat 'mkdir %outputFolder%'
 
 					echo "Buld App..."
 					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -buildTarget "%buildTarget%" -customBuildPath "%CD%\\%outputFolder%\\%BUILD_NAME%" -customBuildName %BUILD_NAME% -executeMethod ProjectBuilder.TestBuildJenkins'
@@ -58,7 +58,7 @@ pipeline {
 	}
 	post {
         	always {
-					bat '''RMDIR %outputFolder%'''
+					//bat '''RMDIR %outputFolder%'''
             		slackSend color: COLOR_MAP[currentBuild.currentResult],
                 	message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}"
         	}
