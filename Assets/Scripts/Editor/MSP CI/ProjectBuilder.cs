@@ -73,6 +73,26 @@ class ProjectBuilder
 		return null;
 	}
 
+    private static void PreBuild()
+    {
+        UnityManifest manifest = UnityManifest.Load();
+        ApplicationBuildIdentifier.UpdateBuildInformation(manifest);
+    }
+    
+ //   private static T GetArg<T>(string name)
+	//{
+	//	var args = System.Environment.GetCommandLineArgs();
+	//	for (int i = 0; i < args.Length; i++)
+	//	{
+	//		if (args[i] == name && args.Length > i + 1)
+	//		{
+	//			//return args[i + 1];
+ //               return (T)Convert.ChangeType(args[i + 1], typeof(T));
+ //           }
+	//	}
+	//	return (T)Convert.ChangeType("", typeof(T));
+	//}
+
     //private static void PreBuild()
     //{
     //    //Put build date into the game
