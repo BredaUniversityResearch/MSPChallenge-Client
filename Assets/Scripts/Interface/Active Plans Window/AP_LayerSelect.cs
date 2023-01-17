@@ -118,7 +118,7 @@ namespace MSP2050.Scripts
 			foreach (PlanLayer pl in m_plan.PlanLayers)
 			{
 				originalLayers.Add(pl.BaseLayer);
-				m_layerObjects[pl.BaseLayer].SetValue(true);
+				//m_layerObjects[pl.BaseLayer].SetValue(true);
 			}
 
 			HashSet<AbstractLayer> added = new HashSet<AbstractLayer>(m_currentLayers);
@@ -141,7 +141,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			HashSet<AbstractLayer> removed = new HashSet<AbstractLayer>(originalLayers);
-			originalLayers.ExceptWith(m_currentLayers);
+			removed.ExceptWith(m_currentLayers);
 
 			bool seperatelyRemoveGreenCables = PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null && !removed.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGreen);
 			bool seperatelyRemoveGreyCables = PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null && !removed.Contains(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);

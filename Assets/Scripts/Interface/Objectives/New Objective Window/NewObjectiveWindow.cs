@@ -19,6 +19,7 @@ namespace MSP2050.Scripts
 		public void Awake()
 		{
 			acceptObjectiveButton.interactable = false;
+			acceptObjectiveButton.onClick.AddListener(CreateNewObjective);
 			countryDropdown.gameObject.SetActive(SessionManager.Instance.AreWeManager);
 			title.onValueChanged.AddListener((s) => SetObjectiveValid());
 			description.onValueChanged.AddListener((s) => SetObjectiveValid());

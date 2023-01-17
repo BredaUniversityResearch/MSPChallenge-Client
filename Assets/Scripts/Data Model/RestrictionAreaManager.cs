@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using UnityEngine;
 
 namespace MSP2050.Scripts
 {
@@ -178,11 +179,18 @@ namespace MSP2050.Scripts
 
 		public void SetRestrictionsToObject(Plan targetPlan, IEnumerable<RestrictionAreaObject> planObjectRestrictionSettings)
 		{
-			foreach(RestrictionAreaObject restrictionObj in planObjectRestrictionSettings)
+			if (planObjectRestrictionSettings == null)
 			{
-				AbstractLayer targetLayer = LayerManager.Instance.GetLayerByID(restrictionObj.layer_id);
-				EntityType targetType = targetLayer.GetEntityTypeByKey(restrictionObj.entity_type_id);
-				SetRestrictionAreaSetting(targetPlan, targetType, new RestrictionAreaSetting(restrictionObj.team_id, restrictionObj.restriction_size));
+				Debug.LogError("Trying to clear restriction area settings for a plan that doesn't have any");
+			}
+			else
+			{
+				foreach (RestrictionAreaObject restrictionObj in planObjectRestrictionSettings)
+				{
+					AbstractLayer targetLayer = LayerManager.Instance.GetLayerByID(restrictionObj.layer_id);
+					EntityType targetType = targetLayer.GetEntityTypeByKey(restrictionObj.entity_type_id);
+					SetRestrictionAreaSetting(targetPlan, targetType, new RestrictionAreaSetting(restrictionObj.team_id, restrictionObj.restriction_size));
+				}
 			}
 		}
 	}

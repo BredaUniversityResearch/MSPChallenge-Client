@@ -54,7 +54,8 @@ namespace MSP2050.Scripts
 
 		public override void RestoreBackupForPlan(Plan a_plan)
 		{
-			RestrictionAreaManager.instance.SetRestrictionsToObject(a_plan, m_backup);
+			if(m_wasShippingPlanBeforeEditing || a_plan.ContainsPolicy(PolicyManager.SHIPPING_POLICY_NAME))
+				RestrictionAreaManager.instance.SetRestrictionsToObject(a_plan, m_backup);
 		}
 
 		public override void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch)

@@ -406,7 +406,7 @@ namespace MSP2050.Scripts
 			m_planDescription.gameObject.SetActive(!string.IsNullOrEmpty(m_currentPlan.Description) || Editing);
 			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
-			m_communicationSection.SetActive(m_interactionMode == EInteractionMode.EditExisting);
+			m_communicationSection.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
 			m_viewModeSection.SetActive(!Editing);
 			m_changeLayersToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_changePoliciesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);

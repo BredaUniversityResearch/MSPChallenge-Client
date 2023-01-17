@@ -44,8 +44,15 @@ namespace MSP2050.Scripts
 
 		void OnToggleChanged(bool a_value)
 		{
-			if(!m_ignoreCallback)
+			if (!m_ignoreCallback)
+			{
 				m_callback(m_layer, a_value);
+				if (m_dependencies != null)
+				{
+					foreach (AP_LayerSelectLayer layer in m_dependencies)
+						layer.DependentLayerChanged(a_value);
+				}
+			}
 		}
 
 		public void ResetValue()
@@ -59,11 +66,6 @@ namespace MSP2050.Scripts
 		public void SetValue(bool a_value)
 		{
 			m_toggle.isOn = a_value;
-			if (m_dependencies != null)
-			{
-				foreach (AP_LayerSelectLayer layer in m_dependencies)
-					layer.DependentLayerChanged(a_value);
-			}
 		}
 
 		public void DependentLayerChanged(bool a_value)

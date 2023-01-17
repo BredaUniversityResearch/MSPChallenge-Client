@@ -666,6 +666,11 @@ namespace MSP2050.Scripts
 			return new Rect(min, max - min);
 		}
 
+		public bool ContainsPolicy(string a_policyType)
+		{
+			return Policies.ContainsKey(a_policyType);	
+		}
+
 		public bool TryGetPolicyData<T>(string a_policyType, out T a_result) where T : APolicyPlanData
 		{
 			if(Policies.TryGetValue(a_policyType, out var temp))
