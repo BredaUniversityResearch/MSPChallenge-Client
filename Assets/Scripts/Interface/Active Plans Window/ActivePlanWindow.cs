@@ -412,7 +412,7 @@ namespace MSP2050.Scripts
 			m_changePoliciesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_planStateToggle.gameObject.SetActive(!Editing);
 			m_planStateToggle.SetInteractable(m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID || SessionManager.Instance.AreWeManager);
-			m_issuesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_issuesToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.SetupNew);
 			m_planDateToggle.SetInteractable(Editing);
 
 			foreach(var toggle in m_layerToggles)

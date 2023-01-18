@@ -73,7 +73,7 @@ namespace MSP2050.Scripts
 				else
 				{
 					m_energyGrid.name = m_gridNameField.text;
-					m_energyGrid.SetName(m_gridNameField.text);
+					//m_energyGrid.SubmitName();//TODO CHECK: this should not happen here, but in submit
 				}
 			}
 		}

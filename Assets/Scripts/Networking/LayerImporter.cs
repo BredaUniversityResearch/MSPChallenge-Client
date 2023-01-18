@@ -134,7 +134,7 @@ namespace MSP2050.Scripts
 		private void HandleVectorLayerImport(List<SubEntityObject> layerObjects, AbstractLayer layer)
 		{
 			importLayer(layerObjects, layer);
-			LayerImportComplete();
+			LayerImportComplete(layer);
 		}
 
 		private void ImportRasterLayer(RasterLayer layer)
@@ -156,13 +156,14 @@ namespace MSP2050.Scripts
 			entityObject.type = typeIdString.ToString();
 			objects.Add(entityObject); // add one empty object, it doesnt need this anyways
 			LayerManager.Instance.LoadLayer(layer, objects);
-			LayerImportComplete();
+			LayerImportComplete(layer);
 		}
 
-		private void LayerImportComplete()
+		private void LayerImportComplete(AbstractLayer layer)
 		{
 			importedLayers++;
 			InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("layers");
+			LayerManager.Instance.InvokeLayerLoaded(layer);
 
 			if (importedLayers == expectedLayers)
 			{

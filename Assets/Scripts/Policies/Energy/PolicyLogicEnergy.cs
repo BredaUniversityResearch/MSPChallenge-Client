@@ -134,12 +134,24 @@ namespace MSP2050.Scripts
 				m_wasEnergyPlanBeforeEditing = true;
 				m_backup = new PolicyPlanDataEnergy(this)
 				{
-					energyGrids = data.energyGrids,
-					removedGrids = data.removedGrids,
+					energyGrids = new List<EnergyGrid>(data.energyGrids),
+					removedGrids = new HashSet<int>(data.removedGrids),
 					altersEnergyDistribution = data.altersEnergyDistribution,
 					energyError = data.energyError
 				};
-			
+
+				RecalculateGridsInEditedPlan(a_plan);
+			}
+			else
+			{
+				m_wasEnergyPlanBeforeEditing = false;
+			}
+		}
+
+		public void RecalculateGridsInEditedPlan(Plan a_plan)
+		{
+			if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
+			{
 				//Reset plan's grids
 				List<EnergyGrid> oldGridsInPlan = data.energyGrids;
 				data.removedGrids = new HashSet<int>();
@@ -156,10 +168,6 @@ namespace MSP2050.Scripts
 						data.energyGrids.AddRange(layer.DetermineChangedGridsInPlan(a_plan, oldGridsInPlan, m_energyGridsBeforePlan, data.removedGrids)); //Updates removedgrids
 					}
 				}
-			}
-			else
-			{
-				m_wasEnergyPlanBeforeEditing = false;
 			}
 		}
 

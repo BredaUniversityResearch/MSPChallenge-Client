@@ -40,6 +40,7 @@ namespace MSP2050.Scripts
 			set
 			{
 				m_maxValue = value;
+				m_valueSlider.maxValue = value;
 				OnSliderRangeChanged();
 			}
 		}

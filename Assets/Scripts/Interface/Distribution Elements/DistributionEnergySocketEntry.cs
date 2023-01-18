@@ -61,6 +61,7 @@ namespace MSP2050.Scripts
 				Initialise();
 
 			m_team = a_team;
+			m_teamName.text = m_team.name;
 			//m_oldSliderValue = a_oldSliderValue; //TODO
 			m_teamBall.color = a_team.color;
 			Sending = a_sliderValue < 0;

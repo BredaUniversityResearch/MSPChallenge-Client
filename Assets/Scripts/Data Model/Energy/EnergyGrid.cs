@@ -422,7 +422,7 @@ namespace MSP2050.Scripts
 		/// Sets the grids name. Sends it to the server if it already has a database id. 
 		/// Otherwise it will automatically be sent when the grid is sent to the server.
 		/// </summary>
-		public void SetName(string newName)
+		public void SubmitName()
 		{
 			if (databaseIDSet)
 			{

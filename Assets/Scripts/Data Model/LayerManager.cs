@@ -702,5 +702,10 @@ namespace MSP2050.Scripts
 			}
 			return null;
 		}
+
+		public void InvokeLayerLoaded(AbstractLayer a_layer)
+		{
+			OnLayerLoaded.Invoke(a_layer);
+		}
 	}
 }

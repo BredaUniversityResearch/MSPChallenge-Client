@@ -24,6 +24,7 @@ namespace MSP2050.Scripts
 		public override void Initialise()
 		{
 			CreateSourcePoint();
+			cachedMaxCapacity = (long)((double)Entity.EntityTypes[0].capacity * (double)SurfaceAreaSqrKm);
 			base.Initialise();
 		}
 
