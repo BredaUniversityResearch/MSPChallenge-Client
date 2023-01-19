@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
 using System.Text.RegularExpressions;
-using Codice.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+#if UNITY_EDITOR
+using Codice.Utils;
+#endif
 
 namespace MSP2050.Scripts
 {
@@ -26,9 +28,11 @@ namespace MSP2050.Scripts
 		public ARequest(string url, System.Action<ARequest, string> failureCallback, int retriesRemaining)
 		{
 			UriBuilder uriBuilder = new UriBuilder(url);
+#if UNITY_EDITOR
 			NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
 			AddXdebugTriggerToQueryByUrl(url, query);
 			uriBuilder.Query = query.ToString();
+#endif
 			Url = uriBuilder.ToString();
 			this.failureCallback = failureCallback;
 			this.retriesRemaining = retriesRemaining;

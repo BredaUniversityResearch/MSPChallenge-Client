@@ -65,6 +65,7 @@ namespace MSP2050.Scripts
 			geoJSONCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
 
 			GameSettings.Instance.SetAudioMixer(audioMixer);
+			InterfaceCanvas.Instance.loadingScreen.ShowHideLoadScreen(true);
 
 			fsm = new FSM();
 			fsmActive = true;

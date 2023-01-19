@@ -5,8 +5,6 @@ using UnityEngine.UI;
 using TMPro;
 using System.Text;
 using static MSP2050.Scripts.Plan;
-using System.Reactive.Joins;
-using ShaderForge;
 
 namespace MSP2050.Scripts
 {

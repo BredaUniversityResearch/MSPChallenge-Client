@@ -48,6 +48,7 @@ namespace MSP2050.Scripts
 			LayerInfo.Load(layerMeta);
 			if (Main.IsDeveloper)
 			{
+				//InterfaceCanvas.Instance.loadingScreen.ShowHideLoadScreen(false);
 				layerPickerUI.CreateUI();
 				layerPickerUI.onLayersSelected = ImportLayers;
 			}

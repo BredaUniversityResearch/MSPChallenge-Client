@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using static MSP2050.Scripts.ActivePlanWindow;
-using UnityEditor.Experimental.GraphView;
 
 namespace MSP2050.Scripts
 {
