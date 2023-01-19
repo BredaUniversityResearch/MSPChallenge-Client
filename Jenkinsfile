@@ -42,14 +42,27 @@ pipeline {
 						echo "Cloning the branch commit"
 						checkout scm
 						echo "Cloning the private plugins"
-						withCredentials([sshUserPrivateKey(credentialsId: 'CradleBuildMachine',  keyFileVariable: 'CradleBuildMachine')]) {
-							bat '''git submodule update --init --recursive'''
-						}						
+						bat '''BuildScripts/CloneSubmodule.bat'''
+						//withCredentials([sshUserPrivateKey(credentialsId: 'CradleBuildMachine',  keyFileVariable: 'CradleBuildMachine')]) {
+						//	bat '''BuildScripts/CloneSubmodule.bat'''
+						//}						
 						//bat '''cd Assets/Plugins
 						//	rmdir /s /q ./PrivatePlugins
 						//	git clone -b main git@github.com:BredaUniversityResearch/MSPChallenge-PrivatePlugins.git'''
 						//bat	'''git submodule update --recursive --init'''
 						//	git checkout JenkinsTest'''
+						
+						//checkout([$class: 'GitSCM',
+						//	branches: [[name: '*/JenkinsTest']],
+						//	doGenerateSubmoduleConfigurations: false,
+						//	extensions: [[$class: 'SubmoduleOption',
+						//		disableSubmodules: false,
+						//		parentCredentials: true,
+						//		recursiveSubmodules: true,
+						//		reference: '',
+						//		trackingSubmodules: false]], 
+						//	submoduleCfg: [], 
+						//	userRemoteConfigs: [[credentialsId: 'WebmasterCradle', url: 'ssh://git@github.com:BredaUniversityResearch/MSPChallenge-PrivatePlugins.git']]])
        		 	}
 		}
 		
