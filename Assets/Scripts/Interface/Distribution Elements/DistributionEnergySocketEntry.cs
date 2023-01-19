@@ -62,12 +62,12 @@ namespace MSP2050.Scripts
 
 			m_team = a_team;
 			m_teamName.text = m_team.name;
-			//m_oldSliderValue = a_oldSliderValue; //TODO
 			m_teamBall.color = a_team.color;
 			Sending = a_sliderValue < 0;
 			m_socketMaximum = a_socketMaximum;
 			m_group = a_group;
 			m_slider.MaxValue = a_allSocketMaximum;
+			m_oldSliderValue = a_sliderValue;
 			SetValue(a_sliderValue);
 			SetInteractability(a_interactable);
 			gameObject.SetActive(true);

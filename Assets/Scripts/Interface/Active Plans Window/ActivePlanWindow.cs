@@ -203,10 +203,10 @@ namespace MSP2050.Scripts
 				LayerManager.Instance.UpdateVisibleLayersToPlan(m_currentPlan);
 				m_currentPlan.AttemptUnlock();
 			}
-			else if(m_interactionMode == EInteractionMode.EditNew)
+			else if (m_interactionMode == EInteractionMode.EditNew)
 			{
 				PlanManager.Instance.RemovePlan(m_currentPlan);
-				foreach(PlanLayer planLayer in m_currentPlan.PlanLayers)
+				foreach (PlanLayer planLayer in m_currentPlan.PlanLayers)
 				{
 					planLayer.BaseLayer.RemovePlanLayer(planLayer);
 					planLayer.RemoveGameObjects();
@@ -244,7 +244,7 @@ namespace MSP2050.Scripts
 				m_interactionMode = EInteractionMode.EditNew;
 				RefreshContent();
 			}
-			else if(m_interactionMode == EInteractionMode.RestoreArchived)
+			else if (m_interactionMode == EInteractionMode.RestoreArchived)
 			{
 				InterfaceCanvas.ShowNetworkingBlocker();
 				SubmitRestoration();
@@ -276,7 +276,7 @@ namespace MSP2050.Scripts
 			}
 
 			m_delayedPolicyEffects = PolicyManager.Instance.CalculateEffectsOfEditing(m_currentPlan);
-			if(m_delayedPolicyEffects == 0)
+			if (m_delayedPolicyEffects == 0)
 				SubmitChanges();
 		}
 
@@ -310,7 +310,7 @@ namespace MSP2050.Scripts
 			m_currentPlan.SubmitName(batch);
 			m_currentPlan.SubmitPlanDate(batch);
 
-			if(m_interactionMode == EInteractionMode.EditExisting)
+			if (m_interactionMode == EInteractionMode.EditExisting)
 				m_currentPlan.AttemptUnlock(batch);
 			batch.ExecuteBatch(HandleChangesSubmissionSuccess, HandleChangesSubmissionFailure);
 		}
@@ -383,7 +383,7 @@ namespace MSP2050.Scripts
 				m_currentPlan = plan;
 				m_interactionMode = EInteractionMode.View;
 			}
-			if(m_countryIndicator != null)
+			if (m_countryIndicator != null)
 				m_countryIndicator.color = SessionManager.Instance.FindTeamByID(m_currentPlan.Country).color;
 			RefreshContent();
 		}
@@ -402,8 +402,8 @@ namespace MSP2050.Scripts
 			m_planName.interactable = Editing;
 			m_planDescription.interactable = Editing;
 			m_planDescription.gameObject.SetActive(!string.IsNullOrEmpty(m_currentPlan.Description) || Editing);
-			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
-			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
+			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
 			m_communicationSection.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
 			m_viewModeSection.SetActive(!Editing);
 			m_changeLayersToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);

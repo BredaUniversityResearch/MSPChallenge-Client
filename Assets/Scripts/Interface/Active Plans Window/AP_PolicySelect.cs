@@ -91,7 +91,7 @@ namespace MSP2050.Scripts
 
 		public override void ApplyContent()
 		{
-			HashSet<string> added = m_currentPolicies;
+			HashSet<string> added = new HashSet<string>(m_currentPolicies);
 			added.ExceptWith(m_originalPolicies);
 			foreach (string addedPolicy in added)
 			{

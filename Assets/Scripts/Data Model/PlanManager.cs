@@ -149,7 +149,10 @@ namespace MSP2050.Scripts
 				LayerManager.Instance.UpdateVisibleLayersToPlan(plan);
 				InterfaceCanvas.Instance.activePlanWindow.SetToPlan(plan);
 				IssueManager.Instance.SetIssueInstancesToPlan(plan);
-				OnViewingPlanChanged.Invoke(plan);
+				if (OnViewingPlanChanged != null)
+				{
+					OnViewingPlanChanged.Invoke(plan);
+				}
 			}
 		}
 
@@ -166,7 +169,10 @@ namespace MSP2050.Scripts
 					InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);//Needs to be done before redraw
 					LayerManager.Instance.UpdateVisibleLayersToBase();
 					InterfaceCanvas.Instance.activePlanWindow.SetToPlan(lockedPlan);
-					OnViewingPlanChanged.Invoke(lockedPlan);
+					if (OnViewingPlanChanged != null)
+					{
+						OnViewingPlanChanged.Invoke(lockedPlan);
+					}
 				}
 				else
 				{
@@ -192,8 +198,10 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.activePlanWindow.CloseWindow();
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);
 			IssueManager.Instance.HidePlanIssueInstances();
-
-			OnViewingPlanChanged.Invoke(null);
+			if (OnViewingPlanChanged != null)
+			{
+				OnViewingPlanChanged.Invoke(null);
+			}
 		}
 
 		public SubEntityPlanState GetSubEntityPlanState(SubEntity subEntity)
@@ -483,7 +491,10 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
 			LayerManager.Instance.UpdateVisibleLayersToPlan(a_plan);
 			IssueManager.Instance.SetIssueInstancesToPlan(a_plan);
-			OnViewingPlanChanged.Invoke(a_plan);
+			if(OnViewingPlanChanged != null)
+			{
+				OnViewingPlanChanged.Invoke(a_plan);
+			}
 		}
 		
 	}

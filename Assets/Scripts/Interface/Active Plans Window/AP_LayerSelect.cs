@@ -192,7 +192,7 @@ namespace MSP2050.Scripts
 				if (!m_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
 				{
 					//Energy layers added and no energy policy selected, add to pan
-					PolicyLogicEnergy.Instance.AddToPlan(m_plan);
+					PolicyLogicEnergy.Instance.AddToPlan(m_plan, false);
 				}
 			}
 			ConstraintManager.Instance.CheckConstraints(m_plan, out var unavailableTypeNames);

@@ -10,6 +10,8 @@ namespace MSP2050.Scripts
 		public enum EPolicyUpdateStage { General, PreKPI, PostKPI }
 		public PolicyDefinition m_definition;
 
+		public string Name => m_definition.m_name;
+
 		public virtual void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
 		{
 			m_definition = a_definition;

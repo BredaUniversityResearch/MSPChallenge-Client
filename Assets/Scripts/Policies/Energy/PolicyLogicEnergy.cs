@@ -103,10 +103,10 @@ namespace MSP2050.Scripts
 
 		public override void AddToPlan(Plan a_plan)
 		{
-			AddToPlan(a_plan, false);
+			AddToPlan(a_plan, true);
 		}
 
-		void AddToPlan(Plan a_plan, bool a_altersEnergyDistribution)
+		public void AddToPlan(Plan a_plan, bool a_altersEnergyDistribution)
 		{
 			a_plan.AddPolicyData(new PolicyPlanDataEnergy(this) { 
 				altersEnergyDistribution = a_altersEnergyDistribution,
@@ -217,6 +217,7 @@ namespace MSP2050.Scripts
 
 			}
 			a_plan.AddSystemMessage("Levelized cost of energy for windfarms in plan: " + totalCost.ToString("N0") + " €/MWh");
+			InterfaceCanvas.Instance.activePlanWindow.OnDelayedPolicyEffectCalculated();
 		}
 
 		void ExternalEnergyEffectsFailed(ARequest request, string message)
@@ -267,6 +268,12 @@ namespace MSP2050.Scripts
 				//Submit removed (unconnected) cables
 				foreach (EnergyLineStringSubEntity cable in m_removedCables)
 					cable.SubmitDelete(a_batch);
+
+				
+				JObject dataObject = new JObject();
+				dataObject.Add("id", a_plan.GetDataBaseOrBatchIDReference());
+				dataObject.Add("alters_energy_distribution", data.altersEnergyDistribution ? 1 : 0);
+				a_batch.AddRequest(Server.SetPlanEnergyDistribution(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 			}
 			else if(m_wasEnergyPlanBeforeEditing)
 			{

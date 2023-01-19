@@ -682,12 +682,12 @@ namespace MSP2050.Scripts
 
 		public void SetPolicyData(APolicyPlanData a_data)
 		{
-			Policies[a_data.logic.name] = a_data;
+			Policies[a_data.logic.Name] = a_data;
 		}
 
 		public void AddPolicyData(APolicyPlanData a_data)
 		{
-			Policies.Add(a_data.logic.m_definition.m_name, a_data);
+			Policies.Add(a_data.logic.Name, a_data);
 		}
 
 		public string GetDataBaseOrBatchIDReference()
