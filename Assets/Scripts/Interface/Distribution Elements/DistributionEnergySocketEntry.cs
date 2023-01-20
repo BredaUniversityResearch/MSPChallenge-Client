@@ -91,19 +91,19 @@ namespace MSP2050.Scripts
 			if (m_ignoreValueTextCallback)
 				return;
 
-			m_valueConversionCollection.ParseUnit(newValueText, ValueConversionCollection.UNIT_WATT, out float value);
-			long actual = (long)value;
+			long value = 0l;
+			m_valueConversionCollection.ParseUnit(newValueText, ValueConversionCollection.UNIT_WATT, out value);
 			if(Sending)
 			{
-				if (actual > m_socketMaximum)
-					actual = m_socketMaximum;
+				if (value > m_socketMaximum)
+					value = m_socketMaximum;
 
 			}
-			else if(actual > m_slider.MaxAvailableValue)
+			else if(value > m_slider.MaxAvailableValue)
 			{
-				actual = m_slider.MaxAvailableValue;
+				value = m_slider.MaxAvailableValue;
 			}
-			m_slider.Value = actual;
+			m_slider.Value = value;
 			m_group.UpdateEntireDistribution();
 		}
 

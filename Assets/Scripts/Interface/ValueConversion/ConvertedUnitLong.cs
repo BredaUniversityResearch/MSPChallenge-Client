@@ -3,13 +3,16 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public struct ConvertedUnit
+	public struct ConvertedUnitLong
 	{
-		public readonly float amount;		//e.g. 1.56
-		private readonly int amountDecimalPlaces;
-		public readonly string unit;		//e.g. kg
+		private long amount;		//e.g. 1.56
+		private int amountDecimalPlaces;
+		private string unit;        //e.g. kg
 
-		public ConvertedUnit(float amount, string unit, int amountDecimalPlaces)
+		public int AmountDecimalPlaces => amountDecimalPlaces;
+		public string Unit => unit;
+
+		public ConvertedUnitLong(long amount, string unit, int amountDecimalPlaces)
 		{
 			this.amount = amount;
 			this.unit = unit;
@@ -24,25 +27,25 @@ namespace MSP2050.Scripts
 		public string FormatValue()
 		{
 			//Determine power
-			bool sign = amount >= 0;
-			float formatValue = Mathf.Abs(amount);
+			bool sign = amount >= 0D;
+			double formatValue = Math.Abs(amount);
 			int power = 0;
 
-			if (formatValue >= 10000f)
+			if (formatValue >= 10000D)
 			{
-				formatValue /= 10000f;
+				formatValue /= 10000D;
 				power += 4;
-				while (formatValue >= 10f)
+				while (formatValue >= 10D)
 				{
-					formatValue /= 10f;
+					formatValue /= 10D;
 					power++;
 				}
 			}
-			else if (formatValue != 0)
+			else if (formatValue != 0D)
 			{
-				while (formatValue <= 0.1f)
+				while (formatValue <= 0.1D)
 				{
-					formatValue *= 10f;
+					formatValue *= 10D;
 					power--;
 				}
 			}
@@ -50,9 +53,9 @@ namespace MSP2050.Scripts
 			if (power == 0)
 			{
 				int decimals = 2;
-				if (formatValue > 1000f)
+				if (formatValue > 1000D)
 					decimals = 0;
-				else if (formatValue > 100f)
+				else if (formatValue > 100D)
 					decimals = 1;
 				string result = amount.ToString("N" + Math.Min(decimals, amountDecimalPlaces), Localisation.NumberFormatting);
 				return result;

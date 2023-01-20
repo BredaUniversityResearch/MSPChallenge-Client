@@ -20,9 +20,9 @@ namespace MSP2050.Scripts
 			unit.text = unitText;
 		}
 
-		public void UpdateValue(ConvertedUnit convertedUnit)
+		public void UpdateValue(IConvertedUnit convertedUnit)
 		{
-			UpdateValue(convertedUnit.FormatValue(), convertedUnit.unit);
+			UpdateValue(convertedUnit.FormatValue(), convertedUnit.Unit);
 		}
 
 		public void UpdateTooltip(string relativeValueString)

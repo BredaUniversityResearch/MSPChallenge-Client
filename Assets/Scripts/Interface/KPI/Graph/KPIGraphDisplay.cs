@@ -138,14 +138,14 @@ namespace MSP2050.Scripts
 
 			string changePercentage = KPIValue.FormatRelativePercentage(startValue, point.value);
 
-			ConvertedUnit displayUnit;
+			ConvertedUnitFloat displayUnit;
 			if (valueConversionCollection != null)
 			{
 				displayUnit = valueConversionCollection.ConvertUnit(point.value, graphEntry.activeValue.unit);
 			}
 			else
 			{
-				displayUnit = new ConvertedUnit(point.value, graphEntry.activeValue.unit, 2);
+				displayUnit = new ConvertedUnitFloat(point.value, graphEntry.activeValue.unit, 2);
 			}
 
 			return string.Format(Localisation.NumberFormatting, "{0} ({1})\n{2} ({3})",

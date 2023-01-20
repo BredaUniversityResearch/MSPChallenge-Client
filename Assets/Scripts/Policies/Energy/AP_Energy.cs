@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 			if(a_APWindow.Editing)
 			{
 				PolicyLogicEnergy.Instance.RecalculateGridsInEditedPlan(a_content);
-				SetSliderValuesToEnergyDistribution(a_content, PolicyLogicEnergy.Instance.GetEnergyGridsBeforePlan(a_content, EnergyGrid.GridColor.Either, true, false));
+				SetSliderValuesToEnergyDistribution(a_content, PolicyLogicEnergy.Instance.GetEnergyGridsBeforePlan(a_content, EnergyGrid.GridColor.Either, true, true));
 			}
 			else
 			{

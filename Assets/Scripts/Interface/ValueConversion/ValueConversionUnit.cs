@@ -47,13 +47,13 @@ namespace MSP2050.Scripts
 		[SerializeField]
 		private int decimalPlaces = 2;
 
-		public ConvertedUnit ConvertUnit(float value)
+		public ConvertedUnitFloat ConvertUnit(float value)
 		{
 			float absValue = Mathf.Abs(value);
 
 			if (value == 0)
 			{
-				return new ConvertedUnit(0.0f, baseUnitFormat, 0);
+				return new ConvertedUnitFloat(0.0f, baseUnitFormat, 0);
 			}
 
 			UnitEntry unitConversion = conversionUnits[0];
@@ -66,7 +66,29 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			return new ConvertedUnit(value / unitConversion.unitSize, unitConversion.unitPostfix, decimalPlaces);
+			return new ConvertedUnitFloat(value / unitConversion.unitSize, unitConversion.unitPostfix, decimalPlaces);
+		}
+
+		public ConvertedUnitLong ConvertUnit(long value)
+		{
+			long absValue = Math.Abs(value);
+
+			if (value == 0L)
+			{
+				return new ConvertedUnitLong(0, baseUnitFormat, 0);
+			}
+
+			UnitEntry unitConversion = conversionUnits[0];
+			for (int i = conversionUnits.Length - 1; i >= 0; --i)
+			{
+				if (absValue >= conversionUnits[i].unitSize)
+				{
+					unitConversion = conversionUnits[i];
+					break;
+				}
+			}
+
+			return new ConvertedUnitLong(value / (long)unitConversion.unitSize, unitConversion.unitPostfix, decimalPlaces);
 		}
 
 		public void ParseUnit(string input, out float amount)
@@ -89,6 +111,31 @@ namespace MSP2050.Scripts
 					if (unit != null)
 					{
 						amount *= unit.unitSize;
+					}
+				}
+			}
+		}
+
+		public void ParseUnit(string input, out long amount)
+		{
+			int separatorIndex = input.LastIndexOfAny("0123456789".ToCharArray());
+
+			string numberString = input.Substring(0, separatorIndex + 1).Trim();
+			string unitString = input.Substring(separatorIndex + 1).Trim();
+
+			if (long.TryParse(numberString, Localisation.FloatNumberStyle, Localisation.NumberFormatting, out amount))
+			{
+				UnitEntry unit = FindUnitEntryForPostfix(unitString, conversionUnits, EPostfixMatchMode.MatchExact | EPostfixMatchMode.IgnoreCase);
+				if (unit != null)
+				{
+					amount *= (long)unit.unitSize;
+				}
+				else
+				{
+					unit = FindUnitEntryForPostfix(unitString, defaultMetricUnits, EPostfixMatchMode.StartsWith | EPostfixMatchMode.IgnoreCase);
+					if (unit != null)
+					{
+						amount *= (long)unit.unitSize;
 					}
 				}
 			}

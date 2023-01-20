@@ -41,7 +41,7 @@ namespace MSP2050.Scripts
 
 		public void SetActual(float val, int countryId)
 		{
-			ConvertedUnit convertedValue = GetConvertedValue(val);
+			ConvertedUnitFloat convertedValue = GetConvertedValue(val);
 
 			m_actual.UpdateValue(convertedValue);
 
@@ -49,16 +49,16 @@ namespace MSP2050.Scripts
 			m_actual.UpdateTooltip(changePercentage);
 		}
 
-		private ConvertedUnit GetConvertedValue(float value)
+		private ConvertedUnitFloat GetConvertedValue(float value)
 		{
-			ConvertedUnit convertedValue;
+			ConvertedUnitFloat convertedValue;
 			if (m_valueConversionCollection != null)
 			{
 				convertedValue = m_valueConversionCollection.ConvertUnit(value, m_currentValue.unit);
 			}
 			else
 			{
-				convertedValue = new ConvertedUnit(value, m_currentValue.unit, 0);
+				convertedValue = new ConvertedUnitFloat(value, m_currentValue.unit, 0);
 			}
 
 			return convertedValue;
@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 
 		public void SetStartValue(float value)
 		{
-			ConvertedUnit convertedValue = GetConvertedValue(value);
+			ConvertedUnitFloat convertedValue = GetConvertedValue(value);
 			m_start.UpdateValue(convertedValue);
 			m_startingValue = value;
 		}

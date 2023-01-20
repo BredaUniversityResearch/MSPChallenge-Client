@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 	{
 		//[SerializeField] Image m_lockIcon;
 		[SerializeField] Image m_countryIcon;
+		[SerializeField] Button m_forceUnlockButton;
 		[SerializeField] RectTransform m_countryIconRect;
 		[SerializeField] Sprite m_regularCountrySprite;
 		[SerializeField] Sprite m_lockedCountrySprite;
@@ -50,6 +51,8 @@ namespace MSP2050.Scripts
 			});
 			PlanManager.Instance.OnViewingPlanChanged += OnViewedPlanChanged;
 			UpdateActionRequired();
+			m_forceUnlockButton.interactable = false;
+			m_forceUnlockButton.onClick.AddListener(OnForceUnlockClicked);
 		}
 
 		private void OnDestroy()
@@ -146,6 +149,7 @@ namespace MSP2050.Scripts
 		{
 			m_countryIcon.sprite = a_value ? m_lockedCountrySprite : m_regularCountrySprite;
 			m_countryIconRect.sizeDelta = a_value ? new Vector2(m_lockedCountrySize, m_lockedCountrySize) : new Vector2(m_regularCountrySize, m_regularCountrySize);
+			m_forceUnlockButton.interactable = a_value && SessionManager.Instance.AreWeGameMaster;
 		}
 
 		public void MoveToGroup(PlansGroupBar a_group)
@@ -197,6 +201,16 @@ namespace MSP2050.Scripts
 		void UpdateActivity()
 		{
 			gameObject.SetActive(!m_hiddenByFilter && !m_hiddenByVisibility);
+		}
+
+		void OnForceUnlockClicked()
+		{
+			DialogBoxManager.instance.ConfirmationWindow("Force unlock plan", $"Are you sure you want to force unlock the plan: {m_plan.Name}? If anyone is still editing this plan their changes will be discarded.", null, ForceCancel);
+		}
+
+		void ForceCancel()
+		{
+			m_plan.AttemptUnlock(true);
 		}
 	}
 }
