@@ -63,7 +63,6 @@ namespace MSP2050.Scripts
 			m_team = a_team;
 			m_teamName.text = m_team.name;
 			m_teamBall.color = a_team.color;
-			Sending = a_sliderValue < 0;
 			m_socketMaximum = a_socketMaximum;
 			m_group = a_group;
 			m_slider.MaxValue = a_allSocketMaximum;
@@ -132,16 +131,13 @@ namespace MSP2050.Scripts
 
 		public void SetValue(long a_newValue)
 		{
-			m_slider.Value = a_newValue;
+			Sending = a_newValue < 0;
+			long absValue = Math.Abs(a_newValue);
+			m_slider.Value = absValue;
 			m_ignoreValueTextCallback = true;
-			m_valueField.text = m_valueConversionCollection.ConvertUnit(a_newValue, ValueConversionCollection.UNIT_WATT).FormatAsString();
+			m_valueField.text = m_valueConversionCollection.ConvertUnit(absValue, ValueConversionCollection.UNIT_WATT).FormatAsString();
 			m_ignoreValueTextCallback = false;
 		}
-
-		//public void SetOldValue(long oldValue)
-		//{
-		//	m_slider.SetOldValue(oldValue);
-		//}
 
 		public void SetRemainingPower(long a_remaining)
 		{

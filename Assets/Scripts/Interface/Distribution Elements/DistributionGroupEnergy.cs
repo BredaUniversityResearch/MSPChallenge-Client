@@ -59,6 +59,18 @@ namespace MSP2050.Scripts
 				{
 					if (m_energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
 						m_energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(m_energyGrid, plan);
+					long old = m_energyGrid.energyDistribution.distribution[entry.Team.ID].expected;
+					if (entry.CurrentValue < 0)
+					{
+						if (old < 0)
+							m_energyGrid.sharedPower -= entry.CurrentValue - old;
+						else
+							m_energyGrid.sharedPower -= entry.CurrentValue;
+					}
+					else if (old < 0)
+					{
+						m_energyGrid.sharedPower += old;
+					}
 					m_energyGrid.energyDistribution.distribution[entry.Team.ID].expected = entry.CurrentValue;
 				}
 			}

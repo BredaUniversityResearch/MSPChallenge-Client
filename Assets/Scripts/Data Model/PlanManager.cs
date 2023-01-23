@@ -457,16 +457,6 @@ namespace MSP2050.Scripts
 			OnPlanUpdateInUIEvent(plan, oldTime);
 		}
 
-		public void PlanLockUpdated(Plan plan)
-		{
-			InterfaceCanvas.Instance.plansList.UpdatePlan(plan);
-			if (Main.InEditMode && Main.CurrentlyEditingPlan == plan)
-			{
-				InterfaceCanvas.Instance.activePlanWindow.ForceCancel(true);
-				DialogBoxManager.instance.NotificationWindow("Plan Unexpectedly Unlocked", "Plan has been unlocked by an external party. All changes have been discarded.", null);
-			}
-		}
-
 		public bool UserHasPlanLocked(int sessionID)
 		{
 			foreach (Plan plan in plans)

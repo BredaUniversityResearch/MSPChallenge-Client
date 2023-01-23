@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using ColourPalette;
 using System;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
@@ -53,6 +54,7 @@ namespace MSP2050.Scripts
 			UpdateActionRequired();
 			m_forceUnlockButton.interactable = false;
 			m_forceUnlockButton.onClick.AddListener(OnForceUnlockClicked);
+			SetLockActive(a_plan.IsLocked);
 		}
 
 		private void OnDestroy()
@@ -66,6 +68,7 @@ namespace MSP2050.Scripts
 			m_date.text = Util.MonthToText(m_plan.StartTime, true);
 			m_countryIcon.color = SessionManager.Instance.GetTeamByTeamID(m_plan.Country).color;
 			m_stateIcon.sprite = VisualizationUtil.Instance.VisualizationSettings.GetplanStateSprite(m_plan.State);
+			SetLockActive(m_plan.IsLocked);
 		}
 
 		public void UpdateActionRequired()

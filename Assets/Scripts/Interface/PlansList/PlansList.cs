@@ -77,7 +77,6 @@ namespace MSP2050.Scripts
 				planBar.gameObject.SetActive(false);
 
 			RefreshPlanBarInteractablity(a_plan, planBar);
-			SetLockIcon(a_plan, a_plan.IsLocked);
 			SetPlanIssues(a_plan);
 			m_needsSorting = true;
 		}
@@ -236,14 +235,6 @@ namespace MSP2050.Scripts
 						PlayerNotifications.RemovePlanIssueNotification(a_plan);
 					}
 				}
-			}
-		}
-
-		public void SetLockIcon(Plan a_plan, bool a_value)
-		{
-			if (m_planBarsPerPlan.TryGetValue(a_plan, out var planBar))
-			{
-				planBar.SetLockActive(a_value);
 			}
 		}
 

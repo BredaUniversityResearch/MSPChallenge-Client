@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Joins;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -127,7 +128,7 @@ namespace MSP2050.Scripts
 		private void HandleAttemptLockSuccess(PlanLockAction actionOnSuccess)
 		{
 			LockedBy = SessionManager.Instance.CurrentSessionID;
-			PlanManager.Instance.PlanLockUpdated(this);
+			InterfaceCanvas.Instance.plansList.UpdatePlan(this);
 			if (actionOnSuccess != null)
 				actionOnSuccess(this);
 			requestingLock = false;
@@ -185,8 +186,13 @@ namespace MSP2050.Scripts
 			if (lockedByUser != LockedBy)
 			{
 				LockedBy = lockedByUser;
-				PlanManager.Instance.PlanLockUpdated(this);
 				stateChanged = true;
+				if (Main.InEditMode && Main.CurrentlyEditingPlan == this && lockedByUser != SessionManager.Instance.CurrentSessionID)
+				{
+					InterfaceCanvas.Instance.activePlanWindow.ForceCancel(true);
+					DialogBoxManager.instance.NotificationWindow("Plan Unexpectedly Unlocked", "Plan has been unlocked by an external party. All changes have been discarded.", null);
+				}
+				//PlanManager.Instance.PlanLockUpdated(this);
 			}
 
 			//Handle state

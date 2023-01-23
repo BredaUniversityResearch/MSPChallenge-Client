@@ -505,6 +505,7 @@ namespace MSP2050.Scripts
 						{
 							long sentValue = Math.Max(-distribution[kvp.Key].maximum, kvp.Value.expected);
 							newTotal += -sentValue;
+							sharedPower -= sentValue;
 							distribution[kvp.Key].expected = sentValue;
 							fractionReceived.Add(kvp.Key, -1f);
 						}

@@ -197,17 +197,18 @@ namespace MSP2050.Scripts
 			m_title.text = a_name;
 			m_viewButton.onClick.RemoveAllListeners();
 			m_viewButton.onClick.AddListener(() => a_grid.ShowGridOnMap());
+			m_barValueText.text = "No simulation has run";
 			GameObject dots = m_countryBallParent.GetChild(0).gameObject;
 			int numberCountryIcons = 0;
-			float totalUsedPower = 0;
+			long totalUsedPower = 0;
 			int nextItemIndex = 0;
 
 			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in a_grid.energyDistribution.distribution)
 			{
-				if (a_grid.actualAndWasted == null)
-					continue;
-				float target = kvp.Value.expected;
-				float received = a_grid.actualAndWasted.socketActual.ContainsKey(kvp.Key) ? a_grid.actualAndWasted.socketActual[kvp.Key] : 0;
+				long received = 0L;
+				if (a_grid.actualAndWasted != null)
+					received = a_grid.actualAndWasted.socketActual.ContainsKey(kvp.Key) ? a_grid.actualAndWasted.socketActual[kvp.Key] : 0;
+				long target = kvp.Value.expected;
 
 				if (kvp.Key == a_country)
 				{
