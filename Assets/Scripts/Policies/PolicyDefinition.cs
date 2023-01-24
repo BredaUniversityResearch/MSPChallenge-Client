@@ -13,5 +13,6 @@ namespace MSP2050.Scripts
 		public Type m_planUpdateType;
 		public Type m_logicType;
 		public GameObject m_activePlanPrefab;
+		public Sprite m_activePlanIcon;
 	}
 }

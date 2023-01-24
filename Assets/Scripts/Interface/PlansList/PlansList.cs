@@ -124,12 +124,12 @@ namespace MSP2050.Scripts
 					kvp.Value.gameObject.SetActive(true);
 				}
 				VerticalLayoutGroup layout = m_contentParent.GetComponent<VerticalLayoutGroup>();
-				layout.padding = new RectOffset(0, 0, 4, 4);
+				layout.padding = new RectOffset(0, 0, 0, 0);
 			}
 			else
 			{
 				VerticalLayoutGroup layout = m_contentParent.GetComponent<VerticalLayoutGroup>();
-				layout.padding = new RectOffset(0, 0, 0, 0);
+				layout.padding = new RectOffset(0, 0, 6, 6);
 			}
 			m_needsSorting = true;
 		}

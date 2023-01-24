@@ -252,6 +252,9 @@ namespace MSP2050.Scripts
 		{
 			if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
 			{
+				if (!m_wasEnergyPlanBeforeEditing)
+					SubmitPolicyActivity(a_plan, PolicyManager.ENERGY_POLICY_NAME, true, a_batch);
+
 				// Add new grids (not distributions/sockets/sources yet)
 				foreach (EnergyGrid grid in data.energyGrids)
 					grid.SubmitEmptyGridToServer(a_batch); //TODO CHECK: won't this submit empty grids even if they already exist on the server?
@@ -268,7 +271,6 @@ namespace MSP2050.Scripts
 				//Submit removed (unconnected) cables
 				foreach (EnergyLineStringSubEntity cable in m_removedCables)
 					cable.SubmitDelete(a_batch);
-
 				
 				JObject dataObject = new JObject();
 				dataObject.Add("id", a_plan.GetDataBaseOrBatchIDReference());
@@ -277,6 +279,7 @@ namespace MSP2050.Scripts
 			}
 			else if(m_wasEnergyPlanBeforeEditing)
 			{
+				SubmitPolicyActivity(a_plan, PolicyManager.ENERGY_POLICY_NAME, false, a_batch);
 				JObject dataObject = new JObject();
 				dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
 				a_batch.AddRequest(Server.DeleteEnergyFromPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);

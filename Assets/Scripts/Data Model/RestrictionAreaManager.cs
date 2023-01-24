@@ -179,11 +179,7 @@ namespace MSP2050.Scripts
 
 		public void SetRestrictionsToObject(Plan targetPlan, IEnumerable<RestrictionAreaObject> planObjectRestrictionSettings)
 		{
-			if (planObjectRestrictionSettings == null)
-			{
-				Debug.LogError("Trying to clear restriction area settings for a plan that doesn't have any");
-			}
-			else
+			if (planObjectRestrictionSettings != null)
 			{
 				foreach (RestrictionAreaObject restrictionObj in planObjectRestrictionSettings)
 				{

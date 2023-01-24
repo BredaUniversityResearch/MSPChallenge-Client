@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace MSP2050.Scripts
 {
@@ -53,5 +54,14 @@ namespace MSP2050.Scripts
 		public abstract void HandleGeneralUpdate(APolicyData a_updateData, EPolicyUpdateStage a_stage);
 		//Update order: 1
 		public abstract void HandlePlanUpdate(APolicyData a_updateData, Plan a_plan, EPolicyUpdateStage a_stage);
+
+		protected void SubmitPolicyActivity(Plan a_plan, string a_policy, bool a_active, BatchRequest a_batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("plan_id", a_plan.GetDataBaseOrBatchIDReference());
+			dataObject.Add("policy_type", a_policy);
+			dataObject.Add("active", a_active ? 1 : 0);
+			a_batch.AddRequest(Server.SetPlanPolicy(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+		}
 	}
 }

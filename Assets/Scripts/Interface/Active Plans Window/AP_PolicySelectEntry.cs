@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Toggle m_toggle;
 		[SerializeField] TextMeshProUGUI m_name;
 
+
 		APolicyLogic m_policy;
 
 		public void Initialise(APolicyLogic a_policy, Action<APolicyLogic, bool> a_callback)

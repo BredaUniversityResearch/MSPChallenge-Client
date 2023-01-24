@@ -67,7 +67,8 @@ namespace MSP2050.Scripts
 				m_updateType = typeof(PolicyUpdateEnergy),
 				m_logicType = typeof(PolicyLogicEnergy),
 				m_settingsType = typeof(APolicyData),
-				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyEnergy_PRFB")
+				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyEnergy_PRFB"),
+				m_activePlanIcon = Resources.Load<Sprite>("Icons/energy")
 			});
 			m_policyDefinitions.Add(FISHING_POLICY_NAME, new PolicyDefinition
 			{
@@ -76,7 +77,8 @@ namespace MSP2050.Scripts
 				m_planUpdateType = typeof(PolicyUpdateFishingPlan),
 				m_logicType = typeof(PolicyLogicFishing),
 				m_settingsType = typeof(APolicyData),
-				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyFishing_PRFB")
+				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyFishing_PRFB"),
+				m_activePlanIcon = Resources.Load<Sprite>("Icons/fishing")
 			});
 			m_policyDefinitions.Add(SHIPPING_POLICY_NAME, new PolicyDefinition
 			{
@@ -85,7 +87,8 @@ namespace MSP2050.Scripts
 				m_planUpdateType = typeof(PolicyUpdateShippingPlan),
 				m_logicType = typeof(PolicyLogicShipping),
 				m_settingsType = typeof(APolicyData),
-				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyShipping_PRFB")
+				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyShipping_PRFB"),
+				m_activePlanIcon = Resources.Load<Sprite>("Icons/shipping")
 			});
 		}
 

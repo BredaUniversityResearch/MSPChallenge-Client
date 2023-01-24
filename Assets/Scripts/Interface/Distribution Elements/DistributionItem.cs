@@ -8,7 +8,8 @@ namespace MSP2050.Scripts
 	{
 		public const float SNAP_RANGE = 0.01f;
 
-		public Image m_teamBubble;
+		[SerializeField] private Image m_teamBubble;
+		[SerializeField] private TextMeshProUGUI m_teamNameText = null;
 		[SerializeField] private TextMeshProUGUI valueText = null;
 		[SerializeField] private CustomInputField valueTextInput = null;
 		[SerializeField] protected DistributionSlider slider = null;
@@ -30,7 +31,7 @@ namespace MSP2050.Scripts
 		public int Country
 		{
 			get;
-			set;
+			private set;
 		}
 
 		void Awake()
@@ -141,6 +142,13 @@ namespace MSP2050.Scripts
 		public void SetMaximum(float maxValue)
 		{
 			slider.MaxValue = maxValue;
+		}
+
+		public void SetTeam(Team a_team)
+		{
+			m_teamBubble.color = a_team.color;
+			m_teamNameText.text = a_team.name;
+			Country = a_team.ID;
 		}
 	}
 }

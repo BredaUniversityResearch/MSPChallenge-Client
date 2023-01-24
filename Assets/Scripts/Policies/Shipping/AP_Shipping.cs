@@ -24,6 +24,7 @@ namespace MSP2050.Scripts
 
 		[SerializeField] Distribution m_distributions = null;
 		[SerializeField] GameObject m_emptyContentOverlay;
+		[SerializeField] TextMeshProUGUI m_emptyContentText;
 
 		private Plan currentDistributionsForPlan = null;
 		private Dictionary<EntityType, DistributionGroupShipping> distributionGroups = new Dictionary<EntityType, DistributionGroupShipping>();
@@ -34,6 +35,7 @@ namespace MSP2050.Scripts
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
 			UpdateDistributions();
 			m_emptyContentOverlay.SetActive(m_distributions.NumberGroups == 0);
+			m_emptyContentText.text = a_APWindow.Editing ? "This plan contains no layers for which shipping restrictions can be set" : "No shipping restriction areas have been changed";
 			m_distributions.SetInteractability(a_APWindow.Editing);
 		}
 

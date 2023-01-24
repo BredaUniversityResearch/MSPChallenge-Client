@@ -319,6 +319,12 @@ namespace MSP2050.Scripts
 		{
 			return "api/plan/Restrictions";
 		}
+
+		public static string SetPlanPolicy()
+		{
+			return "api/plan/SetPolicy";
+		}
+
 		public static string UpdateMaxCapacity()
 		{
 			return "api/energy/UpdateMaxCapacity";

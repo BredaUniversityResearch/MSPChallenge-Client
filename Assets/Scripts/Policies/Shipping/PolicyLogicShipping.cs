@@ -60,6 +60,15 @@ namespace MSP2050.Scripts
 
 		public override void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch)
 		{
+			if (a_plan.TryGetPolicyData<PolicyPlanDataShipping>(PolicyManager.SHIPPING_POLICY_NAME, out var data))
+			{
+				if(!m_wasShippingPlanBeforeEditing)
+					SubmitPolicyActivity(a_plan, PolicyManager.SHIPPING_POLICY_NAME, true, a_batch);
+			}
+			else if(m_wasShippingPlanBeforeEditing)
+			{
+				SubmitPolicyActivity(a_plan, PolicyManager.SHIPPING_POLICY_NAME, false, a_batch);
+			}
 			RestrictionAreaManager.instance.SubmitSettingsForPlan(a_plan, a_batch);
 		}
 

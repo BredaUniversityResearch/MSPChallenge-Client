@@ -117,9 +117,7 @@ namespace MSP2050.Scripts
 					}
 					else
 					{
-						Color col = SessionManager.Instance.GetTeamByTeamID(kvp.Key).color;
-						item.m_teamBubble.color = col;
-						item.Country = kvp.Key;
+						item.SetTeam(SessionManager.Instance.GetTeamByTeamID(kvp.Key));
 					}
 				}
 

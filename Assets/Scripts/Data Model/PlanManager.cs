@@ -190,7 +190,7 @@ namespace MSP2050.Scripts
 
 			//Doesnt have to redraw as we'll do so when updating layers to base anyway
 			ignoreRedrawOnViewStateChange = true;
-			InterfaceCanvas.Instance.activePlanWindow.SetViewMode(PlanManager.PlanViewState.All);
+			TimeBar.instance.SetViewMode(PlanViewState.All);
 			ignoreRedrawOnViewStateChange = false;
 
 			if (updateLayers)

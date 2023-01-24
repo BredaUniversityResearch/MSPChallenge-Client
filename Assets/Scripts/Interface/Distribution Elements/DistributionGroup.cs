@@ -61,7 +61,6 @@ namespace MSP2050.Scripts
 		public T CreateItem(int country)
 		{
 			// Generate item
-			Color col = SessionManager.Instance.GetTeamByTeamID(country).color;
 			GameObject go = Instantiate(itemPrefab);
 			T item = go.GetComponent<T>();
 			items.Add(item);
@@ -69,8 +68,7 @@ namespace MSP2050.Scripts
 
 			// Set values
 			item.group = this;
-			item.Country = country;
-			item.m_teamBubble.color = col;
+			item.SetTeam(SessionManager.Instance.GetTeamByTeamID(country));
 			item.SetSliderInteractability(interactable);
 
 			return item;

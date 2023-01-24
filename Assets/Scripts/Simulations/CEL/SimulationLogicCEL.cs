@@ -8,7 +8,8 @@ namespace MSP2050.Scripts
 	public class SimulationLogicCEL : ASimulationLogic
 	{
 		private CountryKPICollectionEnergy m_energyKPIs = new CountryKPICollectionEnergy();
-		
+		private SimulationSettingsCEL m_settings;
+
 		public override void HandleGeneralUpdate(ASimulationData a_data)
 		{
 			SimulationUpdateCEL data = (SimulationUpdateCEL)a_data;
@@ -17,21 +18,29 @@ namespace MSP2050.Scripts
 
 		public override void Initialise(ASimulationData a_settings)
 		{
-			//Currently in Server.GetCELConfig()
 			CreateEnergyKPIs();
+			m_settings = (SimulationSettingsCEL)a_settings;
 
-			SimulationSettingsCEL config = (SimulationSettingsCEL)a_settings;
-			Sprite greenSprite = config.green_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + config.green_centerpoint_sprite);
-			Sprite greySprite = config.grey_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + config.grey_centerpoint_sprite);
-			Color greenColor = Util.HexToColor(config.green_centerpoint_color);
-			Color greyColor = Util.HexToColor(config.grey_centerpoint_color);
+			if (Main.Instance.GameLoaded)
+				ApplySettings();
+			else
+				Main.Instance.OnPostFinishedLoadingLayers += ApplySettings;
+		}
+
+		void ApplySettings()
+		{
+			Sprite greenSprite = m_settings.green_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + m_settings.green_centerpoint_sprite);
+			Sprite greySprite = m_settings.grey_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + m_settings.grey_centerpoint_sprite);
+			Color greenColor = Util.HexToColor(m_settings.green_centerpoint_color);
+			Color greyColor = Util.HexToColor(m_settings.grey_centerpoint_color);
 
 			foreach (PointLayer layer in PolicyLogicEnergy.Instance.GetCenterPointLayers())
 			{
 				layer.EntityTypes[0].DrawSettings.PointColor = layer.greenEnergy ? greenColor : greyColor;
 				layer.EntityTypes[0].DrawSettings.PointSprite = layer.greenEnergy ? greenSprite : greySprite;
-				layer.EntityTypes[0].DrawSettings.PointSize = layer.greenEnergy ? config.green_centerpoint_size : config.grey_centerpoint_size;
+				layer.EntityTypes[0].DrawSettings.PointSize = layer.greenEnergy ? m_settings.green_centerpoint_size : m_settings.grey_centerpoint_size;
 			}
+			m_settings = null;
 		}
 
 		public override void Destroy()

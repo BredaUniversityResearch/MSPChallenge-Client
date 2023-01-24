@@ -41,12 +41,6 @@ namespace MSP2050.Scripts
 		[SerializeField] ColourAsset m_warningIssueColour;
 		[SerializeField] ColourAsset m_errorIssueColour;
 
-		[Header("View mode")]
-		[SerializeField] GameObject m_viewModeSection;
-		[SerializeField] Toggle m_viewAllToggle;
-		[SerializeField] Toggle m_viewPlanToggle;
-		[SerializeField] Toggle m_viewBaseToggle;
-
 		[Header("Layers")]
 		[SerializeField] GameObject m_layerSection;
 		[SerializeField] Transform m_layerParent;
@@ -99,25 +93,6 @@ namespace MSP2050.Scripts
 			m_planDateToggle.Initialise(this, m_timeSelect);
 			m_planStateToggle.Initialise(this, m_stateSelect);
 
-
-			m_viewAllToggle.onValueChanged.AddListener((value) =>
-			{
-				if (value)
-					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.All);
-			});
-
-			m_viewPlanToggle.onValueChanged.AddListener((value) =>
-			{
-				if (value)
-					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Changes);
-			});
-
-			m_viewBaseToggle.onValueChanged.AddListener((value) =>
-			{
-				if (value)
-					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Base);
-			});
-
 			if (m_zoomToPlanButton != null)
 			{
 				m_zoomToPlanButton.onClick.AddListener(() =>
@@ -154,7 +129,7 @@ namespace MSP2050.Scripts
 
 				AP_ContentToggle toggle = Instantiate(m_policyPrefab, m_policyParent).GetComponent<AP_ContentToggle>();
 				toggle.Initialise(this, popout);
-				toggle.SetContent(kvp.Value.m_definition.m_displayName);
+				toggle.SetContent(kvp.Value.m_definition.m_displayName, kvp.Value.m_definition.m_activePlanIcon);
 				m_policyToggles.Add(kvp.Key, toggle);
 			}
 		}
@@ -405,7 +380,7 @@ namespace MSP2050.Scripts
 			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
 			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
 			m_communicationSection.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
-			m_viewModeSection.SetActive(!Editing);
+			TimeBar.instance.SetGeometryViewModeVisible(!Editing);
 			m_changeLayersToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_changePoliciesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_planStateToggle.gameObject.SetActive(!Editing);
@@ -421,8 +396,7 @@ namespace MSP2050.Scripts
 
 		void EnterEditMode()
 		{
-			if (!m_viewAllToggle.isOn)
-				m_viewAllToggle.isOn = true;
+			TimeBar.instance.SetViewMode(PlanManager.PlanViewState.All);
 
 			if(m_interactionMode == EInteractionMode.SetupNew)
 				m_planBackup = new PlanBackup(null);
@@ -500,7 +474,7 @@ namespace MSP2050.Scripts
 			int issueCount = m_currentPlan.GetMaximumIssueSeverityAndCount(out var severity);
 			if (issueCount == 0)
 			{
-				m_issuesToggle.SetContent("No issues", Color.clear);
+				m_issuesToggle.SetContent("No issues", m_infoIssueColour.GetColour());
 			}
 			else
 			{
@@ -580,22 +554,6 @@ namespace MSP2050.Scripts
 			m_ignoreContentCallback = true;
 			m_geometryTool.StartEditingLayer(m_currentPlan.PlanLayers[a_layerIndex]);
 			m_ignoreContentCallback = false;
-		}
-
-		public void SetViewMode(PlanManager.PlanViewState a_viewMode)
-		{
-			if (a_viewMode == PlanManager.PlanViewState.All)
-			{
-				m_viewAllToggle.isOn = true;
-			}
-			else if (a_viewMode == PlanManager.PlanViewState.Changes)
-			{
-				m_viewPlanToggle.isOn = true;
-			}
-			else if (a_viewMode == PlanManager.PlanViewState.Base)
-			{
-				m_viewBaseToggle.isOn = true;
-			}
 		}
 
 		public bool MayOpenNewPopout(AP_ContentToggle a_newToggle)

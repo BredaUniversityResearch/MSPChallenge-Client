@@ -21,10 +21,10 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		[Header("Layout")]
-		[SerializeField] LayoutElement windowLayout;
-		[SerializeField] float collapsedHeight;
-		[SerializeField] float expandedHeight;
+		//[Header("Layout")]
+		//[SerializeField] LayoutElement windowLayout;
+		//[SerializeField] float collapsedHeight;
+		//[SerializeField] float expandedHeight;
 
 		//Timeline
 		[Header("Timeline")]
@@ -55,6 +55,12 @@ namespace MSP2050.Scripts
 		[SerializeField] AddTooltip toolTip;
 		PlanningState planningState;
 
+		[Header("Geometry view mode")]
+		[SerializeField] GameObject m_geomViewModeSection;
+		[SerializeField] Toggle m_geomViewAllToggle;
+		[SerializeField] Toggle m_geomViewPlanToggle;
+		[SerializeField] Toggle m_geomViewBaseToggle;
+
 		int selectedMonthView, selectedYearView = 0; 
 		int maxSelectableMonth = 0;
 		int maxSelectableYear = 0;
@@ -80,6 +86,24 @@ namespace MSP2050.Scripts
 			timeManagerButton.interactable = SessionManager.Instance.AreWeGameMaster;
 			timeManagerButton.onClick.AddListener(() => TimeManagerWindow.instance.gameObject.SetActive(true));
 			toolTip.enabled = SessionManager.Instance.AreWeGameMaster;
+
+			m_geomViewAllToggle.onValueChanged.AddListener((value) =>
+			{
+				if (value)
+					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.All);
+			});
+
+			m_geomViewPlanToggle.onValueChanged.AddListener((value) =>
+			{
+				if (value)
+					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Changes);
+			});
+
+			m_geomViewBaseToggle.onValueChanged.AddListener((value) =>
+			{
+				if (value)
+					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Base);
+			});
 		}
 		
 		private void OnMonthChanged(int oldCurrentMonth, int newCurrentMonth)
@@ -127,7 +151,7 @@ namespace MSP2050.Scripts
 		{
 			if (isViewingPlan)
 			{
-				planViewingText.text = Util.MonthToText(PlanManager.Instance.planViewing.StartTime, false);
+				planViewingText.text = "Viewing plan at time: " + Util.MonthToText(PlanManager.Instance.planViewing.StartTime, false);
 				UpdateIndicator(viewingTimeIndicatorBottom, PlanManager.Instance.planViewing.StartTime);
 			}
 		}
@@ -198,7 +222,7 @@ namespace MSP2050.Scripts
 						PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.All, false);
 					break;
 				case WorldViewMode.Normal:
-					windowLayout.preferredHeight = active ? collapsedHeight : expandedHeight;
+					//windowLayout.preferredHeight = active ? collapsedHeight : expandedHeight;
 					viewingTimeIndicatorBottom.gameObject.SetActive(!active);
 					if (active && updateWorldView)
 					{
@@ -206,19 +230,7 @@ namespace MSP2050.Scripts
 					}
 					break;
 			}
-		}
-
-		//public TimeBarEraMarker CreateEraMarker(int month)
-		//{
-		//	TimeBarEraMarker marker = (TimeBarEraMarker)Instantiate(eraMarkerPrefab, eraMarkerParent, false);
-		//	eraMarkers.Add(marker);
-
-		//	// Set position based on month
-		//	float posX = ((month + 120) / (float)SessionManager.Instance.MspGlobalData.session_end_month) * eraMarkerParent.rect.width;
-		//	marker.thisRectTrans.anchoredPosition = new Vector2(posX, marker.thisRectTrans.anchoredPosition.y);
-
-		//	return marker;
-		//}
+		} 
 
 		public void ViewCurrentTime()
 		{
@@ -368,6 +380,27 @@ namespace MSP2050.Scripts
 			{
 				timeText.text = string.Format("{0:D1}:{1:D2}:{2:D2}", a_newTime.Hours, a_newTime.Minutes, a_newTime.Seconds);
 			}
+		}
+
+		public void SetViewMode(PlanManager.PlanViewState a_viewMode)
+		{
+			if (a_viewMode == PlanManager.PlanViewState.All)
+			{
+				m_geomViewAllToggle.isOn = true;
+			}
+			else if (a_viewMode == PlanManager.PlanViewState.Changes)
+			{
+				m_geomViewPlanToggle.isOn = true;
+			}
+			else if (a_viewMode == PlanManager.PlanViewState.Base)
+			{
+				m_geomViewBaseToggle.isOn = true;
+			}
+		}
+
+		public void SetGeometryViewModeVisible(bool a_visible)
+		{
+			m_geomViewModeSection.SetActive(a_visible);
 		}
 	}
 }

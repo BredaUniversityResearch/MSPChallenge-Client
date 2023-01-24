@@ -21,6 +21,7 @@ namespace MSP2050.Scripts
 		[SerializeField] ValueConversionCollection valueConversionCollection = null;
 
 		[Title("Content")]
+		[SerializeField] TextMeshProUGUI m_sourcesHeaderText;
 		[SerializeField] Transform m_teamBallParent;
 		[SerializeField] GameObject m_teamBallPrefab;
 		[SerializeField] Transform m_productionEntryParent;
@@ -163,6 +164,7 @@ namespace MSP2050.Scripts
 			}
 			ignoreDistributionUpdate = false;
 
+			m_sourcesHeaderText.text = nextProductionEntryIndex == 0 ? "This grid contains no energy sources" : "Energy sources";
 			//Disable unused items
 			for (int i = nextProductionEntryIndex; i < m_productionEntries.Count; i++)
 			{
