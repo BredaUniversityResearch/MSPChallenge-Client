@@ -135,7 +135,7 @@ namespace MSP2050.Scripts
 
 			if (targetCollection != null)
 			{
-				UpdateDisplayValues(targetCollection, displayMonth);
+				UpdateDisplayValues(targetCollection, automaticallyFollowLatestMonth ? targetCollection.MostRecentMonthReceived : displayMonth);
 				targetCollection.OnKPIValuesUpdated += OnKPIValuesUpdated;
 				targetCollection.OnKPIValueDefinitionsChanged += OnKPIValueDefinitionsChanged;
 			}
@@ -186,7 +186,7 @@ namespace MSP2050.Scripts
 				}
 
 				bar.SetStartValue((float)value.GetKpiValueForMonth(0));
-				bar.SetActual((float)value.GetKpiValueForMonth(month), value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId);
+				bar.SetActual((float)value.GetKpiValueForMonth(month)/*, value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId*/);
 			}
 
 			foreach (KPICategory category in valueCollection.GetCategories()) //Categories also have entries
@@ -200,7 +200,7 @@ namespace MSP2050.Scripts
 					bar = CreateKPIBar(m_entryPrefab, group.EntryParent, category);
 				}
 				bar.SetStartValue((float)category.GetKpiValueForMonth(0));
-				bar.SetActual((float)category.GetKpiValueForMonth(month), category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId);
+				bar.SetActual((float)category.GetKpiValueForMonth(month)/*, category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId*/);
 				bar.transform.SetAsLastSibling();
 				group.PositionSeparator();
 			}

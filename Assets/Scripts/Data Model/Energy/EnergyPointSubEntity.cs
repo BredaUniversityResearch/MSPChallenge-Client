@@ -117,10 +117,11 @@ namespace MSP2050.Scripts
 		{
 			if (Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 			{
-				if (sourcePolygon.HasDatabaseID())
-					return sourcePolygon.GetDatabaseID().ToString();
-				else
-					return BatchRequest.FormatCallIDReference(sourcePolygon.Entity.creationBatchCallID);
+				return sourcePolygon.GetDataBaseOrBatchIDReference();
+				//if (sourcePolygon.HasDatabaseID())
+				//	return sourcePolygon.GetDatabaseID().ToString();
+				//else
+				//	return BatchRequest.FormatCallIDReference(sourcePolygon.Entity.creationBatchCallID);
 			}
 			return base.GetDataBaseOrBatchIDReference();
 		}

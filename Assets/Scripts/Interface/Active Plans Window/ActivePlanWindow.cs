@@ -506,9 +506,14 @@ namespace MSP2050.Scripts
 			}
 			if (m_currentPlan.Policies != null)
 			{
+				bool onePlusPolicyActive = false;
 				foreach (var kvp in m_currentPlan.Policies)
 				{
-					m_policyToggles[kvp.Key].gameObject.SetActive(true);
+					if (kvp.Value.logic.ShowPolicyToggled(kvp.Value))
+					{
+						m_policyToggles[kvp.Key].gameObject.SetActive(true);
+						onePlusPolicyActive = true;
+					}
 				}
 				m_noPoliciesEntry.SetActive(m_currentPlan.Policies.Count == 0);
 			}

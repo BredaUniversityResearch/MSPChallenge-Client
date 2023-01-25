@@ -39,7 +39,7 @@ namespace MSP2050.Scripts
 			m_barToggleCallback = a_barToggleCallback;
 		}
 
-		public void SetActual(float val, int countryId)
+		public void SetActual(float val)
 		{
 			ConvertedUnitFloat convertedValue = GetConvertedValue(val);
 

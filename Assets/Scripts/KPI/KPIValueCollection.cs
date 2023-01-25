@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
         public readonly int countryId;
         private readonly Dictionary<string, KPIValue> values = new Dictionary<string, KPIValue>(); //Includes categories.
 		private readonly List<KPICategory> valueCategories = new List<KPICategory>();
-		protected int MostRecentMonthReceived
+		public int MostRecentMonthReceived
 		{
 			get;
 			private set;

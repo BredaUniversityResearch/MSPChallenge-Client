@@ -16,8 +16,8 @@ namespace MSP2050.Scripts
 
 		private void UpdateValue(string valueText, string unitText)
 		{
-			value.text = valueText;
-			unit.text = unitText;
+			value.text = valueText + " " + unitText;
+			//unit.text = unitText;
 		}
 
 		public void UpdateValue(IConvertedUnit convertedUnit)

@@ -46,6 +46,7 @@ namespace MSP2050.Scripts
 			valueInput.contentType = parameter.ContentType;
 			nameText.text = parameter.DisplayName;
 			unit.text = parameter.Unit;
+			unit.gameObject.SetActive(!string.IsNullOrEmpty(parameter.Unit));
 			SetInteractable(false);
 			if (!string.IsNullOrEmpty(parameter.SpriteName))
 				icon.sprite = Resources.Load<Sprite>(parameter.SpriteName);

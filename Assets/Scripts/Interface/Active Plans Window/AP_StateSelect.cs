@@ -104,7 +104,7 @@ namespace MSP2050.Scripts
 
 		void SetStatusDropdownOptions()
 		{
-			List<PlanState> m_stateDropdownOptions = null;
+			m_stateDropdownOptions = null;
 
 			//Set the right available states
 			if (m_plan.HasErrors() || m_plan.State == PlanState.DELETED)

@@ -145,7 +145,7 @@ namespace MSP2050.Scripts
 		void SetParameterSectionActive(bool a_value)
 		{
 			foreach (GameObject go in m_parameterSections)
-				go.SetActive(false);
+				go.SetActive(a_value);
 		}
 
 		public void SetObjectChangeInteractable(bool a_value)

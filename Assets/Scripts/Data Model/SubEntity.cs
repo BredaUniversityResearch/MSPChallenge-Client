@@ -18,7 +18,7 @@ namespace MSP2050.Scripts
 		private const float frontOfEverythingZOffset = -100.0f;
 
 		public Entity Entity;
-		protected int databaseID;
+		protected int databaseID = -1;
 		protected int persistentID;
 		protected string mspID;
 
