@@ -144,13 +144,16 @@ namespace MSP2050.Scripts
 				}
 
 				//Handle updates
-				foreach (APolicyData data in a_data)
+				if (a_data != null)
 				{
-					if (m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
+					foreach (APolicyData data in a_data)
 					{
-						policy.HandlePlanUpdate(data, a_plan, a_stage);
+						if (m_policyLogic.TryGetValue(data.policy_type, out APolicyLogic policy))
+						{
+							policy.HandlePlanUpdate(data, a_plan, a_stage);
+						}
+						existingPolicies.Remove(data.policy_type);
 					}
-					existingPolicies.Remove(data.policy_type);
 				}
 
 				//Handle removal
@@ -162,7 +165,7 @@ namespace MSP2050.Scripts
 					}
 				}
 			}
-			else
+			else if (a_data != null)
 			{
 				foreach (APolicyData data in a_data)
 				{

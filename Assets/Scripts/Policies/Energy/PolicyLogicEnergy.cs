@@ -108,7 +108,7 @@ namespace MSP2050.Scripts
 
 		public void AddToPlan(Plan a_plan, bool a_altersEnergyDistribution)
 		{
-			a_plan.AddPolicyData(new PolicyPlanDataEnergy(this) { 
+			a_plan.AddPolicyData(new PolicyPlanDataEnergy(this) {
 				altersEnergyDistribution = a_altersEnergyDistribution,
 				energyGrids = new List<EnergyGrid>(),
 				removedGrids = new HashSet<int>()
@@ -130,7 +130,7 @@ namespace MSP2050.Scripts
 				m_backup = null;
 			}
 			else if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
-			{ 
+			{
 				m_wasEnergyPlanBeforeEditing = true;
 				m_backup = new PolicyPlanDataEnergy(this)
 				{
@@ -171,7 +171,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override bool CalculateEffectsOfEditing(Plan a_plan) 
+		public override bool CalculateEffectsOfEditing(Plan a_plan)
 		{
 			if (a_plan.Policies.ContainsKey(PolicyManager.ENERGY_POLICY_NAME) && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
 			{
@@ -271,7 +271,7 @@ namespace MSP2050.Scripts
 				//Submit removed (unconnected) cables
 				foreach (EnergyLineStringSubEntity cable in m_removedCables)
 					cable.SubmitDelete(a_batch);
-				
+
 				JObject dataObject = new JObject();
 				dataObject.Add("id", a_plan.GetDataBaseOrBatchIDReference());
 				dataObject.Add("alters_energy_distribution", data.altersEnergyDistribution ? 1 : 0);
@@ -294,7 +294,7 @@ namespace MSP2050.Scripts
 		}
 
 		public override void GetIssueText(APolicyPlanData a_planData, List<string> a_issueText)
-		{ 
+		{
 			if(((PolicyPlanDataEnergy)a_planData).energyError)
 			{
 				a_issueText.Add("<color=#FF5454>[Error]</color> The energy distribution has been invalidated and must be recalculated. To do this move the plan to the design state, start editing and accept. Note that editing might change energy cables and distributions to repair the plan, make sure to check these.");
@@ -405,8 +405,11 @@ namespace MSP2050.Scripts
 			{
 				planData.removedGrids = a_deleted;
 				planData.energyGrids = new List<EnergyGrid>();
-				foreach (GridObject obj in a_newGrids)
-					planData.energyGrids.Add(new EnergyGrid(obj, a_plan));
+				if (a_newGrids != null)
+				{
+					foreach (GridObject obj in a_newGrids)
+						planData.energyGrids.Add(new EnergyGrid(obj, a_plan));
+				}
 			}
 		}
 
@@ -589,7 +592,10 @@ namespace MSP2050.Scripts
 							ignoredGridIds.Add(grid.persistentID);
 						}
 					}
-					a_removedGridIds.UnionWith(planEnergyData.removedGrids);
+					if (planEnergyData.removedGrids != null)
+					{
+						a_removedGridIds.UnionWith(planEnergyData.removedGrids);
+					}
 				}
 			}
 
