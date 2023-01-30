@@ -16,8 +16,8 @@ namespace MSP2050.Scripts
 
         private void Awake()
 		{
-            gameObject.SetActive(false);
-            PlayerNotifications.OnAddNotification += OnAddNewNotification;
+			InterfaceCanvas.Instance.menuBarNotifications.toggle.isOn = false;
+			PlayerNotifications.OnAddNotification += OnAddNewNotification;
 			PlayerNotifications.OnRemoveNotification += OnRemoveNotification;
 		}
 
@@ -43,8 +43,7 @@ namespace MSP2050.Scripts
 			}
 
 			element.InitializeForData(data);
-            gameObject.SetActive(true);
-
+			InterfaceCanvas.Instance.menuBarNotifications.toggle.isOn = true;
         }
 
 		private void OnRemoveNotification(string identifier)
