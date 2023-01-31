@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
@@ -133,19 +134,18 @@ namespace MSP2050.Scripts
 			return base.GetPersistentID();
 		}
 
-		public override void SubmitNew(BatchRequest batch)
-		{
-			base.SubmitNew(batch);
-		}
+		//public override Action<BatchRequest> SubmitNew(BatchRequest batch)
+		//{
+		//	base.SubmitNew(batch);
+		//}
 
-		public override void SubmitDelete(BatchRequest batch)
+		public override Action<BatchRequest> SubmitDelete(BatchRequest batch)
 		{
-			base.SubmitDelete(batch);
-
 			// Delete energy_output
 			JObject dataObject = new JObject();
 			dataObject.Add("id", databaseID);
 			batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
+			return base.SubmitDelete(batch);
 		}
 	
 		public override void SubmitData(BatchRequest batch)

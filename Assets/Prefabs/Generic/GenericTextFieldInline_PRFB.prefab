@@ -150,6 +150,11 @@ PrefabInstance:
         type: 2}
     - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
         type: 3}
+      propertyPath: useDisabledColor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
+        type: 3}
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
@@ -157,16 +162,22 @@ PrefabInstance:
     - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
         type: 3}
       propertyPath: serializationData.PrefabModifications.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
         type: 3}
       propertyPath: serializationData.PrefabModifications.Array.data[0]
-      value: '"path":"colorHighlight","value":$eref:0'
+      value: '"path":"colorDisabled","value":{"$id":0,"$type":"ColourPalette.ConstColour,
+        MSP2050Plugins","m_colour":{"$type":"UnityEngine.Color, UnityEngine.CoreModule",0,0,0,0}}'
       objectReference: {fileID: 0}
     - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
         type: 3}
       propertyPath: serializationData.PrefabModifications.Array.data[1]
+      value: '"path":"colorHighlight","value":$eref:0'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
+        type: 3}
+      propertyPath: serializationData.PrefabModifications.Array.data[2]
       value: '"path":"colorNormal","value":$eref:1'
       objectReference: {fileID: 0}
     - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,

@@ -173,6 +173,7 @@ namespace MSP2050.Scripts
 
 		public override bool CalculateEffectsOfEditing(Plan a_plan)
 		{
+			RecalculateGridsInEditedPlan(a_plan);
 			if (a_plan.Policies.ContainsKey(PolicyManager.ENERGY_POLICY_NAME) && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
 			{
 				int nextTempID = -1;
@@ -403,7 +404,10 @@ namespace MSP2050.Scripts
 			//Don't update grids if we have the plan locked. Prevents updates while editing.
 			if (!a_plan.IsLockedByUs && a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var planData))
 			{
-				planData.removedGrids = a_deleted;
+				if(a_deleted == null)
+					planData.removedGrids = new HashSet<int>();
+				else
+					planData.removedGrids = a_deleted;
 				planData.energyGrids = new List<EnergyGrid>();
 				if (a_newGrids != null)
 				{

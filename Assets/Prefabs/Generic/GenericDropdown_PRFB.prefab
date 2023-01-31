@@ -685,7 +685,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3208969872095381451}
   - component: {fileID: 3208969872095381449}
-  - component: {fileID: 3208969872095381463}
+  - component: {fileID: 7640341063031366161}
   m_Layer: 5
   m_Name: Arrow
   m_TagString: Untagged
@@ -720,7 +720,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3208969872095381460}
   m_CullTransparentMesh: 0
---- !u!114 &3208969872095381463
+--- !u!114 &7640341063031366161
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -729,11 +729,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 3208969872095381460}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b742792d5f8b2e64e9ce90c5610628fd, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.019607844, g: 0.3647059, b: 0.38823533, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -750,7 +750,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
-  colourAsset: {fileID: 11400000, guid: c730a0031d5e82c4db4573a575b055a8, type: 2}
 --- !u!1 &3208969872149817375
 GameObject:
   m_ObjectHideFlags: 0
@@ -1026,6 +1025,7 @@ GameObject:
   - component: {fileID: 7803730437285772840}
   - component: {fileID: 5698800383367055587}
   - component: {fileID: 625726439436133368}
+  - component: {fileID: 6103666978583278261}
   m_Layer: 5
   m_Name: GenericDropdown_PRFB
   m_TagString: Untagged
@@ -1233,6 +1233,62 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &6103666978583278261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3208969872467482192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d853cf14a001c764a8dc01e4542b7c34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 10
+      Data: 0
+    - Name: colorHighlight
+      Entry: 6
+      Data: 
+    - Name: colorDisabled
+      Entry: 7
+      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
+    - Name: m_colour
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+  targetGraphics:
+  - {fileID: 7640341063031366161}
+  useHighlightColor: 0
+  useDisabledColor: 1
 --- !u!1 &3208969872591299765
 GameObject:
   m_ObjectHideFlags: 0

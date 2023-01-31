@@ -99,6 +99,7 @@ namespace MSP2050.Scripts
 		{
 			HashSet<int> newLayerIds = new HashSet<int>();
 			HashSet<int> oldLayerIds = new HashSet<int>();
+			List<Action<BatchRequest>> postGeometryActions = new List<Action<BatchRequest>>();
 			foreach (PlanLayer planlayer in a_plan.PlanLayers)
 			{
 				newLayerIds.Add(planlayer.BaseLayer.ID);
@@ -147,13 +148,17 @@ namespace MSP2050.Scripts
 							if (newAddedEntity.GetSubEntity(0).edited)
 							{
 								//These are only modified subentities that already existed on the planlayer, so just update the content
-								newAddedEntity.GetSubEntity(0).SubmitUpdate(a_batch);
+								Action<BatchRequest> newPostgeomAction = newAddedEntity.GetSubEntity(0).SubmitUpdate(a_batch);
+								if (newPostgeomAction != null)
+									postGeometryActions.Add(newPostgeomAction);
 							}
 						}
 						else
 						{
-							//This includes both completely new geometry, as well as existing geometry that is newly modified in this plan
-							newAddedEntity.GetSubEntity(0).SubmitNew(a_batch);
+							//This includes both completely new geometry, as well as existing geometry that is newly modified in this plan							
+							Action<BatchRequest> newPostgeomAction = newAddedEntity.GetSubEntity(0).SubmitNew(a_batch);
+							if (newPostgeomAction != null)
+								postGeometryActions.Add(newPostgeomAction);
 						}
 					}
 
@@ -162,7 +167,9 @@ namespace MSP2050.Scripts
 						if (!newAddedIDs.Contains(oldAddedSubEntity.GetDatabaseID()))
 						{
 							//These are subentities that used to be added/modified in the plan, but are no longer
-							oldAddedSubEntity.SubmitDelete(a_batch);
+							Action<BatchRequest> newPostgeomAction = oldAddedSubEntity.SubmitDelete(a_batch);
+							if (newPostgeomAction != null)
+								postGeometryActions.Add(newPostgeomAction);
 						}
 					}
 
@@ -178,14 +185,16 @@ namespace MSP2050.Scripts
 				{
 					//New layer in plan, submit creation and all content
 					planlayer.SubmitNewPlanLayer(a_batch);
-					
+
 					foreach (int removedID in planlayer.RemovedGeometry)
 					{
 						planlayer.SubmitMarkForDeletion(removedID, a_batch);
 					}
 					foreach (Entity newAddedEntity in planlayer.GetNewGeometry())
 					{
-						newAddedEntity.GetSubEntity(0).SubmitNew(a_batch);
+						Action<BatchRequest> newPostgeomAction = newAddedEntity.GetSubEntity(0).SubmitNew(a_batch);
+						if (newPostgeomAction != null)
+							postGeometryActions.Add(newPostgeomAction);
 					}
 					if (planlayer.issues != null)
 					{
@@ -197,8 +206,16 @@ namespace MSP2050.Scripts
 						a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
 					}
 				}
+			}
 
-				//Finish editing for all geometry in new state
+			foreach(var action in postGeometryActions)
+			{
+				action.Invoke(a_batch);
+			}
+
+			//Finish editing for all geometry in new state
+			foreach (PlanLayer planlayer in a_plan.PlanLayers)
+			{
 				foreach (Entity entity in planlayer.GetNewGeometry())
 				{
 					entity.GetSubEntity(0).FinishEditing();

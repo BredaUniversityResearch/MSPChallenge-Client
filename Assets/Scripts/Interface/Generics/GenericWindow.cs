@@ -143,7 +143,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void HandleResize(PointerEventData data, RectTransform handleRect, ResizeHandle.RescaleDirection direction)
+		public void HandleResize(PointerEventData data, RectTransform handleRect, ResizeHandle.RescaleDirectionHor hor, ResizeHandle.RescaleDirectionVer ver)
 		{
 			Vector3[] corners = new Vector3[4];
 			Vector3[] contentCorners = new Vector3[4];
@@ -152,24 +152,39 @@ namespace MSP2050.Scripts
 			contentLayout.GetComponent<RectTransform>().GetWorldCorners(contentCorners);
 
 			//Vertical
-			if (direction == ResizeHandle.RescaleDirection.Vertical || direction == ResizeHandle.RescaleDirection.Both)
+			if (ver == ResizeHandle.RescaleDirectionVer.Down)
 			{
 				float containerSize = (corners[1].y - corners[0].y) - (contentCorners[1].y - contentCorners[0].y); //Size of the area of the window not part of contentlayout
 				float target = corners[1].y - (data.position.y /*- handleRect.sizeDelta.y * 0.5f*/) - containerSize;
 				float max = corners[1].y - containerSize - BORDER_OFFSET;
 				contentLayout.preferredHeight = Mathf.Round(Mathf.Max(0, Mathf.Min(target, max)) / scale);
 			}
+			else if (ver == ResizeHandle.RescaleDirectionVer.Up)
+			{
+				//TODO
+				float containerSize = (corners[1].y - corners[0].y) - (contentCorners[1].y - contentCorners[0].y); //Size of the area of the window not part of contentlayout
+				float target = data.position.y - corners[0].y - containerSize;
+				float max = Screen.height - Mathf.Max(corners[0].y, BORDER_OFFSET) - containerSize - BORDER_OFFSET;
+				contentLayout.preferredHeight = Mathf.Round(Mathf.Max(0, Mathf.Min(target, max)) / scale);
+			}
 
 			//Horizontal
-			if (direction == ResizeHandle.RescaleDirection.Horizontal || direction == ResizeHandle.RescaleDirection.Both)
+			if (hor == ResizeHandle.RescaleDirectionHor.Right)
 			{
 				float containerSize = (corners[2].x - corners[1].x) - (contentCorners[2].x - contentCorners[1].x); //Size of the area of the window not part of contentlayout
 				float target = data.position.x - corners[0].x - containerSize;
 				float max = Screen.width - corners[0].x - containerSize - BORDER_OFFSET;
 				contentLayout.preferredWidth = Mathf.Round( Mathf.Max(0, Mathf.Min(target, max)) / scale);
 			}
+			else if (hor == ResizeHandle.RescaleDirectionHor.Left)
+			{
+				float containerSize = (corners[2].x - corners[1].x) - (contentCorners[2].x - contentCorners[1].x); //Size of the area of the window not part of contentlayout
+				float target =  corners[2].x - data.position.x - containerSize;
+				float max = corners[1].x - containerSize - BORDER_OFFSET;
+				contentLayout.preferredWidth = Mathf.Round(Mathf.Max(0, Mathf.Min(target, max)) / scale);
+			}
 
-			if(secondaryResizeHandlers != null)
+			if (secondaryResizeHandlers != null)
 				foreach (IOnResizeHandler handler in secondaryResizeHandlers)
 					handler.OnResize();
 		}

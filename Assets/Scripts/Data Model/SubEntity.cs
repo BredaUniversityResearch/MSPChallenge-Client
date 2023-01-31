@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using GeoJSON.Net.Feature;
 using Newtonsoft.Json;
@@ -175,7 +176,7 @@ namespace MSP2050.Scripts
 		//	return JsonConvert.SerializeObject(GetLayerObject().geometry);
 		//}
 
-		public virtual void SubmitUpdate(BatchRequest batch)
+		public virtual Action<BatchRequest> SubmitUpdate(BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
 			if (this is PolygonSubEntity && (this as PolygonSubEntity).GetHoleCount() > 0)
@@ -193,13 +194,15 @@ namespace MSP2050.Scripts
 				batch.AddRequest<int>(Server.UpdateGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_UPDATE, handleDatabaseIDResult);
 				SubmitData(batch);
 			}
+			return null;
 		}
 
-		public virtual void SubmitDelete(BatchRequest batch)
+		public virtual Action<BatchRequest> SubmitDelete(BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("id", databaseID);
 			batch.AddRequest(Server.DeleteGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
+			return null;
 		}
 	
 		public virtual void SubmitData(BatchRequest batch)
@@ -213,7 +216,7 @@ namespace MSP2050.Scripts
 			batch.AddRequest(Server.SendGeometryData(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
 		}
 
-		public virtual void SubmitNew(BatchRequest batch)
+		public virtual Action<BatchRequest> SubmitNew(BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
 
@@ -251,6 +254,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			SubmitData(batch);
+			return null;
 		}
 
 		protected virtual void handleDatabaseIDResult(int result)

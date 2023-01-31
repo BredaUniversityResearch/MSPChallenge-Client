@@ -71,6 +71,7 @@ namespace MSP2050.Scripts
 		public  void SetInteractablity(bool a_value)
 		{
 			m_valueSlider.interactable = a_value;
+			m_availableRangeFill.gameObject.SetActive(a_value);
 		}
 
 		public void SetOldValue(long a_value)

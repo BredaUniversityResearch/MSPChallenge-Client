@@ -376,7 +376,7 @@ namespace MSP2050.Scripts
 			//Content
 			m_planName.interactable = Editing;
 			m_planDescription.interactable = Editing;
-			m_planDescription.gameObject.SetActive(!string.IsNullOrEmpty(m_currentPlan.Description) || Editing);
+			m_planDescription.gameObject.SetActive((!string.IsNullOrEmpty(m_currentPlan.Description) && m_currentPlan.Description != " ") || Editing);
 			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
 			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
 			m_communicationSection.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
@@ -515,7 +515,7 @@ namespace MSP2050.Scripts
 						onePlusPolicyActive = true;
 					}
 				}
-				m_noPoliciesEntry.SetActive(m_currentPlan.Policies.Count == 0);
+				m_noPoliciesEntry.SetActive(!onePlusPolicyActive);
 			}
 			else
 			{ 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
@@ -33,22 +34,20 @@ namespace MSP2050.Scripts
 			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 		}
 
-		public override void SubmitNew(BatchRequest batch)
+		public override Action<BatchRequest> SubmitNew(BatchRequest batch)
 		{
 			base.SubmitNew(batch);
-			SubmitAddOrChangeConnection(Server.CreateConnection(), batch);
+			return SubmitAddConnection;
 		}
 
-		public virtual void SubmitUpdate(BatchRequest batch)
+		public override Action<BatchRequest> SubmitUpdate(BatchRequest batch)
 		{
 			base.SubmitUpdate(batch);
-			SubmitAddOrChangeConnection(Server.UpdateConnection(), batch);
+			return SubmitUpdateConnection;
 		}
 
-		public override void SubmitDelete(BatchRequest batch)
+		public override Action<BatchRequest> SubmitDelete(BatchRequest batch)
 		{
-			base.SubmitDelete(batch);
-
 			// Delete energy_output
 			JObject dataObject = new JObject();
 			dataObject.Add("id", databaseID);
@@ -58,6 +57,18 @@ namespace MSP2050.Scripts
 			dataObject = new JObject();
 			dataObject.Add("cable", databaseID);
 			batch.AddRequest(Server.DeleteEnergyConection(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
+
+			return base.SubmitDelete(batch);
+		}
+
+		void SubmitAddConnection(BatchRequest a_batch)
+		{
+			SubmitAddOrChangeConnection(Server.CreateConnection(), a_batch);
+		}
+
+		void SubmitUpdateConnection(BatchRequest a_batch)
+		{
+			SubmitAddOrChangeConnection(Server.UpdateConnection(), a_batch);
 		}
 
 		void SubmitAddOrChangeConnection(string a_endPoint, BatchRequest a_batch)

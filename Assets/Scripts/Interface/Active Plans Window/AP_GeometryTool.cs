@@ -443,6 +443,7 @@ namespace MSP2050.Scripts
 			{
 				//Show single selected
 				SetParameterValues(selectedParams[0]);
+				SetParameterInteractability(true, false);
 			}
 			else
 			{
@@ -482,6 +483,7 @@ namespace MSP2050.Scripts
 					m_parameters[kvp.Key].SetValue(value);
 					m_originalParameterValues[kvp.Key] = value;
 				}
+				SetParameterInteractability(true, false);
 			}
 		}
 

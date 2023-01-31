@@ -168,7 +168,7 @@ namespace MSP2050.Scripts
 		{
 			LoginManager.Instance.SetLoadingOverlayActive(false);
 			DialogBoxManager.instance.NotificationWindow("Connecting failed", message.Split('\n')[0], null, "Continue");
-			Debug.LogError(message);
+			Debug.LogWarning(message);
 		}
 	}
 }
