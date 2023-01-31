@@ -21,14 +21,6 @@ public class ApplicationBuildIdentifier : MonoBehaviour
 	private string gitTag = "";
 	private bool hasInformation = false;
 
-#if UNITY_CLOUD_BUILD
-public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestObject manifest)
-{
-    manifest.SetValue("buildNumber", UpdateTag());
-    manifest.SetValue("buildStartTime", UpdateTime());
-}
-#endif
-
     public static void UpdateBuildInformation(UnityManifest manifest)
     {
         manifest.SetGitTag(UpdateTag());
@@ -107,15 +99,6 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
         buildTime = manifest.buildStartTime;
         hasInformation = true;
     }
-
-	/*public void GetUCBManifest()
-	{
-		UnityCloudBuildManifest manifest = UnityCloudBuildManifest.Load();
-
-		gitTag = manifest.buildNumber;
-		buildTime = manifest.buildStartTime;
-		hasInformation = true;
-	}*/
 
 	public string GetBuildTime()
     {
