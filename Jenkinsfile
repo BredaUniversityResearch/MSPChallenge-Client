@@ -52,7 +52,7 @@ pipeline {
 					echo "create Application output folder..."
 					//bat 'mkdir %outputFolder%'
 
-					echo "Buld App..."
+					echo "Launching App Build..."
 					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -buildTarget "%buildTarget%" -customBuildPath "%CD%\\%outputFolder%\\%BUILD_NAME%" -customBuildName %BUILD_NAME% -executeMethod ProjectBuilder.TestBuildJenkins'
 				}
 			}

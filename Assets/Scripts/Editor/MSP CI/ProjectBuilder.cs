@@ -42,7 +42,6 @@ class ProjectBuilder
 	{
         PreBuild();
 		var outputDir = GetArg("-customBuildPath");
-		//BuildTarget buildTarget = GetArg<BuildTarget>("-buildTarget");
 		BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, BuildOptions.Development);
 	}
 
@@ -78,34 +77,4 @@ class ProjectBuilder
         UnityManifest manifest = UnityManifest.Load();
         ApplicationBuildIdentifier.UpdateBuildInformation(manifest);
     }
-    
- //   private static T GetArg<T>(string name)
-	//{
-	//	var args = System.Environment.GetCommandLineArgs();
-	//	for (int i = 0; i < args.Length; i++)
-	//	{
-	//		if (args[i] == name && args.Length > i + 1)
-	//		{
-	//			//return args[i + 1];
- //               return (T)Convert.ChangeType(args[i + 1], typeof(T));
- //           }
-	//	}
-	//	return (T)Convert.ChangeType("", typeof(T));
-	//}
-
-    //private static void PreBuild()
-    //{
-    //    //Put build date into the game
-    //    ApplicationBuildIdentifier buildIdentifier = ApplicationBuildIdentifier.FindBuildIdentifier();
-    //    if (buildIdentifier != null)
-    //    {
-    //        buildIdentifier.UpdateBuildTime();
-    //        EditorUtility.SetDirty(buildIdentifier);
-
-    //        //Because the GLog namespace cannot be found from the editor folder, this has been disabled for now
-    //        //GLog.GLog.Instance.gameVersion = "Rev " + buildIdentifier.GetSvnRevisionNumber();
-    //        //EditorUtility.SetDirty(GLog.GLog.Instance);
-    //        AssetDatabase.SaveAssets();
-    //    }
-    //}
 }
