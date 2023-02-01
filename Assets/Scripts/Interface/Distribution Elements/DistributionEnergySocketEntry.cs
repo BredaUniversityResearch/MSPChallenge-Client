@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Sirenix.OdinInspector;
 
 namespace MSP2050.Scripts
 {
@@ -14,6 +15,16 @@ namespace MSP2050.Scripts
 		[SerializeField] DistributionSliderLong m_slider;
 		[SerializeField] CustomInputField m_valueField; 
 		[SerializeField] ValueConversionCollection m_valueConversionCollection;
+
+		[Title("Old value")]
+		[SerializeField] GameObject m_oldValueSection; 
+		[SerializeField] TextMeshProUGUI m_oldValueSendReceiveText; 
+		[SerializeField] TextMeshProUGUI m_oldValueText; 
+
+		[Title("Layout")]
+		[SerializeField] LayoutElement m_barLayout; 
+		[SerializeField] float m_expandedHeight; 
+		[SerializeField] float m_collapsedHeight; 
 
 		Team m_team;
 		long m_socketMaximum;
@@ -55,7 +66,7 @@ namespace MSP2050.Scripts
 			m_sendReceiveDropdown.onValueChanged.AddListener(OnSendReceiveDropdownChange);
 		}
 
-		public void SetContent(Team a_team, long a_socketMaximum, long a_allSocketMaximum, long a_sliderValue, /*long a_oldSliderValue,*/ DistributionGroupEnergy a_group, bool a_interactable)
+		public void SetContent(Team a_team, long a_socketMaximum, long a_allSocketMaximum, long a_sliderValue, long a_oldSliderValue, DistributionGroupEnergy a_group, bool a_interactable)
 		{
 			if (!m_initialised)
 				Initialise();
@@ -66,7 +77,7 @@ namespace MSP2050.Scripts
 			m_socketMaximum = a_socketMaximum;
 			m_group = a_group;
 			m_slider.MaxValue = a_allSocketMaximum;
-			m_oldSliderValue = a_sliderValue;
+			m_oldSliderValue = a_oldSliderValue;
 			SetValue(a_sliderValue);
 			SetInteractability(a_interactable);
 			gameObject.SetActive(true);
@@ -83,6 +94,7 @@ namespace MSP2050.Scripts
 			m_ignoreValueTextCallback = true;
 			m_valueField.text = m_valueConversionCollection.ConvertUnit(m_slider.Value, ValueConversionCollection.UNIT_WATT).FormatAsString();
 			m_ignoreValueTextCallback = false;
+			UpdateOldValueDisplay();
 		}
 
 		void OnValueTextChange(string newValueText)
@@ -104,6 +116,7 @@ namespace MSP2050.Scripts
 			}
 			m_slider.Value = value;
 			m_group.UpdateEntireDistribution();
+			UpdateOldValueDisplay();
 		}
 
 		void OnSendReceiveDropdownChange(int a_value)
@@ -129,7 +142,7 @@ namespace MSP2050.Scripts
 			m_valueField.interactable = a_value;
 		}
 
-		public void SetValue(long a_newValue)
+		void SetValue(long a_newValue)
 		{
 			Sending = a_newValue < 0;
 			long absValue = Math.Abs(a_newValue);
@@ -137,6 +150,7 @@ namespace MSP2050.Scripts
 			m_ignoreValueTextCallback = true;
 			m_valueField.text = m_valueConversionCollection.ConvertUnit(absValue, ValueConversionCollection.UNIT_WATT).FormatAsString();
 			m_ignoreValueTextCallback = false;
+			UpdateOldValueDisplay();
 		}
 
 		public void SetRemainingPower(long a_remaining)
@@ -151,6 +165,22 @@ namespace MSP2050.Scripts
 				m_slider.MaxAvailableValue = Math.Max(0, Math.Min(m_socketMaximum, m_slider.Value+a_remaining));
 			}
 			UpdateValueTextNoCallback();
+		}
+
+		void UpdateOldValueDisplay()
+		{
+			if (Changed)
+			{
+				m_oldValueSection.SetActive(true);
+				m_oldValueSendReceiveText.text = m_oldSliderValue < 0 ? "sent" : "received";
+				m_oldValueText.text = m_valueConversionCollection.ConvertUnit(m_oldSliderValue, ValueConversionCollection.UNIT_WATT).FormatAsString();
+				m_barLayout.preferredHeight = m_expandedHeight;
+			}
+			else
+			{
+				m_oldValueSection.SetActive(false);
+				m_barLayout.preferredHeight = m_collapsedHeight;
+			}
 		}
 	}
 }

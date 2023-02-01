@@ -376,9 +376,13 @@ namespace MSP2050.Scripts
 				{
 					if (a != b)
 					{
+						if(a == null || b == null)
+						{
+							Debug.LogError($"Encountered null geometry when doing an overlap check for layers {planLayer.BaseLayer.FileName} and {target.layer.FileName}");
+						}
+
 						// do the check. Returns true if there is an error.
-						Vector3 issueLocation;
-						if (check.Invoke(a, b, target, planLayer, checkingThisPlan, out issueLocation))
+						if (check.Invoke(a, b, target, planLayer, checkingThisPlan, out var issueLocation))
 						{
 							if (satisfactionRule == EConstraintSatisfyRule.All)
 							{

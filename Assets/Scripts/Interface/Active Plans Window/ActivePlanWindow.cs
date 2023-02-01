@@ -24,6 +24,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Image m_countryIndicator;
 		[SerializeField] CustomInputField m_planName;
 		[SerializeField] CustomInputField m_planDescription;
+		[SerializeField] GameObject m_planDescriptionContainer;
 		[SerializeField] AP_ContentToggle m_planDateToggle;
 		[SerializeField] AP_ContentToggle m_planStateToggle;
 		public AP_TimeSelect m_timeSelect;
@@ -376,7 +377,7 @@ namespace MSP2050.Scripts
 			//Content
 			m_planName.interactable = Editing;
 			m_planDescription.interactable = Editing;
-			m_planDescription.gameObject.SetActive((!string.IsNullOrEmpty(m_currentPlan.Description) && m_currentPlan.Description != " ") || Editing);
+			m_planDescriptionContainer.gameObject.SetActive((!string.IsNullOrEmpty(m_currentPlan.Description) && m_currentPlan.Description != " ") || Editing);
 			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
 			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
 			m_communicationSection.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);

@@ -95,8 +95,9 @@ namespace MSP2050.Scripts
 			m_gridNameField.text = name;
 		}
 
-		public void SetGrid(EnergyGrid grid, EnergyGrid.GridPlanState state, ToggleGroup a_toggleGroup)
+		public void SetGrid(EnergyGrid grid, EnergyGrid.GridPlanState state, ToggleGroup a_toggleGroup, GridEnergyDistribution a_oldDistribution)
 		{
+			//TODO: use old distribution
 			m_headerToggleBar.group = a_toggleGroup;
 			m_energyGrid = grid;
 			originalGridState = state;
@@ -114,19 +115,25 @@ namespace MSP2050.Scripts
 			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in grid.energyDistribution.distribution)
 			{
 				Team team = SessionManager.Instance.GetTeamByTeamID(kvp.Key);
+				long oldValue = kvp.Value.expected;
+				if(a_oldDistribution != null)
+				{
+					if(a_oldDistribution.distribution.TryGetValue(kvp.Key, out var oldCountryValue))
+						oldValue = oldCountryValue.expected;
+				}
 
 				//Socket entry
 				if (kvp.Value.maximum > 0)
 				{
 					if (nextSocketEntryIndex < m_socketEntries.Count)
 					{
-						 m_socketEntries[nextSocketEntryIndex].SetContent(team, kvp.Value.maximum, allSocketMaximum, kvp.Value.expected, this, interactable);
+						 m_socketEntries[nextSocketEntryIndex].SetContent(team, kvp.Value.maximum, allSocketMaximum, kvp.Value.expected, oldValue, this, interactable);
 					}
 					else
 					{
 						DistributionEnergySocketEntry socketEntry = Instantiate(m_socketEntryPrefab, m_socketEntryParent).GetComponent<DistributionEnergySocketEntry>();
 						m_socketEntries.Add(socketEntry);
-						socketEntry.SetContent(team, kvp.Value.maximum, allSocketMaximum, kvp.Value.expected, this, interactable);
+						socketEntry.SetContent(team, kvp.Value.maximum, allSocketMaximum, kvp.Value.expected, oldValue, this, interactable);
 					}
 					nextSocketEntryIndex++;
 				}

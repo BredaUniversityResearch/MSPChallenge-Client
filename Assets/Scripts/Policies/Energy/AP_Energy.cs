@@ -20,15 +20,15 @@ namespace MSP2050.Scripts
 		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
 		{
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
-			if(a_APWindow.Editing)
+
+			if (a_APWindow.Editing)
 			{
 				PolicyLogicEnergy.Instance.RecalculateGridsInEditedPlan(a_content);
-				SetSliderValuesToEnergyDistribution(a_content, PolicyLogicEnergy.Instance.GetEnergyGridsBeforePlan(a_content, EnergyGrid.GridColor.Either, true, true));
 			}
-			else
-			{
-				SetSliderValuesToEnergyDistribution(a_content, PolicyLogicEnergy.Instance.GetEnergyGridsBeforePlan(a_content, EnergyGrid.GridColor.Either, true, true));
-			}
+				
+			Dictionary<int, GridEnergyDistribution> previousDistributions;
+			List<EnergyGrid> gridsAtPlanTime = PolicyLogicEnergy.Instance.GetEnergyGridsBeforePlan(a_content, EnergyGrid.GridColor.Either, out previousDistributions, true, true);
+			SetSliderValuesToEnergyDistribution(a_content, gridsAtPlanTime, previousDistributions);		
 
 			m_emptyContentOverlay.SetActive(m_nextGroupIndex == 0);
 			foreach (DistributionGroupEnergy group in m_distributions)
@@ -45,7 +45,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetSliderValuesToEnergyDistribution(Plan a_plan, List<EnergyGrid> a_energyDistribution)
+		public void SetSliderValuesToEnergyDistribution(Plan a_plan, List<EnergyGrid> a_energyDistribution, Dictionary<int, GridEnergyDistribution> a_previousDistributions)
 		{
 			m_nextGroupIndex = 0;
 			if (a_energyDistribution != null)
@@ -56,15 +56,18 @@ namespace MSP2050.Scripts
 					if (state == EnergyGrid.GridPlanState.Hidden || (!Main.InEditMode && state == EnergyGrid.GridPlanState.Normal))
 						continue;
 
+					GridEnergyDistribution oldDistribution = null;
+					a_previousDistributions.TryGetValue(grid.persistentID, out oldDistribution);
+
 					if (m_nextGroupIndex < m_distributions.Count)
 					{
-						m_distributions[m_nextGroupIndex].SetGrid(grid, state, m_toggleGroup);
+						m_distributions[m_nextGroupIndex].SetGrid(grid, state, m_toggleGroup, oldDistribution);
 					}
 					else
 					{
 						DistributionGroupEnergy group = Instantiate(m_energyDistributionGroupPrefab, m_groupParent).GetComponent<DistributionGroupEnergy>();
 						m_distributions.Add(group);
-						group.SetGrid(grid, state, m_toggleGroup);
+						group.SetGrid(grid, state, m_toggleGroup, oldDistribution);
 
 					}
 					m_nextGroupIndex++;

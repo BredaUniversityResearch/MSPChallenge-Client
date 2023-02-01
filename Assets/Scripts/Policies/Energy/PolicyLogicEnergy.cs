@@ -541,14 +541,15 @@ namespace MSP2050.Scripts
 		/// <param name="a_includePlanItself"> Is the given plan included </param>
 		/// <param name="a_forDisplaying"> Is the given plan included even if it's in design</param>
 		/// <returns></returns>
-		public List<EnergyGrid> GetEnergyGridsBeforePlan(Plan a_plan, out HashSet<int> a_removedGridIds, EnergyGrid.GridColor a_color, bool a_includePlanItself = false, bool a_forDisplaying = false)
+		public List<EnergyGrid> GetEnergyGridsBeforePlan(Plan a_plan, out HashSet<int> a_removedGridIds, EnergyGrid.GridColor a_color, out Dictionary<int, GridEnergyDistribution> a_previousDistributions, bool a_includePlanItself = false, bool a_forDisplaying = false)
 		{
 			List<Plan> plans = PlanManager.Instance.Plans;
 
-			List<EnergyGrid> result = new List<EnergyGrid>();
 			a_removedGridIds = new HashSet<int>();
+			a_previousDistributions = new Dictionary<int, GridEnergyDistribution>();
+			List<EnergyGrid> result = new List<EnergyGrid>();
 			HashSet<int> ignoredGridIds = new HashSet<int>();
-			HashSet<int> previousGridIDsLookingFor = new HashSet<int>();
+			HashSet<int> removedButDisplayedIds = new HashSet<int>();
 
 			//Find the index of the given plan
 			int planIndex = 0;
@@ -567,11 +568,15 @@ namespace MSP2050.Scripts
 					{
 						result.Add(grid);
 						ignoredGridIds.Add(grid.persistentID);
+						if(grid.persistentID != -1)
+						{
+							a_previousDistributions.Add(grid.persistentID, null);
+						}
 					}
 				}
 				a_removedGridIds.UnionWith(energyData.removedGrids);
 				if (a_forDisplaying)
-					previousGridIDsLookingFor = new HashSet<int>(energyData.removedGrids);
+					removedButDisplayedIds = new HashSet<int>(energyData.removedGrids);
 			}
 
 			//Add all grids whose persistentID is not in ignoredgrids
@@ -583,12 +588,16 @@ namespace MSP2050.Scripts
 					{
 						if (!grid.MatchesColor(a_color))
 							continue;
-						if (previousGridIDsLookingFor.Contains(grid.persistentID))
+						if (removedButDisplayedIds.Contains(grid.persistentID))
 						{
 							//If we were looking for this persis ID, add it even if in ignored or removed
 							result.Add(grid);
 							ignoredGridIds.Add(grid.persistentID);
-							previousGridIDsLookingFor.Remove(grid.persistentID);
+							removedButDisplayedIds.Remove(grid.persistentID);
+						}
+						else if(a_previousDistributions.TryGetValue(grid.persistentID, out var value) && value == null)
+						{
+							a_previousDistributions[grid.persistentID] = grid.energyDistribution;
 						}
 						else if (grid.persistentID == -1 || (!a_removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
 						{
@@ -606,10 +615,17 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
+		public List<EnergyGrid> GetEnergyGridsBeforePlan(Plan plan, EnergyGrid.GridColor color, out Dictionary<int, GridEnergyDistribution> a_previousDistributions, bool includePlanItself = false, bool forDisplaying = false)
+		{
+			HashSet<int> ignoredGridIds;
+			return GetEnergyGridsBeforePlan(plan, out ignoredGridIds, color, out a_previousDistributions, includePlanItself, forDisplaying);
+		}
+
 		public List<EnergyGrid> GetEnergyGridsBeforePlan(Plan plan, EnergyGrid.GridColor color, bool includePlanItself = false, bool forDisplaying = false)
 		{
 			HashSet<int> ignoredGridIds;
-			return GetEnergyGridsBeforePlan(plan, out ignoredGridIds, color, includePlanItself, forDisplaying);
+			Dictionary<int, GridEnergyDistribution> previousDistributions;
+			return GetEnergyGridsBeforePlan(plan, out ignoredGridIds, color, out previousDistributions, includePlanItself, forDisplaying);
 		}
 
 		public List<EnergyGrid> GetEnergyGridsAtTime(int time, EnergyGrid.GridColor color)
