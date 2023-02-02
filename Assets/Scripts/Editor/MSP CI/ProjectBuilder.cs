@@ -38,12 +38,33 @@ class ProjectBuilder
         }
     }
 	
-	private static void TestBuildJenkins()
+	private static void WindowsDevBuilder()
 	{
         PreBuild();
 		var outputDir = GetArg("-customBuildPath");
 		BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, BuildOptions.Development);
 	}
+
+    private static void MacOSDevBuilder()
+    {
+        PreBuild();
+        var outputDir = GetArg("-customBuildPath");
+        BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneOSX, BuildOptions.Development);
+    }
+
+    private static void WindowsBuilder()
+    {
+        PreBuild();
+        var outputDir = GetArg("-customBuildPath");
+        BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, 0);
+    }
+
+    private static void MacOSBuilder()
+    {
+        PreBuild();
+        var outputDir = GetArg("-customBuildPath");
+        BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneOSX, 0);
+    }
 
     [MenuItem("MSP 2050/Build project")]
     public static void MyBuild()
