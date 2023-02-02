@@ -594,7 +594,7 @@ namespace MSP2050.Scripts
 						showRemoved = true;
 						break;
 					}
-					else if (planLayers[i].Plan.StartTime > plan.StartTime || (planLayers[i].Plan.StartTime == plan.StartTime && plan.ID < planLayers[i].Plan.ID))
+					else if (planLayers[i].Plan.StartTime > plan.StartTime || (plan.ID != -1 && planLayers[i].Plan.StartTime == plan.StartTime && plan.ID < planLayers[i].Plan.ID))
 					{
 						//Checked plan has higher startime or equal startime but higher ID, meaning it would be later in the list
 						index = i - 1;

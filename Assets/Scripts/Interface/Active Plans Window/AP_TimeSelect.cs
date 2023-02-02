@@ -109,7 +109,7 @@ namespace MSP2050.Scripts
 				DialogBoxManager.instance.NotificationWindow("Unavailable types", sb.ToString(), null, "Confirm");
 			}
 
-			m_APWindow.RefreshContent();
+			m_APWindow.OnTimeChange();
 		}
 
 		public override bool MayClose()

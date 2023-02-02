@@ -430,6 +430,12 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(false);
 		}
 
+		public void OnTimeChange()
+		{
+			RefreshContent();
+			PolicyLogicEnergy.Instance.RecalculateGridsInEditedPlan(m_currentPlan);//TODO: move to AP_Policy and run on all policies
+		}
+
 		public void RefreshContent()
 		{
 			//Info
