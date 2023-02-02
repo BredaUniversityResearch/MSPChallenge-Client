@@ -104,7 +104,7 @@ namespace MSP2050.Scripts
         private void SetBuildInformation()
         {
             if (!ApplicationBuildIdentifier.Instance.GetHasInformation())
-                ApplicationBuildIdentifier.Instance.GetUCBManifest();
+                ApplicationBuildIdentifier.Instance.GetManifest();
 
             buildDateText.text = ApplicationBuildIdentifier.Instance.GetBuildTime();
             buildRevisionText.text = ApplicationBuildIdentifier.Instance.GetGitTag();
