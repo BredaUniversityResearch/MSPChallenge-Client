@@ -549,7 +549,7 @@ namespace MSP2050.Scripts
 			}
 			// create new ones if not existing
 			foreach (ShippingIssueObject issue in shippingIssues.Where(
-				issue => !shippingIssueInstances.TryGetValue(issue.warning_id, out ShippingIssueInstance _))
+				issue => !shippingIssueInstances.ContainsKey(issue.warning_id))
 			)
 			{
 				CreateNewShippingIssue(issue);
