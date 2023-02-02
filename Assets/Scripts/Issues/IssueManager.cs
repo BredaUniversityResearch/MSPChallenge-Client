@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,20 +29,20 @@ namespace MSP2050.Scripts
 
 		private event OnIssueChanged issueChangedEvent;
 
-		[SerializeField] 
+		[SerializeField]
 		private WarningLabel warningLabel = null;
 
 		[SerializeField]
 		private GraphicRaycaster issueParentCanvasRaycaster = null;
 
-		[SerializeField] 
+		[SerializeField]
 		private Transform issueParentTransform = null;
 
 		[SerializeField]
 		private int maxShippingIssues = 30;
 
 		private Dictionary<PlanLayer, List<PlanIssueInstance>> planIssuesByLayer = new Dictionary<PlanLayer, List<PlanIssueInstance>>();
-		private Dictionary<int, ShippingIssueInstance> shippingIssueInstances = new Dictionary<int, ShippingIssueInstance>(); 
+		private Dictionary<int, ShippingIssueInstance> shippingIssueInstances = new Dictionary<int, ShippingIssueInstance>();
 
 		private void OnDestroy()
 		{
@@ -535,22 +536,23 @@ namespace MSP2050.Scripts
 
 		private void UpdateShippingIssues(List<ShippingIssueObject> shippingIssues)
 		{
-			for (int i = 0; i < shippingIssues.Count; ++i)
+			// collect all shipping issues not listed to be destroyed
+			List<int> shippingIssuesToDestroy = (
+				from inst in shippingIssueInstances
+				where shippingIssues.All(x => x.warning_id != inst.Key) select inst.Key
+			).ToList();
+			// destroy
+			foreach (var shippingWarningId in shippingIssuesToDestroy)
 			{
-				ShippingIssueObject issue = shippingIssues[i];
-				ShippingIssueInstance existingInstance;
-				if (shippingIssueInstances.TryGetValue(issue.warning_id, out existingInstance))
-				{
-					if (!issue.active)
-					{
-						existingInstance.Destroy();
-						shippingIssueInstances.Remove(issue.warning_id);
-					}
-				}
-				else if (issue.active)
-				{
-					CreateNewShippingIssue(issue);
-				}
+				shippingIssueInstances[shippingWarningId].Destroy();
+				shippingIssueInstances.Remove(shippingWarningId);
+			}
+			// create new ones if not existing
+			foreach (ShippingIssueObject issue in shippingIssues.Where(
+				issue => !shippingIssueInstances.ContainsKey(issue.warning_id))
+			)
+			{
+				CreateNewShippingIssue(issue);
 			}
 		}
 

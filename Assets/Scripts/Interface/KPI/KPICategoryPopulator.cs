@@ -55,7 +55,7 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			Main.Instance.OnPostFinishedLoadingLayers += OnGameFinishedLoading;	
+			Main.Instance.OnPostFinishedLoadingLayers += OnGameFinishedLoading;
 		}
 
 		private void OnGameFinishedLoading()
@@ -126,7 +126,7 @@ namespace MSP2050.Scripts
 				{
 					toggledValueNames = ClearActiveToggledValues();
 				}
-	
+
 				targetTeamId = teamId;
 				SetTargetCollection(KPIManager.Instance.GetKPIValuesForCategory(targetCategory, targetTeamId));
 
@@ -200,8 +200,8 @@ namespace MSP2050.Scripts
 
 				if (bar != null)
 				{
-					bar.SetStartValue((float)value.GetKpiValueForMonth(0));
-					bar.SetActual((float)value.GetKpiValueForMonth(month), value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId);
+					bar.SetStartValue((float)(value.GetKpiValueForMonth(-1) ?? 0f));
+					bar.SetActual((float)(value.GetKpiValueForMonth(month) ?? 0f), value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId);
 				}
 				else
 				{
@@ -292,7 +292,7 @@ namespace MSP2050.Scripts
 			{
 				kpiBar.graphToggle.gameObject.SetActive(false);
 			}
-		
+
 			kpiBarsByValueName.Add(value.name, kpiBar);
 
 			return kpiBar;
@@ -415,4 +415,4 @@ namespace MSP2050.Scripts
 		}
 	}
 }
-   
+
