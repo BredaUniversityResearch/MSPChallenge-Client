@@ -1,38 +1,36 @@
 #!groovy
 
 def COLOR_MAP = [
-    'SUCCESS': 'good', 
-    'FAILURE': 'danger',
+	'SUCCESS': 'good', 
+	'FAILURE': 'danger',
 ]
 
 pipeline {
 	
-	environment {        
-        // Unity tool installation
-        UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2020.3.31f1\\Editor\\Unity.exe"
+	environment {
+		// Unity tool installation
+		UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2020.3.31f1\\Editor\\Unity.exe"
 
         // Unity Build params
         BUILD_NAME = "Windows-${currentBuild.number}.exe"
         String buildTarget = "Win64"
         String outputFolder = "CurrentBuild"
 
-        //PARAMETERS DATA
-        IS_DEVELOPMENT_BUILD = "${params.developmentBuild}"
-
-        // Add other EnvVars here
-    }
+		//PARAMETERS DATA
+		//IS_DEVELOPMENT_BUILD = "${params.developmentBuild}"
+	}
 	
 	options {
-        timestamps()
+		timestamps()
     }
 	
-	parameters {
-        booleanParam(name: 'developmentBuild', defaultValue: true, description: 'Choose the buildType.')
-    }
+	//parameters {
+	//	booleanParam(name: 'developmentBuild', defaultValue: true, description: 'Choose the buildType.')
+	//}
 	
 	agent {
-        	node {
-            		label 'windows'
+			node {
+					label 'windows'
 		}
 	}
 	
@@ -45,7 +43,11 @@ pipeline {
        		 	}
 		}
 		
-		stage('Build Application') {
+		stage('Build Pull Request') {
+		
+			when { 
+					expression { BRANCH_NAME ==~ /(MSP-[0-9]+)/ }
+				}
 			steps {
 				script {
 					echo "create Application output folder..."
