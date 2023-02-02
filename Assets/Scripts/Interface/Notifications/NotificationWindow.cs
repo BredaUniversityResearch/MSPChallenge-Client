@@ -16,6 +16,7 @@ namespace MSP2050.Scripts
 
         private void Awake()
 		{
+			gameObject.SetActive(false);
 			InterfaceCanvas.Instance.menuBarNotifications.toggle.isOn = false;
 			PlayerNotifications.OnAddNotification += OnAddNewNotification;
 			PlayerNotifications.OnRemoveNotification += OnRemoveNotification;
