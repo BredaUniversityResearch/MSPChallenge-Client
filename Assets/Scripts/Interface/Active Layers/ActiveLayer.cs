@@ -67,6 +67,9 @@ namespace MSP2050.Scripts
 					InterfaceCanvas.Instance.activeLayers.TextShowingChanged(value);
 				});
 			}
+			bool interactable = !LayerManager.Instance.IsLayerVisibilityLocked(a_layer);
+			m_visibilityToggle.interactable = interactable;
+			m_closeButton.interactable = interactable;
 		}
 
 		void OnPinToggleChanged(bool a_value)

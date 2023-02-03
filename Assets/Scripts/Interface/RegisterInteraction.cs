@@ -47,7 +47,7 @@ namespace MSP2050.Scripts
 
 		void OnDestroy()
 		{
-			if (m_registerReference)
+			if (m_registerReference && InterfaceCanvas.Instance != null)
 				InterfaceCanvas.Instance.UnregisterUIReference(gameObject.name);
 		}
 	}

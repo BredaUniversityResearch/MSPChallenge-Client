@@ -153,8 +153,6 @@ namespace MSP2050.Scripts
 			{
 				PlanLayer removedPlanLayer = m_plan.GetPlanLayerForLayer(removedLayer);
 				removedLayer.RemovePlanLayerAndEntities(removedPlanLayer);
-				removedPlanLayer.RemoveGameObjects();
-				m_plan.PlanLayers.Remove(removedPlanLayer);
 
 				//Remove attached cables, if the cable layers were not already being removed
 				if (removedLayer.IsEnergyLayer() && (seperatelyRemoveGreenCables || seperatelyRemoveGreyCables))
@@ -172,6 +170,9 @@ namespace MSP2050.Scripts
 						}
 					}
 				}
+
+				removedPlanLayer.RemoveGameObjects();
+				m_plan.PlanLayers.Remove(removedPlanLayer);
 			}
 
 			//Update energy policy data

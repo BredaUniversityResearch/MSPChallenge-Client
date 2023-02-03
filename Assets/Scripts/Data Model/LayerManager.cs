@@ -26,6 +26,7 @@ namespace MSP2050.Scripts
 		private List<AbstractLayer> layers = new List<AbstractLayer>();
 		private HashSet<AbstractLayer> loadedLayers = new HashSet<AbstractLayer>();
 		private HashSet<AbstractLayer> visibleLayers = new HashSet<AbstractLayer>();
+		private HashSet<AbstractLayer> visibilityLockedLayers = new HashSet<AbstractLayer>();
 		private HashSet<AbstractLayer> nonReferenceLayers; //Layers that are drawn as normal during edit mode
 
 		public PolygonLayer EEZLayer;
@@ -399,7 +400,15 @@ namespace MSP2050.Scripts
 
 		public void SetLayerVisibilityLock(AbstractLayer a_layer, bool a_locked)
 		{
+			if (a_locked)
+				visibilityLockedLayers.Add(a_layer);
+			else
+				visibilityLockedLayers.Remove(a_layer);
 			m_onLayerVisibilityLockChanged.Invoke(a_layer, a_locked);
+		}
+		public bool IsLayerVisibilityLocked(AbstractLayer a_layer)
+		{
+			return visibilityLockedLayers.Contains(a_layer);
 		}
 
 		public void HideLayer(AbstractLayer layer)

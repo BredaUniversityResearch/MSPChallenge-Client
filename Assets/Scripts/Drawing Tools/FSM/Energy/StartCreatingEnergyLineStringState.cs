@@ -98,7 +98,11 @@ namespace MSP2050.Scripts
 
 		public override void ExitState(Vector3 currentMousePosition)
 		{
-			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { InterfaceCanvas.Instance.activePlanWindow.CurrentlyEditingBaseLayer }, false, true);
+			AbstractLayer baseLayer = InterfaceCanvas.Instance.activePlanWindow.CurrentlyEditingBaseLayer;
+			if (baseLayer == null)
+				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { }, false, true);
+			else
+				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { baseLayer }, false, true);
 			base.ExitState(currentMousePosition);
 		}
 

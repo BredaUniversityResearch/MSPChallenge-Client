@@ -27,6 +27,7 @@ namespace MSP2050.Scripts
 			m_name.text = a_layer.ShortName;
 			gameObject.SetActive(true);
 
+			m_toggle.interactable = !LayerManager.Instance.IsLayerVisibilityLocked(a_layer);
 			m_toggle.isOn = LayerManager.Instance.LayerIsVisible(a_layer);
 			m_tooltip.SetText(a_layer.Tooltip);
 		}
@@ -58,7 +59,7 @@ namespace MSP2050.Scripts
 		{
 			if (a_layer == m_layer)
 			{
-				m_toggle.interactable = a_locked;
+				m_toggle.interactable = !a_locked;
 			}
 		}
 	}

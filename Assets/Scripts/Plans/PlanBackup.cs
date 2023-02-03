@@ -114,7 +114,8 @@ namespace MSP2050.Scripts
 					//Plan no longer contains layer, submit removal
 					//Removes planlayer from plan and all geom and issues on it
 					//Removes all connections, sockets, sources and output for geom on the layer
-					a_plan.SubmitRemovePlanLayer(a_plan.GetPlanLayerForLayer(backupLayer.m_planLayer.BaseLayer), a_batch);
+					//a_plan.SubmitRemovePlanLayer(a_plan.GetPlanLayerForLayer(backupLayer.m_planLayer.BaseLayer), a_batch);
+					a_plan.SubmitRemovePlanLayer(backupLayer.m_planLayer, a_batch);
 				}
 				else
 				{
