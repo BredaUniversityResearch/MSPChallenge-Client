@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using SoftwareRasterizerLib;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace MSP2050.Scripts
 {
@@ -162,14 +163,20 @@ namespace MSP2050.Scripts
 		#region Inclusion Poly
 		private static bool InclusionCheckPolyToPoly(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
 		{
-			Rect boundingBoxA = subEntityA.BoundingBox;
-			Rect boundingBoxB = subEntityB.BoundingBox;
+			PolygonSubEntity poly1 = subEntityA as PolygonSubEntity;
+			PolygonSubEntity poly2 = subEntityB as PolygonSubEntity;
+			if(poly1 == null || poly2 == null)
+			{
+				Debug.LogError($"Trying to perform a poly to poly check, but one of the arguments is not a polygon. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
+				issueLocation = Vector3.zero;
+				return false;
+			}
 
 			// first check if the bounding boxes collide
-			if (boundingBoxA.Overlaps(boundingBoxB))
+			if (poly1.BoundingBox.Overlaps(poly2.BoundingBox))
 			{
 				List<Vector3> warningLocations;
-				if (GeometryOperations.Overlap(subEntityA, subEntityB, out warningLocations))
+				if (GeometryOperations.Overlap(poly1, poly2, out warningLocations))
 				{
 					issueLocation = warningLocations[0];
 					return true;
@@ -182,19 +189,40 @@ namespace MSP2050.Scripts
 
 		private static bool InclusionCheckPolyToLine(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
 		{
-			if (subEntityB is PolygonSubEntity)
+			PolygonSubEntity poly = subEntityA as PolygonSubEntity;
+			LineStringSubEntity line;
+			if (poly == null)
 			{
-				SubEntity tmpSubentity = subEntityA;
-				subEntityA = subEntityB;
-				subEntityB = tmpSubentity;
+				if (subEntityB is PolygonSubEntity)
+				{
+					poly = (PolygonSubEntity)subEntityB;
+					line = subEntityA as LineStringSubEntity;
+				}
+				else
+				{
+					Debug.LogError($"Trying to perform a poly to line check, but none of the arguments are polygons. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
+					issueLocation = Vector3.zero;
+					return false;
+				}
 			}
-			Rect boundingBoxA = subEntityA.BoundingBox;
-			Rect boundingBoxB = subEntityB.BoundingBox;
+			else
+			{
+				line = subEntityB as LineStringSubEntity;
+			}
+			if(line == null)
+			{
+				Debug.LogError($"Trying to perform a poly to line check, but none of the arguments are lines. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
+				issueLocation = Vector3.zero;
+				return false;
+			}
+
+			Rect boundingBoxA = poly.BoundingBox;
+			Rect boundingBoxB = line.BoundingBox;
 
 			if (boundingBoxA.Overlaps(boundingBoxB))
 			{
 				List<Vector3> warningLocations;
-				if (GeometryOperations.OverlapPolygonLine(subEntityA, subEntityB, out warningLocations))
+				if (GeometryOperations.OverlapPolygonLine(poly, line, out warningLocations))
 				{
 					issueLocation = warningLocations[0];
 					return true;
@@ -207,18 +235,36 @@ namespace MSP2050.Scripts
 
 		private static bool InclusionCheckPolyToPoint(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
 		{
-			PointSubEntity pointSubEntity = subEntityA as PointSubEntity;
-			PolygonSubEntity polygonSubEntity = subEntityB as PolygonSubEntity;
-
-			if (pointSubEntity == null || polygonSubEntity == null)
+			PolygonSubEntity poly = subEntityA as PolygonSubEntity;
+			PointSubEntity point;
+			if (poly == null)
 			{
-				pointSubEntity = (PointSubEntity)subEntityB;
-				polygonSubEntity = (PolygonSubEntity)subEntityA;
+				if (subEntityB is PolygonSubEntity)
+				{
+					poly = (PolygonSubEntity)subEntityB;
+					point = subEntityA as PointSubEntity;
+				}
+				else
+				{
+					Debug.LogError($"Trying to perform a poly to point check, but none of the arguments are polygons. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
+					issueLocation = Vector3.zero;
+					return false;
+				}
+			}
+			else
+			{
+				point = subEntityB as PointSubEntity;
+			}
+			if (point == null)
+			{
+				Debug.LogError($"Trying to perform a poly to point check, but none of the arguments are point. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
+				issueLocation = Vector3.zero;
+				return false;
 			}
 
-			Vector3 pointCenter = pointSubEntity.BoundingBox.center;
+			Vector3 pointCenter = point.BoundingBox.center;
 
-			if (Util.PointCollidesWithPolygon(pointCenter, polygonSubEntity.GetPoints(), polygonSubEntity.GetHoles(), ConstraintManager.Instance.ConstraintPointCollisionSize))
+			if (Util.PointCollidesWithPolygon(point.GetPosition(), poly.GetPoints(), poly.GetHoles(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
 				issueLocation = pointCenter;
 				return true;
@@ -446,6 +492,14 @@ namespace MSP2050.Scripts
 				return ExclusionCheckPointToPoint;
 			}
 			return null;
+		}
+
+		public static string FormatSubentityAndLayer(SubEntity a_subent, AbstractLayer a_layer)
+		{
+			if (a_subent == null)
+				return $"null ({a_layer.ShortName})";
+			else
+				return $"{a_subent.GetDatabaseID()} ({a_layer.ShortName})";
 		}
 	}
 }

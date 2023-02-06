@@ -222,7 +222,7 @@ namespace MSP2050.Scripts
 						planLayer.issues.Clear();
 				}
 				else
-					planLayer.issues = new List<PlanIssueObject>();
+					planLayer.issues = new HashSet<PlanIssueObject>(new IssueObjectEqualityComparer());
 
 				CheckRestrictionsForLayer(cache, plan, planLayer, true);
 			}
@@ -232,6 +232,21 @@ namespace MSP2050.Scripts
 			//Send the issues to the issue manager.
 			//IssueManager.Instance.ImportNewIssues(issueCollection, deltaSet);
 			//IssueManager.Instance.SetIssueVisibilityForPlan(plan, true);
+		}
+
+		public void CheckConstraintsForLayer(Plan plan, PlanLayer planLayer)
+		{
+			RestrictionQueryCache cache = new RestrictionQueryCache();
+
+			if (planLayer.issues != null)
+			{
+				if (planLayer.issues.Count > 0)
+					planLayer.issues.Clear();
+			}
+			else
+				planLayer.issues = new HashSet<PlanIssueObject>(new IssueObjectEqualityComparer());
+
+			CheckRestrictionsForLayer(cache, plan, planLayer, true);
 		}
 
 		public List<string> CheckTypeUnavailableConstraints(Plan plan, int implementationDate)

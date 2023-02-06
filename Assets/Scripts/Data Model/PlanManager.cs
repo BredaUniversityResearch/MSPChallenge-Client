@@ -405,11 +405,6 @@ namespace MSP2050.Scripts
 				layer.AdvanceTimeTo(newMonth);
 		}
 
-
-		/////////////////////////////////////////
-		// EVENT HANDLERS, MOSTLY FOR UI STUFF //
-		/////////////////////////////////////////
-
 		private void AddPlanToUI(Plan plan)
 		{
 			//Show plan if it isnt a hidden plan

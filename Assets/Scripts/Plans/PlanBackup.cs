@@ -245,7 +245,7 @@ namespace MSP2050.Scripts
 		public HashSet<int> m_removedGeometry;
 		public List<SubEntityDataCopy> m_newGeometryData;
 		public List<SubEntity> m_newGeometry;
-		public List<PlanIssueObject> m_issues;
+		public HashSet<PlanIssueObject> m_issues;
 
 		public PlanLayerBackup(PlanLayer a_planLayer)
 		{
@@ -253,7 +253,7 @@ namespace MSP2050.Scripts
 			m_removedGeometry = new HashSet<int>(a_planLayer.RemovedGeometry);
 			m_newGeometryData = new List<SubEntityDataCopy>(a_planLayer.GetNewGeometryCount());
 			m_newGeometry = new List<SubEntity>(a_planLayer.GetNewGeometryCount());
-			m_issues = new List<PlanIssueObject>(a_planLayer.issues);
+			m_issues = new HashSet<PlanIssueObject>(a_planLayer.issues, new IssueObjectEqualityComparer());
 			foreach (Entity entity in a_planLayer.GetNewGeometry())
 			{
 				m_newGeometry.Add(entity.GetSubEntity(0));

@@ -1,5 +1,6 @@
 ﻿using ColourPalette;
 using System.Collections.Generic;
+using System.Reactive.Joins;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -177,6 +178,8 @@ namespace MSP2050.Scripts
 				PolicyManager.Instance.RestoreBackupForPlan(m_currentPlan);
 				Main.Instance.fsm.ClearUndoRedo();
 				LayerManager.Instance.UpdateVisibleLayersToPlan(m_currentPlan);
+				IssueManager.Instance.SetIssueInstancesToPlan(m_currentPlan);
+				RefreshContent();
 				m_currentPlan.AttemptUnlock();
 			}
 			else if (m_interactionMode == EInteractionMode.EditNew)
@@ -193,6 +196,8 @@ namespace MSP2050.Scripts
 				m_currentPlan.StartTime = m_planBackup.m_startTime;
 				m_currentPlan.Name = m_planBackup.m_name;
 				m_currentPlan.State = Plan.PlanState.DELETED;
+				IssueManager.Instance.SetIssueInstancesToPlan(m_currentPlan);
+				RefreshContent();
 				m_currentPlan.AttemptUnlock();
 			}
 			if (m_interactionMode != EInteractionMode.View)
@@ -380,13 +385,14 @@ namespace MSP2050.Scripts
 			m_planDescriptionContainer.gameObject.SetActive((!string.IsNullOrEmpty(m_currentPlan.Description) && m_currentPlan.Description != " ") || Editing);
 			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
 			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
-			m_communicationSection.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
+			m_communicationSection.gameObject.SetActive(m_interactionMode != EInteractionMode.SetupNew);
+			m_communicationToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
 			TimeBar.instance.SetGeometryViewModeVisible(!Editing);
 			m_changeLayersToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_changePoliciesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_planStateToggle.gameObject.SetActive(!Editing);
 			m_planStateToggle.SetInteractable(m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID || SessionManager.Instance.AreWeManager);
-			m_issuesToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.SetupNew);
+			//m_issuesToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.SetupNew);
 			m_planDateToggle.SetInteractable(Editing);
 
 			foreach(var toggle in m_layerToggles)
@@ -432,6 +438,8 @@ namespace MSP2050.Scripts
 
 		public void OnTimeChange()
 		{
+			if(m_interactionMode != EInteractionMode.SetupNew) //In setup this will be done on accept
+				PlanManager.Instance.ForceSetPlanViewing(m_currentPlan);
 			RefreshContent();
 			PolicyLogicEnergy.Instance.RecalculateGridsInEditedPlan(m_currentPlan);//TODO: move to AP_Policy and run on all policies
 		}
@@ -477,7 +485,16 @@ namespace MSP2050.Scripts
 			else
 				m_approvalToggle.gameObject.SetActive(false);
 
-			//Issues
+
+			//Content
+			RefreshIssueText();
+			SetEntriesToPolicies();
+			SetEntriesToLayers();
+			RefreshSectionActivity();
+		}
+
+		public void RefreshIssueText()
+		{
 			int issueCount = m_currentPlan.GetMaximumIssueSeverityAndCount(out var severity);
 			if (issueCount == 0)
 			{
@@ -498,11 +515,6 @@ namespace MSP2050.Scripts
 						break;
 				}
 			}
-
-			//Content
-			SetEntriesToPolicies();
-			SetEntriesToLayers();
-			RefreshSectionActivity();
 		}
 
 		private void SetEntriesToPolicies()

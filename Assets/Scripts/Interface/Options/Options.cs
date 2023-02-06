@@ -20,7 +20,6 @@ namespace MSP2050.Scripts
         // Graphics
         public CustomSlider uiScale;
         public CustomDropdown displayResolution;
-        //public CustomDropdown qualitySettings;
         public Toggle fullscreenToggle;
         public UnityEvent onDisplaySettingsChange;
 
@@ -59,13 +58,18 @@ namespace MSP2050.Scripts
             displayResolution.AddOptions(resNames);
 
             fullscreenToggle.isOn = GameSettings.Instance.Fullscreen;
-
             developerModeToggle.isOn = Main.IsDeveloper;
-            uiScale.m_onRelease.AddListener(OnUIScaleSliderUp);
-
-            SetBuildInformation();
+			SetBuildInformation();
             SetAPIEndpointInfo();
             SetOptions();
+
+            //Callbacks
+            uiScale.m_onRelease.AddListener(OnUIScaleSliderUp);
+			displayResolution.onValueChanged.AddListener(OnResolutionChanged);
+			fullscreenToggle.onValueChanged.AddListener(b => GameSettings.Instance.SetFullscreen(b));
+			developerModeToggle.onValueChanged.AddListener((value) => { Main.IsDeveloper = value; });
+			masterVolume.onValueChanged.AddListener((value) => { GameSettings.Instance.SetMasterVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
+			soundEffects.onValueChanged.AddListener((value) => { GameSettings.Instance.SetSFXVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
         }
 
         public void OnAccept()
@@ -85,7 +89,7 @@ namespace MSP2050.Scripts
         public void OnCancel()
         {
             GameSettings.Instance.SetUIScale(oldScale);
-            GameSettings.Instance.SetQualityLevel(oldGraphicsSettings);
+            //GameSettings.Instance.SetQualityLevel(oldGraphicsSettings);
             GameSettings.Instance.SetResolution(oldDisplayResolution);
             GameSettings.Instance.SetMasterVolume(oldMasterVolume);
             GameSettings.Instance.SetSFXVolume(oldSoundEffects);
@@ -129,38 +133,13 @@ namespace MSP2050.Scripts
                 oldDisplayResolution = GameSettings.Instance.DisplayResolution;
 
             uiScale.value = oldScale;
-            //uiScale.maxValue = GameSettings.GetMaxUIScaleForWidth(Camera.main.pixelWidth);//TODO: disabled for testing
-
-            //qualitySettings.value = oldGraphicsSettings;
             displayResolution.value = oldDisplayResolution;
             masterVolume.value = oldMasterVolume;
             soundEffects.value = oldSoundEffects;
-
-            uiScale.onValueChanged.RemoveAllListeners();
-            //qualitySettings.onValueChanged.RemoveAllListeners();
-            displayResolution.onValueChanged.RemoveAllListeners();
-            masterVolume.onValueChanged.RemoveAllListeners();
-            soundEffects.onValueChanged.RemoveAllListeners();
-            fullscreenToggle.onValueChanged.RemoveAllListeners();
-            masterVolume.onValueChanged.RemoveAllListeners();
-
-            //uiScale.slider.onValueChanged.AddListener((value) => { GameSettings.Instance.SetUIScale(value); });
-            // qualitySettings.onValueChanged.AddListener((value) => { GameSettings.Instance.SetQualityLevel(value); });
-            displayResolution.onValueChanged.AddListener(OnResolutionChanged);
-            fullscreenToggle.onValueChanged.AddListener(b => GameSettings.Instance.SetFullscreen(b));
-            developerModeToggle.onValueChanged.AddListener((value) => { Main.IsDeveloper = value; });
-            masterVolume.onValueChanged.AddListener((value) => { GameSettings.Instance.SetMasterVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
-            soundEffects.onValueChanged.AddListener((value) => { GameSettings.Instance.SetSFXVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
         }
 
         private void OnResolutionChanged(int resolutionIndex)
         {
-            Vector2 newResolution = GameSettings.Instance.SetResolution(resolutionIndex);
-            // float maxUIScale = GameSettings.GetMaxUIScaleForWidth(newResolution.x);
-            // uiScale.maxValue = maxUIScale;
-            // if (GameSettings.Instance.UIScale > maxUIScale)
-            // 	GameSettings.Instance.SetUIScale(maxUIScale);
-            //StartCoroutine(LateUpdatePosition());
             if (InterfaceCanvas.Instance != null)
                 StartCoroutine(InterfaceCanvas.Instance.gameMenu.LateUpdatePosition());
             onDisplaySettingsChange.Invoke();

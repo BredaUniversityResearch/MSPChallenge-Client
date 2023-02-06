@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
@@ -197,6 +198,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			ConstraintManager.Instance.CheckConstraints(m_plan, out var unavailableTypeNames);
+			IssueManager.Instance.SetIssueInstancesToPlan(m_plan);
 			LayerManager.Instance.UpdateVisibleLayersToPlan(m_plan);
 			m_APWindow.RefreshContent();
 		}

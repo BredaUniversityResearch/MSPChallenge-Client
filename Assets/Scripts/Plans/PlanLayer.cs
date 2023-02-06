@@ -18,7 +18,7 @@ namespace MSP2050.Scripts
 		public AbstractLayer BaseLayer; //Pointer
 		private List<Entity> newGeometry; //Object
 		public HashSet<int> RemovedGeometry; //Indexed by persistent ID
-		public List<PlanIssueObject> issues;
+		public HashSet<PlanIssueObject> issues;
     
 		bool isEnabled = false;
 		public bool updating = false;
@@ -29,7 +29,12 @@ namespace MSP2050.Scripts
 			BaseLayer = LayerManager.Instance.GetLayerByID(layerObject.original);
 			//State = layerObject.state;
 			ID = layerObject.layerid;
-			issues = layerObject.issues;
+			issues = new HashSet<PlanIssueObject>(new IssueObjectEqualityComparer());
+			foreach (PlanIssueObject issue in layerObject.issues)
+			{ 
+				if(issue.active)
+					issues.Add(issue);
+			}
 
 			newGeometry = new List<Entity>();
 
@@ -75,7 +80,7 @@ namespace MSP2050.Scripts
 		{
 			RemovedGeometry = new HashSet<int>();
 			newGeometry = new List<Entity>();
-			issues = new List<PlanIssueObject>();
+			issues = new HashSet<PlanIssueObject>(new IssueObjectEqualityComparer());
 		}
 
 		private SubEntity getSubentityOfNewGeometry(int ID)
@@ -208,8 +213,17 @@ namespace MSP2050.Scripts
 			//Copies over the removed geometry
 			RemovedGeometry = updatedData.deleted == null ? new HashSet<int>() : new HashSet<int>(updatedData.deleted);
 
-			//Update issues
-			issues = updatedData.issues;
+			//Update issues, but only if changes received
+			if (updatedData.issues != null)
+			{
+				foreach (PlanIssueObject issue in updatedData.issues)
+				{
+					if (issue.active)
+						issues.Add(issue);
+					else
+						issues.Remove(issue);
+				}
+			}
 
 			//Add an update request for when the update has been resolved
 			if (layerNeedsUpdate && !layerUpdateTimes.ContainsKey(BaseLayer))

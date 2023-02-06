@@ -67,10 +67,8 @@ namespace MSP2050.Scripts
 		{
 			masterVolume = PlayerPrefs.GetFloat("MasterVolume", 0.8f);
 			sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 0.8f);
-
 			GraphicsSettings = PlayerPrefs.GetInt("GraphicsSettings", QualitySettings.GetQualityLevel());
 			Fullscreen = PlayerPrefs.GetInt("Fullscreen", Convert.ToInt32(Screen.fullScreen)) == 1;
-
 			DisplayResolution = PlayerPrefs.GetInt("DisplayResolution", -1); // Get this from the set resolution from the start
 
 			if (Resolutions.Count > 0)
@@ -86,14 +84,12 @@ namespace MSP2050.Scripts
 					}
 				}
 
-				//UIScale = Mathf.Min(PlayerPrefs.GetFloat("UIScale", Screen.dpi / 100f), GetMaxUIScaleForWidth(Resolutions[DisplayResolution].x));
-				UIScale = PlayerPrefs.GetFloat("UIScale", 3f);
+				UIScale = Mathf.Round(Mathf.Clamp(PlayerPrefs.GetFloat("UIScale", 3f), 0f, 7f));
 			}
 		}
 
 		public void ApplyCurrentSettings(bool save = true)
 		{
-			SetQualityLevel(GraphicsSettings, false);
 			SetResolution(DisplayResolution, false, false);
 			SetFullscreen(Fullscreen, false);
 			SetUIScale(UIScale, false, false, true);
@@ -107,7 +103,6 @@ namespace MSP2050.Scripts
 		{
 			PlayerPrefs.SetFloat("MasterVolume", masterVolume);
 			PlayerPrefs.SetFloat("SFXVolume", sfxVolume);
-
 			PlayerPrefs.SetFloat("UIScale", UIScale);
 			PlayerPrefs.SetInt("GraphicsSettings", GraphicsSettings);
 			PlayerPrefs.SetInt("DisplayResolution", DisplayResolution);
@@ -167,7 +162,6 @@ namespace MSP2050.Scripts
 
 		private float SliderToVolume(float sliderValue)
 		{
-			//return sliderValue * 100 - 80;
 			return Mathf.Log(sliderValue) * 20f;
 		}
 
@@ -226,11 +220,6 @@ namespace MSP2050.Scripts
 			}
 			if(save)
 				SavePlayerPrefs();
-			if (InterfaceCanvas.Instance != null)
-			{
-				//InterfaceCanvas.instance.activeLayers.HandleResolutionOrScaleChange();
-				//InterfaceCanvas.instance.plansMonitor.plansMinMax.HandleResolutionOrScaleChange();
-			}
 
 			if (CameraManager.Instance != null)
 			{
@@ -260,32 +249,24 @@ namespace MSP2050.Scripts
 			}
 
 			Fullscreen = fullscreen;
-			//if (fullscreen)
-			//{
-			//    Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
-			//}
-			//else
-			//{
-			//    Screen.fullScreenMode = FullScreenMode.Windowed;
-			//}
 			Screen.fullScreen = fullscreen;
 			if(save)
 				SavePlayerPrefs();
 		}
 
-		public void SetQualityLevel(int level, bool save = true)
-		{
-			if (level < 0 || level > 3)
-			{
-				Debug.Log("Invalid Quality Setting, defaulting to 0");
-				level = 0;
-			}
+		//public void SetQualityLevel(int level, bool save = true)
+		//{
+		//	if (level < 0 || level > 3)
+		//	{
+		//		Debug.Log("Invalid Quality Setting, defaulting to 0");
+		//		level = 0;
+		//	}
 
-			GraphicsSettings = level;
-			QualitySettings.SetQualityLevel(GraphicsSettings);
-			if(save)
-				SavePlayerPrefs();
-		}
+		//	GraphicsSettings = level;
+		//	QualitySettings.SetQualityLevel(GraphicsSettings);
+		//	if(save)
+		//		SavePlayerPrefs();
+		//}
 
 		public static float GetMaxUIScaleForWidth(float screenWidth)
 		{

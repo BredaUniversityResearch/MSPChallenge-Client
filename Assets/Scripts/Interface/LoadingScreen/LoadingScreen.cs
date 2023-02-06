@@ -18,7 +18,6 @@ namespace MSP2050.Scripts
 		private bool m_initialized;
 		private float progress = 0; // 0 - 100
 		private float increment = 0;
-		private bool doneLoading = false;
 		private bool startedLoading = false;
 		private bool isLoading = false;
 		private string loadingBarText = "";
@@ -28,18 +27,6 @@ namespace MSP2050.Scripts
 		{
 			SetLoadingBarPercentage(0.0f);
 		}
-
-		//protected void Start()
-		//{
-		//	//IMPORTANT NOTE to self, this is only true when project is run through LoginScene
-		//	if (SessionManager.Instance.MspGlobalData != null)
-		//	{
-		//		//MSP Icon Swap
-		//		RegionInfo region = InterfaceCanvas.Instance.regionSettings.GetRegionInfo(SessionManager.Instance.MspGlobalData.region);
-		//		//mspIcon.sprite = region.sprite;
-		//		//editionText.text = region.editionPostFix;
-		//	}
-		//}
 
 		protected void Update()
 		{
@@ -51,17 +38,6 @@ namespace MSP2050.Scripts
 
 			currentBarProgress += (progress - currentBarProgress) * m_loadingBarLerpSpeed;
 			SetLoadingBarPercentage(currentBarProgress);
-			if (doneLoading)
-			{
-				ShowHideLoadScreen(false);
-				doneLoading = false;
-				isLoading = false;
-			}
-			if (startedLoading)
-			{
-				ShowHideLoadScreen(true);
-				startedLoading = false;
-			}
 			if (isLoading)
 			{
 				UpdateLoadingScreenText();
@@ -92,7 +68,7 @@ namespace MSP2050.Scripts
 		public void OnFinishedLoading()
 		{
 			CameraManager.Instance.cameraZoom.ZoomOrthoCamera(CameraManager.Instance.gameCamera.ScreenToWorldPoint(Input.mousePosition), CameraManager.Instance.gameCamera.orthographicSize * 0.01f);
-			doneLoading = true;
+			Destroy(gameObject);
 		}
 
 		public void SetNextLoadingItem(string loadingItemName)
