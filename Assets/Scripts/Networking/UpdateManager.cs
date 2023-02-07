@@ -213,7 +213,7 @@ namespace MSP2050.Scripts
 		public string state;
 		public List<SubEntityObject> geometry;
 		public List<int> deleted;
-		public List<PlanIssueObject> issues; //If null, no changes were made to the layer's issues
+		public List<PlanIssueObject> issues; 
 	}
 
 	public class ObjectiveObject

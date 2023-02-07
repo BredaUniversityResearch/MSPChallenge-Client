@@ -221,9 +221,8 @@ namespace MSP2050.Scripts
 				if (State == PlanState.DELETED) //was deleted, disable and remove plan layers
 				{
 					//Stop viewing plan if we were before
-					if (PlanManager.Instance.planViewing != null)
-						if (PlanManager.Instance.planViewing.ID == ID)
-							PlanManager.Instance.HideCurrentPlan();
+					if (PlanManager.Instance.planViewing != null && PlanManager.Instance.planViewing.ID == ID)
+						PlanManager.Instance.HideCurrentPlan();
 
 					//Remove planlayers from their respective layers (AFTER REDRAWING)
 					foreach (PlanLayer layer in PlanLayers)
@@ -235,11 +234,10 @@ namespace MSP2050.Scripts
 				else if (State == PlanState.IMPLEMENTED)
 				{
 					foreach (PlanLayer layer in PlanLayers)
-						layer.issues = null;
+						layer.issues = new HashSet<PlanIssueObject>();
 					//Stop viewing plan if we were before
-					if (PlanManager.Instance.planViewing != null)
-						if (PlanManager.Instance.planViewing.ID == ID)
-							PlanManager.Instance.HideCurrentPlan();
+					if (PlanManager.Instance.planViewing != null && PlanManager.Instance.planViewing.ID == ID)
+						PlanManager.Instance.HideCurrentPlan();
 				}
 				else if (oldState == PlanState.DELETED) //was deleted before, re-enable and add layers to base
 				{
@@ -280,8 +278,10 @@ namespace MSP2050.Scripts
 				StartTime = updatedData.startdate;
 				PlanManager.Instance.UpdatePlanTime(this);
 				if (State != PlanState.DELETED)
+				{
 					foreach (PlanLayer planLayer in PlanLayers)
 						planLayer.BaseLayer.UpdatePlanLayerTime(planLayer);
+				}
 			}
 
 			//Do not update if we have the plan locked, no one could have changed it.

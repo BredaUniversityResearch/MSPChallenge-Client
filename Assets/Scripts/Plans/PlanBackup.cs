@@ -318,6 +318,10 @@ namespace MSP2050.Scripts
 						newIssue.issue_database_id = issue.issue_database_id;
 						newIssues.Remove(key);
 					}
+					else if(issue.issue_database_id == -1)
+					{
+						Debug.LogError("Trying to send issue removal for issue with id -1 to the server");
+					}
 					else
 					{
 						removedIssueIDs.Add(issue.issue_database_id);
