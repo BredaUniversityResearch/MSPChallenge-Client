@@ -199,8 +199,8 @@ namespace MSP2050.Scripts
 				{
 					bar = CreateKPIBar(m_entryPrefab, group.EntryParent, category);
 				}
-				bar.SetStartValue((float)category.GetKpiValueForMonth(0));
-				bar.SetActual((float)category.GetKpiValueForMonth(month)/*, category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId*/);
+				bar.SetStartValue((float)(category.GetKpiValueForMonth(-1) ?? 0f));
+				bar.SetActual((float)(category.GetKpiValueForMonth(month) ?? 0f)/*, category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId*/);
 				bar.transform.SetAsLastSibling();
 				group.PositionSeparator();
 			}

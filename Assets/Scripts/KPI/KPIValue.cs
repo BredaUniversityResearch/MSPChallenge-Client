@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 				kpiValuesPerMonth[n] = null;
 			}
 
-			MostRecentMonth = 0;
+			MostRecentMonth = -1;
 		}
 
 		public void UpdateValue(int monthId, float value)

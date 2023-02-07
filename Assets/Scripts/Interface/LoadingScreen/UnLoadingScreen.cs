@@ -8,10 +8,11 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField]
 		private TextMeshProUGUI editionText = null;
-		public Image mspIcon;
+		public DynamicLogo mspIcon;
 
 		protected void Start()
 		{
+			mspIcon.SetContent(SessionManager.Instance.MspGlobalData.edition_colour, SessionManager.Instance.MspGlobalData.edition_letter);
 			editionText.text = SessionManager.Instance.MspGlobalData.edition_name;
 		}
 
