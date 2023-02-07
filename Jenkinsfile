@@ -65,7 +65,7 @@ pipeline {
 			steps {
 				script {
 					echo "Launching App Build..."
-					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_DEV_BUILD_NAME%" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder'
+					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_DEV_BUILD_NAME%.exe" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder'
 					
 					echo "Cleaning up the Build Folder"
 					bat 'del /s /f /q "%CD%\\%outputFolder%"'
@@ -81,12 +81,12 @@ pipeline {
 			steps {
 				script {
 					echo "Launching App Build..."
-					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_DEV_BUILD_NAME%" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder'
-					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\%MACOS_DEV_BUILD_NAME%" -customBuildName %MACOS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.MacOSDevBuilder'
+					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_DEV_BUILD_NAME%.exe" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder'
+					//bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\%MACOS_DEV_BUILD_NAME%" -customBuildName %MACOS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.MacOSDevBuilder'
 					
 					echo "Zipping builds..."
 					bat '7z a -tzip -r "%output%\\%WINDOWS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputWinFolder%\\*"'
-					bat '7z a -tzip -r "%output%\\%MACOS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputMacFolder%\\*"'
+					//bat '7z a -tzip -r "%output%\\%MACOS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputMacFolder%\\*"'
 					
 					echo "Uploading builds artifact to Nexus..."
 					bat "curl -X 'POST' \
@@ -98,14 +98,14 @@ pipeline {
 						-F 'raw.asset1=@%output%\\%WINDOWS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed' \
 						-F 'raw.asset1.filename="%WINDOWS_DEV_BUILD_NAME%"'"
 						
-					bat "curl -X 'POST' \
-						'http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev' \
-						-H 'accept: application/json' \
-						-H 'Content-Type: multipart/form-data' \
-						-H 'Authorization: Basic %NEXUS_CREDENTIALS%' \
-						-F 'raw.directory=MSPChallenge' \
-						-F 'raw.asset1=@%output%\\%MACOS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed' \
-						-F 'raw.asset1.filename="%MACOS_DEV_BUILD_NAME%"'"
+					//bat "curl -X 'POST' \
+					//	'http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev' \
+					//	-H 'accept: application/json' \
+					//	-H 'Content-Type: multipart/form-data' \
+					//	-H 'Authorization: Basic %NEXUS_CREDENTIALS%' \
+					//	-F 'raw.directory=MSPChallenge' \
+					//	-F 'raw.asset1=@%output%\\%MACOS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed' \
+					//	-F 'raw.asset1.filename="%MACOS_DEV_BUILD_NAME%"'"
 					}
 			}
 		}
