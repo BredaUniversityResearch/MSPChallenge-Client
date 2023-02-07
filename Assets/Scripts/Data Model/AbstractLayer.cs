@@ -256,7 +256,6 @@ namespace MSP2050.Scripts
 		public abstract void DeactivateCurrentEntityWith(int persistentID);
 		public abstract void AdvanceTimeTo(int time);
 		protected abstract void MergePlanWithBaseUpToIndex(int newPlanIndex);
-		public abstract void MergePlanWithBaseAndSubmitChanges(FSM fsm);
 		public abstract LayerState GetLayerStateAtPlan(Plan plan);
 		public abstract LayerState GetLayerStateAtTime(int month, Plan treatAsInfluencingState = null);
 		public abstract LayerState GetLayerStateAtIndex(int planIndex);

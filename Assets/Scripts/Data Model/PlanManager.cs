@@ -209,6 +209,8 @@ namespace MSP2050.Scripts
 			//added, moved, removed, notinplan, notshown
 			PlanLayer currentPlanLayer = subEntity.Entity.Layer.CurrentPlanLayer();
 			bool layerInPlan = planViewing == null || planViewing.IsLayerpartOfPlan(subEntity.Entity.Layer);
+			if(!subEntity.Entity.Layer.Toggleable || (!subEntity.Entity.Layer.Editable && subEntity.Entity.Layer.ActiveOnStart))
+				return SubEntityPlanState.NotInPlan;
 
 			if (planViewState == PlanViewState.All)
 			{
