@@ -75,7 +75,7 @@ namespace MSP2050.Scripts
 
 			if (SessionManager.Instance.MspGlobalData.expertise_definitions != null)
 				InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = true;
-			InterfaceCanvas.Instance.SetRegionWithName(SessionManager.Instance.MspGlobalData.region);
+			InterfaceCanvas.Instance.SetRegion(SessionManager.Instance.MspGlobalData);
 
 			if (SessionManager.Instance.MspGlobalData.dependencies != null)
 			{

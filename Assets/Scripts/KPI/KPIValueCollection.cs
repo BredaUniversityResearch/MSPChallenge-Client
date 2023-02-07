@@ -139,7 +139,7 @@ namespace MSP2050.Scripts
 					float valueSum = 0.0f;
 					foreach (KPIValue childValue in category.GetChildValues())
 					{
-						valueSum += childValue.GetKpiValueForMonth(i);
+						valueSum += childValue.GetKpiValueForMonth(i) ?? 0f;
 					}
 
 					if (category.categoryValueType == EKPICategoryValueType.Sum)

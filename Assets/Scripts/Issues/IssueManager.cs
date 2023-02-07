@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,7 +31,7 @@ namespace MSP2050.Scripts
 		[SerializeField] int maxShippingIssues = 30;
 
 		List<PlanIssueInstance> m_issueInstances = new List<PlanIssueInstance>();
-		Dictionary<int, ShippingIssueInstance> m_shippingIssueInstances = new Dictionary<int, ShippingIssueInstance>(); 
+		Dictionary<int, ShippingIssueInstance> m_shippingIssueInstances = new Dictionary<int, ShippingIssueInstance>();
 
 		private void OnDestroy()
 		{
@@ -190,22 +191,23 @@ namespace MSP2050.Scripts
 
 		public void UpdateShippingIssues(List<ShippingIssueObject> shippingIssues)
 		{
-			for (int i = 0; i < shippingIssues.Count; ++i)
+			// collect all shipping issues not listed to be destroyed
+			List<int> shippingIssuesToDestroy = (
+				from inst in m_shippingIssueInstances
+				where shippingIssues.All(x => x.warning_id != inst.Key) select inst.Key
+			).ToList();
+			// destroy
+			foreach (var shippingWarningId in shippingIssuesToDestroy)
 			{
-				ShippingIssueObject issue = shippingIssues[i];
-				ShippingIssueInstance existingInstance;
-				if (m_shippingIssueInstances.TryGetValue(issue.warning_id, out existingInstance))
-				{
-					if (!issue.active)
-					{
-						existingInstance.Destroy();
-						m_shippingIssueInstances.Remove(issue.warning_id);
-					}
-				}
-				else if (issue.active)
-				{
-					CreateNewShippingIssue(issue);
-				}
+				m_shippingIssueInstances[shippingWarningId].Destroy();
+				m_shippingIssueInstances.Remove(shippingWarningId);
+			}
+			// create new ones if not existing
+			foreach (ShippingIssueObject issue in shippingIssues.Where(
+				issue => !m_shippingIssueInstances.ContainsKey(issue.warning_id))
+			)
+			{
+				CreateNewShippingIssue(issue);
 			}
 		}
 

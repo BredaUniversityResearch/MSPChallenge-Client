@@ -68,7 +68,6 @@ namespace MSP2050.Scripts
 		[Header("Colours")]
 		public ColourAsset accentColour;
 		public ColourAsset regionColour;
-		public RegionSettingsAsset regionSettings;
 
 		private Dictionary<string, Button> buttonUIReferences = new Dictionary<string, Button>();
 		private Dictionary<string, Toggle> toggleUIReferences = new Dictionary<string, Toggle>();
@@ -96,16 +95,11 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetRegionWithName(string name)
+		public void SetRegion(MspGlobalData globalData)
 		{
-			SetRegion(regionSettings.GetRegionInfo(name));
-		}
-
-		public void SetRegion(RegionInfo region)
-		{
-			menuBarLogo.SetRegionLogo(region);
-			gameMenu.SetRegion(region);
-			regionColour.SetValue(region.colour);
+			menuBarLogo.SetRegionLetter(globalData.edition_letter);
+			gameMenu.SetRegion(globalData);
+			regionColour.SetValue(globalData.edition_colour);
 		}
 
 		public void SetAccent(Color a_color)

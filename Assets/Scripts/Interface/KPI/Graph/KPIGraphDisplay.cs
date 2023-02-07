@@ -134,7 +134,7 @@ namespace MSP2050.Scripts
 			int month = (int)nodeData.x;
 			GraphPoint point = graphEntry.graphPoints.GetPointByMonth(month, graphMonthInterval);
 
-			float startValue = graphEntry.activeValue.GetKpiValueForMonth(0);
+			float startValue = graphEntry.activeValue.GetKpiValueForMonth(-1) ?? 0f;
 
 			string changePercentage = KPIValue.FormatRelativePercentage(startValue, point.value);
 
@@ -214,7 +214,7 @@ namespace MSP2050.Scripts
 		private WMG_Series CreateGraph()
 		{
 			WMG_Series serie = targetGraph.addSeries();
-		
+
 			serie.hidePoints = true;
 			serie.hideLines = true;
 
@@ -295,10 +295,10 @@ namespace MSP2050.Scripts
 
 		private void UpdateGraphValues(GraphEntry entry)
 		{
-			entry.graphPoints.Clear(); 
+			entry.graphPoints.Clear();
 			for (int i = 0; i < entry.activeValue.MostRecentMonth; i += graphMonthInterval)
 			{
-				entry.graphPoints.AddPoint(i, (float)entry.activeValue.GetKpiValueForMonth(i));
+				entry.graphPoints.AddPoint(i, (float)(entry.activeValue.GetKpiValueForMonth(i) ?? 0f));
 			}
 
 			entry.series.pointValues.SetList(entry.graphPoints.GetScaledGraphPoints());

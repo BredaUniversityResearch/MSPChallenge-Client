@@ -66,6 +66,7 @@ namespace MSP2050.Scripts
 
 			//Use month
 			int month = GetCurrentMonth();
+			if (month == -1) return; // nothing to do in Setup
 			TimeManagerWindow.instance.timeline.Progress = (float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
 
 			//Era change
@@ -313,6 +314,12 @@ namespace MSP2050.Scripts
 			//Month change
 			if (month != prevMonth)
 			{
+				// fail-safe: setup month should be -1
+				if (gameState == PlanningState.Setup)
+				{
+					month = -1;
+				}
+
 				if (gameState != PlanningState.Setup)
 					PlanManager.Instance.MonthTick(month);
 				InterfaceCanvas.Instance.activePlanWindow.m_timeSelect.UpdateMinTime();
@@ -378,7 +385,7 @@ namespace MSP2050.Scripts
 		private void OnSetupPhaseEnded()
 		{
 			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = true;
-			//Update plans once the setup state is left, so we don't have to wait for month 1 
+			//Update plans once the setup state is left, so we don't have to wait for month 1
 			TimeManagerWindow.instance.eraDivision.gameObject.SetActive(false);
 			PlanManager.Instance.MonthTick(month);
 			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();

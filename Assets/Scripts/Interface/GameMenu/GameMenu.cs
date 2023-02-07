@@ -10,7 +10,7 @@ namespace MSP2050.Scripts
 	{
 		public GenericWindow thisGenericWindow;
 
-		public Image logo;
+		public DynamicLogo logo;
 		public TextMeshProUGUI editionText;
 
 		public Button continueGame, options, credits, exit, tutorial, serverLogin;
@@ -57,10 +57,10 @@ namespace MSP2050.Scripts
 			thisGenericWindow.DestroyModalWindow();
 		}
 
-		public void SetRegion(RegionInfo region)
+		public void SetRegion(MspGlobalData globalData)
 		{
-			logo.sprite = region.sprite;
-			editionText.text = region.editionPostFix;
+			logo.SetContent(globalData.edition_colour, globalData.edition_letter);
+			editionText.text = globalData.edition_name;
 		}
 	
 		public IEnumerator LateUpdatePosition()

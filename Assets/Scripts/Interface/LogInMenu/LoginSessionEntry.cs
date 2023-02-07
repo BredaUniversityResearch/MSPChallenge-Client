@@ -19,6 +19,7 @@ namespace MSP2050.Scripts
 		[SerializeField] private GameObject m_expandContent;
 		[SerializeField] private float m_collapsedHeight;
 		[SerializeField] private float m_expandedHeight;
+		[SerializeField] private DynamicLogo m_regionLogo;
 
 		private GameSession m_session;
 
@@ -40,13 +41,20 @@ namespace MSP2050.Scripts
 			else
 				m_sessionStateText.text = a_session.session_state.ToString();
 
-			int year = a_session.game_current_month / 12 + a_session.game_start_year;
-			int month = a_session.game_current_month % 12 + 1;
+			int monthZeroBased = a_session.game_current_month;
+			if (monthZeroBased == -1) // setup month
+			{
+				monthZeroBased = 0;
+			}
+
+			int year = monthZeroBased / 12 + a_session.game_start_year;
+			int month = monthZeroBased % 12 + 1;
 
 			m_realTimeText.text = $"{a_session.GetStartTime()} - {a_session.GetEndTime()}";
-			m_configNameText.text = $"{a_session.config_file_name} v{a_session.config_version_version}";
+			m_configNameText.text = a_session.edition_name;
 			m_gameTimeText.text = $"{a_session.game_start_year} - {(a_session.game_start_year + (a_session.game_end_month / 12))} ({Localisation.DateFormatting.GetMonthName(month).Substring(0, 3)} {year})";
 			m_playersText.text = a_session.players_active.ToString();
+			m_regionLogo.SetContent(a_session.edition_colour, a_session.edition_letter);
 		}
 
 		void ConnectPressed()

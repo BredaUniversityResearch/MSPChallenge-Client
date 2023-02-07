@@ -41,7 +41,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				Main.Instance.OnPostFinishedLoadingLayers += Initialise;	
+				Main.Instance.OnPostFinishedLoadingLayers += Initialise;
 			}
 		}
 
@@ -109,7 +109,7 @@ namespace MSP2050.Scripts
 				{
 					toggledValueNames = ClearActiveToggledValues();
 				}
-	
+
 				targetTeamId = teamId;
 				SetTargetCollection(SimulationManager.Instance.GetKPIValuesForSimulation(m_targetSimulation, targetTeamId));
 
@@ -185,8 +185,8 @@ namespace MSP2050.Scripts
 					}
 				}
 
-				bar.SetStartValue((float)value.GetKpiValueForMonth(0));
-				bar.SetActual((float)value.GetKpiValueForMonth(month)/*, value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId*/);
+				bar.SetStartValue((float)(value.GetKpiValueForMonth(-1) ?? 0f));
+				bar.SetActual((float)(value.GetKpiValueForMonth(month) ?? 0f)/*, value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId*/);
 			}
 
 			foreach (KPICategory category in valueCollection.GetCategories()) //Categories also have entries
@@ -278,7 +278,7 @@ namespace MSP2050.Scripts
 					kpiBar.SetDisplayedGraphColor(newColor);
 				}
 				else
-				{ 
+				{
 					Debug.LogError("No KPI bar found for value: " + value.name);
 				}
 
@@ -346,4 +346,4 @@ namespace MSP2050.Scripts
 		}
 	}
 }
-   
+
