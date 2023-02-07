@@ -10,16 +10,17 @@ namespace MSP2050.Scripts
 	{
 		public const int BATCH_GROUP_PLAN_CREATE = 1;
 		public const int BATCH_GROUP_ENERGY_DELETE = 2;
-		public const int BATCH_GROUP_GEOMETRY_DELETE = 3;
 		public const int BATCH_GROUP_LAYER_ADD = 3;
 		public const int BATCH_GROUP_LAYER_REMOVE = 3;
+		public const int BATCH_GROUP_GEOMETRY_DELETE = 4;
 
 		public const int BATCH_GROUP_GEOMETRY_ADD = 5;
 		public const int BATCH_GROUP_GEOMETRY_UPDATE = 5;
 		public const int BATCH_GROUP_GRID_ADD = 5;
 		public const int BATCH_GROUP_GRID_DELETE = 5;
 		public const int BATCH_GROUP_PLAN_CHANGE = 5;
-		public const int BATCH_GROUP_ISSUES = 5;
+
+		public const int BATCH_GROUP_ISSUES = 6;
 
 		public const int BATCH_GROUP_PLAN_GRID_CHANGE = 7;
 		public const int BATCH_GROUP_ENERGY_ERROR = 7;
