@@ -10,6 +10,9 @@ pipeline {
 	environment {
 		// Unity tool installation
 		UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2020.3.31f1\\Editor\\Unity.exe"
+		
+		// Latest curl version installation
+		CURL_EXECUTABLE = "C:\\Program Files\\Git\\mingw64\\bin\\curl.exe"
 
 		// Unity Build params & paths
 		WINDOWS_BUILD_NAME = "Windows-${currentBuild.number}"
@@ -69,7 +72,8 @@ pipeline {
 					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_DEV_BUILD_NAME%.exe" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder
 						echo "Zipping builds..."
 						7z a -tzip -r "%output%\\%WINDOWS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputWinFolder%\\*"
-						echo "Cleaning up the Build Folder"'''
+						echo "Uploading builds artifact to Nexus..."
+						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MSPChallenge" -F "raw.asset1=@%output%\\%WINDOWS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_DEV_BUILD_NAME%"'''
 				}
 			}
 		}
@@ -129,8 +133,8 @@ pipeline {
 	}
 	post {
 			always {
-					//echo "Cleaning up workspace..."
-					//bat '''del %output%\\* /F /S /Q'''
+					echo "Cleaning up workspace..."
+					bat '''RMDIR %output% /S /Q'''
 					
 					slackSend color: COLOR_MAP[currentBuild.currentResult],
 					message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}"
