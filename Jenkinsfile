@@ -60,15 +60,16 @@ pipeline {
 		stage('Build Pull Request') {
 		
 			when { 
-					expression { BRANCH_NAME ==~ /(MSP-[0-9]+)/ }
+					//expression { BRANCH_NAME ==~ /(MSP-[0-9]+)/ }
+					expression { BRANCH_NAME ==~ /(JenkinsTest)/ }
 				}
 			steps {
 				script {
 					echo "Launching App Build..."
-					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_DEV_BUILD_NAME%.exe" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder'
-					
-					echo "Cleaning up the Build Folder"
-					bat 'del /s /f /q "%CD%\\%outputFolder%"'
+					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_DEV_BUILD_NAME%.exe" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder
+						echo "Zipping builds..."
+						7z a -tzip -r "%output%\\%WINDOWS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputWinFolder%\\*"
+						echo "Cleaning up the Build Folder"'''
 				}
 			}
 		}
@@ -76,7 +77,7 @@ pipeline {
 		stage('Build Dev Branch') {
 		
 			when { 
-					expression { BRANCH_NAME ==~ /(JenkinsTest)/ }
+					expression { BRANCH_NAME ==~ /(dev)/ }
 				}
 			steps {
 				script {
