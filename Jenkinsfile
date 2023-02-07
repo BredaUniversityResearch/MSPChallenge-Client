@@ -12,18 +12,22 @@ pipeline {
 		UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2020.3.31f1\\Editor\\Unity.exe"
 
 		// Unity Build params & paths
-		WINDOWS_BUILD_NAME = "Windows-${currentBuild.number}.exe"
-		WINDOWS_DEV_BUILD_NAME = "Windows-Dev-${currentBuild.number}.exe"
+		WINDOWS_BUILD_NAME = "Windows-${currentBuild.number}"
+		WINDOWS_DEV_BUILD_NAME = "Windows-Dev-${currentBuild.number}"
 		MACOS_BUILD_NAME = "MacOS-${currentBuild.number}"
 		MACOS_DEV_BUILD_NAME = "MacOS-Dev-${currentBuild.number}"
-		RELEASE_FOLDER = "F:\\MSPReleases"
-		DEVELOPMENT_FOLDER = "F:\\MSPDevBuilds"
+		//RELEASE_FOLDER = "F:\\MSPReleases"
+		//DEVELOPMENT_FOLDER = "F:\\MSPDevBuilds"
 		
-		String outputFolder = "CurrentBuild"
+		String output = "Output"
+		String outputMacFolder = "CurrentMacBuild"
+		String outputWinFolder = "CurrentWinBuild"
 		String mac = "mac"
 		String windows = "windows"
 		String dev = "dev"
 		String release = "release"
+		
+		NEXUS_CREDENTIALS = credentials('NEXUS_CREDENTIALS')
 
 		//PARAMETERS DATA
 		//IS_DEVELOPMENT_BUILD = "${params.developmentBuild}"
@@ -61,7 +65,7 @@ pipeline {
 			steps {
 				script {
 					echo "Launching App Build..."
-					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%outputFolder%\\%WINDOWS_DEV_BUILD_NAME%" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder'
+					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_DEV_BUILD_NAME%" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder'
 					
 					echo "Cleaning up the Build Folder"
 					bat 'del /s /f /q "%CD%\\%outputFolder%"'
@@ -72,14 +76,37 @@ pipeline {
 		stage('Build Dev Branch') {
 		
 			when { 
-					expression { BRANCH_NAME ==~ /(dev)/ }
+					expression { BRANCH_NAME ==~ /(JenkinsTest)/ }
 				}
 			steps {
 				script {
 					echo "Launching App Build..."
-					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%DEVELOPMENT_FOLDER%\\%WINDOWS_DEV_BUILD_NAME%" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder'
-					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%DEVELOPMENT_FOLDER%\\%MACOS_DEV_BUILD_NAME%" -customBuildName %MACOS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.MacOSDevBuilder'
-				}
+					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_DEV_BUILD_NAME%" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder'
+					bat '"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\%MACOS_DEV_BUILD_NAME%" -customBuildName %MACOS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.MacOSDevBuilder'
+					
+					echo "Zipping builds..."
+					bat '7z a -tzip -r "%output%\\%WINDOWS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputWinFolder%\\*"'
+					bat '7z a -tzip -r "%output%\\%MACOS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputMacFolder%\\*"'
+					
+					echo "Uploading builds artifact to Nexus..."
+					bat "curl -X 'POST' \
+						'http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev' \
+						-H 'accept: application/json' \
+						-H 'Content-Type: multipart/form-data' \
+						-H 'Authorization: Basic %NEXUS_CREDENTIALS%' \
+						-F 'raw.directory=MSPChallenge' \
+						-F 'raw.asset1=@%output%\\%WINDOWS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed' \
+						-F 'raw.asset1.filename="%WINDOWS_DEV_BUILD_NAME%"'"
+						
+					bat "curl -X 'POST' \
+						'http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev' \
+						-H 'accept: application/json' \
+						-H 'Content-Type: multipart/form-data' \
+						-H 'Authorization: Basic %NEXUS_CREDENTIALS%' \
+						-F 'raw.directory=MSPChallenge' \
+						-F 'raw.asset1=@%output%\\%MACOS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed' \
+						-F 'raw.asset1.filename="%MACOS_DEV_BUILD_NAME%"'"
+					}
 			}
 		}
 		
@@ -101,6 +128,9 @@ pipeline {
 	}
 	post {
 			always {
+					//echo "Cleaning up workspace..."
+					//bat '''del %output%\\* /F /S /Q'''
+					
 					slackSend color: COLOR_MAP[currentBuild.currentResult],
 					message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}"
 			}
