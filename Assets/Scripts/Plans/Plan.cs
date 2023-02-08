@@ -175,6 +175,7 @@ namespace MSP2050.Scripts
 			//=================================== BASE INFO UPDATE =====================================
 			bool stateChanged = false;
 			bool inTimelineBefore = ShouldBeVisibleInTimeline;
+			bool wasInfluencing = InInfluencingState;
 
 			Name = updatedData.name;
 			Description = updatedData.description;
@@ -293,7 +294,7 @@ namespace MSP2050.Scripts
 				HashSet<PlanLayer> removedPlanLayers = new HashSet<PlanLayer>(PlanLayers);
 				foreach (PlanLayerObject updatedLayer in updatedData.layers)
 				{
-					PlanLayer planLayer = getPlanLayerForID(updatedLayer.layerid);
+					PlanLayer planLayer = getPlanLayerForBaseID(updatedLayer.original);
 					if (planLayer == null)
 					{
 						//Create new planLayer
@@ -328,6 +329,11 @@ namespace MSP2050.Scripts
 
 				//=================================== POLICY UPDATE =====================================
 				PolicyManager.Instance.RunPlanUpdate(updatedData.policies, this, APolicyLogic.EPolicyUpdateStage.General);
+			}
+
+			if(wasInfluencing != InInfluencingState)
+			{
+				PlanManager.Instance.OnPlanInfluencingChanged(this, !wasInfluencing);
 			}
 
 			LayerManager.Instance.UpdateVisibleLayersFromPlan(this);
@@ -374,10 +380,10 @@ namespace MSP2050.Scripts
 			planLayer.DrawGameObjects();
 		}
 
-		public PlanLayer getPlanLayerForID(int planLayerID)
+		public PlanLayer getPlanLayerForBaseID(int baseLayerID)
 		{
 			foreach (PlanLayer planLayer in PlanLayers)
-				if (planLayer.ID == planLayerID)
+				if (planLayer.BaseLayer.ID == baseLayerID)
 					return planLayer;
 
 			return null;

@@ -219,7 +219,7 @@ namespace MSP2050.Scripts
 				foreach (PlanIssueObject issue in updatedData.issues)
 				{
 					if (issue.active)
-						issues.Add(issue);
+						issues.Add(issue); //This will not update existing, so database IDs are not updated here.
 					else
 						issues.Remove(issue);
 				}

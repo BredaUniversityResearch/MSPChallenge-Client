@@ -1557,7 +1557,7 @@ namespace MSP2050.Scripts
 				int index = -1;
 				for (int i = 0; i < planLayers.Count; i++)
 				{
-					if (planLayers[i].ID == planLayer.ID)
+					if (planLayers[i].Plan.ID == planLayer.Plan.ID)
 					{
 						index = i;
 						break;

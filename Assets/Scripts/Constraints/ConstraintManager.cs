@@ -85,7 +85,7 @@ namespace MSP2050.Scripts
 			{
 				StringBuilder sb = new StringBuilder(128);
 				sb.Append("PLAN_LAYER");
-				sb.Append(planLayer.ID);
+				sb.Append(planLayer.BaseLayer.ID);
 				sb.Append((type == null) ? "complete_layer" : type.Name);
 
 				return new HashCode(sb.ToString());

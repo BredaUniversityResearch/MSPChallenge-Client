@@ -420,6 +420,12 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public void OnPlanInfluencingChanged(Plan a_plan, bool a_nowInfluencing)
+		{
+			//if editing, check if edited plan affected by this change, redo energy backup and distr
+			//TODO
+		}
+
 		public void UpdatePlanInUI(Plan plan, bool stateChanged, int oldTime, bool inTimelineBefore)
 		{
 			bool inTimelineNow = plan.ShouldBeVisibleInTimeline;

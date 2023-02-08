@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 			foreach (PlanLayerBackup layerbackup in m_planLayers)
 			{
 				originalLayers.Add(layerbackup.m_planLayer.ID);
-				if (a_plan.getPlanLayerForID(layerbackup.m_planLayer.ID) == null)
+				if (a_plan.getPlanLayerForBaseID(layerbackup.m_planLayer.BaseLayer.ID) == null)
 				{
 					//If layer not in plan, add again
 					a_plan.PlanLayers.Add(layerbackup.m_planLayer);
