@@ -31,9 +31,6 @@ pipeline {
 		String release = "release"
 		
 		NEXUS_CREDENTIALS = credentials('NEXUS_CREDENTIALS')
-
-		//PARAMETERS DATA
-		//IS_DEVELOPMENT_BUILD = "${params.developmentBuild}"
 	}
 	
 	options {
@@ -96,8 +93,7 @@ pipeline {
 		stage('Build Main Branch') {
 		
 			when { 
-					//expression { BRANCH_NAME ==~ /(main)/ }
-					expression { BRANCH_NAME ==~ /(JenkinsTest)/ }
+					expression { BRANCH_NAME ==~ /(main)/ }
 				}
 			steps {
 				script {
@@ -107,28 +103,14 @@ pipeline {
 						echo "Zipping build..."
 						7z a -tzip -r "%output%\\%WINDOWS_BUILD_NAME%" "%CD%\\%output%\\%outputDevFolder%\\*"
 						echo "Uploading release build artifact to Nexus..."
-						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Releases" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MSPChallenge" -F "raw.asset1=@%output%\\%WINDOWS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_BUILD_NAME%"'''
+						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MSPChallenge" -F "raw.asset1=@%output%\\%WINDOWS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_BUILD_NAME%"'''
 						
 					echo "Launching MacOS Release Build..."
 					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\%MACOS_BUILD_NAME%.exe" -customBuildName %MACOS_BUILD_NAME% -executeMethod ProjectBuilder.MacOSBuilder
 						echo "Zipping build..."
 						7z a -tzip -r "%output%\\%MACOS_BUILD_NAME%" "%CD%\\%output%\\%outputMacFolder%\\*"
 						echo "Uploading release build artifact to Nexus..."
-						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Releases" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MSPChallenge" -F "raw.asset1=@%output%\\%MACOS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_BUILD_NAME%"'''
-						
-					echo "Launching Windows Development Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinDevFolder%\\%WINDOWS_DEV_BUILD_NAME%.exe" -customBuildName %WINDOWS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.WindowsDevBuilder
-						echo "Zipping build..."
-						7z a -tzip -r "%output%\\%WINDOWS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputWinDevFolder%\\*"
-						echo "Uploading dev build artifact to Nexus..."
-						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Releases" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MSPChallenge" -F "raw.asset1=@%output%\\%WINDOWS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_DEV_BUILD_NAME%"'''
-						
-					echo "Launching MacOS Development Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacDevFolder%\\%MACOS_DEV_BUILD_NAME%.exe" -customBuildName %MACOS_DEV_BUILD_NAME% -executeMethod ProjectBuilder.MacOSDevBuilder
-						echo "Zipping build..."
-						7z a -tzip -r "%output%\\%MACOS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputMacDevFolder%\\*"
-						echo "Uploading dev build artifact to Nexus..."
-						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Releases" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MSPChallenge" -F "raw.asset1=@%output%\\%MACOS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_DEV_BUILD_NAME%"'''
+						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MSPChallenge" -F "raw.asset1=@%output%\\%MACOS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_BUILD_NAME%"'''
 				}
 			}
 		}
