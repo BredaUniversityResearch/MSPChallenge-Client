@@ -480,6 +480,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 352710155013494589, guid: e6aa4a326cbdad14481853ad36944f8a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 405069516437755550, guid: e6aa4a326cbdad14481853ad36944f8a,
         type: 3}
       propertyPath: m_Padding.m_Bottom
@@ -682,21 +687,6 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 8772285809589596307}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5111933231877326566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2984374478719729320}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: acf366b2fd2bb0c42a10851ac05e42fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  planApprovalEntryParent: {fileID: 1665628264075897528}
-  planApprovalEntryPrefab: {fileID: 1130347671910426084, guid: 94ab416d776c5ab4da6814112d45bbfa,
-    type: 3}
 --- !u!114 &286046690862359805
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -717,3 +707,18 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 0
   m_LayoutPriority: 1
+--- !u!114 &5111933231877326566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2984374478719729320}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acf366b2fd2bb0c42a10851ac05e42fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  planApprovalEntryParent: {fileID: 1665628264075897528}
+  planApprovalEntryPrefab: {fileID: 1130347671910426084, guid: 94ab416d776c5ab4da6814112d45bbfa,
+    type: 3}
