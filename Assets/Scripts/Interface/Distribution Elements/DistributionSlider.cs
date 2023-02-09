@@ -5,7 +5,7 @@ namespace MSP2050.Scripts
 {
 	public class DistributionSlider : MonoBehaviour
 	{
-		[SerializeField] protected RectTransform oldValueIndicator = null;
+		[SerializeField] protected RectTransform[] oldValueIndicators = null;
 		[SerializeField] protected DistributionItem parent = null;
 		[SerializeField] Slider valueSlider;
 
@@ -137,8 +137,11 @@ namespace MSP2050.Scripts
 		private void UpdateOldValueIndicatorPosition()
 		{
 			oldRemappedNormalizedValue = sliderValueMapping.InverseMap(oldValue);
-			oldValueIndicator.anchorMin = new Vector2(oldRemappedNormalizedValue, 0.0f);
-			oldValueIndicator.anchorMax = new Vector2(oldRemappedNormalizedValue, 1.0f);
+			foreach (RectTransform rect in oldValueIndicators)
+			{
+				rect.anchorMin = new Vector2(oldRemappedNormalizedValue, 0.0f);
+				rect.anchorMax = new Vector2(oldRemappedNormalizedValue, 1.0f);
+			}
 		}
 
 		protected void OnSliderRangeChanged()

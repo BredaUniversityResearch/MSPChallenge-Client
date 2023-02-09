@@ -133,7 +133,6 @@ namespace MSP2050.Scripts
 			List<Plan> plans = null;
 
 			//General update
-			PolicyManager.Instance.RunGeneralUpdate(a_update.policy_updates, APolicyLogic.EPolicyUpdateStage.PreKPI);
 			if (a_update.plan != null)
 			{
 				//Sort plans by time and ID so there are no issues with dependencies when loading them in

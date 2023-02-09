@@ -32,7 +32,7 @@ namespace MSP2050.Scripts
 		private bool m_actionWasRequired;
 		private bool m_hasError;
 		private bool m_hiddenByFilter;
-		private bool m_hiddenByVisibility;
+		//private bool m_hiddenByVisibility;
 		private PlansGroupBar m_group;
 
 		public void Initialise(Plan a_plan)
@@ -181,13 +181,13 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				m_hiddenByFilter = m_plan.Name.IndexOf(a_filter, StringComparison.OrdinalIgnoreCase) >= 0;
-				if(!m_hiddenByFilter)
+				m_hiddenByFilter = m_plan.Name.IndexOf(a_filter, StringComparison.OrdinalIgnoreCase) < 0;
+				if(m_hiddenByFilter)
 				{
 					foreach(PlanLayer pl in m_plan.PlanLayers)
 					{
-						m_hiddenByFilter = pl.BaseLayer.ShortName.IndexOf(a_filter, StringComparison.OrdinalIgnoreCase) >= 0;
-						if (m_hiddenByFilter)
+						m_hiddenByFilter = pl.BaseLayer.ShortName.IndexOf(a_filter, StringComparison.OrdinalIgnoreCase) < 0;
+						if (!m_hiddenByFilter)
 							break;
 					}
 				}
@@ -195,15 +195,15 @@ namespace MSP2050.Scripts
 			UpdateActivity();
 		}
 
-		public void SetPlanVisibility(bool a_value)
-		{
-			m_hiddenByVisibility = !a_value;
-			UpdateActivity();
-		}
+		//public void SetPlanVisibility(bool a_value)
+		//{
+		//	m_hiddenByVisibility = !a_value;
+		//	UpdateActivity();
+		//}
 
-		void UpdateActivity()
+		public void UpdateActivity()
 		{
-			gameObject.SetActive(!m_hiddenByFilter && !m_hiddenByVisibility);
+			gameObject.SetActive(!m_hiddenByFilter && m_plan.ShouldBeVisibleInUI);
 		}
 
 		void OnForceUnlockClicked()

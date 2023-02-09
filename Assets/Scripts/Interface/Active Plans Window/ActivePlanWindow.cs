@@ -441,7 +441,13 @@ namespace MSP2050.Scripts
 			if(m_interactionMode != EInteractionMode.SetupNew) //In setup this will be done on accept
 				PlanManager.Instance.ForceSetPlanViewing(m_currentPlan);
 			RefreshContent();
-			PolicyLogicEnergy.Instance.RecalculateGridsInEditedPlan(m_currentPlan);//TODO: move to AP_Policy and run on all policies
+			PolicyManager.Instance.EditedPlanTimeChanged(m_currentPlan);
+		}
+
+		public void OnPreviousPlanChangedInfluence()
+		{
+			//TODO: set active entities again
+			PolicyManager.Instance.PreviousPlanChangedInfluence(m_currentPlan);
 		}
 
 		public void RefreshContent()

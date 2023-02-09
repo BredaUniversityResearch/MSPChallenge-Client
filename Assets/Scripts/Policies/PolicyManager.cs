@@ -212,6 +212,22 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public void EditedPlanTimeChanged(Plan a_plan) 		
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.EditedPlanTimeChanged(a_plan);
+			}
+		}
+
+		public void PreviousPlanChangedInfluence(Plan a_plan) 
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.PreviousPlanChangedInfluence(a_plan);
+			}
+		}
+
 		public void StopEditingPlan(Plan a_plan)
 		{
 			foreach (var kvp in m_policyLogic)

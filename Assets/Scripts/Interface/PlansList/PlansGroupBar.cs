@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
 		{
 			for(int i = 1; i < m_contentContainer.childCount; i++)
 			{
-				if(m_contentContainer.GetChild(i).gameObject.activeSelf)
+				if(m_contentContainer.GetChild(i).gameObject.activeSelf && m_contentContainer.GetChild(i).gameObject != m_emptyEntry)
 				{
 					m_emptyEntry.SetActive(false);
 					return;

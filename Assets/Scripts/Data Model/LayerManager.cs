@@ -625,7 +625,7 @@ namespace MSP2050.Scripts
 		/// <param name="plan"></param>
 		public void UpdateVisibleLayersFromPlan(Plan plan)
 		{
-			//Dont update layers while in edit mode, quickly causes errors
+			//Dont update layers while in edit mode, this is handled in ActivePlanWindow
 			if (Main.InEditMode)
 				return;
 

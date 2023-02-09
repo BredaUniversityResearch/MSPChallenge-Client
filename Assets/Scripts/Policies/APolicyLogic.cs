@@ -49,6 +49,8 @@ namespace MSP2050.Scripts
 		public virtual void RestoreBackupForPlan(Plan a_plan) { }
 		public virtual void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch) { }
 		public virtual void StopEditingPlan(Plan a_plan) { }
+		public virtual void EditedPlanTimeChanged(Plan a_plan) { }
+		public virtual void PreviousPlanChangedInfluence(Plan a_plan) { }
 
 		//Update order: 0
 		public abstract void HandleGeneralUpdate(APolicyData a_updateData, EPolicyUpdateStage a_stage);

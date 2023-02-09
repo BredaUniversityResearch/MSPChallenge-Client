@@ -198,13 +198,7 @@ namespace MSP2050.Scripts
 				m_needsSorting = true;
 
 				//Update plan visibility 
-				if (planBar.gameObject.activeSelf)
-				{
-					if (!plan.ShouldBeVisibleInUI)
-						planBar.SetPlanVisibility(false);
-				}
-				else if (plan.ShouldBeVisibleInUI)
-					planBar.SetPlanVisibility(true);
+				planBar.UpdateActivity();
 
 				//Reparents the planbar to the right group
 				m_planBarsPerPlan[plan].MoveToGroup(m_planGroupsPerState[plan.State]);

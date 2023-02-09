@@ -331,13 +331,12 @@ namespace MSP2050.Scripts
 				PolicyManager.Instance.RunPlanUpdate(updatedData.policies, this, APolicyLogic.EPolicyUpdateStage.General);
 			}
 
+			LayerManager.Instance.UpdateVisibleLayersFromPlan(this);
+			PlanManager.Instance.UpdatePlanInUI(this, stateChanged, oldStartTime, inTimelineBefore);
 			if(wasInfluencing != InInfluencingState)
 			{
 				PlanManager.Instance.OnPlanInfluencingChanged(this, !wasInfluencing);
 			}
-
-			LayerManager.Instance.UpdateVisibleLayersFromPlan(this);
-			PlanManager.Instance.UpdatePlanInUI(this, stateChanged, oldStartTime, inTimelineBefore);
 		}
 
 		public void ReceiveMessage(PlanMessageObject a_message)

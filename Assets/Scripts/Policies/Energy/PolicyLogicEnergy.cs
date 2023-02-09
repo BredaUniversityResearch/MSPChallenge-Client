@@ -21,6 +21,8 @@ namespace MSP2050.Scripts
 		public Dictionary<int, int> m_sourceCountries = new Dictionary<int, int>();
 		public Dictionary<int, SubEntity> m_energySubEntities;
 
+		AP_Energy m_apEnergy;
+
 		//Editing backups
 		bool m_wasEnergyPlanBeforeEditing;
 		PolicyPlanDataEnergy m_backup;
@@ -815,6 +817,35 @@ namespace MSP2050.Scripts
 					result.Add(oldGrid.GetDatabaseID());
 			}
 			return result;
+		}
+
+		public override void EditedPlanTimeChanged(Plan a_plan) 
+		{
+			m_removedCables = ForceEnergyLayersActiveUpTo(a_plan);
+			m_energyGridsBeforePlan = GetEnergyGridsBeforePlan(a_plan, EnergyGrid.GridColor.Either);
+			if (m_apEnergy != null && m_apEnergy.IsOpen)
+			{
+				m_apEnergy.RefreshContent(a_plan);
+			}
+			else
+				RecalculateGridsInEditedPlan(a_plan);
+		}
+
+		public override void PreviousPlanChangedInfluence(Plan a_plan) 
+		{
+			m_removedCables = ForceEnergyLayersActiveUpTo(a_plan);
+			m_energyGridsBeforePlan = GetEnergyGridsBeforePlan(a_plan, EnergyGrid.GridColor.Either);
+			if (m_apEnergy != null && m_apEnergy.IsOpen)
+			{
+				m_apEnergy.RefreshContent(a_plan);
+			}
+			else
+				RecalculateGridsInEditedPlan(a_plan);
+		}
+
+		public void RegisterAPEnergy(AP_Energy a_apEnergy)
+		{
+			m_apEnergy = a_apEnergy;
 		}
 
 		public void SubmitEnergyError(Plan a_plan, bool a_value, bool a_checkDependencies, BatchRequest a_batch)

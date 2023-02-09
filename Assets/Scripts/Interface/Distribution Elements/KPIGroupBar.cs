@@ -14,6 +14,7 @@ namespace MSP2050.Scripts
 		[SerializeField] ValueConversionCollection m_valueConversionCollection = null;
 		[SerializeField] DistributionFillBar m_fillBar = null;
 		[SerializeField] Button m_viewButton;
+		[SerializeField] GameObject m_countryBallDots;
 
 		[Header("Prefabs")]
 		[SerializeField] GameObject m_itemPrefab;
@@ -88,9 +89,11 @@ namespace MSP2050.Scripts
 			go.transform.SetParent(m_itemParent.transform, false);
 
 			// Set values
-			item.teamGraphic.color = SessionManager.Instance.GetTeamByTeamID(a_teamID).color;
+			Team team = SessionManager.Instance.GetTeamByTeamID(a_teamID);
+			item.teamGraphic.color = team.color;
+			item.title.text = team.name;
 			item.numbers.text = a_valueText;
-			item.title.gameObject.SetActive(false);
+			item.title.gameObject.SetActive(true);
 			return item;
 		}
 
@@ -198,7 +201,6 @@ namespace MSP2050.Scripts
 			m_viewButton.onClick.RemoveAllListeners();
 			m_viewButton.onClick.AddListener(() => a_grid.ShowGridOnMap());
 			m_barValueText.text = "No simulation has run";
-			GameObject dots = m_countryBallParent.GetChild(0).gameObject;
 			int numberCountryIcons = 0;
 			long totalUsedPower = 0;
 			int nextItemIndex = 0;
@@ -210,24 +212,24 @@ namespace MSP2050.Scripts
 					received = a_grid.actualAndWasted.socketActual.ContainsKey(kvp.Key) ? a_grid.actualAndWasted.socketActual[kvp.Key] : 0;
 				long target = kvp.Value.expected;
 
-				if (kvp.Key == a_country)
-				{
-					//Our team, put it in the group bar
-					string formatString;
-					if (kvp.Value.expected < 0)
-					{
-						formatString = "Sent {0} / {1} target";
-					}
-					else
-					{
-						formatString = "Got {0} / {1} target";
-						totalUsedPower += received;
-					}
-					m_barValueText.text = string.Format(formatString, m_valueConversionCollection.ConvertUnit(received, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
-						m_valueConversionCollection.ConvertUnit(target, ValueConversionCollection.UNIT_WATT).FormatAsString());
-				}
-				else
-				{
+				//if (kvp.Key == a_country)
+				//{
+				//	//Our team, put it in the group bar
+				//	string formatString;
+				//	if (kvp.Value.expected < 0)
+				//	{
+				//		formatString = "Sent {0} / {1} target";
+				//	}
+				//	else
+				//	{
+				//		formatString = "Got {0} / {1} target";
+				//		totalUsedPower += received;
+				//	}
+				//	m_barValueText.text = string.Format(formatString, m_valueConversionCollection.ConvertUnit(received, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
+				//		m_valueConversionCollection.ConvertUnit(target, ValueConversionCollection.UNIT_WATT).FormatAsString());
+				//}
+				//else
+				//{
 					//Other team, create an entry
 					string formatString;
 					if (kvp.Value.expected < 0)
@@ -253,22 +255,25 @@ namespace MSP2050.Scripts
 						temp.color = SessionManager.Instance.GetTeamByTeamID(kvp.Key).color;
 					}
 					numberCountryIcons++;
-				}
+				//}
 			}
 
 			//Create summary
-			SetItemAtIndexTo(nextItemIndex, "Total  ", string.Format("Used {0} / {1} ({2})", m_valueConversionCollection.ConvertUnit(totalUsedPower, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
-				m_valueConversionCollection.ConvertUnit(a_grid.AvailablePower, ValueConversionCollection.UNIT_WATT).FormatAsString(), (totalUsedPower / (float)a_grid.AvailablePower).ToString("P1")));
-			nextItemIndex++;
+			m_barValueText.text = string.Format("{0} / {1} ({2})", m_valueConversionCollection.ConvertUnit(totalUsedPower, ValueConversionCollection.UNIT_WATT).FormatAsString(),
+				m_valueConversionCollection.ConvertUnit(a_grid.AvailablePower, ValueConversionCollection.UNIT_WATT).FormatAsString(),
+				(float)a_grid.AvailablePower < 0.01f ? "0%" : (totalUsedPower / (float)a_grid.AvailablePower).ToString("P1"));
+			//SetItemAtIndexTo(nextItemIndex, "Total  ", string.Format("Used {0} / {1} ({2})", m_valueConversionCollection.ConvertUnit(totalUsedPower, ValueConversionCollection.UNIT_WATT).FormatAsString(), 
+			//	m_valueConversionCollection.ConvertUnit(a_grid.AvailablePower, ValueConversionCollection.UNIT_WATT).FormatAsString(), (totalUsedPower / (float)a_grid.AvailablePower).ToString("P1")));
+			//nextItemIndex++;
 
 			//Clear unused items
 			for (int i = nextItemIndex; i < m_items.Count; i++)
 				Destroy(m_items[i]);
 			m_items.RemoveRange(nextItemIndex, m_items.Count - nextItemIndex);
 
-			dots.SetActive(numberCountryIcons > 3);
-			dots.transform.SetAsLastSibling();
-			m_countryBallParent.gameObject.SetActive(numberCountryIcons > 0);
+			m_countryBallDots.SetActive(numberCountryIcons > 3);
+			m_countryBallDots.transform.SetAsLastSibling();
+			//m_countryBallParent.gameObject.SetActive(numberCountryIcons > 0);
 		}
 	}
 }
