@@ -487,7 +487,10 @@ namespace MSP2050.Scripts
 
 			//Approval
 			if (m_currentPlan.State == Plan.PlanState.APPROVAL)
+            {
 				m_approvalToggle.SetContent($"Approval required from {m_currentPlan.countryApproval.Count} teams");
+				m_approvalContent.OpenToContent(m_currentPlan, m_approvalToggle, this);
+            }
 			else
 				m_approvalToggle.gameObject.SetActive(false);
 
