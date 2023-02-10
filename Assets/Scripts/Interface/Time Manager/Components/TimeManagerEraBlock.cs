@@ -9,74 +9,65 @@ namespace MSP2050.Scripts
 		public Image divisionMask;
 
 		public Button highlight;
-		public CustomInputField days;
-		public CustomInputField hours;
-		public CustomInputField minutes;
+		public CustomInputField daysText;
+		public CustomInputField hoursText;
+		public CustomInputField minutesText;
 
-		private TimeSpan duration;
 		public int planningMonthsTotal;
 		public int era;
 
+		int days, hours, minutes;
+
 		void Start()
 		{
-			days.onEndEdit.AddListener((s) =>
+			daysText.onEndEdit.AddListener((s) =>
 			{
-				int numDays = 0;
-				int.TryParse(s, out numDays);
-				//int numDays = string.IsNullOrEmpty(s) ? 0 : Convert.ToInt16(s);
-				Duration = new TimeSpan(numDays, Mathf.Clamp(Convert.ToInt16(hours.text), 0, 23), Mathf.Clamp(Convert.ToInt16(minutes.text), 0, 59), 0);
+				days = 0;
+				int.TryParse(s, out days);
+				if (days == 0 && hours == 0 && minutes == 0)
+					minutes = 1;
+				UpdateDurationText();
 			});        
-			hours.onEndEdit.AddListener((s) =>
+			hoursText.onEndEdit.AddListener((s) =>
 			{
-				int numHours = 0;
-				if (int.TryParse(s, out numHours))
+				hours = 0;
+				if (int.TryParse(s, out hours))
 				{
-					numHours = Mathf.Clamp(numHours, 0, 23);
+					hours = Mathf.Clamp(hours, 0, 23);
 				}
-				//int numHours = string.IsNullOrEmpty(s) ? 0 : Mathf.Clamp(Convert.ToInt16(s), 0, 23);
-				Duration = new TimeSpan(Convert.ToInt16(days.text), numHours, Mathf.Clamp(Convert.ToInt16(minutes.text), 0, 59), 0);
-			});
-			minutes.onEndEdit.AddListener((s) =>
-			{
+				if (days == 0 && hours == 0 && minutes == 0)
+					minutes = 1;
+				UpdateDurationText();
 
-				int numMinutes = 0;
-				if (int.TryParse(s, out numMinutes))
+			});
+			minutesText.onEndEdit.AddListener((s) =>
+			{
+				if (int.TryParse(s, out minutes))
 				{
-					numMinutes = Mathf.Clamp(numMinutes, 0, 59);
+					minutes = Mathf.Clamp(minutes, 0, 59);
 				}
-				//string.IsNullOrEmpty(s) ? 0 : Mathf.Clamp(Convert.ToInt16(s), 0, 59);
-				Duration = new TimeSpan(Convert.ToInt16(days.text), Mathf.Clamp(Convert.ToInt16(hours.text), 0, 23), numMinutes, 0);
+				if (days == 0 && hours == 0 && minutes == 0)
+					minutes = 1;
+				UpdateDurationText();
 			});
 		}
 
-		public TimeSpan Duration
+		void UpdateDurationText(bool sendUpdate = true)
 		{
-			get
-			{
-				return duration;
-			}
-			set
-			{
-				TimeSpan newDuration = value.TotalSeconds < 60 ? TimeSpan.FromSeconds(60) : value;
-
-				if (!days.isFocused && !hours.isFocused && !minutes.isFocused) {
-					days.text = newDuration.Days.ToString();
-					hours.text = newDuration.Hours.ToString("D2");
-					minutes.text = newDuration.Minutes.ToString("D2");
-				}
-				duration = newDuration;
-				if(active)
-					TimeManager.Instance.EraRealTimeChanged(era, duration);
-			}
+			daysText.text = days.ToString();
+			hoursText.text = hours.ToString("D2");
+			minutesText.text = minutes.ToString("D2");
+			if (active && sendUpdate)
+				TimeManager.Instance.EraRealTimeChanged(era, new TimeSpan(days, hours, minutes, 0));
 		}
 
 		public void SetDurationUI(TimeSpan value)
 		{
-			if (!days.isFocused && !hours.isFocused && !minutes.isFocused) {
-				days.text = value.Days.ToString();
-				hours.text = value.Hours.ToString("D2");
-				minutes.text = value.Minutes.ToString("D2");
-				duration = value;
+			if (!daysText.isFocused && !hoursText.isFocused && !minutesText.isFocused) {
+				days = value.Days;
+				hours = value.Hours;
+				minutes = value.Minutes;
+				UpdateDurationText(false);
 			}
 		}
 
@@ -94,17 +85,17 @@ namespace MSP2050.Scripts
 				highlight.interactable = value;
 
 				// Input Fields
-				days.interactable = value;
-				hours.interactable = value;
-				minutes.interactable = value;
+				daysText.interactable = value;
+				hoursText.interactable = value;
+				minutesText.interactable = value;
 
 				// Flag
 				active = value;
 				if (!active)
 				{
-					days.text = "0";
-					hours.text = "00";
-					minutes.text = "00";
+					daysText.text = "0";
+					hoursText.text = "00";
+					minutesText.text = "00";
 				}
 			}
 		}

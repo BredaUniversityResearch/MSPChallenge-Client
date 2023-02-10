@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 		{
 			foreach(PlanIssueInstance issue in m_issueInstances)
 			{
-				issue.SetLabelInteractability(false);
+				issue.SetLabelVisibility(false);
 			}
 		}
 

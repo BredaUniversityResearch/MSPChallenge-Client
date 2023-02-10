@@ -82,11 +82,5 @@ namespace MSP2050.Scripts
 			sourceLabel.CloseIfNotClickedOn();
 			destinationLabel.CloseIfNotClickedOn();
 		}
-
-		public override void SetLabelInteractability(bool interactability)
-		{
-			sourceLabel.SetInteractability(interactability);
-			destinationLabel.SetInteractability(interactability);
-		}
 	}
 }

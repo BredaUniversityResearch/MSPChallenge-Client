@@ -39,11 +39,6 @@ namespace MSP2050.Scripts
 			m_label.SetVisible(visibility);
 		}
 
-		public override void SetLabelInteractability(bool interactability)
-		{
-			m_label.SetInteractability(interactability);
-		}
-
 		public override bool IsLabelVisible()
 		{
 			return m_label.IsVisible();
