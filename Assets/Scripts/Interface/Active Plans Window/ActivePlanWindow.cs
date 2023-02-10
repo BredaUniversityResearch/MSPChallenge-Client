@@ -20,6 +20,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_acceptEditButton;
 		[SerializeField] Button m_cancelEditButton;
 		[SerializeField] Button m_zoomToPlanButton;
+		[SerializeField] AddTooltip m_acceptButtonTooltip;
 
 		[Header("Plan info")]
 		[SerializeField] Image m_countryIndicator;
@@ -377,7 +378,30 @@ namespace MSP2050.Scripts
 			m_startEditingButton.gameObject.SetActive(!Editing);
 			m_cancelEditButton.gameObject.SetActive(Editing);
 			m_acceptEditButton.gameObject.SetActive(Editing);
-			m_acceptEditButton.interactable = !string.IsNullOrEmpty(m_planName.text) && (m_currentPlan.ConstructionStartTime >= TimeManager.Instance.GetCurrentMonth() || m_currentPlan.StartTime == -1);
+			if(string.IsNullOrEmpty(m_planName.text))
+			{
+				m_acceptEditButton.interactable = false;
+				m_acceptButtonTooltip.enabled = true;
+				m_acceptButtonTooltip.SetText("Set a name for the plan");
+			}
+			else if(m_currentPlan.StartTime < -1)
+			{
+				m_acceptEditButton.interactable = false;
+				m_acceptButtonTooltip.enabled = true;
+				m_acceptButtonTooltip.SetText("Set an implementation time for the plan");
+			}
+			else if(m_currentPlan.ConstructionStartTime < TimeManager.Instance.GetCurrentMonth() && m_currentPlan.StartTime > -1)
+			{
+				m_acceptEditButton.interactable = false;
+				m_acceptButtonTooltip.enabled = true;
+				m_acceptButtonTooltip.SetText("The plan cannot be implemented by the designated time, select a later implementation time");
+			}
+			else
+			{
+				m_acceptEditButton.interactable = true;
+				m_acceptButtonTooltip.enabled = false;
+				m_acceptButtonTooltip.SetText("");
+			}
 
 			//Content
 			m_planName.interactable = Editing;
@@ -472,11 +496,11 @@ namespace MSP2050.Scripts
 						maxConstructionTime = layer.BaseLayer.AssemblyTime;
 				}
 				if (maxConstructionTime == 0)
-					m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}. No construction time required");
+					m_planDateToggle.SetContent($"{Util.MonthToText(m_currentPlan.StartTime)}. No construction time required.");
 				else if (maxConstructionTime == 1)
-					m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after 1 month construction");
+					m_planDateToggle.SetContent($"{Util.MonthToText(m_currentPlan.StartTime)}, after 1 month construction.");
 				else
-					m_planDateToggle.SetContent($"Implementation in {Util.MonthToText(m_currentPlan.StartTime)}, after {maxConstructionTime} months construction");
+					m_planDateToggle.SetContent($"{Util.MonthToText(m_currentPlan.StartTime)}, after {maxConstructionTime} months construction.");
 			}
 
 			//State
