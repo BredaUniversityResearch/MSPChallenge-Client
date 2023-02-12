@@ -390,7 +390,7 @@ namespace MSP2050.Scripts
 				m_acceptButtonTooltip.enabled = true;
 				m_acceptButtonTooltip.SetText("Set an implementation time for the plan");
 			}
-			else if(m_currentPlan.ConstructionStartTime < TimeManager.Instance.GetCurrentMonth() && m_currentPlan.StartTime > -1)
+			else if(m_currentPlan.ConstructionStartTime < TimeManager.Instance.GetCurrentMonth() || !(m_currentPlan.StartTime > -1 || TimeManager.Instance.GetCurrentMonth() > -1))
 			{
 				m_acceptEditButton.interactable = false;
 				m_acceptButtonTooltip.enabled = true;
@@ -411,12 +411,12 @@ namespace MSP2050.Scripts
 			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
 			m_communicationSection.gameObject.SetActive(m_interactionMode != EInteractionMode.SetupNew);
 			m_communicationToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
+			m_issuesToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.RestoreArchived);
 			TimeBar.instance.SetGeometryViewModeVisible(!Editing);
 			m_changeLayersToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_changePoliciesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_planStateToggle.gameObject.SetActive(!Editing);
 			m_planStateToggle.SetInteractable(m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID || SessionManager.Instance.AreWeManager);
-			//m_issuesToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.SetupNew);
 			m_planDateToggle.SetInteractable(Editing);
 
 			foreach(var toggle in m_layerToggles)

@@ -177,6 +177,10 @@ namespace MSP2050.Scripts
 				else
 				{
 					AP_StateSelect.SubmitPlanRecovery(lockedPlan);
+					if (OnViewingPlanChanged != null)
+					{
+						OnViewingPlanChanged.Invoke(null);
+					}
 				}
 			}, null);
 		}

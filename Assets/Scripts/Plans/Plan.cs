@@ -229,7 +229,7 @@ namespace MSP2050.Scripts
 					foreach (PlanLayer layer in PlanLayers)
 					{
 						layer.BaseLayer.RemovePlanLayer(layer);
-						layer.issues = null;
+						layer.issues = new HashSet<PlanIssueObject>(new IssueObjectEqualityComparer());
 					}
 				}
 				else if (State == PlanState.IMPLEMENTED)

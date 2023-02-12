@@ -72,6 +72,12 @@ namespace MSP2050.Scripts
 			m_APWindow.RefreshContent();
 		}
 
+		public override bool MayClose()
+		{
+			m_contentToggle.ForceClose(false);
+			return false;
+		}
+
 		public override void ApplyContent()
 		{
 			if (!m_statusDropdown.interactable)
