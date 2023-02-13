@@ -185,7 +185,7 @@ namespace MSP2050.Scripts
 					}
 				}
 
-				bar.SetStartValue((float)(value.GetKpiValueForMonth(-1) ?? 0f));
+				bar.SetStartValue((float)(value.GetKpiValueForMonth(-1) ?? value.GetKpiValueForMonth(0) ?? 0f));
 				bar.SetActual((float)(value.GetKpiValueForMonth(month) ?? 0f)/*, value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId*/);
 			}
 
@@ -199,7 +199,7 @@ namespace MSP2050.Scripts
 				{
 					bar = CreateKPIBar(m_entryPrefab, group.EntryParent, category);
 				}
-				bar.SetStartValue((float)(category.GetKpiValueForMonth(-1) ?? 0f));
+				bar.SetStartValue((float)(category.GetKpiValueForMonth(-1) ?? category.GetKpiValueForMonth(0) ?? 0f));
 				bar.SetActual((float)(category.GetKpiValueForMonth(month) ?? 0f)/*, category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId*/);
 				bar.transform.SetAsLastSibling();
 				group.PositionSeparator();
