@@ -140,6 +140,7 @@ namespace MSP2050.Scripts
 		{
 			m_slider.SetInteractablity(a_value);
 			m_valueField.interactable = a_value;
+			m_sendReceiveDropdown.interactable = a_value;
 		}
 
 		void SetValue(long a_newValue)

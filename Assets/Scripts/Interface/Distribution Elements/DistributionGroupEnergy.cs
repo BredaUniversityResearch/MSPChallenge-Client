@@ -60,7 +60,15 @@ namespace MSP2050.Scripts
 				{
 					if (m_energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
 						m_energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(m_energyGrid, plan);
-					long old = m_energyGrid.energyDistribution.distribution[entry.Team.ID].expected;
+					long old = 0L;
+					if (m_energyGrid.energyDistribution.distribution.TryGetValue(entry.Team.ID, out var oldExpected))
+					{
+						old = oldExpected.expected;
+					}
+					else
+					{
+						Debug.LogWarning($"Trying to get an old energy value from a distribution that doesn't contain the team: {entry.Team.ID}. Grid persisid: {m_energyGrid.persistentID}. New value: {entry.CurrentValue}");
+					}
 					if (entry.CurrentValue < 0)
 					{
 						if (old < 0)
@@ -97,7 +105,6 @@ namespace MSP2050.Scripts
 
 		public void SetGrid(EnergyGrid grid, EnergyGrid.GridPlanState state, ToggleGroup a_toggleGroup, GridEnergyDistribution a_oldDistribution)
 		{
-			//TODO: use old distribution
 			m_headerToggleBar.group = a_toggleGroup;
 			m_energyGrid = grid;
 			originalGridState = state;
@@ -215,14 +222,17 @@ namespace MSP2050.Scripts
 					case EnergyGrid.GridPlanState.Added:
 						m_changeStateImage.gameObject.SetActive(true);
 						m_changeStateImage.sprite = m_addedSprite;
+						m_changeStateImage.GetComponent<RectTransform>().sizeDelta = new Vector2(14f, 14f);
 						break;
 					case EnergyGrid.GridPlanState.Removed:
 						m_changeStateImage.gameObject.SetActive(true);
 						m_changeStateImage.sprite = m_removedSprite;
+						m_changeStateImage.GetComponent<RectTransform>().sizeDelta = new Vector2(16f, 16f);
 						break;
 					case EnergyGrid.GridPlanState.Changed:
 						m_changeStateImage.gameObject.SetActive(true);
 						m_changeStateImage.sprite = m_changedSprite;
+						m_changeStateImage.GetComponent<RectTransform>().sizeDelta = new Vector2(16f, 16f);
 						break;
 				}
 			}

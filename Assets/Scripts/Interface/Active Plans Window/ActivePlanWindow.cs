@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 	{
 		[Header("General")]
 		[SerializeField] GenericWindow m_window;
-		[SerializeField] ToggleGroup m_contentToggleGroup;
+		//[SerializeField] ToggleGroup m_contentToggleGroup;
 		[SerializeField] Transform m_popoutParent;
 
 		[Header("Buttons")]
@@ -346,6 +346,11 @@ namespace MSP2050.Scripts
 			if (!m_initialised)
 				Initialise();
 
+			if (m_selectedContentToggle != null)
+			{
+				m_selectedContentToggle.ForceClose(false);
+			}
+
 			gameObject.SetActive(true);
 			if (plan == null)
 			{
@@ -427,6 +432,10 @@ namespace MSP2050.Scripts
 
 		void EnterEditMode()
 		{
+			if (m_selectedContentToggle != null)
+			{
+				m_selectedContentToggle.ForceClose(false);
+			}
 			TimeBar.instance.SetViewMode(PlanManager.PlanViewState.All);
 
 			if(m_interactionMode == EInteractionMode.SetupNew)

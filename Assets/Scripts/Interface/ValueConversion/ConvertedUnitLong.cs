@@ -5,14 +5,14 @@ namespace MSP2050.Scripts
 {
 	public struct ConvertedUnitLong
 	{
-		private long amount;		//e.g. 1.56
+		private double amount;		//e.g. 1.56
 		private int amountDecimalPlaces;
 		private string unit;        //e.g. kg
 
 		public int AmountDecimalPlaces => amountDecimalPlaces;
 		public string Unit => unit;
 
-		public ConvertedUnitLong(long amount, string unit, int amountDecimalPlaces)
+		public ConvertedUnitLong(double amount, string unit, int amountDecimalPlaces)
 		{
 			this.amount = amount;
 			this.unit = unit;

@@ -316,10 +316,16 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Sends the grid to the server, including the name but not the energy distribution.
 		/// </summary>
-		public void SubmitEmptyGridToServer(BatchRequest batch)
+		public void SubmitEmptyGridOrName(BatchRequest batch)
 		{
 			if (databaseIDSet)
+			{
+				JObject dataObject2 = new JObject();
+				dataObject2.Add("id", databaseID);
+				dataObject2.Add("name", name);
+				batch.AddRequest(Server.UpdateGridName(), dataObject2, BatchRequest.BATCH_GROUP_GRID_ADD);
 				return;
+			}
 
 			//Add new grid on server and get databaseID
 			JObject dataObject = new JObject();
@@ -416,22 +422,6 @@ namespace MSP2050.Scripts
 			//dataObject.Add("expected", JToken.FromObject(expected));
 			batch.AddRequest(Server.UpdateGridEnergy(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
 
-		}
-
-		/// <summary>
-		/// Sets the grids name. Sends it to the server if it already has a database id. 
-		/// Otherwise it will automatically be sent when the grid is sent to the server.
-		/// </summary>
-		public void SubmitName()
-		{
-			if (databaseIDSet)
-			{
-				//Submit new name to server (for databaseID)
-				NetworkForm form = new NetworkForm();
-				form.AddField("id", databaseID);
-				form.AddField("name", name);
-				ServerCommunication.Instance.DoRequest(Server.UpdateGridName(), form);
-			}
 		}
 
 		/// <summary>
@@ -743,23 +733,39 @@ namespace MSP2050.Scripts
 			{
 				result = true;
 				Dictionary<int, SourceSummary> dict = new Dictionary<int, SourceSummary>();
+				List<SourceSummary> newSources = new List<SourceSummary>();
 				foreach (EnergyPointSubEntity newSource in sources)
 				{
-					//Grids with new geom will never be identical to existing ones (even if it IS the same)
+					SourceSummary summary = new SourceSummary(newSource.Entity.Country,
+							newSource.sourcePolygon == null ? newSource.Entity.EntityTypes[0] : newSource.sourcePolygon.Entity.EntityTypes[0],
+							newSource.Capacity);
 					if (newSource.GetPersistentID() == -1)
-						return false;
-					dict.Add(newSource.GetPersistentID(), 
-						new SourceSummary(newSource.Entity.Country, 
-							newSource.sourcePolygon == null ? newSource.Entity.EntityTypes[0] : newSource.sourcePolygon.Entity.EntityTypes[0], 
-							newSource.Capacity));
+						newSources.Add(summary);
+					else
+						dict.Add(newSource.GetPersistentID(), summary);
 				}
 				foreach (EnergyPointSubEntity oldSource in other.sources)
 				{
 					SourceSummary pair;
-					if (!dict.TryGetValue(oldSource.GetPersistentID(), out pair)
-					    || pair.type != (oldSource.sourcePolygon == null ? oldSource.Entity.EntityTypes[0] : oldSource.sourcePolygon.Entity.EntityTypes[0])
-					    || pair.country != oldSource.Entity.Country
-					    || pair.capacity != oldSource.Capacity)
+					if(oldSource.GetPersistentID() == -1)
+					{
+						bool found = false;
+						foreach(SourceSummary sourceSummary in newSources)
+						{
+							if (sourceSummary.Matches(oldSource.Entity.Country, oldSource.sourcePolygon == null ? oldSource.Entity.EntityTypes[0] : oldSource.sourcePolygon.Entity.EntityTypes[0], oldSource.Capacity))
+							{
+								found = true;
+								break;
+							}
+						}
+						if(!found)
+						{
+							result = false;
+							break;
+						}
+					}
+					else if (!dict.TryGetValue(oldSource.GetPersistentID(), out pair)
+					    || !pair.Matches(oldSource.Entity.Country, oldSource.sourcePolygon == null ? oldSource.Entity.EntityTypes[0] : oldSource.sourcePolygon.Entity.EntityTypes[0], oldSource.Capacity))
 					{ 
 						result = false;
 						break;

@@ -260,7 +260,7 @@ namespace MSP2050.Scripts
 
 				// Add new grids (not distributions/sockets/sources yet)
 				foreach (EnergyGrid grid in data.energyGrids)
-					grid.SubmitEmptyGridToServer(a_batch); //TODO CHECK: won't this submit empty grids even if they already exist on the server?
+					grid.SubmitEmptyGridOrName(a_batch); //TODO CHECK: won't this submit empty grids even if they already exist on the server?
 				// Delete previously added grids no longer in this plan
 				foreach (int gridID in GetGridsRemovedFromPlanSinceBackup(data))
 					EnergyGrid.SubmitGridDeletionToServer(gridID, a_batch);

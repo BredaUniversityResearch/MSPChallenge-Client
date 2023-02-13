@@ -1607,5 +1607,10 @@ namespace MSP2050.Scripts
 			this.type = type;
 			this.capacity = capacity;
 		}
+
+		public bool Matches(int a_country, EntityType a_type, long a_capacity)
+		{
+			return country == a_country && type == a_type && capacity == a_capacity;
+		}
 	}
 }

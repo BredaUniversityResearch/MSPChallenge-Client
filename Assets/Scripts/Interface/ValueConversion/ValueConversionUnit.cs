@@ -75,7 +75,7 @@ namespace MSP2050.Scripts
 
 			if (value == 0L)
 			{
-				return new ConvertedUnitLong(0, baseUnitFormat, 0);
+				return new ConvertedUnitLong(0D, baseUnitFormat, 0);
 			}
 
 			UnitEntry unitConversion = conversionUnits[0];
@@ -88,7 +88,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			return new ConvertedUnitLong(value / (long)unitConversion.unitSize, unitConversion.unitPostfix, decimalPlaces);
+			return new ConvertedUnitLong((double)value / (double)unitConversion.unitSize, unitConversion.unitPostfix, decimalPlaces);
 		}
 
 		public void ParseUnit(string input, out float amount)
@@ -122,23 +122,25 @@ namespace MSP2050.Scripts
 
 			string numberString = input.Substring(0, separatorIndex + 1).Trim();
 			string unitString = input.Substring(separatorIndex + 1).Trim();
+			double tempResult;
 
-			if (long.TryParse(numberString, Localisation.FloatNumberStyle, Localisation.NumberFormatting, out amount))
+			if (double.TryParse(numberString, Localisation.FloatNumberStyle, Localisation.NumberFormatting, out tempResult))
 			{
 				UnitEntry unit = FindUnitEntryForPostfix(unitString, conversionUnits, EPostfixMatchMode.MatchExact | EPostfixMatchMode.IgnoreCase);
 				if (unit != null)
 				{
-					amount *= (long)unit.unitSize;
+					tempResult *= (double)unit.unitSize;
 				}
 				else
 				{
 					unit = FindUnitEntryForPostfix(unitString, defaultMetricUnits, EPostfixMatchMode.StartsWith | EPostfixMatchMode.IgnoreCase);
 					if (unit != null)
 					{
-						amount *= (long)unit.unitSize;
+						tempResult *= (double)unit.unitSize;
 					}
 				}
 			}
+			amount = (long)tempResult;
 		}
 
 		private UnitEntry FindUnitEntryForPostfix(string inputPostfix, UnitEntry[] entries, EPostfixMatchMode matchMode)
