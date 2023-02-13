@@ -142,7 +142,8 @@ namespace MSP2050.Scripts
         {
             if (InterfaceCanvas.Instance != null)
                 StartCoroutine(InterfaceCanvas.Instance.gameMenu.LateUpdatePosition());
-            onDisplaySettingsChange.Invoke();
+			GameSettings.Instance.SetResolution(resolutionIndex);
+			onDisplaySettingsChange.Invoke();
         }
 
         private void playSoundEffect(string audioID)
