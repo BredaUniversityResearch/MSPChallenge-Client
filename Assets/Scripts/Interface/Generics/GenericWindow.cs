@@ -16,6 +16,7 @@ namespace MSP2050.Scripts
 		public LayoutElement contentLayout;
 		public TextMeshProUGUI title;
 		public bool shouldCenter;
+		public bool shouldMaximize;
 
 		// Buttons
 		public Button exitButton;
@@ -61,6 +62,18 @@ namespace MSP2050.Scripts
 			{
 				CenterWindow();
 			}
+			if(shouldMaximize)
+			{
+				Vector3[] corners = new Vector3[4];
+				Vector3[] contentCorners = new Vector3[4];
+				float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
+				windowTransform.GetWorldCorners(corners);
+				contentLayout.GetComponent<RectTransform>().GetWorldCorners(contentCorners);
+				float containerSizeVer = (corners[1].y - corners[0].y) - (contentCorners[1].y - contentCorners[0].y); 
+				float containerSizeHor = (corners[2].x - corners[1].x) - (contentCorners[2].x - contentCorners[1].x); 
+				contentLayout.preferredWidth = (Screen.width - containerSizeHor) / InterfaceCanvas.Instance.canvas.scaleFactor - LEFT_OFFSET - BORDER_OFFSET;
+				contentLayout.preferredHeight = (Screen.height - containerSizeVer) / InterfaceCanvas.Instance.canvas.scaleFactor - 2 * BORDER_OFFSET;
+			}
 		}
 
 		public void CenterWindow()
@@ -74,9 +87,8 @@ namespace MSP2050.Scripts
 			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
 			Vector3[] corners = new Vector3[4];
 			windowTransform.GetWorldCorners(corners);
-			//48f = sidebar size
-			windowTransform.anchoredPosition = new Vector2(Mathf.Round((corners[1].x - corners[2].x + 48f) * 0.5f * (1f / scale)),
-				Mathf.Round((corners[1].y - corners[0].y) * 0.5f * (1f / scale)));
+			windowTransform.anchoredPosition = new Vector2(Mathf.Round(((corners[1].x - corners[2].x) / scale + (LEFT_OFFSET - BORDER_OFFSET))*0.5f),
+				Mathf.Round((corners[1].y - corners[0].y) * 0.5f / scale));
 		}
 		
 		public void SetTitle(string text) {
@@ -161,7 +173,6 @@ namespace MSP2050.Scripts
 			}
 			else if (ver == ResizeHandle.RescaleDirectionVer.Up)
 			{
-				//TODO
 				float containerSize = (corners[1].y - corners[0].y) - (contentCorners[1].y - contentCorners[0].y); //Size of the area of the window not part of contentlayout
 				float target = data.position.y - corners[0].y - containerSize;
 				float max = Screen.height - Mathf.Max(corners[0].y, BORDER_OFFSET) - containerSize - BORDER_OFFSET;

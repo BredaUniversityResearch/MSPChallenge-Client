@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		[Title("Header")]
 		[SerializeField] Toggle m_headerToggleBar;
 		[SerializeField] Image m_changeStateImage;
+		[SerializeField] AddTooltip m_changeStateTooltip;
 		[SerializeField] CustomInputField m_gridNameField;
 		[SerializeField] CustomButton m_viewGridButton;
 		[SerializeField] Sprite m_addedSprite, m_removedSprite, m_changedSprite, m_greenEnergySprite, m_greyEnergySprite;
@@ -46,7 +47,6 @@ namespace MSP2050.Scripts
 			m_gridNameField.onValueChanged.AddListener((a) => CheckIfChanged());
 			m_viewGridButton.onClick.AddListener(() =>
 			{
-				//TODO: fade UI out until mouse move (was in plansmonitor FadeUntilMouseMove)
 				m_energyGrid.HighlightSockets();
 				CameraManager.Instance.ZoomToBounds(m_energyGrid.GetGridRect());
 			});
@@ -209,6 +209,7 @@ namespace MSP2050.Scripts
 				{
 					m_changeStateImage.gameObject.SetActive(true);
 					m_changeStateImage.sprite = m_changedSprite;
+					m_changeStateTooltip.SetText("This grid's sources or energy distribution have been changed in this plan.");
 				}
 				else
 				{
@@ -223,16 +224,19 @@ namespace MSP2050.Scripts
 						m_changeStateImage.gameObject.SetActive(true);
 						m_changeStateImage.sprite = m_addedSprite;
 						m_changeStateImage.GetComponent<RectTransform>().sizeDelta = new Vector2(14f, 14f);
+						m_changeStateTooltip.SetText("This grid was added in this plan, possibly replacing one or more previous grids.");
 						break;
 					case EnergyGrid.GridPlanState.Removed:
 						m_changeStateImage.gameObject.SetActive(true);
 						m_changeStateImage.sprite = m_removedSprite;
 						m_changeStateImage.GetComponent<RectTransform>().sizeDelta = new Vector2(16f, 16f);
+						m_changeStateTooltip.SetText("This grid was removed or replaced in this plan.");
 						break;
 					case EnergyGrid.GridPlanState.Changed:
 						m_changeStateImage.gameObject.SetActive(true);
 						m_changeStateImage.sprite = m_changedSprite;
 						m_changeStateImage.GetComponent<RectTransform>().sizeDelta = new Vector2(16f, 16f);
+						m_changeStateTooltip.SetText("This grid's sources or energy distribution have been changed in this plan.");
 						break;
 				}
 			}

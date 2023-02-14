@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_headerToggleBar: {fileID: 4298917368631413167}
   m_changeStateImage: {fileID: 2476648013847333407}
+  m_changeStateTooltip: {fileID: 2425171709194899891}
   m_gridNameField: {fileID: 1363282317190372188}
   m_viewGridButton: {fileID: 7709019999349958638}
   m_addedSprite: {fileID: 21300000, guid: 4d66c5c61f24f7345a540bf457f2d00e, type: 3}
@@ -927,6 +928,7 @@ GameObject:
   - component: {fileID: 4026275315266676716}
   - component: {fileID: 2005525306939026455}
   - component: {fileID: 2476648013847333407}
+  - component: {fileID: 2425171709194899891}
   m_Layer: 5
   m_Name: GridState
   m_TagString: Untagged
@@ -992,6 +994,21 @@ MonoBehaviour:
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
   colourAsset: {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
+--- !u!114 &2425171709194899891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3297489163479810842}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: 
+  timeBeforeShowing: 0.5
+  passClickToParent: 0
 --- !u!1 &4176885963337840256
 GameObject:
   m_ObjectHideFlags: 0
@@ -2046,6 +2063,12 @@ PrefabInstance:
         type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7501b655479a0db4fbb14a13f5afcade, type: 3}
+--- !u!224 &8936134249509785992 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4804249205629611, guid: 7501b655479a0db4fbb14a13f5afcade,
+    type: 3}
+  m_PrefabInstance: {fileID: 8940374998769201955}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1363282317190372188 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7996648812605073535, guid: 7501b655479a0db4fbb14a13f5afcade,
@@ -2058,9 +2081,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30a9fec5836a98a4abddbd8282ec3f2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &8936134249509785992 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 4804249205629611, guid: 7501b655479a0db4fbb14a13f5afcade,
-    type: 3}
-  m_PrefabInstance: {fileID: 8940374998769201955}
-  m_PrefabAsset: {fileID: 0}

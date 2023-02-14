@@ -35,10 +35,11 @@ namespace MSP2050.Scripts
 		//private bool m_hiddenByVisibility;
 		private PlansGroupBar m_group;
 
-		public void Initialise(Plan a_plan)
+		public void Initialise(Plan a_plan, bool a_selected)
 		{
 			this.m_plan = a_plan;
 			UpdateInfo();
+			m_barToggle.isOn = a_selected;
 			m_barToggle.onValueChanged.AddListener((b) =>
 			{
 				if (!m_ignoreBarCallback)

@@ -50,8 +50,7 @@ namespace MSP2050.Scripts
 		//Planning time
 		[Header("Planning State and Time")]
 		[SerializeField] CustomButton timeManagerButton;
-		[SerializeField] TextMeshProUGUI stateText;
-		[SerializeField] TextMeshProUGUI timeText;
+		[SerializeField] TextMeshProUGUI stateAndTimeText;
 		[SerializeField] AddTooltip toolTip;
 		PlanningState planningState;
 
@@ -65,6 +64,7 @@ namespace MSP2050.Scripts
 		int maxSelectableMonth = 0;
 		int maxSelectableYear = 0;
 		bool ignoreActivityCallback = false;
+		TimeSpan timeRemaining;
 
 		public enum WorldViewMode { Normal, Time, Difference, Plan }
 		WorldViewMode viewMode = WorldViewMode.Normal;
@@ -137,9 +137,7 @@ namespace MSP2050.Scripts
 			}
 
 			fill.anchorMax = new Vector2((float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month, 1f);
-			//fill.fillAmount = (float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month;
 			currentDateText.text = Util.MonthToText(month);
-			UpdateIndicator(viewingTimeIndicatorBottom, month);
 
 			if (isViewingPlan)
 			{
@@ -329,35 +327,14 @@ namespace MSP2050.Scripts
 		public void SetState(PlanningState a_newState)
 		{
 			planningState = a_newState;
-			switch (a_newState)
-			{
-				case TimeManager.PlanningState.Setup:
-					stateText.text = "Setup";
-					break;
-				case TimeManager.PlanningState.Play:
-					stateText.text = "Planning";
-					break;
-				case TimeManager.PlanningState.FastForward:
-					stateText.text = "Fast Forward";
-					break;
-				case TimeManager.PlanningState.Simulation:
-					stateText.text = "Simulating";
-					break;
-				case TimeManager.PlanningState.Pause:
-					stateText.text = "Paused";
-					break;
-				case TimeManager.PlanningState.End:
-					stateText.text = "End";
-					break;
-			}
-
+			UpdateStateAndTimeText();
 		}
 
 		public void SetCatchingUp(bool a_value)
 		{
 			if (a_value && planningState == TimeManager.PlanningState.Play)
 			{
-				stateText.text = "Calculating";
+				stateAndTimeText.text = "Calculating";
 			}
 			else
 			{
@@ -367,18 +344,45 @@ namespace MSP2050.Scripts
 
 		public void SetTimeRemaining(TimeSpan a_newTime)
 		{
+			timeRemaining = a_newTime;
+			UpdateStateAndTimeText();
+		}
 
-			if (a_newTime.Ticks > TimeSpan.TicksPerDay)
+		void UpdateStateAndTimeText()
+		{
+			string timeString ="";
+			if (timeRemaining.Ticks > TimeSpan.TicksPerDay)
 			{
-				timeText.text = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}", a_newTime.Days, a_newTime.Hours, a_newTime.Minutes, a_newTime.Seconds);
+				timeString = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}", timeRemaining.Days, timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
 			}
-			else if (a_newTime.Ticks < TimeSpan.TicksPerHour)
+			else if (timeRemaining.Ticks < TimeSpan.TicksPerHour)
 			{
-				timeText.text = string.Format("{0:D1}:{1:D2}", a_newTime.Minutes, a_newTime.Seconds);
+				timeString = string.Format("{0:D1}:{1:D2}", timeRemaining.Minutes, timeRemaining.Seconds);
 			}
-			else if (a_newTime.Ticks < TimeSpan.TicksPerDay)
+			else if (timeRemaining.Ticks < TimeSpan.TicksPerDay)
 			{
-				timeText.text = string.Format("{0:D1}:{1:D2}:{2:D2}", a_newTime.Hours, a_newTime.Minutes, a_newTime.Seconds);
+				timeString = string.Format("{0:D1}:{1:D2}:{2:D2}", timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
+			}
+			switch (planningState)
+			{
+				case TimeManager.PlanningState.Setup:
+					stateAndTimeText.text = "Setup";
+					break;
+				case TimeManager.PlanningState.Play:
+					stateAndTimeText.text = $"Planning\n{timeString}";
+					break;
+				case TimeManager.PlanningState.FastForward:
+					stateAndTimeText.text = "Fast Forward";
+					break;
+				case TimeManager.PlanningState.Simulation:
+					stateAndTimeText.text = "Simulating";
+					break;
+				case TimeManager.PlanningState.Pause:
+					stateAndTimeText.text = $"Paused\n{timeString}";
+					break;
+				case TimeManager.PlanningState.End:
+					stateAndTimeText.text = "End";
+					break;
 			}
 		}
 

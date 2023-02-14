@@ -265,7 +265,10 @@ namespace MSP2050.Scripts
 
 			if(m_graphDisplay != null)
 			{
-				m_graphDisplay.ToggleGraph(targetValue, isOnState);
+				if(!m_graphDisplay.ToggleGraph(targetValue, isOnState))
+				{
+					targetBar.SetGraphToggled(false);
+				}
 			}
 
 			KPIValueProceduralColorScheme.Context context = new KPIValueProceduralColorScheme.Context();

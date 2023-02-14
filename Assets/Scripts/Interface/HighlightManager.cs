@@ -21,7 +21,6 @@ namespace MSP2050.Scripts
 		[SerializeField] Object pointHighlightPrefab;
 		[SerializeField] Object uiHighlightPrefab;
 		[SerializeField] private Transform uiHighlightParent;
-		List<GameObject> pointHighlightObjects = new List<GameObject>();
 		List<GameObject> uiHighlightObjects = new List<GameObject>();
 		private List<string> unresolvedHighlights = new List<string>();
 
@@ -36,14 +35,7 @@ namespace MSP2050.Scripts
 			GameObject temp = Instantiate(pointHighlightPrefab, subEnt.GetGameObject().transform) as GameObject;
 			temp.GetComponent<SpriteRenderer>().color = SessionManager.Instance.GetTeamByTeamID(subEnt.Entity.Country).color;
 			temp.transform.localPosition = Vector3.zero;
-			pointHighlightObjects.Add(temp);
-		}
-
-		public void ClearPointHighlights()
-		{
-			foreach (GameObject go in pointHighlightObjects)
-				Destroy(go);
-			pointHighlightObjects = new List<GameObject>();
+			//pointHighlightObjects.Add(temp);
 		}
 
 		public void ClearUIHighlights()
