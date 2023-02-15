@@ -112,8 +112,9 @@ namespace MSP2050.Scripts
 			m_APWindow.OnTimeChange();
 		}
 
-		public override bool MayClose()
+		public override bool MayClose(out bool a_applyChanges)
 		{
+			a_applyChanges = false;
 			if (m_finishTime != GetNewPlanStartDate())
 			{
 				DialogBoxManager.instance.ConfirmationWindow("Discard time change", "Are you sure you want to return to the plan's previous implementation time?", null, m_contentToggle.ForceClose);

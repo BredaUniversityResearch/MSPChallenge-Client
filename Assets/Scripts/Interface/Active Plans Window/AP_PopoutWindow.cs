@@ -39,9 +39,10 @@ namespace MSP2050.Scripts
 		public virtual void DiscardContent()
 		{ }
 
-		public virtual bool MayClose()
+		public virtual bool MayClose(out bool a_applyChanges)
 		{
 			//Overwritten by children that have confirm / cancel buttons
+			a_applyChanges = true;
 			return true; 
 		}
 

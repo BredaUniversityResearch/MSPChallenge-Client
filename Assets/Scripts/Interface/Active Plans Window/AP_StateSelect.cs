@@ -72,10 +72,10 @@ namespace MSP2050.Scripts
 			m_APWindow.RefreshContent();
 		}
 
-		public override bool MayClose()
+		public override bool MayClose(out bool a_applyChanges)
 		{
-			m_contentToggle.ForceClose(false);
-			return false;
+			a_applyChanges = false;
+			return true;
 		}
 
 		public override void ApplyContent()

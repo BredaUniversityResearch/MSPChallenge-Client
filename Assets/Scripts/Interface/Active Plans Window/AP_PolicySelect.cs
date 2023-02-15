@@ -114,8 +114,9 @@ namespace MSP2050.Scripts
 			m_APWindow.RefreshContent();
 		}
 
-		public override bool MayClose()
+		public override bool MayClose(out bool a_applyChanges)
 		{
+			a_applyChanges = false;
 			if (m_changed)
 			{
 				DialogBoxManager.instance.ConfirmationWindow("Discard policy changes?", "Are you sure you want to discard any changes made to what policies are in the plan?", null, m_contentToggle.ForceClose);

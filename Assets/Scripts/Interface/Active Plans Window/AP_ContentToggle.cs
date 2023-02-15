@@ -85,9 +85,9 @@ namespace MSP2050.Scripts
 
 		public bool TryClose()
 		{
-			if (m_popoutWindow.MayClose())
+			if (m_popoutWindow.MayClose(out bool applyChanges))
 			{
-				ForceClose(true);
+				ForceClose(applyChanges);
 				return true;
 			}
 			return false;

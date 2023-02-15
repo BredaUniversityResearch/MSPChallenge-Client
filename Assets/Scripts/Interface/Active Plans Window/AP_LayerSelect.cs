@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Reactive.Joins;
+using Codice.Client.BaseCommands;
+using static MSP2050.Scripts.Plan;
 
 namespace MSP2050.Scripts
 {
@@ -197,15 +199,26 @@ namespace MSP2050.Scripts
 					PolicyLogicEnergy.Instance.AddToPlan(m_plan, false);
 				}
 			}
+
+			//Determine construction start time
+			int maxConstructionTime = 0;
+			foreach (AbstractLayer layer in m_currentLayers)
+			{
+				if (layer.AssemblyTime > maxConstructionTime)
+					maxConstructionTime = layer.AssemblyTime;
+			}
+			m_plan.ConstructionStartTime = m_plan.StartTime - maxConstructionTime;
+
 			ConstraintManager.Instance.CheckConstraints(m_plan, out var unavailableTypeNames);
 			IssueManager.Instance.SetIssueInstancesToPlan(m_plan);
 			LayerManager.Instance.UpdateVisibleLayersToPlan(m_plan);
 			m_APWindow.RefreshContent();
 		}
 
-		public override bool MayClose()
+		public override bool MayClose(out bool a_applyChanges)
 		{
-			if(m_changed)
+			a_applyChanges = false;
+			if (m_changed)
 			{
 				DialogBoxManager.instance.ConfirmationWindow("Discard layer changes?", "Are you sure you want to discard any changes made to what layers are in the plan?", null, m_contentToggle.ForceClose);
 				return false;
