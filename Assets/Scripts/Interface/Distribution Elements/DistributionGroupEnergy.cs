@@ -56,6 +56,8 @@ namespace MSP2050.Scripts
 		{
 			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
 			{
+				if (!entry.gameObject.activeSelf)
+					continue;
 				if (entry.Changed)
 				{
 					if (m_energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
@@ -245,9 +247,11 @@ namespace MSP2050.Scripts
 		bool CheckIfChanged()
 		{
 			changed = false;
-			foreach(var socketEntry in m_socketEntries)
+			foreach(var entry in m_socketEntries)
 			{
-				if(socketEntry.Changed)
+				if (!entry.gameObject.activeSelf)
+					continue;
+				if (entry.Changed)
 				{
 					changed = true;
 					break;
@@ -281,6 +285,8 @@ namespace MSP2050.Scripts
 			long totalOutput = 0;
 			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
 			{
+				if (!entry.gameObject.activeSelf)
+					continue;
 				if (entry.CurrentValue < 0)
 				{
 					totalInput -= entry.CurrentValue; //Is a negative value
@@ -295,6 +301,8 @@ namespace MSP2050.Scripts
 			long remaining = totalInput-totalOutput;
 			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
 			{
+				if (!entry.gameObject.activeSelf)
+					continue;
 				entry.SetRemainingPower(remaining);
 			}
 
@@ -302,6 +310,8 @@ namespace MSP2050.Scripts
 			totalOutput = 0;
 			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
 			{
+				if (!entry.gameObject.activeSelf)
+					continue;
 				if (entry.CurrentValue > 0)
 					totalOutput += entry.CurrentValue;
 			}
@@ -309,6 +319,8 @@ namespace MSP2050.Scripts
 
 			foreach (DistributionEnergySocketEntry entry in m_socketEntries)
 			{
+				if (!entry.gameObject.activeSelf)
+					continue;
 				entry.SetRemainingPower(remaining);
 			}
 			CheckIfChanged();

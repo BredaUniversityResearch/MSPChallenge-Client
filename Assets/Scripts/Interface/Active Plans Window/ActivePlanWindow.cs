@@ -49,6 +49,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_layerParent;
 		[SerializeField] GameObject m_layerPrefab;
 		[SerializeField] AP_ContentToggle m_changeLayersToggle;
+		[SerializeField] GameObject m_changeLayersToggleContainer;
 		public AP_GeometryTool m_geometryTool;
 		[SerializeField] AP_LayerSelect m_layerSelect;
 		[SerializeField] GameObject m_noLayersEntry;
@@ -58,6 +59,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_policyParent;
 		[SerializeField] GameObject m_policyPrefab;
 		[SerializeField] AP_ContentToggle m_changePoliciesToggle;
+		[SerializeField] GameObject m_changePoliciesToggleContainer;
 		[SerializeField] AP_PolicySelect m_policySelect;
 		[SerializeField] GameObject m_noPoliciesEntry;
 
@@ -418,8 +420,8 @@ namespace MSP2050.Scripts
 			m_communicationToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
 			m_issuesToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.RestoreArchived);
 			TimeBar.instance.SetGeometryViewModeVisible(!Editing);
-			m_changeLayersToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
-			m_changePoliciesToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_changeLayersToggleContainer.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_changePoliciesToggleContainer.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_planStateToggle.gameObject.SetActive(!Editing);
 			m_planStateToggle.SetInteractable(m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID || SessionManager.Instance.AreWeManager);
 			m_planDateToggle.SetInteractable(Editing);
@@ -576,11 +578,11 @@ namespace MSP2050.Scripts
 						onePlusPolicyActive = true;
 					}
 				}
-				m_noPoliciesEntry.SetActive(!onePlusPolicyActive);
+				m_noPoliciesEntry.SetActive(!Editing && !onePlusPolicyActive);
 			}
 			else
 			{ 
-				m_noPoliciesEntry.SetActive(false);
+				m_noPoliciesEntry.SetActive(!Editing);
 			}
 		}
 
@@ -598,7 +600,7 @@ namespace MSP2050.Scripts
 			{
 				m_layerToggles[i].gameObject.SetActive(false);
 			}
-			m_noLayersEntry.SetActive(m_currentPlan.PlanLayers.Count == 0);
+			m_noLayersEntry.SetActive(!Editing && m_currentPlan.PlanLayers.Count == 0);
 		}
 
 		private void CreateLayerEntry(PlanLayer layer)

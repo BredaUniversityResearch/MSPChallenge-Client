@@ -7,17 +7,11 @@ namespace MSP2050.Scripts
 	{
 		private string identifier = string.Empty;
 
-		[SerializeField]
-		private TextMeshProUGUI fullDescriptionText = null;
-
-		[SerializeField]
-		private CustomButton dismissButton = null;
-
-		[SerializeField]
-		private CustomButton notificationActionButton = null;
-
-		[SerializeField]
-		private TextMeshProUGUI notificationActionButtonText = null;
+		[SerializeField] TextMeshProUGUI fullDescriptionText = null;
+		[SerializeField] TextMeshProUGUI titleText = null;
+		[SerializeField] CustomButton dismissButton = null;
+		[SerializeField] CustomButton notificationActionButton = null;
+		//[SerializeField] TextMeshProUGUI notificationActionButtonText = null;
 
 		private void Start()
 		{
@@ -36,12 +30,13 @@ namespace MSP2050.Scripts
 		{
 			identifier = data.identifier;
 			fullDescriptionText.text = data.description;
+			titleText.text = data.summary;
 
 			bool buttonActive = !string.IsNullOrEmpty(data.buttonText) && data.onButtonPress != null;
 			notificationActionButton.gameObject.SetActive(buttonActive);
 			if (buttonActive)
 			{
-				notificationActionButtonText.text = data.buttonText;
+				//notificationActionButtonText.text = data.buttonText;
 				notificationActionButton.onClick.RemoveAllListeners();
 				notificationActionButton.onClick.AddListener(data.onButtonPress);
 			}
