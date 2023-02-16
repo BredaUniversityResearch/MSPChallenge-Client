@@ -40,10 +40,9 @@ class ProjectBuilder
 	
 	private static void WindowsDevBuilder()
 	{
-		List<string> scenes = FindEnabledEditorScenes();
+        PreBuild();
 		var outputDir = GetArg("-customBuildPath");
-		//BuildTarget buildTarget = GetArg("-buildTarget");
-		BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, BuildOptions.None);
+		BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, BuildOptions.Development);
 	}
 
     private static void MacOSDevBuilder()
@@ -89,7 +88,7 @@ class ProjectBuilder
 			if (args[i] == name && args.Length > i + 1)
 			{
 				return args[i + 1];
-			}
+            }
 		}
 		return null;
 	}
