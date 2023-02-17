@@ -13,6 +13,7 @@ namespace MSP2050.Scripts
 		[SerializeField] GenericWindow m_window;
 		//[SerializeField] ToggleGroup m_contentToggleGroup;
 		[SerializeField] Transform m_popoutParent;
+		[SerializeField] GameObject m_popoutLip;
 
 		[Header("Buttons")]
 		[SerializeField] GameObject m_buttonContainer;
@@ -630,13 +631,17 @@ namespace MSP2050.Scripts
 			if(m_selectedContentToggle != null)
 				result = m_selectedContentToggle.TryClose();
 			if (result)
+			{
 				m_selectedContentToggle = a_newToggle;
+				m_popoutLip.SetActive(true);
+			}
 			return result;
 		}
 
 		public void ClearSelectedContentToggle()
 		{
 			m_selectedContentToggle = null;
+			m_popoutLip.SetActive(false);
 		}
 
 		public void OnDelayedPolicyEffectCalculated()
