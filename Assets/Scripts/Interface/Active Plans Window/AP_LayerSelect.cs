@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Reactive.Joins;
-using Codice.Client.BaseCommands;
-using static MSP2050.Scripts.Plan;
 
 namespace MSP2050.Scripts
 {
