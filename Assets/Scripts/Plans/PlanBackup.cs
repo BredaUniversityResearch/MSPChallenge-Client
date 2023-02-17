@@ -311,7 +311,11 @@ namespace MSP2050.Scripts
 				List<int> removedIssueIDs = new List<int>();
 				Dictionary<int, PlanIssueObject> newIssues = new Dictionary<int, PlanIssueObject>();
 				foreach (PlanIssueObject issue in m_planLayer.issues)
-					newIssues.Add(issue.GetIssueHash(), issue);
+				{
+					int hash = issue.GetIssueHash();
+					if(!newIssues.ContainsKey(hash))
+						newIssues.Add(hash, issue);
+				}
 
 				foreach (PlanIssueObject issue in m_issues)
 				{
