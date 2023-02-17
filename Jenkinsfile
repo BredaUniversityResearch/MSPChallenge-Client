@@ -25,10 +25,6 @@ pipeline {
 		String outputWinDevFolder = "CurrentWinDevBuild"
 		String outputMacFolder = "CurrentMacBuild"
 		String outputWinFolder = "CurrentWinBuild"
-		String mac = "mac"
-		String windows = "windows"
-		String dev = "dev"
-		String release = "release"
 		
 		NEXUS_CREDENTIALS = credentials('NEXUS_CREDENTIALS')
 	}
