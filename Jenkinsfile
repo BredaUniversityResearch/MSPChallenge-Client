@@ -51,14 +51,14 @@ pipeline {
 				script {
 					
 					echo "Launching Windows Release Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\%WINDOWS_BUILD_NAME%.exe" -customBuildName %WINDOWS_BUILD_NAME% -executeMethod ProjectBuilder.WindowsBuilder
+					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\MSP Challenge.exe" -customBuildName "MSP Challenge" -executeMethod ProjectBuilder.WindowsBuilder
 						echo "Zipping build..."
 						7z a -tzip -r "%output%\\%WINDOWS_BUILD_NAME%" "%CD%\\%output%\\%outputWinFolder%\\*"
 						echo "Uploading release build artifact to Nexus..."
 						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Temporary-Releases" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MSPChallenge" -F "raw.asset1=@%output%\\%WINDOWS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_BUILD_NAME%"'''
 						
 					echo "Launching MacOS Release Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\%MACOS_BUILD_NAME%" -customBuildName %MACOS_BUILD_NAME% -executeMethod ProjectBuilder.MacOSBuilder
+					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\MSP Challenge.app" -customBuildName "MSP Challenge.app" -executeMethod ProjectBuilder.MacOSBuilder
 						echo "Zipping build..."
 						7z a -tzip -r "%output%\\%MACOS_BUILD_NAME%" "%CD%\\%output%\\%outputMacFolder%\\*"
 						echo "Uploading release build artifact to Nexus..."
