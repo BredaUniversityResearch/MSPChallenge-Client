@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace MSP2050.Scripts
 {
@@ -73,6 +74,8 @@ namespace MSP2050.Scripts
 
 		public void ProcessReceivedKPIData(IEnumerable<KPIObject> receivedKpiData)
 		{
+			if (receivedKpiData.Count() == 0) return;
+
 			int mostRecentMonth = -1;
 			foreach (KPIObject kpiData in receivedKpiData)
 			{
