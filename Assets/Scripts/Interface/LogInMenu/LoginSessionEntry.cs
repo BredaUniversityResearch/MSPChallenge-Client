@@ -1,7 +1,5 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using TMPro;
 
 namespace MSP2050.Scripts
@@ -60,6 +58,11 @@ namespace MSP2050.Scripts
 		void ConnectPressed()
 		{
 			LoginManager.Instance.ConnectPressedForSession(m_session);
+		}
+
+		public GameSession GetSession()
+		{
+			return m_session;
 		}
 
 		void OnBarToggled(bool a_isOn)

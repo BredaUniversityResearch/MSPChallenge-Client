@@ -46,7 +46,10 @@ namespace MSP2050.Scripts
 		{
 			//Load layers
 			LayerInfo.Load(layerMeta);
-			if (Main.IsDeveloper)
+
+			var autoLoginEnabled = null != CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.AutoLogin);
+			if (Main.IsDeveloper && !autoLoginEnabled)
 			{
 				//InterfaceCanvas.Instance.loadingScreen.ShowHideLoadScreen(false);
 				layerPickerUI.CreateUI();
