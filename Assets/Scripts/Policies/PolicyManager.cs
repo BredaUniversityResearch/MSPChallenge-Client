@@ -83,7 +83,7 @@ namespace MSP2050.Scripts
 			m_policyDefinitions.Add(SHIPPING_POLICY_NAME, new PolicyDefinition
 			{
 				m_name = SHIPPING_POLICY_NAME,
-				m_displayName = "Shipping Restriction Zones",
+				m_displayName = "Shipping Safety Zones",
 				m_planUpdateType = typeof(PolicyUpdateShippingPlan),
 				m_logicType = typeof(PolicyLogicShipping),
 				m_settingsType = typeof(APolicyData),
