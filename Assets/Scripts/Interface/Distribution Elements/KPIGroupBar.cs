@@ -184,7 +184,7 @@ namespace MSP2050.Scripts
 				KPIGroupBarItem item = m_items.Find(obj => obj.team == kvp.Key);
 				if (item == null)
 				{
-					CreateItem(kvp.Key, kvp.Value, a_name);
+					CreateItem(kvp.Key, kvp.Value, kvp.Value.Abbreviated());
 				}
 				else
 				{
