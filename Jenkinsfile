@@ -57,7 +57,7 @@ pipeline {
 			steps {
 				script {
 					echo "Launching Windows Development Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinDevFolder%\\\MSP-Challenge.exe" -customBuildName "MSP-Challenge" -executeMethod ProjectBuilder.WindowsDevBuilder'''
+					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinDevFolder%\\MSP-Challenge.exe" -customBuildName "MSP-Challenge" -executeMethod ProjectBuilder.WindowsDevBuilder'''
 				}
 			}
 		}
