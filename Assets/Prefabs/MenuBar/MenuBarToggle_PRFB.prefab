@@ -204,6 +204,9 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 10
       Data: 0
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
@@ -211,6 +214,7 @@ MonoBehaviour:
   - {fileID: 3983962242145034302}
   highlightIfOn: 1
   useHighlightColor: 1
+  separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!114 &7104831383288313420
 MonoBehaviour:
@@ -245,6 +249,9 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 6
       Data: 
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 10
       Data: 2
@@ -252,6 +259,7 @@ MonoBehaviour:
   - {fileID: 2601716646114941776}
   highlightIfOn: 0
   useHighlightColor: 0
+  separateSelectedHighlight: 0
   useDisabledColor: 1
 --- !u!114 &3988326023620199840
 MonoBehaviour:
@@ -276,7 +284,7 @@ MonoBehaviour:
     SerializationNodes: []
   m_uiElement: {fileID: 8798624935984820285}
   m_tags:
-  - Topbar
+  - Menubar
   m_registerReference: 1
 --- !u!222 &761655956605857970
 CanvasRenderer:
@@ -329,6 +337,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connectTo: 0
+  otherWindow: {fileID: 0}
   toggle: {fileID: 8798624935984820285}
 --- !u!1 &6463635854557736212
 GameObject:

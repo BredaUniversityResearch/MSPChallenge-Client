@@ -26,7 +26,7 @@ MonoBehaviour:
       Data: 0|MSP2050.Scripts.ATutorialDataStep[], MSP2050
     - Name: 
       Entry: 12
-      Data: 48
+      Data: 45
     - Name: 
       Entry: 7
       Data: 1|MSP2050.Scripts.TutorialDataStepTitleChoice, MSP2050
@@ -1071,9 +1071,9 @@ MonoBehaviour:
       Data: CREATING & IMPLEMENTING PLANS [2/19]
     - Name: m_contentText
       Entry: 1
-      Data: "Provide a <#049696>plan name</color>, decide what <#049696>data layers</color>
-        you want to <#049696>alter</color> with your spatial plan \nand <#049696>when</color>
-        you want these changes to be implemented. When you are done, click the <#049696>accept
+      Data: "Provide a <#049696>plan name</color>, add a <#049696>description</color>
+        (optional) and select the <#049696>date</color> when you want the implementation
+        of the plan to be completed. \nWhen you are done, click the <#049696>accept
         button</color>."
     - Name: m_alignTop
       Entry: 5
@@ -1086,22 +1086,13 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 7
-      Data: 68|MSP2050.Scripts.TutorialRequirementButtonPress, MSP2050
-    - Name: m_buttonNames
-      Entry: 7
-      Data: 69|System.String[], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 1
-      Data: PlanWizConfirmButton
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
+      Data: 68|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 3
+    - Name: m_invert
+      Entry: 5
+      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -1113,13 +1104,13 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 70|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 69|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 71|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
+      Data: 70|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
     - Name: m_targetState
       Entry: 3
       Data: 2
@@ -1137,13 +1128,13 @@ MonoBehaviour:
       Data: 
     - Name: m_highlightedObjects
       Entry: 7
-      Data: 72|System.String[], mscorlib
+      Data: 71|System.String[], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 1
-      Data: PlanWizConfirmButton
+      Data: APAcceptButton
     - Name: 
       Entry: 13
       Data: 
@@ -1161,109 +1152,16 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 73|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 72|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: CREATING & IMPLEMENTING PLANS [3/19]
     - Name: m_contentText
       Entry: 1
-      Data: You can view all the spatial plans you and other teams created by selecting
-        the <#049696>plans monitor button</color>.
-    - Name: m_alignTop
-      Entry: 5
-      Data: false
-    - Name: m_completionRequirements
-      Entry: 7
-      Data: 74|MSP2050.Scripts.ATutorialRequirement[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 75|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
-    - Name: m_objectName
-      Entry: 1
-      Data: PlansMonitor
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_prerequisites
-      Entry: 6
-      Data: 
-    - Name: m_highlightedObjects
-      Entry: 7
-      Data: 76|System.String[], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 1
-      Data: TopBarTogglePlanMon
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_visualsPrefab
-      Entry: 6
-      Data: 
-    - Name: m_enterStepActions
-      Entry: 7
-      Data: 77|MSP2050.Scripts.ATutorialAction[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 2
-    - Name: 
-      Entry: 7
-      Data: 78|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
-    - Name: m_toggleName
-      Entry: 1
-      Data: TopBarTogglePlanMon
-    - Name: m_value
-      Entry: 5
-      Data: false
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 79|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
-    - Name: m_toggleName
-      Entry: 1
-      Data: PlanDetailsExpandToggle
-    - Name: m_value
-      Entry: 5
-      Data: false
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 80|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
-    - Name: m_headerText
-      Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [4/19]
-    - Name: m_contentText
-      Entry: 1
-      Data: "Each spatial plan will appear under a specific <#049696>state</color>
-        in the plans list. \nThis state represents where the plan currently is within
-        the <#049696>planning process</color>."
+      Data: 'You now have a <#049696>base plan</color>. From here you can decide
+        what <#049696>policies</color> and <#049696>data layers</color> you want
+        to <#049696>alter</color> with your spatial plan and specify what those alterations
+        would be. '
     - Name: m_alignTop
       Entry: 5
       Data: false
@@ -1272,16 +1170,19 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 81|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 73|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 82|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
-    - Name: m_objectName
-      Entry: 1
-      Data: PlansMonitor
+      Data: 74|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 3
+    - Name: m_invert
+      Entry: 5
+      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -1305,7 +1206,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 83|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 75|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: CREATING & IMPLEMENTING PLANS [5/19]
@@ -1322,16 +1223,19 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 84|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 76|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 85|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
-    - Name: m_objectName
-      Entry: 1
-      Data: PlansMonitor
+      Data: 77|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 3
+    - Name: m_invert
+      Entry: 5
+      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -1355,47 +1259,29 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 86|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 78|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [6/19]
+      Data: CREATING & IMPLEMENTING PLANS [3/19]
     - Name: m_contentText
       Entry: 1
-      Data: "You can see the details of a selected spatial plan by <#049696>expanding</color>
-        the plans monitor. \nClick the <#049696>expand toggle</color>."
+      Data: You can add <#049696>data layers</color> to the spatial plan by selecting
+        the <#049696>add data layer button</color>.
     - Name: m_alignTop
       Entry: 5
       Data: false
     - Name: m_completionRequirements
       Entry: 7
-      Data: 87|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 79|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 88|MSP2050.Scripts.TutorialRequirementToggleState, MSP2050
-    - Name: m_toggleNames
-      Entry: 7
-      Data: 89|System.String[], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
+      Data: 80|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
+    - Name: m_objectName
       Entry: 1
-      Data: PlanDetailsExpandToggle
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_targetState
-      Entry: 5
-      Data: true
-    - Name: m_requireAll
-      Entry: 5
-      Data: false
+      Data: AP_LayerSelect_PRFB
     - Name: 
       Entry: 8
       Data: 
@@ -1407,56 +1293,17 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 90|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 81|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 91|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
-    - Name: m_objectName
-      Entry: 1
-      Data: PlansMonitor
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_highlightedObjects
-      Entry: 7
-      Data: 92|System.String[], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 1
-      Data: PlanDetailsExpandToggle
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_visualsPrefab
-      Entry: 6
-      Data: 
-    - Name: m_enterStepActions
-      Entry: 7
-      Data: 93|MSP2050.Scripts.ATutorialAction[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 94|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
-    - Name: m_toggleName
-      Entry: 1
-      Data: PlanDetailsExpandToggle
-    - Name: m_value
+      Data: 82|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 3
+    - Name: m_invert
       Entry: 5
       Data: false
     - Name: 
@@ -1468,6 +1315,175 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: m_highlightedObjects
+      Entry: 7
+      Data: 83|System.String[], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 1
+      Data: ChangelayersToggle
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_visualsPrefab
+      Entry: 6
+      Data: 
+    - Name: m_enterStepActions
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 84|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+    - Name: m_headerText
+      Entry: 1
+      Data: CREATING & IMPLEMENTING PLANS
+    - Name: m_contentText
+      Entry: 1
+      Data: "Avoid adding too <#049696>many\_data layers</color>\_to a spatial plan,
+        you can create as many\_<#049696>separate plans</color>\_as you want. \nFor
+        now, add at least 1 data layer to the spatial plan."
+    - Name: m_alignTop
+      Entry: 5
+      Data: false
+    - Name: m_completionRequirements
+      Entry: 7
+      Data: 85|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 86|MSP2050.Scripts.TutorialRequirementAPHasLayers, MSP2050
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_prerequisites
+      Entry: 7
+      Data: 87|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 88|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 3
+    - Name: m_invert
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_highlightedObjects
+      Entry: 6
+      Data: 
+    - Name: m_visualsPrefab
+      Entry: 6
+      Data: 
+    - Name: m_enterStepActions
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 89|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+    - Name: m_headerText
+      Entry: 1
+      Data: CREATING & IMPLEMENTING PLANS
+    - Name: m_contentText
+      Entry: 1
+      Data: Once a data layer has been added to the plan, you can <#049696>edit existing</color>-
+        or <#049696>draw new implementation areas</color> by selecting the data layer
+        from the <#049696>list</color>.
+    - Name: m_alignTop
+      Entry: 5
+      Data: false
+    - Name: m_completionRequirements
+      Entry: 7
+      Data: 90|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 91|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 2
+    - Name: m_invert
+      Entry: 5
+      Data: true
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_prerequisites
+      Entry: 7
+      Data: 92|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+    - Name: 
+      Entry: 12
+      Data: 2
+    - Name: 
+      Entry: 7
+      Data: 93|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 3
+    - Name: m_invert
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 94|MSP2050.Scripts.TutorialRequirementAPHasLayers, MSP2050
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_highlightedObjects
+      Entry: 6
+      Data: 
+    - Name: m_visualsPrefab
+      Entry: 6
+      Data: 
+    - Name: m_enterStepActions
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -1476,12 +1492,15 @@ MonoBehaviour:
       Data: 95|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [7/19]
+      Data: CREATING & IMPLEMENTING PLANS [6/19]
     - Name: m_contentText
       Entry: 1
-      Data: "In the plan details you can see the <#049696>proposed changes</color>
-        and <#049696>discuss</color> the plan with other teams. \nIf the plan belongs
-        to your team, you can also <#049696>edit</color> these proposed changes."
+      Data: 'You are now in <#049696>edit mode</color>. In <#049696>edit mode</color>
+        you can move, remove and alter <#049696>existing areas</color> on the map
+        that belong to the selected data layer.
+
+        Click an existing area on
+        the map to try it out.'
     - Name: m_alignTop
       Entry: 5
       Data: false
@@ -1493,38 +1512,32 @@ MonoBehaviour:
       Data: 96|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
-      Data: 2
+      Data: 3
     - Name: 
       Entry: 7
-      Data: 97|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
-    - Name: m_objectName
-      Entry: 1
-      Data: PlansMonitor
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 98|MSP2050.Scripts.TutorialRequirementToggleState, MSP2050
-    - Name: m_toggleNames
-      Entry: 7
-      Data: 99|System.String[], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 1
-      Data: PlanDetailsExpandToggle
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
+      Data: 97|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
     - Name: m_targetState
+      Entry: 3
+      Data: 3
+    - Name: m_invert
       Entry: 5
-      Data: true
-    - Name: m_requireAll
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 98|MSP2050.Scripts.TutorialRequirementAPHasLayers, MSP2050
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 99|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 1
+    - Name: m_invert
       Entry: 5
       Data: false
     - Name: 
@@ -1553,11 +1566,11 @@ MonoBehaviour:
       Data: 100|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [8/19]
+      Data: CREATING & IMPLEMENTING PLANS [7/19]
     - Name: m_contentText
       Entry: 1
-      Data: You can edit a spatial plan's <#049696>data layers</color> and specify
-        the desired <#049696>areas</color> by going to the <#049696>layers tab</color>.
+      Data: To draw <#049696>new areas</color>, you first need to toggle on a <#049696>data
+        layer sub type</color> from the list and click the <#049696>create button</color>.
     - Name: m_alignTop
       Entry: 5
       Data: false
@@ -1569,10 +1582,13 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 7
-      Data: 102|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
-    - Name: m_objectName
-      Entry: 1
-      Data: PlanDetailsLayers Container
+      Data: 102|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 0
+    - Name: m_invert
+      Entry: 5
+      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -1587,38 +1603,32 @@ MonoBehaviour:
       Data: 103|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
-      Data: 2
+      Data: 3
     - Name: 
       Entry: 7
-      Data: 104|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
-    - Name: m_objectName
-      Entry: 1
-      Data: PlansMonitor
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 105|MSP2050.Scripts.TutorialRequirementToggleState, MSP2050
-    - Name: m_toggleNames
-      Entry: 7
-      Data: 106|System.String[], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 1
-      Data: PlanDetailsExpandToggle
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
+      Data: 104|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
     - Name: m_targetState
+      Entry: 3
+      Data: 3
+    - Name: m_invert
       Entry: 5
-      Data: true
-    - Name: m_requireAll
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 105|MSP2050.Scripts.TutorialRequirementAPHasLayers, MSP2050
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 106|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+    - Name: m_targetState
+      Entry: 3
+      Data: 1
+    - Name: m_invert
       Entry: 5
       Data: false
     - Name: 
@@ -1638,7 +1648,7 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 1
-      Data: PlanDetailsTabButton_Layers
+      Data: CreateToggle
     - Name: 
       Entry: 13
       Data: 
@@ -1659,13 +1669,15 @@ MonoBehaviour:
       Data: 108|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [9/19]
+      Data: CREATING & IMPLEMENTING PLANS [14/19]
     - Name: m_contentText
       Entry: 1
-      Data: Followed by selecting the <#049696>edit button</color>.
+      Data: 'You are now in <#049696>create mode</color>. In <#049696>create mode</color>
+        you can create <#049696>new areas</color> on the map for the currently selected
+        data layer. '
     - Name: m_alignTop
       Entry: 5
-      Data: false
+      Data: true
     - Name: m_completionRequirements
       Entry: 7
       Data: 109|MSP2050.Scripts.ATutorialRequirement[], MSP2050
@@ -1675,313 +1687,6 @@ MonoBehaviour:
     - Name: 
       Entry: 7
       Data: 110|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
-    - Name: m_targetState
-      Entry: 3
-      Data: 2
-    - Name: m_invert
-      Entry: 5
-      Data: true
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_prerequisites
-      Entry: 7
-      Data: 111|MSP2050.Scripts.ATutorialRequirement[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 112|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
-    - Name: m_objectName
-      Entry: 1
-      Data: PlanDetailsLayers Container
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_highlightedObjects
-      Entry: 7
-      Data: 113|System.String[], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 1
-      Data: PlanDetailsEditButton
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_visualsPrefab
-      Entry: 6
-      Data: 
-    - Name: m_enterStepActions
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 114|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
-    - Name: m_headerText
-      Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [10/19]
-    - Name: m_contentText
-      Entry: 1
-      Data: "All data layers within the plan can be edited, but only <#049696>one
-        at the time</color>. \nStart by selecting one of the data layers within the
-        <#049696>active plan window</color>."
-    - Name: m_alignTop
-      Entry: 5
-      Data: true
-    - Name: m_completionRequirements
-      Entry: 6
-      Data: 
-    - Name: m_prerequisites
-      Entry: 7
-      Data: 115|MSP2050.Scripts.ATutorialRequirement[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 116|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
-    - Name: m_targetState
-      Entry: 3
-      Data: 2
-    - Name: m_invert
-      Entry: 5
-      Data: true
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_highlightedObjects
-      Entry: 6
-      Data: 
-    - Name: m_visualsPrefab
-      Entry: 6
-      Data: 
-    - Name: m_enterStepActions
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 117|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
-    - Name: m_headerText
-      Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [11/19]
-    - Name: m_contentText
-      Entry: 1
-      Data: Notice that all the areas on the map that do not belong to this data
-        layer are greyed out.
-    - Name: m_alignTop
-      Entry: 5
-      Data: true
-    - Name: m_completionRequirements
-      Entry: 6
-      Data: 
-    - Name: m_prerequisites
-      Entry: 7
-      Data: 118|MSP2050.Scripts.ATutorialRequirement[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 119|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
-    - Name: m_targetState
-      Entry: 3
-      Data: 2
-    - Name: m_invert
-      Entry: 5
-      Data: true
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_highlightedObjects
-      Entry: 6
-      Data: 
-    - Name: m_visualsPrefab
-      Entry: 6
-      Data: 
-    - Name: m_enterStepActions
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 120|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
-    - Name: m_headerText
-      Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [12/19]
-    - Name: m_contentText
-      Entry: 1
-      Data: "There are two ways to change data layers: <#049696>Editing existing</color>
-        areas or <#049696>adding new</color> areas. \nThese are separated into corresponding
-        modes: <#049696>Edit mode</color> and <#049696>create mode</color>."
-    - Name: m_alignTop
-      Entry: 5
-      Data: true
-    - Name: m_completionRequirements
-      Entry: 6
-      Data: 
-    - Name: m_prerequisites
-      Entry: 7
-      Data: 121|MSP2050.Scripts.ATutorialRequirement[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 122|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
-    - Name: m_targetState
-      Entry: 3
-      Data: 2
-    - Name: m_invert
-      Entry: 5
-      Data: true
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_highlightedObjects
-      Entry: 6
-      Data: 
-    - Name: m_visualsPrefab
-      Entry: 6
-      Data: 
-    - Name: m_enterStepActions
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 123|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
-    - Name: m_headerText
-      Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [13/19]
-    - Name: m_contentText
-      Entry: 1
-      Data: 'While in <#049696>edit mode</color> you can move, remove and alter <#049696>existing
-        areas</color> on the map that belong to the selected data layer.
-
-        Click
-        an existing area on the map to try it out.'
-    - Name: m_alignTop
-      Entry: 5
-      Data: true
-    - Name: m_completionRequirements
-      Entry: 6
-      Data: 
-    - Name: m_prerequisites
-      Entry: 7
-      Data: 124|MSP2050.Scripts.ATutorialRequirement[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 125|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
-    - Name: m_targetState
-      Entry: 3
-      Data: 2
-    - Name: m_invert
-      Entry: 5
-      Data: true
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_highlightedObjects
-      Entry: 7
-      Data: 126|System.String[], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 1
-      Data: ToolbarButtonEdit
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_visualsPrefab
-      Entry: 6
-      Data: 
-    - Name: m_enterStepActions
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 127|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
-    - Name: m_headerText
-      Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [14/19]
-    - Name: m_contentText
-      Entry: 1
-      Data: 'While in <#049696>create mode</color> you can create <#049696>new areas</color>
-        on the map for the currently selected data layer. '
-    - Name: m_alignTop
-      Entry: 5
-      Data: true
-    - Name: m_completionRequirements
-      Entry: 7
-      Data: 128|MSP2050.Scripts.ATutorialRequirement[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 129|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
     - Name: m_targetState
       Entry: 3
       Data: 0
@@ -1999,13 +1704,13 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 130|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 111|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 131|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+      Data: 112|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
     - Name: m_targetState
       Entry: 3
       Data: 2
@@ -2023,7 +1728,7 @@ MonoBehaviour:
       Data: 
     - Name: m_highlightedObjects
       Entry: 7
-      Data: 132|System.String[], mscorlib
+      Data: 113|System.String[], mscorlib
     - Name: 
       Entry: 12
       Data: 1
@@ -2047,66 +1752,14 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 133|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
-    - Name: m_headerText
-      Entry: 1
-      Data: CREATING & IMPLEMENTING PLANS [15/19]
-    - Name: m_contentText
-      Entry: 1
-      Data: Select a <#049696>data layer</color> and the <#049696>type of area</color>
-        you want to create on that layer in the <#049696>active plan window</color>.
-    - Name: m_alignTop
-      Entry: 5
-      Data: true
-    - Name: m_completionRequirements
-      Entry: 6
-      Data: 
-    - Name: m_prerequisites
-      Entry: 7
-      Data: 134|MSP2050.Scripts.ATutorialRequirement[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 135|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
-    - Name: m_targetState
-      Entry: 3
-      Data: 0
-    - Name: m_invert
-      Entry: 5
-      Data: false
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_highlightedObjects
-      Entry: 6
-      Data: 
-    - Name: m_visualsPrefab
-      Entry: 6
-      Data: 
-    - Name: m_enterStepActions
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 136|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 114|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: CREATING & IMPLEMENTING PLANS [16/19]
     - Name: m_contentText
       Entry: 1
-      Data: Depending on the selected data layer, new areas will either be <#049696>
-        points</color>, <#049696>lines</color> or <#049696>shapes</color>.
+      Data: Depending on the selected data layer, new areas will either be <#049696>points</color>,
+        <#049696>lines</color> or <#049696>shapes</color>.
     - Name: m_alignTop
       Entry: 5
       Data: true
@@ -2115,13 +1768,13 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 137|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 115|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 138|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+      Data: 116|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
     - Name: m_targetState
       Entry: 3
       Data: 0
@@ -2151,16 +1804,16 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 139|MSP2050.Scripts.TutorialDataStepDiverging, MSP2050
+      Data: 117|MSP2050.Scripts.TutorialDataStepDiverging, MSP2050
     - Name: m_divergingSteps
       Entry: 7
-      Data: 140|MSP2050.Scripts.TutorialDataStepRegular[], MSP2050
+      Data: 118|MSP2050.Scripts.TutorialDataStepRegular[], MSP2050
     - Name: 
       Entry: 12
       Data: 3
     - Name: 
       Entry: 7
-      Data: 141|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 119|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: CREATING & IMPLEMENTING PLANS [17/19]
@@ -2174,13 +1827,13 @@ MonoBehaviour:
       Data: true
     - Name: m_completionRequirements
       Entry: 7
-      Data: 142|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 120|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 143|MSP2050.Scripts.TutorialRequirementCreateGeometry, MSP2050
+      Data: 121|MSP2050.Scripts.TutorialRequirementCreateGeometry, MSP2050
     - Name: 
       Entry: 8
       Data: 
@@ -2192,13 +1845,13 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 144|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 122|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 145|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+      Data: 123|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
     - Name: m_targetState
       Entry: 3
       Data: 0
@@ -2228,7 +1881,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 146|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 124|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: CREATING & IMPLEMENTING PLANS  [17/19]
@@ -2242,13 +1895,13 @@ MonoBehaviour:
       Data: true
     - Name: m_completionRequirements
       Entry: 7
-      Data: 147|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 125|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 148|MSP2050.Scripts.TutorialRequirementCreateGeometry, MSP2050
+      Data: 126|MSP2050.Scripts.TutorialRequirementCreateGeometry, MSP2050
     - Name: 
       Entry: 8
       Data: 
@@ -2260,13 +1913,13 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 149|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 127|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 150|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+      Data: 128|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
     - Name: m_targetState
       Entry: 3
       Data: 0
@@ -2296,7 +1949,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 151|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 129|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: CREATING & IMPLEMENTING PLANS  [17/19]
@@ -2309,13 +1962,13 @@ MonoBehaviour:
       Data: true
     - Name: m_completionRequirements
       Entry: 7
-      Data: 152|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 130|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 153|MSP2050.Scripts.TutorialRequirementCreateGeometry, MSP2050
+      Data: 131|MSP2050.Scripts.TutorialRequirementCreateGeometry, MSP2050
     - Name: 
       Entry: 8
       Data: 
@@ -2327,13 +1980,13 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 154|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 132|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 155|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+      Data: 133|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
     - Name: m_targetState
       Entry: 3
       Data: 0
@@ -2369,13 +2022,13 @@ MonoBehaviour:
       Data: 
     - Name: m_divergingRequirements
       Entry: 7
-      Data: 156|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 134|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 157|MSP2050.Scripts.TutorialRequirementEditingLayerType, MSP2050
+      Data: 135|MSP2050.Scripts.TutorialRequirementEditingLayerType, MSP2050
     - Name: m_type
       Entry: 3
       Data: 2
@@ -2384,7 +2037,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 158|MSP2050.Scripts.TutorialRequirementEditingLayerType, MSP2050
+      Data: 136|MSP2050.Scripts.TutorialRequirementEditingLayerType, MSP2050
     - Name: m_type
       Entry: 3
       Data: 1
@@ -2402,7 +2055,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 159|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 137|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: CREATING & IMPLEMENTING PLANS  [18/19]
@@ -2416,16 +2069,16 @@ MonoBehaviour:
       Data: true
     - Name: m_completionRequirements
       Entry: 7
-      Data: 160|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 138|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 161|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+      Data: 139|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
     - Name: m_targetState
       Entry: 3
-      Data: 2
+      Data: 0
     - Name: m_invert
       Entry: 5
       Data: false
@@ -2440,19 +2093,19 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 162|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 140|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 163|MSP2050.Scripts.TutorialRequirementEditingState, MSP2050
+      Data: 141|MSP2050.Scripts.TutorialRequirementAPState, MSP2050
     - Name: m_targetState
       Entry: 3
-      Data: 2
+      Data: 3
     - Name: m_invert
       Entry: 5
-      Data: true
+      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -2464,13 +2117,13 @@ MonoBehaviour:
       Data: 
     - Name: m_highlightedObjects
       Entry: 7
-      Data: 164|System.String[], mscorlib
+      Data: 142|System.String[], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 1
-      Data: ToolBarButtonAccept
+      Data: APAcceptButton
     - Name: 
       Entry: 13
       Data: 
@@ -2488,14 +2141,129 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 165|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 143|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+    - Name: m_headerText
+      Entry: 1
+      Data: CREATING & IMPLEMENTING PLANS [8/19]
+    - Name: m_contentText
+      Entry: 1
+      Data: You can view all the spatial plans you and other teams created by selecting
+        the <#049696>plans list button</color>.
+    - Name: m_alignTop
+      Entry: 5
+      Data: false
+    - Name: m_completionRequirements
+      Entry: 7
+      Data: 144|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 145|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
+    - Name: m_objectName
+      Entry: 1
+      Data: PlansListWindow
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_prerequisites
+      Entry: 6
+      Data: 
+    - Name: m_highlightedObjects
+      Entry: 7
+      Data: 146|System.String[], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 1
+      Data: MenuBarTogglePlanList
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_visualsPrefab
+      Entry: 6
+      Data: 
+    - Name: m_enterStepActions
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 147|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+    - Name: m_headerText
+      Entry: 1
+      Data: CREATING & IMPLEMENTING PLANS [4/19]
+    - Name: m_contentText
+      Entry: 1
+      Data: "Each spatial plan will appear under a specific <#049696>state</color>
+        in the plans list. \nThis state represents where the plan currently is within
+        the <#049696>planning process</color>."
+    - Name: m_alignTop
+      Entry: 5
+      Data: false
+    - Name: m_completionRequirements
+      Entry: 6
+      Data: 
+    - Name: m_prerequisites
+      Entry: 7
+      Data: 148|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 149|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
+    - Name: m_objectName
+      Entry: 1
+      Data: PlansListWindow
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_highlightedObjects
+      Entry: 6
+      Data: 
+    - Name: m_visualsPrefab
+      Entry: 6
+      Data: 
+    - Name: m_enterStepActions
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 150|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: CREATING & IMPLEMENTING PLANS  [19/19]
     - Name: m_contentText
       Entry: 1
-      Data: Once a spatial plan has been drawn up and approved, it will be implemented
-        on the selected date.
+      Data: 'Once the <#049696>implementation date</color> of a spatial plan is reached,
+        it will be <#049696>implemented if</color> it is in the <#049696>approved</color>
+        state.
+
+        If it has not been approved by that time, it will be <#049696>archived</color>
+        instead.'
     - Name: m_alignTop
       Entry: 5
       Data: false
@@ -2519,7 +2287,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 166|MSP2050.Scripts.TutorialDataStepTitleChoice, MSP2050
+      Data: 151|MSP2050.Scripts.TutorialDataStepTitleChoice, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: WANT TO GET STARTED?
@@ -2544,13 +2312,13 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 167|MSP2050.Scripts.TutorialDataStepTitle, MSP2050
+      Data: 152|MSP2050.Scripts.TutorialDataStepTitle, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: "EVALUATING \nCONSEQUENCES"
     - Name: m_contentText
       Entry: 1
-      Data: "Once the <#049696>simulations</color> reaches the spatial plan's <#049696>implementation
+      Data: "Once the <#049696>simulation</color> reaches the spatial plan's <#049696>implementation
         date</color>, \nyou will be able to assess the <#049696>impact</color> and
         <#049696>consequences</color> of the <#049696>changes</color>."
     - Name: m_partText
@@ -2558,13 +2326,13 @@ MonoBehaviour:
       Data: PART 4
     - Name: m_enterStepActions
       Entry: 7
-      Data: 168|MSP2050.Scripts.ATutorialAction[], MSP2050
+      Data: 153|MSP2050.Scripts.ATutorialAction[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 169|MSP2050.Scripts.TutorialActionCloseAllWindows, MSP2050
+      Data: 154|MSP2050.Scripts.TutorialActionCloseAllWindows, MSP2050
     - Name: 
       Entry: 8
       Data: 
@@ -2579,7 +2347,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 170|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 155|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: EVALUATING CONSEQUENCES [1/6]
@@ -2587,7 +2355,8 @@ MonoBehaviour:
       Entry: 1
       Data: "A server administrator can start the <#049696>simulation</color>, after
         which the time will progress. \nThe <#049696>current simulated month and
-        year</color> are visible in the <#049696>top bar</color>."
+        year</color> are visible in the <#049696>time view window</color> in the
+        top right corner."
     - Name: m_alignTop
       Entry: 5
       Data: false
@@ -2611,7 +2380,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 171|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 156|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: EVALUATING CONSEQUENCES [2/6]
@@ -2642,7 +2411,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 172|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 157|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: EVALUATING CONSEQUENCES [3/6]
@@ -2657,22 +2426,22 @@ MonoBehaviour:
       Data: false
     - Name: m_completionRequirements
       Entry: 7
-      Data: 173|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 158|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 174|MSP2050.Scripts.TutorialRequirementButtonPress, MSP2050
+      Data: 159|MSP2050.Scripts.TutorialRequirementButtonPress, MSP2050
     - Name: m_buttonNames
       Entry: 7
-      Data: 175|System.String[], mscorlib
+      Data: 160|System.String[], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 1
-      Data: ViewingTimeWindowToggle
+      Data: ViewTimeToggle
     - Name: 
       Entry: 13
       Data: 
@@ -2693,13 +2462,13 @@ MonoBehaviour:
       Data: 
     - Name: m_highlightedObjects
       Entry: 7
-      Data: 176|System.String[], mscorlib
+      Data: 161|System.String[], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 1
-      Data: ViewingTimeWindowToggle
+      Data: ViewTimeToggle
     - Name: 
       Entry: 13
       Data: 
@@ -2711,16 +2480,16 @@ MonoBehaviour:
       Data: 
     - Name: m_enterStepActions
       Entry: 7
-      Data: 177|MSP2050.Scripts.ATutorialAction[], MSP2050
+      Data: 162|MSP2050.Scripts.ATutorialAction[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 178|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
+      Data: 163|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
     - Name: m_toggleName
       Entry: 1
-      Data: ViewingTimeWindowToggle
+      Data: ViewTimeToggle
     - Name: m_value
       Entry: 5
       Data: false
@@ -2738,7 +2507,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 179|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 164|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: EVALUATING CONSEQUENCES [4/6]
@@ -2751,22 +2520,22 @@ MonoBehaviour:
       Data: false
     - Name: m_completionRequirements
       Entry: 7
-      Data: 180|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 165|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 181|MSP2050.Scripts.TutorialRequirementTagInteract, MSP2050
+      Data: 166|MSP2050.Scripts.TutorialRequirementTagInteract, MSP2050
     - Name: m_tags
       Entry: 7
-      Data: 182|System.String[], mscorlib
+      Data: 167|System.String[], mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 1
-      Data: Topbar
+      Data: Menubar
     - Name: 
       Entry: 1
       Data: KPI
@@ -2793,80 +2562,19 @@ MonoBehaviour:
       Data: 
     - Name: m_highlightedObjects
       Entry: 7
-      Data: 183|System.String[], mscorlib
+      Data: 168|System.String[], mscorlib
     - Name: 
       Entry: 12
       Data: 3
     - Name: 
       Entry: 1
-      Data: TopBarToggleKPIShip
+      Data: MenuBarToggleShippingKPI
     - Name: 
       Entry: 1
-      Data: TopBarToggleKPIEner
+      Data: MenuBarToggleEcologyKPI
     - Name: 
       Entry: 1
-      Data: TopBarToggleKPIEco
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_visualsPrefab
-      Entry: 6
-      Data: 
-    - Name: m_enterStepActions
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 184|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
-    - Name: m_headerText
-      Entry: 1
-      Data: EVALUATING CONSEQUENCES [5/6]
-    - Name: m_contentText
-      Entry: 1
-      Data: You can access <#049696>raw data</color> by selecting the <#049696>objectives
-        monitor button</color>.
-    - Name: m_alignTop
-      Entry: 5
-      Data: false
-    - Name: m_completionRequirements
-      Entry: 7
-      Data: 185|MSP2050.Scripts.ATutorialRequirement[], MSP2050
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 186|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
-    - Name: m_objectName
-      Entry: 1
-      Data: ObjectivesMonitorWindow
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: m_prerequisites
-      Entry: 6
-      Data: 
-    - Name: m_highlightedObjects
-      Entry: 7
-      Data: 187|System.String[], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 1
-      Data: TopBarToggleObjectives
+      Data: MenuBarToggleEnergyKPI
     - Name: 
       Entry: 13
       Data: 
@@ -2878,16 +2586,40 @@ MonoBehaviour:
       Data: 
     - Name: m_enterStepActions
       Entry: 7
-      Data: 188|MSP2050.Scripts.ATutorialAction[], MSP2050
+      Data: 169|MSP2050.Scripts.ATutorialAction[], MSP2050
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 3
     - Name: 
       Entry: 7
-      Data: 189|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
+      Data: 170|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
     - Name: m_toggleName
       Entry: 1
-      Data: TopBarToggleObjectives
+      Data: MenuBarToggleShippingKPI
+    - Name: m_value
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 171|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
+    - Name: m_toggleName
+      Entry: 1
+      Data: MenuBarToggleEcologyKPI
+    - Name: m_value
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 172|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
+    - Name: m_toggleName
+      Entry: 1
+      Data: MenuBarToggleEnergyKPI
     - Name: m_value
       Entry: 5
       Data: false
@@ -2905,7 +2637,89 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 190|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+      Data: 173|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
+    - Name: m_headerText
+      Entry: 1
+      Data: EVALUATING CONSEQUENCES [5/6]
+    - Name: m_contentText
+      Entry: 1
+      Data: You can access <#049696>raw data</color> by selecting the <#049696>objectives
+        monitor button</color>.
+    - Name: m_alignTop
+      Entry: 5
+      Data: false
+    - Name: m_completionRequirements
+      Entry: 7
+      Data: 174|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 175|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
+    - Name: m_objectName
+      Entry: 1
+      Data: ObjectivesMonitorWindow
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_prerequisites
+      Entry: 6
+      Data: 
+    - Name: m_highlightedObjects
+      Entry: 7
+      Data: 176|System.String[], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 1
+      Data: MenuBarToggleObjectives
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: m_visualsPrefab
+      Entry: 6
+      Data: 
+    - Name: m_enterStepActions
+      Entry: 7
+      Data: 177|MSP2050.Scripts.ATutorialAction[], MSP2050
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 178|MSP2050.Scripts.TutorialActionToggleSet, MSP2050
+    - Name: m_toggleName
+      Entry: 1
+      Data: MenuBarToggleObjectives
+    - Name: m_value
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 179|MSP2050.Scripts.TutorialDataStepRegular, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: EVALUATING CONSEQUENCES [6/6]
@@ -2920,13 +2734,13 @@ MonoBehaviour:
       Data: 
     - Name: m_prerequisites
       Entry: 7
-      Data: 191|MSP2050.Scripts.ATutorialRequirement[], MSP2050
+      Data: 180|MSP2050.Scripts.ATutorialRequirement[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 192|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
+      Data: 181|MSP2050.Scripts.TutorialRequirementObjectActive, MSP2050
     - Name: m_objectName
       Entry: 1
       Data: ObjectivesMonitorWindow
@@ -2953,7 +2767,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 193|MSP2050.Scripts.TutorialDataStepTitleChoice, MSP2050
+      Data: 182|MSP2050.Scripts.TutorialDataStepTitleChoice, MSP2050
     - Name: m_headerText
       Entry: 1
       Data: CONGRATS!
@@ -2970,13 +2784,13 @@ MonoBehaviour:
       Data: 
     - Name: m_enterStepActions
       Entry: 7
-      Data: 194|MSP2050.Scripts.ATutorialAction[], MSP2050
+      Data: 183|MSP2050.Scripts.ATutorialAction[], MSP2050
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 195|MSP2050.Scripts.TutorialActionCloseAllWindows, MSP2050
+      Data: 184|MSP2050.Scripts.TutorialActionCloseAllWindows, MSP2050
     - Name: 
       Entry: 8
       Data: 
