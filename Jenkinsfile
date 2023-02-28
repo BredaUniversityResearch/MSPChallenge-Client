@@ -57,7 +57,7 @@ pipeline {
 			steps {
 				script {
 					echo "Launching Windows Development Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinDevFolder%\\msp.exe" -customBuildName msp -executeMethod ProjectBuilder.WindowsDevBuilder'''
+					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinDevFolder%\\\MSP Challenge.exe" -customBuildName "MSP Challenge" -executeMethod ProjectBuilder.WindowsDevBuilder'''
 				}
 			}
 		}
@@ -70,14 +70,14 @@ pipeline {
 			steps {
 				script {
 					echo "Launching Windows Development Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinDevFolder%\\msp.exe" -customBuildName msp -executeMethod ProjectBuilder.WindowsDevBuilder
+					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinDevFolder%\\MSP Challenge.exe" -customBuildName "MSP Challenge" -executeMethod ProjectBuilder.WindowsDevBuilder
 						echo "Zipping build..."
 						7z a -tzip -r "%output%\\%WINDOWS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputWinDevFolder%\\*"
 						echo "Uploading dev build artifact to Nexus..."
 						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_DEV_BUILD_NAME%"'''
 						
 					echo "Launching MacOS Development Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacDevFolder%\\msp" -customBuildName msp -executeMethod ProjectBuilder.MacOSDevBuilder
+					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacDevFolder%\\MSP Challenge" -customBuildName "MSP Challenge" -executeMethod ProjectBuilder.MacOSDevBuilder
 						echo "Zipping build..."
 						7z a -tzip -r "%output%\\%MACOS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputMacDevFolder%\\*"
 						echo "Uploading dev build artifact to Nexus..."
@@ -95,14 +95,14 @@ pipeline {
 				script {
 					
 					echo "Launching Windows Release Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\msp.exe" -customBuildName msp -executeMethod ProjectBuilder.WindowsBuilder
+					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\MSP Challenge.exe" -customBuildName "MSP Challenge" -executeMethod ProjectBuilder.WindowsBuilder
 						echo "Zipping build..."
 						7z a -tzip -r "%output%\\%WINDOWS_BUILD_NAME%" "%CD%\\%output%\\%outputDevFolder%\\*"
 						echo "Uploading release build artifact to Nexus..."
 						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_BUILD_NAME%"'''
 						
 					echo "Launching MacOS Release Build..."
-					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\msp" -customBuildName msp -executeMethod ProjectBuilder.MacOSBuilder
+					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\MSP Challenge" -customBuildName "MSP Challenge" -executeMethod ProjectBuilder.MacOSBuilder
 						echo "Zipping build..."
 						7z a -tzip -r "%output%\\%MACOS_BUILD_NAME%" "%CD%\\%output%\\%outputMacFolder%\\*"
 						echo "Uploading release build artifact to Nexus..."
