@@ -37,12 +37,38 @@ class ProjectBuilder
             throw new Exception("BuildPlayer failure: " + res);
         }
     }
+	
+	private static void WindowsDevBuilder()
+	{
+        PreBuild();
+        string outputDir = GetArg("-customBuildPath");
+		BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, BuildOptions.Development);
+	}
+
+    private static void MacOSDevBuilder()
+    {
+        PreBuild();
+        string outputDir = GetArg("-customBuildPath");
+        BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneOSX, BuildOptions.Development);
+    }
+
+    private static void WindowsBuilder()
+    {
+        PreBuild();
+        string outputDir = GetArg("-customBuildPath");
+        BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, 0);
+    }
+
+    private static void MacOSBuilder()
+    {
+        PreBuild();
+        string outputDir = GetArg("-customBuildPath");
+        BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneOSX, 0);
+    }
 
     [MenuItem("MSP 2050/Build project")]
     public static void MyBuild()
     {
-        //PreBuild();
-
         //Build a dev and non-dev player
         string path = EditorUtility.SaveFolderPanel("Choose folder to build game", "", "");
         if (path.Length != 0)
@@ -51,20 +77,23 @@ class ProjectBuilder
             BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/Windows_Dev/msp_dev.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.Development);
         }
     }
+	
+	private static string GetArg(string name)
+	{
+		string[] args = System.Environment.GetCommandLineArgs();
+		for (int i = 0; i < args.Length; i++)
+		{
+			if (args[i] == name && args.Length > i + 1)
+			{
+				return args[i + 1];
+            }
+		}
+		return null;
+	}
 
-    //private static void PreBuild()
-    //{
-    //    //Put build date into the game
-    //    ApplicationBuildIdentifier buildIdentifier = ApplicationBuildIdentifier.FindBuildIdentifier();
-    //    if (buildIdentifier != null)
-    //    {
-    //        buildIdentifier.UpdateBuildTime();
-    //        EditorUtility.SetDirty(buildIdentifier);
-
-    //        //Because the GLog namespace cannot be found from the editor folder, this has been disabled for now
-    //        //GLog.GLog.Instance.gameVersion = "Rev " + buildIdentifier.GetSvnRevisionNumber();
-    //        //EditorUtility.SetDirty(GLog.GLog.Instance);
-    //        AssetDatabase.SaveAssets();
-    //    }
-    //}
+    private static void PreBuild()
+    {
+        UnityManifest manifest = UnityManifest.Load();
+        ApplicationBuildIdentifier.UpdateBuildInformation(manifest);
+    }
 }

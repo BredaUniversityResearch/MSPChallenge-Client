@@ -17,19 +17,18 @@ public class ApplicationBuildIdentifier : MonoBehaviour
 			return singleton;
 		}
 	}
-	private string buildTime = "2022-08-24 13:24:12Z";
+	private string buildTime = "2023-01-01 13:24:12Z";
 	private string gitTag = "";
 	private bool hasInformation = false;
 
-#if UNITY_CLOUD_BUILD
-public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestObject manifest)
-{
-    manifest.SetValue("buildNumber", UpdateTag());
-    manifest.SetValue("buildStartTime", UpdateTime());
-}
-#endif
+    public static void UpdateBuildInformation(UnityManifest manifest)
+    {
+        manifest.SetGitTag(UpdateTag());
+        manifest.SetBuildTime(UpdateTime());
+		manifest.Save();
+    }
 
-	void Awake()
+    void Awake()
 	{
 		if (singleton != null && singleton != this)
 		{
@@ -42,10 +41,10 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 			DontDestroyOnLoad(gameObject);
 		}
 
-		singleton.GetUCBManifest();
+        singleton.GetManifest();
 	}
 
-	public static string UpdateTime()
+    public static string UpdateTime()
 	{
 		string buildTime = System.DateTime.Now.ToString("u", CultureInfo.InvariantCulture);
         return buildTime;
@@ -55,7 +54,7 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 	{
         string gitTag = "";
 
-		var proc = new Process
+		Process proc = new Process
 		{
 			StartInfo = new ProcessStartInfo()
 			{
@@ -87,20 +86,19 @@ public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestOb
 		}
 		proc.WaitForExit();
 
-		gitTag = gitTag.Remove(gitTag.Length - 1);
+        gitTag = gitTag.Remove(gitTag.Length - 1);
 
 		return gitTag;
 	}
 
+    public void GetManifest()
+    {
+        UnityManifest manifest = UnityManifest.Load();
 
-	public void GetUCBManifest()
-	{
-		UnityCloudBuildManifest manifest = UnityCloudBuildManifest.Load();
-
-		gitTag = manifest.buildNumber;
-		buildTime = manifest.buildStartTime;
-		hasInformation = true;
-	}
+        gitTag = manifest.buildNumber;
+        buildTime = manifest.buildStartTime;
+        hasInformation = true;
+    }
 
 	public string GetBuildTime()
     {
