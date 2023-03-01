@@ -355,6 +355,9 @@ namespace MSP2050.Scripts
 
 		public PlanLayer GetPlanLayerForLayer(AbstractLayer baseLayer)
 		{
+			if (baseLayer == null)
+				return null;
+
 			foreach (PlanLayer planLayer in PlanLayers)
 				if (planLayer.BaseLayer.ID == baseLayer.ID)
 					return planLayer;

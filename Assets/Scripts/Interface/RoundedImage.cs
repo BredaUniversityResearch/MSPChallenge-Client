@@ -39,7 +39,9 @@ namespace UnityEngine.UI
 		{
 			get
 			{
-				if (m_sprites == null)
+				if (m_rounding == 0)
+					return null;
+				if (m_sprites == null || m_sprites.Length == 0)
 					m_sprites = RoundingManager.RoundingAssetDatabase.GetSprites(m_rounding / 4 - 1, m_slice);
 
 				return m_sprites[RoundingManager.UIScale];

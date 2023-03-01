@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -57,7 +58,8 @@ namespace MSP2050.Scripts
 				if (target != null)
 				{
 					GameObject temp = Instantiate(uiHighlightPrefab, uiHighlightParent) as GameObject;
-					temp.GetComponent<HighlightPulse>().SetTarget(target.transform);
+					//temp.GetComponent<HighlightPulse>().SetTarget(target.transform);
+					temp.GetComponent<FollowBorder>().SetTarget(target.GetComponent<RectTransform>());
 					uiHighlightObjects.Add(temp);
 				}
 				else
@@ -73,13 +75,24 @@ namespace MSP2050.Scripts
 			{
 				if (unresolvedHighlights[i] == name)
 				{
-					GameObject temp = Instantiate(uiHighlightPrefab, uiHighlightParent) as GameObject;
-					temp.GetComponent<HighlightPulse>().SetTarget(obj.transform);
-					uiHighlightObjects.Add(temp);
+					//GameObject temp = Instantiate(uiHighlightPrefab, uiHighlightParent) as GameObject;
 					unresolvedHighlights.RemoveAt(i);
+					//temp.GetComponent<HighlightPulse>().SetTarget(obj.transform);
+					//temp.GetComponent<FollowBorder>().SetTarget(obj.GetComponent<RectTransform>());
+					//uiHighlightObjects.Add(temp);
+					StartCoroutine(CreateHighlightNextFrame(obj));
 					break;
 				}
 			}
+		}
+
+		IEnumerator CreateHighlightNextFrame(GameObject obj)
+		{
+			yield return new WaitForEndOfFrame();
+			GameObject temp = Instantiate(uiHighlightPrefab, uiHighlightParent) as GameObject;
+			//temp.GetComponent<HighlightPulse>().SetTarget(obj.transform);
+			temp.GetComponent<FollowBorder>().SetTarget(obj.GetComponent<RectTransform>());
+			uiHighlightObjects.Add(temp);			
 		}
 	}
 }

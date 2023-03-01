@@ -376,6 +376,10 @@ namespace MSP2050.Scripts
 			if (m_countryIndicator != null)
 				m_countryIndicator.color = SessionManager.Instance.FindTeamByID(m_currentPlan.Country).color;
 			RefreshContent();
+			if (plan.State == Plan.PlanState.APPROVAL)
+			{
+				m_approvalToggle.IsOn = true;
+			}
 		}
 
 		public void RefreshSectionActivity()
@@ -525,7 +529,6 @@ namespace MSP2050.Scripts
 			if (m_currentPlan.State == Plan.PlanState.APPROVAL)
             {
 				m_approvalToggle.SetContent($"Approval required from {m_currentPlan.countryApproval.Count} teams");
-				m_approvalContent.OpenToContent(m_currentPlan, m_approvalToggle, this);
             }
 			else
 				m_approvalToggle.gameObject.SetActive(false);
