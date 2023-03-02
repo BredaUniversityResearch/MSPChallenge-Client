@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
-	public class HighlightPulse : MonoBehaviour
+	public class HighlightPulse : MonoBehaviour, IHighlightObject
 	{
 		[SerializeField] float m_minSize;
 		[SerializeField] float m_maxSize;
@@ -19,7 +19,7 @@ namespace MSP2050.Scripts
 		private float m_remainingInterval = -1f;
 		private Transform m_target;
 
-		public void SetTarget(Transform a_target)
+		public void SetTarget(RectTransform a_target)
 		{
 			m_target = a_target;
 		}

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
-	public class FollowBorder : MonoBehaviour
+	public class FollowBorder : MonoBehaviour, IHighlightObject
 	{
 		[SerializeField] float m_speed;
 

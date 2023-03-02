@@ -376,7 +376,7 @@ namespace MSP2050.Scripts
 			if (m_countryIndicator != null)
 				m_countryIndicator.color = SessionManager.Instance.FindTeamByID(m_currentPlan.Country).color;
 			RefreshContent();
-			if (plan.State == Plan.PlanState.APPROVAL)
+			if (plan != null && plan.State == Plan.PlanState.APPROVAL)
 			{
 				m_approvalToggle.IsOn = true;
 			}
