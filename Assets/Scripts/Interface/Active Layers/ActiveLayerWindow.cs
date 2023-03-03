@@ -83,7 +83,7 @@ namespace MSP2050.Scripts
 			{
 				activeLayer.OnLayerVisibilityChanged(a_visible);
 			}
-			else
+			else if(a_visible)
 			{
 				ActiveLayer newActiveLayer = Instantiate(m_activeLayerPrefab, m_contentLocation).GetComponent<ActiveLayer>();
 				newActiveLayer.SetLayerRepresenting(a_layer, m_allTextHidden);

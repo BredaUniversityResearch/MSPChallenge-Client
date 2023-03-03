@@ -97,11 +97,11 @@ namespace MSP2050.Scripts
 
 		void OnCloseButtonPressed()
 		{
-			if (PlanManager.Instance.planViewing == null || !PlanManager.Instance.planViewing.IsLayerpartOfPlan(m_layerRepresenting))
-			{
+			//if (PlanManager.Instance.planViewing == null || !PlanManager.Instance.planViewing.IsLayerpartOfPlan(m_layerRepresenting))
+			//{
 				InterfaceCanvas.Instance.activeLayers.RemoveLayer(m_layerRepresenting);
 				LayerManager.Instance.HideLayer(m_layerRepresenting);
-			}
+			//}
 		}
 
 		public void SetExpanded(bool a_value)

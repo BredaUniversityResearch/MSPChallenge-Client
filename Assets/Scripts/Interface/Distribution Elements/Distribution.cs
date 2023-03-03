@@ -146,9 +146,6 @@ namespace MSP2050.Scripts
 
 		private void SetSliderInteractability(bool value)
 		{
-			if (interactable == value)
-				return;
-
 			interactable = value;
 			foreach (AbstractDistributionGroup group in groups)
 				group.SetSliderInteractability(value);

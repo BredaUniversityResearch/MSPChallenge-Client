@@ -402,7 +402,7 @@ namespace MSP2050.Scripts
 				m_acceptButtonTooltip.enabled = true;
 				m_acceptButtonTooltip.SetText("Set an implementation time for the plan");
 			}
-			else if(m_currentPlan.ConstructionStartTime < TimeManager.Instance.GetCurrentMonth() || !(m_currentPlan.StartTime > -1 || TimeManager.Instance.GetCurrentMonth() > -1))
+			else if(m_currentPlan.ConstructionStartTime < TimeManager.Instance.GetCurrentMonth() && TimeManager.Instance.GetCurrentMonth() > -1 && m_currentPlan.StartTime > -1)
 			{
 				m_acceptEditButton.interactable = false;
 				m_acceptButtonTooltip.enabled = true;

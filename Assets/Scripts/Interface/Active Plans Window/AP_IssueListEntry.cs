@@ -44,7 +44,7 @@ namespace MSP2050.Scripts
 					m_issueTypeText.color = m_errorIssueColour.GetColour();
 					break;
 				default:
-					m_issueText.text = "Unknow issue type " + m_issue.type;
+					m_issueText.text = "Unknown issue type " + m_issue.type;
 					break;
 			}
 			gameObject.SetActive(true);
@@ -55,6 +55,8 @@ namespace MSP2050.Scripts
 			m_issue = null;
 			m_issueText.text = a_text;
 			m_viewIssueButton.gameObject.SetActive(false);
+			m_issueTypeText.text = "Error";
+			m_issueTypeText.color = m_errorIssueColour.GetColour();
 			gameObject.SetActive(true);
 		}
 

@@ -247,9 +247,9 @@ namespace MSP2050.Scripts
 				for (int i = 0; i < planErrorsIDs.Length && i < 4; i++)
 				{
 					errorPlan = PlanManager.Instance.GetPlanWithID(planErrorsIDs[i]);
-					notificationText.Append("<color=#").Append(Util.ColorToHex(SessionManager.Instance.GetTeamByTeamID(errorPlan.Country).color)).Append(">");
+					//notificationText.Append("<color=#").Append(Util.ColorToHex(SessionManager.Instance.GetTeamByTeamID(errorPlan.Country).color)).Append(">");
 					notificationText.Append(" - ").Append(errorPlan.Name).Append("\n");
-					notificationText.Append("</color>");
+					//notificationText.Append("</color>");
 				}
 				if (planErrorsIDs.Length > 4)
 					notificationText.Append("and " + (planErrorsIDs.Length - 4).ToString() + " others.");
