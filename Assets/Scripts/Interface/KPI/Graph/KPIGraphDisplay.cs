@@ -134,7 +134,7 @@ namespace MSP2050.Scripts
 			int month = (int)nodeData.x;
 			GraphPoint point = graphEntry.graphPoints.GetPointByMonth(month, graphMonthInterval);
 
-			float startValue = graphEntry.activeValue.GetKpiValueForMonth(-1) ?? graphEntry.activeValue.GetKpiValueForMonth(0) ?? 0f;
+			float startValue = graphEntry.activeValue.GetKpiValueForMonth(0) ?? graphEntry.activeValue.GetKpiValueForMonth(-1) ?? 0f;
 
 			string changePercentage = KPIValue.FormatRelativePercentage(startValue, point.value);
 
