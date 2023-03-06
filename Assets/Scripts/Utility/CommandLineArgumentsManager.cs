@@ -15,6 +15,7 @@ namespace MSP2050.Scripts
 			Password,
 			ServerAddress,
 			ConfigFileName,
+			SessionEntryIndex,
 			AutoLogin
 		}
 

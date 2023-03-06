@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -129,14 +130,32 @@ namespace MSP2050.Scripts
 
 			if (null == CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
 				CommandLineArgumentsManager.CommandLineArgumentName.AutoLogin)) yield break;
-			var configFilename = CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
-				CommandLineArgumentsManager.CommandLineArgumentName.ConfigFileName);
-			if (null == configFilename) yield break;
-			IEnumerable<LoginSessionEntry> entries= m_sessionEntries.Where(
-				x => x.GetSession().config_file_name == configFilename
-			);
+			IEnumerable<LoginSessionEntry> entries = GetSessionEntryByAutoLogin();
 			if (!entries.Any()) yield break;
 			LoginManager.Instance.ConnectPressedForSession(entries.First().GetSession());
+		}
+		
+		private IEnumerable<LoginSessionEntry> GetSessionEntryByAutoLogin()
+		{
+			// get by session entry index.
+			var sessionEntryIndexText = CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.SessionEntryIndex);
+			if (null != sessionEntryIndexText && int.TryParse(sessionEntryIndexText, out var sessionEntryIndex) &&
+				sessionEntryIndex > 0 && sessionEntryIndex < m_sessionEntries.Count)
+			{
+				return new List<LoginSessionEntry> {m_sessionEntries[sessionEntryIndex]};
+			}
+			// or, get by config file name match
+			var configFilename = CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.ConfigFileName);
+			
+			// no match found
+			if (null == configFilename)
+				return new List<LoginSessionEntry>();
+
+			return m_sessionEntries.Where(
+				x => x.GetSession().config_file_name == configFilename
+			);
 		}
 
 		void SetSessionEntry(GameSession a_session)
