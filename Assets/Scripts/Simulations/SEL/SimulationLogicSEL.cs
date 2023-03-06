@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 			{
 				shippingKPI.ProcessReceivedKPIData(data.kpi);
 			}
-			if (data.shipping_issues != null && data.shipping_issues.Count > 0)
+			if (data.shipping_issues != null)
 				IssueManager.Instance.UpdateShippingIssues(data.shipping_issues);
 		}
 
