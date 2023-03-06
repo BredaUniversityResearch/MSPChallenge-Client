@@ -52,7 +52,7 @@ pipeline {
 		stage('Build Pull Request') {
 		
 			when { 
-					expression { BRANCH_NAME ==~ /(MSP-[0-9]+)/ }
+					expression { env.BRANCH_NAME.startsWith('PR') }
 				}
 			steps {
 				script {
