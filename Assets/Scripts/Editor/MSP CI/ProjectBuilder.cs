@@ -41,36 +41,34 @@ class ProjectBuilder
 	private static void WindowsDevBuilder()
 	{
         PreBuild();
-		var outputDir = GetArg("-customBuildPath");
+        string outputDir = GetArg("-customBuildPath");
 		BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, BuildOptions.Development);
 	}
 
     private static void MacOSDevBuilder()
     {
         PreBuild();
-        var outputDir = GetArg("-customBuildPath");
+        string outputDir = GetArg("-customBuildPath");
         BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneOSX, BuildOptions.Development);
     }
 
     private static void WindowsBuilder()
     {
         PreBuild();
-        var outputDir = GetArg("-customBuildPath");
+        string outputDir = GetArg("-customBuildPath");
         BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, 0);
     }
 
     private static void MacOSBuilder()
     {
         PreBuild();
-        var outputDir = GetArg("-customBuildPath");
+        string outputDir = GetArg("-customBuildPath");
         BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneOSX, 0);
     }
 
     [MenuItem("MSP 2050/Build project")]
     public static void MyBuild()
     {
-        //PreBuild();
-
         //Build a dev and non-dev player
         string path = EditorUtility.SaveFolderPanel("Choose folder to build game", "", "");
         if (path.Length != 0)
@@ -82,7 +80,7 @@ class ProjectBuilder
 	
 	private static string GetArg(string name)
 	{
-		var args = System.Environment.GetCommandLineArgs();
+		string[] args = System.Environment.GetCommandLineArgs();
 		for (int i = 0; i < args.Length; i++)
 		{
 			if (args[i] == name && args.Length > i + 1)

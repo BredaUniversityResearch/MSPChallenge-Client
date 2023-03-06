@@ -54,7 +54,7 @@ public class ApplicationBuildIdentifier : MonoBehaviour
 	{
         string gitTag = "";
 
-		var proc = new Process
+		Process proc = new Process
 		{
 			StartInfo = new ProcessStartInfo()
 			{
