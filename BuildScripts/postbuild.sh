@@ -1,2 +1,0 @@
-env
-jq . < build.json
