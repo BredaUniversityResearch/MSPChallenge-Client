@@ -54,9 +54,8 @@ namespace MSP2050.Scripts
 		public override void LeftClick(Vector3 worldPosition)
 		{
 			List<AbstractLayer> loadedLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth(); // change this back to loaded layers by depth, for the layerprobe
-			Vector3 windowPosition = Input.mousePosition;
-			windowPosition.y -= Screen.height;
-
+			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
+			Vector3 windowPosition = new Vector3(Input.mousePosition.x / scale, (Input.mousePosition.y - Screen.height) / scale);
 
 			if (Input.GetKey(KeyCode.LeftAlt))
 			{

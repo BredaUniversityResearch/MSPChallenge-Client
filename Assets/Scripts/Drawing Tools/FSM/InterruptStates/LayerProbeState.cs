@@ -46,10 +46,10 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			Vector3 windowPosition = Input.mousePosition;
-			windowPosition.y -= Screen.height;
+			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
+			Vector3 windowPosition = new Vector3(Input.mousePosition.x / scale, (Input.mousePosition.y - Screen.height) / scale);
 
-			if(subEntities.Count > 0)
+			if (subEntities.Count > 0)
 				InterfaceCanvas.Instance.layerProbeWindow.ShowLayerProbeWindow(subEntities, position, windowPosition);
 			fsm.SetInterruptState(null);
 		}
