@@ -29,7 +29,7 @@ namespace MSP2050.Scripts
 			int pointCount = subEntity.GetPolygonPointCount();
 			subEntity.SetPointPosition(pointCount - 1, subEntity.GetPointPosition(pointCount - 2), true);
 
-			if ((subEntity.Entity.Layer as PolygonLayer).activeEntities.Contains(subEntity.Entity as PolygonEntity))
+			if ((subEntity.Entity.Layer as PolygonLayer).m_activeEntities.Contains(subEntity.Entity as PolygonEntity))
 			{
 				subEntity.DrawGameObject(subEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			}

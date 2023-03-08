@@ -60,41 +60,41 @@ namespace MSP2050.Scripts
 					continue;
 				if (entry.Changed)
 				{
-					if (m_energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
+					if (m_energyGrid.m_plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
 						m_energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(m_energyGrid, plan);
 					long old = 0L;
-					if (m_energyGrid.energyDistribution.distribution.TryGetValue(entry.Team.ID, out var oldExpected))
+					if (m_energyGrid.m_energyDistribution.m_distribution.TryGetValue(entry.Team.ID, out var oldExpected))
 					{
-						old = oldExpected.expected;
+						old = oldExpected.m_expected;
 					}
 					else
 					{
-						Debug.LogWarning($"Trying to get an old energy value from a distribution that doesn't contain the team: {entry.Team.ID}. Grid persisid: {m_energyGrid.persistentID}. New value: {entry.CurrentValue}");
+						Debug.LogWarning($"Trying to get an old energy value from a distribution that doesn't contain the team: {entry.Team.ID}. Grid persisid: {m_energyGrid.m_persistentID}. New value: {entry.CurrentValue}");
 					}
 					if (entry.CurrentValue < 0)
 					{
 						if (old < 0)
-							m_energyGrid.sharedPower -= entry.CurrentValue - old;
+							m_energyGrid.m_sharedPower -= entry.CurrentValue - old;
 						else
-							m_energyGrid.sharedPower -= entry.CurrentValue;
+							m_energyGrid.m_sharedPower -= entry.CurrentValue;
 					}
 					else if (old < 0)
 					{
-						m_energyGrid.sharedPower += old;
+						m_energyGrid.m_sharedPower += old;
 					}
-					m_energyGrid.energyDistribution.distribution[entry.Team.ID].expected = entry.CurrentValue;
+					m_energyGrid.m_energyDistribution.m_distribution[entry.Team.ID].m_expected = entry.CurrentValue;
 				}
 			}
-			if (m_gridNameField.text != m_energyGrid.name)
+			if (m_gridNameField.text != m_energyGrid.m_name)
 			{
-				if (m_energyGrid.plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
+				if (m_energyGrid.m_plan.ID != plan.ID) //Older distribution was changed: duplicate it to the new plan
 				{
 					m_energyGrid = PolicyLogicEnergy.DuplicateEnergyGridToPlan(m_energyGrid, plan);
-					m_energyGrid.name = m_gridNameField.text;
+					m_energyGrid.m_name = m_gridNameField.text;
 				}
 				else
 				{
-					m_energyGrid.name = m_gridNameField.text;
+					m_energyGrid.m_name = m_gridNameField.text;
 					//m_energyGrid.SubmitName();//TODO CHECK: this should not happen here, but in submit
 				}
 			}
@@ -110,55 +110,55 @@ namespace MSP2050.Scripts
 			m_headerToggleBar.group = a_toggleGroup;
 			m_energyGrid = grid;
 			originalGridState = state;
-			allSocketMaximum = grid.maxCountryCapacity;
-			m_totalSourcePower = grid.sourcePower;
+			allSocketMaximum = grid.m_maxCountryCapacity;
+			m_totalSourcePower = grid.m_sourcePower;
 			m_greenGreyEnergyImage.sprite = grid.IsGreen ? m_greenEnergySprite : m_greyEnergySprite; 
 			m_gridNameField.interactable = (state != EnergyGrid.GridPlanState.Removed);
-			SetName(grid.name);
+			SetName(grid.m_name);
 
 			int nextProductionEntryIndex = 0;
 			int nextSocketEntryIndex = 0;
 			int nextTeamBallIndex = 0;
 
 			ignoreDistributionUpdate = true; //Ignore distr updates while creating (it sorts, messing up order)
-			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in grid.energyDistribution.distribution)
+			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in grid.m_energyDistribution.m_distribution)
 			{
 				Team team = SessionManager.Instance.GetTeamByTeamID(kvp.Key);
-				long oldValue = kvp.Value.expected;
+				long oldValue = kvp.Value.m_expected;
 				if(a_oldDistribution != null)
 				{
-					if(a_oldDistribution.distribution.TryGetValue(kvp.Key, out var oldCountryValue))
-						oldValue = oldCountryValue.expected;
+					if(a_oldDistribution.m_distribution.TryGetValue(kvp.Key, out var oldCountryValue))
+						oldValue = oldCountryValue.m_expected;
 				}
 
 				//Socket entry
-				if (kvp.Value.maximum > 0)
+				if (kvp.Value.m_maximum > 0)
 				{
 					if (nextSocketEntryIndex < m_socketEntries.Count)
 					{
-						 m_socketEntries[nextSocketEntryIndex].SetContent(team, kvp.Value.maximum, allSocketMaximum, kvp.Value.expected, oldValue, this, interactable);
+						 m_socketEntries[nextSocketEntryIndex].SetContent(team, kvp.Value.m_maximum, allSocketMaximum, kvp.Value.m_expected, oldValue, this, interactable);
 					}
 					else
 					{
 						DistributionEnergySocketEntry socketEntry = Instantiate(m_socketEntryPrefab, m_socketEntryParent).GetComponent<DistributionEnergySocketEntry>();
 						m_socketEntries.Add(socketEntry);
-						socketEntry.SetContent(team, kvp.Value.maximum, allSocketMaximum, kvp.Value.expected, oldValue, this, interactable);
+						socketEntry.SetContent(team, kvp.Value.m_maximum, allSocketMaximum, kvp.Value.m_expected, oldValue, this, interactable);
 					}
 					nextSocketEntryIndex++;
 				}
 
 				//Source production entry
-				if(kvp.Value.sourceInput > 0)
+				if(kvp.Value.m_sourceInput > 0)
 				{
 					if (nextProductionEntryIndex < m_productionEntries.Count)
 					{
-						m_productionEntries[nextProductionEntryIndex].SetContent(team, valueConversionCollection.ConvertUnit(kvp.Value.sourceInput, ValueConversionCollection.UNIT_WATT).FormatAsString());
+						m_productionEntries[nextProductionEntryIndex].SetContent(team, valueConversionCollection.ConvertUnit(kvp.Value.m_sourceInput, ValueConversionCollection.UNIT_WATT).FormatAsString());
 					}
 					else
 					{
 						DistributionEnergyProductionEntry productionEntry = Instantiate(m_productionEntryPrefab, m_productionEntryParent).GetComponent<DistributionEnergyProductionEntry>();
 						m_productionEntries.Add(productionEntry);
-						productionEntry.SetContent(team, valueConversionCollection.ConvertUnit(kvp.Value.sourceInput, ValueConversionCollection.UNIT_WATT).FormatAsString());
+						productionEntry.SetContent(team, valueConversionCollection.ConvertUnit(kvp.Value.m_sourceInput, ValueConversionCollection.UNIT_WATT).FormatAsString());
 					}
 					//m_totalSourcePower += kvp.Value.sourceInput;
 					nextProductionEntryIndex++;
@@ -257,7 +257,7 @@ namespace MSP2050.Scripts
 					break;
 				}
 			}
-			changed = changed || m_gridNameField.text != m_energyGrid.name;
+			changed = changed || m_gridNameField.text != m_energyGrid.m_name;
 			UpdateStateIndicator(changed);
 			return changed;
 		}

@@ -271,7 +271,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("id", persistentID);
 			dataObject.Add("plan", Plan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("layer", GetDataBaseOrBatchIDReference());
-			batch.AddRequest(Server.MarkForDelete(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
+			batch.AddRequest(Server.MarkForDelete(), dataObject, BatchRequest.BatchGroupGeometryDelete);
 		}
 
 		public void SubmitUnmarkForDeletion(int persistentID, BatchRequest batch)
@@ -285,7 +285,7 @@ namespace MSP2050.Scripts
 			JObject dataObject = new JObject();
 			dataObject.Add("id", persistentID);
 			dataObject.Add("plan", Plan.GetDataBaseOrBatchIDReference());
-			batch.AddRequest(Server.UnmarkForDelete(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
+			batch.AddRequest(Server.UnmarkForDelete(), dataObject, BatchRequest.BatchGroupGeometryDelete);
 		}
 
 		public Rect GetBounds()
@@ -400,8 +400,8 @@ namespace MSP2050.Scripts
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("id", Plan.GetDataBaseOrBatchIDReference());
-			dataObject.Add("layerid", BaseLayer.ID);
-			creationBatchCallID = batch.AddRequest<int>(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_LAYER_ADD, HandleDatabaseIDResult);
+			dataObject.Add("layerid", BaseLayer.m_id);
+			creationBatchCallID = batch.AddRequest<int>(Server.AddPlanLayer(), dataObject, BatchRequest.BatchGroupLayerAdd, HandleDatabaseIDResult);
 		}
 		void HandleDatabaseIDResult(int a_result)
 		{

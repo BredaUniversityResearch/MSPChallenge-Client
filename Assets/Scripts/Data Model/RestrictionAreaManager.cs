@@ -133,7 +133,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("plan_id", referencePlan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("settings", JToken.FromObject(settingsToSubmit));
 
-			batch.AddRequest(Server.SetPlanRestrictionAreas(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			batch.AddRequest(Server.SetPlanRestrictionAreas(), dataObject, BatchRequest.BatchGroupPlanChange);
 		}
 	
 		public List<RestrictionAreaObject> GatherSettingsForPlan(Plan referencePlan)
@@ -152,7 +152,7 @@ namespace MSP2050.Scripts
 		private void GatherSettingsForPlanLayer(Plan referencePlan, AbstractLayer layer, List<RestrictionAreaObject> result)
 		{
 			List<RestrictionAreaSetting> settings = new List<RestrictionAreaSetting>(16);
-			foreach (var entityIdTypePair in layer.EntityTypes)
+			foreach (var entityIdTypePair in layer.m_entityTypes)
 			{
 				EntityTypeRestrictionSettings typeSettings;
 				if (restrictionSettings.TryGetValue(entityIdTypePair.Value, out typeSettings))
@@ -164,7 +164,7 @@ namespace MSP2050.Scripts
 						RestrictionAreaSetting setting = settings[settingId];
 						RestrictionAreaObject serverData = new RestrictionAreaObject
 						{
-							layer_id = layer.ID,
+							layer_id = layer.m_id,
 							entity_type_id = entityIdTypePair.Key,
 							team_id = setting.teamId,
 							restriction_size  = setting.restrictionSize

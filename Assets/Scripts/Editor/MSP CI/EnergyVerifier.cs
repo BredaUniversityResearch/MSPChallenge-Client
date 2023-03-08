@@ -65,7 +65,7 @@ public class EnergyVerifierObj : MonoBehaviour
 		{
 			LayerManager.Instance.ShowLayer(layer);
 			layer.ResetEnergyConnections();
-			if (layer.editingType == AbstractLayer.EditingType.Socket)
+			if (layer.m_editingType == AbstractLayer.EditingType.Socket)
 			{
 				foreach (SubEntity socket in layer.GetActiveSubEntities())
 					socketIDs.Add(socket.GetDatabaseID());
@@ -100,7 +100,7 @@ public class EnergyVerifierObj : MonoBehaviour
 		//Check if all sockets are part of a grid and all expected sockets in grids can be found
 		foreach (EnergyGrid grid in currentGrids)
 		{
-			foreach(EnergyPointSubEntity socket in grid.sockets)
+			foreach(EnergyPointSubEntity socket in grid.m_sockets)
 			{
 				if (!socketIDs.Remove(socket.GetDatabaseID()))
 				{
@@ -128,14 +128,14 @@ public class EnergyVerifierObj : MonoBehaviour
 		foreach (var subEnt in layer.GetAllSubEntities())
 		{
 			EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)subEnt;
-			if (cable.connections == null || cable.connections.Count == 0)
+			if (cable.Connections == null || cable.Connections.Count == 0)
 			{
 				Debug.LogError($"Cable without connections found: {cable.GetDatabaseID()}");
 				errors++;
 			}
-			if (cable.connections.Count < 2)
+			if (cable.Connections.Count < 2)
 			{
-				Debug.LogError($"Cable with missing connection found: {cable.GetDatabaseID()}. Only connected to: {cable.connections[0].point.GetDatabaseID()}");
+				Debug.LogError($"Cable with missing connection found: {cable.GetDatabaseID()}. Only connected to: {cable.Connections[0].point.GetDatabaseID()}");
 				errors++;
 			}
 		}
@@ -150,24 +150,24 @@ public class EnergyVerifierObj : MonoBehaviour
 			int gridId = grid.GetDatabaseID();
 
 			//Compare grid to the grid we get when retracing from a single source
-			EnergyGrid retracedGrid = new EnergyGrid(grid.sockets[0], null);
-			List<int> originalSockets = new List<int>(grid.sockets.Count);
-			List<int> originalSources = new List<int>(grid.sources.Count);
-			foreach (EnergyPointSubEntity socket in grid.sockets)
+			EnergyGrid retracedGrid = new EnergyGrid(grid.m_sockets[0], null);
+			List<int> originalSockets = new List<int>(grid.m_sockets.Count);
+			List<int> originalSources = new List<int>(grid.m_sources.Count);
+			foreach (EnergyPointSubEntity socket in grid.m_sockets)
 				originalSockets.Add(socket.GetDatabaseID());
 			//string originalSourceIDs = string.Join(", ", grid.sources.Select<EnergyPointSubEntity, string>(source => { return source.GetDatabaseID().ToString(); }));
 			if (!retracedGrid.SourceWiseIdentical(grid))
 			{
-				string retracedIDs = string.Join(", ", retracedGrid.sources.Select<EnergyPointSubEntity, string>(source => { return source.GetDatabaseID().ToString(); }));
+				string retracedIDs = string.Join(", ", retracedGrid.m_sources.Select<EnergyPointSubEntity, string>(source => { return source.GetDatabaseID().ToString(); }));
 				Debug.LogError($"Sources in grid with id: {gridId} were different when it was retraced in the current state.\nOriginal sources: {JsonConvert.SerializeObject(originalSources)}.\nRetraced sources: {retracedIDs}.");
 				errors++;
 			}
 			//string originalSocketIDs = string.Join(", ", grid.sockets.Select<EnergyPointSubEntity, string>(socket => { return socket.GetDatabaseID().ToString(); }));
-			foreach (EnergyPointSubEntity source in grid.sources)
+			foreach (EnergyPointSubEntity source in grid.m_sources)
 				originalSources.Add(source.GetDatabaseID());
 			if (!retracedGrid.SocketWiseIdentical(grid))
 			{
-				string retracedIDs = string.Join(", ", retracedGrid.sockets.Select<EnergyPointSubEntity, string>(socket => { return socket.GetDatabaseID().ToString(); }));
+				string retracedIDs = string.Join(", ", retracedGrid.m_sockets.Select<EnergyPointSubEntity, string>(socket => { return socket.GetDatabaseID().ToString(); }));
 				Debug.LogError($"Sockets in grid with id: {gridId} were different when it was retraced in the current state.\nOriginal sockets: {JsonConvert.SerializeObject(originalSockets)}.\nRetraced sockets: {retracedIDs}.");
 				errors++;
 			}

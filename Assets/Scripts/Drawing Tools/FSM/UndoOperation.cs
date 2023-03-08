@@ -705,7 +705,7 @@ namespace MSP2050.Scripts
 				//Remove connections between cable and point
 				EnergyLineStringSubEntity cable = SubEntity as EnergyLineStringSubEntity;
 				Connection connectionToRemove = null;
-				foreach (Connection con in cable.connections)
+				foreach (Connection con in cable.Connections)
 				{
 					if (con.point == point)
 					{

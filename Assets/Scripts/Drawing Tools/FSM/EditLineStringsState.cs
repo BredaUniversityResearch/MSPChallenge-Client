@@ -85,7 +85,7 @@ namespace MSP2050.Scripts
 					bool canRecall = selectedRemovedEntity;
 					//If a point connected to this line was moved or removed it cannot be recalled
 					if (selectedRemovedEntity)
-						foreach (Connection con in energyLine.connections)
+						foreach (Connection con in energyLine.Connections)
 							if (con.point.IsPlannedForRemoval() || !con.point.IsNotShownInPlan())
 								canRecall = false;
 					gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, canRecall);
@@ -253,8 +253,8 @@ namespace MSP2050.Scripts
 
 			//Change active geom 
 			baseLayer.AddPreModifiedEntity(baseLineString.Entity);
-			baseLayer.activeEntities.Remove(baseLineString.Entity as LineStringEntity);
-			baseLayer.activeEntities.Add(duplicate.Entity as LineStringEntity);
+			baseLayer.m_activeEntities.Remove(baseLineString.Entity as LineStringEntity);
+			baseLayer.m_activeEntities.Add(duplicate.Entity as LineStringEntity);
 
 			//Redraw based on activity changes
 			duplicate.RedrawGameObject(SubEntityDrawMode.Selected, duplicateSelection);
@@ -1077,7 +1077,7 @@ namespace MSP2050.Scripts
 					selectedTeam = lse.Entity.Country;
 
 				Dictionary<EntityPropertyMetaData, string> parameters = new Dictionary<EntityPropertyMetaData, string>();
-				foreach (EntityPropertyMetaData p in baseLayer.propertyMetaData)
+				foreach (EntityPropertyMetaData p in baseLayer.m_propertyMetaData)
 				{
 					if (p.ShowInEditMode)
 						parameters.Add(p, lse.Entity.GetPropertyMetaData(p));

@@ -69,12 +69,12 @@ namespace MSP2050.Scripts
 			gameObject = VisualizationUtil.Instance.CreatePointGameObject();
 			gameObject.transform.SetParent(parent);
 
-			if(Entity.Layer.textInfo != null)
+			if(Entity.Layer.m_textInfo != null)
 			{
 				//Points need inverse scale...
-				Entity.Layer.textInfo.UseInverseScale = true;
+				Entity.Layer.m_textInfo.UseInverseScale = true;
 
-				CreateTextMesh(gameObject.transform, Entity.Layer.textInfo.textOffset);
+				CreateTextMesh(gameObject.transform, Entity.Layer.m_textInfo.textOffset);
 				ScaleTextMesh(VisualizationUtil.Instance.UpdatePointScale(gameObject, Entity.EntityTypes[0].DrawSettings));
 			}
 

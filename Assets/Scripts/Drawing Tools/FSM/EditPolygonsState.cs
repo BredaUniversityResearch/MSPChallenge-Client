@@ -197,7 +197,7 @@ namespace MSP2050.Scripts
 		protected PolygonSubEntity createNewPlanPolygon(SubEntityDataCopy dataCopy, int persistentID)
 		{
 			PolygonEntity newEntity = baseLayer.CreateNewPolygonEntity(dataCopy.entityTypeCopy, planLayer);
-			PolygonSubEntity newSubEntity = baseLayer.editingType == AbstractLayer.EditingType.SourcePolygon ? new EnergyPolygonSubEntity(newEntity) : new PolygonSubEntity(newEntity);
+			PolygonSubEntity newSubEntity = baseLayer.m_editingType == AbstractLayer.EditingType.SourcePolygon ? new EnergyPolygonSubEntity(newEntity) : new PolygonSubEntity(newEntity);
 			newSubEntity.SetPersistentID(persistentID);
 			((PolygonEntity)newSubEntity.Entity).AddSubEntity(newSubEntity);
 			newSubEntity.SetDataToCopy(dataCopy);
@@ -218,14 +218,14 @@ namespace MSP2050.Scripts
 
 			//Change active geom 
 			baseLayer.AddPreModifiedEntity(basePolygon.Entity);
-			baseLayer.activeEntities.Remove(basePolygon.Entity as PolygonEntity);
-			baseLayer.activeEntities.Add(duplicate.Entity as PolygonEntity);
+			baseLayer.m_activeEntities.Remove(basePolygon.Entity as PolygonEntity);
+			baseLayer.m_activeEntities.Add(duplicate.Entity as PolygonEntity);
 			if (baseLayer.IsEnergyPolyLayer())
 			{
 				EnergyPolygonSubEntity baseEnergyPoly = (basePolygon as EnergyPolygonSubEntity);
 				EnergyPolygonSubEntity energyDuplicate = (duplicate as EnergyPolygonSubEntity);
 				baseEnergyPoly.DeactivateSourcePoint();
-				energyDuplicate.sourcePoint.RedrawGameObject();
+				energyDuplicate.m_sourcePoint.RedrawGameObject();
 			}
 
 			//Redraw based on activity changes
@@ -1193,7 +1193,7 @@ namespace MSP2050.Scripts
 		{
 			selectedSubEntities.Add(subEntity);
 			if (this is EditEnergyPolygonState)
-				selectedSourcePoints.Add((subEntity as EnergyPolygonSubEntity).sourcePoint);
+				selectedSourcePoints.Add((subEntity as EnergyPolygonSubEntity).m_sourcePoint);
 			if(updateActivePlanWindow)
 				UpdateActivePlanWindowToSelection();
 		}
@@ -1212,7 +1212,7 @@ namespace MSP2050.Scripts
 			{
 				selectedSourcePoints = new HashSet<EnergyPointSubEntity>();
 				foreach (PolygonSubEntity poly in selectedSubEntities)
-					selectedSourcePoints.Add((poly as EnergyPolygonSubEntity).sourcePoint);
+					selectedSourcePoints.Add((poly as EnergyPolygonSubEntity).m_sourcePoint);
 			}
 		}
 
@@ -1220,7 +1220,7 @@ namespace MSP2050.Scripts
 		{
 			selectedSubEntities.Remove(subEntity);
 			if (this is EditEnergyPolygonState)
-				selectedSourcePoints.Remove((subEntity as EnergyPolygonSubEntity).sourcePoint);
+				selectedSourcePoints.Remove((subEntity as EnergyPolygonSubEntity).m_sourcePoint);
 		}
 
 		private void UpdateActivePlanWindowToSelection()
@@ -1238,7 +1238,7 @@ namespace MSP2050.Scripts
 					selectedTeam = pse.Entity.Country;
 
 				Dictionary<EntityPropertyMetaData, string> parameters = new Dictionary<EntityPropertyMetaData, string>();
-				foreach (EntityPropertyMetaData p in baseLayer.propertyMetaData)
+				foreach (EntityPropertyMetaData p in baseLayer.m_propertyMetaData)
 				{
 					if (p.ShowInEditMode)
 						parameters.Add(p, pse.Entity.GetPropertyMetaData(p));

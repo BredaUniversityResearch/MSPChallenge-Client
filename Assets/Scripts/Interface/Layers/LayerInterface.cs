@@ -47,7 +47,7 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			string categoryName = LayerManager.Instance.MakeCategoryDisplayString(layer.Category);
+			string categoryName = LayerManager.Instance.MakeCategoryDisplayString(layer.m_category);
 
 			LayerCategoryBar categoryBar = null;
 			if (!m_categories.TryGetValue(categoryName, out categoryBar))
@@ -58,12 +58,12 @@ namespace MSP2050.Scripts
 				categoryBar = newCategoryGroup;
 			}
 
-			if (!m_subCategories.ContainsKey(layer.SubCategory))
+			if (!m_subCategories.ContainsKey(layer.m_subCategory))
 			{
-				string subCategoryName = LayerManager.Instance.MakeCategoryDisplayString(layer.SubCategory);
+				string subCategoryName = LayerManager.Instance.MakeCategoryDisplayString(layer.m_subCategory);
 				LayerSubCategoryBar newSubcategory = Instantiate(m_subcategoryPrefab, categoryBar.ContentParent).GetComponent<LayerSubCategoryBar>();
-				m_subCategories.Add(layer.SubCategory, newSubcategory);
-				newSubcategory.SetContent(subCategoryName, layer.SubCategory, LayerManager.Instance.GetSubcategoryIcon(layer.SubCategory), OnSubcategoryClick, m_subcategoryToggleGroup);
+				m_subCategories.Add(layer.m_subCategory, newSubcategory);
+				newSubcategory.SetContent(subCategoryName, layer.m_subCategory, LayerManager.Instance.GetSubcategoryIcon(layer.m_subCategory), OnSubcategoryClick, m_subcategoryToggleGroup);
 			}
 			//m_searchBarContainer.SetAsLastSibling();
 		}

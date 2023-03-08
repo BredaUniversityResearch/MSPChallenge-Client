@@ -23,7 +23,7 @@ namespace MSP2050.Scripts
 				{
 					PointEntity ent = new PointEntity(this, layerObject);
 					Entities.Add(ent);
-					initialEntities.Add(ent);
+					InitialEntities.Add(ent);
 				}
 			}
 		}
@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 			PointSubEntity closestSubEntity = null;
 			float closestDistanceSquared = float.MaxValue;
 
-			foreach (PointEntity pointEntity in activeEntities)
+			foreach (PointEntity pointEntity in m_activeEntities)
 			{
 				List<PointSubEntity> subEntities = pointEntity.GetSubEntities();
 				foreach (PointSubEntity subEntity in subEntities)
@@ -81,7 +81,7 @@ namespace MSP2050.Scripts
 			List<SubEntity> closestSubEntities = new List<SubEntity>();
 			float closestDistanceSquared = float.MaxValue;
 
-			foreach (PointEntity pointEntity in activeEntities)
+			foreach (PointEntity pointEntity in m_activeEntities)
 			{
 				List<PointSubEntity> subEntities = pointEntity.GetSubEntities();
 				foreach (PointSubEntity subEntity in subEntities)
@@ -112,7 +112,7 @@ namespace MSP2050.Scripts
 
 			HashSet<PointSubEntity> result = new HashSet<PointSubEntity>();
 
-			foreach (PointEntity pointEntity in activeEntities)
+			foreach (PointEntity pointEntity in m_activeEntities)
 			{
 				List<PointSubEntity> subEntities = pointEntity.GetSubEntities();
 				foreach (PointSubEntity subEntity in subEntities)
@@ -142,7 +142,7 @@ namespace MSP2050.Scripts
 
 		public override void UpdateScale(Camera targetCamera)
 		{
-			foreach (PointEntity point in activeEntities)
+			foreach (PointEntity point in m_activeEntities)
 			{
 				List<PointSubEntity> subpoints = point.GetSubEntities();
 
@@ -156,7 +156,7 @@ namespace MSP2050.Scripts
 		public List<PointSubEntity> GetAllSubEntities()
 		{
 			List<PointSubEntity> subEntities = new List<PointSubEntity>();
-			foreach (PointEntity entity in activeEntities)
+			foreach (PointEntity entity in m_activeEntities)
 			{
 				foreach (PointSubEntity subent in entity.GetSubEntities())
 					if (!subent.IsPlannedForRemoval())
@@ -165,9 +165,9 @@ namespace MSP2050.Scripts
 			return subEntities;
 		}
 
-		public override  LayerManager.GeoType GetGeoType()
+		public override  LayerManager.EGeoType GetGeoType()
 		{
-			return  LayerManager.GeoType.point;
+			return  LayerManager.EGeoType.point;
 		}
 
 		#region Legacy stuff

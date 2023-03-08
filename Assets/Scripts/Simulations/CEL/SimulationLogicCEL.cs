@@ -29,16 +29,16 @@ namespace MSP2050.Scripts
 
 		void ApplySettings()
 		{
-			Sprite greenSprite = m_settings.green_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + m_settings.green_centerpoint_sprite);
-			Sprite greySprite = m_settings.grey_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + m_settings.grey_centerpoint_sprite);
+			Sprite greenSprite = m_settings.green_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.PointSpriteRootFolder + m_settings.green_centerpoint_sprite);
+			Sprite greySprite = m_settings.grey_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.PointSpriteRootFolder + m_settings.grey_centerpoint_sprite);
 			Color greenColor = Util.HexToColor(m_settings.green_centerpoint_color);
 			Color greyColor = Util.HexToColor(m_settings.grey_centerpoint_color);
 
 			foreach (PointLayer layer in PolicyLogicEnergy.Instance.GetCenterPointLayers())
 			{
-				layer.EntityTypes[0].DrawSettings.PointColor = layer.greenEnergy ? greenColor : greyColor;
-				layer.EntityTypes[0].DrawSettings.PointSprite = layer.greenEnergy ? greenSprite : greySprite;
-				layer.EntityTypes[0].DrawSettings.PointSize = layer.greenEnergy ? m_settings.green_centerpoint_size : m_settings.grey_centerpoint_size;
+				layer.m_entityTypes[0].DrawSettings.PointColor = layer.m_greenEnergy ? greenColor : greyColor;
+				layer.m_entityTypes[0].DrawSettings.PointSprite = layer.m_greenEnergy ? greenSprite : greySprite;
+				layer.m_entityTypes[0].DrawSettings.PointSize = layer.m_greenEnergy ? m_settings.green_centerpoint_size : m_settings.grey_centerpoint_size;
 			}
 			m_settings = null;
 		}

@@ -65,8 +65,8 @@ namespace MSP2050.Scripts
 				{
 					state.AdvanceStateToMonth(i);
 
-					Dictionary<EntityType, float> sizeByEntityType = new Dictionary<EntityType, float>(layer.EntityTypes.Count);
-					foreach (EntityType layerType in layer.EntityTypes.Values)
+					Dictionary<EntityType, float> sizeByEntityType = new Dictionary<EntityType, float>(layer.m_entityTypes.Count);
+					foreach (EntityType layerType in layer.m_entityTypes.Values)
 					{
 						//Make sure we initialize all the types otherwise the KPIs wont add values in for these new months.
 						sizeByEntityType.Add(layerType, 0.0f);

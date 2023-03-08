@@ -170,8 +170,8 @@ namespace MSP2050.Scripts
 
 			//Change active geom 
 			baseLayer.AddPreModifiedEntity(basePoint.Entity);
-			baseLayer.activeEntities.Remove(basePoint.Entity as PointEntity);
-			baseLayer.activeEntities.Add(duplicate.Entity as PointEntity);
+			baseLayer.m_activeEntities.Remove(basePoint.Entity as PointEntity);
+			baseLayer.m_activeEntities.Add(duplicate.Entity as PointEntity);
 
 
 			//Redraw based on activity changes
@@ -527,7 +527,7 @@ namespace MSP2050.Scripts
 				else
 					selectedTeam = pse.Entity.Country;
 				Dictionary<EntityPropertyMetaData, string> parameters = new Dictionary<EntityPropertyMetaData, string>();
-				foreach (EntityPropertyMetaData p in baseLayer.propertyMetaData)
+				foreach (EntityPropertyMetaData p in baseLayer.m_propertyMetaData)
 				{
 					if (p.ShowInEditMode)
 						parameters.Add(p, pse.Entity.GetPropertyMetaData(p));

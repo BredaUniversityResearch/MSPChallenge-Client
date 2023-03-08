@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 			foreach (PlanLayerBackup layerbackup in m_planLayers)
 			{
 				originalLayers.Add(layerbackup.m_planLayer.ID);
-				if (a_plan.getPlanLayerForBaseID(layerbackup.m_planLayer.BaseLayer.ID) == null)
+				if (a_plan.getPlanLayerForBaseID(layerbackup.m_planLayer.BaseLayer.m_id) == null)
 				{
 					//If layer not in plan, add again
 					a_plan.PlanLayers.Add(layerbackup.m_planLayer);
@@ -102,14 +102,14 @@ namespace MSP2050.Scripts
 			List<Action<BatchRequest>> postGeometryActions = new List<Action<BatchRequest>>();
 			foreach (PlanLayer planlayer in a_plan.PlanLayers)
 			{
-				newLayerIds.Add(planlayer.BaseLayer.ID);
+				newLayerIds.Add(planlayer.BaseLayer.m_id);
 			}
 
 			//Submit changes or removal to all existing layers
 			foreach (PlanLayerBackup backupLayer in m_planLayers)
 			{
-				oldLayerIds.Add(backupLayer.m_planLayer.BaseLayer.ID);
-				if (!newLayerIds.Contains(backupLayer.m_planLayer.BaseLayer.ID))
+				oldLayerIds.Add(backupLayer.m_planLayer.BaseLayer.m_id);
+				if (!newLayerIds.Contains(backupLayer.m_planLayer.BaseLayer.m_id))
 				{
 					//Plan no longer contains layer, submit removal
 					//Removes planlayer from plan and all geom and issues on it
@@ -182,7 +182,7 @@ namespace MSP2050.Scripts
 			//Submit new layers
 			foreach (PlanLayer planlayer in a_plan.PlanLayers)
 			{
-				if (!oldLayerIds.Contains(planlayer.BaseLayer.ID))
+				if (!oldLayerIds.Contains(planlayer.BaseLayer.m_id))
 				{
 					//New layer in plan, submit creation and all content
 					planlayer.SubmitNewPlanLayer(a_batch);
@@ -204,7 +204,7 @@ namespace MSP2050.Scripts
 						dataObject.Add("plan", planlayer.Plan.GetDataBaseOrBatchIDReference());
 						dataObject.Add("planlayer_id", planlayer.GetDataBaseOrBatchIDReference());
 						dataObject.Add("removed", JToken.FromObject(new int[0]));
-						a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
+						a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BatchGroupIssues);
 					}
 				}
 			}
@@ -303,7 +303,7 @@ namespace MSP2050.Scripts
 
 					dataObject.Add("added", JToken.FromObject(newIssues.Values.ToArray()));
 					dataObject.Add("removed", JToken.FromObject(new int[] {}));
-					a_batch.AddRequest<List<PlanIssueObject>>(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES, HandleDatabaseIDResults);
+					a_batch.AddRequest<List<PlanIssueObject>>(Server.SendIssues(), dataObject, BatchRequest.BatchGroupIssues, HandleDatabaseIDResults);
 				}
 			}
 			else
@@ -342,7 +342,7 @@ namespace MSP2050.Scripts
 				dataObject.Add("plan", m_planLayer.Plan.GetDataBaseOrBatchIDReference());
 				dataObject.Add("added", JToken.FromObject(newIssues.Values.ToArray()));
 				dataObject.Add("removed", JToken.FromObject(removedIssueIDs));
-				a_batch.AddRequest<List<PlanIssueObject>>(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES, HandleDatabaseIDResults);
+				a_batch.AddRequest<List<PlanIssueObject>>(Server.SendIssues(), dataObject, BatchRequest.BatchGroupIssues, HandleDatabaseIDResults);
 			}
 		}
 

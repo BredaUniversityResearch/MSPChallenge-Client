@@ -165,7 +165,7 @@ namespace MSP2050.Scripts
 		{
 			if (textMesh != null)
 			{
-				textMesh.SetPosition(Util.GetLineCenter(targetLod.Points) + Entity.Layer.textInfo.textOffset, false);
+				textMesh.SetPosition(Util.GetLineCenter(targetLod.Points) + Entity.Layer.m_textInfo.textOffset, false);
 			}
 		}
 
@@ -303,13 +303,13 @@ namespace MSP2050.Scripts
 			if (Entity.EntityTypes[0] == null)
 			{
 				//Mark Layer Dirty because it loaded in wrongly
-				Entity.Layer.Dirty = true;
+				Entity.Layer.m_dirty = true;
 				return;
 			}
 			drawSettings = Entity.EntityTypes[0].DrawSettings;
 
 			RebuildLODs();
-			if (Entity.Layer.textInfo != null)
+			if (Entity.Layer.m_textInfo != null)
 			{
 				CreateTextMesh(gameObject.transform, Vector3.zero);
 				m_meshDirty = true;

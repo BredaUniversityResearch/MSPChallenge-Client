@@ -16,19 +16,19 @@ namespace MSP2050.Scripts
 			//All points are non-reference
 			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 			{
-				if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy)
+				if (layer.m_greenEnergy == planLayer.BaseLayer.m_greenEnergy)
 				{
-					if (layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+					if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 					{
 						//Get and add the centerpoint layer
 						EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;
-						LayerManager.Instance.AddNonReferenceLayer(polyLayer.centerPointLayer, false); //Redrawing a centerpoint layer doesn't work, so manually redraw active entities
-						foreach (Entity entity in polyLayer.centerPointLayer.activeEntities)
+						LayerManager.Instance.AddNonReferenceLayer(polyLayer.m_centerPointLayer, false); //Redrawing a centerpoint layer doesn't work, so manually redraw active entities
+						foreach (Entity entity in polyLayer.m_centerPointLayer.m_activeEntities)
 							entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
 					}
-					else if (layer.editingType == AbstractLayer.EditingType.SourcePoint ||
-					         layer.editingType == AbstractLayer.EditingType.Socket ||
-					         layer.editingType == AbstractLayer.EditingType.Transformer)
+					else if (layer.m_editingType == AbstractLayer.EditingType.SourcePoint ||
+					         layer.m_editingType == AbstractLayer.EditingType.Socket ||
+					         layer.m_editingType == AbstractLayer.EditingType.Transformer)
 					{
 						LayerManager.Instance.AddNonReferenceLayer(layer, true);
 					}
@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 			if (!cursorIsOverUI)
 			{
 				EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(currentPosition);
-				if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
+				if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.m_greenEnergy))
 				{
 					fsm.SetCursor(FSM.CursorType.Invalid);
 					if (!showingToolTip || validPointTooltip)
@@ -80,11 +80,11 @@ namespace MSP2050.Scripts
 		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
 		{        
 			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(finalPosition);
-			if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
+			if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.m_greenEnergy))
 				return;
 
-			LineStringEntity entity = baseLayer.CreateNewEnergyLineStringEntity(point.GetPosition(), new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, point, planLayer);
-			baseLayer.activeEntities.Add(entity);
+			LineStringEntity entity = baseLayer.CreateNewEnergyLineStringEntity(point.GetPosition(), new List<EntityType>() { baseLayer.m_entityTypes.GetFirstValue() }, point, planLayer);
+			baseLayer.m_activeEntities.Add(entity);
 			entity.EntityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			LineStringSubEntity subEntity = entity.GetSubEntity(0) as LineStringSubEntity;
 			subEntity.edited = true;

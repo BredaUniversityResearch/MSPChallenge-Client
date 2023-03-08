@@ -37,7 +37,7 @@ namespace MSP2050.Scripts
 		private AbstractDistributionGroup CreateGroup(EnergyGrid grid, EnergyGrid.GridPlanState state)
 		{
 			// Generate item
-			AbstractDistributionGroup group = CreateGroup(grid.name);
+			AbstractDistributionGroup group = CreateGroup(grid.m_name);
 			group.SetSliderValues(grid, state);
 			group.SetSliderInteractability(interactable);
 			return group;

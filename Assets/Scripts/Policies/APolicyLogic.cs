@@ -63,7 +63,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("plan_id", a_plan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("policy_type", a_policy);
 			dataObject.Add("active", a_active ? 1 : 0);
-			a_batch.AddRequest(Server.SetPlanPolicy(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			a_batch.AddRequest(Server.SetPlanPolicy(), dataObject, BatchRequest.BatchGroupPlanChange);
 		}
 	}
 }

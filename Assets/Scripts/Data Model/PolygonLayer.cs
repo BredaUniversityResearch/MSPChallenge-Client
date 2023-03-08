@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 		public PolygonLayer(LayerMeta layerMeta, List<SubEntityObject> layerObjects) : base(layerMeta)
 		{
 			LoadLayerObjects(layerObjects);
-			presetProperties.Add("Area", (subent) =>
+			m_presetProperties.Add("Area", (subent) =>
 			{
 				PolygonSubEntity polygonEntity = (PolygonSubEntity)subent;
 				return polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>";
@@ -28,14 +28,14 @@ namespace MSP2050.Scripts
 				{
 					PolygonEntity ent = new PolygonEntity(this, layerObject);
 					Entities.Add(ent);
-					initialEntities.Add(ent);
+					InitialEntities.Add(ent);
 				}
 			}
 		}
 
 		public bool HasEntityTypeWithInnerGlow()
 		{
-			foreach (var kvp in EntityTypes)
+			foreach (var kvp in m_entityTypes)
 			{
 				if (kvp.Value.DrawSettings.InnerGlowEnabled) { return true; }
 			}
@@ -44,7 +44,7 @@ namespace MSP2050.Scripts
 
 		public void UpdateInnerGlowWithFirstEntityTypeSettings(bool forceRecalculate = false)
 		{
-			SubEntityDrawSettings s = EntityTypes.GetFirstValue().DrawSettings;
+			SubEntityDrawSettings s = m_entityTypes.GetFirstValue().DrawSettings;
 			UpdateInnerGlow(s.InnerGlowRadius, s.InnerGlowIterations, s.InnerGlowMultiplier, s.InnerGlowPixelSize, forceRecalculate);
 		}
 
@@ -67,7 +67,7 @@ namespace MSP2050.Scripts
 		public PolygonEntity CreateNewPolygonEntity(Vector3 initialPoint, List<EntityType> entityType, PlanLayer planLayer)
 		{
 			PolygonEntity polygonEntity = new PolygonEntity(this, planLayer, entityType);
-			PolygonSubEntity subEntity = editingType == EditingType.SourcePolygon ? new EnergyPolygonSubEntity(polygonEntity) : new PolygonSubEntity(polygonEntity);
+			PolygonSubEntity subEntity = m_editingType == EditingType.SourcePolygon ? new EnergyPolygonSubEntity(polygonEntity) : new PolygonSubEntity(polygonEntity);
 			polygonEntity.AddSubEntity(subEntity);
 
 			if (SessionManager.Instance.AreWeGameMaster)
@@ -111,7 +111,7 @@ namespace MSP2050.Scripts
 
 			List<PolygonSubEntity> collisions = new List<PolygonSubEntity>();
 
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				List<PolygonSubEntity> subEntities = entity.GetSubEntities();
 				foreach (PolygonSubEntity subEntity in subEntities)
@@ -152,7 +152,7 @@ namespace MSP2050.Scripts
 
 			List<PolygonSubEntity> collisions = new List<PolygonSubEntity>();
 
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				List<PolygonSubEntity> subEntities = entity.GetSubEntities();
 				foreach (PolygonSubEntity subEntity in subEntities)
@@ -185,7 +185,7 @@ namespace MSP2050.Scripts
 
 			List<PolygonSubEntity> collisions = new List<PolygonSubEntity>();
 
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				List<PolygonSubEntity> subEntities = entity.GetSubEntities();
 				foreach (PolygonSubEntity subEntity in subEntities)
@@ -214,7 +214,7 @@ namespace MSP2050.Scripts
 		public List<PolygonSubEntity> GetAllSubEntities()
 		{
 			List<PolygonSubEntity> subEntities = new List<PolygonSubEntity>();
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				foreach (PolygonSubEntity subent in entity.GetSubEntities())
 					if (!subent.IsPlannedForRemoval())
@@ -225,7 +225,7 @@ namespace MSP2050.Scripts
 
 		public override void UpdateScale(Camera targetCamera)
 		{
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				List<PolygonSubEntity> subEntities = entity.GetSubEntities();
 				foreach (PolygonSubEntity subEntity in subEntities)
@@ -235,9 +235,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override  LayerManager.GeoType GetGeoType()
+		public override  LayerManager.EGeoType GetGeoType()
 		{
-			return  LayerManager.GeoType.polygon;
+			return  LayerManager.EGeoType.polygon;
 		}
 
 		#region Legacy Stuff

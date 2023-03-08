@@ -16,7 +16,7 @@ namespace MSP2050.Scripts
 		{
 			KPIGroupBar bar = Instantiate(m_entryPrefab, m_entryParent).GetComponent<KPIGroupBar>();
 			m_entries.Add(a_grid.GetDatabaseID().ToString(), bar);
-			bar.SetToEnergyValues(a_grid, a_country, a_grid.name);
+			bar.SetToEnergyValues(a_grid, a_country, a_grid.m_name);
 		}
 
 		private void UpdateBarForFishing(string a_name, Dictionary<int, float> a_values)

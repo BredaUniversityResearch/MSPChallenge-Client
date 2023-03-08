@@ -87,7 +87,7 @@ namespace MSP2050.Scripts
 			// Because keys can have gaps in them
 			List<int> entityTypeKeysOrdered = new List<int>();
 
-			foreach (var kvp in Entity.Layer.EntityTypes)
+			foreach (var kvp in Entity.Layer.m_entityTypes)
 			{
 				entityTypeKeysOrdered.Add(kvp.Key);
 			}
@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 
 			int currentEntityTypeKey = Entity.Layer.GetEntityTypeKey(Entity.EntityTypes[0]);
 
-			Order = ((float)entityTypeKeysOrdered.IndexOf(currentEntityTypeKey) / (float)Entity.Layer.EntityTypes.Count) * layerTypeOrderMaxZOffset;
+			Order = ((float)entityTypeKeysOrdered.IndexOf(currentEntityTypeKey) / (float)Entity.Layer.m_entityTypes.Count) * layerTypeOrderMaxZOffset;
 		}
 
 
@@ -191,7 +191,7 @@ namespace MSP2050.Scripts
 				dataObject.Add("country", Entity.Country);
 				dataObject.Add("id", databaseID);
 
-				batch.AddRequest<int>(Server.UpdateGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_UPDATE, handleDatabaseIDResult);
+				batch.AddRequest<int>(Server.UpdateGeometry(), dataObject, BatchRequest.BatchGroupGeometryUpdate, handleDatabaseIDResult);
 				SubmitData(batch);
 			}
 			return null;
@@ -201,7 +201,7 @@ namespace MSP2050.Scripts
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("id", databaseID);
-			batch.AddRequest(Server.DeleteGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
+			batch.AddRequest(Server.DeleteGeometry(), dataObject, BatchRequest.BatchGroupGeometryDelete);
 			return null;
 		}
 	
@@ -213,7 +213,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("data", Entity.MetaToJSON());
 			dataObject.Add("type", Util.IntListToString(Entity.GetEntityTypeKeys()));
 
-			batch.AddRequest(Server.SendGeometryData(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
+			batch.AddRequest(Server.SendGeometryData(), dataObject, BatchRequest.BatchGroupGeometryData);
 		}
 
 		public virtual Action<BatchRequest> SubmitNew(BatchRequest batch)
@@ -234,10 +234,10 @@ namespace MSP2050.Scripts
 			else
 			{
 				dataObject.Add("plan", "");
-				dataObject.Add("layer", Entity.Layer.ID);
+				dataObject.Add("layer", Entity.Layer.m_id);
 			}
 
-			Entity.creationBatchCallID = batch.AddRequest<int>(Server.PostGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_ADD, handleDatabaseIDResult);
+			Entity.creationBatchCallID = batch.AddRequest<int>(Server.PostGeometry(), dataObject, BatchRequest.BatchGroupGeometryAdd, handleDatabaseIDResult);
 
 			if (this is PolygonSubEntity)
 			{
@@ -250,7 +250,7 @@ namespace MSP2050.Scripts
 					dataObject.Add("layer", Entity.PlanLayer.GetDataBaseOrBatchIDReference());
 					dataObject.Add("subtractive", BatchRequest.FormatCallIDReference(Entity.creationBatchCallID)); 
 
-					batch.AddRequest(Server.PostGeometrySub(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
+					batch.AddRequest(Server.PostGeometrySub(), dataObject, BatchRequest.BatchGroupGeometryData);
 				}
 			}
 			SubmitData(batch);
@@ -325,7 +325,7 @@ namespace MSP2050.Scripts
 		{
 			if (textMesh == null)
 			{
-				textMesh = new EntityInfoText(this, Entity.Layer.textInfo, parent);
+				textMesh = new EntityInfoText(this, Entity.Layer.m_textInfo, parent);
 				textMesh.SetPosition(textPosition, setWorldPosition);
 			}
     
@@ -356,31 +356,31 @@ namespace MSP2050.Scripts
 
 		protected void ScaleTextMesh(float parentScale = 1f)
 		{
-			if (Entity.Layer.textInfo == null)
+			if (Entity.Layer.m_textInfo == null)
 			{
 				return;
 			}
 
 			if (TextMeshVisibleAtZoom)
 			{
-				if (CameraManager.Instance.cameraZoom.currentZoom > Entity.Layer.textInfo.zoomCutoff)
+				if (CameraManager.Instance.cameraZoom.currentZoom > Entity.Layer.m_textInfo.zoomCutoff)
 					TextMeshVisibleAtZoom = false;
 				else
 				{
 					if (textMesh != null)
 					{
-						textMesh.UpdateTextMeshScale(Entity.Layer.textInfo.UseInverseScale, parentScale);
+						textMesh.UpdateTextMeshScale(Entity.Layer.m_textInfo.UseInverseScale, parentScale);
 					}
 				}
 			}
 			else
 			{
-				if (CameraManager.Instance.cameraZoom.currentZoom <= Entity.Layer.textInfo.zoomCutoff)
+				if (CameraManager.Instance.cameraZoom.currentZoom <= Entity.Layer.m_textInfo.zoomCutoff)
 				{
 					TextMeshVisibleAtZoom = true;
 					if (textMesh != null)
 					{
-						textMesh.UpdateTextMeshScale(Entity.Layer.textInfo.UseInverseScale, parentScale);
+						textMesh.UpdateTextMeshScale(Entity.Layer.m_textInfo.UseInverseScale, parentScale);
 					}
 				}
 			}
@@ -494,9 +494,9 @@ namespace MSP2050.Scripts
 
 		public string GetProperty(string key)
 		{
-			if (Entity.Layer.presetProperties.ContainsKey(key))
+			if (Entity.Layer.m_presetProperties.ContainsKey(key))
 			{
-				return Entity.Layer.presetProperties[key](this);
+				return Entity.Layer.m_presetProperties[key](this);
 			}
 			else
 			{

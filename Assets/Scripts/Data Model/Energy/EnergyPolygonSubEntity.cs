@@ -7,79 +7,110 @@ namespace MSP2050.Scripts
 {
 	public class EnergyPolygonSubEntity : PolygonSubEntity, IEnergyDataHolder
 	{
-		public EnergyPointSubEntity sourcePoint;
-		public long cachedMaxCapacity;
+		public EnergyPointSubEntity m_sourcePoint;
+		private long m_cachedMaxCapacity;
+		
+		public long Capacity
+		{
+			get
+			{
+				if (edited)
+					return (long)((double)Entity.EntityTypes[0].capacity * (double)SurfaceAreaSqrKm);
+				return m_cachedMaxCapacity;
+			}
+			set => m_cachedMaxCapacity = value;
+		}
 
-		public EnergyPolygonSubEntity(Entity entity, int persistentID = -1)
-			: base(entity, persistentID)
+		public long UsedCapacity
+		{
+			get => m_sourcePoint.UsedCapacity;
+			set => m_sourcePoint.UsedCapacity = value;
+		}
+
+		public EnergyGrid LastRunGrid
+		{
+			get => m_sourcePoint.LastRunGrid;
+			set => m_sourcePoint.LastRunGrid = value;
+		}
+
+		public EnergyGrid CurrentGrid
+		{
+			get => m_sourcePoint.CurrentGrid;
+			set => m_sourcePoint.CurrentGrid = value;
+		}		
+
+		public EnergyPolygonSubEntity(Entity a_entity, int a_persistentID = -1)
+			: base(a_entity, a_persistentID)
 		{
 			CreateSourcePoint();
 		}
 
-		public EnergyPolygonSubEntity(Entity entity, SubEntityObject geometry, int databaseID)
-			: base(entity, geometry, databaseID)
+		public EnergyPolygonSubEntity(Entity a_entity, SubEntityObject a_geometry, int a_databaseID)
+			: base(a_entity, a_geometry, a_databaseID)
 		{
 			//Base calls initialise
-			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
 		}
 		public override void Initialise()
 		{
 			CreateSourcePoint();
-			cachedMaxCapacity = (long)((double)Entity.EntityTypes[0].capacity * (double)SurfaceAreaSqrKm);
+			m_cachedMaxCapacity = (long)((double)Entity.EntityTypes[0].capacity * (double)SurfaceAreaSqrKm);
 			base.Initialise();
 		}
 
-		public override void SetDatabaseID(int databaseID)
+		public override void SetDatabaseID(int a_databaseID)
 		{
-			PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(databaseID);
-			this.databaseID = databaseID;
-			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(a_databaseID);
+			databaseID = a_databaseID;
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
 		}
 
-		//public override void SubmitNew(BatchRequest batch)
-		//{
-		//	base.SubmitNew(batch);
-		//}
-
-		public override Action<BatchRequest> SubmitDelete(BatchRequest batch)
+		public override Action<BatchRequest> SubmitDelete(BatchRequest a_batch)
 		{
 			// Delete energy_output
-			JObject dataObject = new JObject();
-			dataObject.Add("id", databaseID);
-			batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
+			JObject dataObject = new JObject {
+				{
+					"id", databaseID
+				}
+			};
+			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BatchGroupEnergyDelete);
 
-			return base.SubmitDelete(batch);
+			return base.SubmitDelete(a_batch);
 		}
 	
-		public override void SubmitData(BatchRequest batch)
+		public override void SubmitData(BatchRequest a_batch)
 		{
-			base.SubmitData(batch);
+			base.SubmitData(a_batch);
 
 			//Set energy_output
-			JObject dataObject = new JObject();
-			dataObject.Add("id", GetDataBaseOrBatchIDReference());
-			dataObject.Add("capacity", 0);
-			dataObject.Add("maxcapacity", Capacity.ToString());
-			batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
+			JObject dataObject = new JObject {
+				{
+					"id", GetDataBaseOrBatchIDReference()
+				},
+				{
+					"capacity", 0
+				},
+				{
+					"maxcapacity", Capacity.ToString()
+				}
+			};
+			a_batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BatchGroupGeometryData);
 		}
 	
 		protected override void UpdateBoundingBox()
 		{
 			base.UpdateBoundingBox();
-
-			Vector3 center = Util.Compute2DPolygonCentroidAlt(polygon);
-			sourcePoint.SetPosition(BoundingBox.center);
+			m_sourcePoint.SetPosition(BoundingBox.center);
 		}
 
 		public override void RemoveDependencies()
 		{
 			//Remove sourcePoint
-			if (sourcePoint != null)
-			{
-				PointLayer centerPointLayer = ((EnergyPolygonLayer)Entity.Layer).centerPointLayer;
-				PointEntity sourceEntity = sourcePoint.Entity as PointEntity;
-				centerPointLayer.activeEntities.Remove(sourceEntity);
-			}
+			if (m_sourcePoint == null)
+				return;
+			PointLayer centerPointLayer = ((EnergyPolygonLayer)Entity.Layer).m_centerPointLayer;
+			PointEntity sourceEntity = m_sourcePoint.Entity as PointEntity;
+			centerPointLayer.m_activeEntities.Remove(sourceEntity);
 		}
 
 		public override void RestoreDependencies()
@@ -87,121 +118,84 @@ namespace MSP2050.Scripts
 			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
 
 			//Restore sourcePoint
-			if (sourcePoint != null)
-			{
-				PointLayer centerPointLayer = ((EnergyPolygonLayer)Entity.Layer).centerPointLayer;
-				PointEntity sourceEntity = sourcePoint.Entity as PointEntity;
-				centerPointLayer.activeEntities.Add(sourceEntity);
-				sourcePoint.SetPosition(BoundingBox.center);
-				sourcePoint.RedrawGameObject(); //Redraws to new position
-			}
+			if (m_sourcePoint == null)
+				return;
+			PointLayer centerPointLayer = ((EnergyPolygonLayer)Entity.Layer).m_centerPointLayer;
+			PointEntity sourceEntity = m_sourcePoint.Entity as PointEntity;
+			centerPointLayer.m_activeEntities.Add(sourceEntity);
+			m_sourcePoint.SetPosition(BoundingBox.center);
+			m_sourcePoint.RedrawGameObject(); //Redraws to new position
 		}
 
-		public void CreateSourcePoint()
+		private void CreateSourcePoint()
 		{
-			if (sourcePoint == null)
-			{
-				PointLayer centerPointLayer = ((EnergyPolygonLayer)Entity.Layer).centerPointLayer;
-				PointEntity ent = new PointEntity(centerPointLayer, null, Vector3.zero, new List<EntityType>() { centerPointLayer.EntityTypes[0] }, this);
-				sourcePoint = ent.GetSubEntity(0) as EnergyPointSubEntity;
-			}
+			if (m_sourcePoint != null)
+				return;
+			PointLayer centerPointLayer = ((EnergyPolygonLayer)Entity.Layer).m_centerPointLayer;
+			PointEntity ent = new PointEntity(centerPointLayer, null, Vector3.zero, new List<EntityType>() { centerPointLayer.m_entityTypes[0] }, this);
+			m_sourcePoint = ent.GetSubEntity(0) as EnergyPointSubEntity;
 		}
 
 		public override void ClearConnections()
 		{
-			sourcePoint.ClearConnections();
+			m_sourcePoint.ClearConnections();
 		}
 
-		public override void UpdateScale(Camera targetCamera)
+		public override void UpdateScale(Camera a_targetCamera)
 		{
-			base.UpdateScale(targetCamera);
-			sourcePoint.UpdateScale(targetCamera);
+			base.UpdateScale(a_targetCamera);
+			m_sourcePoint.UpdateScale(a_targetCamera);
 		}
 
 		public void DeactivateSourcePoint()
 		{
-			((EnergyPolygonLayer)Entity.Layer).centerPointLayer.activeEntities.Remove(sourcePoint.Entity as PointEntity);
-			sourcePoint.RedrawGameObject();
+			((EnergyPolygonLayer)Entity.Layer).m_centerPointLayer.m_activeEntities.Remove(m_sourcePoint.Entity as PointEntity);
+			m_sourcePoint.RedrawGameObject();
 		}
 
-		public override void DrawGameObject(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null)
+		public override void DrawGameObject(Transform a_parent, SubEntityDrawMode a_drawMode = SubEntityDrawMode.Default, HashSet<int> a_selectedPoints = null, HashSet<int> a_hoverPoints = null)
 		{
-			PointLayer centerPointLayer = (PointLayer)sourcePoint.Entity.Layer;
-			PointEntity centerPoint = (PointEntity)sourcePoint.Entity;
+			PointLayer centerPointLayer = (PointLayer)m_sourcePoint.Entity.Layer;
+			PointEntity centerPoint = (PointEntity)m_sourcePoint.Entity;
 			centerPointLayer.Entities.Add(centerPoint);
-			centerPointLayer.activeEntities.Add(centerPoint);
-			sourcePoint.DrawGameObject(centerPointLayer.LayerGameObject.transform);
-			base.DrawGameObject(parent, drawMode, selectedPoints, hoverPoints);
+			centerPointLayer.m_activeEntities.Add(centerPoint);
+			m_sourcePoint.DrawGameObject(centerPointLayer.LayerGameObject.transform);
+			base.DrawGameObject(a_parent, a_drawMode, a_selectedPoints, a_hoverPoints);
 		}
 
-		public override void RedrawGameObject(SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null, bool updatePlanState = true)
+		public override void RedrawGameObject(SubEntityDrawMode a_drawMode = SubEntityDrawMode.Default, HashSet<int> a_selectedPoints = null, HashSet<int> a_hoverPoints = null, bool a_updatePlanState = true)
 		{
-			base.RedrawGameObject(drawMode, selectedPoints, hoverPoints, updatePlanState);
+			base.RedrawGameObject(a_drawMode, a_selectedPoints, a_hoverPoints, a_updatePlanState);
 
-			GameObject sourcePointObject = sourcePoint.GetGameObject();
-			if (sourcePointObject != null)
-			{
-				sourcePoint.SetPlanState(planState);
+			GameObject sourcePointObject = m_sourcePoint.GetGameObject();
+			if (sourcePointObject == null)
+				return;
+			m_sourcePoint.SetPlanState(planState);
 
-				//Redraw sourcepoints without updating its plan state
-				sourcePoint.RedrawGameObject(SubEntityDrawMode.Default, null, null, false);
-			}
+			//Redraw sourcepoints without updating its plan state
+			m_sourcePoint.RedrawGameObject(SubEntityDrawMode.Default, null, null, false);
 		}
 
 		public override void RemoveGameObject()
 		{
 			base.RemoveGameObject();
-			if (sourcePoint != null)
-			{
-				((PointLayer)sourcePoint.Entity.Layer).Entities.Remove((PointEntity)sourcePoint.Entity);
-				sourcePoint.RemoveGameObject();
-			}
+			if (m_sourcePoint == null)
+				return;
+			((PointLayer)m_sourcePoint.Entity.Layer).Entities.Remove((PointEntity)m_sourcePoint.Entity);
+			m_sourcePoint.RemoveGameObject();
 		}
 
-		public override void ForceGameObjectVisibility(bool value)
+		public override void ForceGameObjectVisibility(bool a_value)
 		{
-			base.ForceGameObjectVisibility(value);
-			sourcePoint.SetPlanState(value ? SubEntityPlanState.NotInPlan : SubEntityPlanState.NotShown);
-			sourcePoint.ForceGameObjectVisibility(value);
-		}
-
-		public long Capacity
-		{
-			get
-			{
-				if (edited)
-					return (long)((double)Entity.EntityTypes[0].capacity * (double)SurfaceAreaSqrKm);
-				else
-					return cachedMaxCapacity;
-			}
-			set
-			{
-				cachedMaxCapacity = value;
-			}
-		}
-
-		public long UsedCapacity
-		{
-			get { return sourcePoint.UsedCapacity; }
-			set { sourcePoint.UsedCapacity = value; }
-		}
-
-		public EnergyGrid LastRunGrid
-		{
-			get { return sourcePoint.LastRunGrid; }
-			set { sourcePoint.LastRunGrid = value; }
-		}
-
-		public EnergyGrid CurrentGrid
-		{
-			get { return sourcePoint.CurrentGrid; }
-			set { sourcePoint.CurrentGrid = value; }
+			base.ForceGameObjectVisibility(a_value);
+			m_sourcePoint.SetPlanState(a_value ? SubEntityPlanState.NotInPlan : SubEntityPlanState.NotShown);
+			m_sourcePoint.ForceGameObjectVisibility(a_value);
 		}
 
 		public override void FinishEditing()
 		{
 			if (edited)
-				cachedMaxCapacity = Capacity;
+				m_cachedMaxCapacity = Capacity;
 			base.FinishEditing();
 		}
     
@@ -213,4 +207,3 @@ namespace MSP2050.Scripts
 		}
 	}
 }
-

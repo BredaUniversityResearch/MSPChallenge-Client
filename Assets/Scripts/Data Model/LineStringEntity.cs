@@ -18,7 +18,7 @@ namespace MSP2050.Scripts
 			lineStringSubEntities = new List<LineStringSubEntity>();
 			//for (int i = 0; i < layerObject.geometry.Count; ++i)
 			//{
-			if (layer.editingType == AbstractLayer.EditingType.Cable)
+			if (layer.m_editingType == AbstractLayer.EditingType.Cable)
 				lineStringSubEntities.Add(new EnergyLineStringSubEntity(this, layerObject, layerObject.id));
 			else
 				lineStringSubEntities.Add(new LineStringSubEntity(this, layerObject, layerObject.id));

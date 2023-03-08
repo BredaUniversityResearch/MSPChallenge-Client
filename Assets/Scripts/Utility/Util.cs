@@ -34,11 +34,11 @@ namespace MSP2050.Scripts
 			if (layers == null || layers.Count == 0)
 				return "";
 
-			string layerIDs = layers[0].ID.ToString();
+			string layerIDs = layers[0].m_id.ToString();
 
 			for (int i = 1; i < layers.Count; i++)
 			{
-				layerIDs += "," + layers[i].ID;
+				layerIDs += "," + layers[i].m_id;
 			}
 
 			return layerIDs;

@@ -72,8 +72,8 @@ namespace MSP2050.Scripts
 		{
 			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
-			LineStringEntity entity = baseLayer.CreateNewLineStringEntity(finalPosition, new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, planLayer);
-			baseLayer.activeEntities.Add(entity);
+			LineStringEntity entity = baseLayer.CreateNewLineStringEntity(finalPosition, new List<EntityType>() { baseLayer.m_entityTypes.GetFirstValue() }, planLayer);
+			baseLayer.m_activeEntities.Add(entity);
 			entity.EntityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			LineStringSubEntity subEntity = entity.GetSubEntity(0) as LineStringSubEntity;
 

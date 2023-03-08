@@ -86,10 +86,10 @@ namespace MSP2050.Scripts
 			foreach (AbstractLayer layer in LayerManager.Instance.GetLoadedLayers())
 			{
 				foreach (LayerMeta meta in layerMeta)
-					if (layer.ID == meta.layer_id)
+					if (layer.m_id == meta.layer_id)
 					{
 						foreach (KeyValuePair<int, EntityTypeValues> kvp in meta.layer_type)
-							layer.EntityTypes[kvp.Key].SetColors(Util.HexToColor(kvp.Value.polygonColor), Util.HexToColor(kvp.Value.lineColor), Util.HexToColor(kvp.Value.pointColor));
+							layer.m_entityTypes[kvp.Key].SetColors(Util.HexToColor(kvp.Value.polygonColor), Util.HexToColor(kvp.Value.lineColor), Util.HexToColor(kvp.Value.pointColor));
 						break;
 					}
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 			List<int> layersToLoad = new List<int>(layerList.Count);
 			foreach (AbstractLayer layerToLoad in layerList)
 			{
-				layersToLoad.Add(layerToLoad.ID);
+				layersToLoad.Add(layerToLoad.m_id);
 			}
 			ImportLayers(layersToLoad);
 		}
@@ -122,7 +122,7 @@ namespace MSP2050.Scripts
 			foreach (int selectedLayerID in selectedLayerIDs)
 			{
 				AbstractLayer layer = LayerManager.Instance.GetLayerByID(selectedLayerID);
-				if (layer.GetGeoType() == LayerManager.GeoType.raster)
+				if (layer.GetGeoType() == LayerManager.EGeoType.raster)
 				{
 					ImportRasterLayer((layer as RasterLayer));
 				}
@@ -148,7 +148,7 @@ namespace MSP2050.Scripts
 
 			//Convert all the entity types to a
 			StringBuilder typeIdString = new StringBuilder(64);
-			foreach (int entityTypeId in layer.EntityTypes.Keys)
+			foreach (int entityTypeId in layer.m_entityTypes.Keys)
 			{
 				if (typeIdString.Length > 0)
 				{
@@ -212,7 +212,7 @@ namespace MSP2050.Scripts
 				if (!int.TryParse(entityTypeString, out entityTypeKey))
 				{
 					UnityEngine.Debug.LogError("Invalid type in layer '" + layer.FileName + "': entity with ID '" + id + "' has type: '" + entityTypeString + "' which is not a valid integer");
-					entityTypes.Add(layer.EntityTypes.GetFirstValue());
+					entityTypes.Add(layer.m_entityTypes.GetFirstValue());
 					return entityTypes;
 				}
 
@@ -220,7 +220,7 @@ namespace MSP2050.Scripts
 				if (entityType == null)
 				{
 					UnityEngine.Debug.LogError("Invalid type in layer '" + layer.FileName + "': entity with ID '" + id + "' has type: '" + entityTypeString + "' which is an undefined type key");
-					entityTypes.Add(layer.EntityTypes.GetFirstValue());
+					entityTypes.Add(layer.m_entityTypes.GetFirstValue());
 					return entityTypes;
 				}
 

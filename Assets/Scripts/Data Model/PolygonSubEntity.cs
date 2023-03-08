@@ -734,7 +734,7 @@ namespace MSP2050.Scripts
 					layer.UpdateInnerGlow(drawSettings.InnerGlowRadius, drawSettings.InnerGlowIterations, drawSettings.InnerGlowMultiplier, drawSettings.InnerGlowPixelSize);
 				}
 
-				if (Entity.Layer.textInfo != null)
+				if (Entity.Layer.m_textInfo != null)
 				{
 					CreateTextMesh(gameObject.transform, Vector3.zero);
 				}
@@ -755,7 +755,7 @@ namespace MSP2050.Scripts
 				return;
 
 			// Bathymetry and Countries/Councils are not selectable, and will not change drawmode
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer) && Entity.Layer.Selectable)
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer) && Entity.Layer.m_selectable)
 			{
 				drawMode = SubEntityDrawMode.PlanReference;			
 			}
@@ -1000,7 +1000,7 @@ namespace MSP2050.Scripts
 		{
 			if (textMesh != null)
 			{
-				textMesh.SetPosition(new Vector3(BoundingBox.center.x, BoundingBox.center.y) + Entity.Layer.textInfo.textOffset, false);
+				textMesh.SetPosition(new Vector3(BoundingBox.center.x, BoundingBox.center.y) + Entity.Layer.m_textInfo.textOffset, false);
 			}
 		}
 
@@ -1022,7 +1022,7 @@ namespace MSP2050.Scripts
 				}
 				catch (Exception ex)
 				{
-					Debug.LogError(string.Format("Triangulation error occurred in layer: {0}, database ID: {1}. Exception: {2}", layer.ID, databaseID, ex.Message));
+					Debug.LogError(string.Format("Triangulation error occurred in layer: {0}, database ID: {1}. Exception: {2}", layer.m_id, databaseID, ex.Message));
 					throw;
 				}
 

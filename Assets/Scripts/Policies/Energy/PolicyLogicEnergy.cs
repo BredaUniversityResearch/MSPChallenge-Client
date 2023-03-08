@@ -48,12 +48,12 @@ namespace MSP2050.Scripts
 		{
 			if (a_layer.IsEnergyLineLayer())
 			{
-				if (a_layer.greenEnergy)
+				if (a_layer.m_greenEnergy)
 					m_energyCableLayerGreen = a_layer as LineStringLayer;
 				else
 					m_energyCableLayerGrey = a_layer as LineStringLayer;
 			}
-			if (a_layer.editingType != AbstractLayer.EditingType.Normal && a_layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+			if (a_layer.m_editingType != AbstractLayer.EditingType.Normal && a_layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
 				m_energyLayers.Add(a_layer);
 		}
 
@@ -160,11 +160,11 @@ namespace MSP2050.Scripts
 				data.energyGrids = new List<EnergyGrid>();
 
 				foreach (EnergyGrid grid in m_energyGridsBeforePlan)
-					data.removedGrids.Add(grid.persistentID);
+					data.removedGrids.Add(grid.m_persistentID);
 
 				foreach (AbstractLayer layer in m_energyLayers)
 				{
-					if (layer.editingType == AbstractLayer.EditingType.Socket)
+					if (layer.m_editingType == AbstractLayer.EditingType.Socket)
 					{
 						//Add results of the (changed/updated) grids on the socket layer to the existing ones
 						data.energyGrids.AddRange(layer.DetermineChangedGridsInPlan(a_plan, oldGridsInPlan, m_energyGridsBeforePlan, data.removedGrids)); //Updates removedgrids
@@ -182,7 +182,7 @@ namespace MSP2050.Scripts
 				Dictionary<int, SubEntity> energyEntities = new Dictionary<int, SubEntity>();
 				foreach (PlanLayer planLayer in a_plan.PlanLayers)
 				{
-					if (planLayer.BaseLayer.editingType == AbstractLayer.EditingType.SourcePolygon)
+					if (planLayer.BaseLayer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 					{
 						//Ignores removed geometry
 						foreach (Entity entity in planLayer.GetNewGeometry())
@@ -278,14 +278,14 @@ namespace MSP2050.Scripts
 				JObject dataObject = new JObject();
 				dataObject.Add("id", a_plan.GetDataBaseOrBatchIDReference());
 				dataObject.Add("alters_energy_distribution", data.altersEnergyDistribution ? 1 : 0);
-				a_batch.AddRequest(Server.SetPlanEnergyDistribution(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+				a_batch.AddRequest(Server.SetPlanEnergyDistribution(), dataObject, BatchRequest.BatchGroupPlanChange);
 			}
 			else if(m_wasEnergyPlanBeforeEditing)
 			{
 				SubmitPolicyActivity(a_plan, PolicyManager.ENERGY_POLICY_NAME, false, a_batch);
 				JObject dataObject = new JObject();
 				dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
-				a_batch.AddRequest(Server.DeleteEnergyFromPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+				a_batch.AddRequest(Server.DeleteEnergyFromPlan(), dataObject, BatchRequest.BatchGroupPlanChange);
 			}
 		}
 
@@ -450,14 +450,14 @@ namespace MSP2050.Scripts
 			tempSubEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(startID);
 			if (tempSubEnt == null) return;
 			else if (tempSubEnt is EnergyPolygonSubEntity)
-				point1 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
+				point1 = (tempSubEnt as EnergyPolygonSubEntity).m_sourcePoint;
 			else
 				point1 = tempSubEnt as EnergyPointSubEntity;
 
 			tempSubEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(endID);
 			if (tempSubEnt == null) return;
 			else if (tempSubEnt is EnergyPolygonSubEntity)
-				point2 = (tempSubEnt as EnergyPolygonSubEntity).sourcePoint;
+				point2 = (tempSubEnt as EnergyPolygonSubEntity).m_sourcePoint;
 			else
 				point2 = tempSubEnt as EnergyPointSubEntity;
 
@@ -467,7 +467,6 @@ namespace MSP2050.Scripts
 			//Cables store connections and attach them to points when editing starts
 			cable.AddConnection(conn1);
 			cable.AddConnection(conn2);
-			cable.SetEndPointsToConnections();
 		}
 
 		/// <summary>
@@ -476,7 +475,7 @@ namespace MSP2050.Scripts
 		public static EnergyGrid DuplicateEnergyGridToPlan(EnergyGrid a_gridToDuplicate, Plan a_plan)
 		{
 			EnergyGrid duplicate = new EnergyGrid(a_gridToDuplicate, a_plan);
-			duplicate.distributionOnly = true;
+			duplicate.m_distributionOnly = true;
 
 			if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var planData))
 			{
@@ -500,8 +499,8 @@ namespace MSP2050.Scripts
 
 				HashSet<int> countriesAffectedByRemovedGrids = new HashSet<int>();
 				foreach (EnergyGrid grid in energyGridsBeforePlan)
-					if (planData.removedGrids.Contains(grid.persistentID))
-						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.energyDistribution.distribution)
+					if (planData.removedGrids.Contains(grid.m_persistentID))
+						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.m_energyDistribution.m_distribution)
 							if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
 								countriesAffectedByRemovedGrids.Add(countryAmount.Key);
 
@@ -522,7 +521,7 @@ namespace MSP2050.Scripts
 				{
 					foreach (EnergyGrid grid in planData.energyGrids)
 					{
-						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.energyDistribution.distribution)
+						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.m_energyDistribution.m_distribution)
 						{
 							if (!a_approvalStates.ContainsKey(countryAmount.Key))
 							{
@@ -566,13 +565,13 @@ namespace MSP2050.Scripts
 				{
 					if (!grid.MatchesColor(a_color))
 						continue;
-					if (grid.persistentID == -1 || (!a_removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
+					if (grid.m_persistentID == -1 || (!a_removedGridIds.Contains(grid.m_persistentID) && !ignoredGridIds.Contains(grid.m_persistentID)))
 					{
 						result.Add(grid);
-						ignoredGridIds.Add(grid.persistentID);
-						if(grid.persistentID != -1)
+						ignoredGridIds.Add(grid.m_persistentID);
+						if(grid.m_persistentID != -1)
 						{
-							a_previousDistributions.Add(grid.persistentID, null);
+							a_previousDistributions.Add(grid.m_persistentID, null);
 						}
 					}
 				}
@@ -590,21 +589,21 @@ namespace MSP2050.Scripts
 					{
 						if (!grid.MatchesColor(a_color))
 							continue;
-						if (removedButDisplayedIds.Contains(grid.persistentID))
+						if (removedButDisplayedIds.Contains(grid.m_persistentID))
 						{
 							//If we were looking for this persis ID, add it even if in ignored or removed
 							result.Add(grid);
-							ignoredGridIds.Add(grid.persistentID);
-							removedButDisplayedIds.Remove(grid.persistentID);
+							ignoredGridIds.Add(grid.m_persistentID);
+							removedButDisplayedIds.Remove(grid.m_persistentID);
 						}
-						else if(a_previousDistributions.TryGetValue(grid.persistentID, out var value) && value == null)
+						else if(a_previousDistributions.TryGetValue(grid.m_persistentID, out var value) && value == null)
 						{
-							a_previousDistributions[grid.persistentID] = grid.energyDistribution;
+							a_previousDistributions[grid.m_persistentID] = grid.m_energyDistribution;
 						}
-						else if (grid.persistentID == -1 || (!a_removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
+						else if (grid.m_persistentID == -1 || (!a_removedGridIds.Contains(grid.m_persistentID) && !ignoredGridIds.Contains(grid.m_persistentID)))
 						{
 							result.Add(grid);
-							ignoredGridIds.Add(grid.persistentID);
+							ignoredGridIds.Add(grid.m_persistentID);
 						}
 					}
 					if (planEnergyData.removedGrids != null)
@@ -718,17 +717,17 @@ namespace MSP2050.Scripts
 					//Create layer states for energy layers of a marching color, ignoring the cable layer
 					Dictionary<AbstractLayer, LayerState> energyLayerStates = new Dictionary<AbstractLayer, LayerState>();
 					foreach (AbstractLayer energyLayer in PolicyLogicEnergy.Instance.m_energyLayers)
-						if (energyLayer.greenEnergy == planLayer.BaseLayer.greenEnergy && energyLayer.ID != planLayer.BaseLayer.ID)
+						if (energyLayer.m_greenEnergy == planLayer.BaseLayer.m_greenEnergy && energyLayer.m_id != planLayer.BaseLayer.m_id)
 							energyLayerStates.Add(energyLayer, energyLayer.GetLayerStateAtPlan(a_plan));
 
 					foreach (Entity entity in planLayer.GetNewGeometry())
 					{
 						//Check the 2 connections for valid points
 						EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)entity.GetSubEntity(0);
-						foreach (Connection conn in cable.connections)
+						foreach (Connection conn in cable.Connections)
 						{
 							bool found = false;
-							AbstractLayer targetPointLayer = conn.point.sourcePolygon == null ? conn.point.Entity.Layer : conn.point.sourcePolygon.Entity.Layer;
+							AbstractLayer targetPointLayer = conn.point.m_sourcePolygon == null ? conn.point.Entity.Layer : conn.point.m_sourcePolygon.Entity.Layer;
 							foreach (Entity existingEntity in energyLayerStates[targetPointLayer].baseGeometry)
 							{
 								if (existingEntity.DatabaseID == conn.point.GetDatabaseID())
@@ -755,7 +754,7 @@ namespace MSP2050.Scripts
 		{
 			List<PointLayer> result = new List<PointLayer>();
 			foreach (PointLayer layer in m_energyPointLayers)
-				if (layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+				if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 					result.Add(layer);
 			return result;
 		}
@@ -792,7 +791,7 @@ namespace MSP2050.Scripts
 			if (m_energySubEntities != null)
 				m_energySubEntities.TryGetValue(ID, out result);
 			if (getSourcePointIfPoly && result is EnergyPolygonSubEntity)
-				result = ((EnergyPolygonSubEntity)result).sourcePoint;
+				result = ((EnergyPolygonSubEntity)result).m_sourcePoint;
 			return result;
 		}
 
@@ -854,7 +853,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("id", a_plan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("error", a_value ? 1 : 0);
 			dataObject.Add("check_dependent_plans", a_checkDependencies ? 1 : 0);
-			a_batch.AddRequest(Server.SetEnergyError(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_ERROR);
+			a_batch.AddRequest(Server.SetEnergyError(), dataObject, BatchRequest.BatchGroupEnergyError);
 		}
 
 		public void SubmitRemovedGrids(Plan a_plan, PolicyPlanDataEnergy a_data, BatchRequest a_batch)
@@ -863,7 +862,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
 			if (a_data.removedGrids != null && a_data.removedGrids.Count > 0)
 				dataObject.Add("delete", JToken.FromObject(a_data.removedGrids));
-			a_batch.AddRequest(Server.SetPlanRemovedGrids(), dataObject, BatchRequest.BATCH_GROUP_PLAN_GRID_CHANGE);
+			a_batch.AddRequest(Server.SetPlanRemovedGrids(), dataObject, BatchRequest.BatchGroupPlanGridChange);
 		}
 	}
 }

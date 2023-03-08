@@ -92,7 +92,7 @@ namespace MSP2050.Scripts
 				SubmitPolicyActivity(a_plan, PolicyManager.FISHING_POLICY_NAME, false, a_batch);
 				JObject dataObject = new JObject();
 				dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
-				a_batch.AddRequest(Server.DeleteFishingFromPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+				a_batch.AddRequest(Server.DeleteFishingFromPlan(), dataObject, BatchRequest.BatchGroupPlanChange);
 			}
 		}
 

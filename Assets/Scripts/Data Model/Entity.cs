@@ -26,9 +26,9 @@ namespace MSP2050.Scripts
 			set
 			{
 				country = value;
-				if (Layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+				if (Layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 				{
-					((EnergyPolygonSubEntity)GetSubEntity(0)).sourcePoint.Entity.Country = value;
+					((EnergyPolygonSubEntity)GetSubEntity(0)).m_sourcePoint.Entity.Country = value;
 				}
 			}
 		}
@@ -198,7 +198,7 @@ namespace MSP2050.Scripts
 
 		public bool GreenEnergy
 		{
-			get { return Layer.greenEnergy; }
+			get { return Layer.m_greenEnergy; }
 		}
 
 		public int DatabaseID

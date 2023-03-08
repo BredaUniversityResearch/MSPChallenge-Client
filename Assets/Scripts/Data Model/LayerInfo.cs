@@ -1,73 +1,69 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
 	public static class LayerInfo
 	{
-		static LayerInfo()
+		public static List<LayerMeta> Load(List<LayerMeta> a_layerMeta)
 		{
-		}
-
-		public static List<LayerMeta> Load(List<LayerMeta> layerMeta)
-		{
-			for (int i = 0; i < layerMeta.Count; i++)
+			for (int i = 0; i < a_layerMeta.Count; i++)
 			{
 				AbstractLayer layer;
 
 				// This means its a plan, dont load those here
-				if (!string.IsNullOrEmpty(layerMeta[i].layer_original_id))
+				if (!string.IsNullOrEmpty(a_layerMeta[i].layer_original_id))
 				{
 					continue;
 				}
 
-				if (layerMeta[i].layer_geotype == "polygon")
+				if (a_layerMeta[i].layer_geotype == "polygon")
 				{
-					if (layerMeta[i].layer_editing_type == "sourcepolygon")
-						layer = new EnergyPolygonLayer(layerMeta[i], new List<SubEntityObject>());
+					if (a_layerMeta[i].layer_editing_type == "sourcepolygon")
+						layer = new EnergyPolygonLayer(a_layerMeta[i], new List<SubEntityObject>());
 					else
-						layer = new PolygonLayer(layerMeta[i], new List<SubEntityObject>());
+						layer = new PolygonLayer(a_layerMeta[i], new List<SubEntityObject>());
 				}
-				else if (layerMeta[i].layer_geotype == "line")
+				else if (a_layerMeta[i].layer_geotype == "line")
 				{
-					if (layerMeta[i].layer_special_entity_type == ELayerSpecialEntityType.ShippingLine)
+					if (a_layerMeta[i].layer_special_entity_type == ELayerSpecialEntityType.ShippingLine)
 					{
-						layer = new ShippingLineStringLayer(layerMeta[i], new List<SubEntityObject>());
+						layer = new ShippingLineStringLayer(a_layerMeta[i], new List<SubEntityObject>());
 					}
 					else
 					{
-						layer = new LineStringLayer(layerMeta[i], new List<SubEntityObject>());
+						layer = new LineStringLayer(a_layerMeta[i], new List<SubEntityObject>());
 					}
 				}
-				else if (layerMeta[i].layer_geotype == "point")
+				else if (a_layerMeta[i].layer_geotype == "point")
 				{
-					layer = new PointLayer(layerMeta[i], new List<SubEntityObject>());
+					layer = new PointLayer(a_layerMeta[i], new List<SubEntityObject>());
 				}
-				else if (layerMeta[i].layer_geotype == "raster")
+				else if (a_layerMeta[i].layer_geotype == "raster")
 				{
-					layer = new RasterLayer(layerMeta[i]);
+					layer = new RasterLayer(a_layerMeta[i]);
 				}
 				else
 				{
-					layer = new PolygonLayer(layerMeta[i], new List<SubEntityObject>());
-					Debug.LogError("Layer has invalid geotype: " + layerMeta[i].layer_geotype + " in layer " + layer.FileName);
+					layer = new PolygonLayer(a_layerMeta[i], new List<SubEntityObject>());
+					Debug.LogError("Layer has invalid geotype: " + a_layerMeta[i].layer_geotype + " in layer " + layer.FileName);
 				}
-				layer.versionNr = layerMeta[i].layer_filecreationtime;
+				layer.m_versionNr = a_layerMeta[i].layer_filecreationtime;
 				LayerManager.Instance.AddLayer(layer);
 			}
 			//Load dependencies after all layers have been added to the layer manager
-			foreach(LayerMeta meta in layerMeta)
+			foreach(LayerMeta meta in a_layerMeta)
 			{
 				LayerManager.Instance.GetLayerByID(meta.layer_id).LoadDependencies(meta);
 			}
 
-			return layerMeta;
+			return a_layerMeta;
 		}
 	}
 
+	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match json
 	public class EntityTypeValues
 	{
 		public string displayName { get; set; }
@@ -103,6 +99,7 @@ namespace MSP2050.Scripts
 		}
 	}
 	
+	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match json
 	public class LayerMeta
 	{
 		public LayerMeta()
@@ -170,12 +167,14 @@ namespace MSP2050.Scripts
 		public float? layer_entity_value_max { get; set; }
 	}
 
+	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match json
 	public class LayerStateObject
 	{
 		public string state { get; set; }
 		public int time { get; set; }
 	}
 
+	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match json
 	public class LayerInfoPropertiesObject
 	{
 		public enum ContentValidation { None, ShippingWidth, NumberCables }
@@ -194,6 +193,7 @@ namespace MSP2050.Scripts
 		public string unit { get; set; }
 	}
 
+	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match json
 	public class GeometryParameterObject
 	{
 		public string meta_name { get; set; }

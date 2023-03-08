@@ -20,7 +20,7 @@ namespace MSP2050.Scripts
 			{
 				foreach (AbstractLayer layer in visibleLayers)
 				{
-					if (!layer.Selectable)
+					if (!layer.m_selectable)
 					{
 						continue;
 					}
@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 
 				}
 
-				if (hover != null && hover.Layer.Selectable == true)
+				if (hover != null && hover.Layer.m_selectable == true)
 				{
 					HoveredSubEntity(hover.GetSubEntity(0), true);
 				}
@@ -62,7 +62,7 @@ namespace MSP2050.Scripts
 				List<SubEntity> subEntities = new List<SubEntity>();
 				foreach (AbstractLayer layer in loadedLayers)
 				{
-					if (!layer.Selectable) { continue; }
+					if (!layer.m_selectable) { continue; }
 
 					foreach (SubEntity entity in layer.GetSubEntitiesAt(worldPosition))
 					{

@@ -210,7 +210,7 @@ namespace MSP2050.Scripts
 				switchSelectionFromBaseLineStringToDuplicate(subEntity, duplicate);
             
 				//Add connections to new cable and reconnect attached points
-				foreach (Connection con in (subEntity as EnergyLineStringSubEntity).connections)
+				foreach (Connection con in (subEntity as EnergyLineStringSubEntity).Connections)
 				{
 					Connection newCon = new Connection(duplicate, con.point, con.connectedToFirst);
 					con.point.RemoveConnection(con);

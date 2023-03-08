@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
             float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
             Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
-            foreach (LineStringEntity entity in activeEntities)
+            foreach (LineStringEntity entity in m_activeEntities)
             {
                 List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)

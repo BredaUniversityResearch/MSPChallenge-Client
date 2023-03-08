@@ -7,16 +7,16 @@ namespace MSP2050.Scripts
 {
 	public class LayerManager : MonoBehaviour
 	{
-		public enum GeoType { polygon, line, point, raster }
+		public enum EGeoType { polygon, line, point, raster }
 
-		private static LayerManager singleton;
+		private static LayerManager Singleton;
 		public static LayerManager Instance
 		{
 			get
 			{
-				if (singleton == null)
-					singleton = FindObjectOfType<LayerManager>();
-				return singleton;
+				if (Singleton == null)
+					Singleton = FindObjectOfType<LayerManager>();
+				return Singleton;
 			}
 		}
 
@@ -49,36 +49,36 @@ namespace MSP2050.Scripts
 
 		void Start()
 		{
-			if (singleton != null && singleton != this)
+			if (Singleton != null && Singleton != this)
 				Destroy(this);
 			else
-				singleton = this;
+				Singleton = this;
 			SetSubcategoryIcons();
 		}
 
 		void OnDestroy()
 		{
-			singleton = null;
+			Singleton = null;
 		}
 
 		public void AddLayer(AbstractLayer layer)
 		{
 			finishedImporting = false;
-			while (layer.ID >= layers.Count)
+			while (layer.m_id >= layers.Count)
 			{
 				layers.Add(null);
 			}
-			layers[layer.ID] = layer;
+			layers[layer.m_id] = layer;
 
 			if (layer.FileName == SessionManager.Instance.MspGlobalData.countries)
 				EEZLayer = layer as PolygonLayer;
-			if(m_subcategoryToLayers.TryGetValue(layer.SubCategory, out var entry))
+			if(m_subcategoryToLayers.TryGetValue(layer.m_subCategory, out var entry))
 			{
 				entry.Add(layer);
 			}
 			else
 			{
-				m_subcategoryToLayers.Add(layer.SubCategory, new List<AbstractLayer>() { layer });
+				m_subcategoryToLayers.Add(layer.m_subCategory, new List<AbstractLayer>() { layer });
 			}
 		}
 
@@ -131,7 +131,7 @@ namespace MSP2050.Scripts
 
 			foreach (AbstractLayer tLayer in loadedLayers)
 			{
-				if (tLayer.ID == EEZLayer.ID)
+				if (tLayer.m_id == EEZLayer.m_id)
 					continue;
 
 				if (tLayer is PointLayer)
@@ -221,7 +221,7 @@ namespace MSP2050.Scripts
 			{
 				if (loadedLayers.Contains(layer))
 				{
-					if (layer.Category == category && layer.SubCategory == subcategory)
+					if (layer.m_category == category && layer.m_subCategory == subcategory)
 					{
 						result.Add(layer);
 					}
@@ -326,11 +326,11 @@ namespace MSP2050.Scripts
 
 			layer.DrawGameObject();
 
-			if (!layer.Dirty)
+			if (!layer.m_dirty)
 			{
 				loadedLayers.Add(layer);
 
-				AddToCategories(layer.Category, layer.SubCategory);
+				AddToCategories(layer.m_category, layer.m_subCategory);
 
 				InterfaceCanvas.Instance.layerInterface.AddLayerToInterface(layer);
 
@@ -343,7 +343,7 @@ namespace MSP2050.Scripts
 					InterfaceCanvas.Instance.activeLayers.AddPinnedInvisibleLayer(layer);
 				}
 
-				layer.Loaded = true;
+				layer.m_loaded = true;
 			}
 			else
 			{
@@ -362,7 +362,7 @@ namespace MSP2050.Scripts
 		public void ShowLayer(AbstractLayer layer)
 		{
 			bool needsUpdateAndRedraw = false;
-			foreach (EntityType entityType in layer.EntityTypes.Values)
+			foreach (EntityType entityType in layer.m_entityTypes.Values)
 			{
 				bool newNeed = layer.SetEntityTypeVisibility(entityType, true);
 				needsUpdateAndRedraw = needsUpdateAndRedraw || newNeed;
@@ -575,8 +575,8 @@ namespace MSP2050.Scripts
 
 			for (int i = 0; i < layersInOrder.Count; i++)
 			{
-				layersInOrder[i].Order = i;
-				layersInOrder[i].LayerGameObject.transform.position = new Vector3(0, 0, -layersInOrder[i].Order);
+				layersInOrder[i].m_order = i;
+				layersInOrder[i].LayerGameObject.transform.position = new Vector3(0, 0, -layersInOrder[i].m_order);
 			}
 		}
 

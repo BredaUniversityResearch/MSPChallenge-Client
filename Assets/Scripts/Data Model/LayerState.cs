@@ -62,9 +62,9 @@ namespace MSP2050.Scripts
 			lastMonthUpdated = month;
 			while (true)
 			{
-				if (layer.planLayers.Count > lastMergedPlanIndex + 1)
+				if (layer.m_planLayers.Count > lastMergedPlanIndex + 1)
 				{
-					PlanLayer newlayer = layer.planLayers[lastMergedPlanIndex + 1];
+					PlanLayer newlayer = layer.m_planLayers[lastMergedPlanIndex + 1];
 					if (newlayer.Plan.StartTime <= month)
 					{
 						if (newlayer.Plan.InInfluencingState) //Plans in DESIGN and DELETES states are ignored
@@ -89,13 +89,13 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < baseGeometry.Count; ++i)
 			{
 				EnergyLineStringSubEntity cable = (baseGeometry[i].GetSubEntity(0) as EnergyLineStringSubEntity);
-				if (cable.connections == null || cable.connections.Count < 2)
+				if (cable.Connections == null || cable.Connections.Count < 2)
 				{
 					Debug.LogWarning("Cable (ID: " + cable.GetDatabaseID().ToString() + ") doesn't have 2 connections when constructing network.");
 					continue;
 				}
-				EnergyPointSubEntity p0 = cable.connections[0].point;
-				EnergyPointSubEntity p1 = cable.connections[1].point;
+				EnergyPointSubEntity p0 = cable.Connections[0].point;
+				EnergyPointSubEntity p1 = cable.Connections[1].point;
 
 				//Add connections from p0 to p1 and vive versa to network
 				if (network.ContainsKey(p0.GetDatabaseID()))

@@ -8,7 +8,7 @@ namespace MSP2050.Scripts
 		public LineStringLayer(LayerMeta layerMeta, List<SubEntityObject> layerObjects) : base(layerMeta)
 		{
 			LoadLayerObjects(layerObjects);
-			presetProperties.Add("Length", (subent) =>
+			m_presetProperties.Add("Length", (subent) =>
 			{
 				LineStringSubEntity lineEntity = (LineStringSubEntity)subent;
 				return lineEntity.LineLengthKm.ToString("0.00") + " km";
@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 				{
 					LineStringEntity ent = (LineStringEntity)CreateEntity(layerObject);
 					Entities.Add(ent);
-					initialEntities.Add(ent);
+					InitialEntities.Add(ent);
 				}
 			}
 		}
@@ -100,7 +100,7 @@ namespace MSP2050.Scripts
 
 			List<LineStringSubEntity> collisions = new List<LineStringSubEntity>();
 
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
@@ -141,7 +141,7 @@ namespace MSP2050.Scripts
 			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
@@ -171,7 +171,7 @@ namespace MSP2050.Scripts
 
 			List<LineStringSubEntity> collisions = new List<LineStringSubEntity>();
 
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
@@ -200,7 +200,7 @@ namespace MSP2050.Scripts
 		public List<LineStringSubEntity> GetAllSubEntities()
 		{
 			List<LineStringSubEntity> subEntities = new List<LineStringSubEntity>();
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				foreach (LineStringSubEntity subent in entity.GetSubEntities())
 					if (!subent.IsPlannedForRemoval())
@@ -211,7 +211,7 @@ namespace MSP2050.Scripts
 
 		public override void UpdateScale(Camera targetCamera)
 		{
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 
@@ -222,9 +222,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override  LayerManager.GeoType GetGeoType()
+		public override  LayerManager.EGeoType GetGeoType()
 		{
-			return  LayerManager.GeoType.line;
+			return  LayerManager.EGeoType.line;
 		}
 
 		#region Legacy Stuff

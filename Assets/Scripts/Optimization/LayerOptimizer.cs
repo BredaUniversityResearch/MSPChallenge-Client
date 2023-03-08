@@ -71,8 +71,8 @@ namespace MSP2050.Scripts
 			tLineParent.transform.SetParent(target.LayerGameObject.transform, false);
 			Gradient gradient = new Gradient();
 			Color outlineColor = Color.black;
-			if(target.EntityTypes != null)
-				outlineColor = target.EntityTypes.GetFirstValue().DrawSettings.LineColor;
+			if(target.m_entityTypes != null)
+				outlineColor = target.m_entityTypes.GetFirstValue().DrawSettings.LineColor;
 			gradient.SetKeys(
 				new GradientColorKey[] { new GradientColorKey(outlineColor, 0.0f), new GradientColorKey(outlineColor, 1.0f) },
 				new GradientAlphaKey[] { new GradientAlphaKey(1f, 0.0f), new GradientAlphaKey(1f, 1.0f) }

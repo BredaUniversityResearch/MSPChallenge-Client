@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using SoftwareRasterizerLib;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace MSP2050.Scripts
 {
@@ -10,38 +9,36 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// The generic check delegate.
 		/// </summary>
-		/// <param name="a">SubEntity A</param>
-		/// <param name="b">Entity B</param>
-		/// <param name="target">The constraint we are checking</param>
-		/// <param name="targetPlanLayer">The plan layer we are checking issues for. Any issues will be submitted to this layer.</param>
-		/// <param name="checkForPlan">The plan we are checking the issues for. The planLayer may or may not be contained within this plan. This is for tracking issues that are cross-plan.</param>
-		/// <param name="issueLocation">Location where where the check roughly found an issue</param>
+		/// <param name="a_a">SubEntity A</param>
+		/// <param name="a_b">Entity B</param>
+		/// <param name="a_target">The constraint we are checking</param>
+		/// <param name="a_targetPlanLayer">The plan layer we are checking issues for. Any issues will be submitted to this layer.</param>
+		/// <param name="a_checkForPlan">The plan we are checking the issues for. The planLayer may or may not be contained within this plan. This is for tracking issues that are cross-plan.</param>
+		/// <param name="a_issueLocation">Location where where the check roughly found an issue</param>
 		/// <returns></returns>
-		public delegate bool DoCheck(SubEntity a, SubEntity b, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation);
+		public delegate bool DoCheck(SubEntity a_a, SubEntity a_b, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation);
 
-		private static bool CheckPointOnRasterToEntityType(RasterLayer raster, Vector2 point, EntityType entityType)
+		private static bool CheckPointOnRasterToEntityType(RasterLayer a_raster, Vector2 a_point, EntityType a_entityType)
 		{
-			EntityType type = raster.GetEntityTypeForRasterAt(point);
-			return type == entityType;
+			EntityType type = a_raster.GetEntityTypeForRasterAt(a_point);
+			return type == a_entityType;
 		}
 
 		#region Raster
-		private static bool PolyToRaster(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool PolyToRaster(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 		
 			// maybe make sure raster layer is always B (should then be enforced server side or when inputting the data!) To avoid that check
-			if (subEntityB is PolygonSubEntity)
+			if (a_subEntityB is PolygonSubEntity)
 			{
-				SubEntity tmpSubEntity = subEntityA;
-				subEntityA = subEntityB;
-				subEntityB = tmpSubEntity;
+				(a_subEntityA, a_subEntityB) = (a_subEntityB, a_subEntityA);
 			}
 
-			PolygonSubEntity poly = (PolygonSubEntity)subEntityA;
-			RasterLayer rasterLayer = (RasterLayer)subEntityB.Entity.Layer;
+			PolygonSubEntity poly = (PolygonSubEntity)a_subEntityA;
+			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.Entity.Layer;
 
-			Vector3 polyCentre = subEntityA.BoundingBox.center;
+			Vector3 polyCentre = a_subEntityA.BoundingBox.center;
 
 			Rect rasterBounds = new Rect(rasterLayer.RasterBounds.position, rasterLayer.RasterBounds.size);
 			PolygonRasterizer.Raster rasterizedPolygon = Rasterizer.CreateScanlinesForPolygon(rasterLayer.GetRasterImageWidth(), rasterLayer.GetRasterImageHeight(), poly.GetPoints(), rasterBounds);
@@ -51,40 +48,38 @@ namespace MSP2050.Scripts
 				PolygonRasterizer.ScanlineMinMax scanline = rasterizedPolygon.m_scanlines[y];
 				for (int x = (int)scanline.xMin; x < (int)scanline.xMax; ++x)
 				{
-					if (rasterLayer.GetEntityTypeForRasterAt(x, y) == target.entityType)
-					{
-						issueLocation = rasterLayer.GetWorldPositionForTextureLocation(x, y);
-						return true;
-					}
+					if (rasterLayer.GetEntityTypeForRasterAt(x, y) != a_target.entityType)
+						continue;
+					a_issueLocation = rasterLayer.GetWorldPositionForTextureLocation(x, y);
+					return true;
 				}
 			}
 
 			return false;
 		}
 
-		private static bool LineToRaster(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool LineToRaster(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			if (subEntityB is LineStringSubEntity)
+			if (a_subEntityB is LineStringSubEntity)
 			{
-				SubEntity tmpSubentity = subEntityA;
-				subEntityA = subEntityB;
-				subEntityB = tmpSubentity;
+				SubEntity tmpSubentity = a_subEntityA;
+				a_subEntityA = a_subEntityB;
+				a_subEntityB = tmpSubentity;
 			}
 
-			EntityType targetEntityType = target.entityType;
+			EntityType targetEntityType = a_target.entityType;
 
-			LineStringSubEntity line = (LineStringSubEntity)subEntityA;
-			RasterLayer rasterLayer = (RasterLayer)subEntityB.Entity.Layer;
+			LineStringSubEntity line = (LineStringSubEntity)a_subEntityA;
+			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.Entity.Layer;
 
 			List<Vector3> linePoints = line.GetPoints();
 
 			foreach (Vector3 point in linePoints)
 			{
-				if (rasterLayer.GetEntityTypeForRasterAt(point) == targetEntityType)
-				{
-					issueLocation = point;
-					return true;
-				}
+				if (rasterLayer.GetEntityTypeForRasterAt(point) != targetEntityType)
+					continue;
+				a_issueLocation = point;
+				return true;
 			}
 
 			int count = linePoints.Count;
@@ -100,75 +95,73 @@ namespace MSP2050.Scripts
 				for (float j = 0; j < lengthOfLine; j += increment)
 				{
 					Vector3 point = Util.GetPointAlongLine(pointA, pointB, j);
-					if (rasterLayer.GetEntityTypeForRasterAt(point) == target.entityType)
-					{
-						issueLocation = point;
-						return true;
-					}
+					if (rasterLayer.GetEntityTypeForRasterAt(point) != a_target.entityType)
+						continue;
+					a_issueLocation = point;
+					return true;
 				}
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 
-		private static bool PointToRaster(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool PointToRaster(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			if (subEntityB is PointSubEntity)
+			if (a_subEntityB is PointSubEntity)
 			{
-				SubEntity tmpSubentity = subEntityA;
-				subEntityA = subEntityB;
-				subEntityB = tmpSubentity;
+				SubEntity tmpSubentity = a_subEntityA;
+				a_subEntityA = a_subEntityB;
+				a_subEntityB = tmpSubentity;
 			}
 
-			Vector3 pos = subEntityA.BoundingBox.center;
+			Vector3 pos = a_subEntityA.BoundingBox.center;
 
-			RasterLayer rasterLayer = (RasterLayer)subEntityB.Entity.Layer;
-			if (rasterLayer.GetEntityTypeForRasterAt(pos) == target.entityType)
+			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.Entity.Layer;
+			if (rasterLayer.GetEntityTypeForRasterAt(pos) == a_target.entityType)
 			{
-				issueLocation = pos;
+				a_issueLocation = pos;
 				return true;
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 
-		private static bool ExclusionCheckLineToPoly(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool ExclusionCheckLineToPoly(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			PolygonSubEntity polyEntity = subEntityA as PolygonSubEntity;
-			LineStringSubEntity lineEntity = subEntityB as LineStringSubEntity;
+			PolygonSubEntity polyEntity = a_subEntityA as PolygonSubEntity;
+			LineStringSubEntity lineEntity = a_subEntityB as LineStringSubEntity;
 			if (polyEntity == null || lineEntity == null)
 			{
-				polyEntity = (PolygonSubEntity)subEntityB;
-				lineEntity = (LineStringSubEntity)subEntityA;
+				polyEntity = (PolygonSubEntity)a_subEntityB;
+				lineEntity = (LineStringSubEntity)a_subEntityA;
 			}
 
 			List<Vector3> linePoints = lineEntity.GetPoints();
 			for (int i = 0; i < linePoints.Count; ++i)
 			{
 				Vector3 linePoint = linePoints[i];
-				if (!Util.PointCollidesWithPolygon(linePoint, polyEntity.GetPoints(), polyEntity.GetHoles(), 0.005f))
-				{
-					issueLocation = linePoint;
-					return true;
-				}
+				if (Util.PointCollidesWithPolygon(linePoint, polyEntity.GetPoints(), polyEntity.GetHoles(), 0.005f))
+					continue;
+				a_issueLocation = linePoint;
+				return true;
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 		#endregion
 
 		#region Inclusion Poly
-		private static bool InclusionCheckPolyToPoly(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool InclusionCheckPolyToPoly(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			PolygonSubEntity poly1 = subEntityA as PolygonSubEntity;
-			PolygonSubEntity poly2 = subEntityB as PolygonSubEntity;
+			PolygonSubEntity poly1 = a_subEntityA as PolygonSubEntity;
+			PolygonSubEntity poly2 = a_subEntityB as PolygonSubEntity;
 			if(poly1 == null || poly2 == null)
 			{
-				Debug.LogError($"Trying to perform a poly to poly check, but one of the arguments is not a polygon. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
-				issueLocation = Vector3.zero;
+				Debug.LogError($"Trying to perform a poly to poly check, but one of the arguments is not a polygon. Subent1: {FormatSubentityAndLayer(a_subEntityA, a_target.layer)}, subent2: {FormatSubentityAndLayer(a_subEntityB, a_targetPlanLayer.BaseLayer)}");
+				a_issueLocation = Vector3.zero;
 				return false;
 			}
 
@@ -178,41 +171,41 @@ namespace MSP2050.Scripts
 				List<Vector3> warningLocations;
 				if (GeometryOperations.Overlap(poly1, poly2, out warningLocations))
 				{
-					issueLocation = warningLocations[0];
+					a_issueLocation = warningLocations[0];
 					return true;
 				}
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 
-		private static bool InclusionCheckPolyToLine(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool InclusionCheckPolyToLine(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			PolygonSubEntity poly = subEntityA as PolygonSubEntity;
+			PolygonSubEntity poly = a_subEntityA as PolygonSubEntity;
 			LineStringSubEntity line;
 			if (poly == null)
 			{
-				if (subEntityB is PolygonSubEntity)
+				if (a_subEntityB is PolygonSubEntity)
 				{
-					poly = (PolygonSubEntity)subEntityB;
-					line = subEntityA as LineStringSubEntity;
+					poly = (PolygonSubEntity)a_subEntityB;
+					line = a_subEntityA as LineStringSubEntity;
 				}
 				else
 				{
-					Debug.LogError($"Trying to perform a poly to line check, but none of the arguments are polygons. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
-					issueLocation = Vector3.zero;
+					Debug.LogError($"Trying to perform a poly to line check, but none of the arguments are polygons. Subent1: {FormatSubentityAndLayer(a_subEntityA, a_target.layer)}, subent2: {FormatSubentityAndLayer(a_subEntityB, a_targetPlanLayer.BaseLayer)}");
+					a_issueLocation = Vector3.zero;
 					return false;
 				}
 			}
 			else
 			{
-				line = subEntityB as LineStringSubEntity;
+				line = a_subEntityB as LineStringSubEntity;
 			}
 			if(line == null)
 			{
-				Debug.LogError($"Trying to perform a poly to line check, but none of the arguments are lines. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
-				issueLocation = Vector3.zero;
+				Debug.LogError($"Trying to perform a poly to line check, but none of the arguments are lines. Subent1: {FormatSubentityAndLayer(a_subEntityA, a_target.layer)}, subent2: {FormatSubentityAndLayer(a_subEntityB, a_targetPlanLayer.BaseLayer)}");
+				a_issueLocation = Vector3.zero;
 				return false;
 			}
 
@@ -224,41 +217,41 @@ namespace MSP2050.Scripts
 				List<Vector3> warningLocations;
 				if (GeometryOperations.OverlapPolygonLine(poly, line, out warningLocations))
 				{
-					issueLocation = warningLocations[0];
+					a_issueLocation = warningLocations[0];
 					return true;
 				}
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 
-		private static bool InclusionCheckPolyToPoint(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool InclusionCheckPolyToPoint(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			PolygonSubEntity poly = subEntityA as PolygonSubEntity;
+			PolygonSubEntity poly = a_subEntityA as PolygonSubEntity;
 			PointSubEntity point;
 			if (poly == null)
 			{
-				if (subEntityB is PolygonSubEntity)
+				if (a_subEntityB is PolygonSubEntity)
 				{
-					poly = (PolygonSubEntity)subEntityB;
-					point = subEntityA as PointSubEntity;
+					poly = (PolygonSubEntity)a_subEntityB;
+					point = a_subEntityA as PointSubEntity;
 				}
 				else
 				{
-					Debug.LogError($"Trying to perform a poly to point check, but none of the arguments are polygons. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
-					issueLocation = Vector3.zero;
+					Debug.LogError($"Trying to perform a poly to point check, but none of the arguments are polygons. Subent1: {FormatSubentityAndLayer(a_subEntityA, a_target.layer)}, subent2: {FormatSubentityAndLayer(a_subEntityB, a_targetPlanLayer.BaseLayer)}");
+					a_issueLocation = Vector3.zero;
 					return false;
 				}
 			}
 			else
 			{
-				point = subEntityB as PointSubEntity;
+				point = a_subEntityB as PointSubEntity;
 			}
 			if (point == null)
 			{
-				Debug.LogError($"Trying to perform a poly to point check, but none of the arguments are point. Subent1: {FormatSubentityAndLayer(subEntityA, target.layer)}, subent2: {FormatSubentityAndLayer(subEntityB, targetPlanLayer.BaseLayer)}");
-				issueLocation = Vector3.zero;
+				Debug.LogError($"Trying to perform a poly to point check, but none of the arguments are point. Subent1: {FormatSubentityAndLayer(a_subEntityA, a_target.layer)}, subent2: {FormatSubentityAndLayer(a_subEntityB, a_targetPlanLayer.BaseLayer)}");
+				a_issueLocation = Vector3.zero;
 				return false;
 			}
 
@@ -266,85 +259,85 @@ namespace MSP2050.Scripts
 
 			if (Util.PointCollidesWithPolygon(point.GetPosition(), poly.GetPoints(), poly.GetHoles(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
-				issueLocation = pointCenter;
+				a_issueLocation = pointCenter;
 				return true;
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 		#endregion
 
 		#region Inclusion Line
-		private static bool InclusionCheckLineToLine(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool InclusionCheckLineToLine(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			Rect boundingBoxA = subEntityA.BoundingBox;
-			Rect boundingBoxB = subEntityB.BoundingBox;
+			Rect boundingBoxA = a_subEntityA.BoundingBox;
+			Rect boundingBoxB = a_subEntityB.BoundingBox;
 
 			if (boundingBoxA.Overlaps(boundingBoxB))
 			{
-				LineStringSubEntity lineB = (LineStringSubEntity)subEntityB;
+				LineStringSubEntity lineB = (LineStringSubEntity)a_subEntityB;
 				List<Vector3> lineBPoints = lineB.GetPoints();
 
-				if (Util.LineStringCollidesWithLineString(((LineStringSubEntity)subEntityA).GetPoints(), lineBPoints, out issueLocation))
+				if (Util.LineStringCollidesWithLineString(((LineStringSubEntity)a_subEntityA).GetPoints(), lineBPoints, out a_issueLocation))
 				{
 					return true;
 				}
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 
-		private static bool InclusionCheckLineToPoint(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool InclusionCheckLineToPoint(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			if (subEntityB is LineStringSubEntity)
+			if (a_subEntityB is LineStringSubEntity)
 			{
-				SubEntity tmpSubentity = subEntityA;
-				subEntityA = subEntityB;
-				subEntityB = tmpSubentity;
+				SubEntity tmpSubentity = a_subEntityA;
+				a_subEntityA = a_subEntityB;
+				a_subEntityB = tmpSubentity;
 			}
 
-			Rect boundingBoxB = subEntityB.BoundingBox;
+			Rect boundingBoxB = a_subEntityB.BoundingBox;
 
-			if (Util.PointCollidesWithLineString(boundingBoxB.center, ((LineStringSubEntity)subEntityA).GetPoints(), ConstraintManager.Instance.ConstraintPointCollisionSize))
+			if (Util.PointCollidesWithLineString(boundingBoxB.center, ((LineStringSubEntity)a_subEntityA).GetPoints(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
-				issueLocation = boundingBoxB.center;
+				a_issueLocation = boundingBoxB.center;
 				return true;
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 		#endregion
 
 		#region Inclusion Point
-		private static bool InclusionCheckPointToPoint(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool InclusionCheckPointToPoint(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			Rect boundingBoxA = subEntityA.BoundingBox;
-			Rect boundingBoxB = subEntityB.BoundingBox;
+			Rect boundingBoxA = a_subEntityA.BoundingBox;
+			Rect boundingBoxB = a_subEntityB.BoundingBox;
 
 			if (Util.PointCollidesWithPoint(boundingBoxA.center, boundingBoxB.center, ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
-				issueLocation = boundingBoxA.center;
+				a_issueLocation = boundingBoxA.center;
 				return true;
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 		#endregion
 
 		#region Exclusion Poly (Incomplete)
-		private static bool ExclusionCheckPolyToPoly(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool ExclusionCheckPolyToPoly(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			Rect boundingBoxA = subEntityA.BoundingBox;
-			Rect boundingBoxB = subEntityB.BoundingBox;
+			Rect boundingBoxA = a_subEntityA.BoundingBox;
+			Rect boundingBoxB = a_subEntityB.BoundingBox;
 
 			if (boundingBoxA.Overlaps(boundingBoxB))
 			{
-				PolygonSubEntity a = (PolygonSubEntity)subEntityA;
-				PolygonSubEntity b = (PolygonSubEntity)subEntityB;
+				PolygonSubEntity a = (PolygonSubEntity)a_subEntityA;
+				PolygonSubEntity b = (PolygonSubEntity)a_subEntityB;
 
 				List<Vector3> aPolygon = a.GetPoints();
 				List<Vector3> bPolygon = b.GetPoints();
@@ -354,18 +347,18 @@ namespace MSP2050.Scripts
 					if (!Util.PointInPolygon(point, bPolygon, null))
 					{
 						// point isnt in the other polygon
-						issueLocation = point;
+						a_issueLocation = point;
 						return true;
 					}
 				}
 
 				// overlapping
-				issueLocation = Vector3.zero;
+				a_issueLocation = Vector3.zero;
 				return false;
 			}
 
 			// this is because the bounding boxes arent overlapping, so there is no inclusion
-			issueLocation = boundingBoxA.center;
+			a_issueLocation = boundingBoxA.center;
 			return true;
 		}
 		#endregion
@@ -374,12 +367,12 @@ namespace MSP2050.Scripts
 		#endregion
 
 		#region Exclusion Point
-		private static bool ExclusionCheckPointToPoint(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool ExclusionCheckPointToPoint(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			Rect boundingBoxA = subEntityA.BoundingBox;
-			Rect boundingBoxB = subEntityB.BoundingBox;
+			Rect boundingBoxA = a_subEntityA.BoundingBox;
+			Rect boundingBoxB = a_subEntityB.BoundingBox;
 
-			issueLocation = boundingBoxA.center;
+			a_issueLocation = boundingBoxA.center;
 
 			if (Util.PointCollidesWithPoint(boundingBoxA.center, boundingBoxB.center, ConstraintManager.Instance.ConstraintPointCollisionSize))//if (boundingBoxA.Overlaps(subEntityB.BoundingBox))
 			{
@@ -389,26 +382,26 @@ namespace MSP2050.Scripts
 			return true;
 		}
 
-		private static bool ExclusionCheckPolyToPoint(SubEntity subEntityA, SubEntity subEntityB, ConstraintTarget target, PlanLayer targetPlanLayer, Plan checkForPlan, out Vector3 issueLocation)
+		private static bool ExclusionCheckPolyToPoint(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			PointSubEntity pointSubEntity = subEntityA as PointSubEntity;
-			PolygonSubEntity polygonSubEntity = subEntityB as PolygonSubEntity;
+			PointSubEntity pointSubEntity = a_subEntityA as PointSubEntity;
+			PolygonSubEntity polygonSubEntity = a_subEntityB as PolygonSubEntity;
 
 			if (pointSubEntity == null || polygonSubEntity == null)
 			{
-				pointSubEntity = (PointSubEntity)subEntityB;
-				polygonSubEntity = (PolygonSubEntity)subEntityA;
+				pointSubEntity = (PointSubEntity)a_subEntityB;
+				polygonSubEntity = (PolygonSubEntity)a_subEntityA;
 			}
 
 			Vector3 pointCenter = pointSubEntity.BoundingBox.center;
 
 			if (!Util.PointCollidesWithPolygon(pointCenter, polygonSubEntity.GetPoints(), polygonSubEntity.GetHoles(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
-				issueLocation = pointCenter;
+				a_issueLocation = pointCenter;
 				return true;
 			}
 
-			issueLocation = Vector3.zero;
+			a_issueLocation = Vector3.zero;
 			return false;
 		}
 		#endregion
@@ -417,89 +410,88 @@ namespace MSP2050.Scripts
 		/// <summary>
 		///  Takes the correct type of restriction check based on what the layers are
 		/// </summary>
-		/// <param name="layerA"></param>
-		/// <param name="layerB"></param>
+		/// <param name="a_layerA"></param>
+		/// <param name="a_layerB"></param>
 		/// <returns></returns>
-		public static DoCheck PickCorrectInclusionCheckType(AbstractLayer layerA, AbstractLayer layerB)
+		public static DoCheck PickCorrectInclusionCheckType(AbstractLayer a_layerA, AbstractLayer a_layerB)
 		{
-			if ((layerA is PolygonLayer && layerB is RasterLayer) || (layerA is RasterLayer && layerB is PolygonLayer))
+			if ((a_layerA is PolygonLayer && a_layerB is RasterLayer) || (a_layerA is RasterLayer && a_layerB is PolygonLayer))
 			{
 				return PolyToRaster;
 			}
-			else if ((layerA is LineStringLayer && layerB is RasterLayer) || (layerA is RasterLayer && layerB is LineStringLayer))
+			if ((a_layerA is LineStringLayer && a_layerB is RasterLayer) || (a_layerA is RasterLayer && a_layerB is LineStringLayer))
 			{
 				return LineToRaster;
 			}
-			else if ((layerA is PointLayer && layerB is RasterLayer) || (layerA is RasterLayer && layerB is PointLayer))
+			if ((a_layerA is PointLayer && a_layerB is RasterLayer) || (a_layerA is RasterLayer && a_layerB is PointLayer))
 			{
 				return PointToRaster;
 			}
-			else if (layerA is PolygonLayer && layerB is PolygonLayer)
+			if (a_layerA is PolygonLayer && a_layerB is PolygonLayer)
 			{
 				return InclusionCheckPolyToPoly;
 			}
-			else if (layerA is PointLayer && layerB is PointLayer)
+			if (a_layerA is PointLayer && a_layerB is PointLayer)
 			{
 				return InclusionCheckPointToPoint;
 			}
-			else if (layerA is LineStringLayer && layerB is LineStringLayer)
+			if (a_layerA is LineStringLayer && a_layerB is LineStringLayer)
 			{
 				return InclusionCheckLineToLine;
 			}
-			else if ((layerA is PolygonLayer && layerB is PointLayer) || (layerA is PointLayer && layerB is PolygonLayer))
+			if ((a_layerA is PolygonLayer && a_layerB is PointLayer) || (a_layerA is PointLayer && a_layerB is PolygonLayer))
 			{
 				return InclusionCheckPolyToPoint;
 			}
-			else if ((layerA is PolygonLayer && layerB is LineStringLayer) || (layerA is LineStringLayer && layerB is PolygonLayer))
+			if ((a_layerA is PolygonLayer && a_layerB is LineStringLayer) || (a_layerA is LineStringLayer && a_layerB is PolygonLayer))
 			{
 				return InclusionCheckPolyToLine;
 			}
-			else if ((layerA is LineStringLayer && layerB is PointLayer) || (layerA is PointLayer && layerB is LineStringLayer))
+			if ((a_layerA is LineStringLayer && a_layerB is PointLayer) || (a_layerA is PointLayer && a_layerB is LineStringLayer))
 			{
 				return InclusionCheckLineToPoint;
 			}
 			return null;
 		}
 
-		public static DoCheck PickCorrectExclusionCheckType(AbstractLayer layerA, AbstractLayer layerB)
+		public static DoCheck PickCorrectExclusionCheckType(AbstractLayer a_layerA, AbstractLayer a_layerB)
 		{
-			if ((layerA is PolygonLayer && layerB is RasterLayer) || (layerA is RasterLayer && layerB is PolygonLayer))
+			if ((a_layerA is PolygonLayer && a_layerB is RasterLayer) || (a_layerA is RasterLayer && a_layerB is PolygonLayer))
 			{
 				return PolyToRaster;
 			}
-			else if ((layerA is LineStringLayer && layerB is RasterLayer) || (layerA is RasterLayer && layerB is LineStringLayer))
+			if ((a_layerA is LineStringLayer && a_layerB is RasterLayer) || (a_layerA is RasterLayer && a_layerB is LineStringLayer))
 			{
 				return LineToRaster;
 			}
-			else if ((layerA is PointLayer && layerB is RasterLayer) || (layerA is RasterLayer && layerB is PointLayer))
+			if ((a_layerA is PointLayer && a_layerB is RasterLayer) || (a_layerA is RasterLayer && a_layerB is PointLayer))
 			{
 				return PointToRaster;
 			}
-			else if ((layerA is LineStringLayer && layerB is PolygonLayer) || (layerA is PolygonLayer && layerB is LineStringLayer))
+			if ((a_layerA is LineStringLayer && a_layerB is PolygonLayer) || (a_layerA is PolygonLayer && a_layerB is LineStringLayer))
 			{
 				return ExclusionCheckLineToPoly;
 			}
-			else if ((layerA is PointLayer && layerB is PolygonLayer) || (layerA is PolygonLayer && layerB is PointLayer))
+			if ((a_layerA is PointLayer && a_layerB is PolygonLayer) || (a_layerA is PolygonLayer && a_layerB is PointLayer))
 			{
 				return ExclusionCheckPolyToPoint;
 			}
-			else if (layerA is PolygonLayer && layerB is PolygonLayer)
+			if (a_layerA is PolygonLayer && a_layerB is PolygonLayer)
 			{
 				return ExclusionCheckPolyToPoly;
 			}
-			else if (layerA is PointLayer && layerB is PointLayer)
+			if (a_layerA is PointLayer && a_layerB is PointLayer)
 			{
 				return ExclusionCheckPointToPoint;
 			}
 			return null;
 		}
 
-		public static string FormatSubentityAndLayer(SubEntity a_subent, AbstractLayer a_layer)
+		private static string FormatSubentityAndLayer(SubEntity a_subent, AbstractLayer a_layer)
 		{
 			if (a_subent == null)
 				return $"null ({a_layer.ShortName})";
-			else
-				return $"{a_subent.GetDatabaseID()} ({a_layer.ShortName})";
+			return $"{a_subent.GetDatabaseID()} ({a_layer.ShortName})";
 		}
 	}
 }

@@ -192,7 +192,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			m_fillBar.CreateEmptyFill(FishingDistributionDelta.MAX_SUMMED_FISHING_VALUE, true);
+			m_fillBar.CreateEmptyFill(FishingDistributionDelta.MaxSummedFishingValue, true);
 		}
 
 		public void SetToEnergyValues(EnergyGrid a_grid, int a_country, string a_name)
@@ -205,12 +205,12 @@ namespace MSP2050.Scripts
 			long totalUsedPower = 0;
 			int nextItemIndex = 0;
 
-			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in a_grid.energyDistribution.distribution)
+			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in a_grid.m_energyDistribution.m_distribution)
 			{
 				long received = 0L;
-				if (a_grid.actualAndWasted != null)
-					received = a_grid.actualAndWasted.socketActual.ContainsKey(kvp.Key) ? a_grid.actualAndWasted.socketActual[kvp.Key] : 0;
-				long target = kvp.Value.expected;
+				if (a_grid.m_actualAndWasted != null)
+					received = a_grid.m_actualAndWasted.m_socketActual.ContainsKey(kvp.Key) ? a_grid.m_actualAndWasted.m_socketActual[kvp.Key] : 0;
+				long target = kvp.Value.m_expected;
 
 				//if (kvp.Key == a_country)
 				//{
@@ -232,7 +232,7 @@ namespace MSP2050.Scripts
 				//{
 					//Other team, create an entry
 					string formatString;
-					if (kvp.Value.expected < 0)
+					if (kvp.Value.m_expected < 0)
 					{
 						//Send
 						formatString = "Sent {0} / {1} target";

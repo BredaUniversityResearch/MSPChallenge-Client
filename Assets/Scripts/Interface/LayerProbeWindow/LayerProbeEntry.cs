@@ -36,7 +36,7 @@ namespace MSP2050.Scripts
 			m_layerNameText.text = a_subEntity.Entity.Layer.ShortName;
 			string geomName = a_subEntity.Entity.name;
 			m_geomNameText.text = string.IsNullOrEmpty(geomName) ? "Unnamed" : geomName;
-			m_layerIcon.sprite = LayerManager.Instance.GetSubcategoryIcon(a_subEntity.Entity.Layer.SubCategory);		
+			m_layerIcon.sprite = LayerManager.Instance.GetSubcategoryIcon(a_subEntity.Entity.Layer.m_subCategory);		
 		}
 	}
 }

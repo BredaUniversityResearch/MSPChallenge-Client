@@ -36,23 +36,23 @@ namespace MSP2050.Scripts
 
 			foreach(AbstractLayer layer in LayerManager.Instance.GetAllLayers())
 			{
-				if (!layer.Editable)
+				if (!layer.m_editable)
 					continue;
 
 				AP_LayerSelectSubcategory subcategory;
-				if (!m_subcategoryObjects.TryGetValue(layer.SubCategory, out subcategory))
+				if (!m_subcategoryObjects.TryGetValue(layer.m_subCategory, out subcategory))
 				{
 					AP_LayerSelectCategory category;
-					if (!m_categoryObjects.TryGetValue(layer.Category, out category))
+					if (!m_categoryObjects.TryGetValue(layer.m_category, out category))
 					{
 						category = Instantiate(m_catgoryPrefab, m_contentContainer).GetComponent<AP_LayerSelectCategory>();
-						category.Initialise(LayerManager.Instance.MakeCategoryDisplayString(layer.Category));
-						m_categoryObjects.Add(layer.Category, category);
+						category.Initialise(LayerManager.Instance.MakeCategoryDisplayString(layer.m_category));
+						m_categoryObjects.Add(layer.m_category, category);
 					}
 					subcategory = Instantiate(m_subcatgoryPrefab, m_contentContainer).GetComponent<AP_LayerSelectSubcategory>();
 					subcategory.transform.SetSiblingIndex(category.transform.GetSiblingIndex() + 1);
-					subcategory.Initialise(LayerManager.Instance.MakeCategoryDisplayString(layer.SubCategory), LayerManager.Instance.GetSubcategoryIcon(layer.SubCategory));
-					m_subcategoryObjects.Add(layer.SubCategory, subcategory);
+					subcategory.Initialise(LayerManager.Instance.MakeCategoryDisplayString(layer.m_subCategory), LayerManager.Instance.GetSubcategoryIcon(layer.m_subCategory));
+					m_subcategoryObjects.Add(layer.m_subCategory, subcategory);
 				}
 
 				AP_LayerSelectLayer layerObj = Instantiate(m_layerPrefab, subcategory.ContentContainer).GetComponent<AP_LayerSelectLayer>();

@@ -12,14 +12,14 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)subEntity;
-			if (cable.connections[0].point.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+			if (cable.Connections[0].point.Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 			{
 				//All points except sourcepoints are non-reference
 				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 				{
-					if (layer.greenEnergy == cable.Entity.Layer.greenEnergy &&
-					    (layer.editingType == AbstractLayer.EditingType.Socket ||
-					     layer.editingType == AbstractLayer.EditingType.Transformer))
+					if (layer.m_greenEnergy == cable.Entity.Layer.m_greenEnergy &&
+					    (layer.m_editingType == AbstractLayer.EditingType.Socket ||
+					     layer.m_editingType == AbstractLayer.EditingType.Transformer))
 						LayerManager.Instance.AddNonReferenceLayer(layer, true);
 				}
 			}
@@ -28,17 +28,17 @@ namespace MSP2050.Scripts
 				//All points are non-reference
 				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 				{
-					if (layer.greenEnergy == cable.Entity.Layer.greenEnergy)
+					if (layer.m_greenEnergy == cable.Entity.Layer.m_greenEnergy)
 					{
-						if (layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+						if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 						{
 							//Get and add the centerpoint layer
 							EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;   
-							LayerManager.Instance.AddNonReferenceLayer(polyLayer.centerPointLayer, true);
+							LayerManager.Instance.AddNonReferenceLayer(polyLayer.m_centerPointLayer, true);
 						}
-						else if (layer.editingType == AbstractLayer.EditingType.SourcePoint ||
-						         layer.editingType == AbstractLayer.EditingType.Socket ||
-						         layer.editingType == AbstractLayer.EditingType.Transformer)
+						else if (layer.m_editingType == AbstractLayer.EditingType.SourcePoint ||
+						         layer.m_editingType == AbstractLayer.EditingType.Socket ||
+						         layer.m_editingType == AbstractLayer.EditingType.Transformer)
 						{
 							LayerManager.Instance.AddNonReferenceLayer(layer, true);
 						}
@@ -56,7 +56,7 @@ namespace MSP2050.Scripts
 			if (point != null)
 			{
 				snappingPoint = point.GetPosition();
-				if (point.CanConnectToEnergySubEntity(cable.connections.First().point))
+				if (point.CanConnectToEnergySubEntity(cable.Connections.First().point))
 				{
 					drawAsInvalid = false;
 					return true;
@@ -80,7 +80,7 @@ namespace MSP2050.Scripts
 			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(finalPosition);
 			if (point != null)
 			{
-				if (point.CanConnectToEnergySubEntity(cable.connections.First().point))
+				if (point.CanConnectToEnergySubEntity(cable.Connections.First().point))
 				{
 					//Valid energy points clicked: Finalize
 					fsm.AddToUndoStack(new FinalizeEnergyLineStringOperation(subEntity, planLayer, point));

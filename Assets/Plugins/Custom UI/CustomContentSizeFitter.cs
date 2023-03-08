@@ -1,7 +1,6 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine;
-using System;
 using System.Collections.Generic;
 
 [AddComponentMenu("Layout/Content Size Fitter", 141)]
@@ -9,7 +8,7 @@ using System.Collections.Generic;
 [RequireComponent(typeof(RectTransform))]
 public class CustomContentSizeFitter : UIBehaviour, ILayoutSelfController
 {
-	public enum FitMode
+	public enum EFitMode
 	{
 		/// <summary>
 		/// Don't perform any resizing.
@@ -25,19 +24,19 @@ public class CustomContentSizeFitter : UIBehaviour, ILayoutSelfController
 		PreferredSize
 	}
 
-	[SerializeField] protected FitMode m_HorizontalFit = FitMode.Unconstrained;
+	[SerializeField] protected EFitMode m_HorizontalFit = EFitMode.Unconstrained;
 
 	/// <summary>
 	/// The fit mode to use to determine the width.
 	/// </summary>
-	public FitMode horizontalFit { get { return m_HorizontalFit; } set { if (SetStruct(ref m_HorizontalFit, value)) SetDirty(); } }
+	public EFitMode horizontalFit { get { return m_HorizontalFit; } set { if (SetStruct(ref m_HorizontalFit, value)) SetDirty(); } }
 
-	[SerializeField] protected FitMode m_VerticalFit = FitMode.Unconstrained;
+	[SerializeField] protected EFitMode m_VerticalFit = EFitMode.Unconstrained;
 
 	/// <summary>
 	/// The fit mode to use to determine the height.
 	/// </summary>
-	public FitMode verticalFit { get { return m_VerticalFit; } set { if (SetStruct(ref m_VerticalFit, value)) SetDirty(); } }
+	public EFitMode verticalFit { get { return m_VerticalFit; } set { if (SetStruct(ref m_VerticalFit, value)) SetDirty(); } }
 
 	[SerializeField] Vector2 m_maxSize;
 
@@ -72,32 +71,32 @@ public class CustomContentSizeFitter : UIBehaviour, ILayoutSelfController
 		SetDirty();
 	}
 
-	private void HandleSelfFittingAlongAxis(int axis)
+	private void HandleSelfFittingAlongAxis(int a_axis)
 	{
-		FitMode fitting = (axis == 0 ? horizontalFit : verticalFit);
-		if (fitting == FitMode.Unconstrained)
+		EFitMode fitting = (a_axis == 0 ? horizontalFit : verticalFit);
+		if (fitting == EFitMode.Unconstrained)
 		{
 			// Keep a reference to the tracked transform, but don't control its properties:
 			m_Tracker.Add(this, rectTransform, DrivenTransformProperties.None);
 			return;
 		}
 
-		m_Tracker.Add(this, rectTransform, (axis == 0 ? DrivenTransformProperties.SizeDeltaX : DrivenTransformProperties.SizeDeltaY));
+		m_Tracker.Add(this, rectTransform, (a_axis == 0 ? DrivenTransformProperties.SizeDeltaX : DrivenTransformProperties.SizeDeltaY));
 
 		// Set size to min or preferred size
-		if (fitting == FitMode.MinSize)
+		if (fitting == EFitMode.MinSize)
 		{
-			if (m_maxSize[axis] > 0.01f)
-				rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, Mathf.Min(m_maxSize[axis], LayoutUtility.GetMinSize(m_Rect, axis)));
+			if (m_maxSize[a_axis] > 0.01f)
+				rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)a_axis, Mathf.Min(m_maxSize[a_axis], LayoutUtility.GetMinSize(m_Rect, a_axis)));
 			else
-				rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetMinSize(m_Rect, axis));
+				rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)a_axis, LayoutUtility.GetMinSize(m_Rect, a_axis));
 		}
 		else
 		{
-			if (m_maxSize[axis] > 0.01f)
-				rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, Mathf.Min(m_maxSize[axis], LayoutUtility.GetPreferredSize(m_Rect, axis)));
+			if (m_maxSize[a_axis] > 0.01f)
+				rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)a_axis, Mathf.Min(m_maxSize[a_axis], LayoutUtility.GetPreferredSize(m_Rect, a_axis)));
 			else
-				rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)axis, LayoutUtility.GetPreferredSize(m_Rect, axis));
+				rectTransform.SetSizeWithCurrentAnchors((RectTransform.Axis)a_axis, LayoutUtility.GetPreferredSize(m_Rect, a_axis));
 		}
 	}
 
@@ -126,14 +125,14 @@ public class CustomContentSizeFitter : UIBehaviour, ILayoutSelfController
 		LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
 	}
 
-	public static bool SetStruct<T>(ref T currentValue, T newValue) where T : struct
+	public static bool SetStruct<T>(ref T a_currentValue, T a_newValue) where T : struct
 	{
-		if (EqualityComparer<T>.Default.Equals(currentValue, newValue))
+		if (EqualityComparer<T>.Default.Equals(a_currentValue, a_newValue))
 		{
 			return false;
 		}
 
-		currentValue = newValue;
+		a_currentValue = a_newValue;
 		return true;
 	}
 

@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 
 		public EditEnergyPolygonState(FSM fsm, PlanLayer planLayer, HashSet<PolygonSubEntity> selectedSubEntities) : base(fsm, planLayer, selectedSubEntities)
 		{
-			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? PolicyLogicEnergy.Instance.m_energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.m_energyCableLayerGrey.CurrentPlanLayer();
+			cablePlanLayer = planLayer.BaseLayer.m_greenEnergy ? PolicyLogicEnergy.Instance.m_energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.m_energyCableLayerGrey.CurrentPlanLayer();
 		}
 
 		protected override void OnPolygonRemoved(SubEntity removedSubEntity)
@@ -17,8 +17,8 @@ namespace MSP2050.Scripts
 			base.OnPolygonRemoved(removedSubEntity);
 			//Connected cables removed second so connections stay intact in cables
 
-			EnergyPointSubEntity energyEnt = ((EnergyPolygonSubEntity)removedSubEntity).sourcePoint;
-			List<Connection> removedConnections = new List<Connection>(energyEnt.connections);
+			EnergyPointSubEntity energyEnt = ((EnergyPolygonSubEntity)removedSubEntity).m_sourcePoint;
+			List<Connection> removedConnections = new List<Connection>(energyEnt.Connections);
 			foreach (Connection con in removedConnections)
 			{
 				fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(con.cable, cablePlanLayer, UndoOperation.EditMode.Modify, false, true));
@@ -30,8 +30,8 @@ namespace MSP2050.Scripts
 		protected override void OnPolygonModifiedViaRemoval(SubEntity modifiedSubEntity)
 		{
 			base.OnPolygonModifiedViaRemoval(modifiedSubEntity);
-			EnergyPointSubEntity energyEnt = ((EnergyPolygonSubEntity)modifiedSubEntity).sourcePoint;
-			List<Connection> removedConnections = new List<Connection>(energyEnt.connections);
+			EnergyPointSubEntity energyEnt = ((EnergyPolygonSubEntity)modifiedSubEntity).m_sourcePoint;
+			List<Connection> removedConnections = new List<Connection>(energyEnt.Connections);
 			foreach (Connection con in removedConnections)
 			{
 				//Undooperation depends on wether the cable was on the current planlayer
@@ -56,7 +56,7 @@ namespace MSP2050.Scripts
 					Vector3 finalPos = energySubEnt.GetPosition();
 
 					//Move attached cables
-					foreach (Connection con in energySubEnt.connections)
+					foreach (Connection con in energySubEnt.Connections)
 					{
 						//Check if set contains the other endpoint of moved cables
 						//Dont add undo operations for these moves
@@ -80,7 +80,7 @@ namespace MSP2050.Scripts
 					Vector3 finalPos = energySubEnt.GetPosition();
 
 					//Move attached cables
-					foreach (Connection con in energySubEnt.connections)
+					foreach (Connection con in energySubEnt.Connections)
 					{
 						//Check if set contains the other endpoint of moved cables
 						//Dont add undo operations for these moves
@@ -105,7 +105,7 @@ namespace MSP2050.Scripts
 				subEntity.edited = true;
 
 				//Create undo operations for cables attached to sourcepoint
-				foreach (Connection con in (subEntity as EnergyPolygonSubEntity).sourcePoint.connections)
+				foreach (Connection con in (subEntity as EnergyPolygonSubEntity).m_sourcePoint.Connections)
 				{ 
 					con.cable.AddModifyLineUndoOperation(fsm);
 					con.cable.edited = true;
@@ -124,9 +124,9 @@ namespace MSP2050.Scripts
 				//fsm.AddToUndoStack(new ChangeSourcePointActivity(oldEnergySubEnt, false)); //Adds an undo state for the old sourcepoint being deactivated
 
 				//Duplicate all attached cables that were not part of the plan
-				EnergyPointSubEntity newEnergySubEnt = (duplicate as EnergyPolygonSubEntity).sourcePoint;
+				EnergyPointSubEntity newEnergySubEnt = (duplicate as EnergyPolygonSubEntity).m_sourcePoint;
 				List<EnergyLineStringSubEntity> newCables = new List<EnergyLineStringSubEntity>();
-				foreach (Connection con in oldEnergySubEnt.sourcePoint.connections)
+				foreach (Connection con in oldEnergySubEnt.m_sourcePoint.Connections)
 					if (con.cable.Entity.PlanLayer != cablePlanLayer) //Make sure not to add 2 new cables if both endpoints are being edited
 						newCables.Add(con.cable);
 					else //Change the cables connection from the old point to the new

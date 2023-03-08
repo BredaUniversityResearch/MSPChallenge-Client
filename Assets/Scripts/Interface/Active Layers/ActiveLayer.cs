@@ -52,7 +52,7 @@ namespace MSP2050.Scripts
 				ActiveLayerEntityType mapKey = Instantiate(m_entityTypeEntryPrefab, m_contentLocation).GetComponent<ActiveLayerEntityType>();
 				mapKey.SetContent(m_layerRepresenting, entityType);
 			}
-			if (m_layerRepresenting.textInfo == null)
+			if (m_layerRepresenting.m_textInfo == null)
 			{
 				m_layerTextToggle.gameObject.SetActive(false);
 			}

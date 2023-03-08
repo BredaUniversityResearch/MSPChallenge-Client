@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 
 		public EditEnergyPointsState(FSM fsm, PlanLayer planLayer) : base(fsm, planLayer)
 		{
-			cablePlanLayer = planLayer.BaseLayer.greenEnergy ? PolicyLogicEnergy.Instance.m_energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.m_energyCableLayerGrey.CurrentPlanLayer();
+			cablePlanLayer = planLayer.BaseLayer.m_greenEnergy ? PolicyLogicEnergy.Instance.m_energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.m_energyCableLayerGrey.CurrentPlanLayer();
 		}
 
 		protected override void deleteSelection()
@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 					fsm.AddToUndoStack(new RemoveEnergyPointOperation(subEntity, planLayer));
                 
 					//Connected cables removed second so connections stay intact in cables
-					List<Connection> removedConnections = new List<Connection>(energyEnt.connections);
+					List<Connection> removedConnections = new List<Connection>(energyEnt.Connections);
 					foreach (Connection con in removedConnections)
 					{
 						fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(con.cable, cablePlanLayer, UndoOperation.EditMode.Modify, false, true));
@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 					fsm.AddToUndoStack(new ModifyPointRemovalPlanOperation(subEntity, planLayer, false));
 
 					//Cables removed second
-					List<Connection> removedConnections = new List<Connection>(energyEnt.connections);
+					List<Connection> removedConnections = new List<Connection>(energyEnt.Connections);
 					foreach (Connection con in removedConnections)
 					{  
 						//Undooperation depends on wether the cable was on the current planlayer
@@ -82,7 +82,7 @@ namespace MSP2050.Scripts
 
 					//Move attached cables
 					EnergyPointSubEntity energyEnt = subEntity as EnergyPointSubEntity;
-					foreach (Connection con in energyEnt.connections)
+					foreach (Connection con in energyEnt.Connections)
 					{
 						//Check if set contains the other endpoint of moved cables
 						if (selection.Contains(con.cable.GetConnection(!con.connectedToFirst).point))
@@ -114,7 +114,7 @@ namespace MSP2050.Scripts
 
 					//Move attached cables
 					EnergyPointSubEntity energyEnt = subEntity as EnergyPointSubEntity;
-					foreach (Connection con in energyEnt.connections)
+					foreach (Connection con in energyEnt.Connections)
 					{
 						//Check if set contains the other endpoint of moved cables
 						if (selection.Contains(con.cable.GetConnection(!con.connectedToFirst).point))      
@@ -147,7 +147,7 @@ namespace MSP2050.Scripts
 				subEntity.edited = true;
 
 				//Create undo operations for attached cables
-				foreach (Connection con in (subEntity as EnergyPointSubEntity).connections)
+				foreach (Connection con in (subEntity as EnergyPointSubEntity).Connections)
 				{
 					con.cable.AddModifyLineUndoOperation(fsm);
 					con.cable.edited = true;
@@ -168,7 +168,7 @@ namespace MSP2050.Scripts
 				EnergyPointSubEntity oldEnergySubEnt = subEntity as EnergyPointSubEntity;
 				EnergyPointSubEntity newEnergySubEnt = duplicate as EnergyPointSubEntity;
 				List<EnergyLineStringSubEntity> newCables = new List<EnergyLineStringSubEntity>();
-				foreach (Connection con in oldEnergySubEnt.connections)
+				foreach (Connection con in oldEnergySubEnt.Connections)
 					if (con.cable.Entity.PlanLayer != cablePlanLayer) //Make sure not to add 2 new cables if both endpoints are being edited
 						newCables.Add(con.cable);
 					else //Change the cables connection from the old point to the new

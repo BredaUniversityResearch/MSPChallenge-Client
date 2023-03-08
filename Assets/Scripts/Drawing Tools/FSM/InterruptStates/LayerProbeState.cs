@@ -37,7 +37,7 @@ namespace MSP2050.Scripts
 
 			foreach (AbstractLayer layer in loadedLayers)
 			{
-				if (!layer.Selectable) { continue; }
+				if (!layer.m_selectable) { continue; }
 
 				foreach (SubEntity entity in layer.GetSubEntitiesAt(position))
 				{

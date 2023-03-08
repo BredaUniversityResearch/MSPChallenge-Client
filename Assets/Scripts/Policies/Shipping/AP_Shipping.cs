@@ -65,7 +65,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < m_plan.PlanLayers.Count; ++i)
 			{
 				PlanLayer layer = m_plan.PlanLayers[i];
-				foreach (var kvp in layer.BaseLayer.EntityTypes)
+				foreach (var kvp in layer.BaseLayer.m_entityTypes)
 				{
 					if (SessionManager.Instance.IsManager(m_plan.Country))
 					{

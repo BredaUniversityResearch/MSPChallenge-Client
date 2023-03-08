@@ -130,7 +130,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("country", country.ID);
 			dataObject.Add("vote", (int)state);
 
-			batch.AddRequest(Server.SetApproval(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			batch.AddRequest(Server.SetApproval(), dataObject, BatchRequest.BatchGroupPlanChange);
 		}
 	}
 }

@@ -596,7 +596,7 @@ namespace MSP2050.Scripts
 			for (; i < m_currentPlan.PlanLayers.Count; i++)
 			{
 				if (i < m_layerToggles.Count)
-					m_layerToggles[i].SetContent(m_currentPlan.PlanLayers[i].BaseLayer.ShortName, LayerManager.Instance.GetSubcategoryIcon(m_currentPlan.PlanLayers[i].BaseLayer.SubCategory));
+					m_layerToggles[i].SetContent(m_currentPlan.PlanLayers[i].BaseLayer.ShortName, LayerManager.Instance.GetSubcategoryIcon(m_currentPlan.PlanLayers[i].BaseLayer.m_subCategory));
 				else
 					CreateLayerEntry(m_currentPlan.PlanLayers[i]);
 			}
@@ -612,7 +612,7 @@ namespace MSP2050.Scripts
 			AP_ContentToggle obj = Instantiate(m_layerPrefab, m_layerParent).GetComponent<AP_ContentToggle>();
 			int layerIndex = m_layerToggles.Count;
 			obj.Initialise(this, m_geometryTool, () => OnLayerContentToggled(layerIndex));
-			obj.SetContent(layer.BaseLayer.ShortName, LayerManager.Instance.GetSubcategoryIcon(layer.BaseLayer.SubCategory));
+			obj.SetContent(layer.BaseLayer.ShortName, LayerManager.Instance.GetSubcategoryIcon(layer.BaseLayer.m_subCategory));
 			m_layerToggles.Add(obj);
 		}
 
