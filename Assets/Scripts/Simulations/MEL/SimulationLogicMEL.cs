@@ -58,7 +58,7 @@ namespace MSP2050.Scripts
 
 		private void OnEcologyKPIReceivedNewMonth(KPIValueCollection a_valueCollection, int a_previousMostRecentMonth, int a_mostRecentMonth)
 		{
-			foreach (AbstractLayer layer in LayerManager.Instance.protectedAreaLayers)
+			foreach (AbstractLayer layer in LayerManager.Instance.m_protectedAreaLayers)
 			{
 				LayerState state = layer.GetLayerStateAtTime(a_previousMostRecentMonth);
 				for (int i = a_previousMostRecentMonth + 1; i <= a_mostRecentMonth; ++i)

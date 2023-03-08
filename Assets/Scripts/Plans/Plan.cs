@@ -486,9 +486,9 @@ namespace MSP2050.Scripts
 			else
 			{
 				//Actually check the geometry to add required approval based on level
-				if (requiredApprovalLevel > 0 && LayerManager.Instance.EEZLayer != null)
+				if (requiredApprovalLevel > 0 && LayerManager.Instance.m_eezLayer != null)
 				{
-					List<PolygonEntity> EEZs = LayerManager.Instance.EEZLayer.Entities;
+					List<PolygonEntity> EEZs = LayerManager.Instance.m_eezLayer.Entities;
 					int userCountry = SessionManager.Instance.CurrentUserTeamID;
 					for (int i = 0; i < PlanLayers.Count; i++)
 					{
