@@ -101,13 +101,13 @@ namespace MSP2050.Scripts
 			string result;
             switch (layerGeoType)
             {
-                case LayerManager.EGeoType.point:
+                case LayerManager.EGeoType.Point:
                     result = "Points";
                     break;
-                case LayerManager.EGeoType.line:
+                case LayerManager.EGeoType.Line:
                     result = "km";
                     break;
-                case LayerManager.EGeoType.polygon:
+                case LayerManager.EGeoType.Polygon:
                     result = "km<sup>2</sup>";
                     break;
                 default:

@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 {
 	public class LayerManager : MonoBehaviour
 	{
-		public enum EGeoType { polygon, line, point, raster }
+		public enum EGeoType { Polygon, Line, Point, Raster }
 
 		private static LayerManager Singleton;
 		public static LayerManager Instance

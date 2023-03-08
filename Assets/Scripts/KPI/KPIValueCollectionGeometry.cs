@@ -31,15 +31,15 @@ namespace MSP2050.Scripts
 				float subEntityTotal;
 				switch (layerGeoType)
 				{
-				case LayerManager.EGeoType.polygon:
+				case LayerManager.EGeoType.Polygon:
 					PolygonSubEntity polygonEntity = (PolygonSubEntity)subEntity;
 					subEntityTotal = polygonEntity.SurfaceAreaSqrKm;
 					break;
-				case LayerManager.EGeoType.line:
+				case LayerManager.EGeoType.Line:
 					LineStringSubEntity lineEntity = (LineStringSubEntity)subEntity;
 					subEntityTotal = lineEntity.LineLengthKm;
 					break;
-				case LayerManager.EGeoType.point:
+				case LayerManager.EGeoType.Point:
 					subEntityTotal = 1.0f;
 					break;
 				default:

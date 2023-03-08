@@ -6,20 +6,20 @@ namespace MSP2050.Scripts
 {
 	public class StartCreatingLineStringState : FSMState
 	{
-		protected LineStringLayer baseLayer;
-		protected PlanLayer planLayer;
-		protected bool showingToolTip = false;
+		protected LineStringLayer m_baseLayer;
+		protected PlanLayer m_planLayer;
+		protected bool m_showingToolTip = false;
 		public override EEditingStateType StateType => EEditingStateType.Create;
 
-		public StartCreatingLineStringState(FSM fsm, PlanLayer planLayer) : base(fsm)
+		public StartCreatingLineStringState(FSM a_fsm, PlanLayer a_planLayer) : base(a_fsm)
 		{
-			this.planLayer = planLayer;
-			this.baseLayer = planLayer.BaseLayer as LineStringLayer;
+			m_planLayer = a_planLayer;
+			m_baseLayer = a_planLayer.BaseLayer as LineStringLayer;
 		}
 
-		public override void EnterState(Vector3 currentMousePosition)
+		public override void EnterState(Vector3 a_currentMousePosition)
 		{
-			base.EnterState(currentMousePosition);
+			base.EnterState(a_currentMousePosition);
 
 			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
 			gt.m_toolBar.SetCreateMode(true);
@@ -29,26 +29,26 @@ namespace MSP2050.Scripts
 			gt.SetTeamAndTypeToBasicIfEmpty();
 			gt.SetActivePlanWindowInteractability(true);
 
-			fsm.SetCursor(FSM.CursorType.Add);
-			fsm.SetSnappingEnabled(true);
+			m_fsm.SetCursor(FSM.CursorType.Add);
+			m_fsm.SetSnappingEnabled(true);
 
 			IssueManager.Instance.SetIssueInteractability(false);
 		}
 
-		public override void ExitState(Vector3 currentMousePosition)
+		public override void ExitState(Vector3 a_currentMousePosition)
 		{
-			base.ExitState(currentMousePosition);
-			if (showingToolTip)
+			base.ExitState(a_currentMousePosition);
+			if (m_showingToolTip)
 				TooltipManager.HideTooltip();
 			IssueManager.Instance.SetIssueInteractability(true);
 		}
 
-		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
+		public override void MouseMoved(Vector3 a_previousPosition, Vector3 a_currentPosition, bool a_cursorIsOverUI)
 		{
-			if (!cursorIsOverUI)
+			if (!a_cursorIsOverUI)
 			{
-				fsm.SetCursor(FSM.CursorType.Add);
-				if (!showingToolTip)
+				m_fsm.SetCursor(FSM.CursorType.Add);
+				if (!m_showingToolTip)
 				{
 					List<EntityType> entityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 					StringBuilder sb = new StringBuilder("Creating: " + entityTypes[0].Name);
@@ -56,49 +56,49 @@ namespace MSP2050.Scripts
 						sb.Append("\n& " + entityTypes[i].Name);
 					TooltipManager.ForceSetToolTip(sb.ToString());
 				}
-				showingToolTip = true;
+				m_showingToolTip = true;
 			}
 			else
 			{
-				fsm.SetCursor(FSM.CursorType.Default);
-				if(showingToolTip)
+				m_fsm.SetCursor(FSM.CursorType.Default);
+				if(m_showingToolTip)
 					TooltipManager.HideTooltip();
-				showingToolTip = false;
+				m_showingToolTip = false;
 
 			}
 		}
 
-		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
+		public override void LeftMouseButtonUp(Vector3 a_startPosition, Vector3 a_finalPosition)
 		{
 			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
-			LineStringEntity entity = baseLayer.CreateNewLineStringEntity(finalPosition, new List<EntityType>() { baseLayer.m_entityTypes.GetFirstValue() }, planLayer);
-			baseLayer.m_activeEntities.Add(entity);
+			LineStringEntity entity = m_baseLayer.CreateNewLineStringEntity(a_finalPosition, new List<EntityType>() { m_baseLayer.m_entityTypes.GetFirstValue() }, m_planLayer);
+			m_baseLayer.m_activeEntities.Add(entity);
 			entity.EntityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			LineStringSubEntity subEntity = entity.GetSubEntity(0) as LineStringSubEntity;
 
-			entity.DrawGameObjects(baseLayer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
+			entity.DrawGameObjects(m_baseLayer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			subEntity.m_edited = true;
-			fsm.SetCurrentState(new CreatingLineStringState(fsm, planLayer, subEntity));
+			m_fsm.SetCurrentState(new CreatingLineStringState(m_fsm, m_planLayer, subEntity));
 
-			fsm.AddToUndoStack(new CreateLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Create));
+			m_fsm.AddToUndoStack(new CreateLineStringOperation(subEntity, m_planLayer, UndoOperation.EditMode.Create));
 		}
 
 		public override void HandleKeyboardEvents()
 		{
 			if (Input.GetKeyDown(KeyCode.Escape))
 			{
-				fsm.SetCurrentState(new SelectLineStringsState(fsm, planLayer));
+				m_fsm.SetCurrentState(new SelectLineStringsState(m_fsm, m_planLayer));
 			}
 		}
 
-		public override void HandleToolbarInput(FSM.ToolbarInput toolbarInput)
+		public override void HandleToolbarInput(FSM.ToolbarInput a_toolbarInput)
 		{
-			switch (toolbarInput)
+			switch (a_toolbarInput)
 			{
 				case FSM.ToolbarInput.Edit:
 				case FSM.ToolbarInput.Abort:
-					fsm.SetCurrentState(new SelectLineStringsState(fsm, planLayer));
+					m_fsm.SetCurrentState(new SelectLineStringsState(m_fsm, m_planLayer));
 					break;
 			}
 		}

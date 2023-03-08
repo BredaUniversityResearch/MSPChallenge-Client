@@ -19,15 +19,15 @@ namespace MSP2050.Scripts
 
 			Color color = a_entityType.DrawSettings.PolygonColor;
 
-			if (a_layer.GetGeoType() == LayerManager.EGeoType.line)
+			if (a_layer.GetGeoType() == LayerManager.EGeoType.Line)
 			{
 				color = a_entityType.DrawSettings.LineColor;
 			}
-			else if (a_layer.GetGeoType() == LayerManager.EGeoType.point)
+			else if (a_layer.GetGeoType() == LayerManager.EGeoType.Point)
 			{
 				color = a_entityType.DrawSettings.PointColor;
 			}
-			else if (a_layer.GetGeoType() == LayerManager.EGeoType.raster)
+			else if (a_layer.GetGeoType() == LayerManager.EGeoType.Raster)
 			{
 				pattern = MaterialManager.Instance.GetPatternOrDefault(((RasterLayer)a_layer).rasterObject.layer_raster_pattern);
 			}
@@ -38,7 +38,7 @@ namespace MSP2050.Scripts
 				mapKeyName += " (" + key + ")";
 			m_label.text = mapKeyName;
 
-			if (a_layer.GetGeoType() == LayerManager.EGeoType.polygon)
+			if (a_layer.GetGeoType() == LayerManager.EGeoType.Polygon)
 			{
 				//m_background.gameObject.SetActive(true);
 				m_pointKey.gameObject.SetActive(false);
@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 				outlineColor.a = 1.0f; //Force Alpha to 1 as it is with the outline line rendering.
 				m_outlineKey.color = outlineColor;
 			}
-			else if (a_layer.GetGeoType() == LayerManager.EGeoType.line)
+			else if (a_layer.GetGeoType() == LayerManager.EGeoType.Line)
 			{
 				//m_background.gameObject.SetActive(true);
 				m_areaKey.gameObject.SetActive(false);
@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 				m_lineKey.color = color;
 				m_lineKey.sprite = InterfaceCanvas.Instance.activeLayerLineSprites[(int)a_entityType.DrawSettings.LinePatternType];
 			}
-			else if (a_layer.GetGeoType() == LayerManager.EGeoType.point)
+			else if (a_layer.GetGeoType() == LayerManager.EGeoType.Point)
 			{
 				//m_background.gameObject.SetActive(false);
 				m_areaKey.gameObject.SetActive(false);

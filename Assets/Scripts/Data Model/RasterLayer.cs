@@ -386,7 +386,7 @@ namespace MSP2050.Scripts
 
 		public override  LayerManager.EGeoType GetGeoType()
 		{
-			return  LayerManager.EGeoType.raster;
+			return  LayerManager.EGeoType.Raster;
 		}
 
 		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)

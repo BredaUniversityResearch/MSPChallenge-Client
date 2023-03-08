@@ -30,8 +30,8 @@ namespace MSP2050.Scripts
 			gt.SetTeamAndTypeToBasicIfEmpty();
 			gt.SetActivePlanWindowInteractability(true);
 
-			fsm.SetCursor(FSM.CursorType.Add);
-			fsm.SetSnappingEnabled(true);
+			m_fsm.SetCursor(FSM.CursorType.Add);
+			m_fsm.SetSnappingEnabled(true);
 
 			IssueManager.Instance.SetIssueInteractability(false);
 		}
@@ -48,7 +48,7 @@ namespace MSP2050.Scripts
 		{
 			if (!cursorIsOverUI)
 			{
-				fsm.SetCursor(FSM.CursorType.Add);
+				m_fsm.SetCursor(FSM.CursorType.Add);
 				if (!showingToolTip)
 				{
 					List<EntityType> entityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				fsm.SetCursor(FSM.CursorType.Default);
+				m_fsm.SetCursor(FSM.CursorType.Default);
 				if (showingToolTip)
 					TooltipManager.HideTooltip();
 				showingToolTip = false;
@@ -81,8 +81,8 @@ namespace MSP2050.Scripts
 			subEntity.m_edited = true;
 			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 
-			fsm.TriggerGeometryComplete();
-			fsm.AddToUndoStack(new CreatePointOperation(subEntity, planLayer));
+			m_fsm.TriggerGeometryComplete();
+			m_fsm.AddToUndoStack(new CreatePointOperation(subEntity, planLayer));
 		}
 
 		public override void HandleKeyboardEvents()
@@ -90,9 +90,9 @@ namespace MSP2050.Scripts
 			if (Input.GetKeyDown(KeyCode.Escape))
 			{
 				if (baseLayer.IsEnergyPointLayer())
-					fsm.SetCurrentState(new EditEnergyPointsState(fsm, planLayer));
+					m_fsm.SetCurrentState(new EditEnergyPointsState(m_fsm, planLayer));
 				else
-					fsm.SetCurrentState(new EditPointsState(fsm, planLayer));
+					m_fsm.SetCurrentState(new EditPointsState(m_fsm, planLayer));
 			}
 		}
 
@@ -103,9 +103,9 @@ namespace MSP2050.Scripts
 				case FSM.ToolbarInput.Edit:
 				case FSM.ToolbarInput.Abort:
 					if (baseLayer.IsEnergyPointLayer())
-						fsm.SetCurrentState(new EditEnergyPointsState(fsm, planLayer));
+						m_fsm.SetCurrentState(new EditEnergyPointsState(m_fsm, planLayer));
 					else
-						fsm.SetCurrentState(new EditPointsState(fsm, planLayer));
+						m_fsm.SetCurrentState(new EditPointsState(m_fsm, planLayer));
 					break;
 			}
 		}

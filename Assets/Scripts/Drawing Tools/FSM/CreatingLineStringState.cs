@@ -40,8 +40,8 @@ namespace MSP2050.Scripts
 				subEntity.DrawGameObject(layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			}
 
-			fsm.SetCursor(FSM.CursorType.Add);
-			fsm.SetSnappingEnabled(true);
+			m_fsm.SetCursor(FSM.CursorType.Add);
+			m_fsm.SetSnappingEnabled(true);
 
 			IssueManager.Instance.SetIssueInteractability(false);
 		}
@@ -56,12 +56,12 @@ namespace MSP2050.Scripts
 				if (drawAsInvalid)
 				{
 					subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreatedInvalid);
-					fsm.SetCursor(FSM.CursorType.Invalid);
+					m_fsm.SetCursor(FSM.CursorType.Invalid);
 				}
 				else
 				{
 					subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-					fsm.SetCursor(FSM.CursorType.Complete);
+					m_fsm.SetCursor(FSM.CursorType.Complete);
 				}
 			}
 			else
@@ -70,18 +70,18 @@ namespace MSP2050.Scripts
 				if (drawAsInvalid)
 				{
 					subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreatedInvalid);
-					fsm.SetCursor(FSM.CursorType.Invalid);
+					m_fsm.SetCursor(FSM.CursorType.Invalid);
 				}
 				else
 				{
 					subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-					fsm.SetCursor(FSM.CursorType.Add);
+					m_fsm.SetCursor(FSM.CursorType.Add);
 				}
 			}
 
 			if (cursorIsOverUI)
 			{
-				fsm.SetCursor(FSM.CursorType.Default);
+				m_fsm.SetCursor(FSM.CursorType.Default);
 			}
 		}
 
@@ -112,7 +112,7 @@ namespace MSP2050.Scripts
 			bool drawAsInvalid;
 			if (ClickingWouldFinishDrawing(finalPosition, out snappingPoint, out drawAsInvalid))
 			{
-				fsm.AddToUndoStack(new FinalizeLineStringOperation(subEntity, planLayer));
+				m_fsm.AddToUndoStack(new FinalizeLineStringOperation(subEntity, planLayer));
 				FinalizeLineString();
 				return;
 			}
@@ -123,9 +123,9 @@ namespace MSP2050.Scripts
 			subEntity.AddPoint(finalPosition);
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 			if (subEntity.GetPointCount() > 1)
-				fsm.SetCursor(FSM.CursorType.Complete);
+				m_fsm.SetCursor(FSM.CursorType.Complete);
 
-			fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
+			m_fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
 		}
 
 		public override void HandleEntityTypeChange(List<EntityType> newTypes)
@@ -136,13 +136,13 @@ namespace MSP2050.Scripts
 			subEntity.m_entity.EntityTypes = newTypes;
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 
-			fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
+			m_fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
 		}
 
 		public override void Abort()
 		{
-			fsm.AddToUndoStack(new RemoveLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Create));
-			fsm.SetCurrentState(new SelectLineStringsState(fsm, planLayer));
+			m_fsm.AddToUndoStack(new RemoveLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Create));
+			m_fsm.SetCurrentState(new SelectLineStringsState(m_fsm, planLayer));
 		}
 
 		public virtual void FinalizeLineString()
@@ -158,15 +158,15 @@ namespace MSP2050.Scripts
 
 			subEntity = null; // set line string to null so the exit state function doesn't remove it
 
-			fsm.TriggerGeometryComplete();
-			fsm.SetCurrentState(new StartCreatingLineStringState(fsm, planLayer));
+			m_fsm.TriggerGeometryComplete();
+			m_fsm.SetCurrentState(new StartCreatingLineStringState(m_fsm, planLayer));
 		}
 
 		public override void HandleKeyboardEvents()
 		{
 			if (Input.GetKeyDown(KeyCode.Return))
 			{
-				fsm.AddToUndoStack(new FinalizeLineStringOperation(subEntity, planLayer));
+				m_fsm.AddToUndoStack(new FinalizeLineStringOperation(subEntity, planLayer));
 				FinalizeLineString();
 			}
 			else if (Input.GetKeyDown(KeyCode.Escape))

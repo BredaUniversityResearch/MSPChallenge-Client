@@ -209,7 +209,7 @@ namespace MSP2050.Scripts
 
 		public override  LayerManager.EGeoType GetGeoType()
 		{
-			return  LayerManager.EGeoType.line;
+			return  LayerManager.EGeoType.Line;
 		}
 	}
 }

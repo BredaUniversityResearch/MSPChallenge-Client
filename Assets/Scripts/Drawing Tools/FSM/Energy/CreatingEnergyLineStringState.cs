@@ -6,10 +6,10 @@ namespace MSP2050.Scripts
 {
 	class CreatingEnergyLineStringState : CreatingLineStringState
 	{
-		public CreatingEnergyLineStringState(FSM fsm, PlanLayer planLayer, LineStringSubEntity subEntity) : base(fsm, planLayer, subEntity)
+		public CreatingEnergyLineStringState(FSM a_fsm, PlanLayer a_planLayer, LineStringSubEntity a_subEntity) : base(a_fsm, a_planLayer, a_subEntity)
 		{ }
 
-		public override void EnterState(Vector3 currentMousePosition)
+		public override void EnterState(Vector3 a_currentMousePosition)
 		{
 			EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)subEntity;
 			if (cable.Connections[0].point.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
@@ -28,90 +28,83 @@ namespace MSP2050.Scripts
 				//All points are non-reference
 				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 				{
-					if (layer.m_greenEnergy == cable.m_entity.Layer.m_greenEnergy)
+					if (layer.m_greenEnergy != cable.m_entity.Layer.m_greenEnergy)
+						continue;
+					if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 					{
-						if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
-						{
-							//Get and add the centerpoint layer
-							EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;   
-							LayerManager.Instance.AddNonReferenceLayer(polyLayer.m_centerPointLayer, true);
-						}
-						else if (layer.m_editingType == AbstractLayer.EditingType.SourcePoint ||
-						         layer.m_editingType == AbstractLayer.EditingType.Socket ||
-						         layer.m_editingType == AbstractLayer.EditingType.Transformer)
-						{
-							LayerManager.Instance.AddNonReferenceLayer(layer, true);
-						}
+						//Get and add the centerpoint layer
+						EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;   
+						LayerManager.Instance.AddNonReferenceLayer(polyLayer.m_centerPointLayer, true);
+					}
+					else if (layer.m_editingType == AbstractLayer.EditingType.SourcePoint ||
+						layer.m_editingType == AbstractLayer.EditingType.Socket ||
+						layer.m_editingType == AbstractLayer.EditingType.Transformer)
+					{
+						LayerManager.Instance.AddNonReferenceLayer(layer, true);
 					}
 				}
 			}
 
-			base.EnterState(currentMousePosition);
+			base.EnterState(a_currentMousePosition);
 		}
 
-		protected override bool ClickingWouldFinishDrawing(Vector3 position, out Vector3 snappingPoint, out bool drawAsInvalid)
+		protected override bool ClickingWouldFinishDrawing(Vector3 a_position, out Vector3 a_snappingPoint, out bool a_drawAsInvalid)
 		{
 			EnergyLineStringSubEntity cable = subEntity as EnergyLineStringSubEntity;
-			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(position);
+			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(a_position);
 			if (point != null)
 			{
-				snappingPoint = point.GetPosition();
+				a_snappingPoint = point.GetPosition();
 				if (point.CanConnectToEnergySubEntity(cable.Connections.First().point))
 				{
-					drawAsInvalid = false;
+					a_drawAsInvalid = false;
 					return true;
 				}
-				else
-				{
-					drawAsInvalid = true;
-					return false;
-				}
+				a_drawAsInvalid = true;
+				return false;
 			}
-			snappingPoint = position;
-			drawAsInvalid = false;
+			a_snappingPoint = a_position;
+			a_drawAsInvalid = false;
 			return false;
 		}
 
-		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
+		public override void LeftMouseButtonUp(Vector3 a_startPosition, Vector3 a_finalPosition)
 		{
 			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
 			EnergyLineStringSubEntity cable = subEntity as EnergyLineStringSubEntity;
-			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(finalPosition);
+			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(a_finalPosition);
 			if (point != null)
 			{
 				if (point.CanConnectToEnergySubEntity(cable.Connections.First().point))
 				{
 					//Valid energy points clicked: Finalize
-					fsm.AddToUndoStack(new FinalizeEnergyLineStringOperation(subEntity, planLayer, point));
+					m_fsm.AddToUndoStack(new FinalizeEnergyLineStringOperation(subEntity, planLayer, point));
 					FinalizeEnergyLineString(point);
 					return;
 				}
-				else
-				{
-					//Invalid energy points clicked: do nothing
-					subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreatedInvalid);
-					return;
-				}
+				//Invalid energy points clicked: do nothing
+				subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreatedInvalid);
+				return;
 			}
 
 			//Empty space clicked: add point
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
-			subEntity.AddPoint(finalPosition);
+			subEntity.AddPoint(a_finalPosition);
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 			subEntity.m_edited = true;
 
-			fsm.AddToUndoStack(new ModifyEnergyLineStringOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
+			m_fsm.AddToUndoStack(new ModifyEnergyLineStringOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
 		}
 
-		public void FinalizeEnergyLineString(EnergyPointSubEntity point)
+		public void FinalizeEnergyLineString(EnergyPointSubEntity a_point)
 		{
 			//Add connections
 			EnergyLineStringSubEntity cable = subEntity as EnergyLineStringSubEntity;
-			subEntity.SetPointPosition(subEntity.GetPointCount() - 1, point.GetPosition());
-			Connection con = new Connection(cable, point, false);
+			subEntity.SetPointPosition(subEntity.GetPointCount() - 1, a_point.GetPosition());
+			Connection con = new Connection(cable, a_point, false);
 			cable.AddConnection(con);
-			point.AddConnection(con);
+			a_point.AddConnection(con);
 
 			//Set entitytype
 			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
@@ -123,8 +116,8 @@ namespace MSP2050.Scripts
 
 			subEntity = null; // set line string to null so the exit state function doesn't remove it
 
-			fsm.TriggerGeometryComplete();
-			fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, planLayer));
+			m_fsm.TriggerGeometryComplete();
+			m_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(m_fsm, planLayer));
 		}
 
 		public override void HandleKeyboardEvents()
@@ -137,19 +130,18 @@ namespace MSP2050.Scripts
 
 		public override void Abort()
 		{
-			fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Create));
-			fsm.SetCurrentState(new SelectLineStringsState(fsm, planLayer));
+			m_fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Create));
+			m_fsm.SetCurrentState(new SelectLineStringsState(m_fsm, planLayer));
 		}
 
-		public override void ExitState(Vector3 currentMousePosition)
+		public override void ExitState(Vector3 a_currentMousePosition)
 		{
 			AbstractLayer baseLayer = InterfaceCanvas.Instance.activePlanWindow.CurrentlyEditingBaseLayer;
 			if(baseLayer == null)
 				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { }, false, true);
 			else
 				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { baseLayer }, false, true);
-			base.ExitState(currentMousePosition);
+			base.ExitState(a_currentMousePosition);
 		}
 	}
 }
-

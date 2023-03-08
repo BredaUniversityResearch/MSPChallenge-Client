@@ -352,7 +352,7 @@ namespace MSP2050.Scripts
 
 			if (TextMeshVisibleAtZoom)
 			{
-				if (CameraManager.Instance.cameraZoom.currentZoom > m_entity.Layer.m_textInfo.zoomCutoff)
+				if (CameraManager.Instance.cameraZoom.CurrentZoom > m_entity.Layer.m_textInfo.zoomCutoff)
 					TextMeshVisibleAtZoom = false;
 				else
 				{
@@ -364,7 +364,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				if (CameraManager.Instance.cameraZoom.currentZoom <= m_entity.Layer.m_textInfo.zoomCutoff)
+				if (CameraManager.Instance.cameraZoom.CurrentZoom <= m_entity.Layer.m_textInfo.zoomCutoff)
 				{
 					TextMeshVisibleAtZoom = true;
 					if (m_textMesh != null)

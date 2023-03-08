@@ -49,13 +49,13 @@ namespace MSP2050.Scripts
 			baseDataParent.CreateEntry("Y", (subEntity.m_boundingBox.center.y * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
 
 			//Geometry type specific base data
-			if (entity.Layer.GetGeoType() == LayerManager.EGeoType.polygon)
+			if (entity.Layer.GetGeoType() == LayerManager.EGeoType.Polygon)
 			{
 				PolygonSubEntity polygonEntity = (PolygonSubEntity)subEntity;
 				baseDataParent.CreateEntry("Area", polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>", areaIcon, Color.white);
 				baseDataParent.CreateEntry("Points", polygonEntity.GetTotalPointCount().ToString(), pointsIcon, Color.white);
 			}
-			else if (entity.Layer.GetGeoType() == LayerManager.EGeoType.line)
+			else if (entity.Layer.GetGeoType() == LayerManager.EGeoType.Line)
 			{
 				LineStringSubEntity lineEntity = (LineStringSubEntity)subEntity;
 				baseDataParent.CreateEntry("Length", lineEntity.LineLengthKm.ToString("0.00") + " km", areaIcon, Color.white);

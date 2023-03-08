@@ -164,7 +164,7 @@ namespace MSP2050.Scripts
 
 		public override  LayerManager.EGeoType GetGeoType()
 		{
-			return  LayerManager.EGeoType.point;
+			return  LayerManager.EGeoType.Point;
 		}
 	}
 }

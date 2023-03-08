@@ -122,7 +122,7 @@ namespace MSP2050.Scripts
 			foreach (int selectedLayerID in selectedLayerIDs)
 			{
 				AbstractLayer layer = LayerManager.Instance.GetLayerByID(selectedLayerID);
-				if (layer.GetGeoType() == LayerManager.EGeoType.raster)
+				if (layer.GetGeoType() == LayerManager.EGeoType.Raster)
 				{
 					ImportRasterLayer((layer as RasterLayer));
 				}

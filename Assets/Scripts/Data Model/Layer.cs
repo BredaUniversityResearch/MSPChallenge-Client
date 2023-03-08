@@ -426,7 +426,7 @@ namespace MSP2050.Scripts
 		public override List<SubEntity> GetSubEntitiesAt(Vector2 a_position)
 		{ return null; }
 		public override  LayerManager.EGeoType GetGeoType()
-		{ return  LayerManager.EGeoType.line; }
+		{ return  LayerManager.EGeoType.Line; }
 
 		//Called when the layer is shown by the layermanager
 		public override void LayerShown()

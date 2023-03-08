@@ -9,13 +9,13 @@ namespace MSP2050.Scripts
 
 		public override void ActivateRequirement()
 		{
-			CameraManager.Instance.cameraZoom.onScrollZoom += OnZoom;
+			CameraManager.Instance.cameraZoom.OnScrollZoom += OnZoom;
 			m_complete = false;
 		}
 
 		public override void DeactivateRequirement()
 		{
-			CameraManager.Instance.cameraZoom.onScrollZoom -= OnZoom;
+			CameraManager.Instance.cameraZoom.OnScrollZoom -= OnZoom;
 			m_complete = false;
 		}
 

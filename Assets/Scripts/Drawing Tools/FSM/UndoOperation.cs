@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace MSP2050.Scripts
 {
@@ -9,22 +6,22 @@ namespace MSP2050.Scripts
 	{
 		public enum EditMode { Create, Modify }
 
-		public abstract void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false);
+		public abstract void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false);
 	}
 
 	public class BatchUndoOperationMarker : UndoOperation
 	{
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			redo = new BatchUndoOperationMarker();
+			a_redo = new BatchUndoOperationMarker();
 		}
 	}
 
 	public class ConcatOperationMarker : UndoOperation
 	{
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			redo = new ConcatOperationMarker();
+			a_redo = new ConcatOperationMarker();
 		}
 	}
 
@@ -40,13 +37,13 @@ namespace MSP2050.Scripts
 
 	public abstract class PolygonUndoOperation : UndoOperation, IPlanLayerHolder, ISubEntityHolder
 	{
-		public PolygonSubEntity SubEntity { get; private set; }
-		public PlanLayer PlanLayer { get; private set; }
+		protected PolygonSubEntity SubEntity { get; private set; }
+		protected PlanLayer PlanLayer { get; private set; }
 
-		public PolygonUndoOperation(PolygonSubEntity subEntity, PlanLayer planLayer)
+		protected PolygonUndoOperation(PolygonSubEntity a_subEntity, PlanLayer a_planLayer)
 		{
-			SubEntity = subEntity;
-			PlanLayer = planLayer;
+			SubEntity = a_subEntity;
+			PlanLayer = a_planLayer;
 		}
 
 		public PlanLayer GetPlanLayer()
@@ -62,13 +59,13 @@ namespace MSP2050.Scripts
 
 	public abstract class LineStringUndoOperation : UndoOperation, IPlanLayerHolder, ISubEntityHolder
 	{
-		public LineStringSubEntity SubEntity { get; private set; }
-		public PlanLayer PlanLayer { get; private set; }
+		protected LineStringSubEntity SubEntity { get; private set; }
+		protected PlanLayer PlanLayer { get; private set; }
 
-		public LineStringUndoOperation(LineStringSubEntity subEntity, PlanLayer planLayer)
+		protected LineStringUndoOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer)
 		{
-			SubEntity = subEntity;
-			PlanLayer = planLayer;
+			SubEntity = a_subEntity;
+			PlanLayer = a_planLayer;
 		}
 		public PlanLayer GetPlanLayer()
 		{
@@ -83,13 +80,13 @@ namespace MSP2050.Scripts
 
 	public abstract class PointUndoOperation : UndoOperation, IPlanLayerHolder, ISubEntityHolder
 	{
-		public PointSubEntity SubEntity { get; private set; }
-		public PlanLayer PlanLayer { get; private set; }
+		protected PointSubEntity SubEntity { get; private set; }
+		protected PlanLayer PlanLayer { get; private set; }
 
-		public PointUndoOperation(PointSubEntity subEntity, PlanLayer planLayer)
+		protected PointUndoOperation(PointSubEntity a_subEntity, PlanLayer a_planLayer)
 		{
-			SubEntity = subEntity;
-			PlanLayer = planLayer;
+			SubEntity = a_subEntity;
+			PlanLayer = a_planLayer;
 		}
 		public PlanLayer GetPlanLayer()
 		{
@@ -104,89 +101,89 @@ namespace MSP2050.Scripts
 
 	public class ModifyPolygonOperation : PolygonUndoOperation
 	{
-		protected SubEntityDataCopy previousData;
-		EditMode editMode;
+		private SubEntityDataCopy m_previousData;
+		private EditMode m_editMode;
 
-		public ModifyPolygonOperation(PolygonSubEntity subEntity, PlanLayer planLayer, SubEntityDataCopy previousData, EditMode editMode) : base(subEntity, planLayer)
+		public ModifyPolygonOperation(PolygonSubEntity a_subEntity, PlanLayer a_planLayer, SubEntityDataCopy a_previousData, EditMode a_editMode) : base(a_subEntity, a_planLayer)
 		{
-			this.previousData = previousData;
-			this.editMode = editMode;
+			m_previousData = a_previousData;
+			m_editMode = a_editMode;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			SubEntityDataCopy newData = SubEntity.GetDataCopy();
-			SubEntity.SetDataToCopy(previousData);
-			SubEntity.PerformValidityCheck(editMode == EditMode.Create, editMode == EditMode.Create);
-			redo = new ModifyPolygonOperation(SubEntity, PlanLayer, newData, editMode);
+			SubEntity.SetDataToCopy(m_previousData);
+			SubEntity.PerformValidityCheck(m_editMode == EditMode.Create, m_editMode == EditMode.Create);
+			a_redo = new ModifyPolygonOperation(SubEntity, PlanLayer, newData, m_editMode);
 
-			if (editMode == EditMode.Create)
+			if (m_editMode == EditMode.Create)
 			{
 				SubEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-				if(!totalUndo)
-					fsm.SetCurrentState(new CreatingPolygonState(fsm, SubEntity, PlanLayer));
+				if(!a_totalUndo)
+					a_fsm.SetCurrentState(new CreatingPolygonState(a_fsm, SubEntity, PlanLayer));
 			}
 			else
 			{
 				SubEntity.m_restrictionNeedsUpdate = true;
 				SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default); // redraw entire entity in case of entity type change
-				if (!totalUndo)
-					fsm.SetCurrentState(new SelectPolygonsState(fsm, PlanLayer));
+				if (!a_totalUndo)
+					a_fsm.SetCurrentState(new SelectPolygonsState(a_fsm, PlanLayer));
 			}
 		}
 	}
 
 	public class ModifyLineStringOperation : LineStringUndoOperation
 	{
-		protected SubEntityDataCopy previousData;
-		protected EditMode editMode;
+		protected SubEntityDataCopy m_previousData;
+		protected EditMode m_editMode;
 
-		public ModifyLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer, SubEntityDataCopy previousData, EditMode editMode) : base(subEntity, planLayer)
+		public ModifyLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer, SubEntityDataCopy a_previousData, EditMode a_editMode) : base(a_subEntity, a_planLayer)
 		{
-			this.previousData = previousData;
-			this.editMode = editMode;
+			m_previousData = a_previousData;
+			m_editMode = a_editMode;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			SubEntityDataCopy newData = SubEntity.GetDataCopy();
-			SubEntity.SetDataToCopy(previousData);
-			redo = new ModifyLineStringOperation(SubEntity, PlanLayer, newData, editMode);
+			SubEntity.SetDataToCopy(m_previousData);
+			a_redo = new ModifyLineStringOperation(SubEntity, PlanLayer, newData, m_editMode);
         
-			if (editMode == EditMode.Create)
+			if (m_editMode == EditMode.Create)
 			{
 				SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.BeingCreated); // redraw entire entity in case of entity type change
-				if (!totalUndo)
-					fsm.SetCurrentState(new CreatingLineStringState(fsm, PlanLayer, SubEntity));
+				if (!a_totalUndo)
+					a_fsm.SetCurrentState(new CreatingLineStringState(a_fsm, PlanLayer, SubEntity));
 			}
-			else if (editMode == EditMode.Modify)
+			else if (m_editMode == EditMode.Modify)
 			{
 				SubEntity.m_restrictionNeedsUpdate = true;
 				SubEntity.RedrawGameObject(SubEntityDrawMode.Default);
-				if (!totalUndo)
-					fsm.SetCurrentState(new SelectLineStringsState(fsm, PlanLayer));
+				if (!a_totalUndo)
+					a_fsm.SetCurrentState(new SelectLineStringsState(a_fsm, PlanLayer));
 			}
 		}
 	}
 
 	public class ModifyEnergyLineStringOperation : ModifyLineStringOperation
 	{
-		public ModifyEnergyLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer, SubEntityDataCopy previousData, EditMode editMode) : base(subEntity, planLayer, previousData, editMode)
+		public ModifyEnergyLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer, SubEntityDataCopy a_previousData, EditMode a_editMode) : base(a_subEntity, a_planLayer, a_previousData, a_editMode)
 		{}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			SubEntityDataCopy newData = SubEntity.GetDataCopy();
-			SubEntity.SetDataToCopy(previousData);
-			redo = new ModifyEnergyLineStringOperation(SubEntity, PlanLayer, newData, editMode);
+			SubEntity.SetDataToCopy(m_previousData);
+			a_redo = new ModifyEnergyLineStringOperation(SubEntity, PlanLayer, newData, m_editMode);
 
-			if (editMode == EditMode.Create)
+			if (m_editMode == EditMode.Create)
 			{
 				SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.BeingCreated); // redraw entire entity in case of entity type change
-				if (!totalUndo)
-					fsm.SetCurrentState(new CreatingEnergyLineStringState(fsm, PlanLayer, SubEntity));
+				if (!a_totalUndo)
+					a_fsm.SetCurrentState(new CreatingEnergyLineStringState(a_fsm, PlanLayer, SubEntity));
 			}
-			else if (editMode == EditMode.Modify)
+			else if (m_editMode == EditMode.Modify)
 			{
 				SubEntity.m_restrictionNeedsUpdate = true;
 				//SubEntity.RedrawGameObject(SubEntityDrawMode.PlanReference);
@@ -198,116 +195,105 @@ namespace MSP2050.Scripts
 
 	public class ModifyPointOperation : PointUndoOperation
 	{
-		protected SubEntityDataCopy previousData;
+		protected SubEntityDataCopy m_previousData;
 
-		public ModifyPointOperation(PointSubEntity subEntity, PlanLayer planLayer, SubEntityDataCopy previousData) : base(subEntity, planLayer)
+		public ModifyPointOperation(PointSubEntity a_subEntity, PlanLayer a_planLayer, SubEntityDataCopy a_previousData) : base(a_subEntity, a_planLayer)
 		{
-			this.previousData = previousData;
+			m_previousData = a_previousData;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			SubEntityDataCopy newData = SubEntity.GetDataCopy();
-			SubEntity.SetDataToCopy(previousData);
-			redo = new ModifyPointOperation(SubEntity, PlanLayer, newData);
+			SubEntity.SetDataToCopy(m_previousData);
+			a_redo = new ModifyPointOperation(SubEntity, PlanLayer, newData);
 
 			// redraw entire entity in case of entity type change
 			SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
-			if (!totalUndo)
-				fsm.SetCurrentState(new EditPointsState(fsm, PlanLayer));
+			if (!a_totalUndo)
+				a_fsm.SetCurrentState(new EditPointsState(a_fsm, PlanLayer));
 		}
 	}
 
 	public class ModifyEnergyPointOperation : ModifyPointOperation
 	{
 
-		public ModifyEnergyPointOperation(PointSubEntity subEntity, PlanLayer planLayer, SubEntityDataCopy previousData) : base(subEntity, planLayer, previousData)
+		public ModifyEnergyPointOperation(PointSubEntity a_subEntity, PlanLayer a_planLayer, SubEntityDataCopy a_previousData) : base(a_subEntity, a_planLayer, a_previousData)
 		{ }
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			SubEntityDataCopy newData = SubEntity.GetDataCopy();
-			SubEntity.SetDataToCopy(previousData);
-			redo = new ModifyEnergyPointOperation(SubEntity, PlanLayer, newData);
+			SubEntity.SetDataToCopy(m_previousData);
+			a_redo = new ModifyEnergyPointOperation(SubEntity, PlanLayer, newData);
 
 			// redraw entire entity in case of entity type change
 			SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
 
 			//Changed target state to energy variant
-			if (!totalUndo)
-				fsm.SetCurrentState(new EditEnergyPointsState(fsm, PlanLayer));
+			if (!a_totalUndo)
+				a_fsm.SetCurrentState(new EditEnergyPointsState(a_fsm, PlanLayer));
 		}
 	}
 
 	public class CreatePolygonOperation : PolygonUndoOperation
 	{
-		EditMode editMode;
-		protected bool uncreate;
+		private EditMode m_editMode;
+		private bool m_uncreate;
 
-		public CreatePolygonOperation(PolygonSubEntity subEntity, PlanLayer planLayer, EditMode editMode, bool uncreate = false) : base(subEntity, planLayer)
+		public CreatePolygonOperation(PolygonSubEntity a_subEntity, PlanLayer a_planLayer, EditMode a_editMode, bool a_uncreate = false) : base(a_subEntity, a_planLayer)
 		{
-			this.editMode = editMode;
-			this.uncreate = uncreate;
+			m_editMode = a_editMode;
+			m_uncreate = a_uncreate;
 		}
 
-		public bool IsCreatedManually()
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			return editMode == EditMode.Create;
-		}
+			(SubEntity.m_entity.Layer as PolygonLayer).RemoveSubEntity(SubEntity, m_uncreate);
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
-		{
-			(SubEntity.m_entity.Layer as PolygonLayer).RemoveSubEntity(SubEntity, uncreate);
-
-			redo = new RemovePolygonOperation(SubEntity, PlanLayer, editMode, uncreate);
+			a_redo = new RemovePolygonOperation(SubEntity, PlanLayer, m_editMode, m_uncreate);
 
 			SubEntity.RemoveGameObject();
-			if (!totalUndo)
+			if (a_totalUndo)
+				return;
+			if (m_editMode == EditMode.Create)
 			{
-				if (editMode == EditMode.Create)
-				{
-					fsm.SetCurrentState(new StartCreatingPolygonState(fsm, PlanLayer));
-				}
-				else
-				{
-					fsm.SetCurrentState(new SelectPolygonsState(fsm, PlanLayer));
-				}
+				a_fsm.SetCurrentState(new StartCreatingPolygonState(a_fsm, PlanLayer));
+			}
+			else
+			{
+				a_fsm.SetCurrentState(new SelectPolygonsState(a_fsm, PlanLayer));
 			}
 		}
 	}
 
 	public class CreateLineStringOperation : LineStringUndoOperation
 	{
-		protected EditMode editMode;
-		protected bool uncreate;
+		protected EditMode m_editMode;
+		protected bool m_uncreate;
 
-		public CreateLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer, EditMode editMode, bool uncreate = false) : base(subEntity, planLayer)
+		public CreateLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer, EditMode a_editMode, bool a_uncreate = false) : base(a_subEntity, a_planLayer)
 		{
-			this.editMode = editMode;
-			this.uncreate = uncreate;
+			m_editMode = a_editMode;
+			m_uncreate = a_uncreate;
 		}
 
-		public bool IsCreatedManually()
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			return editMode == EditMode.Create;
-		}
+			(SubEntity.m_entity.Layer as LineStringLayer).RemoveSubEntity(SubEntity, m_uncreate);
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
-		{
-			(SubEntity.m_entity.Layer as LineStringLayer).RemoveSubEntity(SubEntity, uncreate);
-
-			redo = new RemoveLineStringOperation(SubEntity, PlanLayer, editMode, uncreate);
+			a_redo = new RemoveLineStringOperation(SubEntity, PlanLayer, m_editMode, m_uncreate);
 
 			SubEntity.RemoveGameObject();
-			if (!totalUndo)
+			if (!a_totalUndo)
 			{
-				if (editMode == EditMode.Create)
+				if (m_editMode == EditMode.Create)
 				{
-					fsm.SetCurrentState(new StartCreatingLineStringState(fsm, PlanLayer));
+					a_fsm.SetCurrentState(new StartCreatingLineStringState(a_fsm, PlanLayer));
 				}
-				else if (editMode == EditMode.Modify)
+				else if (m_editMode == EditMode.Modify)
 				{
-					fsm.SetCurrentState(new SelectLineStringsState(fsm, PlanLayer));
+					a_fsm.SetCurrentState(new SelectLineStringsState(a_fsm, PlanLayer));
 				}
 			}
 		}
@@ -315,28 +301,28 @@ namespace MSP2050.Scripts
 
 	public class CreateEnergyLineStringOperation : CreateLineStringOperation
 	{
-		public CreateEnergyLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer, EditMode editMode, bool uncreate = false) : base(subEntity, planLayer, editMode, uncreate)
+		public CreateEnergyLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer, EditMode a_editMode, bool a_uncreate = false) : base(a_subEntity, a_planLayer, a_editMode, a_uncreate)
 		{
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			//This also automatically removes references
-			(SubEntity.m_entity.Layer as LineStringLayer).RemoveSubEntity(SubEntity, uncreate);
+			(SubEntity.m_entity.Layer as LineStringLayer).RemoveSubEntity(SubEntity, m_uncreate);
 
-			redo = new RemoveEnergyLineStringOperation(SubEntity, PlanLayer, editMode, uncreate);
+			a_redo = new RemoveEnergyLineStringOperation(SubEntity, PlanLayer, m_editMode, m_uncreate);
 
 			//(SubEntity as EnergyLineStringSubEntity).RemoveReferences();
 			SubEntity.RemoveGameObject();
-			if (!totalUndo)
+			if (!a_totalUndo)
 			{
-				if (editMode == EditMode.Create)
+				if (m_editMode == EditMode.Create)
 				{
-					fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, PlanLayer));
+					a_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(a_fsm, PlanLayer));
 				}
-				else if (editMode == EditMode.Modify)
+				else if (m_editMode == EditMode.Modify)
 				{
-					fsm.SetCurrentState(new SelectLineStringsState(fsm, PlanLayer));
+					a_fsm.SetCurrentState(new SelectLineStringsState(a_fsm, PlanLayer));
 				}
 			}
 		}
@@ -344,82 +330,83 @@ namespace MSP2050.Scripts
 
 	public class CreatePointOperation : PointUndoOperation
 	{
-		protected bool uncreate;
+		protected bool m_uncreate;
 
-		public CreatePointOperation(PointSubEntity subEntity, PlanLayer planLayer, bool uncreate = false) : base(subEntity, planLayer)
+		public CreatePointOperation(PointSubEntity a_subEntity, PlanLayer a_planLayer, bool a_uncreate = false) : base(a_subEntity, a_planLayer)
 		{
-			this.uncreate = uncreate;
+			m_uncreate = a_uncreate;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			(SubEntity.m_entity.Layer as PointLayer).RemoveSubEntity(SubEntity, uncreate);
+			(SubEntity.m_entity.Layer as PointLayer).RemoveSubEntity(SubEntity, m_uncreate);
 
-			redo = new RemovePointOperation(SubEntity, PlanLayer, uncreate);
+			a_redo = new RemovePointOperation(SubEntity, PlanLayer, m_uncreate);
 
 			SubEntity.RemoveGameObject();
 
-			if (!totalUndo)
-				fsm.SetCurrentState(new CreatePointsState(fsm, PlanLayer));
+			if (!a_totalUndo)
+				a_fsm.SetCurrentState(new CreatePointsState(a_fsm, PlanLayer));
 		}
 	}
 
 	public class CreateEnergyPointOperation : CreatePointOperation
 	{
-		bool returnToEdit;
-		public CreateEnergyPointOperation(PointSubEntity subEntity, PlanLayer planLayer, bool uncreate = false, bool returnToEdit = false) : base(subEntity, planLayer, uncreate)
+		private bool m_returnToEdit;
+
+		public CreateEnergyPointOperation(PointSubEntity a_subEntity, PlanLayer a_planLayer, bool a_uncreate = false, bool a_returnToEdit = false) : base(a_subEntity, a_planLayer, a_uncreate)
 		{
-			this.returnToEdit = returnToEdit;
+			m_returnToEdit = a_returnToEdit;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			(SubEntity.m_entity.Layer as PointLayer).RemoveSubEntity(SubEntity, uncreate);
+			(SubEntity.m_entity.Layer as PointLayer).RemoveSubEntity(SubEntity, m_uncreate);
 
-			redo = new RemoveEnergyPointOperation(SubEntity, PlanLayer, uncreate, returnToEdit);
+			a_redo = new RemoveEnergyPointOperation(SubEntity, PlanLayer, m_uncreate, m_returnToEdit);
 
 			SubEntity.RemoveGameObject();
 
-			if (!totalUndo)
+			if (!a_totalUndo)
 			{
-				if (returnToEdit)
-					fsm.SetCurrentState(new EditEnergyPointsState(fsm, PlanLayer));
+				if (m_returnToEdit)
+					a_fsm.SetCurrentState(new EditEnergyPointsState(a_fsm, PlanLayer));
 				else
-					fsm.SetCurrentState(new CreateEnergyPointState(fsm, PlanLayer));
+					a_fsm.SetCurrentState(new CreateEnergyPointState(a_fsm, PlanLayer));
 			}
 		}
 	}
 
 	public class RemovePolygonOperation : PolygonUndoOperation
 	{
-		EditMode editMode;
-		protected bool recreate;
+		private EditMode m_editMode;
+		private bool m_recreate;
 
-		public RemovePolygonOperation(PolygonSubEntity subEntity, PlanLayer planLayer, EditMode editMode, bool recreate = false) : base(subEntity, planLayer)
+		public RemovePolygonOperation(PolygonSubEntity a_subEntity, PlanLayer a_planLayer, EditMode a_editMode, bool a_recreate = false) : base(a_subEntity, a_planLayer)
 		{
-			this.editMode = editMode;
-			this.recreate = recreate;
+			m_editMode = a_editMode;
+			m_recreate = a_recreate;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			(SubEntity.m_entity.Layer as PolygonLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as PolygonLayer).RestoreSubEntity(SubEntity, m_recreate);
 
-			SubEntity.PerformValidityCheck(editMode == EditMode.Create, editMode == EditMode.Create);
+			SubEntity.PerformValidityCheck(m_editMode == EditMode.Create, m_editMode == EditMode.Create);
 
-			redo = new CreatePolygonOperation(SubEntity, PlanLayer, editMode, recreate);
+			a_redo = new CreatePolygonOperation(SubEntity, PlanLayer, m_editMode, m_recreate);
 
-			if (!totalUndo)
+			if (!a_totalUndo)
 			{
-				if (editMode == EditMode.Create)
+				if (m_editMode == EditMode.Create)
 				{
 					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
-					fsm.SetCurrentState(new CreatingPolygonState(fsm, SubEntity, PlanLayer));
+					a_fsm.SetCurrentState(new CreatingPolygonState(a_fsm, SubEntity, PlanLayer));
 				}
 				else
 				{
 					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
-					fsm.SetCurrentState(new SelectPolygonsState(fsm, PlanLayer));
+					a_fsm.SetCurrentState(new SelectPolygonsState(a_fsm, PlanLayer));
 				}
 			}
 			else
@@ -429,32 +416,32 @@ namespace MSP2050.Scripts
 
 	public class RemoveLineStringOperation : LineStringUndoOperation
 	{
-		protected EditMode editMode;
-		protected bool recreate;
+		protected EditMode m_editMode;
+		protected bool m_recreate;
 
-		public RemoveLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer, EditMode editMode, bool recreate = false) : base(subEntity, planLayer)
+		public RemoveLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer, EditMode a_editMode, bool a_recreate = false) : base(a_subEntity, a_planLayer)
 		{
-			this.editMode = editMode;
-			this.recreate = recreate;
+			m_editMode = a_editMode;
+			m_recreate = a_recreate;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			(SubEntity.m_entity.Layer as LineStringLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as LineStringLayer).RestoreSubEntity(SubEntity, m_recreate);
 
-			redo = new CreateLineStringOperation(SubEntity, PlanLayer, editMode, recreate);
+			a_redo = new CreateLineStringOperation(SubEntity, PlanLayer, m_editMode, m_recreate);
 
-			if (!totalUndo)
+			if (!a_totalUndo)
 			{
-				if (editMode == EditMode.Create)
+				if (m_editMode == EditMode.Create)
 				{
 					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
-					fsm.SetCurrentState(new CreatingLineStringState(fsm, PlanLayer, SubEntity));
+					a_fsm.SetCurrentState(new CreatingLineStringState(a_fsm, PlanLayer, SubEntity));
 				}
-				else if (editMode == EditMode.Modify)
+				else if (m_editMode == EditMode.Modify)
 				{
 					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
-					fsm.SetCurrentState(new SelectLineStringsState(fsm, PlanLayer));
+					a_fsm.SetCurrentState(new SelectLineStringsState(a_fsm, PlanLayer));
 				}
 			}
 			else
@@ -464,35 +451,35 @@ namespace MSP2050.Scripts
 
 	public class RemoveEnergyLineStringOperation : RemoveLineStringOperation
 	{
-		bool pointWasDeleted;
+		private bool m_pointWasDeleted;
 
-		public RemoveEnergyLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer, EditMode editMode, bool recreate = false, bool pointWasDeleted = false) : base(subEntity, planLayer, editMode, recreate)
+		public RemoveEnergyLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer, EditMode a_editMode, bool a_recreate = false, bool a_pointWasDeleted = false) : base(a_subEntity, a_planLayer, a_editMode, a_recreate)
 		{
-			this.pointWasDeleted = pointWasDeleted;
+			m_pointWasDeleted = a_pointWasDeleted;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			//This also automatically restores references
-			(SubEntity.m_entity.Layer as LineStringLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as LineStringLayer).RestoreSubEntity(SubEntity, m_recreate);
 
-			redo = new CreateEnergyLineStringOperation(SubEntity, PlanLayer, editMode, recreate);
-			if (!totalUndo)
+			a_redo = new CreateEnergyLineStringOperation(SubEntity, PlanLayer, m_editMode, m_recreate);
+			if (!a_totalUndo)
 			{
-				if (editMode == EditMode.Create)
+				if (m_editMode == EditMode.Create)
 				{
 					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
-					fsm.SetCurrentState(new CreatingEnergyLineStringState(fsm, PlanLayer, SubEntity));
+					a_fsm.SetCurrentState(new CreatingEnergyLineStringState(a_fsm, PlanLayer, SubEntity));
 				}
-				else if (editMode == EditMode.Modify)
+				else if (m_editMode == EditMode.Modify)
 				{
-					if (pointWasDeleted)
+					if (m_pointWasDeleted)
 						//SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.PlanReference);
 						SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 					else
 					{
 						SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
-						fsm.SetCurrentState(new SelectLineStringsState(fsm, PlanLayer));
+						a_fsm.SetCurrentState(new SelectLineStringsState(a_fsm, PlanLayer));
 					}
 				}
 			}
@@ -503,61 +490,61 @@ namespace MSP2050.Scripts
 
 	public class RemovePointOperation : PointUndoOperation
 	{
-		protected bool recreate;
+		protected bool m_recreate;
 
-		public RemovePointOperation(PointSubEntity subEntity, PlanLayer planLayer, bool recreate = false) : base(subEntity, planLayer)
+		public RemovePointOperation(PointSubEntity a_subEntity, PlanLayer a_planLayer, bool a_recreate = false) : base(a_subEntity, a_planLayer)
 		{
-			this.recreate = recreate;
+			m_recreate = a_recreate;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			(SubEntity.m_entity.Layer as PointLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as PointLayer).RestoreSubEntity(SubEntity, m_recreate);
 
-			redo = new CreatePointOperation(SubEntity, PlanLayer, recreate);
+			a_redo = new CreatePointOperation(SubEntity, PlanLayer, m_recreate);
 
 			SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform);
-			if (!totalUndo)
-				fsm.SetCurrentState(new EditPointsState(fsm, PlanLayer));
+			if (!a_totalUndo)
+				a_fsm.SetCurrentState(new EditPointsState(a_fsm, PlanLayer));
 		}
 	}
 
 	public class RemoveEnergyPointOperation : RemovePointOperation
 	{
-		bool returnToEdit;
-		public RemoveEnergyPointOperation(PointSubEntity subEntity, PlanLayer planLayer, bool recreate = false, bool returnToEdit = true) : base(subEntity, planLayer, recreate)
-		{
-			this.returnToEdit = returnToEdit;
+		private bool m_returnToEdit;
+
+		public RemoveEnergyPointOperation(PointSubEntity a_subEntity, PlanLayer a_planLayer, bool a_recreate = false, bool a_returnToEdit = true) : base(a_subEntity, a_planLayer, a_recreate)
+		{ 
+			m_returnToEdit = a_returnToEdit;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			(SubEntity.m_entity.Layer as PointLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as PointLayer).RestoreSubEntity(SubEntity, m_recreate);
 
-			redo = new CreateEnergyPointOperation(SubEntity, PlanLayer, recreate, returnToEdit);
+			a_redo = new CreateEnergyPointOperation(SubEntity, PlanLayer, m_recreate, m_returnToEdit);
 
 			SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform);
 
 			//Changed target state to energy variant
-			if (!totalUndo)
-				fsm.SetCurrentState(new EditEnergyPointsState(fsm, PlanLayer));
+			if (!a_totalUndo)
+				a_fsm.SetCurrentState(new EditEnergyPointsState(a_fsm, PlanLayer));
 		}
 	}
 
 	public class ModifyPolygonRemovalPlanOperation : PolygonUndoOperation
 	{
-		bool wasScheduledForRemovalBeforeOperation;
+		private bool m_wasScheduledForRemovalBeforeOperation;
 
-		public ModifyPolygonRemovalPlanOperation(PolygonSubEntity subEntity, PlanLayer planLayer, bool wasScheduledForRemovalBeforeOperation) : base(subEntity, planLayer)
+		public ModifyPolygonRemovalPlanOperation(PolygonSubEntity a_subEntity, PlanLayer a_planLayer, bool a_wasScheduledForRemovalBeforeOperation) : base(a_subEntity, a_planLayer)
 		{
-			this.wasScheduledForRemovalBeforeOperation = wasScheduledForRemovalBeforeOperation;
+			m_wasScheduledForRemovalBeforeOperation = a_wasScheduledForRemovalBeforeOperation;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			//redo = new ModifyPolygonRemovalPlanOperation(SubEntity, PlanLayer, PlanLayer.RemovedGeometry.Contains(SubEntity.GetPersistentID()));
-			redo = new ModifyPolygonRemovalPlanOperation(SubEntity, PlanLayer, !wasScheduledForRemovalBeforeOperation);
-			if (wasScheduledForRemovalBeforeOperation)
+			a_redo = new ModifyPolygonRemovalPlanOperation(SubEntity, PlanLayer, !m_wasScheduledForRemovalBeforeOperation);
+			if (m_wasScheduledForRemovalBeforeOperation)
 			{
 				PlanLayer.RemovedGeometry.Add(SubEntity.GetPersistentID());
 				SubEntity.RemoveDependencies();
@@ -569,25 +556,24 @@ namespace MSP2050.Scripts
 			}
 
 			SubEntity.RedrawGameObject();
-			if (!totalUndo)
-				fsm.SetCurrentState(new SelectPolygonsState(fsm, PlanLayer));
+			if (!a_totalUndo)
+				a_fsm.SetCurrentState(new SelectPolygonsState(a_fsm, PlanLayer));
 		}
 	}
 
 	public class ModifyLineStringRemovalPlanOperation : LineStringUndoOperation
 	{
-		bool wasScheduledForRemovalBeforeOperation;
+		private bool m_wasScheduledForRemovalBeforeOperation;
 
-		public ModifyLineStringRemovalPlanOperation(LineStringSubEntity subEntity, PlanLayer planLayer, bool wasScheduledForRemovalBeforeOperation) : base(subEntity, planLayer)
+		public ModifyLineStringRemovalPlanOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer, bool a_wasScheduledForRemovalBeforeOperation) : base(a_subEntity, a_planLayer)
 		{
-			this.wasScheduledForRemovalBeforeOperation = wasScheduledForRemovalBeforeOperation;
+			m_wasScheduledForRemovalBeforeOperation = a_wasScheduledForRemovalBeforeOperation;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			//redo = new ModifyLineStringRemovalPlanOperation(SubEntity, PlanLayer, PlanLayer.RemovedGeometry.Contains(SubEntity.GetPersistentID()));
-			redo = new ModifyLineStringRemovalPlanOperation(SubEntity, PlanLayer, !wasScheduledForRemovalBeforeOperation);
-			if (wasScheduledForRemovalBeforeOperation)
+			a_redo = new ModifyLineStringRemovalPlanOperation(SubEntity, PlanLayer, !m_wasScheduledForRemovalBeforeOperation);
+			if (m_wasScheduledForRemovalBeforeOperation)
 			{
 				PlanLayer.RemovedGeometry.Add(SubEntity.GetPersistentID());
 				SubEntity.RemoveDependencies();
@@ -599,26 +585,25 @@ namespace MSP2050.Scripts
 			}
 
 			SubEntity.RedrawGameObject();
-			if (!totalUndo)
-				fsm.SetCurrentState(new SelectLineStringsState(fsm, PlanLayer));
+			if (!a_totalUndo)
+				a_fsm.SetCurrentState(new SelectLineStringsState(a_fsm, PlanLayer));
 		}
 	}
 
 	public class ModifyPointRemovalPlanOperation : PointUndoOperation
 	{
-		bool wasScheduledForRemovalBeforeOperation;
+		private bool m_wasScheduledForRemovalBeforeOperation;
 
-		public ModifyPointRemovalPlanOperation(PointSubEntity subEntity, PlanLayer planLayer, bool wasScheduledForRemovalBeforeOperation) : base(subEntity, planLayer)
+		public ModifyPointRemovalPlanOperation(PointSubEntity a_subEntity, PlanLayer a_planLayer, bool a_wasScheduledForRemovalBeforeOperation) : base(a_subEntity, a_planLayer)
 		{
-			this.wasScheduledForRemovalBeforeOperation = wasScheduledForRemovalBeforeOperation;
+			m_wasScheduledForRemovalBeforeOperation = a_wasScheduledForRemovalBeforeOperation;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			//redo = new ModifyPointRemovalPlanOperation(SubEntity, PlanLayer, PlanLayer.RemovedGeometry.Contains(SubEntity.GetPersistentID()));
-			redo = new ModifyPointRemovalPlanOperation(SubEntity, PlanLayer, !wasScheduledForRemovalBeforeOperation);
+			a_redo = new ModifyPointRemovalPlanOperation(SubEntity, PlanLayer, !m_wasScheduledForRemovalBeforeOperation);
 
-			if (wasScheduledForRemovalBeforeOperation)
+			if (m_wasScheduledForRemovalBeforeOperation)
 			{
 				PlanLayer.RemovedGeometry.Add(SubEntity.GetPersistentID());
 				SubEntity.RemoveDependencies();
@@ -630,75 +615,72 @@ namespace MSP2050.Scripts
 			}
 
 			SubEntity.RedrawGameObject();
-			if (!totalUndo)
-			{
-				if (PlanLayer.BaseLayer.IsEnergyPointLayer())
-					fsm.SetCurrentState(new EditEnergyPointsState(fsm, PlanLayer));
-				else
-					fsm.SetCurrentState(new EditPointsState(fsm, PlanLayer));
-			}
+			if (a_totalUndo)
+				return;
+			if (PlanLayer.BaseLayer.IsEnergyPointLayer())
+				a_fsm.SetCurrentState(new EditEnergyPointsState(a_fsm, PlanLayer));
+			else
+				a_fsm.SetCurrentState(new EditPointsState(a_fsm, PlanLayer));
 		}
 	}
 
 	public class FinalizePolygonOperation : PolygonUndoOperation
 	{
-		public FinalizePolygonOperation(PolygonSubEntity subEntity, PlanLayer planLayer) : base(subEntity, planLayer)
+		public FinalizePolygonOperation(PolygonSubEntity a_subEntity, PlanLayer a_planLayer) : base(a_subEntity, a_planLayer)
 		{
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			SubEntity.AddPoint(Vector3.zero);
 
 			SubEntity.PerformValidityCheck(true, true);
-			//if (SubEntity is EnergyPolygonSubEntity)
-			//    (SubEntity as EnergyPolygonSubEntity).UnFinalizePoly();
 
 			SubEntity.HideRestrictionArea();
 			SubEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-			if (!totalUndo)
-				fsm.SetCurrentState(new CreatingPolygonState(fsm, SubEntity, PlanLayer));
+			if (!a_totalUndo)
+				a_fsm.SetCurrentState(new CreatingPolygonState(a_fsm, SubEntity, PlanLayer));
 
-			redo = new UnfinalizePolygonOperation(SubEntity, PlanLayer);
+			a_redo = new UnfinalizePolygonOperation(SubEntity, PlanLayer);
 		}
 	}
 
 	public class FinalizeLineStringOperation : LineStringUndoOperation
 	{
-		public FinalizeLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer) : base(subEntity, planLayer)
+		public FinalizeLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer) : base(a_subEntity, a_planLayer)
 		{
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			SubEntity.AddPoint(Vector3.zero);
 
 			SubEntity.HideRestrictionArea();
 			SubEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-			if (!totalUndo)
-				fsm.SetCurrentState(new CreatingLineStringState(fsm, PlanLayer, SubEntity));
+			if (!a_totalUndo)
+				a_fsm.SetCurrentState(new CreatingLineStringState(a_fsm, PlanLayer, SubEntity));
 
-			redo = new UnfinalizeLineStringOperation(SubEntity, PlanLayer);
+			a_redo = new UnfinalizeLineStringOperation(SubEntity, PlanLayer);
 		}
 	}
 
 	public class FinalizeEnergyLineStringOperation : FinalizeLineStringOperation
 	{
-		EnergyPointSubEntity point;
+		private EnergyPointSubEntity m_point;
 
-		public FinalizeEnergyLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer, EnergyPointSubEntity point) : base(subEntity, planLayer)
+		public FinalizeEnergyLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer, EnergyPointSubEntity a_point) : base(a_subEntity, a_planLayer)
 		{
-			this.point = point;
+			m_point = a_point;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			if (SubEntity.GetPointCount() == 1) //Points are directly finalized upon creation
 			{
 				LineStringLayer layer = SubEntity.m_entity.Layer as LineStringLayer;
 				layer.RemoveSubEntity(SubEntity, true);
-				if (!totalUndo)
-					fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, PlanLayer));
+				if (!a_totalUndo)
+					a_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(a_fsm, PlanLayer));
 			}
 			else
 			{
@@ -707,120 +689,120 @@ namespace MSP2050.Scripts
 				Connection connectionToRemove = null;
 				foreach (Connection con in cable.Connections)
 				{
-					if (con.point == point)
+					if (con.point == m_point)
 					{
 						connectionToRemove = con;					
 						break;
 					}
 				}
 				cable.RemoveConnection(connectionToRemove);
-				point.RemoveConnection(connectionToRemove);
+				m_point.RemoveConnection(connectionToRemove);
 
 				SubEntity.HideRestrictionArea();
 				SubEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-				if (!totalUndo)
-					fsm.SetCurrentState(new CreatingEnergyLineStringState(fsm, PlanLayer, SubEntity));
+				if (!a_totalUndo)
+					a_fsm.SetCurrentState(new CreatingEnergyLineStringState(a_fsm, PlanLayer, SubEntity));
 			}
 
-			redo = new UnfinalizeEnergyLineStringOperation(SubEntity, PlanLayer, point);
+			a_redo = new UnfinalizeEnergyLineStringOperation(SubEntity, PlanLayer, m_point);
 		}
 	}
 
 	public class UnfinalizePolygonOperation : PolygonUndoOperation
 	{
-		public UnfinalizePolygonOperation(PolygonSubEntity subEntity, PlanLayer planLayer) : base(subEntity, planLayer)
+		public UnfinalizePolygonOperation(PolygonSubEntity a_subEntity, PlanLayer a_planLayer) : base(a_subEntity, a_planLayer)
 		{
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			(fsm.GetCurrentState() as CreatingPolygonState).FinalizePolygon();
+			(a_fsm.GetCurrentState() as CreatingPolygonState).FinalizePolygon();
 
-			redo = new FinalizePolygonOperation(SubEntity, PlanLayer);
+			a_redo = new FinalizePolygonOperation(SubEntity, PlanLayer);
 		}
 	}
 
 	public class UnfinalizeLineStringOperation : LineStringUndoOperation
 	{
-		public UnfinalizeLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer) : base(subEntity, planLayer)
+		public UnfinalizeLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer) : base(a_subEntity, a_planLayer)
 		{
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			(fsm.GetCurrentState() as CreatingLineStringState).FinalizeLineString();
+			(a_fsm.GetCurrentState() as CreatingLineStringState).FinalizeLineString();
 
-			redo = new FinalizeLineStringOperation(SubEntity, PlanLayer);
+			a_redo = new FinalizeLineStringOperation(SubEntity, PlanLayer);
 		}
 	}
 
 	public class UnfinalizeEnergyLineStringOperation : UnfinalizeLineStringOperation
 	{
-		EnergyPointSubEntity point;
+		private EnergyPointSubEntity m_point;
 
-		public UnfinalizeEnergyLineStringOperation(LineStringSubEntity subEntity, PlanLayer planLayer, EnergyPointSubEntity point) : base(subEntity, planLayer)
+		public UnfinalizeEnergyLineStringOperation(LineStringSubEntity a_subEntity, PlanLayer a_planLayer, EnergyPointSubEntity a_point) : base(a_subEntity, a_planLayer)
 		{
-			this.point = point;
+			m_point = a_point;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			if (SubEntity.GetPointCount() == 1) //Points are directly finalized upon creation
 			{
 				LineStringLayer layer = SubEntity.m_entity.Layer as LineStringLayer;
 				layer.RestoreSubEntity(SubEntity, true);
-				if (!totalUndo)
-					fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, PlanLayer));
+				if (!a_totalUndo)
+					a_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(a_fsm, PlanLayer));
 			}
 			else
 			{
-				(fsm.GetCurrentState() as CreatingEnergyLineStringState).FinalizeEnergyLineString(point);
+				(a_fsm.GetCurrentState() as CreatingEnergyLineStringState).FinalizeEnergyLineString(m_point);
 			}
 
-			redo = new FinalizeEnergyLineStringOperation(SubEntity, PlanLayer, point);
+			a_redo = new FinalizeEnergyLineStringOperation(SubEntity, PlanLayer, m_point);
 		}
 	}
 
 	public class ChangeConnectionOperation : UndoOperation
 	{
-		EnergyLineStringSubEntity subEnt;
-		Connection oldConn;
-		Connection newCon;
+		private EnergyLineStringSubEntity m_subEnt;
+		private Connection m_oldConn;
+		private Connection m_newCon;
 
-		public ChangeConnectionOperation(EnergyLineStringSubEntity subEnt, Connection oldConn, Connection newCon)
+		public ChangeConnectionOperation(EnergyLineStringSubEntity a_subEnt, Connection a_oldConn, Connection a_newCon)
 		{
-			this.subEnt = subEnt;
-			this.oldConn = oldConn;
-			this.newCon = newCon;
+			m_subEnt = a_subEnt;
+			m_oldConn = a_oldConn;
+			m_newCon = a_newCon;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
-			subEnt.RemoveConnection(newCon);
-			subEnt.AddConnection(oldConn);
-			newCon.point.RemoveConnection(newCon);
-			oldConn.point.AddConnection(oldConn);
+			m_subEnt.RemoveConnection(m_newCon);
+			m_subEnt.AddConnection(m_oldConn);
+			m_newCon.point.RemoveConnection(m_newCon);
+			m_oldConn.point.AddConnection(m_oldConn);
 
-			redo = new ChangeConnectionOperation(subEnt, newCon, oldConn);
+			a_redo = new ChangeConnectionOperation(m_subEnt, m_newCon, m_oldConn);
 		}
 	}
 
 	public class ReconnectCableToPoint : UndoOperation
 	{
-		Connection oldConnection, newConnection;
+		private Connection m_oldConnection, m_newConnection;
 
-		public ReconnectCableToPoint(Connection oldConnection, Connection newConnection)
+		public ReconnectCableToPoint(Connection a_oldConnection, Connection a_newConnection)
 		{
-			this.oldConnection = oldConnection;
-			this.newConnection = newConnection;
+			m_oldConnection = a_oldConnection;
+			m_newConnection = a_newConnection;
 		}
 
-		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
+		public override void Undo(FSM a_fsm, out UndoOperation a_redo, bool a_totalUndo = false)
 		{
 			//Connections have the same point but different cables
-			oldConnection.point.RemoveConnection(newConnection);
-			oldConnection.point.AddConnection(oldConnection);
-			redo = new ReconnectCableToPoint(newConnection, oldConnection);
+			m_oldConnection.point.RemoveConnection(m_newConnection);
+			m_oldConnection.point.AddConnection(m_oldConnection);
+			a_redo = new ReconnectCableToPoint(m_newConnection, m_oldConnection);
 		}
 	}
 }
