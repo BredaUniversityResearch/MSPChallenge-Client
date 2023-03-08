@@ -164,7 +164,7 @@ namespace MSP2050.Scripts
 						{
 							foreach (EnergyLineStringSubEntity cable in network[subEnt.GetDatabaseID()])
 							{
-								cable.Entity.PlanLayer.RemoveNewGeometry(cable.Entity);
+								cable.m_entity.PlanLayer.RemoveNewGeometry(cable.m_entity);
 								cable.RemoveGameObject();
 							}
 						}

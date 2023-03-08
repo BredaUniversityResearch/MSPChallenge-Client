@@ -157,7 +157,7 @@ namespace MSP2050.Scripts
 			newEntity.Country = country;
 			PointSubEntity newSubEntity = newEntity.GetSubEntity(0) as PointSubEntity;
 			newSubEntity.SetPersistentID(persistentID);
-			newSubEntity.edited = true;
+			newSubEntity.m_edited = true;
 			fsm.AddToUndoStack(new CreatePointOperation(newSubEntity, planLayer, true));
 			newSubEntity.DrawGameObject(baseLayer.LayerGameObject.transform);
 			return newSubEntity;
@@ -169,9 +169,9 @@ namespace MSP2050.Scripts
 			selection.Remove(basePoint);
 
 			//Change active geom 
-			baseLayer.AddPreModifiedEntity(basePoint.Entity);
-			baseLayer.m_activeEntities.Remove(basePoint.Entity as PointEntity);
-			baseLayer.m_activeEntities.Add(duplicate.Entity as PointEntity);
+			baseLayer.AddPreModifiedEntity(basePoint.m_entity);
+			baseLayer.m_activeEntities.Remove(basePoint.m_entity as PointEntity);
+			baseLayer.m_activeEntities.Add(duplicate.m_entity as PointEntity);
 
 
 			//Redraw based on activity changes
@@ -181,16 +181,16 @@ namespace MSP2050.Scripts
 
 		protected virtual PointSubEntity startModifyingSubEntity(PointSubEntity subEntity, bool insideUndoBatch)
 		{
-			if (subEntity.Entity.PlanLayer == planLayer)
+			if (subEntity.m_entity.PlanLayer == planLayer)
 			{
 				fsm.AddToUndoStack(new ModifyPointOperation(subEntity, planLayer, subEntity.GetDataCopy()));
-				subEntity.edited = true;
+				subEntity.m_edited = true;
 			}
 			else
 			{
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 
-				PointSubEntity duplicate = createNewPlanPoint(subEntity.GetPosition(), subEntity.Entity.EntityTypes, subEntity.GetPersistentID(), subEntity.Entity.metaData, subEntity.Entity.Country);
+				PointSubEntity duplicate = createNewPlanPoint(subEntity.GetPosition(), subEntity.m_entity.EntityTypes, subEntity.GetPersistentID(), subEntity.m_entity.metaData, subEntity.m_entity.Country);
 				switchSelectionFromBasePointToDuplicate(subEntity, duplicate);
 				subEntity = duplicate;
 
@@ -327,7 +327,7 @@ namespace MSP2050.Scripts
 
 			foreach (PointSubEntity subEntity in selection)
 			{
-				if (subEntity.Entity.PlanLayer == planLayer)
+				if (subEntity.m_entity.PlanLayer == planLayer)
 				{
 					fsm.AddToUndoStack(new RemovePointOperation(subEntity, planLayer));
 					//planLayer.RemovedGeometry.Add(subEntity.GetPersistentID());
@@ -412,12 +412,12 @@ namespace MSP2050.Scripts
 			//Find subentities with changed entity types
 			foreach (PointSubEntity subEntity in selection)
 			{
-				if (subEntity.Entity.EntityTypes.Count != newTypes.Count)
+				if (subEntity.m_entity.EntityTypes.Count != newTypes.Count)
 				{
 					subEntitiesWithDifferentTypes.Add(subEntity);
 					continue;
 				}
-				foreach (EntityType type in subEntity.Entity.EntityTypes)
+				foreach (EntityType type in subEntity.m_entity.EntityTypes)
 				{
 					if (!newTypes.Contains(type))
 					{
@@ -434,7 +434,7 @@ namespace MSP2050.Scripts
 			foreach (PointSubEntity subEntity in subEntitiesWithDifferentTypes)
 			{
 				PointSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.EntityTypes = newTypes;
+				subEntityToModify.m_entity.EntityTypes = newTypes;
 				subEntityToModify.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null);
 			}
 
@@ -448,7 +448,7 @@ namespace MSP2050.Scripts
 			//Find subentities with changed entity types
 			foreach (PointSubEntity subEntity in selection)
 			{
-				if (subEntity.Entity.Country != newTeam)
+				if (subEntity.m_entity.Country != newTeam)
 				{
 					subEntitiesWithDifferentTeam.Add(subEntity);
 				}
@@ -461,7 +461,7 @@ namespace MSP2050.Scripts
 			foreach (PointSubEntity subEntity in subEntitiesWithDifferentTeam)
 			{
 				PointSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.Country = newTeam;
+				subEntityToModify.m_entity.Country = newTeam;
 			}
 
 			fsm.AddToUndoStack(new BatchUndoOperationMarker());
@@ -474,7 +474,7 @@ namespace MSP2050.Scripts
 			//Find subentities with changed entity types
 			foreach (PointSubEntity subEntity in selection)
 			{
-				if (subEntity.Entity.GetPropertyMetaData(parameter) != newValue)
+				if (subEntity.m_entity.GetPropertyMetaData(parameter) != newValue)
 				{
 					subEntitiesWithDifferentParams.Add(subEntity);
 				}
@@ -487,7 +487,7 @@ namespace MSP2050.Scripts
 			foreach (PointSubEntity subEntity in subEntitiesWithDifferentParams)
 			{
 				PointSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.SetPropertyMetaData(parameter, newValue);
+				subEntityToModify.m_entity.SetPropertyMetaData(parameter, newValue);
 			}
 
 			fsm.AddToUndoStack(new BatchUndoOperationMarker());
@@ -521,16 +521,16 @@ namespace MSP2050.Scripts
 
 			foreach (PointSubEntity pse in selection)
 			{
-				selectedEntityTypes.Add(pse.Entity.EntityTypes);
-				if (selectedTeam.HasValue && pse.Entity.Country != selectedTeam.Value)
+				selectedEntityTypes.Add(pse.m_entity.EntityTypes);
+				if (selectedTeam.HasValue && pse.m_entity.Country != selectedTeam.Value)
 					selectedTeam = -1;
 				else
-					selectedTeam = pse.Entity.Country;
+					selectedTeam = pse.m_entity.Country;
 				Dictionary<EntityPropertyMetaData, string> parameters = new Dictionary<EntityPropertyMetaData, string>();
 				foreach (EntityPropertyMetaData p in baseLayer.m_propertyMetaData)
 				{
 					if (p.ShowInEditMode)
-						parameters.Add(p, pse.Entity.GetPropertyMetaData(p));
+						parameters.Add(p, pse.m_entity.GetPropertyMetaData(p));
 				}
 				selectedParams.Add(parameters);
 

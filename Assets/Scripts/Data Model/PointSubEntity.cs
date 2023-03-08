@@ -21,15 +21,15 @@ namespace MSP2050.Scripts
 		public PointSubEntity(Entity entity, SubEntityObject geometry, int databaseID) : base(entity, databaseID, geometry.persistent)
 		{
 			position = new Vector3(geometry.geometry[0][0] / Main.SCALE, geometry.geometry[0][1] / Main.SCALE);
-			mspID = geometry.mspid;
-			restrictionNeedsUpdate = true;
+			m_mspID = geometry.mspid;
+			m_restrictionNeedsUpdate = true;
 			UpdateBoundingBox();
 
 		}
 
 		protected override void UpdateBoundingBox()
 		{
-			BoundingBox = new Rect(position, Vector3.zero);
+			m_boundingBox = new Rect(position, Vector3.zero);
 		}
 
 		public Vector3 GetPosition()
@@ -53,33 +53,33 @@ namespace MSP2050.Scripts
 		{
 			calculateOrderBasedOnType();
 
-			Vector3 currentPos = gameObject.transform.position;
-			gameObject.transform.localPosition = new Vector3(currentPos.x, currentPos.y, Order);
+			Vector3 currentPos = m_gameObject.transform.position;
+			m_gameObject.transform.localPosition = new Vector3(currentPos.x, currentPos.y, m_order);
 
 		}
 
 		public override void DrawGameObject(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null)
 		{
-			if (gameObject != null)
+			if (m_gameObject != null)
 			{
 				//Debug.LogError("Attempting to draw entity with an existing GameObject.");
 				return;
 			}
 
-			gameObject = VisualizationUtil.Instance.CreatePointGameObject();
-			gameObject.transform.SetParent(parent);
+			m_gameObject = VisualizationUtil.Instance.CreatePointGameObject();
+			m_gameObject.transform.SetParent(parent);
 
-			if(Entity.Layer.m_textInfo != null)
+			if(m_entity.Layer.m_textInfo != null)
 			{
 				//Points need inverse scale...
-				Entity.Layer.m_textInfo.UseInverseScale = true;
+				m_entity.Layer.m_textInfo.UseInverseScale = true;
 
-				CreateTextMesh(gameObject.transform, Entity.Layer.m_textInfo.textOffset);
-				ScaleTextMesh(VisualizationUtil.Instance.UpdatePointScale(gameObject, Entity.EntityTypes[0].DrawSettings));
+				CreateTextMesh(m_gameObject.transform, m_entity.Layer.m_textInfo.textOffset);
+				ScaleTextMesh(VisualizationUtil.Instance.UpdatePointScale(m_gameObject, m_entity.EntityTypes[0].DrawSettings));
 			}
 
 			RedrawGameObject(drawMode, selectedPoints, hoverPoints);
-			UpdateRestrictionArea(Entity.GetCurrentRestrictionSize());
+			UpdateRestrictionArea(m_entity.GetCurrentRestrictionSize());
 
 			SetOrderBasedOnType();
 		}
@@ -88,42 +88,42 @@ namespace MSP2050.Scripts
 		{
 			base.RedrawGameObject(drawMode, selectedPoints, hoverPoints, updatePlanState);
 
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer))
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(m_entity.Layer))
 				drawMode = SubEntityDrawMode.PlanReference;
 
 			SnappingToThisEnabled = IsSnapToDrawMode(drawMode);
 		
-			drawSettings = Entity.EntityTypes[0].DrawSettings;
-			if (drawMode != SubEntityDrawMode.Default) { drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings); }
+			m_drawSettings = m_entity.EntityTypes[0].DrawSettings;
+			if (drawMode != SubEntityDrawMode.Default) { m_drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(m_drawSettings); }
 
-			VisualizationUtil.Instance.UpdatePointSubEntity(gameObject, position, drawSettings, planState, selectedPoints != null, hoverPoints != null);
+			VisualizationUtil.Instance.UpdatePointSubEntity(m_gameObject, position, m_drawSettings, PlanState, selectedPoints != null, hoverPoints != null);
 		}
 
 		public override void UpdateGameObjectForEveryLOD()
 		{
-			VisualizationUtil.Instance.UpdatePointSubEntity(gameObject, position, drawSettings, planState, false, false);
+			VisualizationUtil.Instance.UpdatePointSubEntity(m_gameObject, position, m_drawSettings, PlanState, false, false);
 		}
 
 		public override void UpdateScale(Camera targetCamera)
 		{
-			if (gameObject == null)
+			if (m_gameObject == null)
 				return;
 
 
-			if (drawSettings == null)
+			if (m_drawSettings == null)
 			{
-				drawSettings = Entity.EntityTypes[0].DrawSettings;
+				m_drawSettings = m_entity.EntityTypes[0].DrawSettings;
 				return;
 				//Debug.LogError("Trying to draw point without drawsettings. GO name: " + gameObject.name + ". Parent name: " + gameObject.transform.parent.name);
 			}
 
-			float pointScale = VisualizationUtil.Instance.UpdatePointScale(gameObject, drawSettings);
-			UpdateRestrictionArea(Entity.GetCurrentRestrictionSize());
+			float pointScale = VisualizationUtil.Instance.UpdatePointScale(m_gameObject, m_drawSettings);
+			UpdateRestrictionArea(m_entity.GetCurrentRestrictionSize());
 
 			ScaleTextMesh(pointScale);
 
-			if(planState != SubEntityPlanState.NotShown)
-				objectVisibility(gameObject, (float)getImportance("natlscale", 10), targetCamera);
+			if(PlanState != SubEntityPlanState.NotShown)
+				ObjectVisibility(m_gameObject, (float)GetImportance("natlscale", 10), targetCamera);
 		}
 
 		public override void UpdateGeometry(GeometryObject geo)
@@ -132,7 +132,7 @@ namespace MSP2050.Scripts
 			UpdateBoundingBox();
 		}
 
-		public override SubEntityObject GetLayerObject()
+		protected override SubEntityObject GetLayerObject()
 		{
 			SubEntityObject obj = new SubEntityObject();
 
@@ -157,14 +157,14 @@ namespace MSP2050.Scripts
 		protected override void UpdateRestrictionArea(float newRestrictionSize)
 		{
 			base.UpdateRestrictionArea(newRestrictionSize);
-			if (restrictionAreaSprite == null && newRestrictionSize > 0.0f && !restrictionHidden)
+			if (restrictionAreaSprite == null && newRestrictionSize > 0.0f && !m_restrictionHidden)
 			{
 				CreateRestrictionAreaSprite();
 			}
 
-			if (restrictionAreaSprite != null && !restrictionHidden)
+			if (restrictionAreaSprite != null && !m_restrictionHidden)
 			{
-				restrictionAreaSprite.transform.localScale = new Vector3(newRestrictionSize / gameObject.transform.localScale.x * sizeOffsetToMatchPolyRestriction, newRestrictionSize / gameObject.transform.localScale.y * sizeOffsetToMatchPolyRestriction, 1f);
+				restrictionAreaSprite.transform.localScale = new Vector3(newRestrictionSize / m_gameObject.transform.localScale.x * sizeOffsetToMatchPolyRestriction, newRestrictionSize / m_gameObject.transform.localScale.y * sizeOffsetToMatchPolyRestriction, 1f);
 				if (!restrictionAreaSprite.gameObject.activeInHierarchy)
 					restrictionAreaSprite.gameObject.SetActive(true);
 			}
@@ -179,12 +179,12 @@ namespace MSP2050.Scripts
 
 		private void CreateRestrictionAreaSprite()
 		{
-			float restrictionSize = Entity.GetCurrentRestrictionSize();
+			float restrictionSize = m_entity.GetCurrentRestrictionSize();
 			restrictionAreaSprite = VisualizationUtil.Instance.CreateRestrictionPoint();
 			Transform transform = restrictionAreaSprite.transform;
-			transform.SetParent(gameObject.transform, false);
+			transform.SetParent(m_gameObject.transform, false);
 			transform.localPosition = new Vector3(0, 0, 1f);
-			transform.localScale = new Vector3(restrictionSize / gameObject.transform.localScale.x * sizeOffsetToMatchPolyRestriction, restrictionSize / gameObject.transform.localScale.y * sizeOffsetToMatchPolyRestriction, 1f);
+			transform.localScale = new Vector3(restrictionSize / m_gameObject.transform.localScale.x * sizeOffsetToMatchPolyRestriction, restrictionSize / m_gameObject.transform.localScale.y * sizeOffsetToMatchPolyRestriction, 1f);
 		}
 
 		public override List<Vector3> GetPoints()
@@ -192,7 +192,7 @@ namespace MSP2050.Scripts
 			return new List<Vector3>() { position };
 		}
 
-		public override Feature GetGeoJSONFeature(int idToUse)
+		public override Feature GetGeoJsonFeature(int idToUse)
 		{
 			double[] coordinates = new double[] {(double) position.x * 1000, (double) position.y * 1000};
 			Main.Instance.ConvertToGeoJSONCoordinate(coordinates);
@@ -204,7 +204,7 @@ namespace MSP2050.Scripts
 			return new Dictionary<string, object>();
 		}
 
-		public override void SetPoints(List<Vector3> points)
+		protected override void SetPoints(List<Vector3> points)
 		{
 			SetPosition(points[0]);
 		}

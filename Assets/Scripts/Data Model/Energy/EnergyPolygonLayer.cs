@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 
 			foreach (PolygonEntity entity in m_activeEntities)
 				foreach (PolygonSubEntity subent in entity.GetSubEntities())
-					m_centerPointLayer.m_activeEntities.Add((subent as EnergyPolygonSubEntity).m_sourcePoint.Entity as PointEntity);
+					m_centerPointLayer.m_activeEntities.Add((subent as EnergyPolygonSubEntity).m_sourcePoint.m_entity as PointEntity);
 
 			foreach (PointEntity ent in m_centerPointLayer.Entities)
 				ent.RedrawGameObjects(CameraManager.Instance.gameCamera);

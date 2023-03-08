@@ -36,9 +36,9 @@ namespace MSP2050.Scripts
 			}
 
 			PolygonSubEntity poly = (PolygonSubEntity)a_subEntityA;
-			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.Entity.Layer;
+			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.m_entity.Layer;
 
-			Vector3 polyCentre = a_subEntityA.BoundingBox.center;
+			Vector3 polyCentre = a_subEntityA.m_boundingBox.center;
 
 			Rect rasterBounds = new Rect(rasterLayer.RasterBounds.position, rasterLayer.RasterBounds.size);
 			PolygonRasterizer.Raster rasterizedPolygon = Rasterizer.CreateScanlinesForPolygon(rasterLayer.GetRasterImageWidth(), rasterLayer.GetRasterImageHeight(), poly.GetPoints(), rasterBounds);
@@ -70,7 +70,7 @@ namespace MSP2050.Scripts
 			EntityType targetEntityType = a_target.entityType;
 
 			LineStringSubEntity line = (LineStringSubEntity)a_subEntityA;
-			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.Entity.Layer;
+			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.m_entity.Layer;
 
 			List<Vector3> linePoints = line.GetPoints();
 
@@ -115,9 +115,9 @@ namespace MSP2050.Scripts
 				a_subEntityB = tmpSubentity;
 			}
 
-			Vector3 pos = a_subEntityA.BoundingBox.center;
+			Vector3 pos = a_subEntityA.m_boundingBox.center;
 
-			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.Entity.Layer;
+			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.m_entity.Layer;
 			if (rasterLayer.GetEntityTypeForRasterAt(pos) == a_target.entityType)
 			{
 				a_issueLocation = pos;
@@ -166,7 +166,7 @@ namespace MSP2050.Scripts
 			}
 
 			// first check if the bounding boxes collide
-			if (poly1.BoundingBox.Overlaps(poly2.BoundingBox))
+			if (poly1.m_boundingBox.Overlaps(poly2.m_boundingBox))
 			{
 				List<Vector3> warningLocations;
 				if (GeometryOperations.Overlap(poly1, poly2, out warningLocations))
@@ -209,8 +209,8 @@ namespace MSP2050.Scripts
 				return false;
 			}
 
-			Rect boundingBoxA = poly.BoundingBox;
-			Rect boundingBoxB = line.BoundingBox;
+			Rect boundingBoxA = poly.m_boundingBox;
+			Rect boundingBoxB = line.m_boundingBox;
 
 			if (boundingBoxA.Overlaps(boundingBoxB))
 			{
@@ -255,7 +255,7 @@ namespace MSP2050.Scripts
 				return false;
 			}
 
-			Vector3 pointCenter = point.BoundingBox.center;
+			Vector3 pointCenter = point.m_boundingBox.center;
 
 			if (Util.PointCollidesWithPolygon(point.GetPosition(), poly.GetPoints(), poly.GetHoles(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
@@ -271,8 +271,8 @@ namespace MSP2050.Scripts
 		#region Inclusion Line
 		private static bool InclusionCheckLineToLine(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			Rect boundingBoxA = a_subEntityA.BoundingBox;
-			Rect boundingBoxB = a_subEntityB.BoundingBox;
+			Rect boundingBoxA = a_subEntityA.m_boundingBox;
+			Rect boundingBoxB = a_subEntityB.m_boundingBox;
 
 			if (boundingBoxA.Overlaps(boundingBoxB))
 			{
@@ -298,7 +298,7 @@ namespace MSP2050.Scripts
 				a_subEntityB = tmpSubentity;
 			}
 
-			Rect boundingBoxB = a_subEntityB.BoundingBox;
+			Rect boundingBoxB = a_subEntityB.m_boundingBox;
 
 			if (Util.PointCollidesWithLineString(boundingBoxB.center, ((LineStringSubEntity)a_subEntityA).GetPoints(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
@@ -314,8 +314,8 @@ namespace MSP2050.Scripts
 		#region Inclusion Point
 		private static bool InclusionCheckPointToPoint(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			Rect boundingBoxA = a_subEntityA.BoundingBox;
-			Rect boundingBoxB = a_subEntityB.BoundingBox;
+			Rect boundingBoxA = a_subEntityA.m_boundingBox;
+			Rect boundingBoxB = a_subEntityB.m_boundingBox;
 
 			if (Util.PointCollidesWithPoint(boundingBoxA.center, boundingBoxB.center, ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{
@@ -331,8 +331,8 @@ namespace MSP2050.Scripts
 		#region Exclusion Poly (Incomplete)
 		private static bool ExclusionCheckPolyToPoly(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			Rect boundingBoxA = a_subEntityA.BoundingBox;
-			Rect boundingBoxB = a_subEntityB.BoundingBox;
+			Rect boundingBoxA = a_subEntityA.m_boundingBox;
+			Rect boundingBoxB = a_subEntityB.m_boundingBox;
 
 			if (boundingBoxA.Overlaps(boundingBoxB))
 			{
@@ -369,8 +369,8 @@ namespace MSP2050.Scripts
 		#region Exclusion Point
 		private static bool ExclusionCheckPointToPoint(SubEntity a_subEntityA, SubEntity a_subEntityB, ConstraintTarget a_target, PlanLayer a_targetPlanLayer, Plan a_checkForPlan, out Vector3 a_issueLocation)
 		{
-			Rect boundingBoxA = a_subEntityA.BoundingBox;
-			Rect boundingBoxB = a_subEntityB.BoundingBox;
+			Rect boundingBoxA = a_subEntityA.m_boundingBox;
+			Rect boundingBoxB = a_subEntityB.m_boundingBox;
 
 			a_issueLocation = boundingBoxA.center;
 
@@ -393,7 +393,7 @@ namespace MSP2050.Scripts
 				polygonSubEntity = (PolygonSubEntity)a_subEntityA;
 			}
 
-			Vector3 pointCenter = pointSubEntity.BoundingBox.center;
+			Vector3 pointCenter = pointSubEntity.m_boundingBox.center;
 
 			if (!Util.PointCollidesWithPolygon(pointCenter, polygonSubEntity.GetPoints(), polygonSubEntity.GetHoles(), ConstraintManager.Instance.ConstraintPointCollisionSize))
 			{

@@ -146,7 +146,7 @@ namespace MSP2050.Scripts
 						if (tempHS.Contains(newAddedEntity.DatabaseID))
 						{
 							//Was already added previously, only submit if changed
-							if (newAddedEntity.GetSubEntity(0).edited)
+							if (newAddedEntity.GetSubEntity(0).m_edited)
 							{
 								//These are only modified subentities that already existed on the planlayer, so just update the content
 								Action<BatchRequest> newPostgeomAction = newAddedEntity.GetSubEntity(0).SubmitUpdate(a_batch);
@@ -269,7 +269,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < m_newGeometry.Count; i++)
 			{
 				m_newGeometry[i].SetDataToCopy(m_newGeometryData[i]);
-				m_newGeometry[i].DrawGameObject(m_newGeometry[i].Entity.Layer.LayerGameObject.transform);
+				m_newGeometry[i].DrawGameObject(m_newGeometry[i].m_entity.Layer.LayerGameObject.transform);
 				originalGeometry.Add(m_newGeometry[i].GetDatabaseID());
 			}
 			foreach(Entity entity in m_planLayer.GetNewGeometry())
@@ -282,7 +282,7 @@ namespace MSP2050.Scripts
 			m_planLayer.ClearNewGeometry();
 			foreach(SubEntity sub in m_newGeometry)
 			{
-				m_planLayer.AddNewGeometry(sub.Entity);
+				m_planLayer.AddNewGeometry(sub.m_entity);
 			}
 		}
 

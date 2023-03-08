@@ -5,45 +5,44 @@ namespace MSP2050.Scripts
 {
 	public class PointLayer : Layer<PointEntity>
 	{
-		public EnergyPolygonLayer sourcePolyLayer;
+		public EnergyPolygonLayer m_sourcePolyLayer;
 
-		public PointLayer(LayerMeta layerMeta, List<SubEntityObject> layerObjects, EnergyPolygonLayer sourcePolyLayer = null) : base(layerMeta)
+		public PointLayer(LayerMeta a_layerMeta, List<SubEntityObject> a_layerObjects, EnergyPolygonLayer a_sourcePolyLayer = null) : base(a_layerMeta)
 		{
-			LoadLayerObjects(layerObjects);
-			this.sourcePolyLayer = sourcePolyLayer;
+			LoadLayerObjects(a_layerObjects);
+			m_sourcePolyLayer = a_sourcePolyLayer;
 		}
 
-		public override void LoadLayerObjects(List<SubEntityObject> layerObjects)
+		public override void LoadLayerObjects(List<SubEntityObject> a_layerObjects)
 		{
-			base.LoadLayerObjects(layerObjects);
+			base.LoadLayerObjects(a_layerObjects);
 
-			if (layerObjects != null)
+			if (a_layerObjects == null)
+				return;
+			foreach (SubEntityObject layerObject in a_layerObjects)
 			{
-				foreach (SubEntityObject layerObject in layerObjects)
-				{
-					PointEntity ent = new PointEntity(this, layerObject);
-					Entities.Add(ent);
-					InitialEntities.Add(ent);
-				}
+				PointEntity ent = new PointEntity(this, layerObject);
+				Entities.Add(ent);
+				InitialEntities.Add(ent);
 			}
 		}
 
-		public PointEntity CreateNewPointEntity(Vector3 point, List<EntityType> entityType, PlanLayer planLayer)
+		public PointEntity CreateNewPointEntity(Vector3 a_point, List<EntityType> a_entityType, PlanLayer a_planLayer)
 		{
-			PointEntity pointEntity = new PointEntity(this, planLayer, point, entityType, null);
+			PointEntity pointEntity = new PointEntity(this, a_planLayer, a_point, a_entityType, null);
 			if (SessionManager.Instance.AreWeGameMaster)
 				pointEntity.Country = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SelectedTeam;
         
-			planLayer.AddNewGeometry(pointEntity);
+			a_planLayer.AddNewGeometry(pointEntity);
 			return pointEntity;
 		}
 
-		public override SubEntity GetSubEntityAt(Vector2 position)
+		public override SubEntity GetSubEntityAt(Vector2 a_position)
 		{
-			return GetPointAt(position);
+			return GetPointAt(a_position);
 		}
 
-		public PointSubEntity GetPointAt(Vector3 position)
+		public PointSubEntity GetPointAt(Vector3 a_position)
 		{
 			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
@@ -56,24 +55,22 @@ namespace MSP2050.Scripts
 				List<PointSubEntity> subEntities = pointEntity.GetSubEntities();
 				foreach (PointSubEntity subEntity in subEntities)
 				{
-					if (subEntity.planState != SubEntityPlanState.NotShown)
-					{
-						float distanceSquared = (subEntity.GetPosition() - position).sqrMagnitude;
-						if (distanceSquared < threshold && distanceSquared < closestDistanceSquared)
-						{
-							closestSubEntity = subEntity;
-							closestDistanceSquared = distanceSquared;
-						}
-					}
+					if (subEntity.PlanState == SubEntityPlanState.NotShown)
+						continue;
+					float distanceSquared = (subEntity.GetPosition() - a_position).sqrMagnitude;
+					if (!(distanceSquared < threshold) || !(distanceSquared < closestDistanceSquared))
+						continue;
+					closestSubEntity = subEntity;
+					closestDistanceSquared = distanceSquared;
 				}
 			}
 
 			return closestSubEntity;
 		}
 
-		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)
+		public override List<SubEntity> GetSubEntitiesAt(Vector2 a_position)
 		{
-			Vector3 pos = position;
+			Vector3 pos = a_position;
 
 			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
@@ -87,17 +84,17 @@ namespace MSP2050.Scripts
 				foreach (PointSubEntity subEntity in subEntities)
 				{
 					float distanceSquared = (subEntity.GetPosition() - pos).sqrMagnitude;
-					if (subEntity.planState != SubEntityPlanState.NotShown && distanceSquared < threshold && distanceSquared <= closestDistanceSquared)
+					if (subEntity.PlanState == SubEntityPlanState.NotShown || !(distanceSquared < threshold) ||
+						!(distanceSquared <= closestDistanceSquared))
+						continue;
+					if (distanceSquared < closestDistanceSquared)
 					{
-						if (distanceSquared < closestDistanceSquared)
-						{
-							closestSubEntities = new List<SubEntity>() { subEntity };
-							closestDistanceSquared = distanceSquared;
-						}
-						else // distanceSquared == closestDistanceSquared
-						{
-							closestSubEntities.Add(subEntity);
-						}
+						closestSubEntities = new List<SubEntity>() { subEntity };
+						closestDistanceSquared = distanceSquared;
+					}
+					else // distanceSquared == closestDistanceSquared
+					{
+						closestSubEntities.Add(subEntity);
 					}
 				}
 			}
@@ -105,10 +102,10 @@ namespace MSP2050.Scripts
 			return closestSubEntities;
 		}
 
-		public HashSet<PointSubEntity> GetPointsInBox(Vector3 boxCornerA, Vector3 boxCornerB)
+		public HashSet<PointSubEntity> GetPointsInBox(Vector3 a_boxCornerA, Vector3 a_boxCornerB)
 		{
-			Vector3 min = Vector3.Min(boxCornerA, boxCornerB);
-			Vector3 max = Vector3.Max(boxCornerA, boxCornerB);
+			Vector3 min = Vector3.Min(a_boxCornerA, a_boxCornerB);
+			Vector3 max = Vector3.Max(a_boxCornerA, a_boxCornerB);
 
 			HashSet<PointSubEntity> result = new HashSet<PointSubEntity>();
 
@@ -129,18 +126,18 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public override Entity GetEntityAt(Vector2 position)
+		public override Entity GetEntityAt(Vector2 a_position)
 		{
-			PointSubEntity subEntity = GetPointAt(position);
-			return subEntity != null ? subEntity.Entity : null;
+			PointSubEntity subEntity = GetPointAt(a_position);
+			return subEntity?.m_entity;
 		}
 
-		public override Entity CreateEntity(SubEntityObject obj)
+		public override Entity CreateEntity(SubEntityObject a_obj)
 		{
-			return new PointEntity(this, obj);
+			return new PointEntity(this, a_obj);
 		}
 
-		public override void UpdateScale(Camera targetCamera)
+		public override void UpdateScale(Camera a_targetCamera)
 		{
 			foreach (PointEntity point in m_activeEntities)
 			{
@@ -148,7 +145,7 @@ namespace MSP2050.Scripts
 
 				foreach (PointSubEntity subpoint in subpoints)
 				{
-					subpoint.UpdateScale(targetCamera);
+					subpoint.UpdateScale(a_targetCamera);
 				}
 			}
 		}
@@ -169,20 +166,5 @@ namespace MSP2050.Scripts
 		{
 			return  LayerManager.EGeoType.point;
 		}
-
-		#region Legacy stuff
-		//public override void MoveAllGeometryTo(Layer destination, int entityTypeOffset)
-		//{
-		//    if (!(destination is PointLayer)) { Debug.LogError("destination is not a point layer"); return; }
-		//    PointLayer dst = destination as PointLayer;
-
-		//    foreach (PointEntity entity in PointEntities)
-		//    {
-		//        dst.PointEntities.Add(entity);
-		//        entity.MovedToLayer(destination, entity.GetEntityTypeKeys()[0] + entityTypeOffset);
-		//    }
-		//    PointEntities.Clear();
-		//}
-		#endregion
 	}
 }

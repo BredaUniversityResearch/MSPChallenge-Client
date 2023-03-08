@@ -254,7 +254,7 @@ namespace MSP2050.Scripts
 			SubEntity invalid = m_currentPlan.CheckForInvalidGeometry();
 			if (invalid != null)
 			{
-				CameraManager.Instance.ZoomToBounds(invalid.BoundingBox);
+				CameraManager.Instance.ZoomToBounds(invalid.m_boundingBox);
 				DialogBoxManager.instance.NotificationWindow("Invalid geometry", "The plan contains invalid geometry and cannot be accepted until these have been fixed.", null);
 				InterfaceCanvas.HideNetworkingBlocker();
 				return;

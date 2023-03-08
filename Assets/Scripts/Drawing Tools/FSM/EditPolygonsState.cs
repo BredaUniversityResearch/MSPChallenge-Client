@@ -196,12 +196,12 @@ namespace MSP2050.Scripts
 
 		protected PolygonSubEntity createNewPlanPolygon(SubEntityDataCopy dataCopy, int persistentID)
 		{
-			PolygonEntity newEntity = baseLayer.CreateNewPolygonEntity(dataCopy.entityTypeCopy, planLayer);
+			PolygonEntity newEntity = baseLayer.CreateNewPolygonEntity(dataCopy.m_entityTypeCopy, planLayer);
 			PolygonSubEntity newSubEntity = baseLayer.m_editingType == AbstractLayer.EditingType.SourcePolygon ? new EnergyPolygonSubEntity(newEntity) : new PolygonSubEntity(newEntity);
 			newSubEntity.SetPersistentID(persistentID);
-			((PolygonEntity)newSubEntity.Entity).AddSubEntity(newSubEntity);
+			((PolygonEntity)newSubEntity.m_entity).AddSubEntity(newSubEntity);
 			newSubEntity.SetDataToCopy(dataCopy);
-			newSubEntity.edited = true;
+			newSubEntity.m_edited = true;
 
 			fsm.AddToUndoStack(new CreatePolygonOperation(newSubEntity, planLayer, UndoOperation.EditMode.Modify, true));
 			newSubEntity.DrawGameObject(baseLayer.LayerGameObject.transform);
@@ -217,9 +217,9 @@ namespace MSP2050.Scripts
 			selectedPoints.Remove(basePolygon);
 
 			//Change active geom 
-			baseLayer.AddPreModifiedEntity(basePolygon.Entity);
-			baseLayer.m_activeEntities.Remove(basePolygon.Entity as PolygonEntity);
-			baseLayer.m_activeEntities.Add(duplicate.Entity as PolygonEntity);
+			baseLayer.AddPreModifiedEntity(basePolygon.m_entity);
+			baseLayer.m_activeEntities.Remove(basePolygon.m_entity as PolygonEntity);
+			baseLayer.m_activeEntities.Add(duplicate.m_entity as PolygonEntity);
 			if (baseLayer.IsEnergyPolyLayer())
 			{
 				EnergyPolygonSubEntity baseEnergyPoly = (basePolygon as EnergyPolygonSubEntity);
@@ -235,10 +235,10 @@ namespace MSP2050.Scripts
 
 		protected virtual PolygonSubEntity startModifyingSubEntity(PolygonSubEntity subEntity, bool insideUndoBatch)
 		{
-			if (subEntity.Entity.PlanLayer == planLayer)
+			if (subEntity.m_entity.PlanLayer == planLayer)
 			{
 				fsm.AddToUndoStack(new ModifyPolygonOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
-				subEntity.edited = true;
+				subEntity.m_edited = true;
 			}
 			else
 			{
@@ -287,7 +287,7 @@ namespace MSP2050.Scripts
 					if (lineA != -1)
 					{
 						subEntity = startModifyingSubEntity(subEntity, false);
-						subEntity.restrictionNeedsUpdate = true;
+						subEntity.m_restrictionNeedsUpdate = true;
 
 						int newPoint = subEntity.AddPointBetween(worldPosition, lineA, lineB);
 
@@ -335,7 +335,7 @@ namespace MSP2050.Scripts
 
 			foreach (PolygonSubEntity subEntity in selection)
 			{
-				if (positionBounds.Overlaps(subEntity.BoundingBox))
+				if (positionBounds.Overlaps(subEntity.m_boundingBox))
 				{
 					collisions.Add(subEntity);
 				}
@@ -659,7 +659,7 @@ namespace MSP2050.Scripts
 					kvp.Key.SetPointPosition(selectedPoint, selectionDragStart[kvp.Key][selectedPoint] + offset, updateBoundingBoxes);
 				}
 				if (updateBoundingBoxes && kvp.Value.Count != kvp.Key.GetPolygonPointCount())
-					kvp.Key.restrictionNeedsUpdate = true;
+					kvp.Key.m_restrictionNeedsUpdate = true;
 				kvp.Key.PerformValidityCheck(false);
 				kvp.Key.RedrawGameObject(SubEntityDrawMode.Selected, kvp.Value, null);
 			}
@@ -792,7 +792,7 @@ namespace MSP2050.Scripts
 				//Delete all selected subentities
 				foreach (PolygonSubEntity subEntity in selectedSubEntities)
 				{
-					if (subEntity.Entity.PlanLayer == planLayer)
+					if (subEntity.m_entity.PlanLayer == planLayer)
 					{
 						fsm.AddToUndoStack(new RemovePolygonOperation(subEntity, planLayer, UndoOperation.EditMode.Modify));
 						OnPolygonRemoved(subEntity);
@@ -817,7 +817,7 @@ namespace MSP2050.Scripts
 					if (subEntity.GetPolygonPointCount() - getNumberOfSelectedPointsOnContour(subEntity, selectedPoints[subEntity]) < 3)
 					{
 						// remove polygon if it has fewer than 3 points left on the contour after deletion
-						if (subEntity.Entity.PlanLayer == planLayer)
+						if (subEntity.m_entity.PlanLayer == planLayer)
 						{
 							fsm.AddToUndoStack(new RemovePolygonOperation(subEntity, planLayer, UndoOperation.EditMode.Modify));
 							OnPolygonRemoved(subEntity);
@@ -849,7 +849,7 @@ namespace MSP2050.Scripts
 							}
 						}
 
-						subEntityToModify.restrictionNeedsUpdate = true;
+						subEntityToModify.m_restrictionNeedsUpdate = true;
 						subEntityToModify.PerformValidityCheck(false);
 						subEntityToModify.RedrawGameObject();
 					}
@@ -988,7 +988,7 @@ namespace MSP2050.Scripts
 			{
 				fsm.AddToUndoStack(new ModifyPolygonOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
 
-				subEntity.edited = true;
+				subEntity.m_edited = true;
 				subEntity.RemoveAllHoles();
 				subEntity.PerformValidityCheck(false);
 				subEntity.RedrawGameObject(SubEntityDrawMode.Selected);
@@ -1087,12 +1087,12 @@ namespace MSP2050.Scripts
 			//Find subentities with changed entity types
 			foreach (PolygonSubEntity subEntity in selectedSubEntities)
 			{
-				if (subEntity.Entity.EntityTypes.Count != newTypes.Count)
+				if (subEntity.m_entity.EntityTypes.Count != newTypes.Count)
 				{
 					subEntitiesWithDifferentTypes.Add(subEntity);
 					continue;
 				}
-				foreach (EntityType type in subEntity.Entity.EntityTypes)
+				foreach (EntityType type in subEntity.m_entity.EntityTypes)
 				{
 					if (!newTypes.Contains(type))
 					{
@@ -1109,7 +1109,7 @@ namespace MSP2050.Scripts
 			foreach (PolygonSubEntity subEntity in subEntitiesWithDifferentTypes)
 			{
 				PolygonSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.EntityTypes = newTypes;
+				subEntityToModify.m_entity.EntityTypes = newTypes;
 				subEntityToModify.RedrawGameObject(SubEntityDrawMode.Selected, selectedPoints.ContainsKey(subEntityToModify) ? selectedPoints[subEntityToModify] : null);
 			}
 
@@ -1123,7 +1123,7 @@ namespace MSP2050.Scripts
 			//Find subentities with changed entity types
 			foreach (PolygonSubEntity subEntity in selectedSubEntities)
 			{
-				if (subEntity.Entity.Country != newTeam)
+				if (subEntity.m_entity.Country != newTeam)
 				{
 					subEntitiesWithDifferentTeam.Add(subEntity);
 				}
@@ -1136,7 +1136,7 @@ namespace MSP2050.Scripts
 			foreach (PolygonSubEntity subEntity in subEntitiesWithDifferentTeam)
 			{
 				PolygonSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.Country = newTeam;
+				subEntityToModify.m_entity.Country = newTeam;
 			}
 
 			fsm.AddToUndoStack(new BatchUndoOperationMarker());
@@ -1149,7 +1149,7 @@ namespace MSP2050.Scripts
 			//Find subentities with changed entity types
 			foreach (PolygonSubEntity subEntity in selectedSubEntities)
 			{
-				if (subEntity.Entity.GetPropertyMetaData(parameter) != newValue)
+				if (subEntity.m_entity.GetPropertyMetaData(parameter) != newValue)
 				{
 					subEntitiesWithDifferentParams.Add(subEntity);
 				}
@@ -1162,7 +1162,7 @@ namespace MSP2050.Scripts
 			foreach (PolygonSubEntity subEntity in subEntitiesWithDifferentParams)
 			{
 				PolygonSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.SetPropertyMetaData(parameter, newValue);
+				subEntityToModify.m_entity.SetPropertyMetaData(parameter, newValue);
 			}
 
 			fsm.AddToUndoStack(new BatchUndoOperationMarker());
@@ -1231,17 +1231,17 @@ namespace MSP2050.Scripts
 
 			foreach (PolygonSubEntity pse in selectedSubEntities)
 			{
-				selectedEntityTypes.Add(pse.Entity.EntityTypes);
-				if (selectedTeam.HasValue && pse.Entity.Country != selectedTeam.Value)
+				selectedEntityTypes.Add(pse.m_entity.EntityTypes);
+				if (selectedTeam.HasValue && pse.m_entity.Country != selectedTeam.Value)
 					selectedTeam = -1;
 				else
-					selectedTeam = pse.Entity.Country;
+					selectedTeam = pse.m_entity.Country;
 
 				Dictionary<EntityPropertyMetaData, string> parameters = new Dictionary<EntityPropertyMetaData, string>();
 				foreach (EntityPropertyMetaData p in baseLayer.m_propertyMetaData)
 				{
 					if (p.ShowInEditMode)
-						parameters.Add(p, pse.Entity.GetPropertyMetaData(p));
+						parameters.Add(p, pse.m_entity.GetPropertyMetaData(p));
 				}
 				selectedParams.Add(parameters);
 			}

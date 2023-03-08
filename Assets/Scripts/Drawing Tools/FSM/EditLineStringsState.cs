@@ -229,12 +229,12 @@ namespace MSP2050.Scripts
 
 		protected LineStringSubEntity createNewPlanLineString(int persistentID, SubEntityDataCopy dataCopy)
 		{
-			LineStringEntity newEntity = baseLayer.CreateNewLineStringEntity(dataCopy.entityTypeCopy, planLayer);
+			LineStringEntity newEntity = baseLayer.CreateNewLineStringEntity(dataCopy.m_entityTypeCopy, planLayer);
 			LineStringSubEntity newSubEntity = baseLayer.IsEnergyLineLayer() ? new EnergyLineStringSubEntity(newEntity) : new LineStringSubEntity(newEntity);
 			newSubEntity.SetPersistentID(persistentID);
 			newEntity.AddSubEntity(newSubEntity);
 			newSubEntity.SetDataToCopy(dataCopy);
-			newSubEntity.edited = true;
+			newSubEntity.m_edited = true;
 
 			fsm.AddToUndoStack(new CreateLineStringOperation(newSubEntity, planLayer, UndoOperation.EditMode.Modify, true));
 			newSubEntity.DrawGameObject(baseLayer.LayerGameObject.transform);
@@ -252,9 +252,9 @@ namespace MSP2050.Scripts
 			selectedPoints.Remove(baseLineString);
 
 			//Change active geom 
-			baseLayer.AddPreModifiedEntity(baseLineString.Entity);
-			baseLayer.m_activeEntities.Remove(baseLineString.Entity as LineStringEntity);
-			baseLayer.m_activeEntities.Add(duplicate.Entity as LineStringEntity);
+			baseLayer.AddPreModifiedEntity(baseLineString.m_entity);
+			baseLayer.m_activeEntities.Remove(baseLineString.m_entity as LineStringEntity);
+			baseLayer.m_activeEntities.Add(duplicate.m_entity as LineStringEntity);
 
 			//Redraw based on activity changes
 			duplicate.RedrawGameObject(SubEntityDrawMode.Selected, duplicateSelection);
@@ -263,10 +263,10 @@ namespace MSP2050.Scripts
 
 		protected virtual LineStringSubEntity startModifyingSubEntity(LineStringSubEntity subEntity, bool insideUndoBatch)
 		{
-			if (planLayer == subEntity.Entity.PlanLayer)
+			if (planLayer == subEntity.m_entity.PlanLayer)
 			{
 				fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
-				subEntity.edited = true;
+				subEntity.m_edited = true;
 			}
 			else
 			{
@@ -312,7 +312,7 @@ namespace MSP2050.Scripts
 					if (lineA != -1)
 					{
 						subEntity = startModifyingSubEntity(subEntity, false);
-						subEntity.restrictionNeedsUpdate = true;
+						subEntity.m_restrictionNeedsUpdate = true;
 
 						int newPoint = subEntity.AddPointBetween(worldPosition, lineA, lineB);
 
@@ -365,7 +365,7 @@ namespace MSP2050.Scripts
 
 			foreach (LineStringSubEntity subEntity in selection)
 			{
-				if (positionBounds.Overlaps(subEntity.BoundingBox))
+				if (positionBounds.Overlaps(subEntity.m_boundingBox))
 				{
 					collisions.Add(subEntity);
 				}
@@ -666,7 +666,7 @@ namespace MSP2050.Scripts
 					kvp.Key.SetPointPosition(selectedPoint, selectionDragStart[kvp.Key][selectedPoint] + offset);
 				}
 				if (kvp.Value.Count != kvp.Key.GetPointCount())
-					kvp.Key.restrictionNeedsUpdate = true;
+					kvp.Key.m_restrictionNeedsUpdate = true;
 				kvp.Key.RedrawGameObject(SubEntityDrawMode.Selected, kvp.Value, null);
 			}
 		}
@@ -778,7 +778,7 @@ namespace MSP2050.Scripts
 				//Delete all selected
 				foreach (LineStringSubEntity subEntity in selectedSubEntities)
 				{
-					if (subEntity.Entity.PlanLayer == planLayer)
+					if (subEntity.m_entity.PlanLayer == planLayer)
 					{
 						fsm.AddToUndoStack(new RemoveLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Modify));
 						baseLayer.RemoveSubEntity(subEntity);
@@ -801,7 +801,7 @@ namespace MSP2050.Scripts
 					if (subEntity.GetPointCount() - selectedPoints[subEntity].Count < 2)
 					{
 						// remove linestring if it has fewer than 2 points left after deletion
-						if (subEntity.Entity.PlanLayer == planLayer)
+						if (subEntity.m_entity.PlanLayer == planLayer)
 						{
 							fsm.AddToUndoStack(new RemoveLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Modify));
 							baseLayer.RemoveSubEntity(subEntity);
@@ -823,7 +823,7 @@ namespace MSP2050.Scripts
 
 						subEntityToModify.RemovePoints(selectedPoints[subEntityToModify]);
 
-						subEntity.restrictionNeedsUpdate = true;
+						subEntity.m_restrictionNeedsUpdate = true;
 						subEntityToModify.RedrawGameObject();
 					}
 				}
@@ -861,24 +861,24 @@ namespace MSP2050.Scripts
 			foreach (LineStringSubEntity subEntity in localSelectedEntities)
 			{
 				string oldDirection;
-				if (subEntity.Entity.DoesPropertyExist(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY))
+				if (subEntity.m_entity.DoesPropertyExist(ShippingLineStringEntity.ShippingDirectionMetaKey))
 				{
-					oldDirection = subEntity.Entity.GetMetaData(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY);
+					oldDirection = subEntity.m_entity.GetMetaData(ShippingLineStringEntity.ShippingDirectionMetaKey);
 				}
 				else
 				{
-					oldDirection = ShippingLineStringEntity.DIRECTION_DEFAULT;
+					oldDirection = ShippingLineStringEntity.DirectionDefault;
 				}
 
 				string newDirection = ShippingLineStringEntity.CycleToNextDirection(oldDirection);
 
 				LineStringSubEntity newSubEntity = startModifyingSubEntity(subEntity, true);
 
-				fsm.AddToUndoStack(new UndoOperationChangeMeta(newSubEntity.Entity, ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY, oldDirection, newDirection));
+				fsm.AddToUndoStack(new UndoOperationChangeMeta(newSubEntity.m_entity, ShippingLineStringEntity.ShippingDirectionMetaKey, oldDirection, newDirection));
 
-				newSubEntity.Entity.SetMetaData(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY, newDirection);
+				newSubEntity.m_entity.SetMetaData(ShippingLineStringEntity.ShippingDirectionMetaKey, newDirection);
 
-				newSubEntity.Entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Selected);
+				newSubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Selected);
 			}
 			fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
@@ -964,12 +964,12 @@ namespace MSP2050.Scripts
 			//Find subentities with changed entity types
 			foreach (LineStringSubEntity subEntity in selectedSubEntities)
 			{
-				if (subEntity.Entity.EntityTypes.Count != newTypes.Count)
+				if (subEntity.m_entity.EntityTypes.Count != newTypes.Count)
 				{
 					subEntitiesWithDifferentTypes.Add(subEntity);
 					continue;
 				}
-				foreach (EntityType type in subEntity.Entity.EntityTypes)
+				foreach (EntityType type in subEntity.m_entity.EntityTypes)
 				{
 					if (!newTypes.Contains(type))
 					{
@@ -986,7 +986,7 @@ namespace MSP2050.Scripts
 			foreach (LineStringSubEntity subEntity in subEntitiesWithDifferentTypes)
 			{
 				LineStringSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.EntityTypes = newTypes;
+				subEntityToModify.m_entity.EntityTypes = newTypes;
 				subEntityToModify.RedrawGameObject(SubEntityDrawMode.Selected, selectedPoints.ContainsKey(subEntityToModify) ? selectedPoints[subEntityToModify] : null);
 			}
 
@@ -1000,7 +1000,7 @@ namespace MSP2050.Scripts
 			//Find subentities with changed entity types
 			foreach (LineStringSubEntity subEntity in selectedSubEntities)
 			{
-				if (subEntity.Entity.Country != newTeam)
+				if (subEntity.m_entity.Country != newTeam)
 				{
 					subEntitiesWithDifferentTeam.Add(subEntity);
 				}
@@ -1013,7 +1013,7 @@ namespace MSP2050.Scripts
 			foreach (LineStringSubEntity subEntity in subEntitiesWithDifferentTeam)
 			{
 				LineStringSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.Country = newTeam;
+				subEntityToModify.m_entity.Country = newTeam;
 			}
 
 			fsm.AddToUndoStack(new BatchUndoOperationMarker());
@@ -1026,7 +1026,7 @@ namespace MSP2050.Scripts
 			//Find subentities with changed entity types
 			foreach (LineStringSubEntity subEntity in selectedSubEntities)
 			{
-				if (subEntity.Entity.GetPropertyMetaData(parameter) != newValue)
+				if (subEntity.m_entity.GetPropertyMetaData(parameter) != newValue)
 				{
 					subEntitiesWithDifferentParams.Add(subEntity);
 				}
@@ -1039,7 +1039,7 @@ namespace MSP2050.Scripts
 			foreach (LineStringSubEntity subEntity in subEntitiesWithDifferentParams)
 			{
 				LineStringSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.SetPropertyMetaData(parameter, newValue);
+				subEntityToModify.m_entity.SetPropertyMetaData(parameter, newValue);
 			}
 
 			fsm.AddToUndoStack(new BatchUndoOperationMarker());
@@ -1070,17 +1070,17 @@ namespace MSP2050.Scripts
 
 			foreach (LineStringSubEntity lse in selectedSubEntities)
 			{
-				selectedEntityTypes.Add(lse.Entity.EntityTypes);
-				if (selectedTeam.HasValue && lse.Entity.Country != selectedTeam.Value)
+				selectedEntityTypes.Add(lse.m_entity.EntityTypes);
+				if (selectedTeam.HasValue && lse.m_entity.Country != selectedTeam.Value)
 					selectedTeam = -1;
 				else
-					selectedTeam = lse.Entity.Country;
+					selectedTeam = lse.m_entity.Country;
 
 				Dictionary<EntityPropertyMetaData, string> parameters = new Dictionary<EntityPropertyMetaData, string>();
 				foreach (EntityPropertyMetaData p in baseLayer.m_propertyMetaData)
 				{
 					if (p.ShowInEditMode)
-						parameters.Add(p, lse.Entity.GetPropertyMetaData(p));
+						parameters.Add(p, lse.m_entity.GetPropertyMetaData(p));
 				}
 				selectedParams.Add(parameters);
 			}

@@ -93,7 +93,7 @@ namespace MSP2050.Scripts
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
 				{
-					if (!subEntity.IsPlannedForRemoval() && boxBounds.Overlaps(subEntity.BoundingBox))
+					if (!subEntity.IsPlannedForRemoval() && boxBounds.Overlaps(subEntity.m_boundingBox))
 					{
 						collisions.Add(subEntity);
 					}
@@ -118,7 +118,7 @@ namespace MSP2050.Scripts
 		public override Entity GetEntityAt(Vector2 a_position)
 		{
 			SubEntity subEntity = GetSubEntityAt(a_position);
-			return subEntity?.Entity;
+			return subEntity?.m_entity;
 		}
 
 		public override SubEntity GetSubEntityAt(Vector2 a_position)
@@ -133,7 +133,7 @@ namespace MSP2050.Scripts
 			{
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
-					if (subEntity.planState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.BoundingBox))
+					if (subEntity.PlanState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.m_boundingBox))
 					{
 						float dist = subEntity.DistanceToPoint(a_position);
 						if (dist < closestDistance)
@@ -161,7 +161,7 @@ namespace MSP2050.Scripts
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
 				{
-					if (subEntity.planState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.BoundingBox))
+					if (subEntity.PlanState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.m_boundingBox))
 					{
 						collisions.Add(subEntity);
 					}

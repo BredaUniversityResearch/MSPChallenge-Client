@@ -17,7 +17,7 @@ namespace MSP2050.Scripts
 			{
 				if (m_sourcePolygon != null)
 					return m_sourcePolygon.Capacity;
-				return Entity.EntityTypes[0].capacity;
+				return m_entity.EntityTypes[0].capacity;
 			}
 			set { }
 		}
@@ -45,17 +45,17 @@ namespace MSP2050.Scripts
 
 		public EnergyPointSubEntity(Entity a_entity, SubEntityObject a_geometry, int a_databaseID) : base(a_entity, a_geometry, a_databaseID)
 		{
-			if (Entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+			if (m_entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
 				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
 			Connections = new List<Connection>();
 		}
 
-		public override void SetDatabaseID(int a_databaseID)
+		protected override void SetDatabaseID(int a_databaseID)
 		{
-			if (Entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+			if (m_entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
 				PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(a_databaseID);
-			databaseID = a_databaseID;
-			if (Entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+			m_databaseID = a_databaseID;
+			if (m_entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
 				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
 		}
 
@@ -65,8 +65,8 @@ namespace MSP2050.Scripts
 		public bool CanConnectToEnergySubEntity(EnergyPointSubEntity a_cableOrigin)
 		{
 			//Sources can't connect to sources
-			if ((Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePoint || Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint) &&
-			    (a_cableOrigin.Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePoint || a_cableOrigin.Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint))
+			if ((m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePoint || m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint) &&
+			    (a_cableOrigin.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePoint || a_cableOrigin.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint))
 				return false;
 
 			//Points cannot connect to themselves
@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 				return false;
 
 			//Green energy can't connect to grey
-			return Entity.GreenEnergy == a_cableOrigin.Entity.GreenEnergy;
+			return m_entity.GreenEnergy == a_cableOrigin.m_entity.GreenEnergy;
 		}
 
 		/// <summary>
@@ -83,7 +83,7 @@ namespace MSP2050.Scripts
 		public bool CanCableStartAtSubEntity(bool a_greenCable)
 		{
 			//Green cables cant connect to grey energy and vice versa
-			return Entity.GreenEnergy == a_greenCable;
+			return m_entity.GreenEnergy == a_greenCable;
 		}
 
 		public override void RemoveDependencies()
@@ -116,20 +116,20 @@ namespace MSP2050.Scripts
 
 		public override void RestoreDependencies()
 		{
-			if (Entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
+			if (m_entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(m_databaseID, this);
 		}
 
 		public override int GetDatabaseID()
 		{
-			if (Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+			if (m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 				return m_sourcePolygon.GetDatabaseID();
 			return base.GetDatabaseID();
 		}
 
 		public override string GetDataBaseOrBatchIDReference()
 		{
-			if (Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+			if (m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 			{
 				return m_sourcePolygon.GetDataBaseOrBatchIDReference();
 			}
@@ -138,7 +138,7 @@ namespace MSP2050.Scripts
 
 		public override int GetPersistentID()
 		{
-			if (Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+			if (m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 				return m_sourcePolygon.GetPersistentID();
 			return base.GetPersistentID();
 		}
@@ -147,12 +147,12 @@ namespace MSP2050.Scripts
 		{
 			// Delete energy_output
 			JObject dataObject = new JObject();
-			dataObject.Add("id", databaseID);
+			dataObject.Add("id", m_databaseID);
 			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BatchGroupEnergyDelete);
 			return base.SubmitDelete(a_batch);
 		}
-	
-		public override void SubmitData(BatchRequest a_batch)
+
+		protected override void SubmitData(BatchRequest a_batch)
 		{
 			base.SubmitData(a_batch);
 

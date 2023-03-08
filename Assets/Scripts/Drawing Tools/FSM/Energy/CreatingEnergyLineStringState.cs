@@ -12,12 +12,12 @@ namespace MSP2050.Scripts
 		public override void EnterState(Vector3 currentMousePosition)
 		{
 			EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)subEntity;
-			if (cable.Connections[0].point.Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+			if (cable.Connections[0].point.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 			{
 				//All points except sourcepoints are non-reference
 				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 				{
-					if (layer.m_greenEnergy == cable.Entity.Layer.m_greenEnergy &&
+					if (layer.m_greenEnergy == cable.m_entity.Layer.m_greenEnergy &&
 					    (layer.m_editingType == AbstractLayer.EditingType.Socket ||
 					     layer.m_editingType == AbstractLayer.EditingType.Transformer))
 						LayerManager.Instance.AddNonReferenceLayer(layer, true);
@@ -28,7 +28,7 @@ namespace MSP2050.Scripts
 				//All points are non-reference
 				foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 				{
-					if (layer.m_greenEnergy == cable.Entity.Layer.m_greenEnergy)
+					if (layer.m_greenEnergy == cable.m_entity.Layer.m_greenEnergy)
 					{
 						if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 						{
@@ -99,7 +99,7 @@ namespace MSP2050.Scripts
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 			subEntity.AddPoint(finalPosition);
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-			subEntity.edited = true;
+			subEntity.m_edited = true;
 
 			fsm.AddToUndoStack(new ModifyEnergyLineStringOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
 		}
@@ -115,9 +115,9 @@ namespace MSP2050.Scripts
 
 			//Set entitytype
 			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
-			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
+			if (selectedType != null) { subEntity.m_entity.EntityTypes = selectedType; }
 
-			subEntity.restrictionNeedsUpdate = true;
+			subEntity.m_restrictionNeedsUpdate = true;
 			subEntity.UnHideRestrictionArea();
 			subEntity.RedrawGameObject(SubEntityDrawMode.Default);
 

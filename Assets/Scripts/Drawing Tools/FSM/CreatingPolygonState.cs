@@ -29,14 +29,14 @@ namespace MSP2050.Scripts
 			int pointCount = subEntity.GetPolygonPointCount();
 			subEntity.SetPointPosition(pointCount - 1, subEntity.GetPointPosition(pointCount - 2), true);
 
-			if ((subEntity.Entity.Layer as PolygonLayer).m_activeEntities.Contains(subEntity.Entity as PolygonEntity))
+			if ((subEntity.m_entity.Layer as PolygonLayer).m_activeEntities.Contains(subEntity.m_entity as PolygonEntity))
 			{
-				subEntity.DrawGameObject(subEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
+				subEntity.DrawGameObject(subEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			}
 			else
 			{
-				(subEntity.Entity.Layer as PolygonLayer).RestoreSubEntity(subEntity);
-				subEntity.DrawGameObject(subEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
+				(subEntity.m_entity.Layer as PolygonLayer).RestoreSubEntity(subEntity);
+				subEntity.DrawGameObject(subEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			}
 
 			fsm.SetCursor(FSM.CursorType.Add);
@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 				SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 
 				subEntity.AddPoint(finalPosition);
-				subEntity.edited = true;
+				subEntity.m_edited = true;
 				subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 				if (subEntity.GetPolygonPointCount() > 2)
 					fsm.SetCursor(FSM.CursorType.Complete);
@@ -110,8 +110,8 @@ namespace MSP2050.Scripts
 		{
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 
-			subEntity.Entity.EntityTypes = newTypes;
-			subEntity.edited = true;
+			subEntity.m_entity.EntityTypes = newTypes;
+			subEntity.m_edited = true;
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 
 			fsm.AddToUndoStack(new ModifyPolygonOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
@@ -133,9 +133,9 @@ namespace MSP2050.Scripts
 
 			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 
-			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
+			if (selectedType != null) { subEntity.m_entity.EntityTypes = selectedType; }
 
-			subEntity.restrictionNeedsUpdate = true;
+			subEntity.m_restrictionNeedsUpdate = true;
 			subEntity.UnHideRestrictionArea();
 			subEntity.RedrawGameObject(SubEntityDrawMode.Default);
 
@@ -184,7 +184,7 @@ namespace MSP2050.Scripts
 		{
 			if (subEntity != null)
 			{
-				(subEntity.Entity.Layer as PolygonLayer).RemoveSubEntity(subEntity, false);
+				(subEntity.m_entity.Layer as PolygonLayer).RemoveSubEntity(subEntity, false);
 				subEntity.RemoveGameObject();
 			}
 

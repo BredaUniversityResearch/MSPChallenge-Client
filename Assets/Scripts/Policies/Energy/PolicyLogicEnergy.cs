@@ -215,7 +215,7 @@ namespace MSP2050.Scripts
 					{
 						totalCost += (double)cost;
 					}
-					se.SetPropertiesToGeoJSONFeature(feature);
+					se.SetPropertiesToGeoJsonFeature(feature);
 				}
 
 			}
@@ -727,7 +727,7 @@ namespace MSP2050.Scripts
 						foreach (Connection conn in cable.Connections)
 						{
 							bool found = false;
-							AbstractLayer targetPointLayer = conn.point.m_sourcePolygon == null ? conn.point.Entity.Layer : conn.point.m_sourcePolygon.Entity.Layer;
+							AbstractLayer targetPointLayer = conn.point.m_sourcePolygon == null ? conn.point.m_entity.Layer : conn.point.m_sourcePolygon.m_entity.Layer;
 							foreach (Entity existingEntity in energyLayerStates[targetPointLayer].baseGeometry)
 							{
 								if (existingEntity.DatabaseID == conn.point.GetDatabaseID())
@@ -762,7 +762,7 @@ namespace MSP2050.Scripts
 		public EnergyPointSubEntity GetEnergyPointAtPosition(Vector3 pos)
 		{
 			foreach (PointLayer p in m_energyPointLayers)
-				if (LayerManager.Instance.LayerIsVisible(p) || (p.sourcePolyLayer != null && LayerManager.Instance.LayerIsVisible(p.sourcePolyLayer)))
+				if (LayerManager.Instance.LayerIsVisible(p) || (p.m_sourcePolyLayer != null && LayerManager.Instance.LayerIsVisible(p.m_sourcePolyLayer)))
 					foreach (SubEntity e in p.GetSubEntitiesAt(pos))
 						if (e is EnergyPointSubEntity)
 							return (e as EnergyPointSubEntity);

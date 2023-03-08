@@ -29,8 +29,8 @@ namespace MSP2050.Scripts
 			int pointCount = subEntity.GetPointCount();
 			subEntity.SetPointPosition(pointCount - 1, subEntity.GetPointPosition(pointCount - 2));
 
-			LineStringLayer layer = (LineStringLayer)subEntity.Entity.Layer;
-			if (layer.Entities.Contains(subEntity.Entity as LineStringEntity))
+			LineStringLayer layer = (LineStringLayer)subEntity.m_entity.Layer;
+			if (layer.Entities.Contains(subEntity.m_entity as LineStringEntity))
 			{
 				subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 			}
@@ -119,7 +119,7 @@ namespace MSP2050.Scripts
 
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 
-			subEntity.edited = true;
+			subEntity.m_edited = true;
 			subEntity.AddPoint(finalPosition);
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 			if (subEntity.GetPointCount() > 1)
@@ -132,8 +132,8 @@ namespace MSP2050.Scripts
 		{
 			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
 
-			subEntity.edited = true;
-			subEntity.Entity.EntityTypes = newTypes;
+			subEntity.m_edited = true;
+			subEntity.m_entity.EntityTypes = newTypes;
 			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 
 			fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
@@ -150,9 +150,9 @@ namespace MSP2050.Scripts
 			subEntity.RemovePoints(new HashSet<int>() { subEntity.GetPointCount() - 1 });
 
 			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
-			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
+			if (selectedType != null) { subEntity.m_entity.EntityTypes = selectedType; }
 
-			subEntity.restrictionNeedsUpdate = true;
+			subEntity.m_restrictionNeedsUpdate = true;
 			subEntity.UnHideRestrictionArea();
 			subEntity.RedrawGameObject(SubEntityDrawMode.Default);
 
@@ -190,7 +190,7 @@ namespace MSP2050.Scripts
 		{
 			if (subEntity != null)
 			{
-				subEntity.Entity.Layer.RemoveSubEntity(subEntity, false);
+				subEntity.m_entity.Layer.RemoveSubEntity(subEntity, false);
 				subEntity.RemoveGameObject();
 			}
 

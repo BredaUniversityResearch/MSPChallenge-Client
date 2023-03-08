@@ -41,7 +41,7 @@ namespace MSP2050.Scripts
 
 				foreach (SubEntity entity in layer.GetSubEntitiesAt(position))
 				{
-					if (entity.planState != SubEntityPlanState.NotShown)
+					if (entity.PlanState != SubEntityPlanState.NotShown)
 						subEntities.Add(entity);
 				}
 			}

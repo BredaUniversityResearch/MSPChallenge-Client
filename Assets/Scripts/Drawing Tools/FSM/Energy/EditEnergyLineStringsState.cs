@@ -19,7 +19,7 @@ namespace MSP2050.Scripts
 				//Delete all selected
 				foreach (LineStringSubEntity subEntity in selectedSubEntities)
 				{
-					if (subEntity.Entity.PlanLayer == planLayer)
+					if (subEntity.m_entity.PlanLayer == planLayer)
 					{
 						EnergyLineStringSubEntity energySubEntity = subEntity as EnergyLineStringSubEntity;
 
@@ -50,7 +50,7 @@ namespace MSP2050.Scripts
 							fsm.AddToUndoStack(new ConcatOperationMarker()); //Make sure the point is also moved back if we were dragging it
 						fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
-						if (subEntity.Entity.PlanLayer == planLayer)
+						if (subEntity.m_entity.PlanLayer == planLayer)
 						{
 							EnergyLineStringSubEntity energySubEntity = subEntity as EnergyLineStringSubEntity;
 
@@ -116,7 +116,7 @@ namespace MSP2050.Scripts
 					{
 						//Snap to point
 						energySubEntity.SetPointPosition(kvp.Value.First(), point.GetPosition());
-						energySubEntity.restrictionNeedsUpdate = true;
+						energySubEntity.m_restrictionNeedsUpdate = true;
 						if (!point.CanConnectToEnergySubEntity(energySubEntity.GetConnection(!first).point))
 						{
 							//Redraw with red color
@@ -196,10 +196,10 @@ namespace MSP2050.Scripts
 
 		protected override LineStringSubEntity startModifyingSubEntity(LineStringSubEntity subEntity, bool insideUndoBatch)
 		{
-			if (planLayer == subEntity.Entity.PlanLayer)
+			if (planLayer == subEntity.m_entity.PlanLayer)
 			{
 				fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
-				subEntity.edited = true;
+				subEntity.m_edited = true;
 			}
 			else
 			{

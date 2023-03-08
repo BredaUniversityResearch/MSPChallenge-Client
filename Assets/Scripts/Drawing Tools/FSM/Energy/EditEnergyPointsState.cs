@@ -19,7 +19,7 @@ namespace MSP2050.Scripts
 			foreach (PointSubEntity subEntity in selection)
 			{
 				EnergyPointSubEntity energyEnt = subEntity as EnergyPointSubEntity;
-				if (subEntity.Entity.PlanLayer == planLayer)
+				if (subEntity.m_entity.PlanLayer == planLayer)
 				{
 					//Point undo added first so it is undone last
 					fsm.AddToUndoStack(new RemoveEnergyPointOperation(subEntity, planLayer));
@@ -47,7 +47,7 @@ namespace MSP2050.Scripts
 					foreach (Connection con in removedConnections)
 					{  
 						//Undooperation depends on wether the cable was on the current planlayer
-						if (con.cable.Entity.PlanLayer == cablePlanLayer)
+						if (con.cable.m_entity.PlanLayer == cablePlanLayer)
 						{
 							fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(con.cable, cablePlanLayer, UndoOperation.EditMode.Modify, false, true));
 							con.cable.RemoveGameObject();
@@ -139,18 +139,18 @@ namespace MSP2050.Scripts
 
 		protected override PointSubEntity startModifyingSubEntity(PointSubEntity subEntity, bool insideUndoBatch)
 		{
-			if (planLayer == subEntity.Entity.PlanLayer)
+			if (planLayer == subEntity.m_entity.PlanLayer)
 			{
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 
 				fsm.AddToUndoStack(new ModifyEnergyPointOperation(subEntity, planLayer, subEntity.GetDataCopy()));
-				subEntity.edited = true;
+				subEntity.m_edited = true;
 
 				//Create undo operations for attached cables
 				foreach (Connection con in (subEntity as EnergyPointSubEntity).Connections)
 				{
 					con.cable.AddModifyLineUndoOperation(fsm);
-					con.cable.edited = true;
+					con.cable.m_edited = true;
 				}
 
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
@@ -160,7 +160,7 @@ namespace MSP2050.Scripts
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 
 				//Duplicate point
-				PointSubEntity duplicate = createNewPlanPoint(subEntity.GetPosition(), subEntity.Entity.EntityTypes, subEntity.GetPersistentID(), subEntity.Entity.metaData, subEntity.Entity.Country);
+				PointSubEntity duplicate = createNewPlanPoint(subEntity.GetPosition(), subEntity.m_entity.EntityTypes, subEntity.GetPersistentID(), subEntity.m_entity.metaData, subEntity.m_entity.Country);
 				switchSelectionFromBasePointToDuplicate(subEntity, duplicate);
 				//subEntity = duplicate;
 
@@ -169,7 +169,7 @@ namespace MSP2050.Scripts
 				EnergyPointSubEntity newEnergySubEnt = duplicate as EnergyPointSubEntity;
 				List<EnergyLineStringSubEntity> newCables = new List<EnergyLineStringSubEntity>();
 				foreach (Connection con in oldEnergySubEnt.Connections)
-					if (con.cable.Entity.PlanLayer != cablePlanLayer) //Make sure not to add 2 new cables if both endpoints are being edited
+					if (con.cable.m_entity.PlanLayer != cablePlanLayer) //Make sure not to add 2 new cables if both endpoints are being edited
 						newCables.Add(con.cable);
 					else //Change the cables connection from the old point to the new
 					{

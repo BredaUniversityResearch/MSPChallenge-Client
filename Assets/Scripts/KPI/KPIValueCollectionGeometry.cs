@@ -49,7 +49,7 @@ namespace MSP2050.Scripts
 				}
 
 				total += subEntityTotal;
-				foreach (EntityType type in subEntity.Entity.EntityTypes)
+				foreach (EntityType type in subEntity.m_entity.EntityTypes)
 				{
 					float entityTypeValue;
 					totalByEntityType.TryGetValue(type, out entityTypeValue);

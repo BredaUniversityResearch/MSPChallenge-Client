@@ -444,7 +444,7 @@ namespace MSP2050.Scripts
 				List<SubEntity> removedSubEntities = PlanLayers[i].GetInstancesOfRemovedGeometry();
 				foreach (SubEntity t in removedSubEntities)
 				{
-					foreach (EntityType type in t.Entity.EntityTypes)
+					foreach (EntityType type in t.m_entity.EntityTypes)
 					{
 						if (type.requiredApproval == EApprovalType.AreaManager)
 							requireAMApproval = true;
@@ -519,9 +519,9 @@ namespace MSP2050.Scripts
 				{
 					foreach (SubEntity t in removedGeom[i])
 					{
-						if (t.Entity.Country != Entity.INVALID_COUNTRY_ID && t.Entity.Country != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(t.Entity.Country))
+						if (t.m_entity.Country != Entity.INVALID_COUNTRY_ID && t.m_entity.Country != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(t.m_entity.Country))
 						{
-							countryApproval.Add(t.Entity.Country, EPlanApprovalState.Maybe);
+							countryApproval.Add(t.m_entity.Country, EPlanApprovalState.Maybe);
 						}
 					}
 				}
@@ -664,15 +664,15 @@ namespace MSP2050.Scripts
 				List<SubEntity> removedSubEntities = PlanLayers[i].GetInstancesOfRemovedGeometry();
 				foreach (SubEntity subEntity in removedSubEntities)
 				{
-					min = Vector3.Min(min, subEntity.BoundingBox.min);
-					max = Vector3.Max(max, subEntity.BoundingBox.max);
+					min = Vector3.Min(min, subEntity.m_boundingBox.min);
+					max = Vector3.Max(max, subEntity.m_boundingBox.max);
 				}
 				//Check new geometry
 				for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
 				{
 					SubEntity subEntity = PlanLayers[i].GetNewGeometryByIndex(entityIndex).GetSubEntity(0);
-					min = Vector3.Min(min, subEntity.BoundingBox.min);
-					max = Vector3.Max(max, subEntity.BoundingBox.max);
+					min = Vector3.Min(min, subEntity.m_boundingBox.min);
+					max = Vector3.Max(max, subEntity.m_boundingBox.max);
 				}
 			}
 			return new Rect(min, max - min);

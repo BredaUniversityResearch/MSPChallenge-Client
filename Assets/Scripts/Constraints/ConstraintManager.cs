@@ -265,7 +265,7 @@ namespace MSP2050.Scripts
 					{
 						if (type.availabilityDate <= a_implementationDate)
 							continue;
-						Vector3 issueLocation = newEntity.GetSubEntity(0).BoundingBox.center;
+						Vector3 issueLocation = newEntity.GetSubEntity(0).m_boundingBox.center;
 						ConstraintTarget issueConstraint = FindTypeUnavailableConstraint(layer.BaseLayer, type);
 						if (issueConstraint == null)
 							continue;
@@ -379,7 +379,7 @@ namespace MSP2050.Scripts
 
 				if (a_satisfactionRule == EConstraintSatisfyRule.Any && anySatisfies == false)
 				{
-					a_planLayer.issues.Add(new PlanIssueObject(a_target.issueType, a.BoundingBox.center.x, a.BoundingBox.center.y, a_planLayer.BaseLayer.m_id, a_target.constraintId));
+					a_planLayer.issues.Add(new PlanIssueObject(a_target.issueType, a.m_boundingBox.center.x, a.m_boundingBox.center.y, a_planLayer.BaseLayer.m_id, a_target.constraintId));
 				}
 			}
 		}

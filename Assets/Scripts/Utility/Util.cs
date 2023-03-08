@@ -619,7 +619,7 @@ namespace MSP2050.Scripts
 		public static bool PolygonPointIntersection(PolygonSubEntity polygon, PointSubEntity point)
 		{
 			//Check point inside bounding box -> if no, false
-			if (!polygon.BoundingBox.Contains(point.GetPosition()))
+			if (!polygon.m_boundingBox.Contains(point.GetPosition()))
 				return false;
 			//Check point inside poly -> if yes, true
 			if (pointInPolygon(point.GetPosition(), polygon.GetPoints()))
@@ -636,7 +636,7 @@ namespace MSP2050.Scripts
 		public static bool PolygonLineIntersection(PolygonSubEntity polygon, LineStringSubEntity line, out Vector3 issueLocation)
 		{
 			//Check bounding box intersection -> if no, false
-			if (!polygon.BoundingBox.Overlaps(line.BoundingBox))
+			if (!polygon.m_boundingBox.Overlaps(line.m_boundingBox))
 			{
 				issueLocation = Vector3.zero;
 				return false;
@@ -662,7 +662,7 @@ namespace MSP2050.Scripts
 		public static bool PolygonPolygonIntersection(PolygonSubEntity polygon1, PolygonSubEntity polygon2)
 		{
 			//Check bounding box intersection -> if no, false
-			if (!polygon1.BoundingBox.Overlaps(polygon2.BoundingBox))
+			if (!polygon1.m_boundingBox.Overlaps(polygon2.m_boundingBox))
 				return false;
 			//Check line points inside poly -> if yes, true
 			foreach (Vector2 polyPoint in polygon2.GetPoints())

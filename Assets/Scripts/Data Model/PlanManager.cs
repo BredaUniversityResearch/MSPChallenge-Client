@@ -213,34 +213,34 @@ namespace MSP2050.Scripts
 		public SubEntityPlanState GetSubEntityPlanState(SubEntity a_subEntity)
 		{
 			//added, moved, removed, notinplan, notshown
-			PlanLayer currentPlanLayer = a_subEntity.Entity.Layer.CurrentPlanLayer();
-			bool layerInPlan = m_planViewing == null || m_planViewing.IsLayerpartOfPlan(a_subEntity.Entity.Layer);
-			if(!a_subEntity.Entity.Layer.Toggleable || (!a_subEntity.Entity.Layer.m_editable && a_subEntity.Entity.Layer.ActiveOnStart))
+			PlanLayer currentPlanLayer = a_subEntity.m_entity.Layer.CurrentPlanLayer();
+			bool layerInPlan = m_planViewing == null || m_planViewing.IsLayerpartOfPlan(a_subEntity.m_entity.Layer);
+			if(!a_subEntity.m_entity.Layer.Toggleable || (!a_subEntity.m_entity.Layer.m_editable && a_subEntity.m_entity.Layer.ActiveOnStart))
 				return SubEntityPlanState.NotInPlan;
 
 			if (m_planViewState == PlanViewState.All)
 			{
 				if (currentPlanLayer == null) //Only show the base layer
 				{
-					if (a_subEntity.Entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
+					if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 						return SubEntityPlanState.NotInPlan;
 					return SubEntityPlanState.NotShown;
 				}
 				if (!layerInPlan)
 				{
-					if (a_subEntity.Entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
+					if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 						return SubEntityPlanState.NotInPlan;
 					return SubEntityPlanState.NotShown;
 				}
 				if (currentPlanLayer.IsDatabaseIDInNewGeometry(a_subEntity.GetDatabaseID()))
 				{
-					if (!currentPlanLayer.BaseLayer.IsEntityTypeVisible(a_subEntity.Entity.EntityTypes))
+					if (!currentPlanLayer.BaseLayer.IsEntityTypeVisible(a_subEntity.m_entity.EntityTypes))
 						return SubEntityPlanState.NotShown;
-					if (a_subEntity.Entity.Layer.IsPersisIDCurrentlyNew(a_subEntity.GetPersistentID()))
+					if (a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(a_subEntity.GetPersistentID()))
 						return SubEntityPlanState.Added;
 					return SubEntityPlanState.Moved;
 				}
-				if (!a_subEntity.Entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
+				if (!a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 					return SubEntityPlanState.NotShown;
 				if (currentPlanLayer.IsPersistentIDInRemovedGeometry(a_subEntity.GetPersistentID()))
 					return SubEntityPlanState.Removed;
@@ -250,21 +250,21 @@ namespace MSP2050.Scripts
 			{
 				if (currentPlanLayer == null) //Only show the base layer
 				{
-					if (a_subEntity.Entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
+					if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 						return SubEntityPlanState.NotInPlan;
 					return SubEntityPlanState.NotShown;
 				}
 				if (!layerInPlan)
 				{
-					if (a_subEntity.Entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
+					if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 						return SubEntityPlanState.NotInPlan;
 					return SubEntityPlanState.NotShown;
 				}
-				if (currentPlanLayer.IsPersistentIDInRemovedGeometry(a_subEntity.GetPersistentID()) || a_subEntity.Entity.Layer.IsDatabaseIDPreModified(a_subEntity.GetDatabaseID()))
+				if (currentPlanLayer.IsPersistentIDInRemovedGeometry(a_subEntity.GetPersistentID()) || a_subEntity.m_entity.Layer.IsDatabaseIDPreModified(a_subEntity.GetDatabaseID()))
 					return SubEntityPlanState.NotInPlan;
-				if (a_subEntity.Entity.Layer.IsPersisIDCurrentlyNew(a_subEntity.GetPersistentID()) || currentPlanLayer.IsDatabaseIDInNewGeometry(a_subEntity.GetDatabaseID()))
+				if (a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(a_subEntity.GetPersistentID()) || currentPlanLayer.IsDatabaseIDInNewGeometry(a_subEntity.GetDatabaseID()))
 					return SubEntityPlanState.NotShown;
-				if (a_subEntity.Entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
+				if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 					return SubEntityPlanState.NotInPlan;
 			}
 			else if (m_planViewState == PlanViewState.Changes)
@@ -275,18 +275,18 @@ namespace MSP2050.Scripts
 					return SubEntityPlanState.NotShown;
 				if (currentPlanLayer.IsDatabaseIDInNewGeometry(a_subEntity.GetDatabaseID()))
 				{
-					if (!currentPlanLayer.BaseLayer.IsEntityTypeVisible(a_subEntity.Entity.EntityTypes))
+					if (!currentPlanLayer.BaseLayer.IsEntityTypeVisible(a_subEntity.m_entity.EntityTypes))
 						return SubEntityPlanState.NotShown;
-					if (a_subEntity.Entity.Layer.IsPersisIDCurrentlyNew(a_subEntity.GetPersistentID()))
+					if (a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(a_subEntity.GetPersistentID()))
 						return SubEntityPlanState.Added;
 					return SubEntityPlanState.Moved;
 				}
-				if (a_subEntity.Entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()) && currentPlanLayer.IsPersistentIDInRemovedGeometry(a_subEntity.GetPersistentID()))
+				if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()) && currentPlanLayer.IsPersistentIDInRemovedGeometry(a_subEntity.GetPersistentID()))
 					return SubEntityPlanState.Removed;
 			}
 			else //PlanViewState.Time
 			{
-				if (a_subEntity.Entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
+				if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 					return SubEntityPlanState.NotInPlan;
 				return SubEntityPlanState.NotShown;
 			}

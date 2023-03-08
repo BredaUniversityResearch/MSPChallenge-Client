@@ -101,10 +101,10 @@ namespace MSP2050.Scripts
                 //Determine the actual sourcepower that was used
                 foreach (EnergyPointSubEntity source in associatedGrid.m_sources)
                 {
-                    if (gridData.Value.m_sourceActual.ContainsKey(source.Entity.Country))
-                        gridData.Value.m_sourceActual[source.Entity.Country] += source.UsedCapacity;
+                    if (gridData.Value.m_sourceActual.ContainsKey(source.m_entity.Country))
+                        gridData.Value.m_sourceActual[source.m_entity.Country] += source.UsedCapacity;
                     else
-                        gridData.Value.m_sourceActual.Add(source.Entity.Country, source.UsedCapacity);
+                        gridData.Value.m_sourceActual.Add(source.m_entity.Country, source.UsedCapacity);
                 }
 
                 //Assign the actual and wasted values to its grid. This will be overwritten in later updates.

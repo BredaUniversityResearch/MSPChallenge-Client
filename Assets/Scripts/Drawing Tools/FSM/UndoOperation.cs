@@ -128,8 +128,8 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				SubEntity.restrictionNeedsUpdate = true;
-				SubEntity.Entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default); // redraw entire entity in case of entity type change
+				SubEntity.m_restrictionNeedsUpdate = true;
+				SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default); // redraw entire entity in case of entity type change
 				if (!totalUndo)
 					fsm.SetCurrentState(new SelectPolygonsState(fsm, PlanLayer));
 			}
@@ -155,13 +155,13 @@ namespace MSP2050.Scripts
         
 			if (editMode == EditMode.Create)
 			{
-				SubEntity.Entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.BeingCreated); // redraw entire entity in case of entity type change
+				SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.BeingCreated); // redraw entire entity in case of entity type change
 				if (!totalUndo)
 					fsm.SetCurrentState(new CreatingLineStringState(fsm, PlanLayer, SubEntity));
 			}
 			else if (editMode == EditMode.Modify)
 			{
-				SubEntity.restrictionNeedsUpdate = true;
+				SubEntity.m_restrictionNeedsUpdate = true;
 				SubEntity.RedrawGameObject(SubEntityDrawMode.Default);
 				if (!totalUndo)
 					fsm.SetCurrentState(new SelectLineStringsState(fsm, PlanLayer));
@@ -182,13 +182,13 @@ namespace MSP2050.Scripts
 
 			if (editMode == EditMode.Create)
 			{
-				SubEntity.Entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.BeingCreated); // redraw entire entity in case of entity type change
+				SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.BeingCreated); // redraw entire entity in case of entity type change
 				if (!totalUndo)
 					fsm.SetCurrentState(new CreatingEnergyLineStringState(fsm, PlanLayer, SubEntity));
 			}
 			else if (editMode == EditMode.Modify)
 			{
-				SubEntity.restrictionNeedsUpdate = true;
+				SubEntity.m_restrictionNeedsUpdate = true;
 				//SubEntity.RedrawGameObject(SubEntityDrawMode.PlanReference);
 				SubEntity.RedrawGameObject();
 			}
@@ -212,7 +212,7 @@ namespace MSP2050.Scripts
 			redo = new ModifyPointOperation(SubEntity, PlanLayer, newData);
 
 			// redraw entire entity in case of entity type change
-			SubEntity.Entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
+			SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			if (!totalUndo)
 				fsm.SetCurrentState(new EditPointsState(fsm, PlanLayer));
 		}
@@ -231,7 +231,7 @@ namespace MSP2050.Scripts
 			redo = new ModifyEnergyPointOperation(SubEntity, PlanLayer, newData);
 
 			// redraw entire entity in case of entity type change
-			SubEntity.Entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
+			SubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
 
 			//Changed target state to energy variant
 			if (!totalUndo)
@@ -257,7 +257,7 @@ namespace MSP2050.Scripts
 
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
-			(SubEntity.Entity.Layer as PolygonLayer).RemoveSubEntity(SubEntity, uncreate);
+			(SubEntity.m_entity.Layer as PolygonLayer).RemoveSubEntity(SubEntity, uncreate);
 
 			redo = new RemovePolygonOperation(SubEntity, PlanLayer, editMode, uncreate);
 
@@ -294,7 +294,7 @@ namespace MSP2050.Scripts
 
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
-			(SubEntity.Entity.Layer as LineStringLayer).RemoveSubEntity(SubEntity, uncreate);
+			(SubEntity.m_entity.Layer as LineStringLayer).RemoveSubEntity(SubEntity, uncreate);
 
 			redo = new RemoveLineStringOperation(SubEntity, PlanLayer, editMode, uncreate);
 
@@ -322,7 +322,7 @@ namespace MSP2050.Scripts
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
 			//This also automatically removes references
-			(SubEntity.Entity.Layer as LineStringLayer).RemoveSubEntity(SubEntity, uncreate);
+			(SubEntity.m_entity.Layer as LineStringLayer).RemoveSubEntity(SubEntity, uncreate);
 
 			redo = new RemoveEnergyLineStringOperation(SubEntity, PlanLayer, editMode, uncreate);
 
@@ -353,7 +353,7 @@ namespace MSP2050.Scripts
 
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
-			(SubEntity.Entity.Layer as PointLayer).RemoveSubEntity(SubEntity, uncreate);
+			(SubEntity.m_entity.Layer as PointLayer).RemoveSubEntity(SubEntity, uncreate);
 
 			redo = new RemovePointOperation(SubEntity, PlanLayer, uncreate);
 
@@ -374,7 +374,7 @@ namespace MSP2050.Scripts
 
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
-			(SubEntity.Entity.Layer as PointLayer).RemoveSubEntity(SubEntity, uncreate);
+			(SubEntity.m_entity.Layer as PointLayer).RemoveSubEntity(SubEntity, uncreate);
 
 			redo = new RemoveEnergyPointOperation(SubEntity, PlanLayer, uncreate, returnToEdit);
 
@@ -403,7 +403,7 @@ namespace MSP2050.Scripts
 
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
-			(SubEntity.Entity.Layer as PolygonLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as PolygonLayer).RestoreSubEntity(SubEntity, recreate);
 
 			SubEntity.PerformValidityCheck(editMode == EditMode.Create, editMode == EditMode.Create);
 
@@ -413,17 +413,17 @@ namespace MSP2050.Scripts
 			{
 				if (editMode == EditMode.Create)
 				{
-					SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
+					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 					fsm.SetCurrentState(new CreatingPolygonState(fsm, SubEntity, PlanLayer));
 				}
 				else
 				{
-					SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
+					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 					fsm.SetCurrentState(new SelectPolygonsState(fsm, PlanLayer));
 				}
 			}
 			else
-				SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
+				SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 		}
 	}
 
@@ -440,7 +440,7 @@ namespace MSP2050.Scripts
 
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
-			(SubEntity.Entity.Layer as LineStringLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as LineStringLayer).RestoreSubEntity(SubEntity, recreate);
 
 			redo = new CreateLineStringOperation(SubEntity, PlanLayer, editMode, recreate);
 
@@ -448,17 +448,17 @@ namespace MSP2050.Scripts
 			{
 				if (editMode == EditMode.Create)
 				{
-					SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
+					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 					fsm.SetCurrentState(new CreatingLineStringState(fsm, PlanLayer, SubEntity));
 				}
 				else if (editMode == EditMode.Modify)
 				{
-					SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
+					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 					fsm.SetCurrentState(new SelectLineStringsState(fsm, PlanLayer));
 				}
 			}
 			else
-				SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
+				SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 		}
 	}
 
@@ -474,30 +474,30 @@ namespace MSP2050.Scripts
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
 			//This also automatically restores references
-			(SubEntity.Entity.Layer as LineStringLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as LineStringLayer).RestoreSubEntity(SubEntity, recreate);
 
 			redo = new CreateEnergyLineStringOperation(SubEntity, PlanLayer, editMode, recreate);
 			if (!totalUndo)
 			{
 				if (editMode == EditMode.Create)
 				{
-					SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
+					SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 					fsm.SetCurrentState(new CreatingEnergyLineStringState(fsm, PlanLayer, SubEntity));
 				}
 				else if (editMode == EditMode.Modify)
 				{
 					if (pointWasDeleted)
 						//SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.PlanReference);
-						SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
+						SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 					else
 					{
-						SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
+						SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 						fsm.SetCurrentState(new SelectLineStringsState(fsm, PlanLayer));
 					}
 				}
 			}
 			else
-				SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
+				SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.Default);
 		}
 	}
 
@@ -512,11 +512,11 @@ namespace MSP2050.Scripts
 
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
-			(SubEntity.Entity.Layer as PointLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as PointLayer).RestoreSubEntity(SubEntity, recreate);
 
 			redo = new CreatePointOperation(SubEntity, PlanLayer, recreate);
 
-			SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform);
+			SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform);
 			if (!totalUndo)
 				fsm.SetCurrentState(new EditPointsState(fsm, PlanLayer));
 		}
@@ -532,11 +532,11 @@ namespace MSP2050.Scripts
 
 		public override void Undo(FSM fsm, out UndoOperation redo, bool totalUndo = false)
 		{
-			(SubEntity.Entity.Layer as PointLayer).RestoreSubEntity(SubEntity, recreate);
+			(SubEntity.m_entity.Layer as PointLayer).RestoreSubEntity(SubEntity, recreate);
 
 			redo = new CreateEnergyPointOperation(SubEntity, PlanLayer, recreate, returnToEdit);
 
-			SubEntity.DrawGameObject(SubEntity.Entity.Layer.LayerGameObject.transform);
+			SubEntity.DrawGameObject(SubEntity.m_entity.Layer.LayerGameObject.transform);
 
 			//Changed target state to energy variant
 			if (!totalUndo)
@@ -695,7 +695,7 @@ namespace MSP2050.Scripts
 		{
 			if (SubEntity.GetPointCount() == 1) //Points are directly finalized upon creation
 			{
-				LineStringLayer layer = SubEntity.Entity.Layer as LineStringLayer;
+				LineStringLayer layer = SubEntity.m_entity.Layer as LineStringLayer;
 				layer.RemoveSubEntity(SubEntity, true);
 				if (!totalUndo)
 					fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, PlanLayer));
@@ -767,7 +767,7 @@ namespace MSP2050.Scripts
 		{
 			if (SubEntity.GetPointCount() == 1) //Points are directly finalized upon creation
 			{
-				LineStringLayer layer = SubEntity.Entity.Layer as LineStringLayer;
+				LineStringLayer layer = SubEntity.m_entity.Layer as LineStringLayer;
 				layer.RestoreSubEntity(SubEntity, true);
 				if (!totalUndo)
 					fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, PlanLayer));

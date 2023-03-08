@@ -78,10 +78,10 @@ namespace MSP2050.Scripts
 				if (subEnt != null)
 				{
 					m_sources.Add(subEnt);
-					if (m_energyDistribution.m_distribution.ContainsKey(subEnt.Entity.Country))
-						m_energyDistribution.m_distribution[subEnt.Entity.Country].m_sourceInput += subEnt.Capacity;
+					if (m_energyDistribution.m_distribution.ContainsKey(subEnt.m_entity.Country))
+						m_energyDistribution.m_distribution[subEnt.m_entity.Country].m_sourceInput += subEnt.Capacity;
 					else
-						m_energyDistribution.m_distribution.Add(subEnt.Entity.Country, new CountryEnergyAmount(0, subEnt.Capacity));
+						m_energyDistribution.m_distribution.Add(subEnt.m_entity.Country, new CountryEnergyAmount(0, subEnt.Capacity));
 					m_sourcePower += subEnt.Capacity;
 				}
 				else
@@ -97,10 +97,10 @@ namespace MSP2050.Scripts
 				{
 					m_sockets.Add(subEnt);
 					long newMaximum = subEnt.Capacity;
-					if (m_energyDistribution.m_distribution.ContainsKey(subEnt.Entity.Country))
-						newMaximum = m_energyDistribution.m_distribution[subEnt.Entity.Country].m_maximum += subEnt.Capacity; //Add maxcap to country cap and store new value
+					if (m_energyDistribution.m_distribution.ContainsKey(subEnt.m_entity.Country))
+						newMaximum = m_energyDistribution.m_distribution[subEnt.m_entity.Country].m_maximum += subEnt.Capacity; //Add maxcap to country cap and store new value
 					else
-						m_energyDistribution.m_distribution.Add(subEnt.Entity.Country, new CountryEnergyAmount(subEnt.Capacity));
+						m_energyDistribution.m_distribution.Add(subEnt.m_entity.Country, new CountryEnergyAmount(subEnt.Capacity));
 					if (newMaximum > m_maxCountryCapacity)
 						m_maxCountryCapacity = newMaximum;
 				}
@@ -151,9 +151,9 @@ namespace MSP2050.Scripts
 						continue;
 					stack.Push(other);
 					visited.Add(other);
-					if (other.Entity.Layer.m_editingType == AbstractLayer.EditingType.Socket)
+					if (other.m_entity.Layer.m_editingType == AbstractLayer.EditingType.Socket)
 						m_sockets.Add(other);
-					else if (other.Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePoint || other.Entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+					else if (other.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePoint || other.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 					{
 						m_sources.Add(other);
 						m_sourcePower += other.Capacity;
@@ -375,7 +375,7 @@ namespace MSP2050.Scripts
 			//Add sockets and calculate socket capacities
 			foreach (EnergyPointSubEntity socket in m_sockets)
 			{
-				int country = socket.Entity.Country;
+				int country = socket.m_entity.Country;
 				if (country <= SessionManager.AM_ID)
 					Debug.LogError("Socket (ID: " + socket.GetDatabaseID() + ") has an invalid country (" + country);
 
@@ -394,7 +394,7 @@ namespace MSP2050.Scripts
 			//Add sources and determine source input
 			foreach (EnergyPointSubEntity source in m_sources)
 			{
-				int country = source.Entity.Country;
+				int country = source.m_entity.Country;
 				if (country <= SessionManager.AM_ID)
 					Debug.LogError("Source (ID: " + source.GetDatabaseID() + ") has an invalid country (" + country);
 
@@ -468,7 +468,7 @@ namespace MSP2050.Scripts
 			{
 				if (m_sockets.Count > 0)
 				{
-					return m_sockets[0].Entity.GreenEnergy;
+					return m_sockets[0].m_entity.GreenEnergy;
 				}
 				return false;
 			}
@@ -500,7 +500,7 @@ namespace MSP2050.Scripts
 		public bool CountryHasSocketInGrid(int a_countryID)
 		{
 			foreach (EnergyPointSubEntity socket in m_sockets)
-				if (socket.Entity.Country == a_countryID)
+				if (socket.m_entity.Country == a_countryID)
 					return true;
 			return false;
 		}
@@ -557,8 +557,8 @@ namespace MSP2050.Scripts
 				bool presentInOld = false;//Is newSocket present in oldGrid
 				foreach (EnergyPointSubEntity oldSocket in a_other.m_sockets)
 					if (newSocket.GetPersistentID() == oldSocket.GetPersistentID()
-					    && newSocket.Entity.EntityTypes[0] == oldSocket.Entity.EntityTypes[0]
-					    && newSocket.Entity.Country == oldSocket.Entity.Country)
+					    && newSocket.m_entity.EntityTypes[0] == oldSocket.m_entity.EntityTypes[0]
+					    && newSocket.m_entity.Country == oldSocket.m_entity.Country)
 					{
 						presentInOld = true;
 						break;
@@ -581,8 +581,8 @@ namespace MSP2050.Scripts
 				bool presentInOld = false;//Is newSocket present in oldGrid
 				foreach (EnergyPointSubEntity oldSocket in a_other.m_sockets)
 					if (newSocket.GetPersistentID() == oldSocket.GetPersistentID()
-					    && newSocket.Entity.EntityTypes[0] == oldSocket.Entity.EntityTypes[0]
-					    && newSocket.Entity.Country == oldSocket.Entity.Country)
+					    && newSocket.m_entity.EntityTypes[0] == oldSocket.m_entity.EntityTypes[0]
+					    && newSocket.m_entity.Country == oldSocket.m_entity.Country)
 					{
 						presentInOld = true;
 						a_partiallyIdentical = true;
@@ -617,8 +617,8 @@ namespace MSP2050.Scripts
 			List<SourceSummary> newSources = new List<SourceSummary>();
 			foreach (EnergyPointSubEntity newSource in m_sources)
 			{
-				SourceSummary summary = new SourceSummary(newSource.Entity.Country,
-					newSource.m_sourcePolygon == null ? newSource.Entity.EntityTypes[0] : newSource.m_sourcePolygon.Entity.EntityTypes[0],
+				SourceSummary summary = new SourceSummary(newSource.m_entity.Country,
+					newSource.m_sourcePolygon == null ? newSource.m_entity.EntityTypes[0] : newSource.m_sourcePolygon.m_entity.EntityTypes[0],
 					newSource.Capacity);
 				if (newSource.GetPersistentID() == -1)
 					newSources.Add(summary);
@@ -633,7 +633,7 @@ namespace MSP2050.Scripts
 					bool found = false;
 					foreach(SourceSummary sourceSummary in newSources)
 					{
-						if (sourceSummary.Matches(oldSource.Entity.Country, oldSource.m_sourcePolygon == null ? oldSource.Entity.EntityTypes[0] : oldSource.m_sourcePolygon.Entity.EntityTypes[0], oldSource.Capacity))
+						if (sourceSummary.Matches(oldSource.m_entity.Country, oldSource.m_sourcePolygon == null ? oldSource.m_entity.EntityTypes[0] : oldSource.m_sourcePolygon.m_entity.EntityTypes[0], oldSource.Capacity))
 						{
 							found = true;
 							break;
@@ -645,7 +645,7 @@ namespace MSP2050.Scripts
 					break;
 				}
 				if (!dict.TryGetValue(oldSource.GetPersistentID(), out pair)
-					|| !pair.Matches(oldSource.Entity.Country, oldSource.m_sourcePolygon == null ? oldSource.Entity.EntityTypes[0] : oldSource.m_sourcePolygon.Entity.EntityTypes[0], oldSource.Capacity))
+					|| !pair.Matches(oldSource.m_entity.Country, oldSource.m_sourcePolygon == null ? oldSource.m_entity.EntityTypes[0] : oldSource.m_sourcePolygon.m_entity.EntityTypes[0], oldSource.Capacity))
 				{ 
 					result = false;
 					break;

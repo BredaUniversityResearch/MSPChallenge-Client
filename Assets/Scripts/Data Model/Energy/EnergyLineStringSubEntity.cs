@@ -18,7 +18,7 @@ namespace MSP2050.Scripts
 
 		public long Capacity
 		{
-			get => Entity.EntityTypes[0].capacity * m_numberCables;
+			get => m_entity.EntityTypes[0].capacity * m_numberCables;
 			set { }
 		}
 
@@ -45,10 +45,10 @@ namespace MSP2050.Scripts
 			CalculationPropertyUpdated();
 		}
 
-		public override void SetDatabaseID(int a_databaseID)
+		protected override void SetDatabaseID(int a_databaseID)
 		{
 			PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(a_databaseID);
-			databaseID = a_databaseID;
+			m_databaseID = a_databaseID;
 			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
 		}
 
@@ -68,12 +68,12 @@ namespace MSP2050.Scripts
 		{
 			// Delete energy_output
 			JObject dataObject = new JObject();
-			dataObject.Add("id", databaseID);
+			dataObject.Add("id", m_databaseID);
 			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BatchGroupEnergyDelete);
 
 			//Delete cable
 			dataObject = new JObject();
-			dataObject.Add("cable", databaseID);
+			dataObject.Add("cable", m_databaseID);
 			a_batch.AddRequest(Server.DeleteEnergyConection(), dataObject, BatchRequest.BatchGroupEnergyDelete);
 
 			return base.SubmitDelete(a_batch);
@@ -121,7 +121,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void SubmitData(BatchRequest a_batch)
+		protected override void SubmitData(BatchRequest a_batch)
 		{
 			base.SubmitData(a_batch);
 
@@ -170,7 +170,7 @@ namespace MSP2050.Scripts
 
 		public override void RestoreDependencies()
 		{
-			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(m_databaseID, this);
 			foreach (Connection con in Connections)
 				con.point.AddConnection(con);
 		}
@@ -187,7 +187,7 @@ namespace MSP2050.Scripts
 
 		public void AddModifyLineUndoOperation(FSM a_fsm)
 		{
-			a_fsm.AddToUndoStack(new ModifyEnergyLineStringOperation(this, Entity.PlanLayer, GetDataCopy(), UndoOperation.EditMode.Modify));
+			a_fsm.AddToUndoStack(new ModifyEnergyLineStringOperation(this, m_entity.PlanLayer, GetDataCopy(), UndoOperation.EditMode.Modify));
 		}
 
 		public override HashSet<int> GetPointsInBox(Vector3 a_min, Vector3 a_max)
@@ -235,16 +235,16 @@ namespace MSP2050.Scripts
 			SubEntityDataCopy dataCopy = GetDataCopy();
 
 			//Create new entity
-			LineStringEntity newEntity = cableBaseLayer.CreateNewLineStringEntity(dataCopy.entityTypeCopy, a_cablePlanLayer);
+			LineStringEntity newEntity = cableBaseLayer.CreateNewLineStringEntity(dataCopy.m_entityTypeCopy, a_cablePlanLayer);
 			EnergyLineStringSubEntity newCable = new EnergyLineStringSubEntity(newEntity);
-			newCable.SetPersistentID(persistentID);
-			(newCable.Entity as LineStringEntity).AddSubEntity(newCable);
+			newCable.SetPersistentID(m_persistentID);
+			(newCable.m_entity as LineStringEntity).AddSubEntity(newCable);
 			newCable.SetDataToCopy(dataCopy);
 			a_fsm.AddToUndoStack(new CreateEnergyLineStringOperation(newCable, a_cablePlanLayer, UndoOperation.EditMode.Modify, true));
 
 			//Change active entities and (re)draw
-			cableBaseLayer.m_activeEntities.Remove(Entity as LineStringEntity);
-			cableBaseLayer.PreModifiedEntities.Add(Entity as LineStringEntity);
+			cableBaseLayer.m_activeEntities.Remove(m_entity as LineStringEntity);
+			cableBaseLayer.PreModifiedEntities.Add(m_entity as LineStringEntity);
 			cableBaseLayer.m_activeEntities.Add(newEntity);
 			RedrawGameObject();
 			newCable.DrawGameObject(cableBaseLayer.LayerGameObject.transform);
@@ -273,16 +273,16 @@ namespace MSP2050.Scripts
 
 		public override void CalculationPropertyUpdated()
 		{
-			EntityPropertyMetaData propertyMeta = Entity.Layer.FindPropertyMetaDataByName(NumberCablesMetaKey);
+			EntityPropertyMetaData propertyMeta = m_entity.Layer.FindPropertyMetaDataByName(NumberCablesMetaKey);
 			int defaultValue = 1;
 			if (propertyMeta != null)
 			{
 				defaultValue = Util.ParseToInt(propertyMeta.DefaultValue, 1);
 			}
 
-			if (Entity.DoesPropertyExist(NumberCablesMetaKey))
+			if (m_entity.DoesPropertyExist(NumberCablesMetaKey))
 			{
-				m_numberCables = Util.ParseToInt(Entity.GetMetaData(NumberCablesMetaKey), defaultValue);
+				m_numberCables = Util.ParseToInt(m_entity.GetMetaData(NumberCablesMetaKey), defaultValue);
 			}
 			else
 				m_numberCables = defaultValue;

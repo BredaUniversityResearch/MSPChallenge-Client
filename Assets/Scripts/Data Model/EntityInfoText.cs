@@ -89,7 +89,7 @@ namespace MSP2050.Scripts
 		{
 			ETextState state = Main.GetTextState();
 			string propertyName = "";
-			if (ownerSubEntity.Entity.Layer.m_textInfo.TryGetPropertyNameAtState(state, out propertyName))
+			if (ownerSubEntity.m_entity.Layer.m_textInfo.TryGetPropertyNameAtState(state, out propertyName))
 			{
 				return ownerSubEntity.GetProperty(propertyName);
 			}

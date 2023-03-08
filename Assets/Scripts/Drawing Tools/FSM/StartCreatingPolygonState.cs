@@ -76,7 +76,7 @@ namespace MSP2050.Scripts
 			baseLayer.m_activeEntities.Add(entity);
 			entity.EntityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			PolygonSubEntity subEntity = entity.GetSubEntity(0) as PolygonSubEntity;
-			subEntity.edited = true;
+			subEntity.m_edited = true;
 			fsm.SetCurrentState(new CreatingPolygonState(fsm, subEntity, planLayer));
 
 			fsm.AddToUndoStack(new CreatePolygonOperation(subEntity, planLayer, UndoOperation.EditMode.Create));

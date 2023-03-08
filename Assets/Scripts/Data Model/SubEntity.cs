@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using GeoJSON.Net.Feature;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
+using Object = UnityEngine.Object;
 
 namespace MSP2050.Scripts
 {
@@ -14,80 +13,93 @@ namespace MSP2050.Scripts
 
 	public abstract class SubEntity
 	{
-		private const float layerTypeOrderMaxZOffset = 0.05f;
-		private const float frontOfLayerZOffset = -0.90f;
-		private const float frontOfEverythingZOffset = -100.0f;
+		private const float LayerTypeOrderMaxZOffset = 0.05f;
+		private const float FrontOfLayerZOffset = -0.90f;
+		private const float FrontOfEverythingZOffset = -100.0f;
 
-		public Entity Entity;
-		protected int databaseID = -1;
-		protected int persistentID;
-		protected string mspID;
+		public Entity m_entity;
+		protected int m_databaseID = -1;
+		protected int m_persistentID;
+		protected string m_mspID;
 
-		protected GameObject gameObject;
-		protected SubEntityDrawSettings drawSettings;
-		public SubEntityDrawSettings DrawSettings { get { return drawSettings; } }
-		public SubEntityPlanState planState { get; protected set; }
-		protected SubEntityPlanState previousPlanState { get; private set; } //Temporary until we can move the planState checks out of the RedrawGameObject function
-		public bool edited; //Has this subentity been altered in the current editing session. Only set for polygons.
+		protected GameObject m_gameObject;
+		protected SubEntityDrawSettings m_drawSettings;
+		public SubEntityDrawSettings DrawSettings => m_drawSettings;
+		public SubEntityPlanState PlanState { get; protected set; }
+		protected SubEntityPlanState PreviousPlanState { get; private set; } //Temporary until we can move the planState checks out of the RedrawGameObject function
+		public bool m_edited; //Has this subentity been altered in the current editing session. Only set for polygons.
 
-		public Rect BoundingBox;
+		public Rect m_boundingBox;
 
-		public bool SnappingToThisEnabled { get; set; }
+		public bool SnappingToThisEnabled { get; protected set; }
 
-		public float Order = 0;
+		protected float m_order = 0;
 
-		public bool restrictionNeedsUpdate = false;
-		protected bool restrictionHidden = false;
-		private float currentRestrictionSize = 0.0f;
+		public bool m_restrictionNeedsUpdate = false;
+		protected bool m_restrictionHidden = false;
+		private float m_currentRestrictionSize = 0.0f;
 
-		protected EntityInfoText textMesh = null;
-		protected bool textMeshVisibleAtZoom = true;
-
-		public delegate void SubEntityVisiblityChangedCallback(SubEntity entity, AbstractLayer layer, bool newVisibility);
-		public static event SubEntityVisiblityChangedCallback OnEntityVisibilityChanged;
-
-		public SubEntity(Entity entity, int databaseID = -1, int persistentID = -1, string mspID = null)
+		protected EntityInfoText m_textMesh = null;
+		private bool m_textMeshVisibleAtZoom = true;
+		
+		public bool TextMeshVisibleAtZoom
 		{
-			Entity = entity;
-			this.databaseID = databaseID;
-			this.persistentID = persistentID;
-			this.mspID = mspID;
+			get => m_textMeshVisibleAtZoom;
+			set {
+				if (m_textMeshVisibleAtZoom == value)
+					return;
+				m_textMeshVisibleAtZoom = value;
+				if (value && m_entity.Layer.LayerTextVisible)
+					SetTextMeshActivity(true);
+				else
+					SetTextMeshActivity(false);
+			}
+		}		
+
+		public delegate void SubEntityVisibilityChangedCallback(SubEntity a_entity, AbstractLayer a_layer, bool a_newVisibility);
+		public static event SubEntityVisibilityChangedCallback OnEntityVisibilityChanged;
+
+		protected SubEntity(Entity a_entity, int a_databaseID = -1, int a_persistentID = -1, string a_mspID = null)
+		{
+			m_entity = a_entity;
+			m_databaseID = a_databaseID;
+			m_persistentID = a_persistentID;
+			m_mspID = a_mspID;
 		}
 
-		public abstract void DrawGameObject(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null);
+		public abstract void DrawGameObject(Transform a_parent, SubEntityDrawMode a_drawMode = SubEntityDrawMode.Default, HashSet<int> a_selectedPoints = null, HashSet<int> a_hoverPoints = null);
 
-		public virtual void RedrawGameObject(SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null, bool updatePlanState = true)
+		public virtual void RedrawGameObject(SubEntityDrawMode a_drawMode = SubEntityDrawMode.Default, HashSet<int> a_selectedPoints = null, HashSet<int> a_hoverPoints = null, bool a_updatePlanState = true)
 		{
-			if(updatePlanState)
+			if(a_updatePlanState)
 				UpdatePlanState();
 
-			float restrictionSize = Entity.GetCurrentRestrictionSize();
-			if (restrictionNeedsUpdate || restrictionSize != currentRestrictionSize)
+			float restrictionSize = m_entity.GetCurrentRestrictionSize();
+			if (m_restrictionNeedsUpdate || restrictionSize != m_currentRestrictionSize)
 			{
 				UpdateRestrictionArea(restrictionSize);
 			}
 
-			if (textMesh != null)
-			{
-				textMesh.UpdateTextMeshText();
-				textMesh.SetBackgroundVisibility(drawMode == SubEntityDrawMode.Hover || drawMode == SubEntityDrawMode.Selected);
-			}
+			if (m_textMesh == null)
+				return;
+			m_textMesh.UpdateTextMeshText();
+			m_textMesh.SetBackgroundVisibility(a_drawMode == SubEntityDrawMode.Hover || a_drawMode == SubEntityDrawMode.Selected);
 		}
 
 		public abstract void UpdateGameObjectForEveryLOD();
-		public abstract Vector3 GetPointClosestTo(Vector3 position);
+		public abstract Vector3 GetPointClosestTo(Vector3 a_position);
 		protected abstract void UpdateBoundingBox();
 		public abstract void SetOrderBasedOnType();
-		public abstract SubEntityObject GetLayerObject();
-		public abstract void UpdateGeometry(GeometryObject geo);
-		public abstract void SetDataToObject(SubEntityObject subEntityObject);
+		protected abstract SubEntityObject GetLayerObject();
+		public abstract void UpdateGeometry(GeometryObject a_geo);
+		public abstract void SetDataToObject(SubEntityObject a_subEntityObject);
 
 		protected void calculateOrderBasedOnType()
 		{
 			// Because keys can have gaps in them
 			List<int> entityTypeKeysOrdered = new List<int>();
 
-			foreach (var kvp in Entity.Layer.m_entityTypes)
+			foreach (var kvp in m_entity.Layer.m_entityTypes)
 			{
 				entityTypeKeysOrdered.Add(kvp.Key);
 			}
@@ -95,149 +107,143 @@ namespace MSP2050.Scripts
 			entityTypeKeysOrdered.Sort(); // smallest first
 			entityTypeKeysOrdered.Reverse();
 
-			int currentEntityTypeKey = Entity.Layer.GetEntityTypeKey(Entity.EntityTypes[0]);
+			int currentEntityTypeKey = m_entity.Layer.GetEntityTypeKey(m_entity.EntityTypes[0]);
 
-			Order = ((float)entityTypeKeysOrdered.IndexOf(currentEntityTypeKey) / (float)Entity.Layer.m_entityTypes.Count) * layerTypeOrderMaxZOffset;
+			m_order = ((float)entityTypeKeysOrdered.IndexOf(currentEntityTypeKey) / (float)m_entity.Layer.m_entityTypes.Count) * LayerTypeOrderMaxZOffset;
 		}
 
 
 		public GameObject GetGameObject()
 		{
-			return gameObject;
+			return m_gameObject;
 		}
 
 		public virtual void RemoveGameObject()
 		{
-			if (textMesh != null)
+			if (m_textMesh != null)
 			{
-				textMesh.Destroy();
-				textMesh = null;
+				m_textMesh.Destroy();
+				m_textMesh = null;
 			}
 
-			GameObject.Destroy(gameObject);
-			gameObject = null;
+			Object.Destroy(m_gameObject);
+			m_gameObject = null;
 		}
 
-		public virtual void SetDatabaseID(int databaseID)
+		protected virtual void SetDatabaseID(int a_databaseID)
 		{
-			this.databaseID = databaseID;
+			m_databaseID = a_databaseID;
 		}
 
-		public virtual void SetPersistentID(int persistentID)
+		public virtual void SetPersistentID(int a_persistentID)
 		{
-			this.persistentID = persistentID;
+			m_persistentID = a_persistentID;
 		}
 
 		public bool HasDatabaseID()
 		{
-			return databaseID != -1;
+			return m_databaseID != -1;
 		}
 
 		public virtual int GetDatabaseID()
 		{
-			return databaseID;
+			return m_databaseID;
 		}
 
 		public virtual string GetDataBaseOrBatchIDReference()
 		{
 			if (HasDatabaseID())
-				return databaseID.ToString();
-			else
-				return BatchRequest.FormatCallIDReference(Entity.creationBatchCallID);
+				return m_databaseID.ToString();
+			return BatchRequest.FormatCallIDReference(m_entity.creationBatchCallID);
 		}
 
 		public virtual int GetPersistentID()
 		{
-			return persistentID;
+			return m_persistentID;
 		}
 
 		public string GetMspID()
 		{
-			return mspID;
+			return m_mspID;
 		}
 
 		public bool IsPlannedForRemoval()
 		{
-			return planState == SubEntityPlanState.Removed;
+			return PlanState == SubEntityPlanState.Removed;
 		}
 
 		public bool IsNotShownInPlan()
 		{
-			return planState == SubEntityPlanState.NotShown;
+			return PlanState == SubEntityPlanState.NotShown;
 		}
 
 		public bool IsNotAffectedByPlan()
 		{
-			return planState == SubEntityPlanState.NotInPlan;
+			return PlanState == SubEntityPlanState.NotInPlan;
 		}
 
-		//public string ToJSON()
-		//{
-		//	return JsonConvert.SerializeObject(GetLayerObject().geometry);
-		//}
-
-		public virtual Action<BatchRequest> SubmitUpdate(BatchRequest batch)
+		public virtual Action<BatchRequest> SubmitUpdate(BatchRequest a_batch)
 		{
 			JObject dataObject = new JObject();
 			if (this is PolygonSubEntity && (this as PolygonSubEntity).GetHoleCount() > 0)
 			{
 				//Delete the geometry and create a new one
-				SubmitDelete(batch);
-				SubmitNew(batch);
+				SubmitDelete(a_batch);
+				SubmitNew(a_batch);
 			}
 			else
 			{
 				dataObject.Add("geometry", JsonConvert.SerializeObject(GetLayerObject().geometry));
-				dataObject.Add("country", Entity.Country);
-				dataObject.Add("id", databaseID);
+				dataObject.Add("country", m_entity.Country);
+				dataObject.Add("id", m_databaseID);
 
-				batch.AddRequest<int>(Server.UpdateGeometry(), dataObject, BatchRequest.BatchGroupGeometryUpdate, handleDatabaseIDResult);
-				SubmitData(batch);
+				a_batch.AddRequest<int>(Server.UpdateGeometry(), dataObject, BatchRequest.BatchGroupGeometryUpdate, HandleDatabaseIDResult);
+				SubmitData(a_batch);
 			}
 			return null;
 		}
 
-		public virtual Action<BatchRequest> SubmitDelete(BatchRequest batch)
+		public virtual Action<BatchRequest> SubmitDelete(BatchRequest a_batch)
 		{
 			JObject dataObject = new JObject();
-			dataObject.Add("id", databaseID);
-			batch.AddRequest(Server.DeleteGeometry(), dataObject, BatchRequest.BatchGroupGeometryDelete);
+			dataObject.Add("id", m_databaseID);
+			a_batch.AddRequest(Server.DeleteGeometry(), dataObject, BatchRequest.BatchGroupGeometryDelete);
 			return null;
 		}
-	
-		public virtual void SubmitData(BatchRequest batch)
+
+		protected virtual void SubmitData(BatchRequest a_batch)
 		{
 			JObject dataObject = new JObject();
 
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
-			dataObject.Add("data", Entity.MetaToJSON());
-			dataObject.Add("type", Util.IntListToString(Entity.GetEntityTypeKeys()));
+			dataObject.Add("data", m_entity.MetaToJSON());
+			dataObject.Add("type", Util.IntListToString(m_entity.GetEntityTypeKeys()));
 
-			batch.AddRequest(Server.SendGeometryData(), dataObject, BatchRequest.BatchGroupGeometryData);
+			a_batch.AddRequest(Server.SendGeometryData(), dataObject, BatchRequest.BatchGroupGeometryData);
 		}
 
-		public virtual Action<BatchRequest> SubmitNew(BatchRequest batch)
+		public virtual Action<BatchRequest> SubmitNew(BatchRequest a_batch)
 		{
 			JObject dataObject = new JObject();
 
 			dataObject.Add("geometry", JsonConvert.SerializeObject(GetLayerObject().geometry));
-			dataObject.Add("country", Entity.Country);
+			dataObject.Add("country", m_entity.Country);
 
-			if (persistentID != -1)
-				dataObject.Add("persistent", persistentID);
+			if (m_persistentID != -1)
+				dataObject.Add("persistent", m_persistentID);
 
-			if (Entity.PlanLayer != null)
+			if (m_entity.PlanLayer != null)
 			{
-				dataObject.Add("layer", Entity.PlanLayer.GetDataBaseOrBatchIDReference());
-				dataObject.Add("plan", Entity.PlanLayer.Plan.GetDataBaseOrBatchIDReference());
+				dataObject.Add("layer", m_entity.PlanLayer.GetDataBaseOrBatchIDReference());
+				dataObject.Add("plan", m_entity.PlanLayer.Plan.GetDataBaseOrBatchIDReference());
 			}
 			else
 			{
 				dataObject.Add("plan", "");
-				dataObject.Add("layer", Entity.Layer.m_id);
+				dataObject.Add("layer", m_entity.Layer.m_id);
 			}
 
-			Entity.creationBatchCallID = batch.AddRequest<int>(Server.PostGeometry(), dataObject, BatchRequest.BatchGroupGeometryAdd, handleDatabaseIDResult);
+			m_entity.creationBatchCallID = a_batch.AddRequest<int>(Server.PostGeometry(), dataObject, BatchRequest.BatchGroupGeometryAdd, HandleDatabaseIDResult);
 
 			if (this is PolygonSubEntity)
 			{
@@ -247,140 +253,123 @@ namespace MSP2050.Scripts
 				{
 					dataObject = new JObject();
 					dataObject.Add("geometry", ((PolygonSubEntity)this).HolesToJSON(i));
-					dataObject.Add("layer", Entity.PlanLayer.GetDataBaseOrBatchIDReference());
-					dataObject.Add("subtractive", BatchRequest.FormatCallIDReference(Entity.creationBatchCallID)); 
+					dataObject.Add("layer", m_entity.PlanLayer.GetDataBaseOrBatchIDReference());
+					dataObject.Add("subtractive", BatchRequest.FormatCallIDReference(m_entity.creationBatchCallID)); 
 
-					batch.AddRequest(Server.PostGeometrySub(), dataObject, BatchRequest.BatchGroupGeometryData);
+					a_batch.AddRequest(Server.PostGeometrySub(), dataObject, BatchRequest.BatchGroupGeometryData);
 				}
 			}
-			SubmitData(batch);
+			SubmitData(a_batch);
 			return null;
 		}
 
-		protected virtual void handleDatabaseIDResult(int result)
+		protected virtual void HandleDatabaseIDResult(int a_result)
 		{
-			SetDatabaseID(result);
+			SetDatabaseID(a_result);
 			if (GetPersistentID() == -1)
-				SetPersistentID(result);
+				SetPersistentID(a_result);
 		}
 	
-		public virtual void ForceGameObjectVisibility(bool value)
+		public virtual void ForceGameObjectVisibility(bool a_value)
 		{
-			gameObject.SetActive(value);
+			m_gameObject.SetActive(a_value);
 		}
 		
-		protected void objectVisibility(GameObject gameObject, float distance, Camera targetCamera)
+		protected void ObjectVisibility(GameObject a_gameObject, float a_distance, Camera a_targetCamera)
 		{
-			if (distance > targetCamera.orthographicSize)
+			if (a_distance > a_targetCamera.orthographicSize)
 			{
-				gameObject.SetActive(true);
+				a_gameObject.SetActive(true);
 			}
 			else
 			{
-				gameObject.SetActive(false);
+				a_gameObject.SetActive(false);
 			}
 		}
 
-		protected int getImportance(string entityPropertyName, int multiplier, bool oneIsLargest = false)
+		protected int GetImportance(string a_entityPropertyName, int a_multiplier, bool a_oneIsLargest = false)
 		{
 			int importance = int.MaxValue;
 
-			if (Entity.DoesPropertyExist(entityPropertyName))
+			if (!m_entity.DoesPropertyExist(a_entityPropertyName))
+				return importance;
+			importance = Util.ParseToInt(m_entity.GetMetaData(a_entityPropertyName), int.MaxValue);
+
+			if (a_oneIsLargest)
 			{
-				importance = Util.ParseToInt(Entity.GetMetaData(entityPropertyName), int.MaxValue);
-
-				if (oneIsLargest)
-				{
-					importance -= 10;
-				}
-
-				importance = (int)Mathf.Abs((float)importance);
-
-				importance *= multiplier;
+				importance -= 10;
 			}
+
+			importance = (int)Mathf.Abs((float)importance);
+
+			importance *= a_multiplier;
 
 			return importance;
 		}
 
-		protected bool IsSnapToDrawMode(SubEntityDrawMode drawMode)
+		protected bool IsSnapToDrawMode(SubEntityDrawMode a_drawMode)
 		{
-			return drawMode != SubEntityDrawMode.BeingCreated &&
-			       drawMode != SubEntityDrawMode.BeingCreatedInvalid &&
-			       drawMode != SubEntityDrawMode.Selected;
+			return a_drawMode != SubEntityDrawMode.BeingCreated &&
+			       a_drawMode != SubEntityDrawMode.BeingCreatedInvalid &&
+			       a_drawMode != SubEntityDrawMode.Selected;
 		}
 
 		/// <summary>
 		/// Excepts the restriction area to be updated afterwards
 		/// </summary>
-		public void UnHideRestrictionArea(bool forceUpdate = false)
+		public void UnHideRestrictionArea(bool a_forceUpdate = false)
 		{
-			restrictionHidden = false;
-			if (forceUpdate)
+			m_restrictionHidden = false;
+			if (a_forceUpdate)
 			{
-				UpdateRestrictionArea(Entity.GetCurrentRestrictionSize());
+				UpdateRestrictionArea(m_entity.GetCurrentRestrictionSize());
 			}
 		}
 
-		public virtual void CreateTextMesh(Transform parent, Vector3 textPosition, bool setWorldPosition = false)
+		protected virtual void CreateTextMesh(Transform a_parent, Vector3 a_textPosition, bool a_setWorldPosition = false)
 		{
-			if (textMesh == null)
+			if (m_textMesh == null)
 			{
-				textMesh = new EntityInfoText(this, Entity.Layer.m_textInfo, parent);
-				textMesh.SetPosition(textPosition, setWorldPosition);
+				m_textMesh = new EntityInfoText(this, m_entity.Layer.m_textInfo, a_parent);
+				m_textMesh.SetPosition(a_textPosition, a_setWorldPosition);
 			}
     
 			ScaleTextMesh();
 		}
 
-		public bool TextMeshVisibleAtZoom
+		public void SetTextMeshActivity(bool a_active)
 		{
-			get { return textMeshVisibleAtZoom; }
-			set
-			{
-				if (textMeshVisibleAtZoom != value)
-				{
-					textMeshVisibleAtZoom = value;
-					if (value && Entity.Layer.LayerTextVisible)
-						SetTextMeshActivity(true);
-					else
-						SetTextMeshActivity(false);
-				}
-			}
+			if (m_textMesh != null)
+				m_textMesh.SetVisibility(a_active);
 		}
 
-		public void SetTextMeshActivity(bool active)
+		protected void ScaleTextMesh(float a_parentScale = 1f)
 		{
-			if (textMesh != null)
-				textMesh.SetVisibility(active);
-		}
-
-		protected void ScaleTextMesh(float parentScale = 1f)
-		{
-			if (Entity.Layer.m_textInfo == null)
+			if (m_entity.Layer.m_textInfo == null)
 			{
 				return;
 			}
 
 			if (TextMeshVisibleAtZoom)
 			{
-				if (CameraManager.Instance.cameraZoom.currentZoom > Entity.Layer.m_textInfo.zoomCutoff)
+				if (CameraManager.Instance.cameraZoom.currentZoom > m_entity.Layer.m_textInfo.zoomCutoff)
 					TextMeshVisibleAtZoom = false;
 				else
 				{
-					if (textMesh != null)
+					if (m_textMesh != null)
 					{
-						textMesh.UpdateTextMeshScale(Entity.Layer.m_textInfo.UseInverseScale, parentScale);
+						m_textMesh.UpdateTextMeshScale(m_entity.Layer.m_textInfo.UseInverseScale, a_parentScale);
 					}
 				}
 			}
 			else
 			{
-				if (CameraManager.Instance.cameraZoom.currentZoom <= Entity.Layer.m_textInfo.zoomCutoff)
+				if (CameraManager.Instance.cameraZoom.currentZoom <= m_entity.Layer.m_textInfo.zoomCutoff)
 				{
 					TextMeshVisibleAtZoom = true;
-					if (textMesh != null)
+					if (m_textMesh != null)
 					{
-						textMesh.UpdateTextMeshScale(Entity.Layer.m_textInfo.UseInverseScale, parentScale);
+						m_textMesh.UpdateTextMeshScale(m_entity.Layer.m_textInfo.UseInverseScale, a_parentScale);
 					}
 				}
 			}
@@ -388,141 +377,139 @@ namespace MSP2050.Scripts
 
 		public void UpdateTextMeshText()
 		{
-			if (textMesh != null)
+			if (m_textMesh != null)
 			{
-				textMesh.UpdateTextMeshText();
+				m_textMesh.UpdateTextMeshText();
 			}
 		}
 
 		protected virtual void UpdatePlanState()
 		{
-			previousPlanState = planState;
-			planState = PlanManager.Instance.GetSubEntityPlanState(this);
+			PreviousPlanState = PlanState;
+			PlanState = PlanManager.Instance.GetSubEntityPlanState(this);
 
-			if (gameObject != null)
+			if (m_gameObject == null)
+				return;
+			if (PlanState == SubEntityPlanState.NotShown)
 			{
-				if (planState == SubEntityPlanState.NotShown)
-				{
-					gameObject.SetActive(false);
-					NotifySubEntityVisibilityChanged();
-				}
-				else if (previousPlanState == SubEntityPlanState.NotShown)
-				{
-					gameObject.SetActive(true);
-					NotifySubEntityVisibilityChanged();
-				}
+				m_gameObject.SetActive(false);
+				NotifySubEntityVisibilityChanged();
+			}
+			else if (PreviousPlanState == SubEntityPlanState.NotShown)
+			{
+				m_gameObject.SetActive(true);
+				NotifySubEntityVisibilityChanged();
 			}
 		}
 
-		public void SetPlanState(SubEntityPlanState newState)
+		public void SetPlanState(SubEntityPlanState a_newState)
 		{
-			previousPlanState = planState;
-			planState = newState;
-			if (gameObject != null)
+			PreviousPlanState = PlanState;
+			PlanState = a_newState;
+			if (m_gameObject == null)
+				return;
+			if (PlanState == SubEntityPlanState.NotShown)
 			{
-				if (planState == SubEntityPlanState.NotShown)
-				{
-					gameObject.SetActive(false);
-					NotifySubEntityVisibilityChanged();
-				}
-				else if (previousPlanState == SubEntityPlanState.NotShown)
-				{
-					gameObject.SetActive(true);
-					NotifySubEntityVisibilityChanged();
-				}
+				m_gameObject.SetActive(false);
+				NotifySubEntityVisibilityChanged();
+			}
+			else if (PreviousPlanState == SubEntityPlanState.NotShown)
+			{
+				m_gameObject.SetActive(true);
+				NotifySubEntityVisibilityChanged();
 			}
 		}
 
 		public void NotifySubEntityVisibilityChanged()
 		{
-			bool newVisibility = gameObject != null && gameObject.activeInHierarchy;
+			bool newVisibility = m_gameObject != null && m_gameObject.activeInHierarchy;
 			if (OnEntityVisibilityChanged != null)
 			{
-				OnEntityVisibilityChanged.Invoke(this, Entity.Layer, newVisibility);
+				OnEntityVisibilityChanged.Invoke(this, m_entity.Layer, newVisibility);
 			}
 		}
 
 		public SubEntityDataCopy GetDataCopy()
 		{
 			return new SubEntityDataCopy(
-				new List<EntityType>(Entity.EntityTypes),
+				new List<EntityType>(m_entity.EntityTypes),
 				new List<Vector3>(GetPoints()),
-				new Dictionary<string, string>(Entity.metaData),
+				new Dictionary<string, string>(m_entity.metaData),
 				GetHoles(true),
-				Entity.Country,
-				edited
+				m_entity.Country,
+				m_edited
 			);
 		}
 
-		public void SetInFrontOfLayer(bool isInFrontOfLayer)
+		public void SetInFrontOfLayer(bool a_isInFrontOfLayer)
 		{
-			if (gameObject == null)
+			if (m_gameObject == null)
 				return;
-			Vector3 oldPos = gameObject.transform.position;
-			if (isInFrontOfLayer)
+			Vector3 oldPos = m_gameObject.transform.position;
+			if (a_isInFrontOfLayer)
 			{
-				gameObject.transform.localPosition = new Vector3(oldPos.x, oldPos.y, Order + frontOfLayerZOffset);
-				if (textMesh != null)
+				m_gameObject.transform.localPosition = new Vector3(oldPos.x, oldPos.y, m_order + FrontOfLayerZOffset);
+				if (m_textMesh != null)
 				{
-					textMesh.SetZOffset(frontOfEverythingZOffset);
+					m_textMesh.SetZOffset(FrontOfEverythingZOffset);
 				}
 			}
 			else
 			{
-				gameObject.transform.localPosition = new Vector3(oldPos.x, oldPos.y, Order);
-				if (textMesh != null)
+				m_gameObject.transform.localPosition = new Vector3(oldPos.x, oldPos.y, m_order);
+				if (m_textMesh != null)
 				{
-					textMesh.SetZOffset(0.0f);
+					m_textMesh.SetZOffset(0.0f);
 				}
 			}
 		}
 
-		public virtual void SetDataToCopy(SubEntityDataCopy copy)
+		public virtual void SetDataToCopy(SubEntityDataCopy a_copy)
 		{
-			SetPoints(copy.pointsCopy);
-			SetHoles(copy.holesCopy);
-			Entity.EntityTypes = copy.entityTypeCopy;
-			Entity.metaData = copy.metaDataCopy;
-			Entity.Country = copy.country;
-			edited = copy.edited;
+			SetPoints(a_copy.m_pointsCopy);
+			SetHoles(a_copy.m_holesCopy);
+			m_entity.EntityTypes = a_copy.m_entityTypeCopy;
+			m_entity.metaData = a_copy.m_metaDataCopy;
+			m_entity.Country = a_copy.m_country;
+			m_edited = a_copy.m_edited;
 		}
 
 		public virtual void FinishEditing()
 		{
-			edited = false;
+			m_edited = false;
 		}
 
-		public string GetProperty(string key)
+		public string GetProperty(string a_key)
 		{
-			if (Entity.Layer.m_presetProperties.ContainsKey(key))
+			if (m_entity.Layer.m_presetProperties.ContainsKey(a_key))
 			{
-				return Entity.Layer.m_presetProperties[key](this);
+				return m_entity.Layer.m_presetProperties[a_key](this);
 			}
 			else
 			{
 				string result;
-				Entity.TryGetMetaData(key, out result);
+				m_entity.TryGetMetaData(a_key, out result);
 				return result;
 			}
 		}
-		public virtual void UpdateScale(Camera targetCamera)
+		public virtual void UpdateScale(Camera a_targetCamera)
 		{ }
-		public virtual void SetPoints(List<Vector3> points)
+		protected virtual void SetPoints(List<Vector3> a_points)
 		{ }
-		public virtual void SetHoles(List<List<Vector3>> holes)
+		protected virtual void SetHoles(List<List<Vector3>> a_holes)
 		{ }
 		public virtual List<Vector3> GetPoints()
 		{ return null; }
-		public virtual List<List<Vector3>> GetHoles(bool copy = false)
+		public virtual List<List<Vector3>> GetHoles(bool a_copy = false)
 		{ return null; }
 
-		public abstract Feature GetGeoJSONFeature(int idToUse);
+		public abstract Feature GetGeoJsonFeature(int a_idToUse);
 
-		public virtual void SetPropertiesToGeoJSONFeature(Feature feature)
+		public virtual void SetPropertiesToGeoJsonFeature(Feature a_feature)
 		{
-			foreach (var kvp in feature.Properties)
+			foreach (var kvp in a_feature.Properties)
 			{
-				Entity.SetMetaData(kvp.Key, kvp.Value.ToString());
+				m_entity.SetMetaData(kvp.Key, kvp.Value.ToString());
 			}
 		}
 
@@ -543,14 +530,14 @@ namespace MSP2050.Scripts
 		public virtual void ClearConnections()
 		{ }
 
-		protected virtual void UpdateRestrictionArea(float newRestrictionSize)
+		protected virtual void UpdateRestrictionArea(float a_newRestrictionSize)
 		{
-			currentRestrictionSize = newRestrictionSize;
+			m_currentRestrictionSize = a_newRestrictionSize;
 		}
 
 		public virtual void HideRestrictionArea()
 		{
-			restrictionHidden = true;
+			m_restrictionHidden = true;
 			//Children should disable the restriction gameobject
 		}
 
@@ -562,21 +549,21 @@ namespace MSP2050.Scripts
 
 	public class SubEntityDataCopy
 	{
-		public readonly List<EntityType> entityTypeCopy;
-		public readonly List<Vector3> pointsCopy;
-		public readonly List<List<Vector3>> holesCopy;
-		public readonly Dictionary<string, string> metaDataCopy;
-		public readonly int country;
-		public readonly bool edited;
+		public readonly List<EntityType> m_entityTypeCopy;
+		public readonly List<Vector3> m_pointsCopy;
+		public readonly List<List<Vector3>> m_holesCopy;
+		public readonly Dictionary<string, string> m_metaDataCopy;
+		public readonly int m_country;
+		public readonly bool m_edited;
 
-		public SubEntityDataCopy(List<EntityType> entityTypeCopy, List<Vector3> pointsCopy, Dictionary<string, string> metaDataCopy, List<List<Vector3>> holesCopy, int country, bool edited)
+		public SubEntityDataCopy(List<EntityType> a_entityTypeCopy, List<Vector3> a_pointsCopy, Dictionary<string, string> a_metaDataCopy, List<List<Vector3>> a_holesCopy, int a_country, bool a_edited)
 		{
-			this.entityTypeCopy = entityTypeCopy;
-			this.pointsCopy = pointsCopy;
-			this.metaDataCopy = metaDataCopy;
-			this.holesCopy = holesCopy;
-			this.country = country;
-			this.edited = edited;
+			m_entityTypeCopy = a_entityTypeCopy;
+			m_pointsCopy = a_pointsCopy;
+			m_metaDataCopy = a_metaDataCopy;
+			m_holesCopy = a_holesCopy;
+			m_country = a_country;
+			m_edited = a_edited;
 		}
 	}
 }

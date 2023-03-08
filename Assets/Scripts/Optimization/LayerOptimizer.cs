@@ -87,7 +87,7 @@ namespace MSP2050.Scripts
 					mat = MaterialManager.Instance.GetDefaultPolygonMaterial(sub.DrawSettings.PolygonPatternName, sub.DrawSettings.PolygonColor);
 				}
 
-				Mesh mesh = VisualizationUtil.Instance.CreatePolygon(sub.GetPoints(), sub.GetHoles(), sub.Entity.patternRandomOffset, sub.DrawSettings.InnerGlowEnabled, target.InnerGlowBounds);
+				Mesh mesh = VisualizationUtil.Instance.CreatePolygon(sub.GetPoints(), sub.GetHoles(), sub.m_entity.patternRandomOffset, sub.DrawSettings.InnerGlowEnabled, target.m_innerGlowBounds);
 
 				//Add mesh to combined one
 				combine[i].mesh = mesh;

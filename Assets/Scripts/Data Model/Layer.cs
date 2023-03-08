@@ -145,7 +145,7 @@ namespace MSP2050.Scripts
 
 		public override void RemoveSubEntity(SubEntity a_subEntity, bool a_uncreate = false)
 		{
-			T entity = (T)a_subEntity.Entity;
+			T entity = (T)a_subEntity.m_entity;
 			a_subEntity.RemoveDependencies();
 			int persisID = a_subEntity.GetPersistentID();
 
@@ -161,11 +161,11 @@ namespace MSP2050.Scripts
 				m_activeEntities.Remove(entity);
 
 				//If the entity wasn't created in this plan, active the last entity with that persisID and add it to removedgeom
-				if (!a_subEntity.Entity.Layer.IsPersisIDCurrentlyNew(persisID))
+				if (!a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(persisID))
 				{
 					if (!a_uncreate) //We are uncreating, only reactivate previous version, don't add to removed geom
 					{
-						AddPreModifiedEntity(a_subEntity.Entity);
+						AddPreModifiedEntity(a_subEntity.m_entity);
 						entity.PlanLayer.RemovedGeometry.Add(persisID);
 					}
 					ActivateLastEntityWith(persisID);
@@ -174,14 +174,14 @@ namespace MSP2050.Scripts
 			else //Was on another layer and removed by this plan. It's removed and displayed with (-) icons.
 			{
 				m_currentPlanLayer.RemovedGeometry.Add(persisID);
-				AddPreModifiedEntity(a_subEntity.Entity);
+				AddPreModifiedEntity(a_subEntity.m_entity);
 			}
 			entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
 
 		public override void RestoreSubEntity(SubEntity a_subEntity, bool a_recreate = false)
 		{
-			T entity = (T)a_subEntity.Entity;
+			T entity = (T)a_subEntity.m_entity;
 			//entity.RestoreSubEntity(subEntity);
 			a_subEntity.RestoreDependencies();
 			int persistentID = a_subEntity.GetPersistentID();
@@ -194,11 +194,11 @@ namespace MSP2050.Scripts
 					m_currentPlanLayer.AddNewGeometry(entity);
 
 					// If another object was being displayed because of the deletion, deactivate it and show this instead
-					if (!a_subEntity.Entity.Layer.IsPersisIDCurrentlyNew(persistentID))
+					if (!a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(persistentID))
 					{
 						if (!a_recreate) //We are only recreating a newer version, the ID isn't in removedgeom
 						{
-							RemovePreModifiedEntity(a_subEntity.Entity);
+							RemovePreModifiedEntity(a_subEntity.m_entity);
 							entity.PlanLayer.RemovedGeometry.Remove(persistentID);
 						}
 						DeactivateCurrentEntityWith(persistentID);
@@ -211,7 +211,7 @@ namespace MSP2050.Scripts
 			else //Was on another layer and removed by this plan
 			{
 				m_currentPlanLayer.RemovedGeometry.Remove(persistentID);
-				RemovePreModifiedEntity(a_subEntity.Entity);
+				RemovePreModifiedEntity(a_subEntity.m_entity);
 			}
 			entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
@@ -351,9 +351,9 @@ namespace MSP2050.Scripts
 			List<Entity> result = new List<Entity>();
 			foreach (SubEntity subEntity in subEntities)
 			{
-				if (!result.Contains(subEntity.Entity))
+				if (!result.Contains(subEntity.m_entity))
 				{
-					result.Add(subEntity.Entity);
+					result.Add(subEntity.m_entity);
 				}
 			}
 			return result;
@@ -1182,7 +1182,7 @@ namespace MSP2050.Scripts
 				foreach (Connection conn in cable.Connections)
 				{
 					//If point is not in active entities, remove the cable.
-					if (!conn.point.Entity.Layer.IsIDInActiveGeometry(conn.point.GetDatabaseID()))
+					if (!conn.point.m_entity.Layer.IsIDInActiveGeometry(conn.point.GetDatabaseID()))
 					{
 						cablesToRemove.Add(cable);
 						break;
@@ -1193,9 +1193,9 @@ namespace MSP2050.Scripts
 			foreach (EnergyLineStringSubEntity cable in cablesToRemove)
 			{
 				//Remove from new geometry
-				m_currentPlanLayer.RemoveNewGeometry(cable.Entity);
+				m_currentPlanLayer.RemoveNewGeometry(cable.m_entity);
 				//Remove from active entities
-				m_activeEntities.Remove((T)cable.Entity);
+				m_activeEntities.Remove((T)cable.m_entity);
 				//Remove GO
 				cable.RemoveGameObject();
 				//Actual removal from the server is done with the batch submit
@@ -1210,11 +1210,11 @@ namespace MSP2050.Scripts
 		{
 			foreach (EnergyLineStringSubEntity cable in a_cables)
 			{
-				if (cable.Entity.Layer != this)
+				if (cable.m_entity.Layer != this)
 					continue;
-				cable.Entity.PlanLayer.AddNewGeometry(cable.Entity);
+				cable.m_entity.PlanLayer.AddNewGeometry(cable.m_entity);
 				cable.DrawGameObject(LayerGameObject.transform);
-				m_activeEntities.Add((T)cable.Entity);
+				m_activeEntities.Add((T)cable.m_entity);
 			}
 		}
 

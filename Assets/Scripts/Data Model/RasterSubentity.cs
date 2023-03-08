@@ -32,13 +32,13 @@ namespace MSP2050.Scripts
 		{
 			this.scale = scale;
 
-			if (gameObject != null)
+			if (m_gameObject != null)
 			{
-				gameObject.transform.localScale = this.scale;
+				m_gameObject.transform.localScale = this.scale;
 			}
 			else
 			{
-				Debug.Log(Entity.Layer.GetShortName() + " doesn't have a gameobject yet!");
+				Debug.Log(m_entity.Layer.GetShortName() + " doesn't have a gameobject yet!");
 			}
 
 			UpdateBoundingBox();
@@ -46,16 +46,16 @@ namespace MSP2050.Scripts
 
 		public override void DrawGameObject(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null)
 		{
-			if (gameObject == null)
+			if (m_gameObject == null)
 			{
-				RasterLayer sourceLayer = (RasterLayer) Entity.Layer;
-				gameObject = VisualizationUtil.Instance.CreateRasterGameObject(sourceLayer.rasterObject.layer_raster_material);
-				gameObject.transform.SetParent(parent);
+				RasterLayer sourceLayer = (RasterLayer) m_entity.Layer;
+				m_gameObject = VisualizationUtil.Instance.CreateRasterGameObject(sourceLayer.rasterObject.layer_raster_material);
+				m_gameObject.transform.SetParent(parent);
 
-				gameObject.transform.localScale = scale;
-				gameObject.transform.localPosition = offset;
+				m_gameObject.transform.localScale = scale;
+				m_gameObject.transform.localPosition = offset;
 
-				spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+				spriteRenderer = m_gameObject.GetComponent<SpriteRenderer>();
 
 				spriteRenderer.material.SetFloat("_ValueCutoff",
 					sourceLayer.rasterObject.layer_raster_minimum_value_cutoff /
@@ -80,19 +80,19 @@ namespace MSP2050.Scripts
 		{
 			base.RedrawGameObject(drawMode, selectedPoints, hoverPoints, updatePlanState);
 
-			if (gameObject == null)
+			if (m_gameObject == null)
 			{
 				return;
 			}
 
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer))
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(m_entity.Layer))
 				drawMode = SubEntityDrawMode.PlanReference;
 
 			// PdG 2017-10-03: Disabled snapping entirely for Raster Subentities otherwise everything would snap to the bathymetry layer at the mouse position.
 			SnappingToThisEnabled = false; // snapToDrawMode(drawMode);
 
-			drawSettings = Entity.EntityTypes[0].DrawSettings;
-			if (drawMode != SubEntityDrawMode.Default) { drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings); }
+			m_drawSettings = m_entity.EntityTypes[0].DrawSettings;
+			if (drawMode != SubEntityDrawMode.Default) { m_drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(m_drawSettings); }
 
 			if (raster != null)
 			{
@@ -121,7 +121,7 @@ namespace MSP2050.Scripts
 
 			hasDrawnNewRaster = false;
 
-			if(gameObject != null)
+			if(m_gameObject != null)
 				RedrawGameObject();
 		}
 
@@ -133,7 +133,7 @@ namespace MSP2050.Scripts
 			return spriteRenderer.material;
 		}
 
-		public override SubEntityObject GetLayerObject()
+		protected override SubEntityObject GetLayerObject()
 		{
 			throw new NotImplementedException();
 		}
@@ -160,7 +160,7 @@ namespace MSP2050.Scripts
 
 		protected override void UpdateBoundingBox()
 		{
-			BoundingBox = ((RasterLayer)Entity.Layer).RasterBounds;
+			m_boundingBox = ((RasterLayer)m_entity.Layer).RasterBounds;
 		}
 
 		public override void SetDataToObject(SubEntityObject subEntityObject)
@@ -170,10 +170,10 @@ namespace MSP2050.Scripts
 		protected override void UpdatePlanState()
 		{
 			//Do nothing, except for forcing the planstate to set to not in plan.
-			planState = SubEntityPlanState.NotInPlan;
+			PlanState = SubEntityPlanState.NotInPlan;
 		}
 
-		public override Feature GetGeoJSONFeature(int idToUse)
+		public override Feature GetGeoJsonFeature(int idToUse)
 		{
 			throw new NotImplementedException();
 		}

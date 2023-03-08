@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
 			foreach (Connection con in removedConnections)
 			{
 				//Undooperation depends on wether the cable was on the current planlayer
-				if (con.cable.Entity.PlanLayer == cablePlanLayer)
+				if (con.cable.m_entity.PlanLayer == cablePlanLayer)
 				{
 					fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(con.cable, cablePlanLayer, UndoOperation.EditMode.Modify, false, true));
 					con.cable.RemoveGameObject();
@@ -97,18 +97,18 @@ namespace MSP2050.Scripts
 
 		protected override PolygonSubEntity startModifyingSubEntity(PolygonSubEntity subEntity, bool insideUndoBatch)
 		{
-			if (subEntity.Entity.PlanLayer == planLayer)
+			if (subEntity.m_entity.PlanLayer == planLayer)
 			{
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 
 				fsm.AddToUndoStack(new ModifyPolygonOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
-				subEntity.edited = true;
+				subEntity.m_edited = true;
 
 				//Create undo operations for cables attached to sourcepoint
 				foreach (Connection con in (subEntity as EnergyPolygonSubEntity).m_sourcePoint.Connections)
 				{ 
 					con.cable.AddModifyLineUndoOperation(fsm);
-					con.cable.edited = true;
+					con.cable.m_edited = true;
 				}
 
 				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
@@ -127,7 +127,7 @@ namespace MSP2050.Scripts
 				EnergyPointSubEntity newEnergySubEnt = (duplicate as EnergyPolygonSubEntity).m_sourcePoint;
 				List<EnergyLineStringSubEntity> newCables = new List<EnergyLineStringSubEntity>();
 				foreach (Connection con in oldEnergySubEnt.m_sourcePoint.Connections)
-					if (con.cable.Entity.PlanLayer != cablePlanLayer) //Make sure not to add 2 new cables if both endpoints are being edited
+					if (con.cable.m_entity.PlanLayer != cablePlanLayer) //Make sure not to add 2 new cables if both endpoints are being edited
 						newCables.Add(con.cable);
 					else //Change the cables connection from the old point to the new
 					{

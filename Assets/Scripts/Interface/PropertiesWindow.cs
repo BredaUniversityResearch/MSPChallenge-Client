@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(true);
 
 			//Setup data
-			Entity entity = subEntity.Entity;
+			Entity entity = subEntity.m_entity;
 			windowName.text = entity.Layer.GetShortName();
 			layerIcon.sprite = LayerManager.Instance.GetSubcategoryIcon(entity.Layer.m_subCategory);
 
@@ -45,8 +45,8 @@ namespace MSP2050.Scripts
 
 			Team team = SessionManager.Instance.FindTeamByID(entity.Country);
 			baseDataParent.CreateEntry("Name", entity.name, countryIcon, team == null ? Color.white : team.color);
-			baseDataParent.CreateEntry("X", (subEntity.BoundingBox.center.x * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
-			baseDataParent.CreateEntry("Y", (subEntity.BoundingBox.center.y * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
+			baseDataParent.CreateEntry("X", (subEntity.m_boundingBox.center.x * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
+			baseDataParent.CreateEntry("Y", (subEntity.m_boundingBox.center.y * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
 
 			//Geometry type specific base data
 			if (entity.Layer.GetGeoType() == LayerManager.EGeoType.polygon)

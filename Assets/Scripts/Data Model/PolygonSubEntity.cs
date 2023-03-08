@@ -111,8 +111,8 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			mspID = geometry.mspid;
-			restrictionNeedsUpdate = true;
+			m_mspID = geometry.mspid;
+			m_restrictionNeedsUpdate = true;
 
 			Initialise();
 		}
@@ -163,7 +163,7 @@ namespace MSP2050.Scripts
 				max = Vector3.Max(max, point);
 			}
 
-			BoundingBox = new Rect(min, max - min);
+			m_boundingBox = new Rect(min, max - min);
 			//Update surfface area if it was required before (avoids calculating on load)
 			if(surfaceAreaNeeded)
 				surfaceAreaSqrKm = InterfaceCanvas.Instance.mapScale.GetRealWorldPolygonAreaInSquareKm(polygon, holes);
@@ -176,7 +176,7 @@ namespace MSP2050.Scripts
 			List<LODSettings> lodSettingsList = VisualizationUtil.Instance.VisualizationSettings.LODs;
 			for (int i = 0; i < lodSettingsList.Count; ++i)
 			{
-				lods.Add(new PolygonLOD(null, null, gameObject.transform, lodSettingsList[i]));
+				lods.Add(new PolygonLOD(null, null, m_gameObject.transform, lodSettingsList[i]));
 			}
 			UpdateLods();
 		}
@@ -707,36 +707,36 @@ namespace MSP2050.Scripts
 		public override void SetOrderBasedOnType()
 		{
 			calculateOrderBasedOnType();
-			gameObject.transform.localPosition = new Vector3(0, 0, Order);
+			m_gameObject.transform.localPosition = new Vector3(0, 0, m_order);
 		}
 
 		public override void DrawGameObject(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null)
 		{
-			if (gameObject != null)
+			if (m_gameObject != null)
 			{
 				//Debug.LogError("Attempting to draw entity with an existing GameObject.");
 				return;
 			}
 			if (GetTotalPointCount() >= 65000)
 			{
-				Debug.LogError(" GetTotalPointCount() >= 65000 for " + Entity.Layer.FileName + " - " + GetDatabaseID());
+				Debug.LogError(" GetTotalPointCount() >= 65000 for " + m_entity.Layer.FileName + " - " + GetDatabaseID());
 			}
-			drawSettings = Entity.EntityTypes[0].DrawSettings;
+			m_drawSettings = m_entity.EntityTypes[0].DrawSettings;
 
-			if (!Entity.Layer.Optimized)
+			if (!m_entity.Layer.Optimized)
 			{
-				gameObject = new GameObject(databaseID != -1 ? "" + databaseID : "<undefined database ID>");
-				gameObject.transform.SetParent(parent);
+				m_gameObject = new GameObject(m_databaseID != -1 ? "" + m_databaseID : "<undefined database ID>");
+				m_gameObject.transform.SetParent(parent);
 
-				PolygonLayer layer = (PolygonLayer)Entity.Layer;
-				if (drawSettings.InnerGlowEnabled)
+				PolygonLayer layer = (PolygonLayer)m_entity.Layer;
+				if (m_drawSettings.InnerGlowEnabled)
 				{
-					layer.UpdateInnerGlow(drawSettings.InnerGlowRadius, drawSettings.InnerGlowIterations, drawSettings.InnerGlowMultiplier, drawSettings.InnerGlowPixelSize);
+					layer.UpdateInnerGlow(m_drawSettings.InnerGlowRadius, m_drawSettings.InnerGlowIterations, m_drawSettings.InnerGlowMultiplier, m_drawSettings.InnerGlowPixelSize);
 				}
 
-				if (Entity.Layer.m_textInfo != null)
+				if (m_entity.Layer.m_textInfo != null)
 				{
-					CreateTextMesh(gameObject.transform, Vector3.zero);
+					CreateTextMesh(m_gameObject.transform, Vector3.zero);
 				}
 
 				RebuildLods();
@@ -751,11 +751,11 @@ namespace MSP2050.Scripts
 		{
 			base.RedrawGameObject(drawMode, selectedPoints, hoverPoints, updatePlanState);
 
-			if (gameObject == null)
+			if (m_gameObject == null)
 				return;
 
 			// Bathymetry and Countries/Councils are not selectable, and will not change drawmode
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer) && Entity.Layer.m_selectable)
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(m_entity.Layer) && m_entity.Layer.m_selectable)
 			{
 				drawMode = SubEntityDrawMode.PlanReference;			
 			}
@@ -784,31 +784,31 @@ namespace MSP2050.Scripts
 
 			SnappingToThisEnabled = IsSnapToDrawMode(drawMode);
 
-			SubEntityDrawSettings previousDrawSettings = drawSettings;
-			drawSettings = Entity.EntityTypes[0].DrawSettings;
+			SubEntityDrawSettings previousDrawSettings = m_drawSettings;
+			m_drawSettings = m_entity.EntityTypes[0].DrawSettings;
 			if (drawMode != SubEntityDrawMode.Default)
 			{
-				drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings);
+				m_drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(m_drawSettings);
 			}
 
 			lodLockedAtZero = drawMode != SubEntityDrawMode.Default && drawMode != SubEntityDrawMode.Hover;
 
-			PolygonLayer layer = (PolygonLayer)Entity.Layer;
-			if (drawSettings.InnerGlowEnabled)
+			PolygonLayer layer = (PolygonLayer)m_entity.Layer;
+			if (m_drawSettings.InnerGlowEnabled)
 			{
-				layer.UpdateInnerGlow(drawSettings.InnerGlowRadius, drawSettings.InnerGlowIterations, drawSettings.InnerGlowMultiplier, drawSettings.InnerGlowPixelSize);
+				layer.UpdateInnerGlow(m_drawSettings.InnerGlowRadius, m_drawSettings.InnerGlowIterations, m_drawSettings.InnerGlowMultiplier, m_drawSettings.InnerGlowPixelSize);
 			}
 
 			if (drawMode != SubEntityDrawMode.Hover)
 			{
 				UpdateDisplayedLOD();
 
-				if (drawSettings != previousDrawSettings || planState != previousPlanState)
+				if (m_drawSettings != previousDrawSettings || PlanState != PreviousPlanState)
 				{
 					UpdateGameObjectForEveryLOD();
 				}
 
-				UpdatePolygonMaterialForDrawSettings(lods[displayedLOD], drawSettings);
+				UpdatePolygonMaterialForDrawSettings(lods[displayedLOD], m_drawSettings);
 			}
 
 			PolygonLOD currentLod = lods[displayedLOD];
@@ -821,7 +821,7 @@ namespace MSP2050.Scripts
 
 			if (currentLod.Polygon != null)
 			{
-				UpdatePolygonSubEntity(currentLod, drawSettings, selectedPoints, hoverPoints);
+				UpdatePolygonSubEntity(currentLod, m_drawSettings, selectedPoints, hoverPoints);
 			}
 
 			if (InvalidPoints != null)
@@ -833,20 +833,20 @@ namespace MSP2050.Scripts
 		protected override void UpdateRestrictionArea(float newRestrictionSize)
 		{
 			base.UpdateRestrictionArea(newRestrictionSize);
-			if (restrictionArea == null && newRestrictionSize > 0.0f && !restrictionHidden)
+			if (restrictionArea == null && newRestrictionSize > 0.0f && !m_restrictionHidden)
 			{
 				restrictionArea = VisualizationUtil.Instance.CreateRestrictionArea();
-				restrictionArea.SetParent(gameObject.transform);
+				restrictionArea.SetParent(m_gameObject.transform);
 			}
 
-			if (restrictionArea != null && !restrictionHidden)
+			if (restrictionArea != null && !m_restrictionHidden)
 			{
 				restrictionArea.SetPoints(GetPoints(), newRestrictionSize, true);
 				if (!restrictionArea.gameObject.activeInHierarchy)
 					restrictionArea.gameObject.SetActive(true);
 			}
 
-			restrictionNeedsUpdate = false;
+			m_restrictionNeedsUpdate = false;
 		}
 
 		public override void HideRestrictionArea()
@@ -887,19 +887,19 @@ namespace MSP2050.Scripts
 
 		public override void UpdateScale(Camera targetCamera)
 		{
-			if (gameObject == null)
+			if (m_gameObject == null)
 			{
 				return;
 			}
 
 			UpdateDisplayedLOD();
-			UpdatePolygonPointScale(lods[displayedLOD], drawSettings);
-			UpdatePolygonOutlineScale(drawSettings);
-			if(textMesh != null)
+			UpdatePolygonPointScale(lods[displayedLOD], m_drawSettings);
+			UpdatePolygonOutlineScale(m_drawSettings);
+			if(m_textMesh != null)
 				ScaleTextMesh();
 		}
 
-		public override SubEntityObject GetLayerObject()
+		protected override SubEntityObject GetLayerObject()
 		{
 			SubEntityObject obj = new SubEntityObject();
 			//obj.FID = this.Entity.FID;
@@ -998,9 +998,9 @@ namespace MSP2050.Scripts
 
 		private void UpdateTextMeshPosition(PolygonLOD targetLod)
 		{
-			if (textMesh != null)
+			if (m_textMesh != null)
 			{
-				textMesh.SetPosition(new Vector3(BoundingBox.center.x, BoundingBox.center.y) + Entity.Layer.m_textInfo.textOffset, false);
+				m_textMesh.SetPosition(new Vector3(m_boundingBox.center.x, m_boundingBox.center.y) + m_entity.Layer.m_textInfo.textOffset, false);
 			}
 		}
 
@@ -1014,15 +1014,15 @@ namespace MSP2050.Scripts
 
 			if (targetLod.Polygon != null)
 			{
-				PolygonLayer layer = (PolygonLayer)Entity.Layer;
+				PolygonLayer layer = (PolygonLayer)m_entity.Layer;
 
 				try
 				{
-					filter.mesh = VisualizationUtil.Instance.CreatePolygon(targetLod.Polygon, targetLod.Holes, Entity.patternRandomOffset, drawSettings.InnerGlowEnabled, layer.InnerGlowBounds);
+					filter.mesh = VisualizationUtil.Instance.CreatePolygon(targetLod.Polygon, targetLod.Holes, m_entity.patternRandomOffset, m_drawSettings.InnerGlowEnabled, layer.m_innerGlowBounds);
 				}
 				catch (Exception ex)
 				{
-					Debug.LogError(string.Format("Triangulation error occurred in layer: {0}, database ID: {1}. Exception: {2}", layer.m_id, databaseID, ex.Message));
+					Debug.LogError(string.Format("Triangulation error occurred in layer: {0}, database ID: {1}. Exception: {2}", layer.m_id, m_databaseID, ex.Message));
 					throw;
 				}
 
@@ -1045,7 +1045,7 @@ namespace MSP2050.Scripts
 			if (outline == null)
 			{
 				outline = new GameObject("Outline");
-				outline.transform.parent = gameObject.transform;
+				outline.transform.parent = m_gameObject.transform;
 			}
 			if (lod.Polygon.Count > 0)
 			{
@@ -1091,7 +1091,7 @@ namespace MSP2050.Scripts
 
 		private void UpdatePolygonVisualPoints(PolygonLOD targetLod, SubEntityDrawSettings targetDrawSettings, int totalVertexCount, HashSet<int> selectedPoints, HashSet<int> hoverPoints)
 		{
-			bool displayPoints = targetDrawSettings.DisplayPoints || planState != SubEntityPlanState.NotInPlan;
+			bool displayPoints = targetDrawSettings.DisplayPoints || PlanState != SubEntityPlanState.NotInPlan;
 
 			if (displayPoints)
 			{
@@ -1117,7 +1117,7 @@ namespace MSP2050.Scripts
 					Color pointColor = hover ? VisualizationUtil.Instance.SelectionColor : targetDrawSettings.PointColor;
 					pointColor = selected ? Color.white : pointColor;
 
-					VisualizationUtil.PointRenderMode pointRenderMode = VisualizationUtil.Instance.GetPointRenderMode(targetDrawSettings, planState, selected);
+					VisualizationUtil.PointRenderMode pointRenderMode = VisualizationUtil.Instance.GetPointRenderMode(targetDrawSettings, PlanState, selected);
 				
 					VisualizationUtil.Instance.UpdatePoint(point, targetLod.GetPointPosition(i), pointColor, targetDrawSettings.PointSize, pointRenderMode);
 				}
@@ -1167,10 +1167,10 @@ namespace MSP2050.Scripts
 			{
 				if (targetDrawSettings.DisplayPolygon)
 				{
-					PolygonLayer layer = (PolygonLayer)Entity.Layer;
-					if (targetDrawSettings.InnerGlowEnabled && layer.InnerGlowTexture != null)
+					PolygonLayer layer = (PolygonLayer)m_entity.Layer;
+					if (targetDrawSettings.InnerGlowEnabled && layer.m_innerGlowTexture != null)
 					{
-						renderer.material = MaterialManager.Instance.GetInnerGlowPolygonMaterial(layer.InnerGlowTexture, targetDrawSettings.PolygonPatternName, targetDrawSettings.PolygonColor);
+						renderer.material = MaterialManager.Instance.GetInnerGlowPolygonMaterial(layer.m_innerGlowTexture, targetDrawSettings.PolygonPatternName, targetDrawSettings.PolygonColor);
 					}
 					else
 					{
@@ -1209,7 +1209,7 @@ namespace MSP2050.Scripts
 			return polygon;
 		}
 
-		public override void SetPoints(List<Vector3> points)
+		protected override void SetPoints(List<Vector3> points)
 		{
 			this.polygon = points;
 			UpdateBoundingBox();
@@ -1235,7 +1235,7 @@ namespace MSP2050.Scripts
 			meshIsDirty = true;
 		}
 
-		public override Feature GetGeoJSONFeature(int idToUse)
+		public override Feature GetGeoJsonFeature(int idToUse)
 		{
 			//Convert polygon
 			double[][][] polygonPoints = new double[1][][];
