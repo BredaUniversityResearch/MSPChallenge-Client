@@ -213,7 +213,7 @@ namespace MSP2050.Scripts
 		{
 			if (InEditMode)
 				return ETextState.Edit;
-			if (PlanManager.Instance.planViewing == null) //This currently shows current and past (through ViewAtTime)
+			if (PlanManager.Instance.m_planViewing == null) //This currently shows current and past (through ViewAtTime)
 				return ETextState.Current;
 			return ETextState.View;
 		}

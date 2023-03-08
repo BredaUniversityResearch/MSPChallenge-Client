@@ -222,7 +222,7 @@ namespace MSP2050.Scripts
 				if (State == PlanState.DELETED) //was deleted, disable and remove plan layers
 				{
 					//Stop viewing plan if we were before
-					if (PlanManager.Instance.planViewing != null && PlanManager.Instance.planViewing.ID == ID)
+					if (PlanManager.Instance.m_planViewing != null && PlanManager.Instance.m_planViewing.ID == ID)
 						PlanManager.Instance.HideCurrentPlan();
 
 					//Remove planlayers from their respective layers (AFTER REDRAWING)
@@ -237,7 +237,7 @@ namespace MSP2050.Scripts
 					foreach (PlanLayer layer in PlanLayers)
 						layer.issues = new HashSet<PlanIssueObject>();
 					//Stop viewing plan if we were before
-					if (PlanManager.Instance.planViewing != null && PlanManager.Instance.planViewing.ID == ID)
+					if (PlanManager.Instance.m_planViewing != null && PlanManager.Instance.m_planViewing.ID == ID)
 						PlanManager.Instance.HideCurrentPlan();
 				}
 				else if (oldState == PlanState.DELETED) //was deleted before, re-enable and add layers to base

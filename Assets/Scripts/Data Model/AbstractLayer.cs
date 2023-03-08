@@ -302,10 +302,10 @@ namespace MSP2050.Scripts
 
 		public void SetActiveToCurrentPlanAndRedraw()
 		{
-			if (PlanManager.Instance.planViewing != null || PlanManager.Instance.timeViewing < 0)
-				SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
+			if (PlanManager.Instance.m_planViewing != null || PlanManager.Instance.m_timeViewing < 0)
+				SetEntitiesActiveUpTo(PlanManager.Instance.m_planViewing);
 			else
-				SetEntitiesActiveUpToTime(PlanManager.Instance.timeViewing);
+				SetEntitiesActiveUpToTime(PlanManager.Instance.m_timeViewing);
 			RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
 

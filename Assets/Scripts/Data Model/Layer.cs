@@ -897,8 +897,8 @@ namespace MSP2050.Scripts
 				Entities.Add(entity);
 
 			m_lastImplementedPlanIndex = a_newPlanIndex;
-			if (!LayerManager.Instance.LayerIsVisible(this) || PlanManager.Instance.planViewing != null ||
-				PlanManager.Instance.timeViewing >= 0)
+			if (!LayerManager.Instance.LayerIsVisible(this) || PlanManager.Instance.m_planViewing != null ||
+				PlanManager.Instance.m_timeViewing >= 0)
 				return;
 			SetEntitiesActiveUpToCurrentTime();
 			RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default, true);

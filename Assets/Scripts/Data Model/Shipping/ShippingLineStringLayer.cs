@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 			return new ShippingLineStringEntity(this, obj);
 		}
 
-		public override Entity CreateEntity(PlanLayer planLayer, List<EntityType> entityType)
+		protected override Entity CreateEntity(PlanLayer planLayer, List<EntityType> entityType)
 		{
 			return new ShippingLineStringEntity(this, planLayer, entityType);
 		}

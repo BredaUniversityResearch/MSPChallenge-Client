@@ -363,10 +363,10 @@ namespace MSP2050.Scripts
 				//Performs a more elaborate update and redraw, so no other is needed
 				needsUpdateAndRedraw = false;
 
-				if (PlanManager.Instance.planViewing != null || PlanManager.Instance.timeViewing < 0)
-					a_layer.SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
+				if (PlanManager.Instance.m_planViewing != null || PlanManager.Instance.m_timeViewing < 0)
+					a_layer.SetEntitiesActiveUpTo(PlanManager.Instance.m_planViewing);
 				else
-					a_layer.SetEntitiesActiveUpToTime(PlanManager.Instance.timeViewing);
+					a_layer.SetEntitiesActiveUpToTime(PlanManager.Instance.m_timeViewing);
 
 				a_layer.LayerGameObject.SetActive(true);
 				m_visibleLayers.Add(a_layer);
@@ -618,15 +618,15 @@ namespace MSP2050.Scripts
 				return;
 
 			//Only update if we are viewing the plan or one further in the future
-			if (PlanManager.Instance.planViewing == null ||
-			    (PlanManager.Instance.planViewing.StartTime < a_plan.StartTime ||
-			     (PlanManager.Instance.planViewing.StartTime == a_plan.StartTime && PlanManager.Instance.planViewing.ID < a_plan.ID)))
+			if (PlanManager.Instance.m_planViewing == null ||
+			    (PlanManager.Instance.m_planViewing.StartTime < a_plan.StartTime ||
+			     (PlanManager.Instance.m_planViewing.StartTime == a_plan.StartTime && PlanManager.Instance.m_planViewing.ID < a_plan.ID)))
 				return;
 
 			//Only update if already visible
 			foreach (PlanLayer layer in a_plan.PlanLayers)
 				if (m_visibleLayers.Contains(layer.BaseLayer))
-					layer.BaseLayer.SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
+					layer.BaseLayer.SetEntitiesActiveUpTo(PlanManager.Instance.m_planViewing);
 		}
 
 		public void AddNonReferenceLayer(AbstractLayer a_layer, bool a_redrawLayer)

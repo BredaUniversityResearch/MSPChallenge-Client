@@ -143,11 +143,11 @@ namespace MSP2050.Scripts
 
 			if (layerData.Key != null)
 			{
-				ToggleRelevantPlanIssueLayer(PlanManager.Instance.planViewing, layerData.Key);
+				ToggleRelevantPlanIssueLayer(PlanManager.Instance.m_planViewing, layerData.Key);
 			}
 			if (layerData.Value != null)
 			{
-				ToggleRelevantPlanIssueLayer(PlanManager.Instance.planViewing, layerData.Value);
+				ToggleRelevantPlanIssueLayer(PlanManager.Instance.m_planViewing, layerData.Value);
 			}
 		}
 

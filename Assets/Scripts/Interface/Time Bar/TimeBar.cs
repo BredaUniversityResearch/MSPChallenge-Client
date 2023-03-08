@@ -149,8 +149,8 @@ namespace MSP2050.Scripts
 		{
 			if (isViewingPlan)
 			{
-				planViewingText.text = "Viewing plan at time: " + Util.MonthToText(PlanManager.Instance.planViewing.StartTime, false);
-				UpdateIndicator(viewingTimeIndicatorBottom, PlanManager.Instance.planViewing.StartTime);
+				planViewingText.text = "Viewing plan at time: " + Util.MonthToText(PlanManager.Instance.m_planViewing.StartTime, false);
+				UpdateIndicator(viewingTimeIndicatorBottom, PlanManager.Instance.m_planViewing.StartTime);
 			}
 		}
 
@@ -177,7 +177,7 @@ namespace MSP2050.Scripts
 					ignoreActivityCallback = false;
 					return;
 				}
-				if (PlanManager.Instance.planViewing != null)
+				if (PlanManager.Instance.m_planViewing != null)
 				{
 					ignoreActivityCallback = true;
 					PlanManager.Instance.HideCurrentPlan(false);
@@ -321,7 +321,7 @@ namespace MSP2050.Scripts
 
 		bool isViewingPlan
 		{
-			get { return viewMode == WorldViewMode.Plan && PlanManager.Instance.planViewing != null; }
+			get { return viewMode == WorldViewMode.Plan && PlanManager.Instance.m_planViewing != null; }
 		}
 
 		public void SetState(PlanningState a_newState)
