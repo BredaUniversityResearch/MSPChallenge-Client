@@ -103,6 +103,18 @@ namespace MSP2050.Scripts
 				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { }, false, true);
 			else
 				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { baseLayer }, false, true);
+
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
+			{
+				if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy && layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+				{
+					foreach (Entity entity in ((EnergyPolygonLayer)layer).centerPointLayer.activeEntities)
+					{
+						entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
+					}
+				}
+			}
+
 			base.ExitState(currentMousePosition);
 		}
 

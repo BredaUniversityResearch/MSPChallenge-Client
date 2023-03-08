@@ -139,6 +139,43 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public override void StartedDragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		{
+			base.StartedDragging(dragStartPosition, currentPosition);
+			if (draggingSelection)
+			{
+				foreach (var kvp in selectedPoints)
+				{
+					//If we are dragging endpoints, update nonreference layers
+					if (kvp.Key.AreFirstOrLastPoints(kvp.Value))
+					{
+						foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
+						{
+							if (layer.greenEnergy == kvp.Key.Entity.Layer.greenEnergy)
+							{
+								if (layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+								{
+									//Get and add the centerpoint layer
+									EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;
+									LayerManager.Instance.AddNonReferenceLayer(polyLayer.centerPointLayer, false);
+									foreach (Entity entity in polyLayer.centerPointLayer.activeEntities)
+										entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
+								}
+								else if (layer.editingType == AbstractLayer.EditingType.SourcePoint ||
+										 layer.editingType == AbstractLayer.EditingType.Socket ||
+										 layer.editingType == AbstractLayer.EditingType.Transformer)
+								{
+									LayerManager.Instance.AddNonReferenceLayer(layer, true);
+								}
+							}
+						}
+						return;
+					}
+
+				}
+			}
+		}
+
 		public override void StoppedDragging(Vector3 dragStartPosition, Vector3 dragFinalPosition)
 		{
 			if (draggingSelection)
@@ -150,6 +187,24 @@ namespace MSP2050.Scripts
 				foreach (var kvp in selectedPoints)
 					if (kvp.Key.AreFirstOrLastPoints(kvp.Value))
 					{
+						//Unset non-reference layers
+						AbstractLayer baseLayer = InterfaceCanvas.Instance.activePlanWindow.CurrentlyEditingBaseLayer;
+						if (baseLayer == null)
+							LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { }, false, true);
+						else
+							LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { baseLayer }, false, true);
+
+						foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
+						{
+							if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy && layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+							{
+								foreach (Entity entity in ((EnergyPolygonLayer)layer).centerPointLayer.activeEntities)
+								{
+									entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
+								}
+							}
+						}
+
 						EnergyLineStringSubEntity energySubEntity = kvp.Key as EnergyLineStringSubEntity;
 						bool first = kvp.Value.First() == 0;
 						EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(dragFinalPosition);
@@ -157,8 +212,9 @@ namespace MSP2050.Scripts
 						{
 							//Snap back to original position
 							//If this causes problems, the following line might be more appropriate
-							//energySubEntity.SetPointPosition(kvp.Value.First(), energySubEntity.GetConnection(first).point.GetPosition(), true);
-							fsm.undo(); //Undo the duplication or modified undo state
+							//energySubEntity.SetPointPosition(kvp.Value.First(), energySubEntity.GetConnection(first).point.GetPosition());
+							fsm.undo(false); //Undo the duplication or modified undo state, don't add it to redo
+							fsm.UpdateUndoRedoButtonEnabled(); 
 							return;
 						}
 						//Connect to new point

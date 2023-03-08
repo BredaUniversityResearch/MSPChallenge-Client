@@ -34,7 +34,9 @@ namespace MSP2050.Scripts
 						{
 							//Get and add the centerpoint layer
 							EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;   
-							LayerManager.Instance.AddNonReferenceLayer(polyLayer.centerPointLayer, true);
+							LayerManager.Instance.AddNonReferenceLayer(polyLayer.centerPointLayer, false);
+							foreach (Entity entity in polyLayer.centerPointLayer.activeEntities)
+								entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
 						}
 						else if (layer.editingType == AbstractLayer.EditingType.SourcePoint ||
 						         layer.editingType == AbstractLayer.EditingType.Socket ||
@@ -148,6 +150,18 @@ namespace MSP2050.Scripts
 				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { }, false, true);
 			else
 				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { baseLayer }, false, true);
+
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
+			{
+				if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy && layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+				{
+					foreach (Entity entity in ((EnergyPolygonLayer)layer).centerPointLayer.activeEntities)
+					{
+						entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
+					}
+				}
+			}
+
 			base.ExitState(currentMousePosition);
 		}
 	}

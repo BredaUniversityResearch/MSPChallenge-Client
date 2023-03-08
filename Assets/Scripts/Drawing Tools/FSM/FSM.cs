@@ -167,7 +167,7 @@ namespace MSP2050.Scripts
 					SetCurrentState(new EditPointsState(this, planLayer));
 			}
 
-			updateUndoRedoButtonEnabled();
+			UpdateUndoRedoButtonEnabled();
 		}
 
 		public void StopEditing()
@@ -188,11 +188,11 @@ namespace MSP2050.Scripts
 			{ 
 				case ToolbarInput.Undo:
 					undo();
-					updateUndoRedoButtonEnabled();               
+					UpdateUndoRedoButtonEnabled();               
 					break;
 				case ToolbarInput.Redo:
 					redo();
-					updateUndoRedoButtonEnabled();                
+					UpdateUndoRedoButtonEnabled();                
 					break;
 				//case ToolbarInput.SnapPoints:
 				//	SetSnappingEnabled(!snappingEnabled);
@@ -234,7 +234,7 @@ namespace MSP2050.Scripts
 				redoStack.Clear();
 			}
 
-			updateUndoRedoButtonEnabled();
+			UpdateUndoRedoButtonEnabled();
 		}
 
 		public void ClearUndoRedo()
@@ -243,35 +243,38 @@ namespace MSP2050.Scripts
 			redoStack.Clear();
 		}
 
-		public void undo()
+		public void undo(bool a_addToRedo = true)
 		{
 			if (!(undoStack.Peek() is BatchUndoOperationMarker))
 			{
-				singleUndo();
+				singleUndo(a_addToRedo);
 			}
 			else
 			{
-				singleUndo(); // remove first batch marker from the stack
+				singleUndo(a_addToRedo); // remove first batch marker from the stack
 				while (!(undoStack.Peek() is BatchUndoOperationMarker) && undoStack.Count > 0)
 				{
-					singleUndo();
+					singleUndo(a_addToRedo);
 				}
-				singleUndo(); // remove second batch marker from the stack
+				singleUndo(a_addToRedo); // remove second batch marker from the stack
 			}
 			if (undoStack.Count > 0 && undoStack.Peek() is ConcatOperationMarker)
 			{
-				singleUndo(); //Remove concat operation from stack
-				undo();
+				singleUndo(a_addToRedo); //Remove concat operation from stack
+				undo(a_addToRedo);
 			}
 		}
 
-		private void singleUndo()
+		private void singleUndo(bool a_addToRedo = true)
 		{
 			UndoOperation redo;
 			UndoOperation undo = undoStack.Pop();
 			Debug.Log("Undid: " + undo.GetType().Name);
 			undo.Undo(this, out redo);
-			redoStack.Push(redo);
+			if (a_addToRedo)
+			{
+				redoStack.Push(redo);
+			}
 		}
 
 		private void redo()
@@ -305,7 +308,7 @@ namespace MSP2050.Scripts
 			undoStack.Push(undo);
 		}
 
-		private void updateUndoRedoButtonEnabled()
+		public void UpdateUndoRedoButtonEnabled()
 		{
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Redo, redoStack.Count > 0);
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Undo, undoStack.Count > 0);
@@ -484,13 +487,13 @@ namespace MSP2050.Scripts
 				{
 					SetInterruptState(null);
 					undo();
-					updateUndoRedoButtonEnabled();
+					UpdateUndoRedoButtonEnabled();
 				}
 				else if (Input.GetKeyDown(KeyCode.Y) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && redoStack.Count > 0)
 				{
 					SetInterruptState(null);
 					redo();
-					updateUndoRedoButtonEnabled();
+					UpdateUndoRedoButtonEnabled();
 				}
 
 			}
