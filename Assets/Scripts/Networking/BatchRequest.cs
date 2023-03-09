@@ -10,28 +10,28 @@ namespace MSP2050.Scripts
 {
 	public class BatchRequest
 	{
-		public const int BatchGroupPlanCreate = 1;
-		public const int BatchGroupEnergyDelete = 2;
-		public const int BatchGroupLayerAdd = 3;
-		public const int BatchGroupLayerRemove = 3;
-		public const int BatchGroupGeometryDelete = 4;
+		public const int BATCH_GROUP_PLAN_CREATE = 1;
+		public const int BATCH_GROUP_ENERGY_DELETE = 2;
+		public const int BATCH_GROUP_LAYER_ADD = 3;
+		public const int BATCH_GROUP_LAYER_REMOVE = 3;
+		public const int BATCH_GROUP_GEOMETRY_DELETE = 4;
 
-		public const int BatchGroupGeometryAdd = 5;
-		public const int BatchGroupGeometryUpdate = 5;
-		public const int BatchGroupGridAdd = 5;
-		public const int BatchGroupGridDelete = 5;
-		public const int BatchGroupPlanChange = 5;
+		public const int BATCH_GROUP_GEOMETRY_ADD = 5;
+		public const int BATCH_GROUP_GEOMETRY_UPDATE = 5;
+		public const int BATCH_GROUP_GRID_ADD = 5;
+		public const int BATCH_GROUP_GRID_DELETE = 5;
+		public const int BATCH_GROUP_PLAN_CHANGE = 5;
 
-		public const int BatchGroupIssues = 6;
+		public const int BATCH_GROUP_ISSUES = 6;
 
-		public const int BatchGroupPlanGridChange = 7;
-		public const int BatchGroupEnergyError = 7;
+		public const int BATCH_GROUP_PLAN_GRID_CHANGE = 7;
+		public const int BATCH_GROUP_ENERGY_ERROR = 7;
 
-		public const int BatchGroupGeometryData = 10;
-		public const int BatchGroupConnections = 10;
-		public const int BatchGroupGridContent = 10;
+		public const int BATCH_GROUP_GEOMETRY_DATA = 10;
+		public const int BATCH_GROUP_CONNECTIONS = 10;
+		public const int BATCH_GROUP_GRID_CONTENT = 10;
 
-		public const int BatchGroupUnlock = 100;
+		public const int BATCH_GROUP_UNLOCK = 100;
 
 		private enum EBatchStatus { AwaitingBatchID, AwaitingExecutionIDs, AwaitingResults, Success, Failed }
 

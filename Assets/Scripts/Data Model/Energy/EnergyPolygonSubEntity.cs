@@ -73,7 +73,7 @@ namespace MSP2050.Scripts
 					"id", m_databaseID
 				}
 			};
-			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BatchGroupEnergyDelete);
+			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
 
 			return base.SubmitDelete(a_batch);
 		}
@@ -94,7 +94,7 @@ namespace MSP2050.Scripts
 					"maxcapacity", Capacity.ToString()
 				}
 			};
-			a_batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BatchGroupGeometryData);
+			a_batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
 		}
 	
 		protected override void UpdateBoundingBox()

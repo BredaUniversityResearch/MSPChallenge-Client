@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 {
 	public class EnergyLineStringSubEntity : LineStringSubEntity, IEnergyDataHolder
 	{
-		private const string NumberCablesMetaKey = "NumberCables";
+		private const string NUMBER_CABLES_META_KEY = "NumberCables";
 		public List<Connection> Connections { get; private set; }
 		private int m_numberCables;
 		
@@ -69,12 +69,12 @@ namespace MSP2050.Scripts
 			// Delete energy_output
 			JObject dataObject = new JObject();
 			dataObject.Add("id", m_databaseID);
-			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BatchGroupEnergyDelete);
+			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
 
 			//Delete cable
 			dataObject = new JObject();
 			dataObject.Add("cable", m_databaseID);
-			a_batch.AddRequest(Server.DeleteEnergyConection(), dataObject, BatchRequest.BatchGroupEnergyDelete);
+			a_batch.AddRequest(Server.DeleteEnergyConection(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
 
 			return base.SubmitDelete(a_batch);
 		}
@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 				dataObject.Add("end", second.GetDataBaseOrBatchIDReference());
 				dataObject.Add("cable", GetDataBaseOrBatchIDReference());
 				dataObject.Add("coords", $"[{coordinate.x},{coordinate.y}]");
-				a_batch.AddRequest(a_endPoint, dataObject, BatchRequest.BatchGroupConnections);
+				a_batch.AddRequest(a_endPoint, dataObject, BatchRequest.BATCH_GROUP_CONNECTIONS);
 			}
 		}
 
@@ -130,7 +130,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("capacity", 0);
 			dataObject.Add("maxcapacity", Capacity.ToString());
-			a_batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BatchGroupGeometryData);
+			a_batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
 			//Added connections are handled by the FSM, as they require all geom to have database or batch call IDs
 		}
 
@@ -273,16 +273,16 @@ namespace MSP2050.Scripts
 
 		public override void CalculationPropertyUpdated()
 		{
-			EntityPropertyMetaData propertyMeta = m_entity.Layer.FindPropertyMetaDataByName(NumberCablesMetaKey);
+			EntityPropertyMetaData propertyMeta = m_entity.Layer.FindPropertyMetaDataByName(NUMBER_CABLES_META_KEY);
 			int defaultValue = 1;
 			if (propertyMeta != null)
 			{
 				defaultValue = Util.ParseToInt(propertyMeta.DefaultValue, 1);
 			}
 
-			if (m_entity.DoesPropertyExist(NumberCablesMetaKey))
+			if (m_entity.DoesPropertyExist(NUMBER_CABLES_META_KEY))
 			{
-				m_numberCables = Util.ParseToInt(m_entity.GetMetaData(NumberCablesMetaKey), defaultValue);
+				m_numberCables = Util.ParseToInt(m_entity.GetMetaData(NUMBER_CABLES_META_KEY), defaultValue);
 			}
 			else
 				m_numberCables = defaultValue;

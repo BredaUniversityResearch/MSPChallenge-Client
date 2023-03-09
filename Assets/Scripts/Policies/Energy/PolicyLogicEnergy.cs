@@ -278,14 +278,14 @@ namespace MSP2050.Scripts
 				JObject dataObject = new JObject();
 				dataObject.Add("id", a_plan.GetDataBaseOrBatchIDReference());
 				dataObject.Add("alters_energy_distribution", data.altersEnergyDistribution ? 1 : 0);
-				a_batch.AddRequest(Server.SetPlanEnergyDistribution(), dataObject, BatchRequest.BatchGroupPlanChange);
+				a_batch.AddRequest(Server.SetPlanEnergyDistribution(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 			}
 			else if(m_wasEnergyPlanBeforeEditing)
 			{
 				SubmitPolicyActivity(a_plan, PolicyManager.ENERGY_POLICY_NAME, false, a_batch);
 				JObject dataObject = new JObject();
 				dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
-				a_batch.AddRequest(Server.DeleteEnergyFromPlan(), dataObject, BatchRequest.BatchGroupPlanChange);
+				a_batch.AddRequest(Server.DeleteEnergyFromPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 			}
 		}
 
@@ -853,7 +853,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("id", a_plan.GetDataBaseOrBatchIDReference());
 			dataObject.Add("error", a_value ? 1 : 0);
 			dataObject.Add("check_dependent_plans", a_checkDependencies ? 1 : 0);
-			a_batch.AddRequest(Server.SetEnergyError(), dataObject, BatchRequest.BatchGroupEnergyError);
+			a_batch.AddRequest(Server.SetEnergyError(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_ERROR);
 		}
 
 		public void SubmitRemovedGrids(Plan a_plan, PolicyPlanDataEnergy a_data, BatchRequest a_batch)
@@ -862,7 +862,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
 			if (a_data.removedGrids != null && a_data.removedGrids.Count > 0)
 				dataObject.Add("delete", JToken.FromObject(a_data.removedGrids));
-			a_batch.AddRequest(Server.SetPlanRemovedGrids(), dataObject, BatchRequest.BatchGroupPlanGridChange);
+			a_batch.AddRequest(Server.SetPlanRemovedGrids(), dataObject, BatchRequest.BATCH_GROUP_PLAN_GRID_CHANGE);
 		}
 	}
 }

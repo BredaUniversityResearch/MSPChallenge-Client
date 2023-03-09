@@ -13,9 +13,9 @@ namespace MSP2050.Scripts
 
 	public abstract class SubEntity
 	{
-		private const float LayerTypeOrderMaxZOffset = 0.05f;
-		private const float FrontOfLayerZOffset = -0.90f;
-		private const float FrontOfEverythingZOffset = -100.0f;
+		private const float LAYER_TYPE_ORDER_MAX_Z_OFFSET = 0.05f;
+		private const float FRONT_OF_LAYER_Z_OFFSET = -0.90f;
+		private const float FRONT_OF_EVERYTHING_Z_OFFSET = -100.0f;
 
 		public Entity m_entity;
 		protected int m_databaseID = -1;
@@ -109,7 +109,7 @@ namespace MSP2050.Scripts
 
 			int currentEntityTypeKey = m_entity.Layer.GetEntityTypeKey(m_entity.EntityTypes[0]);
 
-			m_order = ((float)entityTypeKeysOrdered.IndexOf(currentEntityTypeKey) / (float)m_entity.Layer.m_entityTypes.Count) * LayerTypeOrderMaxZOffset;
+			m_order = ((float)entityTypeKeysOrdered.IndexOf(currentEntityTypeKey) / (float)m_entity.Layer.m_entityTypes.Count) * LAYER_TYPE_ORDER_MAX_Z_OFFSET;
 		}
 
 
@@ -197,7 +197,7 @@ namespace MSP2050.Scripts
 				dataObject.Add("country", m_entity.Country);
 				dataObject.Add("id", m_databaseID);
 
-				a_batch.AddRequest<int>(Server.UpdateGeometry(), dataObject, BatchRequest.BatchGroupGeometryUpdate, HandleDatabaseIDResult);
+				a_batch.AddRequest<int>(Server.UpdateGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_UPDATE, HandleDatabaseIDResult);
 				SubmitData(a_batch);
 			}
 			return null;
@@ -207,7 +207,7 @@ namespace MSP2050.Scripts
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("id", m_databaseID);
-			a_batch.AddRequest(Server.DeleteGeometry(), dataObject, BatchRequest.BatchGroupGeometryDelete);
+			a_batch.AddRequest(Server.DeleteGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
 			return null;
 		}
 
@@ -219,7 +219,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("data", m_entity.MetaToJSON());
 			dataObject.Add("type", Util.IntListToString(m_entity.GetEntityTypeKeys()));
 
-			a_batch.AddRequest(Server.SendGeometryData(), dataObject, BatchRequest.BatchGroupGeometryData);
+			a_batch.AddRequest(Server.SendGeometryData(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
 		}
 
 		public virtual Action<BatchRequest> SubmitNew(BatchRequest a_batch)
@@ -243,7 +243,7 @@ namespace MSP2050.Scripts
 				dataObject.Add("layer", m_entity.Layer.m_id);
 			}
 
-			m_entity.creationBatchCallID = a_batch.AddRequest<int>(Server.PostGeometry(), dataObject, BatchRequest.BatchGroupGeometryAdd, HandleDatabaseIDResult);
+			m_entity.creationBatchCallID = a_batch.AddRequest<int>(Server.PostGeometry(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_ADD, HandleDatabaseIDResult);
 
 			if (this is PolygonSubEntity)
 			{
@@ -256,7 +256,7 @@ namespace MSP2050.Scripts
 					dataObject.Add("layer", m_entity.PlanLayer.GetDataBaseOrBatchIDReference());
 					dataObject.Add("subtractive", BatchRequest.FormatCallIDReference(m_entity.creationBatchCallID)); 
 
-					a_batch.AddRequest(Server.PostGeometrySub(), dataObject, BatchRequest.BatchGroupGeometryData);
+					a_batch.AddRequest(Server.PostGeometrySub(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
 				}
 			}
 			SubmitData(a_batch);
@@ -448,10 +448,10 @@ namespace MSP2050.Scripts
 			Vector3 oldPos = m_gameObject.transform.position;
 			if (a_isInFrontOfLayer)
 			{
-				m_gameObject.transform.localPosition = new Vector3(oldPos.x, oldPos.y, m_order + FrontOfLayerZOffset);
+				m_gameObject.transform.localPosition = new Vector3(oldPos.x, oldPos.y, m_order + FRONT_OF_LAYER_Z_OFFSET);
 				if (m_textMesh != null)
 				{
-					m_textMesh.SetZOffset(FrontOfEverythingZOffset);
+					m_textMesh.SetZOffset(FRONT_OF_EVERYTHING_Z_OFFSET);
 				}
 			}
 			else

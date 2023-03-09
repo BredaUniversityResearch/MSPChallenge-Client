@@ -5,7 +5,7 @@ namespace MSP2050.Scripts
 {
 	public class EditPolygonsState : FSMState
 	{
-		private const float InsertPointDelay = 0.5f;
+		private const float INSERT_POINT_DELAY = 0.5f;
 
 		//protected PolygonLayer layer;
 		private PolygonLayer m_baseLayer;
@@ -832,7 +832,7 @@ namespace MSP2050.Scripts
 		public override void HandleKeyboardEvents()
 		{
 			// hasn't got anything to do with keyboard events; added here because this function is called every frame
-			if (m_insertingPointsDisabled && Time.time - m_stateEnteredTime > InsertPointDelay)
+			if (m_insertingPointsDisabled && Time.time - m_stateEnteredTime > INSERT_POINT_DELAY)
 			{
 				m_insertingPointsDisabled = false;
 				MouseMoved(m_reEnableInsertingPointsPosition, m_reEnableInsertingPointsPosition, false);

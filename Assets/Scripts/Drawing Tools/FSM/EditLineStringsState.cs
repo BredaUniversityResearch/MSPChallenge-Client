@@ -5,7 +5,7 @@ namespace MSP2050.Scripts
 {
 	public class EditLineStringsState : FSMState
 	{
-		private const float InsertPointDelay = 0.5f;
+		private const float INSERT_POINT_DELAY = 0.5f;
 
 		//protected LineStringLayer layer;
 		protected LineStringLayer m_baseLayer;
@@ -816,17 +816,17 @@ namespace MSP2050.Scripts
 			foreach (LineStringSubEntity subEntity in localSelectedEntities)
 			{
 				string oldDirection;
-				oldDirection = subEntity.m_entity.DoesPropertyExist(ShippingLineStringEntity.ShippingDirectionMetaKey) ?
-					subEntity.m_entity.GetMetaData(ShippingLineStringEntity.ShippingDirectionMetaKey) :
-					ShippingLineStringEntity.DirectionDefault;
+				oldDirection = subEntity.m_entity.DoesPropertyExist(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY) ?
+					subEntity.m_entity.GetMetaData(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY) :
+					ShippingLineStringEntity.DIRECTION_DEFAULT;
 
 				string newDirection = ShippingLineStringEntity.CycleToNextDirection(oldDirection);
 
 				LineStringSubEntity newSubEntity = StartModifyingSubEntity(subEntity, true);
 
-				m_fsm.AddToUndoStack(new UndoOperationChangeMeta(newSubEntity.m_entity, ShippingLineStringEntity.ShippingDirectionMetaKey, oldDirection, newDirection));
+				m_fsm.AddToUndoStack(new UndoOperationChangeMeta(newSubEntity.m_entity, ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY, oldDirection, newDirection));
 
-				newSubEntity.m_entity.SetMetaData(ShippingLineStringEntity.ShippingDirectionMetaKey, newDirection);
+				newSubEntity.m_entity.SetMetaData(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY, newDirection);
 
 				newSubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Selected);
 			}
@@ -836,7 +836,7 @@ namespace MSP2050.Scripts
 		public override void HandleKeyboardEvents()
 		{
 			// hasn't got anything to do with keyboard events; added here because this function is called every frame
-			if (m_insertingPointsDisabled && Time.time - m_stateEnteredTime > InsertPointDelay)
+			if (m_insertingPointsDisabled && Time.time - m_stateEnteredTime > INSERT_POINT_DELAY)
 			{
 				m_insertingPointsDisabled = false;
 				MouseMoved(m_reEnableInsertingPointsPosition, m_reEnableInsertingPointsPosition, false);

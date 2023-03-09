@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 	public abstract class AbstractLayer
 	{
 		public delegate string PresetPropertyDelegate(SubEntity a_subentity);
-		public const string PointSpriteRootFolder = "points/";
+		public const string POINT_SPRITE_ROOT_FOLDER = "points/";
 
 		public enum EditingType { Normal, Cable, Transformer, Socket, SourcePoint, SourcePolygon, SourcePolygonPoint };
 
@@ -60,7 +60,7 @@ namespace MSP2050.Scripts
 		public List<EntityPropertyMetaData> m_propertyMetaData = new List<EntityPropertyMetaData>();
 		public Dictionary<string, PresetPropertyDelegate> m_presetProperties;
 
-		private const string AssemblyState = "ASSEMBLY";
+		private const string ASSEMBLY_STATE = "ASSEMBLY";
 
 		static AbstractLayer()
 		{
@@ -128,8 +128,8 @@ namespace MSP2050.Scripts
 					m_layerStates.Add(obj.state, obj.time);
 				}
 
-				if (m_layerStates.ContainsKey(AssemblyState))
-					AssemblyTime = m_layerStates[AssemblyState];
+				if (m_layerStates.ContainsKey(ASSEMBLY_STATE))
+					AssemblyTime = m_layerStates[ASSEMBLY_STATE];
 			}
 
 			switch (a_layerMeta.layer_editing_type)
@@ -324,10 +324,10 @@ namespace MSP2050.Scripts
 				Sprite pointSprite = null;
 				if (!string.IsNullOrEmpty(kvp.Value.pointSpriteName) && kvp.Value.pointSpriteName != "None")
 				{
-					pointSprite = Resources.Load<Sprite>(PointSpriteRootFolder + kvp.Value.pointSpriteName);
+					pointSprite = Resources.Load<Sprite>(POINT_SPRITE_ROOT_FOLDER + kvp.Value.pointSpriteName);
 					if (pointSprite == null)
 					{
-						Debug.LogWarning("Could not load sprite at location " + PointSpriteRootFolder + kvp.Value.pointSpriteName + " for entityType " + kvp.Key + " (" + kvp.Value.displayName + "). Is there a file at this location and are the import settings set correctly to be a sprite?");
+						Debug.LogWarning("Could not load sprite at location " + POINT_SPRITE_ROOT_FOLDER + kvp.Value.pointSpriteName + " for entityType " + kvp.Key + " (" + kvp.Value.displayName + "). Is there a file at this location and are the import settings set correctly to be a sprite?");
 					}
 				}
 				SubEntityDrawSettings drawSettings = new SubEntityDrawSettings(kvp.Value.displayPolygon, Util.HexToColor(kvp.Value.polygonColor), kvp.Value.polygonPatternName,

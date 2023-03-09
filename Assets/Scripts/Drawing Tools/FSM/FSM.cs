@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 	{
 		private static FSM Instance;
 
-		private const float DoubleClickMaxInterval = 0.5f;
+		private const float DOUBLE_CLICK_MAX_INTERVAL = 0.5f;
 
 		public enum ToolbarInput { Create, Edit, Undo, Redo, Delete, Recall, ChangeDirection, Abort }//Union, Intersect, Difference, Simplify,
 			//RemoveHoles, FindGaps, SnapPoints, FixInvalid, SelectAll}
@@ -505,7 +505,7 @@ namespace MSP2050.Scripts
 
 				if (m_userMayBeClicking)
 				{
-					if (Time.time - m_previousClickTime < DoubleClickMaxInterval && (mousePosition - m_previousClickLocation).magnitude < VisualizationUtil.Instance.GetMouseMoveThreshold())
+					if (Time.time - m_previousClickTime < DOUBLE_CLICK_MAX_INTERVAL && (mousePosition - m_previousClickLocation).magnitude < VisualizationUtil.Instance.GetMouseMoveThreshold())
 					{
 						InputReceivingState.DoubleClick(mousePosition);
 					}

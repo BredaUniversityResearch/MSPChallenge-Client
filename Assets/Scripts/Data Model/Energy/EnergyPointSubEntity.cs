@@ -148,7 +148,7 @@ namespace MSP2050.Scripts
 			// Delete energy_output
 			JObject dataObject = new JObject();
 			dataObject.Add("id", m_databaseID);
-			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BatchGroupEnergyDelete);
+			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
 			return base.SubmitDelete(a_batch);
 		}
 
@@ -161,7 +161,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("capacity", 0);
 			dataObject.Add("maxcapacity", Capacity.ToString());
-			a_batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BatchGroupGeometryData);
+			a_batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
 		}
 	}
 }

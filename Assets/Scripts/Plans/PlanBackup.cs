@@ -204,7 +204,7 @@ namespace MSP2050.Scripts
 						dataObject.Add("plan", planlayer.Plan.GetDataBaseOrBatchIDReference());
 						dataObject.Add("planlayer_id", planlayer.GetDataBaseOrBatchIDReference());
 						dataObject.Add("removed", JToken.FromObject(new int[0]));
-						a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BatchGroupIssues);
+						a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
 					}
 				}
 			}
@@ -303,7 +303,7 @@ namespace MSP2050.Scripts
 
 					dataObject.Add("added", JToken.FromObject(newIssues.Values.ToArray()));
 					dataObject.Add("removed", JToken.FromObject(new int[] {}));
-					a_batch.AddRequest<List<PlanIssueObject>>(Server.SendIssues(), dataObject, BatchRequest.BatchGroupIssues, HandleDatabaseIDResults);
+					a_batch.AddRequest<List<PlanIssueObject>>(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES, HandleDatabaseIDResults);
 				}
 			}
 			else
@@ -342,7 +342,7 @@ namespace MSP2050.Scripts
 				dataObject.Add("plan", m_planLayer.Plan.GetDataBaseOrBatchIDReference());
 				dataObject.Add("added", JToken.FromObject(newIssues.Values.ToArray()));
 				dataObject.Add("removed", JToken.FromObject(removedIssueIDs));
-				a_batch.AddRequest<List<PlanIssueObject>>(Server.SendIssues(), dataObject, BatchRequest.BatchGroupIssues, HandleDatabaseIDResults);
+				a_batch.AddRequest<List<PlanIssueObject>>(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES, HandleDatabaseIDResults);
 			}
 		}
 

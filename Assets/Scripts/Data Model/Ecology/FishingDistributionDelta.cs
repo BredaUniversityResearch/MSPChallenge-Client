@@ -96,7 +96,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("plan", a_planId);
 			dataObject.Add("fishing_values", JToken.FromObject(valuesToSubmit));
 
-			a_batch.AddRequest(Server.SendFishingAmount(), dataObject, BatchRequest.BatchGroupPlanChange);
+			a_batch.AddRequest(Server.SendFishingAmount(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public FishingDistributionDelta Clone()

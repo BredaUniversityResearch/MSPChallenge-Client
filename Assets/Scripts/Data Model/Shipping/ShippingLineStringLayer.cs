@@ -23,7 +23,7 @@ namespace MSP2050.Scripts
         public override SubEntity GetSubEntityAt(Vector2 position)
 		{
 			float defaultWidth = 1.0f;
-			EntityPropertyMetaData laneWidthMetaData = FindPropertyMetaDataByName(ShippingLineStringEntity.ShippingLaneWidthMetaKey);
+			EntityPropertyMetaData laneWidthMetaData = FindPropertyMetaDataByName(ShippingLineStringEntity.SHIPPING_LANE_WIDTH_META_KEY);
 			if (laneWidthMetaData != null)
 			{
 				defaultWidth = Util.ParseToFloat(laneWidthMetaData.DefaultValue, 1.0f);
@@ -46,8 +46,8 @@ namespace MSP2050.Scripts
 						//Despite insistence on shipping lane width being visual only, it turned out not to be.....
 
 						float width = defaultWidth;
-						if (subEntity.m_entity.DoesPropertyExist(ShippingLineStringEntity.ShippingLaneWidthMetaKey))
-							width = Util.ParseToFloat(subEntity.m_entity.GetMetaData(ShippingLineStringEntity.ShippingLaneWidthMetaKey), defaultWidth);
+						if (subEntity.m_entity.DoesPropertyExist(ShippingLineStringEntity.SHIPPING_LANE_WIDTH_META_KEY))
+							width = Util.ParseToFloat(subEntity.m_entity.GetMetaData(ShippingLineStringEntity.SHIPPING_LANE_WIDTH_META_KEY), defaultWidth);
 						width *= 0.5f;
 						float dist = subEntity.DistanceToPoint(position) - width;
 						if (dist < 0)

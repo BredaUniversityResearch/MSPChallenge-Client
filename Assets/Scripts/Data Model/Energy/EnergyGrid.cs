@@ -273,7 +273,7 @@ namespace MSP2050.Scripts
 				JObject dataObject2 = new JObject();
 				dataObject2.Add("id", m_databaseID);
 				dataObject2.Add("name", m_name);
-				a_batch.AddRequest(Server.UpdateGridName(), dataObject2, BatchRequest.BatchGroupGridAdd);
+				a_batch.AddRequest(Server.UpdateGridName(), dataObject2, BatchRequest.BATCH_GROUP_GRID_ADD);
 				return;
 			}
 
@@ -284,7 +284,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("distribution_only", JsonConvert.SerializeObject(m_distributionOnly));
 			if (m_persistentID != -1)
 				dataObject.Add("persistent", m_persistentID);
-			m_creationBatchCallID = a_batch.AddRequest<int>(Server.AddEnergyGrid(), dataObject, BatchRequest.BatchGroupGridAdd, AddGridCallback);
+			m_creationBatchCallID = a_batch.AddRequest<int>(Server.AddEnergyGrid(), dataObject, BatchRequest.BATCH_GROUP_GRID_ADD, AddGridCallback);
 		}
 
 		private void AddGridCallback(int a_newDatabaseID)
@@ -316,7 +316,7 @@ namespace MSP2050.Scripts
 			//Delete grid by databbaseID
 			JObject dataObject = new JObject();
 			dataObject.Add("id", a_databaseID);
-			a_batch.AddRequest(Server.DeleteGrid(), dataObject, BatchRequest.BatchGroupGridDelete);
+			a_batch.AddRequest(Server.DeleteGrid(), dataObject, BatchRequest.BATCH_GROUP_GRID_DELETE);
 		}
 
 		/// <summary>
@@ -333,7 +333,7 @@ namespace MSP2050.Scripts
 			JObject dataObject = new JObject();
 			dataObject.Add("id", dbOrBatchID);
 			dataObject.Add("sockets", JToken.FromObject(socketIDs));
-			a_batch.AddRequest(Server.UpdateGridSockets(), dataObject, BatchRequest.BatchGroupGridContent);
+			a_batch.AddRequest(Server.UpdateGridSockets(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
 
 			List<string> sourceIDs = new List<string>(m_sources.Count);
 			foreach (EnergyPointSubEntity source in m_sources)
@@ -344,7 +344,7 @@ namespace MSP2050.Scripts
 			if (sourceIDs.Count > 0)
 				//dataObject.Add("sources", JToken.FromObject(sourceIDs));
 				dataObject.Add("sources", JToken.FromObject(sourceIDs));
-			a_batch.AddRequest(Server.UpdateGridSources(), dataObject, BatchRequest.BatchGroupGridContent);
+			a_batch.AddRequest(Server.UpdateGridSources(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
 
 			//Update grid_energy 
 			List<EnergyExpected> expected = new List<EnergyExpected>(m_energyDistribution.m_distribution.Count);
@@ -355,7 +355,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("id", dbOrBatchID);
 			dataObject.Add("expected", JToken.FromObject(expected));
 			//dataObject.Add("expected", JToken.FromObject(expected));
-			a_batch.AddRequest(Server.UpdateGridEnergy(), dataObject, BatchRequest.BatchGroupGridContent);
+			a_batch.AddRequest(Server.UpdateGridEnergy(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
 
 		}
 

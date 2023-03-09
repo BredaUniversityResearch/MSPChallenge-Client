@@ -29,8 +29,8 @@ namespace MSP2050.Scripts
 
 		void ApplySettings()
 		{
-			Sprite greenSprite = m_settings.green_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.PointSpriteRootFolder + m_settings.green_centerpoint_sprite);
-			Sprite greySprite = m_settings.grey_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.PointSpriteRootFolder + m_settings.grey_centerpoint_sprite);
+			Sprite greenSprite = m_settings.green_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + m_settings.green_centerpoint_sprite);
+			Sprite greySprite = m_settings.grey_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + m_settings.grey_centerpoint_sprite);
 			Color greenColor = Util.HexToColor(m_settings.green_centerpoint_color);
 			Color greyColor = Util.HexToColor(m_settings.grey_centerpoint_color);
 

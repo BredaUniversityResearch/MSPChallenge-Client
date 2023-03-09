@@ -395,7 +395,7 @@ namespace MSP2050.Scripts
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("country", Country);
-			creationBatchCallID = a_batch.AddRequest<int>(Server.PostPlan(), dataObject, BatchRequest.BatchGroupPlanCreate, HandleDatabaseIDResult);
+			creationBatchCallID = a_batch.AddRequest<int>(Server.PostPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CREATE, HandleDatabaseIDResult);
 		}
 
 		void HandleDatabaseIDResult(int a_result)
@@ -792,7 +792,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("id", ID);
 			dataObject.Add("force_unlock", 0);
 			dataObject.Add("user", SessionManager.Instance.CurrentSessionID.ToString());
-			batch.AddRequest(Server.UnlockPlan(), dataObject, BatchRequest.BatchGroupUnlock);
+			batch.AddRequest(Server.UnlockPlan(), dataObject, BatchRequest.BATCH_GROUP_UNLOCK);
 		}
 
 		public void SubmitState(PlanState newState, BatchRequest batch)
@@ -809,7 +809,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("state", newState.ToString());
 			dataObject.Add("user", SessionManager.Instance.CurrentSessionID.ToString());
-			batch.AddRequest(Server.SetPlanState(), dataObject, BatchRequest.BatchGroupPlanChange);
+			batch.AddRequest(Server.SetPlanState(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public void SubmitDescription(BatchRequest batch)
@@ -819,7 +819,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("description", string.IsNullOrEmpty(Description) ? " " : Description);
 
-			batch.AddRequest(Server.SetPlanDescription(), dataObject, BatchRequest.BatchGroupPlanChange);
+			batch.AddRequest(Server.SetPlanDescription(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public void SubmitName(BatchRequest batch)
@@ -827,7 +827,7 @@ namespace MSP2050.Scripts
 			JObject dataObject = new JObject();
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("name", Name);
-			batch.AddRequest(Server.RenamePlan(), dataObject, BatchRequest.BatchGroupPlanChange);
+			batch.AddRequest(Server.RenamePlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public void SubmitPlanDate(BatchRequest batch)
@@ -835,14 +835,14 @@ namespace MSP2050.Scripts
 			JObject dataObject = new JObject();
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("date", StartTime);
-			batch.AddRequest(Server.ChangePlanDate(), dataObject, BatchRequest.BatchGroupPlanChange);
+			batch.AddRequest(Server.ChangePlanDate(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public void SubmitRemovePlanLayer(PlanLayer planLayerToRemove, BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("id", planLayerToRemove.ID);
-			batch.AddRequest(Server.DeletePlanLayer(), dataObject, BatchRequest.BatchGroupLayerRemove);
+			batch.AddRequest(Server.DeletePlanLayer(), dataObject, BatchRequest.BATCH_GROUP_LAYER_REMOVE);
 		}
 
 		public void SubmitRequiredApproval(BatchRequest batch)
@@ -856,7 +856,7 @@ namespace MSP2050.Scripts
 				dataObject.Add("countries", JToken.FromObject(countries));
 			}
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
-			batch.AddRequest(Server.AddApproval(), dataObject, BatchRequest.BatchGroupPlanChange);
+			batch.AddRequest(Server.AddApproval(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public void AddSystemMessage(string text)
@@ -887,7 +887,7 @@ namespace MSP2050.Scripts
 			dataObject.Add("team_id", SessionManager.Instance.CurrentUserTeamID);
 			dataObject.Add("user_name", SessionManager.Instance.CurrentUserName);
 			dataObject.Add("text", text);
-			batch.AddRequest(Server.PostPlanFeedback(), dataObject, BatchRequest.BatchGroupPlanChange);
+			batch.AddRequest(Server.PostPlanFeedback(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 		#endregion
 	}

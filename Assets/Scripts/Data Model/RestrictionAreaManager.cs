@@ -129,7 +129,7 @@ namespace MSP2050.Scripts
 				}
 			};
 
-			a_batch.AddRequest(Server.SetPlanRestrictionAreas(), dataObject, BatchRequest.BatchGroupPlanChange);
+			a_batch.AddRequest(Server.SetPlanRestrictionAreas(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 	
 		public List<RestrictionAreaObject> GatherSettingsForPlan(Plan a_referencePlan)
