@@ -235,36 +235,39 @@ namespace MSP2050.Scripts
 			m_undoStack.Clear();
 			m_redoStack.Clear();
 		}
-
-		public void Undo()
+		
+		public void Undo(bool a_addToRedo = true)
 		{
 			if (!(m_undoStack.Peek() is BatchUndoOperationMarker))
 			{
-				SingleUndo();
+				SingleUndo(a_addToRedo);
 			}
 			else
 			{
-				SingleUndo(); // remove first batch marker from the stack
+				SingleUndo(a_addToRedo); // remove first batch marker from the stack
 				while (!(m_undoStack.Peek() is BatchUndoOperationMarker) && m_undoStack.Count > 0)
 				{
-					SingleUndo();
+					SingleUndo(a_addToRedo);
 				}
-				SingleUndo(); // remove second batch marker from the stack
+				SingleUndo(a_addToRedo); // remove second batch marker from the stack
 			}
 			if (m_undoStack.Count > 0 && m_undoStack.Peek() is ConcatOperationMarker)
 			{
-				SingleUndo(); //Remove concat operation from stack
-				Undo();
+				SingleUndo(a_addToRedo); //Remove concat operation from stack
+				Undo(a_addToRedo);
 			}
 		}
 
-		private void SingleUndo()
+		private void SingleUndo(bool a_addToRedo = true)
 		{
 			UndoOperation redo;
 			UndoOperation undo = m_undoStack.Pop();
 			Debug.Log("Undid: " + undo.GetType().Name);
 			undo.Undo(this, out redo);
-			m_redoStack.Push(redo);
+			if (a_addToRedo)
+			{
+				m_redoStack.Push(redo);
+			}
 		}
 
 		private void Redo()
@@ -298,7 +301,7 @@ namespace MSP2050.Scripts
 			m_undoStack.Push(undo);
 		}
 
-		private void UpdateUndoRedoButtonEnabled()
+		public void UpdateUndoRedoButtonEnabled()
 		{
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Redo, m_redoStack.Count > 0);
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Undo, m_undoStack.Count > 0);

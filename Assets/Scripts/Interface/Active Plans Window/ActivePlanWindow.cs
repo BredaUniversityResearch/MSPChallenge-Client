@@ -613,6 +613,7 @@ namespace MSP2050.Scripts
 			int layerIndex = m_layerToggles.Count;
 			obj.Initialise(this, m_geometryTool, () => OnLayerContentToggled(layerIndex));
 			obj.SetContent(layer.BaseLayer.ShortName, LayerManager.Instance.GetSubcategoryIcon(layer.BaseLayer.m_subCategory));
+			obj.GetComponent<RegisterInteraction>().SetTags(new string[] { "AP_Layer" });
 			m_layerToggles.Add(obj);
 		}
 
