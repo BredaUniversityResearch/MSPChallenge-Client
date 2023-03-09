@@ -33,7 +33,7 @@ namespace MSP2050.Scripts
 		{
 			if (targetEntity != null)
 			{
-				Vector3 pos = targetEntity.BoundingBox.center;
+				Vector3 pos = targetEntity.m_boundingBox.center;
 				pos.z = targetLabel.gameObject.transform.parent.position.z;
 				targetLabel.gameObject.transform.position = pos;
 			}
@@ -44,12 +44,12 @@ namespace MSP2050.Scripts
 
 		void InspectSource()
 		{
-			CameraManager.Instance.cameraPan.StartAutoPan(m_sourceSubentity.BoundingBox.center, 0.35f);
+			CameraManager.Instance.cameraPan.StartAutoPan(m_sourceSubentity.m_boundingBox.center, 0.35f);
 		}
 
 		void InspectDestination()
 		{
-			CameraManager.Instance.cameraPan.StartAutoPan(m_sourceSubentity.BoundingBox.center, 0.35f);
+			CameraManager.Instance.cameraPan.StartAutoPan(m_sourceSubentity.m_boundingBox.center, 0.35f);
 		}
 
 		public override void Destroy()

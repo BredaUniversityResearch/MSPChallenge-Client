@@ -116,7 +116,7 @@ namespace MSP2050.Scripts
 		private IEnumerator CoroutineHideAllVisibleLayers()
 		{
 			List<AbstractLayer> layers = m_activeLayers.Keys.ToList();
-			Plan currentPlan = PlanManager.Instance.planViewing;
+			Plan currentPlan = PlanManager.Instance.m_planViewing;
 			foreach(AbstractLayer layer in layers)
 			{
 				if (layer.Toggleable && (currentPlan == null || !currentPlan.IsLayerpartOfPlan(layer)))

@@ -7,58 +7,76 @@ namespace MSP2050.Scripts
 {
 	public class EnergyLineStringSubEntity : LineStringSubEntity, IEnergyDataHolder
 	{
-		public const string NUMBER_CABLES_META_KEY = "NumberCables";
-		public List<Connection> connections { get; private set; }
-		long usedCapacity;
-		EnergyGrid lastRunGrid;
-		EnergyGrid currentGrid;
-		private int numberCables;
+		private const string NUMBER_CABLES_META_KEY = "NumberCables";
+		public List<Connection> Connections { get; private set; }
+		private int m_numberCables;
+		
+		public long UsedCapacity {
+			get;
+			set;
+		}
 
-		public EnergyLineStringSubEntity(Entity entity) : base(entity)
+		public long Capacity
 		{
-			connections = new List<Connection>();
+			get => m_entity.EntityTypes[0].capacity * m_numberCables;
+			set { }
+		}
+
+		public EnergyGrid LastRunGrid {
+			get;
+			set;
+		}
+
+		public EnergyGrid CurrentGrid {
+			get;
+			set;
+		}		
+
+		public EnergyLineStringSubEntity(Entity a_entity) : base(a_entity)
+		{
+			Connections = new List<Connection>();
 			CalculationPropertyUpdated();
 		}
 
-		public EnergyLineStringSubEntity(Entity entity, SubEntityObject geometry, int databaseID) : base(entity, geometry, databaseID)
+		public EnergyLineStringSubEntity(Entity a_entity, SubEntityObject a_geometry, int a_databaseID) : base(a_entity, a_geometry, a_databaseID)
 		{
-			connections = new List<Connection>();
-			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
+			Connections = new List<Connection>();
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
 			CalculationPropertyUpdated();
 		}
 
-		public override void SetDatabaseID(int databaseID)
+		protected override void SetDatabaseID(int a_databaseID)
 		{
-			PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(databaseID);
-			this.databaseID = databaseID;
-			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
+			PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(a_databaseID);
+			m_databaseID = a_databaseID;
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
 		}
 
-		public override Action<BatchRequest> SubmitNew(BatchRequest batch)
+		public override Action<BatchRequest> SubmitNew(BatchRequest a_batch)
 		{
-			base.SubmitNew(batch);
+			base.SubmitNew(a_batch);
 			return SubmitAddConnection;
 		}
 
-		public override Action<BatchRequest> SubmitUpdate(BatchRequest batch)
+		public override Action<BatchRequest> SubmitUpdate(BatchRequest a_batch)
 		{
-			base.SubmitUpdate(batch);
+			base.SubmitUpdate(a_batch);
 			return SubmitUpdateConnection;
 		}
 
-		public override Action<BatchRequest> SubmitDelete(BatchRequest batch)
+		public override Action<BatchRequest> SubmitDelete(BatchRequest a_batch)
 		{
 			// Delete energy_output
 			JObject dataObject = new JObject();
-			dataObject.Add("id", databaseID);
-			batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
+			dataObject.Add("id", m_databaseID);
+			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
 
 			//Delete cable
 			dataObject = new JObject();
-			dataObject.Add("cable", databaseID);
-			batch.AddRequest(Server.DeleteEnergyConection(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
+			dataObject.Add("cable", m_databaseID);
+			a_batch.AddRequest(Server.DeleteEnergyConection(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
 
-			return base.SubmitDelete(batch);
+			return base.SubmitDelete(a_batch);
 		}
 
 		void SubmitAddConnection(BatchRequest a_batch)
@@ -73,18 +91,18 @@ namespace MSP2050.Scripts
 
 		void SubmitAddOrChangeConnection(string a_endPoint, BatchRequest a_batch)
 		{
-			if (connections == null || connections.Count == 0)
+			if (Connections == null || Connections.Count == 0)
 			{
 				Debug.LogError($"Trying to submit a cable with no connections. Cable ID: {GetDatabaseID()}");
 			}
-			else if (connections.Count < 2)
+			else if (Connections.Count < 2)
 			{
-				Debug.LogError($"Trying to submit a cable with a missing connection. Cable ID: {GetDatabaseID()}. Existing connection to point with ID: {connections[0].point.GetDatabaseID()}");
+				Debug.LogError($"Trying to submit a cable with a missing connection. Cable ID: {GetDatabaseID()}. Existing connection to point with ID: {Connections[0].point.GetDatabaseID()}");
 			}
 			else
 			{
 				EnergyPointSubEntity first = null, second = null;
-				foreach (Connection conn in connections)
+				foreach (Connection conn in Connections)
 				{
 					if (conn.connectedToFirst)
 						first = conn.point;
@@ -103,62 +121,40 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void SubmitData(BatchRequest batch)
+		protected override void SubmitData(BatchRequest a_batch)
 		{
-			base.SubmitData(batch);
+			base.SubmitData(a_batch);
 
 			//Set energy_output
 			JObject dataObject = new JObject();
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("capacity", 0);
 			dataObject.Add("maxcapacity", Capacity.ToString());
-			batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
+			a_batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
 			//Added connections are handled by the FSM, as they require all geom to have database or batch call IDs
 		}
 
-		public void RemoveConnection(Connection con)
+		public void RemoveConnection(Connection a_con)
 		{
-			connections.Remove(con);
+			Connections.Remove(a_con);
 		}
 
-		public void AddConnection(Connection newCon)
+		public void AddConnection(Connection a_newCon)
 		{
 			//Make sure we dont add connections multiple times
-			foreach (Connection con in connections)
-				if (con.point == newCon.point)
+			foreach (Connection con in Connections)
+				if (con.point == a_newCon.point)
 				{ 
 					//Debug.Log("Duplicate connections added to cable");
 					return;
 				}
 
-			connections.Add(newCon);
-		}
-
-		public void SetEndPointsToConnections()
-		{
-			//if (connections == null || connections.Count < 2 || m_points == null || m_points.Count < 2)
-			//{
-			//    Debug.LogError("Couldn't set end positions for cable while it should be possible");
-			//    return;
-			//}
-
-			//if (connections[0].connectedToFirst)
-			//{
-			//    m_points[0] = connections[0].point.GetPosition();
-			//    m_points[m_points.Count - 1] = connections[1].point.GetPosition();
-			//}
-			//else
-			//{
-			//    m_points[0] = connections[1].point.GetPosition();
-			//    m_points[m_points.Count - 1] = connections[0].point.GetPosition();
-			//}
-			//OnPointsDataChanged();
-			//RedrawGameObject();
+			Connections.Add(a_newCon);
 		}
 
 		public override void ActivateConnections()
 		{
-			foreach (Connection con in connections)
+			foreach (Connection con in Connections)
 				con.point.AddConnection(con);
 		}
 
@@ -168,43 +164,33 @@ namespace MSP2050.Scripts
 		public override void RemoveDependencies()
 		{
 			//LayerManager.Instance.RemoveEnergySubEntityReference(databaseID);
-			foreach (Connection con in connections)
+			foreach (Connection con in Connections)
 				con.point.RemoveConnection(con);
 		}
 
 		public override void RestoreDependencies()
 		{
-			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
-			foreach (Connection con in connections)
+			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(m_databaseID, this);
+			foreach (Connection con in Connections)
 				con.point.AddConnection(con);
 		}
 
-		public Vector3 GetFirstPoint()
+		public void SetPoint(Vector3 a_pos, bool a_firstPoint)
 		{
-			return m_points[0];
-		}
-
-		public void SetPoint(Vector3 pos, bool firstPoint)
-		{
-			if (firstPoint)
-				SetPointPosition(0, pos);
+			if (a_firstPoint)
+				SetPointPosition(0, a_pos);
 			else
-				SetPointPosition(m_points.Count - 1, pos);
+				SetPointPosition(m_points.Count - 1, a_pos);
 			//RedrawGameObject(SubEntityDrawMode.PlanReference);
 			RedrawGameObject();
 		}
 
-		public void AddModifyLineUndoOperation(FSM fsm)
+		public void AddModifyLineUndoOperation(FSM a_fsm)
 		{
-			fsm.AddToUndoStack(new ModifyEnergyLineStringOperation(this, Entity.PlanLayer, GetDataCopy(), UndoOperation.EditMode.Modify));
+			a_fsm.AddToUndoStack(new ModifyEnergyLineStringOperation(this, m_entity.PlanLayer, GetDataCopy(), UndoOperation.EditMode.Modify));
 		}
 
-		public HashSet<int> GetLastPointIndex()
-		{
-			return new HashSet<int> { m_points.Count - 1 };
-		}
-
-		public override HashSet<int> GetPointsInBox(Vector3 min, Vector3 max)
+		public override HashSet<int> GetPointsInBox(Vector3 a_min, Vector3 a_max)
 		{
 			HashSet<int> result = new HashSet<int>();
 
@@ -212,7 +198,7 @@ namespace MSP2050.Scripts
 			for (int i = 1; i < m_points.Count - 1; ++i)
 			{
 				Vector3 position = m_points[i];
-				if (position.x >= min.x && position.x <= max.x && position.y >= min.y && position.y <= max.y)
+				if (position.x >= a_min.x && position.x <= a_max.x && position.y >= a_min.y && position.y <= a_max.y)
 				{
 					result.Add(i);
 				}
@@ -220,20 +206,20 @@ namespace MSP2050.Scripts
 			return result.Count > 0 ? result : null;
 		}
 
-		public Connection GetConnection(bool first)
+		public Connection GetConnection(bool a_first)
 		{
-			foreach (Connection c in connections)
-				if (c.connectedToFirst == first)
+			foreach (Connection c in Connections)
+				if (c.connectedToFirst == a_first)
 					return c;
 			return null;
 		}
 
 		//Move the cable so that the given endpoint lies on top of its matching point again
 		//Might be called for both endpoints in one frame
-		public void MoveWithEndPoint(bool firstPoint)
+		public void MoveWithEndPoint(bool a_firstPoint)
 		{
-			EnergyPointSubEntity point = GetConnection(firstPoint).point;
-			Vector3 offset = point.GetPosition() - (firstPoint ? m_points[0] : m_points[m_points.Count - 1]);
+			EnergyPointSubEntity point = GetConnection(a_firstPoint).point;
+			Vector3 offset = point.GetPosition() - (a_firstPoint ? m_points[0] : m_points[m_points.Count - 1]);
 			for (int i = 0; i < m_points.Count; i++)
 				m_points[i] += offset;
 			OnPointsDataChanged();
@@ -241,53 +227,43 @@ namespace MSP2050.Scripts
 			RedrawGameObject();
 		}
 
-		public bool FirstPointAt(Vector3 position)
+		public void DuplicateCableToPlanLayer(PlanLayer a_cablePlanLayer, EnergyPointSubEntity a_newPoint, FSM a_fsm)
 		{
-			return (Mathf.Approximately(m_points[0].x, position.x) && Mathf.Approximately(m_points[0].y, position.y));
-		}
-
-		public Vector3 GetPointAtEnd(bool firstPoint)
-		{
-			return firstPoint ? m_points[0] : m_points[m_points.Count - 1];
-		}
-
-		public void DuplicateCableToPlanLayer(PlanLayer cablePlanLayer, EnergyPointSubEntity newPoint, FSM fsm)
-		{
-			LineStringLayer cableBaseLayer = cablePlanLayer.BaseLayer as LineStringLayer;
+			LineStringLayer cableBaseLayer = a_cablePlanLayer.BaseLayer as LineStringLayer;
 
 			//Copy data
 			SubEntityDataCopy dataCopy = GetDataCopy();
 
 			//Create new entity
-			LineStringEntity newEntity = cableBaseLayer.CreateNewLineStringEntity(dataCopy.entityTypeCopy, cablePlanLayer);
+			LineStringEntity newEntity = cableBaseLayer.CreateNewLineStringEntity(dataCopy.m_entityTypeCopy, a_cablePlanLayer);
 			EnergyLineStringSubEntity newCable = new EnergyLineStringSubEntity(newEntity);
-			newCable.SetPersistentID(persistentID);
-			(newCable.Entity as LineStringEntity).AddSubEntity(newCable);
+			newCable.SetPersistentID(m_persistentID);
+			(newCable.m_entity as LineStringEntity).AddSubEntity(newCable);
 			newCable.SetDataToCopy(dataCopy);
-			fsm.AddToUndoStack(new CreateEnergyLineStringOperation(newCable, cablePlanLayer, UndoOperation.EditMode.Modify, true));
+			a_fsm.AddToUndoStack(new CreateEnergyLineStringOperation(newCable, a_cablePlanLayer, UndoOperation.EditMode.Modify, true));
 
 			//Change active entities and (re)draw
-			cableBaseLayer.activeEntities.Remove(Entity as LineStringEntity);
-			cableBaseLayer.preModifiedEntities.Add(Entity as LineStringEntity);
-			cableBaseLayer.activeEntities.Add(newEntity);
+			cableBaseLayer.m_activeEntities.Remove(m_entity as LineStringEntity);
+			cableBaseLayer.PreModifiedEntities.Add(m_entity as LineStringEntity);
+			cableBaseLayer.m_activeEntities.Add(newEntity);
 			RedrawGameObject();
 			newCable.DrawGameObject(cableBaseLayer.LayerGameObject.transform);
 
 			//Replace connections to old cable with connections to new cable
-			int pointID = newPoint.GetPersistentID();
-			foreach (Connection con in connections)
+			int pointID = a_newPoint.GetPersistentID();
+			foreach (Connection con in Connections)
 			{
 				if (con.point.GetPersistentID() == pointID)//Connect to the new point
 				{
-					Connection newCon = new Connection(newCable, newPoint, con.connectedToFirst);
+					Connection newCon = new Connection(newCable, a_newPoint, con.connectedToFirst);
 					con.point.RemoveConnection(con);
 					newCable.AddConnection(newCon);
-					newPoint.AddConnection(newCon);
+					a_newPoint.AddConnection(newCon);
 				}
 				else//Connect the the other point
 				{
 					Connection newCon = new Connection(newCable, con.point, con.connectedToFirst);
-					fsm.AddToUndoStack(new ReconnectCableToPoint(con, newCon));
+					a_fsm.AddToUndoStack(new ReconnectCableToPoint(con, newCon));
 					con.point.RemoveConnection(con);
 					con.point.AddConnection(newCon);
 					newCable.AddConnection(newCon);
@@ -297,44 +273,19 @@ namespace MSP2050.Scripts
 
 		public override void CalculationPropertyUpdated()
 		{
-			EntityPropertyMetaData propertyMeta = Entity.Layer.FindPropertyMetaDataByName(NUMBER_CABLES_META_KEY);
+			EntityPropertyMetaData propertyMeta = m_entity.Layer.FindPropertyMetaDataByName(NUMBER_CABLES_META_KEY);
 			int defaultValue = 1;
 			if (propertyMeta != null)
 			{
 				defaultValue = Util.ParseToInt(propertyMeta.DefaultValue, 1);
 			}
 
-			if (Entity.DoesPropertyExist(NUMBER_CABLES_META_KEY))
+			if (m_entity.DoesPropertyExist(NUMBER_CABLES_META_KEY))
 			{
-				numberCables = Util.ParseToInt(Entity.GetMetaData(NUMBER_CABLES_META_KEY), defaultValue);
+				m_numberCables = Util.ParseToInt(m_entity.GetMetaData(NUMBER_CABLES_META_KEY), defaultValue);
 			}
 			else
-				numberCables = defaultValue;
-		}
-
-		public long UsedCapacity
-		{
-			get { return usedCapacity; }
-			set { usedCapacity = value; }
-		}
-
-		public long Capacity
-		{
-			get { return Entity.EntityTypes[0].capacity * numberCables; }
-			set { }
-		}
-
-		public EnergyGrid LastRunGrid
-		{
-			get { return lastRunGrid; }
-			set { lastRunGrid = value; }
-		}
-
-		public EnergyGrid CurrentGrid
-		{
-			get { return currentGrid; }
-			set { currentGrid = value; }
+				m_numberCables = defaultValue;
 		}
 	}
 }
-

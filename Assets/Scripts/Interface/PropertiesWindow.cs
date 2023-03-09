@@ -35,9 +35,9 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(true);
 
 			//Setup data
-			Entity entity = subEntity.Entity;
+			Entity entity = subEntity.m_entity;
 			windowName.text = entity.Layer.GetShortName();
-			layerIcon.sprite = LayerManager.Instance.GetSubcategoryIcon(entity.Layer.SubCategory);
+			layerIcon.sprite = LayerManager.Instance.GetSubcategoryIcon(entity.Layer.m_subCategory);
 
 			//Base data
 			baseDataParent.Initialise();
@@ -45,17 +45,17 @@ namespace MSP2050.Scripts
 
 			Team team = SessionManager.Instance.FindTeamByID(entity.Country);
 			baseDataParent.CreateEntry("Name", entity.name, countryIcon, team == null ? Color.white : team.color);
-			baseDataParent.CreateEntry("X", (subEntity.BoundingBox.center.x * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
-			baseDataParent.CreateEntry("Y", (subEntity.BoundingBox.center.y * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
+			baseDataParent.CreateEntry("X", (subEntity.m_boundingBox.center.x * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
+			baseDataParent.CreateEntry("Y", (subEntity.m_boundingBox.center.y * 1000).FormatAsCoordinateText(), locationIcon, Color.white);
 
 			//Geometry type specific base data
-			if (entity.Layer.GetGeoType() == LayerManager.GeoType.polygon)
+			if (entity.Layer.GetGeoType() == LayerManager.EGeoType.Polygon)
 			{
 				PolygonSubEntity polygonEntity = (PolygonSubEntity)subEntity;
 				baseDataParent.CreateEntry("Area", polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>", areaIcon, Color.white);
 				baseDataParent.CreateEntry("Points", polygonEntity.GetTotalPointCount().ToString(), pointsIcon, Color.white);
 			}
-			else if (entity.Layer.GetGeoType() == LayerManager.GeoType.line)
+			else if (entity.Layer.GetGeoType() == LayerManager.EGeoType.Line)
 			{
 				LineStringSubEntity lineEntity = (LineStringSubEntity)subEntity;
 				baseDataParent.CreateEntry("Length", lineEntity.LineLengthKm.ToString("0.00") + " km", areaIcon, Color.white);
@@ -67,9 +67,9 @@ namespace MSP2050.Scripts
 				baseDataParent.CreateEntry("Max Capacity", valueConversionCollection.ConvertUnit(data.Capacity, ValueConversionCollection.UNIT_WATT).FormatAsString(), capacityIcon, Color.white);
 				baseDataParent.CreateEntry("Used Capacity", valueConversionCollection.ConvertUnit(data.UsedCapacity, ValueConversionCollection.UNIT_WATT).FormatAsString(), usedCapacityIcon, Color.white);
 				if(data.CurrentGrid == null)
-					baseDataParent.CreateEntry("Last Run Grid", data.LastRunGrid == null ? "-" : data.LastRunGrid.name, gridIcon, Color.white);
+					baseDataParent.CreateEntry("Last Run Grid", data.LastRunGrid == null ? "-" : data.LastRunGrid.m_name, gridIcon, Color.white);
 				else
-					baseDataParent.CreateEntry("Current Grid", data.CurrentGrid.name, gridIcon, Color.white);
+					baseDataParent.CreateEntry("Current Grid", data.CurrentGrid.m_name, gridIcon, Color.white);
 			}
 
 			//Entity type information

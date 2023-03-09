@@ -62,8 +62,8 @@ namespace MSP2050.Scripts
 
 			if (totalSum > 1.0f)
 			{
-				float remainingValue = FishingDistributionDelta.MAX_SUMMED_FISHING_VALUE - currentValue;
-				float multiplier = (FishingDistributionDelta.MAX_SUMMED_FISHING_VALUE / otherItemsSum) * remainingValue;
+				float remainingValue = FishingDistributionDelta.MaxSummedFishingValue - currentValue;
+				float multiplier = (FishingDistributionDelta.MaxSummedFishingValue / otherItemsSum) * remainingValue;
 
 				foreach (DistributionItem memberItem in items)
 				{
@@ -135,7 +135,7 @@ namespace MSP2050.Scripts
 					UpdateDistributionItem(item, currentValue, false);
 				}
 
-				distributionFillBar.CreateEmptyFill(FishingDistributionDelta.MAX_SUMMED_FISHING_VALUE, true);
+				distributionFillBar.CreateEmptyFill(FishingDistributionDelta.MaxSummedFishingValue, true);
 			}
 
 			NormalizeValues();

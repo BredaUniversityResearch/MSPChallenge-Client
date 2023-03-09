@@ -86,7 +86,7 @@ namespace MSP2050.Scripts
 			float nm = km * 0.539957f;
 
 			mapScaleText.text = km.ToString("n0") + "km (" + nm.ToString("n2") + "nm)";
-			zoomText.text = CameraManager.Instance.cameraZoom.currentZoom.ToString("P0");
+			zoomText.text = CameraManager.Instance.cameraZoom.CurrentZoom.ToString("P0");
 		}
 
 		public Vector3 GetRealWorldSize(Vector3 size)
@@ -142,14 +142,14 @@ namespace MSP2050.Scripts
 		public void ZoomIn()
 		{
 			//Called by UI button
-			CameraManager.Instance.cameraZoom.SetZoomLevel(CameraManager.Instance.cameraZoom.currentZoom - 0.05f);
+			CameraManager.Instance.cameraZoom.SetZoomLevel(CameraManager.Instance.cameraZoom.CurrentZoom - 0.05f);
 		}
 
 		public void ZoomOut()
 		{
 
 			//Called by UI button
-			CameraManager.Instance.cameraZoom.SetZoomLevel(CameraManager.Instance.cameraZoom.currentZoom + 0.05f);
+			CameraManager.Instance.cameraZoom.SetZoomLevel(CameraManager.Instance.cameraZoom.CurrentZoom + 0.05f);
 		}
 
 		public void ZoomToAreaClicked(bool a_value)

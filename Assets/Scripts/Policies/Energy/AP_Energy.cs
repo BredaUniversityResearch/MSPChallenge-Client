@@ -68,7 +68,7 @@ namespace MSP2050.Scripts
 						continue;
 
 					GridEnergyDistribution oldDistribution = null;
-					a_previousDistributions.TryGetValue(grid.persistentID, out oldDistribution);
+					a_previousDistributions.TryGetValue(grid.m_persistentID, out oldDistribution);
 
 					if (m_nextGroupIndex < m_distributions.Count)
 					{

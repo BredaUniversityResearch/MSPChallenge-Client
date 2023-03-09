@@ -222,7 +222,7 @@ namespace MSP2050.Scripts
 				if (State == PlanState.DELETED) //was deleted, disable and remove plan layers
 				{
 					//Stop viewing plan if we were before
-					if (PlanManager.Instance.planViewing != null && PlanManager.Instance.planViewing.ID == ID)
+					if (PlanManager.Instance.m_planViewing != null && PlanManager.Instance.m_planViewing.ID == ID)
 						PlanManager.Instance.HideCurrentPlan();
 
 					//Remove planlayers from their respective layers (AFTER REDRAWING)
@@ -237,7 +237,7 @@ namespace MSP2050.Scripts
 					foreach (PlanLayer layer in PlanLayers)
 						layer.issues = new HashSet<PlanIssueObject>();
 					//Stop viewing plan if we were before
-					if (PlanManager.Instance.planViewing != null && PlanManager.Instance.planViewing.ID == ID)
+					if (PlanManager.Instance.m_planViewing != null && PlanManager.Instance.m_planViewing.ID == ID)
 						PlanManager.Instance.HideCurrentPlan();
 				}
 				else if (oldState == PlanState.DELETED) //was deleted before, re-enable and add layers to base
@@ -359,7 +359,7 @@ namespace MSP2050.Scripts
 				return null;
 
 			foreach (PlanLayer planLayer in PlanLayers)
-				if (planLayer.BaseLayer.ID == baseLayer.ID)
+				if (planLayer.BaseLayer.m_id == baseLayer.m_id)
 					return planLayer;
 
 			return null;
@@ -368,7 +368,7 @@ namespace MSP2050.Scripts
 		public PlanLayer GetPlanLayerForLayer(int baseLayerID)
 		{
 			foreach (PlanLayer planLayer in PlanLayers)
-				if (planLayer.BaseLayer.ID == baseLayerID)
+				if (planLayer.BaseLayer.m_id == baseLayerID)
 					return planLayer;
 
 			return null;
@@ -385,7 +385,7 @@ namespace MSP2050.Scripts
 		public PlanLayer getPlanLayerForBaseID(int baseLayerID)
 		{
 			foreach (PlanLayer planLayer in PlanLayers)
-				if (planLayer.BaseLayer.ID == baseLayerID)
+				if (planLayer.BaseLayer.m_id == baseLayerID)
 					return planLayer;
 
 			return null;
@@ -444,7 +444,7 @@ namespace MSP2050.Scripts
 				List<SubEntity> removedSubEntities = PlanLayers[i].GetInstancesOfRemovedGeometry();
 				foreach (SubEntity t in removedSubEntities)
 				{
-					foreach (EntityType type in t.Entity.EntityTypes)
+					foreach (EntityType type in t.m_entity.EntityTypes)
 					{
 						if (type.requiredApproval == EApprovalType.AreaManager)
 							requireAMApproval = true;
@@ -486,9 +486,9 @@ namespace MSP2050.Scripts
 			else
 			{
 				//Actually check the geometry to add required approval based on level
-				if (requiredApprovalLevel > 0 && LayerManager.Instance.EEZLayer != null)
+				if (requiredApprovalLevel > 0 && LayerManager.Instance.m_eezLayer != null)
 				{
-					List<PolygonEntity> EEZs = LayerManager.Instance.EEZLayer.Entities;
+					List<PolygonEntity> EEZs = LayerManager.Instance.m_eezLayer.Entities;
 					int userCountry = SessionManager.Instance.CurrentUserTeamID;
 					for (int i = 0; i < PlanLayers.Count; i++)
 					{
@@ -519,9 +519,9 @@ namespace MSP2050.Scripts
 				{
 					foreach (SubEntity t in removedGeom[i])
 					{
-						if (t.Entity.Country != Entity.INVALID_COUNTRY_ID && t.Entity.Country != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(t.Entity.Country))
+						if (t.m_entity.Country != Entity.INVALID_COUNTRY_ID && t.m_entity.Country != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(t.m_entity.Country))
 						{
-							countryApproval.Add(t.Entity.Country, EPlanApprovalState.Maybe);
+							countryApproval.Add(t.m_entity.Country, EPlanApprovalState.Maybe);
 						}
 					}
 				}
@@ -603,7 +603,7 @@ namespace MSP2050.Scripts
 		public bool IsLayerpartOfPlan(AbstractLayer layer)
 		{
 			foreach (PlanLayer pl in PlanLayers)
-				if (pl.BaseLayer.ID == layer.ID)
+				if (pl.BaseLayer.m_id == layer.m_id)
 					return true;
 			return false;
 		}
@@ -664,15 +664,15 @@ namespace MSP2050.Scripts
 				List<SubEntity> removedSubEntities = PlanLayers[i].GetInstancesOfRemovedGeometry();
 				foreach (SubEntity subEntity in removedSubEntities)
 				{
-					min = Vector3.Min(min, subEntity.BoundingBox.min);
-					max = Vector3.Max(max, subEntity.BoundingBox.max);
+					min = Vector3.Min(min, subEntity.m_boundingBox.min);
+					max = Vector3.Max(max, subEntity.m_boundingBox.max);
 				}
 				//Check new geometry
 				for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
 				{
 					SubEntity subEntity = PlanLayers[i].GetNewGeometryByIndex(entityIndex).GetSubEntity(0);
-					min = Vector3.Min(min, subEntity.BoundingBox.min);
-					max = Vector3.Max(max, subEntity.BoundingBox.max);
+					min = Vector3.Min(min, subEntity.m_boundingBox.min);
+					max = Vector3.Max(max, subEntity.m_boundingBox.max);
 				}
 			}
 			return new Rect(min, max - min);

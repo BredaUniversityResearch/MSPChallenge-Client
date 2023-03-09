@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System;
@@ -8,7 +7,7 @@ namespace MSP2050.Scripts
 {
 	public class FSM
 	{
-		private static FSM instance;
+		private static FSM Instance;
 
 		private const float DOUBLE_CLICK_MAX_INTERVAL = 0.5f;
 
@@ -16,59 +15,61 @@ namespace MSP2050.Scripts
 			//RemoveHoles, FindGaps, SnapPoints, FixInvalid, SelectAll}
 
 		public enum CursorType { Add, Complete, Default, Insert, Move, Invalid, Rescale, ZoomToArea, LayerProbe, Ruler }
-		private CursorType currentCursor = CursorType.Default;
+		private CursorType m_currentCursor = CursorType.Default;
 
-		private Texture2D cursorAdd;
-		private Texture2D cursorComplete;
-		private Texture2D cursorDefault;
-		private Texture2D cursorInsert;
-		private Texture2D cursorMove;
-		private Texture2D cursorInvalid;
-		private Texture2D cursorRescale;
-		private Texture2D cursorZoomToArea;
-		private Texture2D cursorLayerProbe;
-		private Texture2D cursorRuler;
+		private Texture2D m_cursorAdd;
+		private Texture2D m_cursorComplete;
+		private Texture2D m_cursorDefault;
+		private Texture2D m_cursorInsert;
+		private Texture2D m_cursorMove;
+		private Texture2D m_cursorInvalid;
+		private Texture2D m_cursorRescale;
+		private Texture2D m_cursorZoomToArea;
+		private Texture2D m_cursorLayerProbe;
+		private Texture2D m_cursorRuler;
 
-		private FSMState currentState;
-		private FSMState interruptState = null;
-		public static FSMState CurrentState => instance.currentState;
-		public FSMState InputReceivingState => interruptState ?? currentState;
+		private FSMState m_currentState;
+		private FSMState m_interruptState = null;
+		public static FSMState CurrentState => Instance.m_currentState;
+		private FSMState InputReceivingState => m_interruptState ?? m_currentState;
 
-		public event Action onGeometryCompleted;
+		public event Action OnGeometryCompleted;
 
-		private Vector3 leftMouseButtonDownStartPosition;
-		private Vector3 previousMousePosition;
+		private Vector3 m_leftMouseButtonDownStartPosition;
+		private Vector3 m_previousMousePosition;
 
-		private bool userMayBeClicking = false;
-		private bool userMayBeDragging = false;
-		private bool dragging = false;
+		private bool m_userMayBeClicking = false;
+		private bool m_userMayBeDragging = false;
+		private bool m_dragging = false;
 
-		private Stack<UndoOperation> undoStack = new Stack<UndoOperation>();
-		private Stack<UndoOperation> redoStack = new Stack<UndoOperation>();
+		private Stack<UndoOperation> m_undoStack = new Stack<UndoOperation>();
+		private Stack<UndoOperation> m_redoStack = new Stack<UndoOperation>();
 
-		float previousClickTime = float.MinValue;
-		Vector3 previousClickLocation = Vector3.zero;
+		private float m_previousClickTime = float.MinValue;
+		private Vector3 m_previousClickLocation = Vector3.zero;
 
-		private bool snappingEnabled;
+		private bool m_snappingEnabled;
+		
+		public CursorType CurrentCursorType => m_currentCursor;
 
 		public FSM()
 		{
-			instance = this;
+			Instance = this;
 
-			previousMousePosition = GetWorldMousePosition();
+			m_previousMousePosition = GetWorldMousePosition();
 
-			currentState = new DefaultState(this);
+			m_currentState = new DefaultState(this);
 
-			cursorAdd = Resources.Load<Texture2D>("ui_cursor_add");
-			cursorComplete = Resources.Load<Texture2D>("ui_cursor_complete");
-			cursorDefault = Resources.Load<Texture2D>("ui_cursor_default");
-			cursorInsert = Resources.Load<Texture2D>("ui_cursor_insert");
-			cursorMove = Resources.Load<Texture2D>("ui_cursor_move");
-			cursorInvalid = Resources.Load<Texture2D>("ui_cursor_invalid");
-			cursorRescale = Resources.Load<Texture2D>("ui_cursor_rescale");
-			cursorZoomToArea = Resources.Load<Texture2D>("ui_cursor_area");
-			cursorLayerProbe = Resources.Load<Texture2D>("ui_cursor_probe");
-			cursorRuler = Resources.Load<Texture2D>("ui_cursor_ruler");
+			m_cursorAdd = Resources.Load<Texture2D>("ui_cursor_add");
+			m_cursorComplete = Resources.Load<Texture2D>("ui_cursor_complete");
+			m_cursorDefault = Resources.Load<Texture2D>("ui_cursor_default");
+			m_cursorInsert = Resources.Load<Texture2D>("ui_cursor_insert");
+			m_cursorMove = Resources.Load<Texture2D>("ui_cursor_move");
+			m_cursorInvalid = Resources.Load<Texture2D>("ui_cursor_invalid");
+			m_cursorRescale = Resources.Load<Texture2D>("ui_cursor_rescale");
+			m_cursorZoomToArea = Resources.Load<Texture2D>("ui_cursor_area");
+			m_cursorLayerProbe = Resources.Load<Texture2D>("ui_cursor_probe");
+			m_cursorRuler = Resources.Load<Texture2D>("ui_cursor_ruler");
 
 			SetCursor(CursorType.Default, true);
 
@@ -78,93 +79,88 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_parameterChangeCallback = ParameterChanged;
 		}
 
-		public void SetCursor(CursorType cursorType, bool forceRedraw = false)
+		public void SetCursor(CursorType a_cursorType, bool a_forceRedraw = false)
 		{
-			if (!forceRedraw && currentCursor == cursorType) { return; }
-			currentCursor = cursorType;
+			if (!a_forceRedraw && m_currentCursor == a_cursorType) { return; }
+			m_currentCursor = a_cursorType;
 
-			Texture2D cursorTexture = cursorDefault;
-			switch (cursorType)
+			Texture2D cursorTexture = m_cursorDefault;
+			switch (a_cursorType)
 			{
 				case CursorType.Add:
-					cursorTexture = cursorAdd;
+					cursorTexture = m_cursorAdd;
 					break;
 				case CursorType.Complete:
-					cursorTexture = cursorComplete;
+					cursorTexture = m_cursorComplete;
 					break;
 				case CursorType.Default:
-					cursorTexture = cursorDefault;
+					cursorTexture = m_cursorDefault;
 					break;
 				case CursorType.Insert:
-					cursorTexture = cursorInsert;
+					cursorTexture = m_cursorInsert;
 					break;
 				case CursorType.Move:
-					cursorTexture = cursorMove;
+					cursorTexture = m_cursorMove;
 					break;
 				case CursorType.Invalid:
-					cursorTexture = cursorInvalid;
+					cursorTexture = m_cursorInvalid;
 					break;
 				case CursorType.Rescale:
-					cursorTexture = cursorRescale;
+					cursorTexture = m_cursorRescale;
 					break;
 				case CursorType.ZoomToArea:
-					cursorTexture = cursorZoomToArea;
+					cursorTexture = m_cursorZoomToArea;
 					break;
 				case CursorType.LayerProbe:
-					cursorTexture = cursorLayerProbe;
+					cursorTexture = m_cursorLayerProbe;
 					break;
 				case CursorType.Ruler:
-					cursorTexture = cursorRuler;
+					cursorTexture = m_cursorRuler;
 					break;
 			}
 
 			Cursor.SetCursor(cursorTexture, new Vector2(7, 7), CursorMode.Auto);
 		}
 
-		public CursorType CurrentCursorType
+		public void StartEditingLayer(PlanLayer a_planLayer)
 		{
-			get { return currentCursor; }
-		}
+			AbstractLayer layer = a_planLayer.BaseLayer;
 
-		public void StartEditingLayer(PlanLayer planLayer)
-		{
-			AbstractLayer layer = planLayer.BaseLayer;
-
-			if (currentState.StateType == FSMState.EEditingStateType.Create)
+			if (m_currentState.StateType == FSMState.EEditingStateType.Create)
 			{
 				if (layer is PolygonLayer)
 				{
-					SetCurrentState(new StartCreatingPolygonState(this, planLayer));
+					SetCurrentState(new StartCreatingPolygonState(this, a_planLayer));
 				}
 				else if (layer is LineStringLayer)
 				{
 					if(layer.IsEnergyLayer())
-						SetCurrentState(new StartCreatingEnergyLineStringState(this, planLayer));
+						SetCurrentState(new StartCreatingEnergyLineStringState(this, a_planLayer));
 					else
-						SetCurrentState(new StartCreatingLineStringState(this, planLayer));
+						SetCurrentState(new StartCreatingLineStringState(this, a_planLayer));
 				}
 				else if (layer is PointLayer)
 				{
 					if (layer.IsEnergyLayer())
-						SetCurrentState(new CreateEnergyPointState(this, planLayer));
+						SetCurrentState(new CreateEnergyPointState(this, a_planLayer));
 					else
-						SetCurrentState(new CreatePointsState(this, planLayer));
+						SetCurrentState(new CreatePointsState(this, a_planLayer));
 				}
 			}
 			else if (layer is PolygonLayer)
 			{
-				SetCurrentState(new SelectPolygonsState(this, planLayer));
+				SetCurrentState(new SelectPolygonsState(this, a_planLayer));
 			}
 			else if (layer is LineStringLayer)
 			{
-				SetCurrentState(new SelectLineStringsState(this, planLayer));
+				SetCurrentState(new SelectLineStringsState(this, a_planLayer));
 			}
 			else if (layer is PointLayer)
 			{
 				if (layer.IsEnergyPointLayer())
-					SetCurrentState(new EditEnergyPointsState(this, planLayer));
+					SetCurrentState(new EditEnergyPointsState(this, a_planLayer));
 				else
-					SetCurrentState(new EditPointsState(this, planLayer));
+					SetCurrentState(new EditPointsState(this, a_planLayer));
 			}
 
 			UpdateUndoRedoButtonEnabled();
@@ -175,63 +171,60 @@ namespace MSP2050.Scripts
 			SetCurrentState(new DefaultState(this));
 		}
 		
-		public static void ToolbarButtonClicked(ToolbarInput toolbarInput)
+		public static void ToolbarButtonClicked(ToolbarInput a_toolbarInput)
 		{
-			instance.toolbarButtonClicked(toolbarInput);
+			Instance.ToolbarButtonClickedLocal(a_toolbarInput);
 		}
 
-		private void toolbarButtonClicked(ToolbarInput toolbarInput)
+		private void ToolbarButtonClickedLocal(ToolbarInput a_toolbarInput)
 		{
 			SetInterruptState(null);
 
-			switch (toolbarInput)
+			switch (a_toolbarInput)
 			{ 
 				case ToolbarInput.Undo:
-					undo();
+					Undo();
 					UpdateUndoRedoButtonEnabled();               
 					break;
 				case ToolbarInput.Redo:
-					redo();
+					Redo();
 					UpdateUndoRedoButtonEnabled();                
 					break;
-				//case ToolbarInput.SnapPoints:
-				//	SetSnappingEnabled(!snappingEnabled);
-				//	break;
 				default:
-					InputReceivingState.HandleToolbarInput(toolbarInput);
+					InputReceivingState.HandleToolbarInput(a_toolbarInput);
 					break;
 			}
 		}
 
-		public static void EntityTypeChanged(List<EntityType> newTypes)
+		private static void EntityTypeChanged(List<EntityType> a_newTypes)
 		{
-			instance.SetInterruptState(null);
-			instance.currentState.HandleEntityTypeChange(newTypes);
+			Instance.SetInterruptState(null);
+			Instance.m_currentState.HandleEntityTypeChange(a_newTypes);
 		}
 
-		public static void TeamChanged(int newTeam)
+		private static void TeamChanged(int a_newTeam)
 		{
-			instance.SetInterruptState(null);
-			instance.currentState.HandleTeamChange(newTeam);
+			Instance.SetInterruptState(null);
+			Instance.m_currentState.HandleTeamChange(a_newTeam);
 		}
 
-		public static void ParameterChanged(EntityPropertyMetaData parameter, string newValue)
+		private static void ParameterChanged(EntityPropertyMetaData a_parameter, string a_newValue)
 		{
-			instance.SetInterruptState(null);
-			instance.currentState.HandleParameterChange(parameter, newValue);
+			Instance.SetInterruptState(null);
+			Instance.m_currentState.HandleParameterChange(a_parameter, a_newValue);
 		}
 
-		public void SetSnappingEnabled(bool value)
+		public void SetSnappingEnabled(bool a_value)
 		{
-			snappingEnabled = value;
+			m_snappingEnabled = a_value;
 		}
 
-		public void AddToUndoStack(UndoOperation undoOperation)
+		public void AddToUndoStack(UndoOperation a_undoOperation)
 		{
-			undoStack.Push(undoOperation);
-			if (redoStack.Count > 0)
+			m_undoStack.Push(a_undoOperation);
+			if (m_redoStack.Count > 0)
 			{
-				redoStack.Clear();
+				m_redoStack.Clear();
 			}
 
 			UpdateUndoRedoButtonEnabled();
@@ -239,124 +232,119 @@ namespace MSP2050.Scripts
 
 		public void ClearUndoRedo()
 		{
-			undoStack.Clear();
-			redoStack.Clear();
+			m_undoStack.Clear();
+			m_redoStack.Clear();
 		}
-
-		public void undo(bool a_addToRedo = true)
+		
+		public void Undo(bool a_addToRedo = true)
 		{
-			if (!(undoStack.Peek() is BatchUndoOperationMarker))
+			if (!(m_undoStack.Peek() is BatchUndoOperationMarker))
 			{
-				singleUndo(a_addToRedo);
+				SingleUndo(a_addToRedo);
 			}
 			else
 			{
-				singleUndo(a_addToRedo); // remove first batch marker from the stack
-				while (!(undoStack.Peek() is BatchUndoOperationMarker) && undoStack.Count > 0)
+				SingleUndo(a_addToRedo); // remove first batch marker from the stack
+				while (!(m_undoStack.Peek() is BatchUndoOperationMarker) && m_undoStack.Count > 0)
 				{
-					singleUndo(a_addToRedo);
+					SingleUndo(a_addToRedo);
 				}
-				singleUndo(a_addToRedo); // remove second batch marker from the stack
+				SingleUndo(a_addToRedo); // remove second batch marker from the stack
 			}
-			if (undoStack.Count > 0 && undoStack.Peek() is ConcatOperationMarker)
+			if (m_undoStack.Count > 0 && m_undoStack.Peek() is ConcatOperationMarker)
 			{
-				singleUndo(a_addToRedo); //Remove concat operation from stack
-				undo(a_addToRedo);
+				SingleUndo(a_addToRedo); //Remove concat operation from stack
+				Undo(a_addToRedo);
 			}
 		}
 
-		private void singleUndo(bool a_addToRedo = true)
+		private void SingleUndo(bool a_addToRedo = true)
 		{
 			UndoOperation redo;
-			UndoOperation undo = undoStack.Pop();
+			UndoOperation undo = m_undoStack.Pop();
 			Debug.Log("Undid: " + undo.GetType().Name);
 			undo.Undo(this, out redo);
 			if (a_addToRedo)
 			{
-				redoStack.Push(redo);
+				m_redoStack.Push(redo);
 			}
 		}
 
-		private void redo()
+		private void Redo()
 		{
-			if (!(redoStack.Peek() is BatchUndoOperationMarker))
+			if (!(m_redoStack.Peek() is BatchUndoOperationMarker))
 			{
-				singleRedo();
+				SingleRedo();
 			}
 			else
 			{
-				singleRedo(); // remove first batch marker from the stack
-				while (!(redoStack.Peek() is BatchUndoOperationMarker) && redoStack.Count > 0)
+				SingleRedo(); // remove first batch marker from the stack
+				while (!(m_redoStack.Peek() is BatchUndoOperationMarker) && m_redoStack.Count > 0)
 				{
-					singleRedo();
+					SingleRedo();
 				}
-				singleRedo(); // remove second batch marker from the stack
+				SingleRedo(); // remove second batch marker from the stack
 			}
-			if (redoStack.Count > 0 && redoStack.Peek() is ConcatOperationMarker)
+			if (m_redoStack.Count > 0 && m_redoStack.Peek() is ConcatOperationMarker)
 			{
-				singleRedo(); //Remove concat operation from stack
-				redo();
+				SingleRedo(); //Remove concat operation from stack
+				Redo();
 			}
 		}
 
-		private void singleRedo()
+		private void SingleRedo()
 		{
 			UndoOperation undo;
-			UndoOperation redo = redoStack.Pop();
+			UndoOperation redo = m_redoStack.Pop();
 			Debug.Log("Redid: " + redo.GetType().Name);
 			redo.Undo(this, out undo);
-			undoStack.Push(undo);
+			m_undoStack.Push(undo);
 		}
 
 		public void UpdateUndoRedoButtonEnabled()
 		{
-			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Redo, redoStack.Count > 0);
-			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Undo, undoStack.Count > 0);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Redo, m_redoStack.Count > 0);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(ToolbarInput.Undo, m_undoStack.Count > 0);
 		}
 
 		public FSMState GetCurrentState()
 		{
-			return currentState;
-		}
-
-		public FSMState GetInterruptState()
-		{
-			return interruptState;
+			return m_currentState;
 		}
 
 		public void AbortCurrentState()
 		{
-			currentState.Abort();
+			m_currentState.Abort();
 		}
 
-		public void SetCurrentState(FSMState newState)
+		public void SetCurrentState(FSMState a_newState)
 		{
 			Vector3 mousePosition = GetWorldMousePosition();
 
-			currentState.ExitState(mousePosition);
+			m_currentState.ExitState(mousePosition);
 
-			userMayBeClicking = false;
-			dragging = false;
+			m_userMayBeClicking = false;
+			m_dragging = false;
 
 			SetCursor(CursorType.Default);
 			SetSnappingEnabled(false);
 
-			currentState = newState;
-			newState.EnterState(mousePosition);
+			m_currentState = a_newState;
+			a_newState.EnterState(mousePosition);
 		}
 
-		public void SetInterruptState(FSMState newInterruptState)
+		public void SetInterruptState(FSMState a_newInterruptState)
 		{
 			Vector3 mousePosition = GetWorldMousePosition();
-			if (interruptState != null)
-				interruptState.ExitState(mousePosition);
+			if (m_interruptState != null)
+				m_interruptState.ExitState(mousePosition);
 
-			userMayBeClicking = false;
-			dragging = false;
+			m_userMayBeClicking = false;
+			m_dragging = false;
 
-			interruptState = newInterruptState;
-			if(newInterruptState != null)
-				newInterruptState.EnterState(mousePosition);
+			m_interruptState = a_newInterruptState;
+			if(a_newInterruptState != null)
+				a_newInterruptState.EnterState(mousePosition);
 		}
 
 		public Vector3 GetWorldMousePosition()
@@ -364,19 +352,19 @@ namespace MSP2050.Scripts
 			Vector3 position = Camera.main.ScreenPointToRay(Input.mousePosition).origin;
 			position.z = 0;
 
-			if (snappingEnabled) { position = getSnappedMousePosition(position); }
+			if (m_snappingEnabled) { position = GetSnappedMousePosition(position); }
 
 			return position;
 		}
 
-		protected Vector3 getSnappedMousePosition(Vector3 mousePosition)
+		private Vector3 GetSnappedMousePosition(Vector3 a_mousePosition)
 		{
 			List<SubEntity> subEntities = new List<SubEntity>();
 			List<AbstractLayer> visibleLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth();
 
 			foreach (AbstractLayer layer in visibleLayers)
 			{
-				List<SubEntity> layerSubEntities = layer.GetSubEntitiesAt(mousePosition);
+				List<SubEntity> layerSubEntities = layer.GetSubEntitiesAt(a_mousePosition);
 
 				foreach (SubEntity layerSubEntity in layerSubEntities)
 				{
@@ -387,38 +375,34 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			if (subEntities.Count == 0) { return mousePosition; }
+			if (subEntities.Count == 0) { return a_mousePosition; }
 
 			Vector3 snappedPosition = Vector3.zero;
 			float snappedPositionSqrDistance = float.MaxValue;
 
 			foreach (SubEntity subEntity in subEntities)
 			{
-				Vector3 closestPoint = subEntity.GetPointClosestTo(mousePosition);
-				float sqrDistance = (mousePosition - closestPoint).sqrMagnitude;
+				Vector3 closestPoint = subEntity.GetPointClosestTo(a_mousePosition);
+				float sqrDistance = (a_mousePosition - closestPoint).sqrMagnitude;
 
-				if (sqrDistance < snappedPositionSqrDistance)
-				{
-					snappedPosition = closestPoint;
-					snappedPositionSqrDistance = sqrDistance;
-				}
+				if (!(sqrDistance < snappedPositionSqrDistance))
+					continue;
+				snappedPosition = closestPoint;
+				snappedPositionSqrDistance = sqrDistance;
 			}
 
 			float selectMaxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 			if (snappedPositionSqrDistance > selectMaxDistance * selectMaxDistance)
 			{
-				return mousePosition;
+				return a_mousePosition;
 			}
-			else
-			{
-				return snappedPosition;
-			}
+			return snappedPosition;
 		}
 
 		public void Update()
 		{
 			bool cursorIsOverUI = EventSystem.current.IsPointerOverGameObject();
-			if (cursorIsOverUI) { userMayBeClicking = false; userMayBeDragging = false; }
+			if (cursorIsOverUI) { m_userMayBeClicking = false; m_userMayBeDragging = false; }
 
 			if (Input.GetKey(KeyCode.F10))
 			{
@@ -483,23 +467,23 @@ namespace MSP2050.Scripts
 
 				//Only allow undo/redo while not in interrupt state
 
-				if (Input.GetKeyDown(KeyCode.Z) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && undoStack.Count > 0)
+				if (Input.GetKeyDown(KeyCode.Z) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && m_undoStack.Count > 0)
 				{
 					SetInterruptState(null);
-					undo();
+					Undo();
 					UpdateUndoRedoButtonEnabled();
 				}
-				else if (Input.GetKeyDown(KeyCode.Y) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && redoStack.Count > 0)
+				else if (Input.GetKeyDown(KeyCode.Y) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && m_redoStack.Count > 0)
 				{
 					SetInterruptState(null);
-					redo();
+					Redo();
 					UpdateUndoRedoButtonEnabled();
 				}
 
 			}
 
 			// skip mouse input handling if the cursor is outside of the viewport (unless the user is dragging)
-			if (!dragging && (
+			if (!m_dragging && (
 				    Input.mousePosition.x < 0 || Input.mousePosition.y < 0 || Input.mousePosition.x > Screen.width || Input.mousePosition.y > Screen.height
 			    ))
 			{
@@ -512,77 +496,77 @@ namespace MSP2050.Scripts
 			{
 				InputReceivingState.LeftMouseButtonDown(mousePosition);
 
-				leftMouseButtonDownStartPosition = mousePosition;
-				userMayBeClicking = true;
-				userMayBeDragging = true;
+				m_leftMouseButtonDownStartPosition = mousePosition;
+				m_userMayBeClicking = true;
+				m_userMayBeDragging = true;
 			}
 
 
 			if (Input.GetMouseButtonUp(0))
 			{
-				if (!cursorIsOverUI && (userMayBeClicking || dragging || userMayBeDragging)) { InputReceivingState.LeftMouseButtonUp(leftMouseButtonDownStartPosition, mousePosition); }
+				if (!cursorIsOverUI && (m_userMayBeClicking || m_dragging || m_userMayBeDragging)) { InputReceivingState.LeftMouseButtonUp(m_leftMouseButtonDownStartPosition, mousePosition); }
 
-				if (userMayBeClicking)
+				if (m_userMayBeClicking)
 				{
-					if (Time.time - previousClickTime < DOUBLE_CLICK_MAX_INTERVAL && (mousePosition - previousClickLocation).magnitude < VisualizationUtil.Instance.GetMouseMoveThreshold())
+					if (Time.time - m_previousClickTime < DOUBLE_CLICK_MAX_INTERVAL && (mousePosition - m_previousClickLocation).magnitude < VisualizationUtil.Instance.GetMouseMoveThreshold())
 					{
 						InputReceivingState.DoubleClick(mousePosition);
 					}
 
 					InputReceivingState.LeftClick(mousePosition);
 
-					previousClickTime = Time.time;
-					previousClickLocation = mousePosition;
+					m_previousClickTime = Time.time;
+					m_previousClickLocation = mousePosition;
 				}
 
-				userMayBeClicking = false;
+				m_userMayBeClicking = false;
 
-				if (dragging)
+				if (m_dragging)
 				{
-					InputReceivingState.StoppedDragging(leftMouseButtonDownStartPosition, mousePosition);
+					InputReceivingState.StoppedDragging(m_leftMouseButtonDownStartPosition, mousePosition);
 				}
-				dragging = false;
-				userMayBeDragging = false;
+				m_dragging = false;
+				m_userMayBeDragging = false;
 			}
 
-			if (userMayBeClicking)
+			if (m_userMayBeClicking)
 			{
 				float threshold = VisualizationUtil.Instance.GetMouseMoveThreshold();
 				threshold *= threshold;
 
-				if ((mousePosition - leftMouseButtonDownStartPosition).sqrMagnitude > threshold)
+				if ((mousePosition - m_leftMouseButtonDownStartPosition).sqrMagnitude > threshold)
 				{
-					userMayBeClicking = false;
+					m_userMayBeClicking = false;
 				}
 			}
 
-			if (mousePosition != previousMousePosition && !userMayBeClicking)
+			if (mousePosition != m_previousMousePosition && !m_userMayBeClicking)
 			{
-				InputReceivingState.MouseMoved(previousMousePosition, mousePosition, cursorIsOverUI);
-				if (!dragging && userMayBeDragging && Input.GetMouseButton(0))
+				InputReceivingState.MouseMoved(m_previousMousePosition, mousePosition, cursorIsOverUI);
+				if (!m_dragging && m_userMayBeDragging && Input.GetMouseButton(0))
 				{
-					InputReceivingState.StartedDragging(leftMouseButtonDownStartPosition, mousePosition);
-					dragging = true;
+					InputReceivingState.StartedDragging(m_leftMouseButtonDownStartPosition, mousePosition);
+					m_dragging = true;
 				}
-				else if (dragging)
+				else if (m_dragging)
 				{
-					InputReceivingState.Dragging(leftMouseButtonDownStartPosition, mousePosition);
+					InputReceivingState.Dragging(m_leftMouseButtonDownStartPosition, mousePosition);
 				}
 			}
 
-			previousMousePosition = mousePosition;
+			m_previousMousePosition = mousePosition;
 		}
 
 		public static void CameraZoomChanged()
 		{
-			if (instance == null)
+			if (Instance == null)
 				return;
-			instance.InputReceivingState.HandleCameraZoomChanged();
+			Instance.InputReceivingState.HandleCameraZoomChanged();
 		}
 
 		public void TriggerGeometryComplete()
 		{
-			onGeometryCompleted?.Invoke();
+			OnGeometryCompleted?.Invoke();
 		}
 	}
 }

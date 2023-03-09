@@ -190,14 +190,14 @@ namespace MSP2050.Scripts
 				PlanManager.Instance.GetPlanWithID(messageObj.plan_id).ReceiveMessage(messageObj);
 			}
 
-			if (PlanManager.Instance.planViewing != null && !Main.InEditMode)
+			if (PlanManager.Instance.m_planViewing != null && !Main.InEditMode)
 			{
-				int viewingTime = PlanManager.Instance.planViewing.StartTime;
+				int viewingTime = PlanManager.Instance.m_planViewing.StartTime;
 				foreach (KeyValuePair<AbstractLayer, int> kvp in layerUpdateTimes)
 				{
 					if (kvp.Value <= viewingTime)
 					{
-						kvp.Key.SetEntitiesActiveUpTo(PlanManager.Instance.planViewing);
+						kvp.Key.SetEntitiesActiveUpTo(PlanManager.Instance.m_planViewing);
 						kvp.Key.RedrawGameObjects(CameraManager.Instance.gameCamera);
 					}
 				}

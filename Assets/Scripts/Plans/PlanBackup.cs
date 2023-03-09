@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 			foreach (PlanLayerBackup layerbackup in m_planLayers)
 			{
 				originalLayers.Add(layerbackup.m_planLayer.ID);
-				if (a_plan.getPlanLayerForBaseID(layerbackup.m_planLayer.BaseLayer.ID) == null)
+				if (a_plan.getPlanLayerForBaseID(layerbackup.m_planLayer.BaseLayer.m_id) == null)
 				{
 					//If layer not in plan, add again
 					a_plan.PlanLayers.Add(layerbackup.m_planLayer);
@@ -102,14 +102,14 @@ namespace MSP2050.Scripts
 			List<Action<BatchRequest>> postGeometryActions = new List<Action<BatchRequest>>();
 			foreach (PlanLayer planlayer in a_plan.PlanLayers)
 			{
-				newLayerIds.Add(planlayer.BaseLayer.ID);
+				newLayerIds.Add(planlayer.BaseLayer.m_id);
 			}
 
 			//Submit changes or removal to all existing layers
 			foreach (PlanLayerBackup backupLayer in m_planLayers)
 			{
-				oldLayerIds.Add(backupLayer.m_planLayer.BaseLayer.ID);
-				if (!newLayerIds.Contains(backupLayer.m_planLayer.BaseLayer.ID))
+				oldLayerIds.Add(backupLayer.m_planLayer.BaseLayer.m_id);
+				if (!newLayerIds.Contains(backupLayer.m_planLayer.BaseLayer.m_id))
 				{
 					//Plan no longer contains layer, submit removal
 					//Removes planlayer from plan and all geom and issues on it
@@ -146,7 +146,7 @@ namespace MSP2050.Scripts
 						if (tempHS.Contains(newAddedEntity.DatabaseID))
 						{
 							//Was already added previously, only submit if changed
-							if (newAddedEntity.GetSubEntity(0).edited)
+							if (newAddedEntity.GetSubEntity(0).m_edited)
 							{
 								//These are only modified subentities that already existed on the planlayer, so just update the content
 								Action<BatchRequest> newPostgeomAction = newAddedEntity.GetSubEntity(0).SubmitUpdate(a_batch);
@@ -182,7 +182,7 @@ namespace MSP2050.Scripts
 			//Submit new layers
 			foreach (PlanLayer planlayer in a_plan.PlanLayers)
 			{
-				if (!oldLayerIds.Contains(planlayer.BaseLayer.ID))
+				if (!oldLayerIds.Contains(planlayer.BaseLayer.m_id))
 				{
 					//New layer in plan, submit creation and all content
 					planlayer.SubmitNewPlanLayer(a_batch);
@@ -269,7 +269,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < m_newGeometry.Count; i++)
 			{
 				m_newGeometry[i].SetDataToCopy(m_newGeometryData[i]);
-				m_newGeometry[i].DrawGameObject(m_newGeometry[i].Entity.Layer.LayerGameObject.transform);
+				m_newGeometry[i].DrawGameObject(m_newGeometry[i].m_entity.Layer.LayerGameObject.transform);
 				originalGeometry.Add(m_newGeometry[i].GetDatabaseID());
 			}
 			foreach(Entity entity in m_planLayer.GetNewGeometry())
@@ -282,7 +282,7 @@ namespace MSP2050.Scripts
 			m_planLayer.ClearNewGeometry();
 			foreach(SubEntity sub in m_newGeometry)
 			{
-				m_planLayer.AddNewGeometry(sub.Entity);
+				m_planLayer.AddNewGeometry(sub.m_entity);
 			}
 		}
 

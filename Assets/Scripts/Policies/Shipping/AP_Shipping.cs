@@ -49,7 +49,7 @@ namespace MSP2050.Scripts
 					{
 						RestrictionAreaSetting setting = new RestrictionAreaSetting(itemEntry.item.Country, itemEntry.item.GetDistributionValue());
 
-						RestrictionAreaManager.instance.SetRestrictionAreaSetting(m_APWindow.CurrentPlan, itemEntry.targetType, setting);
+						RestrictionAreaManager.Instance.SetRestrictionAreaSetting(m_APWindow.CurrentPlan, itemEntry.targetType, setting);
 					}
 				}
 			}
@@ -65,7 +65,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < m_plan.PlanLayers.Count; ++i)
 			{
 				PlanLayer layer = m_plan.PlanLayers[i];
-				foreach (var kvp in layer.BaseLayer.EntityTypes)
+				foreach (var kvp in layer.BaseLayer.m_entityTypes)
 				{
 					if (SessionManager.Instance.IsManager(m_plan.Country))
 					{
@@ -88,7 +88,7 @@ namespace MSP2050.Scripts
 
 		private void CreateDistributionForTeam(int a_teamId, KeyValuePair<int, EntityType> a_kvp, PlanLayer a_layer)
 		{
-			float restrictionSize = RestrictionAreaManager.instance.GetRestrictionAreaSizeAtPlanTime(m_plan, a_kvp.Value, a_teamId);
+			float restrictionSize = RestrictionAreaManager.Instance.GetRestrictionAreaSizeAtPlanTime(m_plan, a_kvp.Value, a_teamId);
 			SetDistributionSlider(a_layer.BaseLayer, a_kvp.Value, a_teamId, restrictionSize);
 		}
 

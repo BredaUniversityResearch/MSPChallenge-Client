@@ -5,118 +5,117 @@ namespace MSP2050.Scripts
 {
 	public class PolygonLayer : Layer<PolygonEntity>
 	{
-		public Texture2D InnerGlowTexture = null;
-		public Rect InnerGlowBounds = new Rect();
+		public Texture2D m_innerGlowTexture = null;
+		public Rect m_innerGlowBounds = new Rect();
 
-		public PolygonLayer(LayerMeta layerMeta, List<SubEntityObject> layerObjects) : base(layerMeta)
+		public PolygonLayer(LayerMeta a_layerMeta, List<SubEntityObject> a_layerObjects) : base(a_layerMeta)
 		{
-			LoadLayerObjects(layerObjects);
-			presetProperties.Add("Area", (subent) =>
+			LoadLayerObjects(a_layerObjects);
+			m_presetProperties.Add("Area", (a_subent) =>
 			{
-				PolygonSubEntity polygonEntity = (PolygonSubEntity)subent;
+				PolygonSubEntity polygonEntity = (PolygonSubEntity)a_subent;
 				return polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>";
 			});
 		}
 
-		public override void LoadLayerObjects(List<SubEntityObject> layerObjects)
+		public override void LoadLayerObjects(List<SubEntityObject> a_layerObjects)
 		{
-			base.LoadLayerObjects(layerObjects);
+			base.LoadLayerObjects(a_layerObjects);
 
-			if(layerObjects != null)
+			if (a_layerObjects == null)
+				return;
+			foreach (SubEntityObject layerObject in a_layerObjects)
 			{
-				foreach (SubEntityObject layerObject in layerObjects)
-				{
-					PolygonEntity ent = new PolygonEntity(this, layerObject);
-					Entities.Add(ent);
-					initialEntities.Add(ent);
-				}
+				PolygonEntity ent = new PolygonEntity(this, layerObject);
+				Entities.Add(ent);
+				InitialEntities.Add(ent);
 			}
 		}
 
 		public bool HasEntityTypeWithInnerGlow()
 		{
-			foreach (var kvp in EntityTypes)
+			foreach (var kvp in m_entityTypes)
 			{
 				if (kvp.Value.DrawSettings.InnerGlowEnabled) { return true; }
 			}
 			return false;
 		}
 
-		public void UpdateInnerGlowWithFirstEntityTypeSettings(bool forceRecalculate = false)
+		public void UpdateInnerGlowWithFirstEntityTypeSettings(bool a_forceRecalculate = false)
 		{
-			SubEntityDrawSettings s = EntityTypes.GetFirstValue().DrawSettings;
-			UpdateInnerGlow(s.InnerGlowRadius, s.InnerGlowIterations, s.InnerGlowMultiplier, s.InnerGlowPixelSize, forceRecalculate);
+			SubEntityDrawSettings s = m_entityTypes.GetFirstValue().DrawSettings;
+			UpdateInnerGlow(s.InnerGlowRadius, s.InnerGlowIterations, s.InnerGlowMultiplier, s.InnerGlowPixelSize, a_forceRecalculate);
 		}
 
-		public void UpdateInnerGlow(int innerGlowRadius, int innerGlowIterations, float innerGlowMultiplier, float pixelSize, bool forceRecalculate = false)
+		public void UpdateInnerGlow(int a_innerGlowRadius, int a_innerGlowIterations, float a_innerGlowMultiplier, float a_pixelSize, bool a_forceRecalculate = false)
 		{
-			if (innerGlowIterations == 0 && innerGlowMultiplier <= 0 && innerGlowRadius == 0)
+			if (a_innerGlowIterations == 0 && a_innerGlowMultiplier <= 0 && a_innerGlowRadius == 0)
 			{
 				Debug.LogError("Inner glow enabled on layer " + FileName + " but is set with default parameters of 0 iterations, 0 multiplier and 0 radius. Is this correct? Ignoring the inner glow for now.");
 				return;
 			}
 
-			if (forceRecalculate)
+			if (a_forceRecalculate)
 			{
-				MaterialManager.Instance.CalculateInnerGlowTextureData(this, innerGlowRadius, innerGlowIterations, innerGlowMultiplier, pixelSize);
+				MaterialManager.Instance.CalculateInnerGlowTextureData(this, a_innerGlowRadius, a_innerGlowIterations, a_innerGlowMultiplier, a_pixelSize);
 			}
-			InnerGlowTexture = MaterialManager.Instance.GetInnerGlowTexture(this, innerGlowRadius, innerGlowIterations, innerGlowMultiplier, pixelSize);
-			InnerGlowBounds = MaterialManager.Instance.GetInnerGlowTextureBounds(this, innerGlowRadius, innerGlowIterations, innerGlowMultiplier, pixelSize);
+			m_innerGlowTexture = MaterialManager.Instance.GetInnerGlowTexture(this, a_innerGlowRadius, a_innerGlowIterations, a_innerGlowMultiplier, a_pixelSize);
+			m_innerGlowBounds = MaterialManager.Instance.GetInnerGlowTextureBounds(this, a_innerGlowRadius, a_innerGlowIterations, a_innerGlowMultiplier, a_pixelSize);
 		}
 
-		public PolygonEntity CreateNewPolygonEntity(Vector3 initialPoint, List<EntityType> entityType, PlanLayer planLayer)
+		public PolygonEntity CreateNewPolygonEntity(Vector3 a_initialPoint, List<EntityType> a_entityType, PlanLayer a_planLayer)
 		{
-			PolygonEntity polygonEntity = new PolygonEntity(this, planLayer, entityType);
-			PolygonSubEntity subEntity = editingType == EditingType.SourcePolygon ? new EnergyPolygonSubEntity(polygonEntity) : new PolygonSubEntity(polygonEntity);
+			PolygonEntity polygonEntity = new PolygonEntity(this, a_planLayer, a_entityType);
+			PolygonSubEntity subEntity = m_editingType == EditingType.SourcePolygon ? new EnergyPolygonSubEntity(polygonEntity) : new PolygonSubEntity(polygonEntity);
 			polygonEntity.AddSubEntity(subEntity);
 
 			if (SessionManager.Instance.AreWeGameMaster)
 				polygonEntity.Country = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SelectedTeam;
 
-			subEntity.AddPoint(initialPoint);
-			subEntity.AddPoint(initialPoint);
-			planLayer.AddNewGeometry(polygonEntity);
+			subEntity.AddPoint(a_initialPoint);
+			subEntity.AddPoint(a_initialPoint);
+			a_planLayer.AddNewGeometry(polygonEntity);
 			return polygonEntity;
 		}
 
-		public PolygonEntity CreateNewPolygonEntity(List<EntityType> entityType, PlanLayer planLayer)
+		public PolygonEntity CreateNewPolygonEntity(List<EntityType> a_entityType, PlanLayer a_planLayer)
 		{
-			PolygonEntity polygonEntity = new PolygonEntity(this, planLayer, entityType);
-			planLayer.AddNewGeometry(polygonEntity);
+			PolygonEntity polygonEntity = new PolygonEntity(this, a_planLayer, a_entityType);
+			a_planLayer.AddNewGeometry(polygonEntity);
 			return polygonEntity;
 		}
 
-		public override Entity CreateEntity(SubEntityObject obj)
+		public override Entity CreateEntity(SubEntityObject a_obj)
 		{
-			return new PolygonEntity(this, obj);
+			return new PolygonEntity(this, a_obj);
 		}
 
-		public HashSet<PolygonEntity> GetEntitiesInBox(Vector3 boxCornerA, Vector3 boxCornerB)
+		public HashSet<PolygonEntity> GetEntitiesInBox(Vector3 a_boxCornerA, Vector3 a_boxCornerB)
 		{
-			HashSet<PolygonSubEntity> subEntities = GetSubEntitiesInBox(boxCornerA, boxCornerB);
+			HashSet<PolygonSubEntity> subEntities = GetSubEntitiesInBox(a_boxCornerA, a_boxCornerB);
 			HashSet<PolygonEntity> result = new HashSet<PolygonEntity>();
 			foreach (PolygonSubEntity subEntity in subEntities)
 			{
-				result.Add(subEntity.Entity as PolygonEntity);
+				result.Add(subEntity.m_entity as PolygonEntity);
 			}
 			return result;
 		}
 
-		public HashSet<PolygonSubEntity> GetSubEntitiesInBox(Vector3 boxCornerA, Vector3 boxCornerB)
+		public HashSet<PolygonSubEntity> GetSubEntitiesInBox(Vector3 a_boxCornerA, Vector3 a_boxCornerB)
 		{
-			Vector3 min = Vector3.Min(boxCornerA, boxCornerB);
-			Vector3 max = Vector3.Max(boxCornerA, boxCornerB);
+			Vector3 min = Vector3.Min(a_boxCornerA, a_boxCornerB);
+			Vector3 max = Vector3.Max(a_boxCornerA, a_boxCornerB);
 
 			Rect boxBounds = new Rect(min, max - min);
 
 			List<PolygonSubEntity> collisions = new List<PolygonSubEntity>();
 
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				List<PolygonSubEntity> subEntities = entity.GetSubEntities();
 				foreach (PolygonSubEntity subEntity in subEntities)
 				{
-					if (!subEntity.IsPlannedForRemoval() && boxBounds.Overlaps(subEntity.BoundingBox))
+					if (!subEntity.IsPlannedForRemoval() && boxBounds.Overlaps(subEntity.m_boundingBox))
 					{
 						collisions.Add(subEntity);
 					}
@@ -138,26 +137,26 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public override Entity GetEntityAt(Vector2 position)
+		public override Entity GetEntityAt(Vector2 a_position)
 		{
-			SubEntity subEntity = GetSubEntityAt(position);
-			return (subEntity != null) ? subEntity.Entity : null;
+			SubEntity subEntity = GetSubEntityAt(a_position);
+			return (subEntity != null) ? subEntity.m_entity : null;
 		}
 
-		public override SubEntity GetSubEntityAt(Vector2 position)
+		public override SubEntity GetSubEntityAt(Vector2 a_position)
 		{
 			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistancePolygon();
 
-			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
+			Rect positionBounds = new Rect(a_position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
 			List<PolygonSubEntity> collisions = new List<PolygonSubEntity>();
 
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				List<PolygonSubEntity> subEntities = entity.GetSubEntities();
 				foreach (PolygonSubEntity subEntity in subEntities)
 				{
-					if (subEntity.planState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.BoundingBox))
+					if (subEntity.PlanState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.m_boundingBox))
 					{
 						collisions.Add(subEntity);
 					}
@@ -168,7 +167,7 @@ namespace MSP2050.Scripts
 
 			foreach (PolygonSubEntity collision in collisions)
 			{
-				if (collision.CollidesWithPoint(position, maxDistance))
+				if (collision.CollidesWithPoint(a_position, maxDistance))
 				{
 					return collision;
 				}
@@ -177,20 +176,20 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)
+		public override List<SubEntity> GetSubEntitiesAt(Vector2 a_position)
 		{
 			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistancePolygon();
 
-			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
+			Rect positionBounds = new Rect(a_position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
 			List<PolygonSubEntity> collisions = new List<PolygonSubEntity>();
 
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				List<PolygonSubEntity> subEntities = entity.GetSubEntities();
 				foreach (PolygonSubEntity subEntity in subEntities)
 				{
-					if (subEntity.planState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.BoundingBox))
+					if (subEntity.PlanState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.m_boundingBox))
 					{
 						collisions.Add(subEntity);
 					}
@@ -202,7 +201,7 @@ namespace MSP2050.Scripts
 			List<SubEntity> result = new List<SubEntity>();
 			foreach (PolygonSubEntity collision in collisions)
 			{
-				if (collision.CollidesWithPoint(position, maxDistance))
+				if (collision.CollidesWithPoint(a_position, maxDistance))
 				{
 					result.Add(collision);
 				}
@@ -214,7 +213,7 @@ namespace MSP2050.Scripts
 		public List<PolygonSubEntity> GetAllSubEntities()
 		{
 			List<PolygonSubEntity> subEntities = new List<PolygonSubEntity>();
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				foreach (PolygonSubEntity subent in entity.GetSubEntities())
 					if (!subent.IsPlannedForRemoval())
@@ -223,121 +222,21 @@ namespace MSP2050.Scripts
 			return subEntities;
 		}
 
-		public override void UpdateScale(Camera targetCamera)
+		public override void UpdateScale(Camera a_targetCamera)
 		{
-			foreach (PolygonEntity entity in activeEntities)
+			foreach (PolygonEntity entity in m_activeEntities)
 			{
 				List<PolygonSubEntity> subEntities = entity.GetSubEntities();
 				foreach (PolygonSubEntity subEntity in subEntities)
 				{
-					subEntity.UpdateScale(targetCamera);
+					subEntity.UpdateScale(a_targetCamera);
 				}
 			}
 		}
 
-		public override  LayerManager.GeoType GetGeoType()
+		public override  LayerManager.EGeoType GetGeoType()
 		{
-			return  LayerManager.GeoType.polygon;
+			return  LayerManager.EGeoType.Polygon;
 		}
-
-		#region Legacy Stuff
-		//public override void MoveAllGeometryTo(Layer destination, int entityTypeOffset)
-		//{
-		//    if (!(destination is PolygonLayer)) { Debug.LogError("destination is not a polygon layer"); return; }
-		//    PolygonLayer dst = destination as PolygonLayer;
-
-		//    foreach (PolygonEntity entity in Entities)
-		//    {
-		//        dst.Entities.Add(entity);
-		//        entity.MovedToLayer(destination, entity.GetEntityTypeKeys()[0] + entityTypeOffset);
-		//    }
-		//    Entities.Clear();
-		//}
-
-		//public override void TransformAllEntities(float scale, Vector3 translate)
-		//{
-		//foreach (PolygonEntity entity in PolygonEntities)
-		//{
-		//    foreach (PolygonSubEntity subEntity in entity.GetSubEntities())
-		//    {
-		//        int total = subEntity.GetPolygonPointCount();
-		//        for (int i = 0; i < total; i++)
-		//        {
-		//            subEntity.GetPolygon()[i] *= scale;
-		//            subEntity.GetPolygon()[i] += translate;
-		//        }
-
-		//        subEntity.SubmitUpdate();
-		//        Thread.Sleep(15);
-		//    }
-		//}
-		//  RedrawGameObjects();
-		//}
-
-		public void CreateInvertedLayer()
-		{
-			//if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
-			//{
-			//    Debug.LogError("Please press shift while pressing this button if you really want to create an inverted layer");
-			//    return;
-			//}
-
-			//InterfaceCanvas.CreateConfirmWindow("Create Inverted Layer", "Are you sure you want to create an inverted layer?", 200, () => { LayerManager.Instance.AddNewLayer(FileName + " (inverted)", LayerManager.GeoType.polygon, invertedLayerCreated); });
-
-
-		}
-
-		private void invertedLayerCreated(AbstractLayer layer)
-		{
-			//PolygonLayer l = layer as PolygonLayer;
-			//l.Selectable = false;
-
-			//if (ShortName.Length > 0) { layer.ShortName = ShortName + " (inverted)"; }
-
-			//EntityType type = layer.EntityTypes.GetFirstValue();
-
-
-			//type.DrawSettings.PolygonColor = Color.red;
-			//type.DrawSettings.LineColor = Color.red; //new Color(153 / 255f, 0, 0, 1);
-			//type.DrawSettings.DisplayPoints = false;
-			//type.DrawSettings.DisplayPolygon = false;
-
-
-			//layer.SubmitMetaData();
-
-			//Rect layerBounds = GetLayerBounds();
-			//layerBounds.position = layerBounds.position - layerBounds.size * 0.05f;
-			//layerBounds.size = layerBounds.size * 1.1f;
-
-			//PolygonEntity subjectEntity = l.CreateNewPolygonEntity(new Vector3(layerBounds.min.x, layerBounds.min.y), new List<EntityType>() { type }, planLayer);
-			//PolygonSubEntity subjectSubEntity = subjectEntity.GetSubEntity(0) as PolygonSubEntity;
-			//subjectSubEntity.AddPoint(new Vector3(layerBounds.min.x, layerBounds.max.y));
-			//subjectSubEntity.AddPoint(new Vector3(layerBounds.max.x, layerBounds.max.y));
-			//subjectSubEntity.AddPoint(new Vector3(layerBounds.max.x, layerBounds.min.y));
-
-			//HashSet<PolygonEntity> clipEntities = new HashSet<PolygonEntity>(PolygonEntities);
-
-			////foreach (PolygonEntity clipEntity in clipEntities)
-			////{
-			////    PolygonEntity newEntity = SetOperations.BooleanP(subjectEntity, new HashSet<PolygonEntity> { clipEntity }, ClipperLib.ClipType.ctDifference);
-
-			////    List<PolygonSubEntity> subjectSubEntities = new List<PolygonSubEntity>(subjectEntity.GetSubEntities());
-			////    foreach (PolygonSubEntity subEntity in subjectSubEntities)
-			////    {
-			////        l.RemovePolygonSubEntity(subEntity);
-			////    }
-
-			////    subjectEntity = newEntity;
-			////}
-
-			////subjectEntity.DrawGameObjects(l.LayerGameObject.transform);
-
-			//PolygonEntity newEntity = SetOperations.BooleanP(subjectEntity, clipEntities, ClipperLib.ClipType.ctDifference);
-
-			//l.RemovePolygonSubEntity(subjectSubEntity, null);
-
-			//newEntity.DrawGameObjects(l.LayerGameObject.transform);
-		}
-		#endregion
 	}
 }

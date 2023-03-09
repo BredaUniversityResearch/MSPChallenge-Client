@@ -56,7 +56,7 @@ namespace MSP2050.Scripts
 		public RasterLayer(LayerMeta layerMeta/*, PlanLayer planLayer = null*/)
 			: base(layerMeta/*, planLayer*/)
 		{
-			entityTypesSortedByValue = new List<EntityType>(EntityTypes.Values);
+			entityTypesSortedByValue = new List<EntityType>(m_entityTypes.Values);
 			entityTypesSortedByValue.Sort(SortMethodEntityTypesByValue);
 			viewingRaster = rasterAtLatestTime;
 			rasterValueToEntityValueMultiplier = layerMeta.layer_entity_value_max ?? DEFAULT_RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
@@ -75,7 +75,7 @@ namespace MSP2050.Scripts
 		{
 			SubEntityDrawSettings drawSettings = new SubEntityDrawSettings(true, color, "Default", false, 0, 0, 0, 0, false, color, 1.0f, null, Color.white, -1, 0, false, color, 0, null);
 			EntityType entityType = new EntityType("type " + type, "", 0, 0, 0, drawSettings, "");
-			EntityTypes.Add(type, entityType);
+			m_entityTypes.Add(type, entityType);
 			if (SetEntityTypeVisibility(entityType, true))
 				SetActiveToCurrentPlanAndRedraw();
 		}
@@ -215,7 +215,7 @@ namespace MSP2050.Scripts
 				{
 					RasterEntity entity = new RasterEntity(this, viewingRaster, offset, scale, layerObject);
 					Entities.Add(entity);
-					initialEntities.Add(entity);
+					InitialEntities.Add(entity);
 				}
 			}
 		}
@@ -384,9 +384,9 @@ namespace MSP2050.Scripts
 			return Entities.Count;
 		}
 
-		public override  LayerManager.GeoType GetGeoType()
+		public override  LayerManager.EGeoType GetGeoType()
 		{
-			return  LayerManager.GeoType.raster;
+			return  LayerManager.EGeoType.Raster;
 		}
 
 		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)
@@ -426,7 +426,7 @@ namespace MSP2050.Scripts
 		//    throw new NotImplementedException();
 		//}
 
-		public override void RedrawGameObjects(Camera targetCamera, SubEntityDrawMode drawMode, bool forceScaleUpdate = false)
+		protected override void RedrawGameObjects(Camera targetCamera, SubEntityDrawMode drawMode, bool forceScaleUpdate = false)
 		{
 			foreach (RasterEntity re in Entities)
 			{
@@ -454,7 +454,7 @@ namespace MSP2050.Scripts
 		public override HashSet<Entity> GetActiveEntitiesOfType(EntityType type)
 		{
 			HashSet<Entity> result = new HashSet<Entity>();
-			foreach (RasterEntity ent in activeEntities)
+			foreach (RasterEntity ent in m_activeEntities)
 			{
 				result.Add(ent);
 			}
@@ -484,8 +484,8 @@ namespace MSP2050.Scripts
 				SetRasterTexture(viewingRaster);
 			}
 
-			activeEntities.Clear();
-			activeEntities.UnionWith(Entities);
+			m_activeEntities.Clear();
+			m_activeEntities.UnionWith(Entities);
 		}
 
 		public override void SetEntitiesActiveUpTo(Plan plan)
@@ -498,8 +498,8 @@ namespace MSP2050.Scripts
 			viewingRasterTime = -1;
 			viewingRaster = rasterAtLatestTime;
 			SetRasterTexture(viewingRaster);
-			activeEntities.Clear();
-			activeEntities.UnionWith(Entities);
+			m_activeEntities.Clear();
+			m_activeEntities.UnionWith(Entities);
 		}
 
 		public override bool IsIDInActiveGeometry(int ID)

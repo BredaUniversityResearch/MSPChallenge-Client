@@ -321,7 +321,7 @@ namespace MSP2050.Scripts
 				}
 
 				if (gameState != PlanningState.Setup)
-					PlanManager.Instance.MonthTick(month);
+					PlanManager.MonthTick(month);
 				InterfaceCanvas.Instance.activePlanWindow.m_timeSelect.UpdateMinTime();
 
 				if (OnCurrentMonthChanged != null)
@@ -387,7 +387,7 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = true;
 			//Update plans once the setup state is left, so we don't have to wait for month 1
 			TimeManagerWindow.instance.eraDivision.gameObject.SetActive(false);
-			PlanManager.Instance.MonthTick(month);
+			PlanManager.MonthTick(month);
 			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 			SetupStateExited();
 		}

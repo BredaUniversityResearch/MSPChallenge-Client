@@ -36,9 +36,9 @@ namespace MSP2050.Scripts
 
 			foreach (PointLayer layer in PolicyLogicEnergy.Instance.GetCenterPointLayers())
 			{
-				layer.EntityTypes[0].DrawSettings.PointColor = layer.greenEnergy ? greenColor : greyColor;
-				layer.EntityTypes[0].DrawSettings.PointSprite = layer.greenEnergy ? greenSprite : greySprite;
-				layer.EntityTypes[0].DrawSettings.PointSize = layer.greenEnergy ? m_settings.green_centerpoint_size : m_settings.grey_centerpoint_size;
+				layer.m_entityTypes[0].DrawSettings.PointColor = layer.m_greenEnergy ? greenColor : greyColor;
+				layer.m_entityTypes[0].DrawSettings.PointSprite = layer.m_greenEnergy ? greenSprite : greySprite;
+				layer.m_entityTypes[0].DrawSettings.PointSize = layer.m_greenEnergy ? m_settings.green_centerpoint_size : m_settings.grey_centerpoint_size;
 			}
 			m_settings = null;
 		}

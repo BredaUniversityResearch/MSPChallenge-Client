@@ -95,8 +95,8 @@ namespace MSP2050.Scripts
 				m_points.Add(new Vector3(geometry.geometry[i][0] / Main.SCALE, geometry.geometry[i][1] / Main.SCALE));
 			}
 
-			mspID = geometry.mspid;
-			restrictionNeedsUpdate = true;
+			m_mspID = geometry.mspid;
+			m_restrictionNeedsUpdate = true;
 			OnPointsDataChanged();
 		}
 
@@ -128,7 +128,7 @@ namespace MSP2050.Scripts
 				max = Vector3.Max(max, point);
 			}
 
-			BoundingBox = new Rect(min, max - min);
+			m_boundingBox = new Rect(min, max - min);
 			//Update line's length if it was needed before (avoid calculating on load)
 			if(lineLengthNeeded)
 				lineLengthKm = InterfaceCanvas.Instance.mapScale.GetRealWorldLineLength(m_points);
@@ -137,14 +137,14 @@ namespace MSP2050.Scripts
 		protected void OnPointsDataChanged()
 		{
 			m_meshDirty = true;
-			restrictionNeedsUpdate = true;
+			m_restrictionNeedsUpdate = true;
 			UpdateBoundingBox();
 		}
 
 		private void RebuildLODs()
 		{
-			m_displayLod = new LineStringLOD(m_points, gameObject.transform);
-			UpdateLineStringSubEntity(m_displayLod, Entity.EntityTypes[0].DrawSettings, planState, null, null);
+			m_displayLod = new LineStringLOD(m_points, m_gameObject.transform);
+			UpdateLineStringSubEntity(m_displayLod, m_entity.EntityTypes[0].DrawSettings, PlanState, null, null);
 			m_meshDirty = false;
 		}
 
@@ -163,9 +163,9 @@ namespace MSP2050.Scripts
 
 		private void UpdateTextMeshPosition(LineStringLOD targetLod)
 		{
-			if (textMesh != null)
+			if (m_textMesh != null)
 			{
-				textMesh.SetPosition(Util.GetLineCenter(targetLod.Points) + Entity.Layer.textInfo.textOffset, false);
+				m_textMesh.SetPosition(Util.GetLineCenter(targetLod.Points) + m_entity.Layer.m_textInfo.textOffset, false);
 			}
 		}
 
@@ -287,31 +287,31 @@ namespace MSP2050.Scripts
 		public override void SetOrderBasedOnType()
 		{
 			calculateOrderBasedOnType();
-			gameObject.transform.localPosition = new Vector3(0, 0, Order);
+			m_gameObject.transform.localPosition = new Vector3(0, 0, m_order);
 		}
 
 		public override void DrawGameObject(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null)
 		{
-			if (gameObject != null)
+			if (m_gameObject != null)
 			{
 				//Debug.LogError("Attempting to draw entity with an existing GameObject.");
 				return;
 			}
-			gameObject = new GameObject("Line String LODs");
-			gameObject.transform.SetParent(parent);
+			m_gameObject = new GameObject("Line String LODs");
+			m_gameObject.transform.SetParent(parent);
 
-			if (Entity.EntityTypes[0] == null)
+			if (m_entity.EntityTypes[0] == null)
 			{
 				//Mark Layer Dirty because it loaded in wrongly
-				Entity.Layer.Dirty = true;
+				m_entity.Layer.m_dirty = true;
 				return;
 			}
-			drawSettings = Entity.EntityTypes[0].DrawSettings;
+			m_drawSettings = m_entity.EntityTypes[0].DrawSettings;
 
 			RebuildLODs();
-			if (Entity.Layer.textInfo != null)
+			if (m_entity.Layer.m_textInfo != null)
 			{
-				CreateTextMesh(gameObject.transform, Vector3.zero);
+				CreateTextMesh(m_gameObject.transform, Vector3.zero);
 				m_meshDirty = true;
 			}
 			RedrawGameObject(drawMode, selectedPoints, hoverPoints);
@@ -323,24 +323,24 @@ namespace MSP2050.Scripts
 		{
 			base.RedrawGameObject(drawMode, selectedPoints, hoverPoints, updatePlanState);
 
-			if (gameObject == null)
+			if (m_gameObject == null)
 				return;
 
-			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(Entity.Layer))
+			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(m_entity.Layer))
 				drawMode = SubEntityDrawMode.PlanReference;
 
 			SnappingToThisEnabled = IsSnapToDrawMode(drawMode);
 
-			SubEntityDrawSettings previousDrawSettings = drawSettings;
-			drawSettings = Entity.EntityTypes[0].DrawSettings;
+			SubEntityDrawSettings previousDrawSettings = m_drawSettings;
+			m_drawSettings = m_entity.EntityTypes[0].DrawSettings;
 
 			if (drawMode != SubEntityDrawMode.Default)
 			{
-				drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(drawSettings);
+				m_drawSettings = VisualizationUtil.Instance.VisualizationSettings.GetDrawModeSettings(drawMode).GetSubEntityDrawSettings(m_drawSettings);
 			}
 
 			bool meshDirtyFromOverride = false;
-			Entity.OverrideDrawSettings(drawMode, ref drawSettings, ref meshDirtyFromOverride);
+			m_entity.OverrideDrawSettings(drawMode, ref m_drawSettings, ref meshDirtyFromOverride);
 
 			//if (drawSettings != previousDrawSettings || planState != previousPlanState)
 			//{
@@ -351,17 +351,17 @@ namespace MSP2050.Scripts
 			{
 				m_displayLod.SetGeometryData(m_points);
 				UpdateTextMeshPosition(m_displayLod);
-				CreateLineStringIconsForLod(m_displayLod, drawSettings);
+				CreateLineStringIconsForLod(m_displayLod, m_drawSettings);
 				m_meshDirty = false;
 			}
 
 			if(m_displayLod.Points != null)
-				UpdateLineStringSubEntity(m_displayLod, drawSettings, planState, selectedPoints, hoverPoints);
+				UpdateLineStringSubEntity(m_displayLod, m_drawSettings, PlanState, selectedPoints, hoverPoints);
 		}
 
 		public override void UpdateGameObjectForEveryLOD()
 		{
-			UpdateLineStringSubEntity(m_displayLod, drawSettings, planState, null, null);
+			UpdateLineStringSubEntity(m_displayLod, m_drawSettings, PlanState, null, null);
 		}
 
 		private void UpdateLineStringSubEntity(LineStringLOD lod, SubEntityDrawSettings drawSettings, SubEntityPlanState planState, HashSet<int> selectedPoints, HashSet<int> hoverPoints)
@@ -414,13 +414,13 @@ namespace MSP2050.Scripts
 		protected override void UpdateRestrictionArea(float newRestrictionSize)
 		{
 			base.UpdateRestrictionArea(newRestrictionSize);
-			if (m_restrictionArea == null && newRestrictionSize > 0.0f && !restrictionHidden)
+			if (m_restrictionArea == null && newRestrictionSize > 0.0f && !m_restrictionHidden)
 			{
 				m_restrictionArea = VisualizationUtil.Instance.CreateRestrictionArea();
-				m_restrictionArea.SetParent(gameObject.transform);
+				m_restrictionArea.SetParent(m_gameObject.transform);
 			}
 
-			if (m_restrictionArea != null && !restrictionHidden)
+			if (m_restrictionArea != null && !m_restrictionHidden)
 			{
 				m_restrictionArea.SetPoints(m_points, newRestrictionSize, false);
 				if (!m_restrictionArea.gameObject.activeInHierarchy)
@@ -437,8 +437,8 @@ namespace MSP2050.Scripts
 
 		public override void UpdateScale(Camera targetCamera)
 		{
-			UpdateLineStringSubEntityScale(m_displayLod, drawSettings);
-			if (textMesh != null)
+			UpdateLineStringSubEntityScale(m_displayLod, m_drawSettings);
+			if (m_textMesh != null)
 				ScaleTextMesh();
 		}
 
@@ -448,7 +448,7 @@ namespace MSP2050.Scripts
 			return m_points[id];
 		}
 
-		public override SubEntityObject GetLayerObject()
+		protected override SubEntityObject GetLayerObject()
 		{
 			SubEntityObject obj = new SubEntityObject();
 			List<List<float>> geometry = new List<List<float>>();
@@ -632,13 +632,13 @@ namespace MSP2050.Scripts
 			return m_points;
 		}
 
-		public override void SetPoints(List<Vector3> points)
+		protected override void SetPoints(List<Vector3> points)
 		{
 			m_points = points;
 			OnPointsDataChanged();
 		}
 
-		public override Feature GetGeoJSONFeature(int idToUse)
+		public override Feature GetGeoJsonFeature(int idToUse)
 		{
 			//Convert line
 			double[][] linePoints = new double[m_points.Count][];

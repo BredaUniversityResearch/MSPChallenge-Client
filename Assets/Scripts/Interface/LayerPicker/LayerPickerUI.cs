@@ -99,7 +99,7 @@ namespace MSP2050.Scripts
 		{
 			AbstractLayer tmpLayer = layer;
 			// Category name of this nayer
-			string groupName = tmpLayer.Category;
+			string groupName = tmpLayer.m_category;
 
 			// Check if a group of that name exsits
 			GameObject group = GetCategoryGroup(groupName);
@@ -138,7 +138,7 @@ namespace MSP2050.Scripts
 			}
 
 			// tooltip
-			string layerInfo = "Category: " + tmpLayer.Category + ", SubCategory: " + tmpLayer.SubCategory;
+			string layerInfo = "Category: " + tmpLayer.m_category + ", SubCategory: " + tmpLayer.m_subCategory;
 			AddTooltip tooltip = toggle.gameObject.AddComponent<AddTooltip>();
 			tooltip.text = layerInfo;
 			buttons.Add(tmpLayer, toggle);
@@ -238,7 +238,7 @@ namespace MSP2050.Scripts
 		{
 			foreach (var kvp in buttons)
 			{
-				if (kvp.Key.Category == groupName)
+				if (kvp.Key.m_category == groupName)
 				{
 					if (kvp.Value.gameObject.activeInHierarchy) // Dont enable disabled tickboxes
 						kvp.Value.isOn = show;
@@ -253,7 +253,7 @@ namespace MSP2050.Scripts
 			{
 				if (highlight)
 				{
-					if (kvp.Key.Category == groupName)
+					if (kvp.Key.m_category == groupName)
 					{
 						kvp.Value.GetComponentInChildren<Text>().color = normalColour;
 					}
@@ -281,13 +281,13 @@ namespace MSP2050.Scripts
 		{
 			if (active)
 			{
-				selectedLayerIDs.Add(layer.ID);
+				selectedLayerIDs.Add(layer.m_id);
 			}
 			else
 			{
-				if (selectedLayerIDs.Contains(layer.ID))
+				if (selectedLayerIDs.Contains(layer.m_id))
 				{
-					selectedLayerIDs.Remove(layer.ID);
+					selectedLayerIDs.Remove(layer.m_id);
 				}
 			}
 		}

@@ -186,7 +186,7 @@ namespace MSP2050.Scripts
 
 			//Remove entities no longer in new geometry
 			foreach (var kvp in noLongerAddedGeometry)
-				removeNewEntity(kvp.Value.Entity);
+				removeNewEntity(kvp.Value.m_entity);
 
 			bool layerNeedsUpdate = updatedData.geometry.Count > 0 || noLongerAddedGeometry.Count > 0;
 			if (!layerNeedsUpdate)
@@ -233,14 +233,14 @@ namespace MSP2050.Scripts
 		private void updateSubEntity(SubEntity existingSubEntity, SubEntityObject newSubEntityObj)
 		{
 			// Update Entity Type
-			existingSubEntity.Entity.EntityTypes = newSubEntityObj.GetEntityType(BaseLayer);
+			existingSubEntity.m_entity.EntityTypes = newSubEntityObj.GetEntityType(BaseLayer);
 
 			//Update country
-			existingSubEntity.Entity.Country = newSubEntityObj.country;
+			existingSubEntity.m_entity.Country = newSubEntityObj.country;
 
 			//Update metadata
 			if(newSubEntityObj.data != null)
-				existingSubEntity.Entity.metaData = newSubEntityObj.data;
+				existingSubEntity.m_entity.metaData = newSubEntityObj.data;
 
 			// Update Geometry
 			existingSubEntity.SetDataToObject(newSubEntityObj);
@@ -295,8 +295,8 @@ namespace MSP2050.Scripts
 			foreach (int subEntityID in RemovedGeometry)
 			{
 				SubEntity subEntity = BaseLayer.GetSubEntityByPersistentID(subEntityID);
-				Vector2 min = Vector2.Min(result.min, subEntity.BoundingBox.min);
-				Vector2 max = Vector2.Max(result.max, subEntity.BoundingBox.max);
+				Vector2 min = Vector2.Min(result.min, subEntity.m_boundingBox.min);
+				Vector2 max = Vector2.Max(result.max, subEntity.m_boundingBox.max);
 				result = new Rect(min, max - min);
 			}
 
@@ -400,7 +400,7 @@ namespace MSP2050.Scripts
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("id", Plan.GetDataBaseOrBatchIDReference());
-			dataObject.Add("layerid", BaseLayer.ID);
+			dataObject.Add("layerid", BaseLayer.m_id);
 			creationBatchCallID = batch.AddRequest<int>(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_LAYER_ADD, HandleDatabaseIDResult);
 		}
 		void HandleDatabaseIDResult(int a_result)

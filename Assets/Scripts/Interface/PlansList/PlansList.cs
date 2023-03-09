@@ -67,7 +67,7 @@ namespace MSP2050.Scripts
 			PlanBar planBar = Instantiate(m_planBarPrefab, GetparentForState(a_plan.State)).GetComponent<PlanBar>();
 			m_planBarsPerPlan.Add(a_plan, planBar);
 	
-			planBar.Initialise(a_plan, PlanManager.Instance.planViewing == a_plan);
+			planBar.Initialise(a_plan, PlanManager.Instance.m_planViewing == a_plan);
 			planBar.MoveToGroup(m_planGroupsPerState[a_plan.State]);
 			planBar.UpdateActionRequired();
 			planBar.Filter(m_searchbar.Text);

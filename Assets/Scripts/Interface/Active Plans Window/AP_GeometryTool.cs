@@ -110,22 +110,22 @@ namespace MSP2050.Scripts
 			//TODO CHECK: assumes the window always closes between layer edits (&OnDisable is called), check this
 
 			//Clear and recreate layer types
-			m_multiType = a_layer.BaseLayer.MultiTypeSelect;
+			m_multiType = a_layer.BaseLayer.m_multiTypeSelect;
 			m_layerTypeToggleGroup.allowSwitchOff = m_multiType;
 			ClearLayerTypes();
-			foreach (KeyValuePair<int, EntityType> kvp in a_layer.BaseLayer.EntityTypes)
+			foreach (KeyValuePair<int, EntityType> kvp in a_layer.BaseLayer.m_entityTypes)
 				CreateLayerType(kvp.Value, kvp.Value.availabilityDate <= a_layer.Plan.StartTime);
 			CreateMultipleLayerType();
 			SetNoEntityTypesSelected();
 
 			//Clear and recreate parameters
 			ClearParameters();
-			if (a_layer.BaseLayer.propertyMetaData == null || a_layer.BaseLayer.propertyMetaData.Count == 0)
+			if (a_layer.BaseLayer.m_propertyMetaData == null || a_layer.BaseLayer.m_propertyMetaData.Count == 0)
 				SetParameterSectionActive(false);
 			else
 			{
 				bool activeParamsOnLayer = false;
-				foreach (EntityPropertyMetaData param in a_layer.BaseLayer.propertyMetaData)
+				foreach (EntityPropertyMetaData param in a_layer.BaseLayer.m_propertyMetaData)
 					if (param.ShowInEditMode)
 					{
 						CreateParameter(param);

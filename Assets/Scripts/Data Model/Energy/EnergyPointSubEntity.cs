@@ -7,70 +7,83 @@ namespace MSP2050.Scripts
 {
 	public class EnergyPointSubEntity : PointSubEntity, IEnergyDataHolder
 	{
-		public List<Connection> connections { get; private set; }
-		public EnergyPolygonSubEntity sourcePolygon;
-		public int gridID; //Only used if we are a socket or source
-		long usedCapacity;
-		EnergyGrid lastRunGrid;
-		EnergyGrid currentGrid;
-
-		public EnergyPointSubEntity(Entity entity, Vector3 position, EnergyPolygonSubEntity sourcepoly) : base(entity, position)
+		public List<Connection> Connections { get; private set; }
+		public EnergyPolygonSubEntity m_sourcePolygon;
+		public int m_gridID; //Only used if we are a socket or source
+		
+		public long Capacity
 		{
-			connections = new List<Connection>();
-			sourcePolygon = sourcepoly;
+			get
+			{
+				if (m_sourcePolygon != null)
+					return m_sourcePolygon.Capacity;
+				return m_entity.EntityTypes[0].capacity;
+			}
+			set { }
 		}
 
-		public EnergyPointSubEntity(Entity entity, SubEntityObject geometry, int databaseID) : base(entity, geometry, databaseID)
-		{
-			if (Entity.Layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
-			connections = new List<Connection>();
+		public long UsedCapacity {
+			get;
+			set;
 		}
 
-		public override void SetDatabaseID(int databaseID)
+		public EnergyGrid LastRunGrid {
+			get;
+			set;
+		}
+
+		public EnergyGrid CurrentGrid {
+			get;
+			set;
+		}		
+
+		public EnergyPointSubEntity(Entity a_entity, Vector3 a_position, EnergyPolygonSubEntity a_sourcepoly) : base(a_entity, a_position)
 		{
-			if (Entity.Layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(databaseID);
-			this.databaseID = databaseID;
-			if (Entity.Layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
+			Connections = new List<Connection>();
+			m_sourcePolygon = a_sourcepoly;
+		}
+
+		public EnergyPointSubEntity(Entity a_entity, SubEntityObject a_geometry, int a_databaseID) : base(a_entity, a_geometry, a_databaseID)
+		{
+			if (m_entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
+			Connections = new List<Connection>();
+		}
+
+		protected override void SetDatabaseID(int a_databaseID)
+		{
+			if (m_entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+				PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(a_databaseID);
+			m_databaseID = a_databaseID;
+			if (m_entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
 		}
 
 		/// <summary>
 		/// Called on points being placed to check if they can be connected to a certain endpoint
 		/// </summary>
-		public bool CanConnectToEnergySubEntity(EnergyPointSubEntity cableOrigin)
+		public bool CanConnectToEnergySubEntity(EnergyPointSubEntity a_cableOrigin)
 		{
 			//Sources can't connect to sources
-			if ((Entity.Layer.editingType == AbstractLayer.EditingType.SourcePoint || Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint) &&
-			    (cableOrigin.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePoint || cableOrigin.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint))
+			if ((m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePoint || m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint) &&
+			    (a_cableOrigin.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePoint || a_cableOrigin.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint))
 				return false;
 
 			//Points cannot connect to themselves
-			if (cableOrigin == this)
+			if (a_cableOrigin == this)
 				return false;
 
 			//Green energy can't connect to grey
-			if (Entity.GreenEnergy != cableOrigin.Entity.GreenEnergy)
-				return false;
-
-			return true;
+			return m_entity.GreenEnergy == a_cableOrigin.m_entity.GreenEnergy;
 		}
 
 		/// <summary>
 		/// Called on points to see if they can serve as the start point for a cable
 		/// </summary>
-		public bool CanCableStartAtSubEntity(bool greenCable)
+		public bool CanCableStartAtSubEntity(bool a_greenCable)
 		{
-			//Sockets and generators can only have 1 connection
-			//if ((Entity.Layer.editingType == AbstractLayer.EditingType.Socket || Entity.Layer.editingType == AbstractLayer.EditingType.SourcePoint || Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint) && connections.Count > 0)
-			//    return false;
-
 			//Green cables cant connect to grey energy and vice versa
-			if (Entity.GreenEnergy != greenCable)
-				return false;
-
-			return true;
+			return m_entity.GreenEnergy == a_greenCable;
 		}
 
 		public override void RemoveDependencies()
@@ -78,116 +91,77 @@ namespace MSP2050.Scripts
 			ClearConnections();
 		}
 
-		public void RemoveConnection(Connection con)
+		public void RemoveConnection(Connection a_con)
 		{
-			connections.Remove(con);
+			Connections.Remove(a_con);
 		}
 
-		public void AddConnection(Connection newCon)
+		public void AddConnection(Connection a_newCon)
 		{
 			//Make sure we dont add connections multiple times
-			foreach (Connection con in connections)
-				if (con.cable == newCon.cable)
+			foreach (Connection con in Connections)
+				if (con.cable == a_newCon.cable)
 				{
 					//Debug.LogWarning("Duplicate connections added to point");
 					return;
 				}
 
-			connections.Add(newCon);
+			Connections.Add(a_newCon);
 		}
 
 		public override void ClearConnections()
 		{
-			connections = new List<Connection>();
+			Connections = new List<Connection>();
 		}
 
 		public override void RestoreDependencies()
 		{
-			if (Entity.Layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(databaseID, this);
+			if (m_entity.Layer.m_editingType != AbstractLayer.EditingType.SourcePolygonPoint)
+				PolicyLogicEnergy.Instance.AddEnergySubEntityReference(m_databaseID, this);
 		}
 
 		public override int GetDatabaseID()
 		{
-			if (Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
-				return sourcePolygon.GetDatabaseID();
+			if (m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+				return m_sourcePolygon.GetDatabaseID();
 			return base.GetDatabaseID();
 		}
 
 		public override string GetDataBaseOrBatchIDReference()
 		{
-			if (Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+			if (m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 			{
-				return sourcePolygon.GetDataBaseOrBatchIDReference();
-				//if (sourcePolygon.HasDatabaseID())
-				//	return sourcePolygon.GetDatabaseID().ToString();
-				//else
-				//	return BatchRequest.FormatCallIDReference(sourcePolygon.Entity.creationBatchCallID);
+				return m_sourcePolygon.GetDataBaseOrBatchIDReference();
 			}
 			return base.GetDataBaseOrBatchIDReference();
 		}
 
 		public override int GetPersistentID()
 		{
-			if (Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
-				return sourcePolygon.GetPersistentID();
+			if (m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
+				return m_sourcePolygon.GetPersistentID();
 			return base.GetPersistentID();
 		}
 
-		//public override Action<BatchRequest> SubmitNew(BatchRequest batch)
-		//{
-		//	base.SubmitNew(batch);
-		//}
-
-		public override Action<BatchRequest> SubmitDelete(BatchRequest batch)
+		public override Action<BatchRequest> SubmitDelete(BatchRequest a_batch)
 		{
 			// Delete energy_output
 			JObject dataObject = new JObject();
-			dataObject.Add("id", databaseID);
-			batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
-			return base.SubmitDelete(batch);
+			dataObject.Add("id", m_databaseID);
+			a_batch.AddRequest(Server.DeleteEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
+			return base.SubmitDelete(a_batch);
 		}
-	
-		public override void SubmitData(BatchRequest batch)
+
+		protected override void SubmitData(BatchRequest a_batch)
 		{
-			base.SubmitData(batch);
+			base.SubmitData(a_batch);
 
 			//Set energy_output
 			JObject dataObject = new JObject();
 			dataObject.Add("id", GetDataBaseOrBatchIDReference());
 			dataObject.Add("capacity", 0);
 			dataObject.Add("maxcapacity", Capacity.ToString());
-			batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
-		}
-
-		public long Capacity
-		{
-			get
-			{
-				if (sourcePolygon != null)
-					return sourcePolygon.Capacity;
-				return Entity.EntityTypes[0].capacity;
-			}
-			set { }
-		}
-
-		public long UsedCapacity
-		{
-			get { return usedCapacity; }
-			set { usedCapacity = value; }
-		}
-
-		public EnergyGrid LastRunGrid
-		{
-			get{ return lastRunGrid; }
-			set{ lastRunGrid = value; }
-		}
-
-		public EnergyGrid CurrentGrid
-		{
-			get{ return currentGrid; }
-			set{ currentGrid = value; }
+			a_batch.AddRequest(Server.SetEnergyOutput(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DATA);
 		}
 	}
 }
-

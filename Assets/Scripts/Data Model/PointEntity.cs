@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 	{
 		List<PointSubEntity> pointSubEntities;
 
-		public PointEntity(PointLayer layer, PlanLayer planLayer, Vector3 point, List<EntityType> entityType, EnergyPolygonSubEntity sourcepoly) : base(layer, entityType, sourcepoly == null ? planLayer.Plan.Country : sourcepoly.Entity.Country)
+		public PointEntity(PointLayer layer, PlanLayer planLayer, Vector3 point, List<EntityType> entityType, EnergyPolygonSubEntity sourcepoly) : base(layer, entityType, sourcepoly == null ? planLayer.Plan.Country : sourcepoly.m_entity.Country)
 		{
 			PlanLayer = planLayer;
 			if (layer.IsEnergyPointLayer())

@@ -5,107 +5,95 @@ namespace MSP2050.Scripts
 {
 	public class LineStringLayer : Layer<LineStringEntity>
 	{
-		public LineStringLayer(LayerMeta layerMeta, List<SubEntityObject> layerObjects) : base(layerMeta)
+		public LineStringLayer(LayerMeta a_layerMeta, List<SubEntityObject> a_layerObjects) : base(a_layerMeta)
 		{
-			LoadLayerObjects(layerObjects);
-			presetProperties.Add("Length", (subent) =>
+			LoadLayerObjects(a_layerObjects);
+			m_presetProperties.Add("Length", (a_subent) =>
 			{
-				LineStringSubEntity lineEntity = (LineStringSubEntity)subent;
+				LineStringSubEntity lineEntity = (LineStringSubEntity)a_subent;
 				return lineEntity.LineLengthKm.ToString("0.00") + " km";
 			});
 		}
 
-		public override void LoadLayerObjects(List<SubEntityObject> layerObjects)
+		public override void LoadLayerObjects(List<SubEntityObject> a_layerObjects)
 		{
-			base.LoadLayerObjects(layerObjects);
+			base.LoadLayerObjects(a_layerObjects);
 
-			if (layerObjects != null)
+			if (a_layerObjects == null)
+				return;
+			foreach (SubEntityObject layerObject in a_layerObjects)
 			{
-				foreach (SubEntityObject layerObject in layerObjects)
-				{
-					LineStringEntity ent = (LineStringEntity)CreateEntity(layerObject);
-					Entities.Add(ent);
-					initialEntities.Add(ent);
-				}
+				LineStringEntity ent = (LineStringEntity)CreateEntity(layerObject);
+				Entities.Add(ent);
+				InitialEntities.Add(ent);
 			}
 		}
 
-		public LineStringEntity CreateNewLineStringEntity(Vector3 initialPoint, List<EntityType> entityType, PlanLayer planLayer)
+		public LineStringEntity CreateNewLineStringEntity(Vector3 a_initialPoint, List<EntityType> a_entityType, PlanLayer a_planLayer)
 		{
-			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(planLayer, entityType);
+			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(a_planLayer, a_entityType);
 			LineStringSubEntity subEntity = new LineStringSubEntity(lineStringEntity);
 			if (SessionManager.Instance.AreWeGameMaster)
 				lineStringEntity.Country = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SelectedTeam;
 			lineStringEntity.AddSubEntity(subEntity);
-			subEntity.AddPoint(initialPoint);
-			subEntity.AddPoint(initialPoint);
-			planLayer.AddNewGeometry(lineStringEntity);
+			subEntity.AddPoint(a_initialPoint);
+			subEntity.AddPoint(a_initialPoint);
+			a_planLayer.AddNewGeometry(lineStringEntity);
 			return lineStringEntity;
 		}
 
-		public LineStringEntity CreateNewEnergyLineStringEntity(Vector3 initialPoint, List<EntityType> entityType, EnergyPointSubEntity origin, PlanLayer planLayer)
+		public LineStringEntity CreateNewEnergyLineStringEntity(Vector3 a_initialPoint, List<EntityType> a_entityType, EnergyPointSubEntity a_origin, PlanLayer a_planLayer)
 		{
-			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(planLayer, entityType);
+			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(a_planLayer, a_entityType);
 			EnergyLineStringSubEntity subEntity = new EnergyLineStringSubEntity(lineStringEntity);
 			if (SessionManager.Instance.AreWeGameMaster)
 				lineStringEntity.Country = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SelectedTeam;
 			lineStringEntity.AddSubEntity(subEntity);
-			subEntity.AddPoint(initialPoint);
+			subEntity.AddPoint(a_initialPoint);
 
 			//Second point that is being edited
-			subEntity.AddPoint(initialPoint);
+			subEntity.AddPoint(a_initialPoint);
 
 			//Connection from and to origin
-			Connection con = new Connection(subEntity, origin, true);
+			Connection con = new Connection(subEntity, a_origin, true);
 			subEntity.AddConnection(con);
-			origin.AddConnection(con);
-			planLayer.AddNewGeometry(lineStringEntity);
+			a_origin.AddConnection(con);
+			a_planLayer.AddNewGeometry(lineStringEntity);
 			return lineStringEntity;
 		}
 
-		public LineStringEntity CreateNewLineStringEntity(List<EntityType> entityType, PlanLayer planLayer)
+		public LineStringEntity CreateNewLineStringEntity(List<EntityType> a_entityType, PlanLayer a_planLayer)
 		{
-			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(planLayer, entityType);
-			planLayer.AddNewGeometry(lineStringEntity);
+			LineStringEntity lineStringEntity = (LineStringEntity)CreateEntity(a_planLayer, a_entityType);
+			a_planLayer.AddNewGeometry(lineStringEntity);
 			return lineStringEntity;
 		}
 
-		public override Entity CreateEntity(SubEntityObject obj)
+		public override Entity CreateEntity(SubEntityObject a_obj)
 		{
-			return new LineStringEntity(this, obj);
+			return new LineStringEntity(this, a_obj);
 		}
 
-		public virtual Entity CreateEntity(PlanLayer planLayer, List<EntityType> entityType)
+		protected virtual Entity CreateEntity(PlanLayer a_planLayer, List<EntityType> a_entityType)
 		{
-			return new LineStringEntity(this, planLayer, entityType);
+			return new LineStringEntity(this, a_planLayer, a_entityType);
 		}
 
-		public HashSet<LineStringEntity> GetEntitiesInBox(Vector2 boxCornerA, Vector2 boxCornerB)
+		public HashSet<LineStringSubEntity> GetSubEntitiesInBox(Vector2 a_boxCornerA, Vector2 a_boxCornerB)
 		{
-			HashSet<LineStringSubEntity> subEntities = GetSubEntitiesInBox(boxCornerA, boxCornerB);
-			HashSet<LineStringEntity> result = new HashSet<LineStringEntity>();
-			foreach (LineStringSubEntity subEntity in subEntities)
-			{
-				result.Add(subEntity.Entity as LineStringEntity);
-			}
-			return result;
-		}
-
-		public HashSet<LineStringSubEntity> GetSubEntitiesInBox(Vector2 boxCornerA, Vector2 boxCornerB)
-		{
-			Vector2 min = Vector2.Min(boxCornerA, boxCornerB);
-			Vector2 max = Vector2.Max(boxCornerA, boxCornerB);
+			Vector2 min = Vector2.Min(a_boxCornerA, a_boxCornerB);
+			Vector2 max = Vector2.Max(a_boxCornerA, a_boxCornerB);
 
 			Rect boxBounds = new Rect(min, max - min);
 
 			List<LineStringSubEntity> collisions = new List<LineStringSubEntity>();
 
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
 				{
-					if (!subEntity.IsPlannedForRemoval() && boxBounds.Overlaps(subEntity.BoundingBox))
+					if (!subEntity.IsPlannedForRemoval() && boxBounds.Overlaps(subEntity.m_boundingBox))
 					{
 						collisions.Add(subEntity);
 					}
@@ -127,27 +115,27 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public override Entity GetEntityAt(Vector2 position)
+		public override Entity GetEntityAt(Vector2 a_position)
 		{
-			SubEntity subEntity = GetSubEntityAt(position);
-			return (subEntity != null) ? subEntity.Entity : null;
+			SubEntity subEntity = GetSubEntityAt(a_position);
+			return subEntity?.m_entity;
 		}
 
-		public override SubEntity GetSubEntityAt(Vector2 position)
+		public override SubEntity GetSubEntityAt(Vector2 a_position)
 		{
 			SubEntity result = null;
 			float closestDistance = float.MaxValue;
 
 			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
-			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
+			Rect positionBounds = new Rect(a_position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
-					if (subEntity.planState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.BoundingBox))
+					if (subEntity.PlanState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.m_boundingBox))
 					{
-						float dist = subEntity.DistanceToPoint(position);
+						float dist = subEntity.DistanceToPoint(a_position);
 						if (dist < closestDistance)
 						{
 							result = subEntity;
@@ -157,26 +145,23 @@ namespace MSP2050.Scripts
 			}
 
 			//None found close enough
-			if (closestDistance > maxDistance)
-				return null;
-
-			return result;
+			return closestDistance > maxDistance ? null : result;
 		}
 
-		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)
+		public override List<SubEntity> GetSubEntitiesAt(Vector2 a_position)
 		{
 			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 
-			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
+			Rect positionBounds = new Rect(a_position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
 			List<LineStringSubEntity> collisions = new List<LineStringSubEntity>();
 
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
 				{
-					if (subEntity.planState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.BoundingBox))
+					if (subEntity.PlanState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.m_boundingBox))
 					{
 						collisions.Add(subEntity);
 					}
@@ -188,7 +173,7 @@ namespace MSP2050.Scripts
 			List<SubEntity> result = new List<SubEntity>();
 			foreach (LineStringSubEntity collision in collisions)
 			{
-				if (collision.CollidesWithPoint(position, maxDistance))
+				if (collision.CollidesWithPoint(a_position, maxDistance))
 				{
 					result.Add(collision);
 				}
@@ -200,7 +185,7 @@ namespace MSP2050.Scripts
 		public List<LineStringSubEntity> GetAllSubEntities()
 		{
 			List<LineStringSubEntity> subEntities = new List<LineStringSubEntity>();
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				foreach (LineStringSubEntity subent in entity.GetSubEntities())
 					if (!subent.IsPlannedForRemoval())
@@ -209,37 +194,22 @@ namespace MSP2050.Scripts
 			return subEntities;
 		}
 
-		public override void UpdateScale(Camera targetCamera)
+		public override void UpdateScale(Camera a_targetCamera)
 		{
-			foreach (LineStringEntity entity in activeEntities)
+			foreach (LineStringEntity entity in m_activeEntities)
 			{
 				List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 
 				foreach (LineStringSubEntity subEntity in subEntities)
 				{
-					subEntity.UpdateScale(targetCamera);
+					subEntity.UpdateScale(a_targetCamera);
 				}
 			}
 		}
 
-		public override  LayerManager.GeoType GetGeoType()
+		public override  LayerManager.EGeoType GetGeoType()
 		{
-			return  LayerManager.GeoType.line;
+			return  LayerManager.EGeoType.Line;
 		}
-
-		#region Legacy Stuff
-		//public override void MoveAllGeometryTo(Layer destination, int entityTypeOffset)
-		//{
-		//    if (!(destination is LineStringLayer)) { Debug.LogError("destination is not a linestring layer"); return; }
-		//    LineStringLayer dst = destination as LineStringLayer;
-
-		//    foreach (LineStringEntity entity in LineStringEntities)
-		//    {
-		//        dst.LineStringEntities.Add(entity);
-		//        entity.MovedToLayer(destination, entity.GetEntityTypeKeys()[0] + entityTypeOffset);
-		//    }
-		//    LineStringEntities.Clear();
-		//}
-		#endregion
 	}
 }

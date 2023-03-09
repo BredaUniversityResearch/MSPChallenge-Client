@@ -5,56 +5,56 @@ namespace MSP2050.Scripts
 {
 	public class EnergyPolygonLayer : PolygonLayer
 	{
-		public PointLayer centerPointLayer;
+		public PointLayer m_centerPointLayer;
 
-		public EnergyPolygonLayer(LayerMeta layerMeta, List<SubEntityObject> layerObjects) : base(layerMeta, layerObjects)
+		public EnergyPolygonLayer(LayerMeta a_layerMeta, List<SubEntityObject> a_layerObjects) : base(a_layerMeta, a_layerObjects)
 		{
 		}
 
 		public override void Initialise()
 		{
 			//Create new point layer thats only used for centerpoints
-			LayerMeta meta = new LayerMeta();
-			meta.layer_name = "CenterPointLayer_For_" + ShortName;
-			centerPointLayer = new PointLayer(meta, new List<SubEntityObject>(), this);
-			centerPointLayer.EntityTypes.Add(0, new EntityType());
-			centerPointLayer.editingType = EditingType.SourcePolygonPoint;
-			centerPointLayer.greenEnergy = greenEnergy;
-			PolicyLogicEnergy.Instance.AddEnergyPointLayer(centerPointLayer);
-			centerPointLayer.DrawGameObject();
+			LayerMeta meta = new LayerMeta {
+				layer_name = "CenterPointLayer_For_" + ShortName
+			};
+			m_centerPointLayer = new PointLayer(meta, new List<SubEntityObject>(), this);
+			m_centerPointLayer.m_entityTypes.Add(0, new EntityType());
+			m_centerPointLayer.m_editingType = EditingType.SourcePolygonPoint;
+			m_centerPointLayer.m_greenEnergy = m_greenEnergy;
+			PolicyLogicEnergy.Instance.AddEnergyPointLayer(m_centerPointLayer);
+			m_centerPointLayer.DrawGameObject();
 		}
 
 		public override void LayerShown()
 		{
-			centerPointLayer.LayerGameObject.SetActive(true);
-			centerPointLayer.LayerShown();
+			m_centerPointLayer.LayerGameObject.SetActive(true);
+			m_centerPointLayer.LayerShown();
 		}
 
 		public override void LayerHidden()
 		{
-			centerPointLayer.LayerGameObject.SetActive(false);
-			centerPointLayer.LayerHidden();
+			m_centerPointLayer.LayerGameObject.SetActive(false);
+			m_centerPointLayer.LayerHidden();
 		}
 
-		public override void UpdateScale(Camera targetCamera)
+		public override void UpdateScale(Camera a_targetCamera)
 		{
-			base.UpdateScale(targetCamera);
-			centerPointLayer.UpdateScale(targetCamera);
+			base.UpdateScale(a_targetCamera);
+			m_centerPointLayer.UpdateScale(a_targetCamera);
 		}
 
-		public override void SetEntitiesActiveUpTo(int index, bool showRemovedInLatestPlan = true, bool showCurrentIfNotInfluencing = true)
+		public override void SetEntitiesActiveUpTo(int a_index, bool a_showRemovedInLatestPlan = true, bool a_showCurrentIfNotInfluencing = true)
 		{
-			centerPointLayer.activeEntities.Clear();
+			m_centerPointLayer.m_activeEntities.Clear();
 
-			base.SetEntitiesActiveUpTo(index, showRemovedInLatestPlan, showCurrentIfNotInfluencing);
+			base.SetEntitiesActiveUpTo(a_index, a_showRemovedInLatestPlan, a_showCurrentIfNotInfluencing);
 
-			foreach (PolygonEntity entity in activeEntities)
-			foreach (PolygonSubEntity subent in entity.GetSubEntities())
-				centerPointLayer.activeEntities.Add((subent as EnergyPolygonSubEntity).sourcePoint.Entity as PointEntity);
+			foreach (PolygonEntity entity in m_activeEntities)
+				foreach (PolygonSubEntity subent in entity.GetSubEntities())
+					m_centerPointLayer.m_activeEntities.Add((subent as EnergyPolygonSubEntity).m_sourcePoint.m_entity as PointEntity);
 
-			foreach (PointEntity ent in centerPointLayer.Entities)
+			foreach (PointEntity ent in m_centerPointLayer.Entities)
 				ent.RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
 	}
 }
-

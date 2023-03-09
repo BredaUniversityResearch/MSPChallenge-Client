@@ -6,109 +6,108 @@ namespace MSP2050.Scripts
 {
 	class EditEnergyLineStringsState : EditLineStringsState
 	{
-		public EditEnergyLineStringsState(FSM fsm, PlanLayer planLayer, HashSet<LineStringSubEntity> selectedSubEntities) : base(fsm, planLayer, selectedSubEntities)
+		public EditEnergyLineStringsState(FSM a_fsm, PlanLayer a_planLayer, HashSet<LineStringSubEntity> a_selectedSubEntities) : base(a_fsm, a_planLayer, a_selectedSubEntities)
 		{
 		}
 
-		protected override void deleteSelection()
+		protected override void DeleteSelection()
 		{
-			if (selectedPoints.Count == 0)
+			if (m_selectedPoints.Count == 0)
 			{
-				fsm.AddToUndoStack(new BatchUndoOperationMarker());
+				m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
 				//Delete all selected
-				foreach (LineStringSubEntity subEntity in selectedSubEntities)
+				foreach (LineStringSubEntity subEntity in m_selectedSubEntities)
 				{
-					if (subEntity.Entity.PlanLayer == planLayer)
+					if (subEntity.m_entity.PlanLayer == m_planLayer)
 					{
 						EnergyLineStringSubEntity energySubEntity = subEntity as EnergyLineStringSubEntity;
 
-						fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(energySubEntity, planLayer, UndoOperation.EditMode.Modify));
-						baseLayer.RemoveSubEntity(energySubEntity);
+						m_fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(energySubEntity, m_planLayer, UndoOperation.EditMode.Modify));
+						m_baseLayer.RemoveSubEntity(energySubEntity);
 						subEntity.RemoveGameObject();
 					}
 					else
 					{
-						fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, planLayer, planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
-						baseLayer.RemoveSubEntity(subEntity);
+						m_fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, m_planLayer, m_planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
+						m_baseLayer.RemoveSubEntity(subEntity);
 						subEntity.RedrawGameObject();
 					}
 				}
 
-				fsm.AddToUndoStack(new BatchUndoOperationMarker());
+				m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 			}
 			else
 			{
 				//Delete selected points
-				List<LineStringSubEntity> selectedPointsKeys = new List<LineStringSubEntity>(selectedPoints.Keys);
+				List<LineStringSubEntity> selectedPointsKeys = new List<LineStringSubEntity>(m_selectedPoints.Keys);
 				foreach (LineStringSubEntity subEntity in selectedPointsKeys)
 				{
-					bool firstOrLast = (subEntity as EnergyLineStringSubEntity).AreFirstOrLastPoints(selectedPoints[subEntity]);
-					if (subEntity.GetPointCount() - selectedPoints[subEntity].Count < 2 || firstOrLast)
+					bool firstOrLast = (subEntity as EnergyLineStringSubEntity).AreFirstOrLastPoints(m_selectedPoints[subEntity]);
+					if (subEntity.GetPointCount() - m_selectedPoints[subEntity].Count < 2 || firstOrLast)
 					{
-						if (firstOrLast && draggingSelection)
-							fsm.AddToUndoStack(new ConcatOperationMarker()); //Make sure the point is also moved back if we were dragging it
-						fsm.AddToUndoStack(new BatchUndoOperationMarker());
+						if (firstOrLast && m_draggingSelection)
+							m_fsm.AddToUndoStack(new ConcatOperationMarker()); //Make sure the point is also moved back if we were dragging it
+						m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
-						if (subEntity.Entity.PlanLayer == planLayer)
+						if (subEntity.m_entity.PlanLayer == m_planLayer)
 						{
 							EnergyLineStringSubEntity energySubEntity = subEntity as EnergyLineStringSubEntity;
 
-							fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(energySubEntity, planLayer, UndoOperation.EditMode.Modify));
-							baseLayer.RemoveSubEntity(energySubEntity);
+							m_fsm.AddToUndoStack(new RemoveEnergyLineStringOperation(energySubEntity, m_planLayer, UndoOperation.EditMode.Modify));
+							m_baseLayer.RemoveSubEntity(energySubEntity);
 							subEntity.RemoveGameObject();
 						}
 						else
 						{
-							fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, planLayer, planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
-							baseLayer.RemoveSubEntity(subEntity);
+							m_fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, m_planLayer, m_planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
+							m_baseLayer.RemoveSubEntity(subEntity);
 							subEntity.RedrawGameObject();
 						}
 
-						selectedSubEntities.Remove(subEntity);
+						m_selectedSubEntities.Remove(subEntity);
 						subEntity.SetInFrontOfLayer(false);
-						fsm.AddToUndoStack(new BatchUndoOperationMarker());
+						m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 					}
 					else
 					{
-						fsm.AddToUndoStack(new BatchUndoOperationMarker());
-						LineStringSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
+						m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+						LineStringSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
 
-						subEntityToModify.RemovePoints(selectedPoints[subEntityToModify]);
+						subEntityToModify.RemovePoints(m_selectedPoints[subEntityToModify]);
 
 						subEntityToModify.RedrawGameObject();
-						fsm.AddToUndoStack(new BatchUndoOperationMarker());
+						m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 					}
 				}
 			}
 
-			fsm.SetCurrentState(new SelectLineStringsState(fsm, planLayer));
+			m_fsm.SetCurrentState(new SelectLineStringsState(m_fsm, m_planLayer));
 		}
 
-		public override void DoubleClick(Vector3 position)
+		public override void DoubleClick(Vector3 a_position)
 		{
-			LineStringSubEntity clickedSubEntity = getSubEntityFromSelection(position, selectedSubEntities);
-			if (clickedSubEntity != null)
+			LineStringSubEntity clickedSubEntity = GetSubEntityFromSelection(a_position, m_selectedSubEntities);
+			if (clickedSubEntity == null)
+				return;
+			HashSet<int> allPoints = new HashSet<int>();
+			//Ignores first and last point
+			for (int i = 1; i < clickedSubEntity.GetPointCount() -1; ++i)
 			{
-				HashSet<int> allPoints = new HashSet<int>();
-				//Ignores first and last point
-				for (int i = 1; i < clickedSubEntity.GetPointCount() -1; ++i)
-				{
-					allPoints.Add(i);
-				}
-				Dictionary<LineStringSubEntity, HashSet<int>> newSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
-				newSelection.Add(clickedSubEntity, allPoints);
-				selectPoints(newSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+				allPoints.Add(i);
 			}
+			Dictionary<LineStringSubEntity, HashSet<int>> newSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
+			newSelection.Add(clickedSubEntity, allPoints);
+			SelectPoints(newSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 		}
 
-		protected override void UpdateSelectionDragPositions(Vector3 offset)
+		protected override void UpdateSelectionDragPositions(Vector3 a_offset)
 		{
-			foreach (var kvp in selectedPoints)
+			foreach (var kvp in m_selectedPoints)
 			{
 				if (kvp.Key.AreOnlyFirstOrLastPoint(kvp.Value))
 				{
-					Vector3 newPosition = selectionDragStart[kvp.Key][kvp.Value.First()] + offset;
+					Vector3 newPosition = m_selectionDragStart[kvp.Key][kvp.Value.First()] + a_offset;
 					EnergyLineStringSubEntity energySubEntity = kvp.Key as EnergyLineStringSubEntity;
 					bool first = kvp.Value.First() == 0;
 					EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(newPosition);
@@ -116,54 +115,53 @@ namespace MSP2050.Scripts
 					{
 						//Snap to point
 						energySubEntity.SetPointPosition(kvp.Value.First(), point.GetPosition());
-						energySubEntity.restrictionNeedsUpdate = true;
+						energySubEntity.m_restrictionNeedsUpdate = true;
 						if (!point.CanConnectToEnergySubEntity(energySubEntity.GetConnection(!first).point))
 						{
 							//Redraw with red color
 							energySubEntity.RedrawGameObject(SubEntityDrawMode.Invalid, kvp.Value, null);
-							fsm.SetCursor(FSM.CursorType.Invalid);
+							m_fsm.SetCursor(FSM.CursorType.Invalid);
 						}
 						else
 						{
 							energySubEntity.RedrawGameObject(SubEntityDrawMode.Selected, kvp.Value, null);
-							fsm.SetCursor(FSM.CursorType.Default);
+							m_fsm.SetCursor(FSM.CursorType.Default);
 						}
 					}
 					else
-						base.UpdateSelectionDragPositions(offset);
+						base.UpdateSelectionDragPositions(a_offset);
 					return;
 				}
-				else
-					base.UpdateSelectionDragPositions(offset);
+				base.UpdateSelectionDragPositions(a_offset);
 				return;
 			}
 		}
 
-		public override void StartedDragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		public override void StartedDragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			base.StartedDragging(dragStartPosition, currentPosition);
-			if (draggingSelection)
+			base.StartedDragging(a_dragStartPosition, a_currentPosition);
+			if (m_draggingSelection)
 			{
-				foreach (var kvp in selectedPoints)
+				foreach (var kvp in m_selectedPoints)
 				{
 					//If we are dragging endpoints, update nonreference layers
 					if (kvp.Key.AreFirstOrLastPoints(kvp.Value))
 					{
 						foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 						{
-							if (layer.greenEnergy == kvp.Key.Entity.Layer.greenEnergy)
+							if (layer.m_greenEnergy == kvp.Key.m_entity.Layer.m_greenEnergy)
 							{
-								if (layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+								if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 								{
 									//Get and add the centerpoint layer
 									EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;
-									LayerManager.Instance.AddNonReferenceLayer(polyLayer.centerPointLayer, false);
-									foreach (Entity entity in polyLayer.centerPointLayer.activeEntities)
+									LayerManager.Instance.AddNonReferenceLayer(polyLayer.m_centerPointLayer, false);
+									foreach (Entity entity in polyLayer.m_centerPointLayer.m_activeEntities)
 										entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
 								}
-								else if (layer.editingType == AbstractLayer.EditingType.SourcePoint ||
-										 layer.editingType == AbstractLayer.EditingType.Socket ||
-										 layer.editingType == AbstractLayer.EditingType.Transformer)
+								else if (layer.m_editingType == AbstractLayer.EditingType.SourcePoint ||
+										 layer.m_editingType == AbstractLayer.EditingType.Socket ||
+										 layer.m_editingType == AbstractLayer.EditingType.Transformer)
 								{
 									LayerManager.Instance.AddNonReferenceLayer(layer, true);
 								}
@@ -174,17 +172,17 @@ namespace MSP2050.Scripts
 
 				}
 			}
-		}
-
-		public override void StoppedDragging(Vector3 dragStartPosition, Vector3 dragFinalPosition)
+		}		
+		
+		public override void StoppedDragging(Vector3 a_dragStartPosition, Vector3 a_dragFinalPosition)
 		{
-			if (draggingSelection)
+			if (m_draggingSelection)
 			{
 				AudioMain.Instance.PlaySound(AudioMain.ITEM_MOVED);
-				draggingSelection = false;
+				m_draggingSelection = false;
 
 				//Handle start and endpoint movement if those were selected
-				foreach (var kvp in selectedPoints)
+				foreach (var kvp in m_selectedPoints)
 					if (kvp.Key.AreFirstOrLastPoints(kvp.Value))
 					{
 						//Unset non-reference layers
@@ -196,9 +194,9 @@ namespace MSP2050.Scripts
 
 						foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 						{
-							if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy && layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+							if (layer.m_greenEnergy == m_planLayer.BaseLayer.m_greenEnergy && layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 							{
-								foreach (Entity entity in ((EnergyPolygonLayer)layer).centerPointLayer.activeEntities)
+								foreach (Entity entity in ((EnergyPolygonLayer)layer).m_centerPointLayer.m_activeEntities)
 								{
 									entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
 								}
@@ -207,14 +205,13 @@ namespace MSP2050.Scripts
 
 						EnergyLineStringSubEntity energySubEntity = kvp.Key as EnergyLineStringSubEntity;
 						bool first = kvp.Value.First() == 0;
-						EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(dragFinalPosition);
+						EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(a_dragFinalPosition);
 						if (point == null || !point.CanConnectToEnergySubEntity(energySubEntity.GetConnection(!first).point))
 						{
 							//Snap back to original position
 							//If this causes problems, the following line might be more appropriate
-							//energySubEntity.SetPointPosition(kvp.Value.First(), energySubEntity.GetConnection(first).point.GetPosition());
-							fsm.undo(false); //Undo the duplication or modified undo state, don't add it to redo
-							fsm.UpdateUndoRedoButtonEnabled(); 
+							m_fsm.Undo(false); //Undo the duplication or modified undo state, don't add it to redo
+							m_fsm.UpdateUndoRedoButtonEnabled(); 
 							return;
 						}
 						//Connect to new point
@@ -229,57 +226,56 @@ namespace MSP2050.Scripts
 						point.AddConnection(newConn);
 
 						//Remove the last batch marker and add the changed connection to it
-						fsm.AddToUndoStack(new ConcatOperationMarker());
-						fsm.AddToUndoStack(new ChangeConnectionOperation(energySubEntity, oldConn, newConn));
+						m_fsm.AddToUndoStack(new ConcatOperationMarker());
+						m_fsm.AddToUndoStack(new ChangeConnectionOperation(energySubEntity, oldConn, newConn));
                     
 						return;
 					}
 
 				//Handle other point drag
-				UpdateSelectionDragPositions(dragFinalPosition - dragStartPosition);
+				UpdateSelectionDragPositions(a_dragFinalPosition - a_dragStartPosition);
 			}
-			else if (selectingBox)
+			else if (m_selectingBox)
 			{
-				UpdateBoxSelection(dragStartPosition, dragFinalPosition);
+				UpdateBoxSelection(a_dragStartPosition, a_dragFinalPosition);
 
-				selectPoints(currentBoxSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+				SelectPoints(m_currentBoxSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 
 				BoxSelect.HideBoxSelection();
-				selectingBox = false;
-				currentBoxSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
+				m_selectingBox = false;
+				m_currentBoxSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
 			}
 		}
 
-		protected override LineStringSubEntity startModifyingSubEntity(LineStringSubEntity subEntity, bool insideUndoBatch)
+		protected override LineStringSubEntity StartModifyingSubEntity(LineStringSubEntity a_subEntity, bool a_insideUndoBatch)
 		{
-			if (planLayer == subEntity.Entity.PlanLayer)
+			if (m_planLayer == a_subEntity.m_entity.PlanLayer)
 			{
-				fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
-				subEntity.edited = true;
+				m_fsm.AddToUndoStack(new ModifyLineStringOperation(a_subEntity, m_planLayer, a_subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
+				a_subEntity.m_edited = true;
 			}
 			else
 			{
-				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
+				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 
 				//Duplicate linestring
-				EnergyLineStringSubEntity duplicate = createNewPlanLineString(subEntity.GetPersistentID(), subEntity.GetDataCopy()) as EnergyLineStringSubEntity;
-				switchSelectionFromBaseLineStringToDuplicate(subEntity, duplicate);
+				EnergyLineStringSubEntity duplicate = CreateNewPlanLineString(a_subEntity.GetPersistentID(), a_subEntity.GetDataCopy()) as EnergyLineStringSubEntity;
+				SwitchSelectionFromBaseLineStringToDuplicate(a_subEntity, duplicate);
             
 				//Add connections to new cable and reconnect attached points
-				foreach (Connection con in (subEntity as EnergyLineStringSubEntity).connections)
+				foreach (Connection con in (a_subEntity as EnergyLineStringSubEntity).Connections)
 				{
 					Connection newCon = new Connection(duplicate, con.point, con.connectedToFirst);
 					con.point.RemoveConnection(con);
 					newCon.point.AddConnection(newCon);
 					duplicate.AddConnection(newCon);
-					fsm.AddToUndoStack(new ReconnectCableToPoint(con, newCon));
+					m_fsm.AddToUndoStack(new ReconnectCableToPoint(con, newCon));
 				}
-				subEntity = duplicate;
+				a_subEntity = duplicate;
 
-				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
+				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}
-			return subEntity;
+			return a_subEntity;
 		}
 	}
 }
-

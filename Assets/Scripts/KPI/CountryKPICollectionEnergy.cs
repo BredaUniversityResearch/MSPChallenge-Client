@@ -39,11 +39,11 @@ namespace MSP2050.Scripts
                     GridActualAndWasted currentGridData;
                     if (monthData.TryGetValue(data.grid, out currentGridData))
                     {
-                        if (currentGridData.socketActual.ContainsKey(data.country))
-                            currentGridData.socketActual[data.country] += data.actual;
+                        if (currentGridData.m_socketActual.ContainsKey(data.country))
+                            currentGridData.m_socketActual[data.country] += data.actual;
                         else
-                            currentGridData.socketActual.Add(data.country, data.actual);
-                        currentGridData.totalReceived += data.actual;
+                            currentGridData.m_socketActual.Add(data.country, data.actual);
+                        currentGridData.m_totalReceived += data.actual;
                     }
                     else
                     {
@@ -89,26 +89,26 @@ namespace MSP2050.Scripts
             foreach (KeyValuePair<int, GridActualAndWasted> gridData in gridDataForMonth)
             {
                 EnergyGrid associatedGrid = PolicyLogicEnergy.Instance.GetEnergyGrid(gridData.Key);
-                gridData.Value.wasted = associatedGrid.AvailablePower - gridData.Value.totalReceived;
+                gridData.Value.m_wasted = associatedGrid.AvailablePower - gridData.Value.m_totalReceived;
 
                 //Make socket power negative if it has been sent
-                foreach (KeyValuePair<int, CountryEnergyAmount> kvp in associatedGrid.energyDistribution.distribution)
+                foreach (KeyValuePair<int, CountryEnergyAmount> kvp in associatedGrid.m_energyDistribution.m_distribution)
                 {
-                    if (kvp.Value.expected < 0)
-                        gridData.Value.socketActual[kvp.Key] = -gridData.Value.socketActual[kvp.Key];
+                    if (kvp.Value.m_expected < 0)
+                        gridData.Value.m_socketActual[kvp.Key] = -gridData.Value.m_socketActual[kvp.Key];
                 }
 
                 //Determine the actual sourcepower that was used
-                foreach (EnergyPointSubEntity source in associatedGrid.sources)
+                foreach (EnergyPointSubEntity source in associatedGrid.m_sources)
                 {
-                    if (gridData.Value.sourceActual.ContainsKey(source.Entity.Country))
-                        gridData.Value.sourceActual[source.Entity.Country] += source.UsedCapacity;
+                    if (gridData.Value.m_sourceActual.ContainsKey(source.m_entity.Country))
+                        gridData.Value.m_sourceActual[source.m_entity.Country] += source.UsedCapacity;
                     else
-                        gridData.Value.sourceActual.Add(source.Entity.Country, source.UsedCapacity);
+                        gridData.Value.m_sourceActual.Add(source.m_entity.Country, source.UsedCapacity);
                 }
 
                 //Assign the actual and wasted values to its grid. This will be overwritten in later updates.
-                associatedGrid.actualAndWasted = gridData.Value;
+                associatedGrid.m_actualAndWasted = gridData.Value;
             }
         }
 

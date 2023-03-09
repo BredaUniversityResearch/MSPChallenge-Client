@@ -16,7 +16,7 @@ namespace MSP2050.Scripts
 			if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
 			{
 				PolicyUpdateShippingPlan data = (PolicyUpdateShippingPlan)a_data;
-				RestrictionAreaManager.instance.SetRestrictionsToObject(a_plan, data.restriction_settings);
+				RestrictionAreaManager.Instance.SetRestrictionsToObject(a_plan, data.restriction_settings);
 				if (!a_plan.Policies.ContainsKey(PolicyManager.SHIPPING_POLICY_NAME))
 					a_plan.Policies.Add(PolicyManager.SHIPPING_POLICY_NAME, new PolicyPlanDataShipping(this));
 			}
@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 			}
 			else if (a_plan.TryGetPolicyData<PolicyPlanDataShipping>(PolicyManager.SHIPPING_POLICY_NAME, out var data))
 			{
-				m_backup = RestrictionAreaManager.instance.GatherSettingsForPlan(a_plan);
+				m_backup = RestrictionAreaManager.Instance.GatherSettingsForPlan(a_plan);
 				m_wasShippingPlanBeforeEditing = true;
 			}
 			else
@@ -55,7 +55,7 @@ namespace MSP2050.Scripts
 		public override void RestoreBackupForPlan(Plan a_plan)
 		{
 			if(m_wasShippingPlanBeforeEditing || a_plan.ContainsPolicy(PolicyManager.SHIPPING_POLICY_NAME))
-				RestrictionAreaManager.instance.SetRestrictionsToObject(a_plan, m_backup);
+				RestrictionAreaManager.Instance.SetRestrictionsToObject(a_plan, m_backup);
 		}
 
 		public override void SubmitChangesToPlan(Plan a_plan, BatchRequest a_batch)
@@ -69,7 +69,7 @@ namespace MSP2050.Scripts
 			{
 				SubmitPolicyActivity(a_plan, PolicyManager.SHIPPING_POLICY_NAME, false, a_batch);
 			}
-			RestrictionAreaManager.instance.SubmitSettingsForPlan(a_plan, a_batch);
+			RestrictionAreaManager.Instance.SubmitSettingsForPlan(a_plan, a_batch);
 		}
 
 		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)

@@ -5,89 +5,85 @@ namespace MSP2050.Scripts
 {
 	public class LineStringEntity : Entity
 	{
-		List<LineStringSubEntity> lineStringSubEntities;
+		private List<LineStringSubEntity> m_lineStringSubEntities;
 
-		public LineStringEntity(LineStringLayer layer, PlanLayer planLayer, List<EntityType> entityType) : base(layer, entityType, planLayer.Plan.Country)
+		public LineStringEntity(LineStringLayer a_layer, PlanLayer a_planLayer, List<EntityType> a_entityType) : base(a_layer, a_entityType, a_planLayer.Plan.Country)
 		{
-			PlanLayer = planLayer;
-			lineStringSubEntities = new List<LineStringSubEntity>();
+			PlanLayer = a_planLayer;
+			m_lineStringSubEntities = new List<LineStringSubEntity>();
 		}
 
-		public LineStringEntity(LineStringLayer layer, SubEntityObject layerObject) : base(layer, layerObject)
+		public LineStringEntity(LineStringLayer a_layer, SubEntityObject a_layerObject) : base(a_layer, a_layerObject)
 		{
-			lineStringSubEntities = new List<LineStringSubEntity>();
-			//for (int i = 0; i < layerObject.geometry.Count; ++i)
-			//{
-			if (layer.editingType == AbstractLayer.EditingType.Cable)
-				lineStringSubEntities.Add(new EnergyLineStringSubEntity(this, layerObject, layerObject.id));
+			m_lineStringSubEntities = new List<LineStringSubEntity>();
+			if (a_layer.m_editingType == AbstractLayer.EditingType.Cable)
+				m_lineStringSubEntities.Add(new EnergyLineStringSubEntity(this, a_layerObject, a_layerObject.id));
 			else
-				lineStringSubEntities.Add(new LineStringSubEntity(this, layerObject, layerObject.id));
-			//}
+				m_lineStringSubEntities.Add(new LineStringSubEntity(this, a_layerObject, a_layerObject.id));
 		}
 
-		public override SubEntity GetSubEntity(int index)
+		public override SubEntity GetSubEntity(int a_index)
 		{
-			return lineStringSubEntities[index];
+			return m_lineStringSubEntities[a_index];
 		}
 
 		public LineStringSubEntity GetLineStringSubEntity()
 		{
-			return lineStringSubEntities[0];
+			return m_lineStringSubEntities[0];
 		}
 
 		public override int GetSubEntityCount()
 		{
-			return lineStringSubEntities.Count;
+			return m_lineStringSubEntities.Count;
 		}
 
-		public void AddSubEntity(LineStringSubEntity subEntity)
+		public void AddSubEntity(LineStringSubEntity a_subEntity)
 		{
-			lineStringSubEntities.Add(subEntity);
+			m_lineStringSubEntities.Add(a_subEntity);
 		}
 
 		public List<LineStringSubEntity> GetSubEntities()
 		{
-			return lineStringSubEntities;
+			return m_lineStringSubEntities;
 		}
 
 		public override void RemoveGameObjects()
 		{
-			foreach (LineStringSubEntity lsse in lineStringSubEntities)
+			foreach (LineStringSubEntity lsse in m_lineStringSubEntities)
 			{
 				lsse.RemoveGameObject();
 			}
-			lineStringSubEntities = null;
+			m_lineStringSubEntities = null;
 		}
 
-		public override void DrawGameObjects(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default)
+		public override void DrawGameObjects(Transform a_parent, SubEntityDrawMode a_drawMode = SubEntityDrawMode.Default)
 		{
-			foreach (LineStringSubEntity lsse in lineStringSubEntities)
+			foreach (LineStringSubEntity lsse in m_lineStringSubEntities)
 			{
-				lsse.DrawGameObject(parent, drawMode);
+				lsse.DrawGameObject(a_parent, a_drawMode);
 			}
 		}
 
-		public override void RedrawGameObjects(Camera targetCamera, SubEntityDrawMode drawMode = SubEntityDrawMode.Default, bool forceScaleUpdate = false)
+		public override void RedrawGameObjects(Camera a_targetCamera, SubEntityDrawMode a_drawMode = SubEntityDrawMode.Default, bool a_forceScaleUpdate = false)
 		{
-			if (forceScaleUpdate)
+			if (a_forceScaleUpdate)
 			{
-				foreach (LineStringSubEntity lsse in lineStringSubEntities)
+				foreach (LineStringSubEntity lsse in m_lineStringSubEntities)
 				{
-					lsse.RedrawGameObject(drawMode);
-					lsse.UpdateScale(targetCamera);
+					lsse.RedrawGameObject(a_drawMode);
+					lsse.UpdateScale(a_targetCamera);
 				}
 			}
 			else
-				foreach (LineStringSubEntity lsse in lineStringSubEntities)
-					lsse.RedrawGameObject(drawMode);
+				foreach (LineStringSubEntity lsse in m_lineStringSubEntities)
+					lsse.RedrawGameObject(a_drawMode);
 		}
 
 		public override float GetRestrictionAreaSurface()
 		{
-			if (lineStringSubEntities[0].m_restrictionArea)
-				return InterfaceCanvas.Instance.mapScale.GetRealWorldPolygonAreaInSquareKm(lineStringSubEntities[0].m_restrictionArea.polygon);
-			else
-				return lineStringSubEntities[0].LineLengthKm * Mathf.Max(GetCurrentRestrictionSize(), 0.25f);
+			if (m_lineStringSubEntities[0].m_restrictionArea)
+				return InterfaceCanvas.Instance.mapScale.GetRealWorldPolygonAreaInSquareKm(m_lineStringSubEntities[0].m_restrictionArea.polygon);
+			return m_lineStringSubEntities[0].LineLengthKm * Mathf.Max(GetCurrentRestrictionSize(), 0.25f);
 			//TODO: optimize this so it no longer uses the polygon area, but one only based on restriction size and length
 		}
 	}

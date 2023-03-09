@@ -9,13 +9,13 @@ namespace MSP2050.Scripts
 
 		public override void ActivateRequirement()
 		{
-			Main.Instance.fsm.onGeometryCompleted += OnGeomComplete;
+			Main.Instance.fsm.OnGeometryCompleted += OnGeomComplete;
 			m_complete = false;
 		}
 
 		public override void DeactivateRequirement()
 		{
-			Main.Instance.fsm.onGeometryCompleted -= OnGeomComplete;
+			Main.Instance.fsm.OnGeometryCompleted -= OnGeomComplete;
 			m_complete = false;
 		}
 
