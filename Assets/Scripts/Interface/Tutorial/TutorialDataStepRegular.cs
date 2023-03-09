@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		[SerializeField] ATutorialRequirement[] m_completionRequirements;
 		[SerializeField] ATutorialRequirement[] m_prerequisites;
 		[SerializeField] string[] m_highlightedObjects;
+		[SerializeField] bool m_highlightBasedOnTags;
 		[SerializeField] GameObject m_visualsPrefab;
 		[SerializeField] ATutorialAction[] m_enterStepActions;
 
@@ -52,8 +53,10 @@ namespace MSP2050.Scripts
 			}
 
 			a_manager.UI.SetUIToRegular(m_headerText, m_contentText, m_completionRequirements != null && m_completionRequirements.Length > 0, m_alignTop, m_visualsPrefab, IsComplete);
-			if(m_highlightedObjects != null && m_highlightedObjects.Length > 0)
-				HighlightManager.instance.SetUIHighlights(m_highlightedObjects);
+			if (m_highlightedObjects != null && m_highlightedObjects.Length > 0)
+			{
+				HighlightManager.instance.SetUIHighlights(m_highlightedObjects, m_highlightBasedOnTags);
+			}
 
 		}
 

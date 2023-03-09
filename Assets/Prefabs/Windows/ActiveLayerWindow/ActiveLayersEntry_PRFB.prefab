@@ -1931,7 +1931,8 @@ MonoBehaviour:
   m_tags:
   - Expand
   - Activelayer
-  m_registerReference: 0
+  m_registerNameReference: 0
+  m_registerTagsReference: 0
 --- !u!1 &8246550269203223233
 GameObject:
   m_ObjectHideFlags: 0
@@ -1943,6 +1944,7 @@ GameObject:
   - component: {fileID: 1170359206930941733}
   - component: {fileID: 6168010844322223885}
   - component: {fileID: 7551894659854598643}
+  - component: {fileID: 6148266340596152297}
   m_Layer: 5
   m_Name: ActiveLayersEntry_PRFB
   m_TagString: Untagged
@@ -2018,6 +2020,32 @@ MonoBehaviour:
   m_entityTypeEntryPrefab: {fileID: 8332012114851229089, guid: 77981dce83f4405428ddca7cb8c1268a,
     type: 3}
   m_contentLocation: {fileID: 9122699014763981537}
+--- !u!114 &6148266340596152297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8246550269203223233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02557f98f0d3a3848b3eca8ceed2bf7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  m_uiElement: {fileID: 0}
+  m_tags:
+  - ActiveLayer
+  m_registerNameReference: 0
+  m_registerTagsReference: 1
 --- !u!1 &8325106311792585887
 GameObject:
   m_ObjectHideFlags: 0

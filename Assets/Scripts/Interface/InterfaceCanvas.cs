@@ -72,8 +72,10 @@ namespace MSP2050.Scripts
 		private Dictionary<string, Button> buttonUIReferences = new Dictionary<string, Button>();
 		private Dictionary<string, Toggle> toggleUIReferences = new Dictionary<string, Toggle>();
 		private Dictionary<string, GameObject> genericUIReferences = new Dictionary<string, GameObject>();
+		private Dictionary<string, HashSet<GameObject>> tagUIReferences = new Dictionary<string, HashSet<GameObject>>();
 		public event Action<string, string[]> interactionEvent;
-		public event Action<string, GameObject> uiReferenceRegisteredEvent;
+		public event Action<string, GameObject> uiReferenceNameRegisteredEvent;
+		public event Action<string[], GameObject> uiReferenceTagsRegisteredEvent;
 
 		private void Awake()
 		{
@@ -139,19 +141,31 @@ namespace MSP2050.Scripts
 		public void RegisterUIReference(string name, Button button)
 		{
 			buttonUIReferences[name] = button;
-			uiReferenceRegisteredEvent?.Invoke(name, button.gameObject);
+			uiReferenceNameRegisteredEvent?.Invoke(name, button.gameObject);
 		}
 
 		public void RegisterUIReference(string name, Toggle toggle)
 		{
 			toggleUIReferences[name] = toggle;
-			uiReferenceRegisteredEvent?.Invoke(name, toggle.gameObject);
+			uiReferenceNameRegisteredEvent?.Invoke(name, toggle.gameObject);
 		}
 
 		public void RegisterUIReference(string name, GameObject ui)
 		{
 			genericUIReferences[name] = ui;
-			uiReferenceRegisteredEvent?.Invoke(name, ui.gameObject);
+			uiReferenceNameRegisteredEvent?.Invoke(name, ui.gameObject);
+		}
+
+		public void RegisterUITagsReference(string[] tags, GameObject ui)
+		{
+			foreach (string tag in tags)
+			{
+				if (tagUIReferences.TryGetValue(tag, out var list))
+					list.Add(ui);
+				else
+					tagUIReferences.Add(tag, new HashSet<GameObject>() { ui });
+			}
+			uiReferenceTagsRegisteredEvent?.Invoke(tags, ui.gameObject);
 		}
 
 		public void UnregisterUIReference(string name)
@@ -162,6 +176,20 @@ namespace MSP2050.Scripts
 				toggleUIReferences.Remove(name);
 			else if (genericUIReferences.ContainsKey(name))
 				genericUIReferences.Remove(name);
+		}
+
+		public void UnregisterUITagsReference(string[] tags, GameObject ui)
+		{
+			foreach (string tag in tags)
+			{
+				if (tagUIReferences.TryGetValue(tag, out var list))
+				{
+					if (list.Count == 0)
+						tagUIReferences.Remove(tag);
+					else
+						list.Remove(ui);
+				}
+			}
 		}
 
 		public Button GetUIButton(string name)
@@ -192,6 +220,13 @@ namespace MSP2050.Scripts
 		public GameObject GetUIGeneric(string name)
 		{
 			if (genericUIReferences.TryGetValue(name, out var result))
+				return result;
+			return null;
+		}
+
+		public HashSet<GameObject> GetUIWithTag(string tag)
+		{
+			if (tagUIReferences.TryGetValue(tag, out var result))
 				return result;
 			return null;
 		}
