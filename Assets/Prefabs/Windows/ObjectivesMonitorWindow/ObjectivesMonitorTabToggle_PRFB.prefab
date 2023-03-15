@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2453616735908223020}
   - component: {fileID: 3356069544688615865}
   - component: {fileID: 4991488611918585860}
+  - component: {fileID: 433858509111415041}
   m_Layer: 5
   m_Name: Icon
   m_TagString: Untagged
@@ -75,6 +76,24 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &433858509111415041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3900667770913967954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef4c00f50fb0be243a14fabcb408cd5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colourAsset: {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+  graphics:
+  - {fileID: 4991488611918585860}
+  colourChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5435797909111053119
 GameObject:
   m_ObjectHideFlags: 0
@@ -87,8 +106,8 @@ GameObject:
   - component: {fileID: 381101119919069864}
   - component: {fileID: 3739414052517142807}
   - component: {fileID: 2851930002978006823}
-  - component: {fileID: 4723166421420020709}
   - component: {fileID: 2389454033212636512}
+  - component: {fileID: 5167948400190973917}
   m_Layer: 5
   m_Name: ObjectivesMonitorTabToggle_PRFB
   m_TagString: Untagged
@@ -176,7 +195,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 2389454033212636512}
   toggleTransition: 1
   graphic: {fileID: 0}
   m_Group: {fileID: 0}
@@ -200,8 +219,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
+    SerializedFormat: 0
+    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010d00000063006f006c006f007200530065006c0065006300740065006400010000000b010e00000063006f006c006f00720048006900670068006c006900670068007400020000002d011600000063006f006c006f007200530065006c006500630074006500640048006900670068006c0069006700680074002d010d00000063006f006c006f007200440069007300610062006c0065006400
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
     - {fileID: 11400000, guid: dbe24502a18c5e546a327941d209c921, type: 2}
@@ -210,70 +229,11 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorSelected
-      Entry: 10
-      Data: 1
-    - Name: colorHighlight
-      Entry: 10
-      Data: 2
-    - Name: colorSelectedHighlight
-      Entry: 6
-      Data: 
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   targetGraphics:
   - {fileID: 2389454033212636512}
   highlightIfOn: 0
   useHighlightColor: 1
-  separateSelectedHighlight: 0
-  useDisabledColor: 0
---- !u!114 &4723166421420020709
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5435797909111053119}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b0b013a8cfba12845bf7b18016e82e0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects:
-    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
-    - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes:
-    - Name: colorNormal
-      Entry: 10
-      Data: 0
-    - Name: colorSelected
-      Entry: 10
-      Data: 1
-    - Name: colorHighlight
-      Entry: 6
-      Data: 
-    - Name: colorSelectedHighlight
-      Entry: 6
-      Data: 
-    - Name: colorDisabled
-      Entry: 6
-      Data: 
-  targetGraphics:
-  - {fileID: 4991488611918585860}
-  highlightIfOn: 0
-  useHighlightColor: 0
   separateSelectedHighlight: 0
   useDisabledColor: 0
 --- !u!114 &2389454033212636512
@@ -299,3 +259,11 @@ MonoBehaviour:
   m_FillCenter: 1
   m_slice: 4
   m_rounding: 12
+--- !u!222 &5167948400190973917
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5435797909111053119}
+  m_CullTransparentMesh: 1

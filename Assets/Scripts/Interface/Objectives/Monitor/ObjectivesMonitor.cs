@@ -17,7 +17,6 @@ namespace MSP2050.Scripts
 		}
 
 		public GenericWindow thisGenericWindow;
-		public GameObject raycastBlocker;
 
 		[Header("Rect")]
 		public RectTransform thisRect;
