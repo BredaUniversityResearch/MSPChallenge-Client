@@ -66,6 +66,7 @@ namespace MSP2050.Scripts
 
 			KPIValueCollection collection = SimulationManager.Instance.GetKPIValuesForSimulation(m_targetSimulation, targetTeamId);
 			TimeManager.Instance.OnCurrentMonthChanged += OnCurrentMonthChanged;
+			displayMonth = TimeManager.Instance.GetCurrentMonth();
 
 			if (collection != null)
 			{
@@ -145,8 +146,11 @@ namespace MSP2050.Scripts
 
 		private void OnCurrentMonthChanged(int oldCurrentMonth, int newCurrentMonth)
 		{
-			if(automaticallyFollowLatestMonth)
+			if (automaticallyFollowLatestMonth)
+			{
+				displayMonth = newCurrentMonth;
 				UpdateDisplayValues(targetCollection, newCurrentMonth);
+			}
 		}
 
 		private void OnKPIValueDefinitionsChanged(KPIValueCollection sourceCollection)

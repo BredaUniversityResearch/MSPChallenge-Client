@@ -67,14 +67,14 @@ namespace MSP2050.Scripts
 
 		public float? GetKpiValueForMonth(int monthId)
 		{
-			if (!kpiValuesPerMonth.ContainsKey(monthId))
+			if (monthId > MostRecentMonth || !kpiValuesPerMonth.ContainsKey(monthId))
 			{
 				return null;
 			}
-			if (monthId > MostRecentMonth)
-			{
-				return kpiValuesPerMonth[MostRecentMonth];
-			}
+			//if (monthId > MostRecentMonth)
+			//{
+			//	return kpiValuesPerMonth[MostRecentMonth];
+			//}
 			return kpiValuesPerMonth[monthId];
 		}
 
