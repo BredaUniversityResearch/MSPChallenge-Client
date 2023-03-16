@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
-using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -32,11 +28,27 @@ namespace MSP2050.Scripts
 		{
 			base.Initialize();
 
-			m_usernameField.text = PlayerPrefs.GetString(LOGIN_USER_NAME, "");
+			m_usernameField.text = CommandLineArgumentsManager.GetInstance().AutoFill(
+				CommandLineArgumentsManager.CommandLineArgumentName.User, 
+				PlayerPrefs.GetString(LOGIN_USER_NAME, ""));
+			m_passwordField.text = CommandLineArgumentsManager.GetInstance().AutoFill(
+				CommandLineArgumentsManager.CommandLineArgumentName.Password,
+				"");
 
 			m_cancelButton.onClick.AddListener(OnCancelClick);
 			m_acceptButton.onClick.AddListener(OnAcceptClick);
 			m_countryDropdown.onValueChanged.AddListener(OnCountryChanged);
+		}
+
+		private bool AutoFillCountry()
+		{
+			var autoFillCountryName = CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+	            CommandLineArgumentsManager.CommandLineArgumentName.Team);
+			if (autoFillCountryName == null) return false;
+			var countryIndex = m_countryDropdown.options.FindIndex(x => x.text == autoFillCountryName);
+			if (countryIndex == -1) return false;
+            m_countryDropdown.value = countryIndex;
+            return true;
 		}
 
 		public void SetToSession(GameSession a_session)
@@ -54,26 +66,29 @@ namespace MSP2050.Scripts
 			m_countryDropdown.ClearOptions();
 			m_countryDropdown.AddOptions(dropdownOptionList);
 
-			//Load countryDropdown index from playerprefs
-			string countryName = PlayerPrefs.GetString(LOGIN_COUNTRY_NAME_STR, "");
-			bool indexSet = false;
-			if (countryName != "")
+			if (!AutoFillCountry())
 			{
-				int countryIndex = PlayerPrefs.GetInt(LOGIN_COUNTRY_INDEX_STR, -1);
-				if (countryIndex != -1)
+				//Load countryDropdown index from playerprefs
+				var countryName = PlayerPrefs.GetString(LOGIN_COUNTRY_NAME_STR, "");
+				bool indexSet = false;
+				if (countryName != "")
 				{
-					if (countryIndex < m_countryDropdown.options.Count)
+					int countryIndex = PlayerPrefs.GetInt(LOGIN_COUNTRY_INDEX_STR, -1);
+					if (countryIndex != -1)
 					{
-						if (m_countryDropdown.options[countryIndex].text == countryName)
+						if (countryIndex < m_countryDropdown.options.Count)
 						{
-							m_countryDropdown.value = countryIndex;
-							indexSet = true;
+							if (m_countryDropdown.options[countryIndex].text == countryName)
+							{
+								m_countryDropdown.value = countryIndex;
+								indexSet = true;
+							}
 						}
 					}
 				}
+				if (!indexSet)
+					m_countryDropdown.value = 0;				
 			}
-			if (!indexSet)
-				m_countryDropdown.value = 0;
 
 			//Load expertise definitions and populate the dropdown
 			if (SessionManager.Instance.MspGlobalData.expertise_definitions == null || SessionManager.Instance.MspGlobalData.expertise_definitions.Length == 0)
@@ -102,6 +117,10 @@ namespace MSP2050.Scripts
 			}
 
 			OnCountryChanged(0);
+			
+			if (null == CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.AutoLogin)) return;
+			OnAcceptClick();
 		}
 
 		void OnCountryChanged(int a_newIndex)
@@ -168,7 +187,7 @@ namespace MSP2050.Scripts
 		{
 			LoginManager.Instance.SetLoadingOverlayActive(false);
 			DialogBoxManager.instance.NotificationWindow("Connecting failed", message.Split('\n')[0], null, "Continue");
-			Debug.LogError(message);
+			Debug.LogWarning(message);
 		}
 	}
 }

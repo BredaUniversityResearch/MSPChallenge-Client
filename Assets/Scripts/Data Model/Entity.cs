@@ -26,9 +26,9 @@ namespace MSP2050.Scripts
 			set
 			{
 				country = value;
-				if (Layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+				if (Layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 				{
-					((EnergyPolygonSubEntity)GetSubEntity(0)).sourcePoint.Entity.Country = value;
+					((EnergyPolygonSubEntity)GetSubEntity(0)).m_sourcePoint.m_entity.Country = value;
 				}
 			}
 		}
@@ -164,11 +164,11 @@ namespace MSP2050.Scripts
 
 			if (subEntityCount == 0) { return new Rect(); }
 
-			Rect result = GetSubEntity(0).BoundingBox;
+			Rect result = GetSubEntity(0).m_boundingBox;
 			for (int i = 1; i < subEntityCount; ++i)
 			{
-				Vector2 min = Vector2.Min(result.min, GetSubEntity(i).BoundingBox.min);
-				Vector2 max = Vector2.Max(result.max, GetSubEntity(i).BoundingBox.max);
+				Vector2 min = Vector2.Min(result.min, GetSubEntity(i).m_boundingBox.min);
+				Vector2 max = Vector2.Max(result.max, GetSubEntity(i).m_boundingBox.max);
 				result = new Rect(min, max - min);
 			}
 
@@ -198,7 +198,7 @@ namespace MSP2050.Scripts
 
 		public bool GreenEnergy
 		{
-			get { return Layer.greenEnergy; }
+			get { return Layer.m_greenEnergy; }
 		}
 
 		public int DatabaseID
@@ -213,7 +213,7 @@ namespace MSP2050.Scripts
 		//returns the restriction size of this entity for the respective owner country and the current time.
 		public float GetCurrentRestrictionSize()
 		{
-			return RestrictionAreaManager.instance.GetRestrictionAreaSizeAtPlanTime(PlanManager.Instance.planViewing, EntityTypes[0], country);
+			return RestrictionAreaManager.Instance.GetRestrictionAreaSizeAtPlanTime(PlanManager.Instance.m_planViewing, EntityTypes[0], country);
 		}
 
 		/// <summary>

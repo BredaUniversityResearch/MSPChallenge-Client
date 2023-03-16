@@ -5,449 +5,435 @@ namespace MSP2050.Scripts
 {
 	public class EditPointsState : FSMState
 	{
-		protected PointLayer baseLayer;
-		protected PlanLayer planLayer;
+		protected PointLayer m_baseLayer;
+		protected PlanLayer m_planLayer;
 
-		protected bool selectedRemovedEntity = false;
-		protected bool draggingSelection = false;
-		protected Dictionary<PointSubEntity, Vector3> selectionDragStart = null;
+		protected bool m_selectedRemovedEntity = false;
+		protected bool m_draggingSelection = false;
+		protected Dictionary<PointSubEntity, Vector3> m_selectionDragStart = null;
 
-		protected bool selectingBox = false;
-		protected HashSet<PointSubEntity> currentBoxSelection = null;
+		protected bool m_selectingBox = false;
+		protected HashSet<PointSubEntity> m_currentBoxSelection = null;
 
-		protected HashSet<PointSubEntity> selection = new HashSet<PointSubEntity>();
+		protected HashSet<PointSubEntity> m_selection = new HashSet<PointSubEntity>();
 
-		PointSubEntity previousHover = null;
+		private PointSubEntity m_previousHover = null;
 
-		protected static HashSet<int> firstPoint = new HashSet<int>() { 0 };
+		protected static HashSet<int> m_firstPoint = new HashSet<int>() { 0 };
 		public override EEditingStateType StateType => EEditingStateType.Edit;
 
-		public EditPointsState(FSM fsm, PlanLayer planLayer) : base(fsm)
+		public EditPointsState(FSM a_fsm, PlanLayer a_planLayer) : base(a_fsm)
 		{
-			this.planLayer = planLayer;
-			this.baseLayer = planLayer.BaseLayer as PointLayer;
-			//if (layer.planLayer != null)
-			//{
-			//    planLayer = layer.planLayer;
-			//    baseLayer = planLayer.BaseLayer as PointLayer;
-			//}
+			m_planLayer = a_planLayer;
+			m_baseLayer = a_planLayer.BaseLayer as PointLayer;
 		}
 
-		public override void EnterState(Vector3 currentMousePosition)
+		public override void EnterState(Vector3 a_currentMousePosition)
 		{
-			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
+			base.EnterState(a_currentMousePosition);
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete, FSM.ToolbarInput.Recall, FSM.ToolbarInput.Abort);
-			ic.SetActivePlanWindowInteractability(false);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetCreateMode(false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, false);
+			//ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			gt.SetActivePlanWindowInteractability(false);
 
-			PointSubEntity hover = baseLayer.GetPointAt(currentMousePosition);
+			PointSubEntity hover = m_baseLayer.GetPointAt(a_currentMousePosition);
 
 			if (hover != null)
 			{
-				hover.RedrawGameObject(SubEntityDrawMode.Default, null, firstPoint);
+				hover.RedrawGameObject(SubEntityDrawMode.Default, null, m_firstPoint);
 			}
 
-			previousHover = hover;
+			m_previousHover = hover;
 
-			fsm.SetSnappingEnabled(true);
-			IssueManager.instance.SetIssueInteractability(false);
+			m_fsm.SetSnappingEnabled(true);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
 
-		public override void LeftClick(Vector3 worldPosition)
+		public override void LeftClick(Vector3 a_worldPosition)
 		{
-			PointSubEntity point = baseLayer.GetPointAt(worldPosition);
-			if (point == null && baseLayer != null) { point = baseLayer.GetPointAt(worldPosition); }
+			PointSubEntity point = m_baseLayer.GetPointAt(a_worldPosition);
+			if (point == null && m_baseLayer != null) { point = m_baseLayer.GetPointAt(a_worldPosition); }
 
 			if (point != null)
 			{
-				select(new HashSet<PointSubEntity>() { point }, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+				Select(new HashSet<PointSubEntity>() { point }, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 			}
 			else
 			{
-				select(new HashSet<PointSubEntity>(), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+				Select(new HashSet<PointSubEntity>(), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 			}
 		}
 
-		protected void select(HashSet<PointSubEntity> newSelection, bool keepPreviousSelection)
+		protected void Select(HashSet<PointSubEntity> a_newSelection, bool a_keepPreviousSelection)
 		{
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
-
-			if (!keepPreviousSelection)
+			if (!a_keepPreviousSelection)
 			{
-				foreach (PointSubEntity pse in selection)
+				foreach (PointSubEntity pse in m_selection)
 				{
 					pse.RedrawGameObject(SubEntityDrawMode.Default, null, null);
 				}
-				selection = newSelection;
+				m_selection = a_newSelection;
 			}
-			else if(!selectedRemovedEntity)
+			else if(!m_selectedRemovedEntity)
 			{
-				selection.UnionWith(newSelection);
+				m_selection.UnionWith(a_newSelection);
 			}
 
-			selectedRemovedEntity = false;
-			foreach (PointSubEntity pse in newSelection)
+			m_selectedRemovedEntity = false;
+			foreach (PointSubEntity pse in a_newSelection)
 			{
 				if (pse.IsPlannedForRemoval())
-					selectedRemovedEntity = true;
-				pse.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null);
+					m_selectedRemovedEntity = true;
+				pse.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint, null);
 			}
 
-			ic.ToolbarEnable(selection.Count > 0, FSM.ToolbarInput.Delete, FSM.ToolbarInput.Abort);
-			ic.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
-			ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, m_selection.Count > 0);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, m_selectedRemovedEntity);
+			gt.SetObjectChangeInteractable(!m_selectedRemovedEntity);
+
 			//Points have no selecting state, so dropdown interactivity can change while in this state
-			if (selection.Count == 0)
+			if (m_selection.Count == 0)
 			{
-				ic.SetActivePlanWindowInteractability(false);
+				gt.SetActivePlanWindowInteractability(false);
 				return;
-			}
-			else
-			{
-				ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
 			}
 
 			UpdateActivePlanWindowToSelection();
 		}
 
-		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
+		public override void MouseMoved(Vector3 a_previousPosition, Vector3 a_currentPosition, bool a_cursorIsOverUI)
 		{
-			if (!draggingSelection && !selectingBox)
+			if (m_draggingSelection || m_selectingBox)
+				return;
+			PointSubEntity hover = null;
+			if (!a_cursorIsOverUI)
 			{
-				PointSubEntity hover = null;
-				if (!cursorIsOverUI)
+				hover = m_baseLayer.GetPointAt(a_currentPosition);
+				if (hover == null && m_baseLayer != null) { hover = m_baseLayer.GetPointAt(a_currentPosition); }
+			}
+
+			if (m_previousHover != hover)
+			{
+				if (m_previousHover != null)
 				{
-					hover = baseLayer.GetPointAt(currentPosition);
-					if (hover == null && baseLayer != null) { hover = baseLayer.GetPointAt(currentPosition); }
+					if (m_selection.Contains(m_previousHover)) { m_previousHover.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint, null); }
+					else { m_previousHover.RedrawGameObject(); }
 				}
 
-				if (previousHover != hover)
+				if (hover != null)
 				{
-					if (previousHover != null)
-					{
-						if (selection.Contains(previousHover)) { previousHover.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null); }
-						else { previousHover.RedrawGameObject(); }
-					}
-
-					if (hover != null)
-					{
-						if (selection.Contains(hover)) { hover.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, firstPoint); }
-						else { hover.RedrawGameObject(SubEntityDrawMode.Default, null, firstPoint); }
-					}
-				}
-
-				previousHover = hover;
-
-				if (hover == null)
-				{
-					fsm.SetCursor(FSM.CursorType.Default);
-				}
-				else
-				{
-					fsm.SetCursor(FSM.CursorType.Move);
+					if (m_selection.Contains(hover)) { hover.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint, m_firstPoint); }
+					else { hover.RedrawGameObject(SubEntityDrawMode.Default, null, m_firstPoint); }
 				}
 			}
-		}
 
-		protected virtual PointSubEntity createNewPlanPoint(Vector3 point, List<EntityType> entityType, int persistentID, Dictionary<string, string> metaData, int country)
-		{
-			PointEntity newEntity = baseLayer.CreateNewPointEntity(point, entityType, planLayer);
-			newEntity.metaData = new Dictionary<string, string>(metaData);
-			newEntity.Country = country;
-			PointSubEntity newSubEntity = newEntity.GetSubEntity(0) as PointSubEntity;
-			newSubEntity.SetPersistentID(persistentID);
-			fsm.AddToUndoStack(new CreatePointOperation(newSubEntity, planLayer, true));
-			newSubEntity.DrawGameObject(baseLayer.LayerGameObject.transform);
-			return newSubEntity;
-		}
+			m_previousHover = hover;
 
-		protected void switchSelectionFromBasePointToDuplicate(PointSubEntity basePoint, PointSubEntity duplicate)
-		{
-			selection.Add(duplicate);
-			selection.Remove(basePoint);
-
-			//Change active geom 
-			baseLayer.AddPreModifiedEntity(basePoint.Entity);
-			baseLayer.activeEntities.Remove(basePoint.Entity as PointEntity);
-			baseLayer.activeEntities.Add(duplicate.Entity as PointEntity);
-
-
-			//Redraw based on activity changes
-			basePoint.RedrawGameObject();
-			duplicate.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint);
-		}
-
-		protected virtual PointSubEntity startModifyingSubEntity(PointSubEntity subEntity, bool insideUndoBatch)
-		{
-			if (subEntity.Entity.PlanLayer == planLayer)
+			if (hover == null)
 			{
-				fsm.AddToUndoStack(new ModifyPointOperation(subEntity, planLayer, subEntity.GetDataCopy()));
+				m_fsm.SetCursor(FSM.CursorType.Default);
 			}
 			else
 			{
-				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
-
-				PointSubEntity duplicate = createNewPlanPoint(subEntity.GetPosition(), subEntity.Entity.EntityTypes, subEntity.GetPersistentID(), subEntity.Entity.metaData, subEntity.Entity.Country);
-				switchSelectionFromBasePointToDuplicate(subEntity, duplicate);
-				subEntity = duplicate;
-
-				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
+				m_fsm.SetCursor(FSM.CursorType.Move);
 			}
-			return subEntity;
 		}
 
-		protected void createUndoForDraggedSelection()
+		protected virtual PointSubEntity CreateNewPlanPoint(Vector3 a_point, List<EntityType> a_entityType, int a_persistentID, Dictionary<string, string> a_metaData, int a_country)
 		{
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			PointEntity newEntity = m_baseLayer.CreateNewPointEntity(a_point, a_entityType, m_planLayer);
+			newEntity.metaData = new Dictionary<string, string>(a_metaData);
+			newEntity.Country = a_country;
+			PointSubEntity newSubEntity = newEntity.GetSubEntity(0) as PointSubEntity;
+			newSubEntity.SetPersistentID(a_persistentID);
+			newSubEntity.m_edited = true;
+			m_fsm.AddToUndoStack(new CreatePointOperation(newSubEntity, m_planLayer, true));
+			newSubEntity.DrawGameObject(m_baseLayer.LayerGameObject.transform);
+			return newSubEntity;
+		}
 
-			HashSet<PointSubEntity> selectionCopy = new HashSet<PointSubEntity>(selection);
+		protected void SwitchSelectionFromBasePointToDuplicate(PointSubEntity a_basePoint, PointSubEntity a_duplicate)
+		{
+			m_selection.Add(a_duplicate);
+			m_selection.Remove(a_basePoint);
+
+			//Change active geom 
+			m_baseLayer.AddPreModifiedEntity(a_basePoint.m_entity);
+			m_baseLayer.m_activeEntities.Remove(a_basePoint.m_entity as PointEntity);
+			m_baseLayer.m_activeEntities.Add(a_duplicate.m_entity as PointEntity);
+
+
+			//Redraw based on activity changes
+			a_basePoint.RedrawGameObject();
+			a_duplicate.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint);
+		}
+
+		protected virtual PointSubEntity StartModifyingSubEntity(PointSubEntity a_subEntity, bool a_insideUndoBatch)
+		{
+			if (a_subEntity.m_entity.PlanLayer == m_planLayer)
+			{
+				m_fsm.AddToUndoStack(new ModifyPointOperation(a_subEntity, m_planLayer, a_subEntity.GetDataCopy()));
+				a_subEntity.m_edited = true;
+			}
+			else
+			{
+				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
+
+				PointSubEntity duplicate = CreateNewPlanPoint(a_subEntity.GetPosition(), a_subEntity.m_entity.EntityTypes, a_subEntity.GetPersistentID(), a_subEntity.m_entity.metaData, a_subEntity.m_entity.Country);
+				SwitchSelectionFromBasePointToDuplicate(a_subEntity, duplicate);
+				a_subEntity = duplicate;
+
+				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
+			}
+			return a_subEntity;
+		}
+
+		private void CreateUndoForDraggedSelection()
+		{
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+
+			HashSet<PointSubEntity> selectionCopy = new HashSet<PointSubEntity>(m_selection);
 			foreach (PointSubEntity subEntity in selectionCopy)
 			{
-				startModifyingSubEntity(subEntity, true);
+				StartModifyingSubEntity(subEntity, true);
 			}
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
-		public override void StartedDragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		public override void StartedDragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			if (selectedRemovedEntity)
+			if (m_selectedRemovedEntity)
 				return;
-			PointSubEntity draggingPoint = baseLayer.GetPointAt(dragStartPosition);
-			if (draggingPoint != null && !selection.Contains(draggingPoint))
+			PointSubEntity draggingPoint = m_baseLayer.GetPointAt(a_dragStartPosition);
+			if (draggingPoint != null && !m_selection.Contains(draggingPoint))
 			{
-				select(new HashSet<PointSubEntity> { draggingPoint }, false);
-				if (selectedRemovedEntity)
+				Select(new HashSet<PointSubEntity> { draggingPoint }, false);
+				if (m_selectedRemovedEntity)
 					return;
 			}
 
 			if (draggingPoint != null)
 			{
-				draggingSelection = true;
-				createUndoForDraggedSelection();
+				m_draggingSelection = true;
+				CreateUndoForDraggedSelection();
 
 				// this offset is used to make sure the user is dragging the center of the point that is being dragged (to make snapping work correctly)
-				Vector3 offset = dragStartPosition - draggingPoint.GetPosition();
+				Vector3 offset = a_dragStartPosition - draggingPoint.GetPosition();
 
-				selectionDragStart = new Dictionary<PointSubEntity, Vector3>();
-				foreach (PointSubEntity pse in selection)
+				m_selectionDragStart = new Dictionary<PointSubEntity, Vector3>();
+				foreach (PointSubEntity pse in m_selection)
 				{
-					selectionDragStart.Add(pse, pse.GetPosition() + offset);
+					m_selectionDragStart.Add(pse, pse.GetPosition() + offset);
 				}
 			}
 			else
 			{
-				select(new HashSet<PointSubEntity>(), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+				Select(new HashSet<PointSubEntity>(), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 
-				selectingBox = true;
-				currentBoxSelection = new HashSet<PointSubEntity>();
+				m_selectingBox = true;
+				m_currentBoxSelection = new HashSet<PointSubEntity>();
 
-				BoxSelect.DrawBoxSelection(dragStartPosition, currentPosition);
+				BoxSelect.DrawBoxSelection(a_dragStartPosition, a_currentPosition);
 			}
 		}
 
-		public override void Dragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		public override void Dragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			if (selectedRemovedEntity)
+			if (m_selectedRemovedEntity)
 				return;
-			if (draggingSelection)
+			if (m_draggingSelection)
 			{
-				Vector3 offset = currentPosition - dragStartPosition;
-				foreach (PointSubEntity subEntity in selection)
+				Vector3 offset = a_currentPosition - a_dragStartPosition;
+				foreach (PointSubEntity subEntity in m_selection)
 				{
-					subEntity.SetPosition(selectionDragStart[subEntity] + offset);
-					subEntity.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null);
+					subEntity.SetPosition(m_selectionDragStart[subEntity] + offset);
+					subEntity.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint, null);
 				}
 			}
-			else if (selectingBox)
+			else if (m_selectingBox)
 			{
-				updateBoxSelection(dragStartPosition, currentPosition);
+				UpdateBoxSelection(a_dragStartPosition, a_currentPosition);
 			}
 		}
 
-		protected void updateBoxSelection(Vector3 dragStartPosition, Vector3 currentPosition)
+		protected void UpdateBoxSelection(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			BoxSelect.DrawBoxSelection(dragStartPosition, currentPosition);
+			BoxSelect.DrawBoxSelection(a_dragStartPosition, a_currentPosition);
 
-			HashSet<PointSubEntity> pointsInBox = baseLayer.GetPointsInBox(dragStartPosition, currentPosition);
+			HashSet<PointSubEntity> pointsInBox = m_baseLayer.GetPointsInBox(a_dragStartPosition, a_currentPosition);
 			//if (baseLayer != null) { pointsInBox.UnionWith(baseLayer.GetPointsInBox(dragStartPosition, currentPosition)); }
 
 			foreach (PointSubEntity pointInBox in pointsInBox)
 			{
-				if (!currentBoxSelection.Contains(pointInBox))
-				{
-					if (selection.Contains(pointInBox)) { pointInBox.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, firstPoint); }
-					else { pointInBox.RedrawGameObject(SubEntityDrawMode.Default, null, firstPoint); }
-				}
+				if (m_currentBoxSelection.Contains(pointInBox))
+					continue;
+				if (m_selection.Contains(pointInBox)) { pointInBox.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint, m_firstPoint); }
+				else { pointInBox.RedrawGameObject(SubEntityDrawMode.Default, null, m_firstPoint); }
 			}
 
-			foreach (PointSubEntity selectedPoint in currentBoxSelection)
+			foreach (PointSubEntity selectedPoint in m_currentBoxSelection)
 			{
-				if (!pointsInBox.Contains(selectedPoint))
-				{
-					if (selection.Contains(selectedPoint)) { selectedPoint.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null); }
-					else { selectedPoint.RedrawGameObject(SubEntityDrawMode.Default, null, null); }
-				}
+				if (pointsInBox.Contains(selectedPoint))
+					continue;
+				if (m_selection.Contains(selectedPoint)) { selectedPoint.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint, null); }
+				else { selectedPoint.RedrawGameObject(SubEntityDrawMode.Default, null, null); }
 			}
 
-			currentBoxSelection = pointsInBox;
+			m_currentBoxSelection = pointsInBox;
 		}
 
-		public override void StoppedDragging(Vector3 dragStartPosition, Vector3 dragFinalPosition)
+		public override void StoppedDragging(Vector3 a_dragStartPosition, Vector3 a_dragFinalPosition)
 		{
-			if (draggingSelection)
+			if (m_draggingSelection)
 			{
 				AudioMain.Instance.PlaySound(AudioMain.ITEM_MOVED);
 
-				Vector3 offset = dragFinalPosition - dragStartPosition;
-				foreach (PointSubEntity subEntity in selection)
+				Vector3 offset = a_dragFinalPosition - a_dragStartPosition;
+				foreach (PointSubEntity subEntity in m_selection)
 				{
-					subEntity.SetPosition(selectionDragStart[subEntity] + offset);
-					subEntity.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null);
+					subEntity.SetPosition(m_selectionDragStart[subEntity] + offset);
+					subEntity.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint, null);
 				}
-				draggingSelection = false;
+				m_draggingSelection = false;
 			}
-			else if (selectingBox)
+			else if (m_selectingBox)
 			{
-				updateBoxSelection(dragStartPosition, dragFinalPosition);
-				select(currentBoxSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+				UpdateBoxSelection(a_dragStartPosition, a_dragFinalPosition);
+				Select(m_currentBoxSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 
 				BoxSelect.HideBoxSelection();
-				selectingBox = false;
-				currentBoxSelection = null;
+				m_selectingBox = false;
+				m_currentBoxSelection = null;
 			}
 		}
 
-		protected virtual void deleteSelection()
+		protected virtual void DeleteSelection()
 		{
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
-			foreach (PointSubEntity subEntity in selection)
+			foreach (PointSubEntity subEntity in m_selection)
 			{
-				if (subEntity.Entity.PlanLayer == planLayer)
+				if (subEntity.m_entity.PlanLayer == m_planLayer)
 				{
-					fsm.AddToUndoStack(new RemovePointOperation(subEntity, planLayer));
+					m_fsm.AddToUndoStack(new RemovePointOperation(subEntity, m_planLayer));
 					//planLayer.RemovedGeometry.Add(subEntity.GetPersistentID());
-					baseLayer.RemoveSubEntity(subEntity);
+					m_baseLayer.RemoveSubEntity(subEntity);
 					subEntity.RemoveGameObject();
 				}
 				else
 				{
-					fsm.AddToUndoStack(new ModifyPointRemovalPlanOperation(subEntity, planLayer, planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
-					baseLayer.RemoveSubEntity(subEntity);
+					m_fsm.AddToUndoStack(new ModifyPointRemovalPlanOperation(subEntity, m_planLayer, m_planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
+					m_baseLayer.RemoveSubEntity(subEntity);
 					subEntity.RedrawGameObject();
 				}
 			}
-			selection = new HashSet<PointSubEntity>();
+			m_selection = new HashSet<PointSubEntity>();
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
-		private void undoDeleteForSelection()
+		private void UndoDeleteForSelection()
 		{
-			if (selectedRemovedEntity)
+			if (!m_selectedRemovedEntity)
+				return;
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			foreach (PointSubEntity subEntity in m_selection)
 			{
-				fsm.AddToUndoStack(new BatchUndoOperationMarker());
-				foreach (PointSubEntity subEntity in selection)
-				{
-					fsm.AddToUndoStack(new ModifyPointRemovalPlanOperation(subEntity, planLayer, true));
-					planLayer.RemovedGeometry.Remove(subEntity.GetPersistentID());
-					subEntity.RestoreDependencies();
-					subEntity.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null);
+				m_fsm.AddToUndoStack(new ModifyPointRemovalPlanOperation(subEntity, m_planLayer, true));
+				m_planLayer.RemovedGeometry.Remove(subEntity.GetPersistentID());
+				subEntity.RestoreDependencies();
+				subEntity.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint, null);
 
-				}
-				fsm.AddToUndoStack(new BatchUndoOperationMarker());
-				selectedRemovedEntity = false;
 			}
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_selectedRemovedEntity = false;
 		}
 
 		public override void HandleKeyboardEvents()
 		{
 			if (Input.GetKeyDown(KeyCode.Delete))
 			{
-				deleteSelection();
+				DeleteSelection();
 			}
 
-			if (Input.GetKeyDown(KeyCode.Return))
-			{
-				if (baseLayer.IsEnergyPointLayer())
-					fsm.SetCurrentState(new CreateEnergyPointState(fsm, planLayer));
-				else
-					fsm.SetCurrentState(new CreatePointsState(fsm, planLayer));
-			}
+			if (!Input.GetKeyDown(KeyCode.Return))
+				return;
+			if (m_baseLayer.IsEnergyPointLayer())
+				m_fsm.SetCurrentState(new CreateEnergyPointState(m_fsm, m_planLayer));
+			else
+				m_fsm.SetCurrentState(new CreatePointsState(m_fsm, m_planLayer));
 		}
 
-		public override void HandleToolbarInput(FSM.ToolbarInput toolbarInput)
+		public override void HandleToolbarInput(FSM.ToolbarInput a_toolbarInput)
 		{
-			switch (toolbarInput)
+			switch (a_toolbarInput)
 			{
 				case FSM.ToolbarInput.Create:
-					if (baseLayer.IsEnergyPointLayer())
-						fsm.SetCurrentState(new CreateEnergyPointState(fsm, planLayer));
+					if (m_baseLayer.IsEnergyPointLayer())
+						m_fsm.SetCurrentState(new CreateEnergyPointState(m_fsm, m_planLayer));
 					else
-						fsm.SetCurrentState(new CreatePointsState(fsm, planLayer));
+						m_fsm.SetCurrentState(new CreatePointsState(m_fsm, m_planLayer));
 					break;
 				case FSM.ToolbarInput.Delete:
-					deleteSelection();
+					DeleteSelection();
 					break;
 				case FSM.ToolbarInput.Abort:
-					select(new HashSet<PointSubEntity>(), false);
-					break;
-				case FSM.ToolbarInput.SelectAll:
-					select(new HashSet<PointSubEntity>((baseLayer as PointLayer).GetAllSubEntities()), true);
+					Select(new HashSet<PointSubEntity>(), false);
 					break;
 				case FSM.ToolbarInput.Recall:
-					undoDeleteForSelection();
+					UndoDeleteForSelection();
 					break;
 			}
 		}
 
-		public override void HandleEntityTypeChange(List<EntityType> newTypes)
+		public override void HandleEntityTypeChange(List<EntityType> a_newTypes)
 		{
 			List<PointSubEntity> subEntitiesWithDifferentTypes = new List<PointSubEntity>();
 
 			//Find subentities with changed entity types
-			foreach (PointSubEntity subEntity in selection)
+			foreach (PointSubEntity subEntity in m_selection)
 			{
-				if (subEntity.Entity.EntityTypes.Count != newTypes.Count)
+				if (subEntity.m_entity.EntityTypes.Count != a_newTypes.Count)
 				{
 					subEntitiesWithDifferentTypes.Add(subEntity);
 					continue;
 				}
-				foreach (EntityType type in subEntity.Entity.EntityTypes)
+				foreach (EntityType type in subEntity.m_entity.EntityTypes)
 				{
-					if (!newTypes.Contains(type))
-					{
-						subEntitiesWithDifferentTypes.Add(subEntity);
-						break;
-					}
+					if (a_newTypes.Contains(type))
+						continue;
+					subEntitiesWithDifferentTypes.Add(subEntity);
+					break;
 				}
 			}
 
 			if (subEntitiesWithDifferentTypes.Count == 0) { return; }
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
 			foreach (PointSubEntity subEntity in subEntitiesWithDifferentTypes)
 			{
-				PointSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.EntityTypes = newTypes;
-				subEntityToModify.RedrawGameObject(SubEntityDrawMode.Selected, firstPoint, null);
+				PointSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
+				subEntityToModify.m_entity.EntityTypes = a_newTypes;
+				subEntityToModify.RedrawGameObject(SubEntityDrawMode.Selected, m_firstPoint, null);
 			}
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
-		public override void HandleTeamChange(int newTeam)
+		public override void HandleTeamChange(int a_newTeam)
 		{
 			List<PointSubEntity> subEntitiesWithDifferentTeam = new List<PointSubEntity>();
 
 			//Find subentities with changed entity types
-			foreach (PointSubEntity subEntity in selection)
+			foreach (PointSubEntity subEntity in m_selection)
 			{
-				if (subEntity.Entity.Country != newTeam)
+				if (subEntity.m_entity.Country != a_newTeam)
 				{
 					subEntitiesWithDifferentTeam.Add(subEntity);
 				}
@@ -455,25 +441,25 @@ namespace MSP2050.Scripts
 
 			if (subEntitiesWithDifferentTeam.Count == 0) { return; }
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
 			foreach (PointSubEntity subEntity in subEntitiesWithDifferentTeam)
 			{
-				PointSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.Country = newTeam;
+				PointSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
+				subEntityToModify.m_entity.Country = a_newTeam;
 			}
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
-		public override void HandleParameterChange(EntityPropertyMetaData parameter, string newValue)
+		public override void HandleParameterChange(EntityPropertyMetaData a_parameter, string a_newValue)
 		{
 			List<PointSubEntity> subEntitiesWithDifferentParams = new List<PointSubEntity>();
 
 			//Find subentities with changed entity types
-			foreach (PointSubEntity subEntity in selection)
+			foreach (PointSubEntity subEntity in m_selection)
 			{
-				if (subEntity.Entity.GetPropertyMetaData(parameter) != newValue)
+				if (subEntity.m_entity.GetPropertyMetaData(a_parameter) != a_newValue)
 				{
 					subEntitiesWithDifferentParams.Add(subEntity);
 				}
@@ -481,35 +467,32 @@ namespace MSP2050.Scripts
 
 			if (subEntitiesWithDifferentParams.Count == 0) { return; }
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
 			foreach (PointSubEntity subEntity in subEntitiesWithDifferentParams)
 			{
-				PointSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.SetPropertyMetaData(parameter, newValue);
+				PointSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
+				subEntityToModify.m_entity.SetPropertyMetaData(a_parameter, a_newValue);
 			}
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
-		public override void ExitState(Vector3 currentMousePosition)
+		public override void ExitState(Vector3 a_currentMousePosition)
 		{
-			if (previousHover != null)
+			if (m_previousHover != null)
 			{
-				previousHover.RedrawGameObject(SubEntityDrawMode.Default, null, null);
+				m_previousHover.RedrawGameObject(SubEntityDrawMode.Default, null, null);
 			}
 
-			foreach (PointSubEntity pse in selection)
+			foreach (PointSubEntity pse in m_selection)
 			{
 				pse.RedrawGameObject(SubEntityDrawMode.Default);
 			}
-			selection = new HashSet<PointSubEntity>();
+			m_selection = new HashSet<PointSubEntity>();
 
 			BoxSelect.HideBoxSelection();
-			IssueManager.instance.SetIssueInteractability(true);
-
-			// make sure the entity type dropdown shows a valid value
-			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());
+			IssueManager.Instance.SetIssueInteractability(true);
 		}
 
 		private void UpdateActivePlanWindowToSelection()
@@ -518,23 +501,23 @@ namespace MSP2050.Scripts
 			int? selectedTeam = null;
 			List<Dictionary<EntityPropertyMetaData, string>> selectedParams = new List<Dictionary<EntityPropertyMetaData, string>>();
 
-			foreach (PointSubEntity pse in selection)
+			foreach (PointSubEntity pse in m_selection)
 			{
-				selectedEntityTypes.Add(pse.Entity.EntityTypes);
-				if (selectedTeam.HasValue && pse.Entity.Country != selectedTeam.Value)
+				selectedEntityTypes.Add(pse.m_entity.EntityTypes);
+				if (selectedTeam.HasValue && pse.m_entity.Country != selectedTeam.Value)
 					selectedTeam = -1;
 				else
-					selectedTeam = pse.Entity.Country;
+					selectedTeam = pse.m_entity.Country;
 				Dictionary<EntityPropertyMetaData, string> parameters = new Dictionary<EntityPropertyMetaData, string>();
-				foreach (EntityPropertyMetaData p in baseLayer.propertyMetaData)
+				foreach (EntityPropertyMetaData p in m_baseLayer.m_propertyMetaData)
 				{
 					if (p.ShowInEditMode)
-						parameters.Add(p, pse.Entity.GetPropertyMetaData(p));
+						parameters.Add(p, pse.m_entity.GetPropertyMetaData(p));
 				}
 				selectedParams.Add(parameters);
 
 			}
-			InterfaceCanvas.Instance.SetActiveplanWindowToSelection(
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
 				selectedParams);

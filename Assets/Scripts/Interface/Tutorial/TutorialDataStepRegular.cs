@@ -12,10 +12,12 @@ namespace MSP2050.Scripts
 		[SerializeField] ATutorialRequirement[] m_completionRequirements;
 		[SerializeField] ATutorialRequirement[] m_prerequisites;
 		[SerializeField] string[] m_highlightedObjects;
+		[SerializeField] bool m_highlightBasedOnTags;
 		[SerializeField] GameObject m_visualsPrefab;
 		[SerializeField] ATutorialAction[] m_enterStepActions;
 
 		private bool m_complete;
+		public bool IsComplete() { return m_complete; }
 
 		public override void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep)
 		{
@@ -50,9 +52,11 @@ namespace MSP2050.Scripts
 				m_complete = false;
 			}
 
-			a_manager.UI.SetUIToRegular(m_headerText, m_contentText, m_completionRequirements != null && m_completionRequirements.Length > 0, m_alignTop, m_visualsPrefab, m_complete);
-			if(m_highlightedObjects != null && m_highlightedObjects.Length > 0)
-				HighlightManager.instance.SetUIHighlights(m_highlightedObjects);
+			a_manager.UI.SetUIToRegular(m_headerText, m_contentText, m_completionRequirements != null && m_completionRequirements.Length > 0, m_alignTop, m_visualsPrefab, IsComplete);
+			if (m_highlightedObjects != null && m_highlightedObjects.Length > 0)
+			{
+				HighlightManager.instance.SetUIHighlights(m_highlightedObjects, m_highlightBasedOnTags);
+			}
 
 		}
 

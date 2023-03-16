@@ -157,7 +157,7 @@ namespace MSP2050.Scripts
 			List<Feature> features = new List<Feature>(subEntitiesToPass.Count);
 			foreach (var kvp in subEntitiesToPass)
 			{
-				features.Add(kvp.Value.GetGeoJSONFeature(kvp.Key));
+				features.Add(kvp.Value.GetGeoJsonFeature(kvp.Key));
 			}
 			FeatureCollection featureCollection = new FeatureCollection(features);
 			string content = JsonConvert.SerializeObject(featureCollection);

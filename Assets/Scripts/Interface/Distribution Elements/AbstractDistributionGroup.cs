@@ -1,0 +1,17 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+namespace MSP2050.Scripts
+{
+	public abstract class AbstractDistributionGroup : MonoBehaviour
+	{
+		public abstract void UpdateDistributionItem(DistributionItem updatedItem, float currentValue);
+
+		public abstract void ApplySliderValues(Plan plan, int index);
+		public abstract void SetSliderValues(Dictionary<int, float> planDeltaValues, Dictionary<int, float> initialValues);
+		public abstract void SetSliderValues(EnergyGrid grid, EnergyGrid.GridPlanState state);
+		public abstract void SetSliderInteractability(bool value);
+		public abstract void SetName(string name);
+	}
+}
+

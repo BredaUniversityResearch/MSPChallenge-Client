@@ -41,7 +41,7 @@ namespace UnityEngine.UI
 		{
 			if (m_instance != null && m_instance != this)
 			{
-				Destroy(gameObject);
+				Destroy(this);
 			}
 			else
 			{

@@ -40,6 +40,7 @@ namespace MSP2050.Scripts
 		enum EScreenPosition {Top, Center, Bottom}
 		private EScreenPosition m_screenPosition = EScreenPosition.Center;
 		bool m_highlightingCheckbox;
+		public delegate bool Completioncheck();
 
 		public void Initialise(UnityAction a_nextButtonCallback, UnityAction a_previousButtonCallback, UnityAction a_quitButtonCallback)
 		{
@@ -116,7 +117,7 @@ namespace MSP2050.Scripts
 			StartCoroutine(FadeIn());
 		}
 
-		public void SetUIToRegular(string a_header, string a_content, bool a_hasRequirements, bool a_alignTop, GameObject a_graphicPrefab, bool a_preComplete)
+		public void SetUIToRegular(string a_header, string a_content, bool a_hasRequirements, bool a_alignTop, GameObject a_graphicPrefab, Completioncheck a_preComplete)
 		{
 			
 			if(a_alignTop)
@@ -129,7 +130,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		IEnumerator SetUIToRegularFade(string a_header, string a_content, bool a_hasRequirements, bool a_alignTop, GameObject a_graphicPrefab, bool a_preComplete,
+		IEnumerator SetUIToRegularFade(string a_header, string a_content, bool a_hasRequirements, bool a_alignTop, GameObject a_graphicPrefab, Completioncheck a_preComplete,
 			Vector2 a_targetAnchorMin, Vector2 a_targetAnchorMax, Vector2 a_targetPivot)
 		{
 			m_fade.interactable = false;
@@ -189,7 +190,7 @@ namespace MSP2050.Scripts
 			if (a_hasRequirements)
 			{
 				m_regularCheckbox.SetActive(true);
-				SetRequirementChecked(a_preComplete);
+				SetRequirementChecked(a_preComplete());
 			}
 			else
 			{

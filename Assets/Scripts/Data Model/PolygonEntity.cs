@@ -16,7 +16,7 @@ namespace MSP2050.Scripts
 		public PolygonEntity(PolygonLayer layer, SubEntityObject layerObject) : base(layer, layerObject)
 		{
 			polygonSubEntities = new List<PolygonSubEntity>();
-			if (layer.editingType == AbstractLayer.EditingType.SourcePolygon)
+			if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 				polygonSubEntities.Add(new EnergyPolygonSubEntity(this, layerObject, layerObject.id));
 			else
 				polygonSubEntities.Add(new PolygonSubEntity(this, layerObject, layerObject.id));

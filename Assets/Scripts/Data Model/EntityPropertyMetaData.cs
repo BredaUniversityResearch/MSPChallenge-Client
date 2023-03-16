@@ -1,45 +1,41 @@
-﻿
-using UnityEngine.UI;
-
+﻿using System.Diagnostics.CodeAnalysis;
 namespace MSP2050.Scripts
 {
 	/// <summary>
 	/// Meta data for properties defined on the entities. These properties are stored in the metaData on the entities and the geometry_data field in the database.
 	/// </summary>
+	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match database
 	public class EntityPropertyMetaData
 	{
 		public readonly string PropertyName;
 		public readonly bool Enabled;   //Visible in game for non-dev users
-		public readonly bool Editable;  //Is this property editable for non-dev users? 
+		private readonly bool Editable;  //Is this property editable for non-dev users? 
 		public readonly string DisplayName;
 		public readonly string SpriteName;
 		public readonly string DefaultValue;
-		public readonly bool UpateVisuals;
+		public readonly bool UpateVisuals; // todo: fix typo's. Will break existing database content
 		public readonly bool UpateText;
 		public readonly bool UpateCalculation;
-		public readonly InputField.ContentType ContentType;
+		public readonly TMPro.TMP_InputField.ContentType ContentType;
 		public readonly LayerInfoPropertiesObject.ContentValidation ContentValidation;
 		public readonly string Unit;
 
-		public EntityPropertyMetaData(string propertyName, bool enabled, bool editable, string displayName, string spriteName, string defaultValue, bool updateVisuals, bool updateText, bool updateCalculation, InputField.ContentType contentType, LayerInfoPropertiesObject.ContentValidation contentValidation, string unit)
+		public EntityPropertyMetaData(string a_propertyName, bool a_enabled, bool a_editable, string a_displayName, string a_spriteName, string a_defaultValue, bool a_updateVisuals, bool a_updateText, bool a_updateCalculation, TMPro.TMP_InputField.ContentType a_contentType, LayerInfoPropertiesObject.ContentValidation a_contentValidation, string a_unit)
 		{
-			PropertyName = propertyName;
-			Enabled = enabled;
-			Editable = editable;
-			DisplayName = displayName;
-			SpriteName = spriteName;
-			DefaultValue = defaultValue;
-			UpateVisuals = updateVisuals;
-			UpateText = updateText;
-			UpateCalculation = updateCalculation;
-			ContentType = contentType;
-			ContentValidation = contentValidation;
-			Unit = unit;
+			PropertyName = a_propertyName;
+			Enabled = a_enabled;
+			Editable = a_editable;
+			DisplayName = a_displayName;
+			SpriteName = a_spriteName;
+			DefaultValue = a_defaultValue;
+			UpateVisuals = a_updateVisuals;
+			UpateText = a_updateText;
+			UpateCalculation = a_updateCalculation;
+			ContentType = a_contentType;
+			ContentValidation = a_contentValidation;
+			Unit = a_unit;
 		}
 
-		public bool ShowInEditMode
-		{
-			get { return Enabled && Editable; }
-		}
+		public bool ShowInEditMode => Enabled && Editable;
 	}
 }

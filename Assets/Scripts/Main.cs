@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 		public const double SCALE_DOUBLE = 1000.0;
 		public const string FIRST_TIME_KEY = "FirstTimePlaying";
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
 		public static bool IsDeveloper = true;
 #else
     public static bool IsDeveloper = false;
@@ -38,18 +38,18 @@ namespace MSP2050.Scripts
 		[HideInInspector] public bool fsmActive;
 
 		private bool interceptQuit = true;
-		private bool editingPlanDetailsContent = false;
-		private bool preventPlanAndTabChange = false;
+		private bool preventPlanChange = false;
 
 		private ProjectionInfo mspCoordinateProjection;
 		private ProjectionInfo geoJSONCoordinateProjection;
 		[HideInInspector] public int currentExpertiseIndex;
-		[HideInInspector] public SELGameClientConfig SelConfig{ get; set; }
-
-		private ESimulationType availableSimulations;
 
 		[HideInInspector] public event Action OnFinishedLoadingLayers; //Called when we finished loading all layers and right before the first tick is requested.
 		[HideInInspector] public event Action OnPostFinishedLoadingLayers;
+
+		bool m_gameLoaded;
+		public bool GameLoaded => m_gameLoaded;
+
 
 		protected void Awake()
 		{
@@ -59,22 +59,22 @@ namespace MSP2050.Scripts
 				singleton = this;
 
 			System.Threading.Thread.CurrentThread.CurrentCulture = Localisation.NumberFormatting;
-        
+
 			//Setup projection parameters for later conversion
 			mspCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs");
 			geoJSONCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
 
 			GameSettings.Instance.SetAudioMixer(audioMixer);
+			InterfaceCanvas.Instance.loadingScreen.ShowHideLoadScreen(true);
 
 			fsm = new FSM();
 			fsmActive = true;
 			Application.wantsToQuit += OnApplicationQuit;
 
 			currentExpertiseIndex = PlayerPrefs.GetInt(LoginContentTabLogin.LOGIN_EXPERTISE_INDEX_STR, -1);
-			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
+
 			if (SessionManager.Instance.MspGlobalData.expertise_definitions != null)
 				InterfaceCanvas.Instance.menuBarActiveLayers.toggle.isOn = true;
-			ParseAvailableSimulations(SessionManager.Instance.MspGlobalData.configured_simulations);
 			InterfaceCanvas.Instance.SetRegion(SessionManager.Instance.MspGlobalData);
 
 			if (SessionManager.Instance.MspGlobalData.dependencies != null)
@@ -88,6 +88,16 @@ namespace MSP2050.Scripts
 				else
 					InterfaceCanvas.Instance.ImpactToolGraph.Initialise(HEBData);
 			}
+			PolicyManager.Instance.RegisterBuiltInPolicies();
+			SimulationManager.Instance.RegisterBuiltInSimulations();
+			ServerCommunication.Instance.DoRequest<PolicySimSettings>(Server.PolicySimSettings(), new NetworkForm(), HandlePolicySimSettingsCallback);
+		}
+
+		private void HandlePolicySimSettingsCallback(PolicySimSettings a_settings)
+		{
+			PolicyManager.Instance.InitialisePolicies(a_settings.policy_settings);
+			SimulationManager.Instance.InitialiseSimulations(a_settings.simulation_settings);
+			layerImporter = new LayerImporter(layerPickerUI); //This starts importing meta
 		}
 
 		void OnDestroy()
@@ -127,7 +137,7 @@ namespace MSP2050.Scripts
 		}
 
 		public static void QuitGame()
-		{       
+		{
 			if (Instance != null)
 			{
 				NetworkForm form = new NetworkForm();
@@ -143,12 +153,8 @@ namespace MSP2050.Scripts
 
 		protected void Update()
 		{
-			if (fsmActive)
-			{
-				fsm.Update();
-			}
+			fsm?.Update();
 			ServerCommunication.Instance.UpdateCommunication();
-
 			MaterialManager.Instance.Update();
 		}
 
@@ -168,11 +174,11 @@ namespace MSP2050.Scripts
 				OnPostFinishedLoadingLayers = null;
 			}
 
-			LayerInterface.SortLayerToggles();
 			InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("Existing plans");
 			StartCoroutine(UpdateManager.Instance.GetFirstUpdate());
 
 			ConstraintManager.Instance.LoadRestrictions();
+			m_gameLoaded = true;
 		}
 
 		public void FirstUpdateTickComplete()
@@ -189,7 +195,7 @@ namespace MSP2050.Scripts
 
 		public static Plan CurrentlyEditingPlan
 		{
-			get { return PlanDetails.LayersTab.LockedPlan; }
+			get { return InterfaceCanvas.Instance.activePlanWindow.Editing ? InterfaceCanvas.Instance.activePlanWindow.CurrentPlan : null; }
 		}
 
 		public static bool InEditMode
@@ -197,42 +203,19 @@ namespace MSP2050.Scripts
 			get { return CurrentlyEditingPlan != null; }
 		}
 
-		public bool EditingPlanDetailsContent
+		public bool PreventPlanChange
 		{
-			get { return editingPlanDetailsContent; }
-			set { editingPlanDetailsContent = value; }
-		}
-
-		public bool PreventPlanAndTabChange
-		{
-			get { return preventPlanAndTabChange; }
-			set { preventPlanAndTabChange = value; }
+			get { return preventPlanChange; }
+			set { preventPlanChange = value; }
 		}
 
 		public static ETextState GetTextState()
 		{
 			if (InEditMode)
 				return ETextState.Edit;
-			if (PlanManager.Instance.planViewing == null) //This currently shows current and past (through ViewAtTime)
+			if (PlanManager.Instance.m_planViewing == null) //This currently shows current and past (through ViewAtTime)
 				return ETextState.Current;
 			return ETextState.View;
-		}
-
-		private void ParseAvailableSimulations(ESimulationType[] configuredSimulations)
-		{
-			availableSimulations = ESimulationType.None;
-			if (configuredSimulations != null)
-			{
-				foreach (ESimulationType simType in configuredSimulations)
-				{
-					availableSimulations |= simType;
-				}
-			}
-		}
-
-		public bool IsSimulationConfigured(ESimulationType simulationType)
-		{
-			return (availableSimulations & simulationType) == simulationType;
 		}
 
 		public void GetRealWorldMousePosition(out double x, out double y)
@@ -245,7 +228,7 @@ namespace MSP2050.Scripts
 			x = (double)position.x * SCALE_DOUBLE;
 			y = (double)position.y * SCALE_DOUBLE;
 		}
-    
+
 		public FSM.CursorType CursorType
 		{
 			get { return fsm.CurrentCursorType; }

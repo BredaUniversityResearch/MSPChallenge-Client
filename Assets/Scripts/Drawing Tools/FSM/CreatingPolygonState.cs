@@ -5,158 +5,155 @@ namespace MSP2050.Scripts
 {
 	public class CreatingPolygonState : FSMState
 	{
-		PolygonSubEntity subEntity;
-		PlanLayer planLayer;
+		private PolygonSubEntity m_subEntity;
+		private PlanLayer m_planLayer;
 		public override EEditingStateType StateType => EEditingStateType.Create;
-		public CreatingPolygonState(FSM fsm, PolygonSubEntity subEntity, PlanLayer planLayer) : base(fsm)
+		public CreatingPolygonState(FSM a_fsm, PolygonSubEntity a_subEntity, PlanLayer a_planLayer) : base(a_fsm)
 		{
-			this.subEntity = subEntity;
-			this.planLayer = planLayer;
+			m_subEntity = a_subEntity;
+			m_planLayer = a_planLayer;
 		}
 
-		public override void EnterState(Vector3 currentMousePosition)
+		public override void EnterState(Vector3 a_currentMousePosition)
 		{
-			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
+			base.EnterState(a_currentMousePosition);
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Create);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
-			ic.SetTeamAndTypeToBasicIfEmpty();
-			ic.SetActivePlanWindowInteractability(true);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetCreateMode(true);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, false);
+			//ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
+			gt.SetTeamAndTypeToBasicIfEmpty();
+			gt.SetActivePlanWindowInteractability(true);
 
-			int pointCount = subEntity.GetPolygonPointCount();
-			subEntity.SetPointPosition(pointCount - 1, subEntity.GetPointPosition(pointCount - 2), true);
+			int pointCount = m_subEntity.GetPolygonPointCount();
+			m_subEntity.SetPointPosition(pointCount - 1, m_subEntity.GetPointPosition(pointCount - 2), true);
 
-			if ((subEntity.Entity.Layer as PolygonLayer).activeEntities.Contains(subEntity.Entity as PolygonEntity))
+			if ((m_subEntity.m_entity.Layer as PolygonLayer).m_activeEntities.Contains(m_subEntity.m_entity as PolygonEntity))
 			{
-				subEntity.DrawGameObject(subEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
+				m_subEntity.DrawGameObject(m_subEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			}
 			else
 			{
-				(subEntity.Entity.Layer as PolygonLayer).RestoreSubEntity(subEntity);
-				subEntity.DrawGameObject(subEntity.Entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
+				(m_subEntity.m_entity.Layer as PolygonLayer).RestoreSubEntity(m_subEntity);
+				m_subEntity.DrawGameObject(m_subEntity.m_entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			}
 
-			fsm.SetCursor(FSM.CursorType.Add);
-			fsm.SetSnappingEnabled(true);
+			m_fsm.SetCursor(FSM.CursorType.Add);
+			m_fsm.SetSnappingEnabled(true);
 
-			IssueManager.instance.SetIssueInteractability(false);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
 
-		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
+		public override void MouseMoved(Vector3 a_previousPosition, Vector3 a_currentPosition, bool a_cursorIsOverUI)
 		{
-			bool finishing = clickingWouldFinishDrawing(currentPosition);
-			subEntity.SetPointPosition(subEntity.GetPolygonPointCount() - 1, currentPosition, true);
-			subEntity.PerformNewSegmentValidityCheck(finishing);
+			bool finishing = ClickingWouldFinishDrawing(a_currentPosition);
+			m_subEntity.SetPointPosition(m_subEntity.GetPolygonPointCount() - 1, a_currentPosition, true);
+			m_subEntity.PerformNewSegmentValidityCheck(finishing);
 
 			if (finishing)
-				subEntity.SetPointPosition(subEntity.GetPolygonPointCount() - 1, subEntity.GetPointPosition(0), true);
+				m_subEntity.SetPointPosition(m_subEntity.GetPolygonPointCount() - 1, m_subEntity.GetPointPosition(0), true);
 
-			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
+			m_subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 
-			if (cursorIsOverUI)
-				fsm.SetCursor(FSM.CursorType.Default);       
-			else if(subEntity.InvalidPoints != null)
-				fsm.SetCursor(FSM.CursorType.Invalid);
+			if (a_cursorIsOverUI)
+				m_fsm.SetCursor(FSM.CursorType.Default);       
+			else if(m_subEntity.InvalidPoints != null)
+				m_fsm.SetCursor(FSM.CursorType.Invalid);
 			else if(finishing)
-				fsm.SetCursor(FSM.CursorType.Complete);
+				m_fsm.SetCursor(FSM.CursorType.Complete);
 			else
-				fsm.SetCursor(FSM.CursorType.Add);
+				m_fsm.SetCursor(FSM.CursorType.Add);
 		}
 
-		private bool clickingWouldFinishDrawing(Vector3 position)
+		private bool ClickingWouldFinishDrawing(Vector3 a_position)
 		{
-			int points = subEntity.GetPolygonPointCount();
+			int points = m_subEntity.GetPolygonPointCount();
 			if (points < 4)
 				return false; 
 
 			//Get closest, ignoring the last point
 			float closestDistSq;
-			int pointClicked = subEntity.GetPointAt(position, out closestDistSq, true);
+			int pointClicked = m_subEntity.GetPointAt(a_position, out closestDistSq, true);
 
 			return pointClicked == 0 || pointClicked == points - 2;
 		}
 
-		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
+		public override void LeftMouseButtonUp(Vector3 a_startPosition, Vector3 a_finalPosition)
 		{
-			bool finishing = clickingWouldFinishDrawing(finalPosition);
-			subEntity.PerformNewSegmentValidityCheck(finishing);
+			bool finishing = ClickingWouldFinishDrawing(a_finalPosition);
+			m_subEntity.PerformNewSegmentValidityCheck(finishing);
 
-			if (subEntity.InvalidPoints == null)
+			if (m_subEntity.InvalidPoints != null)
+				return;
+			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
+			if (finishing)
 			{
-				AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
-				if (finishing)
-				{
-					fsm.AddToUndoStack(new FinalizePolygonOperation(subEntity, planLayer));
-					FinalizePolygon();
-					return;
-				}
-
-				SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
-
-				subEntity.AddPoint(finalPosition);
-				subEntity.edited = true;
-				subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
-				if (subEntity.GetPolygonPointCount() > 2)
-					fsm.SetCursor(FSM.CursorType.Complete);
-
-				fsm.AddToUndoStack(new ModifyPolygonOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
+				m_fsm.AddToUndoStack(new FinalizePolygonOperation(m_subEntity, m_planLayer));
+				FinalizePolygon();
+				return;
 			}
+
+			SubEntityDataCopy dataCopy = m_subEntity.GetDataCopy();
+
+			m_subEntity.AddPoint(a_finalPosition);
+			m_subEntity.m_edited = true;
+			m_subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
+			if (m_subEntity.GetPolygonPointCount() > 2)
+				m_fsm.SetCursor(FSM.CursorType.Complete);
+
+			m_fsm.AddToUndoStack(new ModifyPolygonOperation(m_subEntity, m_planLayer, dataCopy, UndoOperation.EditMode.Create));
 		}
 
-		public override void HandleEntityTypeChange(List<EntityType> newTypes)
+		public override void HandleEntityTypeChange(List<EntityType> a_newTypes)
 		{
-			SubEntityDataCopy dataCopy = subEntity.GetDataCopy();
+			SubEntityDataCopy dataCopy = m_subEntity.GetDataCopy();
 
-			subEntity.Entity.EntityTypes = newTypes;
-			subEntity.edited = true;
-			subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
+			m_subEntity.m_entity.EntityTypes = a_newTypes;
+			m_subEntity.m_edited = true;
+			m_subEntity.RedrawGameObject(SubEntityDrawMode.BeingCreated);
 
-			fsm.AddToUndoStack(new ModifyPolygonOperation(subEntity, planLayer, dataCopy, UndoOperation.EditMode.Create));
+			m_fsm.AddToUndoStack(new ModifyPolygonOperation(m_subEntity, m_planLayer, dataCopy, UndoOperation.EditMode.Create));
 		}
 
 		public override void Abort()
 		{
-			fsm.AddToUndoStack(new RemovePolygonOperation(subEntity, planLayer, UndoOperation.EditMode.Create));
-			fsm.SetCurrentState(new SelectPolygonsState(fsm, planLayer));
+			m_fsm.AddToUndoStack(new RemovePolygonOperation(m_subEntity, m_planLayer, UndoOperation.EditMode.Create));
+			m_fsm.SetCurrentState(new SelectPolygonsState(m_fsm, m_planLayer));
 		}
 
 		public void FinalizePolygon()
 		{
-			subEntity.RemovePoints(new HashSet<int>() { subEntity.GetPolygonPointCount() - 1 });
+			m_subEntity.RemovePoints(new HashSet<int>() { m_subEntity.GetPolygonPointCount() - 1 });
 
-			subEntity.PerformValidityCheck(false);
-			//if (subEntity is EnergyPolygonSubEntity)
-			//    (subEntity as EnergyPolygonSubEntity).FinalizePoly();
+			m_subEntity.PerformValidityCheck(false);
+			
+			List<EntityType> selectedType = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 
-			List<EntityType> selectedType = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			if (selectedType != null) { m_subEntity.m_entity.EntityTypes = selectedType; }
 
-			if (selectedType != null) { subEntity.Entity.EntityTypes = selectedType; }
+			m_subEntity.m_restrictionNeedsUpdate = true;
+			m_subEntity.UnHideRestrictionArea();
+			m_subEntity.RedrawGameObject(SubEntityDrawMode.Default);
 
-			subEntity.restrictionNeedsUpdate = true;
-			subEntity.UnHideRestrictionArea();
-			subEntity.RedrawGameObject(SubEntityDrawMode.Default);
+			m_subEntity = null; // set polygon to null so the exit state function doesn't remove it
 
-			subEntity = null; // set polygon to null so the exit state function doesn't remove it
-
-			fsm.TriggerGeometryComplete();
-			fsm.SetCurrentState(new StartCreatingPolygonState(fsm, planLayer));
+			m_fsm.TriggerGeometryComplete();
+			m_fsm.SetCurrentState(new StartCreatingPolygonState(m_fsm, m_planLayer));
 		}
 
 		public override void HandleKeyboardEvents()
 		{
 			if (Input.GetKeyDown(KeyCode.Return))
 			{
-				if (subEntity.GetPolygonPointCount() < 4)
+				if (m_subEntity.GetPolygonPointCount() < 4)
 					DialogBoxManager.instance.NotificationWindow("Couldn't complete polygon", "A polygon needs at least 3 points to be completed.", null);
 				else
 				{
-					subEntity.PerformNewSegmentValidityCheck(true);
-					if (subEntity.InvalidPoints == null)
+					m_subEntity.PerformNewSegmentValidityCheck(true);
+					if (m_subEntity.InvalidPoints == null)
 					{
-						fsm.AddToUndoStack(new FinalizePolygonOperation(subEntity, planLayer));
+						m_fsm.AddToUndoStack(new FinalizePolygonOperation(m_subEntity, m_planLayer));
 						FinalizePolygon();
 					}
 					else
@@ -169,9 +166,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void HandleToolbarInput(FSM.ToolbarInput toolbarInput)
+		public override void HandleToolbarInput(FSM.ToolbarInput a_toolbarInput)
 		{
-			switch (toolbarInput)
+			switch (a_toolbarInput)
 			{
 				case FSM.ToolbarInput.Edit:
 				case FSM.ToolbarInput.Abort:
@@ -180,15 +177,15 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void ExitState(Vector3 currentMousePosition)
+		public override void ExitState(Vector3 a_currentMousePosition)
 		{
-			if (subEntity != null)
+			if (m_subEntity != null)
 			{
-				(subEntity.Entity.Layer as PolygonLayer).RemoveSubEntity(subEntity, false);
-				subEntity.RemoveGameObject();
+				(m_subEntity.m_entity.Layer as PolygonLayer).RemoveSubEntity(m_subEntity, false);
+				m_subEntity.RemoveGameObject();
 			}
 
-			IssueManager.instance.SetIssueInteractability(true);
+			IssueManager.Instance.SetIssueInteractability(true);
 		}
 	}
 }

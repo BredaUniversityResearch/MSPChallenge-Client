@@ -8,89 +8,64 @@ namespace MSP2050.Scripts
 	public class KPIBar : MonoBehaviour
 	{
 		[Header("References")]
-		public TextMeshProUGUI title;
-		public Image teamColour;
-		public CustomToggle barToggle;
-		public Toggle graphToggle;
-		public GameObject childContainer;
-		public GameObject otherObjectEnabledOnExpand;
-		public RectTransform foldIcon;
-		public bool isParent;
-		public bool isExpanded = false;
-		public string unit;
-		public string ValueName
-		{
-			get;
-			set;
-		}
-
-		public bool usesKPIValueColor = true;
+		[SerializeField] TextMeshProUGUI m_title;
+		[SerializeField] Toggle m_graphToggle;
+		[SerializeField] Image m_graphColourDisplay;
 
 		[Header("Values")]
-		[SerializeField]
-		private KPIValueDisplay start = null;
-		[SerializeField]
-		private KPIValueDisplay actual = null;
+		[SerializeField] KPIValueDisplay m_start = null;
+		[SerializeField] KPIValueDisplay m_actual = null; 
+		[SerializeField] ValueConversionCollection m_valueConversionCollection = null;
 
-		[SerializeField]
-		private ValueConversionCollection valueConversionCollection = null;
-		//public Text yearly;
+		KPIValue m_currentValue;
+		float m_startingValue = 0.0f;
+		Action<bool, KPIBar> m_barToggleCallback;
 
-		private float startingValue = 0.0f;
-		public float CurrentValue
+		public string ValueName => m_currentValue.name;
+		public bool GraphToggled => m_graphToggle != null && m_graphToggle.isOn;
+
+		void Start()
 		{
-			get;
-			private set;
-		}
-
-		private Color barCol;
-		private ColorBlock toggleColBlock;
-
-		private Action<bool> onBarExpandedStateToggled;
-
-		void Awake()
-		{
-			if(isParent)
-				barToggle.onValueChanged.AddListener(SetExpandedInternal);
-			else if(graphToggle.gameObject.activeSelf)
-			{
-				barToggle.onValueChanged.AddListener((b) => { graphToggle.isOn = !graphToggle.isOn;});
+			if(m_graphToggle != null)
+            {
+				m_graphToggle.onValueChanged.AddListener((a) => m_barToggleCallback.Invoke(a, this));
 			}
 		}
 
-		/// <summary>
-		/// Sets the text of the first bar value
-		/// </summary>
-		public void SetActual(float val, int countryId)
+		public void SetContent(KPIValue a_value, Action<bool, KPIBar> a_barToggleCallback)
 		{
-			ConvertedUnit convertedValue = GetConvertedValue(val);
-
-			actual.UpdateValue(convertedValue);
-			CurrentValue = val;
-			//lastActual = currentValue;
-
-			string changePercentage = KPIValue.FormatRelativePercentage(startingValue, val);
-			actual.UpdateTooltip(changePercentage);
-			if (countryId != -1 && teamColour != null)
-			{
-				teamColour.gameObject.SetActive(true);
-				if (countryId == 0)
-					teamColour.color = Color.white;
-				else
-					teamColour.color = SessionManager.Instance.GetTeamByTeamID(countryId).color;
-			}
+			m_currentValue = a_value;
+			m_title.text = a_value.displayName;
+			m_barToggleCallback = a_barToggleCallback;
 		}
 
-		private ConvertedUnit GetConvertedValue(float value)
+		public void SetActual(float? val)
 		{
-			ConvertedUnit convertedValue;
-			if (valueConversionCollection != null)
+			if (val.HasValue)
 			{
-				convertedValue = valueConversionCollection.ConvertUnit(value, unit);
+				ConvertedUnitFloat convertedValue = GetConvertedValue(val.Value);
+
+				m_actual.UpdateValue(convertedValue);
+
+				string changePercentage = KPIValue.FormatRelativePercentage(m_startingValue, val.Value);
+				m_actual.UpdateTooltip(changePercentage);
 			}
 			else
 			{
-				convertedValue = new ConvertedUnit(value, unit, 0);
+				m_actual.SetUnknown();
+			}
+		}
+
+		private ConvertedUnitFloat GetConvertedValue(float value)
+		{
+			ConvertedUnitFloat convertedValue;
+			if (m_valueConversionCollection != null)
+			{
+				convertedValue = m_valueConversionCollection.ConvertUnit(value, m_currentValue.unit);
+			}
+			else
+			{
+				convertedValue = new ConvertedUnitFloat(value, m_currentValue.unit, 0);
 			}
 
 			return convertedValue;
@@ -98,45 +73,20 @@ namespace MSP2050.Scripts
 
 		public void SetStartValue(float value)
 		{
-			ConvertedUnit convertedValue = GetConvertedValue(value);
-			start.UpdateValue(convertedValue);
-			startingValue = value;
-		}
-
-		private void SetExpandedInternal(bool state)
-		{
-			isExpanded = state;
-			childContainer.SetActive(isExpanded);
-			if (otherObjectEnabledOnExpand != null)
-			{
-				otherObjectEnabledOnExpand.SetActive(isExpanded);
-				otherObjectEnabledOnExpand.transform.SetAsFirstSibling();
-			}
-
-			Vector3 rot = foldIcon.eulerAngles;
-			foldIcon.eulerAngles = isExpanded ? new Vector3(rot.x, rot.y, 0f) : new Vector3(rot.x, rot.y, 90f);
-
-			if (onBarExpandedStateToggled != null)
-			{
-				onBarExpandedStateToggled(isExpanded);
-			}
-		}
-
-		public void SetExpandedState(bool state)
-		{
-			if(isParent)
-				barToggle.isOn = state;
-		}
-
-		public void SetBarExpandedStateChangedCallback(Action<bool> callback)
-		{
-			onBarExpandedStateToggled = callback;
+			ConvertedUnitFloat convertedValue = GetConvertedValue(value);
+			m_start.UpdateValue(convertedValue);
+			m_startingValue = value;
 		}
 
 		public void SetDisplayedGraphColor(Color graphColor)
 		{
-			title.color = graphColor;
-			graphToggle.graphic.color = graphColor;
+			m_title.color = graphColor;
+			m_graphColourDisplay.color = graphColor;
+		}
+
+		public void SetGraphToggled(bool a_value)
+        {
+			m_graphToggle.isOn = a_value;
 		}
 	}
 }

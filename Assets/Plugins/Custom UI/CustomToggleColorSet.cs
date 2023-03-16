@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -9,84 +8,105 @@ using ColourPalette;
 [RequireComponent(typeof(CustomToggle))]
 public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    // ReSharper disable once InconsistentNaming // serialized by odin
     public List<Graphic> targetGraphics;
+    // ReSharper disable once InconsistentNaming // serialized by odin
     public IColourContainer colorNormal;
+    // ReSharper disable once InconsistentNaming // serialized by odin
     public IColourContainer colorSelected;
+    // ReSharper disable once InconsistentNaming // serialized by odin
     public bool highlightIfOn;
 
+    // ReSharper disable once InconsistentNaming // serialized by odin
     public bool useHighlightColor;
     [ShowIf("useHighlightColor")]
+    // ReSharper disable once InconsistentNaming // serialized by odin
     public IColourContainer colorHighlight;
-    public bool useDisabledColor;
+	[ShowIf("useHighlightColor")]
+    // ReSharper disable once InconsistentNaming // serialized by odin
+	public bool separateSelectedHighlight;
+	[ShowIf("separateSelectedHighlight")]
+    // ReSharper disable once InconsistentNaming // serialized by odin
+	public IColourContainer colorSelectedHighlight;
+    // ReSharper disable once InconsistentNaming // serialized by odin
+	public bool useDisabledColor;
     [ShowIf("useDisabledColor")]
+    // ReSharper disable once InconsistentNaming // serialized by odin
     public IColourContainer colorDisabled;
 
-    CustomToggle toggle;
-    bool pointerOnToggle = false;
-    bool isDisabled = false;
-    private bool colorLocked = false;
+    private CustomToggle m_toggle;
+    private bool m_pointerOnToggle = false;
+    private bool m_isDisabled = false;
+    private bool m_colorLocked = false;
 
-    void Start()
+    private bool Highlight => useHighlightColor;
+
+    private bool UseDisabledColor => m_isDisabled && useDisabledColor;    
+    
+    private void Start()
     {
-        toggle = GetComponent<CustomToggle>();
+        m_toggle = GetComponent<CustomToggle>();
         SubscribeToAssetChange();
-        if (!toggle.interactable)
+        if (!m_toggle.interactable)
             SetDisabled(true);
         if (!UseDisabledColor)
-            SetGraphicSetToColor(toggle.isOn ? colorSelected : colorNormal);
-        toggle.onValueChanged.AddListener((value) =>
-        {
-            if (!UseDisabledColor && (!highlightIfOn || !(Highlight && pointerOnToggle)))
+            SetGraphicSetToColor(m_toggle.isOn ? colorSelected : colorNormal);
+        m_toggle.onValueChanged.AddListener((a_value) => {
+            if (UseDisabledColor)
+                return;
+            if (!highlightIfOn || !(Highlight && m_pointerOnToggle))
                 SetGraphicsToNormal();
+            else if(highlightIfOn && separateSelectedHighlight && useHighlightColor && m_pointerOnToggle)
+                SetGraphicsToHighlight(a_value);
         });
-        toggle.interactabilityChangeCallback += HandleInteractabilityChange;
+        m_toggle.interactabilityChangeCallback += HandleInteractabilityChange;
     }
 
     private void OnDestroy()
     {
-        if (toggle != null)
-            toggle.interactabilityChangeCallback -= HandleInteractabilityChange;
+        if (m_toggle != null)
+            m_toggle.interactabilityChangeCallback -= HandleInteractabilityChange;
         UnSubscribeFromAssetChange();
     }
 
-    private void HandleInteractabilityChange(bool newState)
+    private void HandleInteractabilityChange(bool a_newState)
     {
-        if (!newState && !isDisabled)
+        if (!a_newState && !m_isDisabled)
         {
             SetDisabled(true);
         }
-        else if (newState && isDisabled)
+        else if (a_newState && m_isDisabled)
         {
             SetDisabled(false);
         }
     }
 
-    private void SetDisabled(bool value)
+    private void SetDisabled(bool a_value)
     {
-        if (isDisabled && !value)
+        if (m_isDisabled && !a_value)
         {
             //No longer disabled, set to previous color
-            if (pointerOnToggle && Highlight)
-                SetGraphicsToHighlight();
+            if (m_pointerOnToggle && Highlight)
+                SetGraphicsToHighlight(m_toggle.isOn);
             else
                 SetGraphicsToNormal();
         }
-        isDisabled = value;
+        m_isDisabled = a_value;
         //Disabled and color change required
         if (UseDisabledColor)
             SetGraphicsToDisabled();
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public void OnPointerEnter(PointerEventData a_eventData)
     {
-        pointerOnToggle = true;
-        if (Highlight && (highlightIfOn || !toggle.isOn) && toggle.interactable)
-            SetGraphicsToHighlight();
+        m_pointerOnToggle = true;
+        if (Highlight && (highlightIfOn || !m_toggle.isOn) && m_toggle.interactable)
+            SetGraphicsToHighlight(m_toggle.isOn);
     }
 
-    public void OnPointerExit(PointerEventData eventData)
+    public void OnPointerExit(PointerEventData a_eventData)
     {
-        pointerOnToggle = false;
+        m_pointerOnToggle = false;
         if (Highlight && !UseDisabledColor)
             SetGraphicsToNormal();
     }
@@ -94,107 +114,95 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
     public void LockToColor(IColourContainer a_color)
     {
 	    SetGraphicSetToColor(a_color);
-	    colorLocked = true;
+	    m_colorLocked = true;
     }
 
     public void UnlockColor()
     {
-	    colorLocked = false;
-	    if (toggle != null)
-	    {
-		    if (UseDisabledColor)
-			    SetGraphicsToDisabled();
-		    if (Highlight && pointerOnToggle && (highlightIfOn || !toggle.isOn))
-			    SetGraphicsToHighlight();
-		    else
-			    SetGraphicsToNormal();
-	    }
+	    m_colorLocked = false;
+        if (m_toggle == null)
+            return;
+        if (UseDisabledColor)
+            SetGraphicsToDisabled();
+        if (Highlight && m_pointerOnToggle && (highlightIfOn || !m_toggle.isOn))
+            SetGraphicsToHighlight(m_toggle.isOn);
+        else
+            SetGraphicsToNormal();
     }
 
-	void SetGraphicsToNormal()
+    private void SetGraphicsToNormal()
     {
-        SetGraphicSetToColor(toggle.isOn ? colorSelected : colorNormal);
+        SetGraphicSetToColor(m_toggle.isOn ? colorSelected : colorNormal);
     }
 
-    void SetGraphicsToHighlight()
+    private void SetGraphicsToHighlight(bool a_toggleOn)
     {
-        SetGraphicSetToColor(colorHighlight);
+        if(separateSelectedHighlight && a_toggleOn)
+            SetGraphicSetToColor(colorSelectedHighlight);
+        else
+            SetGraphicSetToColor(colorHighlight);
     }
 
-    void SetGraphicsToDisabled()
+    private void SetGraphicsToDisabled()
     {
         SetGraphicSetToColor(colorDisabled);
     }
 
-    void SetGraphicSetToColor(IColourContainer colorAsset)
+    private void SetGraphicSetToColor(IColourContainer a_colorAsset)
     {
-	    if (colorLocked)
+	    if (m_colorLocked)
 		    return;
         foreach (Graphic g in targetGraphics)
-            g.color = colorAsset.GetColour();
+            g.color = a_colorAsset.GetColour();
     }
 
-    void SubscribeToAssetChange()
+    private void SubscribeToAssetChange()
     {
-        if (Application.isPlaying)
-        {
-            colorNormal?.SubscribeToChanges(OnNormalColourAssetChanged);
-            if (useHighlightColor)
-                colorHighlight?.SubscribeToChanges(OnHighlightColourAssetChanged);
-            if (useDisabledColor)
-                colorDisabled?.SubscribeToChanges(OnDisabledColourAssetChanged);
-        }
+        if (!Application.isPlaying)
+            return;
+        colorNormal?.SubscribeToChanges(OnNormalColourAssetChanged);
+        if (useHighlightColor)
+            colorHighlight?.SubscribeToChanges(OnHighlightColourAssetChanged);
+        if (separateSelectedHighlight)
+            colorSelectedHighlight?.SubscribeToChanges(OnHighlightColourAssetChanged);
+        if (useDisabledColor)
+            colorDisabled?.SubscribeToChanges(OnDisabledColourAssetChanged);
     }
 
-    void UnSubscribeFromAssetChange()
+    private void UnSubscribeFromAssetChange()
     {
-        if (Application.isPlaying)
-        {
-            colorNormal?.UnSubscribeFromChanges(OnNormalColourAssetChanged);
-            if (useHighlightColor)
-                colorHighlight?.UnSubscribeFromChanges(OnHighlightColourAssetChanged);
-            if (useDisabledColor)
-                colorDisabled?.UnSubscribeFromChanges(OnDisabledColourAssetChanged);
-        }
+        if (!Application.isPlaying)
+            return;
+        colorNormal?.UnSubscribeFromChanges(OnNormalColourAssetChanged);
+        if (useHighlightColor)
+            colorHighlight?.UnSubscribeFromChanges(OnHighlightColourAssetChanged);
+        if (separateSelectedHighlight)
+            colorSelectedHighlight?.UnSubscribeFromChanges(OnHighlightColourAssetChanged);
+        if (useDisabledColor)
+            colorDisabled?.UnSubscribeFromChanges(OnDisabledColourAssetChanged);
     }
 
-    void OnNormalColourAssetChanged(Color newColour)
+    private void OnNormalColourAssetChanged(Color a_newColour)
     {
-        if (!UseDisabledColor && !(Highlight && pointerOnToggle) && !toggle.isOn)
+        if (!UseDisabledColor && !(Highlight && m_pointerOnToggle) && !m_toggle.isOn)
             SetGraphicsToNormal();
     }
 
-    void OnSelectedColourAssetChanged(Color newColour)
+    private void OnSelectedColourAssetChanged(Color a_newColour)
     {
-        if (!UseDisabledColor && (!highlightIfOn || !(Highlight && pointerOnToggle)) && toggle.isOn)
+        if (!UseDisabledColor && (!highlightIfOn || !(Highlight && m_pointerOnToggle)) && m_toggle.isOn)
             SetGraphicsToNormal();
     }
 
-    void OnHighlightColourAssetChanged(Color newColour)
+    private void OnHighlightColourAssetChanged(Color a_newColour)
     {
-        if (Highlight && pointerOnToggle && (highlightIfOn || !toggle.isOn) && !UseDisabledColor)
-            SetGraphicsToHighlight();
+        if (Highlight && m_pointerOnToggle && (highlightIfOn || !m_toggle.isOn) && !UseDisabledColor)
+            SetGraphicsToHighlight(m_toggle.isOn);
     }
 
-    void OnDisabledColourAssetChanged(Color newColour)
+    private void OnDisabledColourAssetChanged(Color a_newColour)
     {
         if (UseDisabledColor)
             SetGraphicsToDisabled();
-    }
-
-    bool Highlight
-    {
-        get
-        {
-            return useHighlightColor;
-        }
-    }
-
-    bool UseDisabledColor
-    {
-        get
-        {
-            return isDisabled && useDisabledColor;
-        }
     }
 }

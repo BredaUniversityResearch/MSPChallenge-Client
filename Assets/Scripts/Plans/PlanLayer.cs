@@ -11,14 +11,14 @@ namespace MSP2050.Scripts
 		public const string STATE_ACTIVE = "ACTIVE";
 		public const string STATE_INACTIVE = "INACTIVE";
 
-		public int ID;
+		public int ID = -1;
+		public int creationBatchCallID;
 
 		public Plan Plan { get; set; }
 		public AbstractLayer BaseLayer; //Pointer
 		private List<Entity> newGeometry; //Object
 		public HashSet<int> RemovedGeometry; //Indexed by persistent ID
-
-		public string State { get; private set; }
+		public HashSet<PlanIssueObject> issues;
     
 		bool isEnabled = false;
 		public bool updating = false;
@@ -27,8 +27,14 @@ namespace MSP2050.Scripts
 		{
 			Plan = plan;
 			BaseLayer = LayerManager.Instance.GetLayerByID(layerObject.original);
-			State = layerObject.state;
+			//State = layerObject.state;
 			ID = layerObject.layerid;
+			issues = new HashSet<PlanIssueObject>(new IssueObjectEqualityComparer());
+			foreach (PlanIssueObject issue in layerObject.issues)
+			{ 
+				if(issue.active)
+					issues.Add(issue);
+			}
 
 			newGeometry = new List<Entity>();
 
@@ -63,12 +69,18 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void UpdatePlanLayer(PlanLayerObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
+		public PlanLayer(Plan a_plan, AbstractLayer a_baseLayer)
 		{
-			// wait until all local sub entities have a database ID until processing the updated plan layer
-			//ServerCommunication.Instance.WaitForCondition(AllNewSubEntitiesHaveIDs, () => updatePlanLayer(updatedData, tracker));
+			Plan = a_plan;
+			BaseLayer = a_baseLayer;
+			ClearContent();
+		}
 
-			updatePlanLayer(updatedData, layerUpdateTimes);
+		public void ClearContent()
+		{
+			RemovedGeometry = new HashSet<int>();
+			newGeometry = new List<Entity>();
+			issues = new HashSet<PlanIssueObject>(new IssueObjectEqualityComparer());
 		}
 
 		private SubEntity getSubentityOfNewGeometry(int ID)
@@ -142,7 +154,7 @@ namespace MSP2050.Scripts
 			return true;
 		}
 
-		private void updatePlanLayer(PlanLayerObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
+		public void UpdatePlanLayer(PlanLayerObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
 			// Puts existing geometry in a dictionary
 			Dictionary<int, SubEntity> noLongerAddedGeometry = new Dictionary<int, SubEntity>();
@@ -174,7 +186,7 @@ namespace MSP2050.Scripts
 
 			//Remove entities no longer in new geometry
 			foreach (var kvp in noLongerAddedGeometry)
-				removeNewEntity(kvp.Value.Entity);
+				removeNewEntity(kvp.Value.m_entity);
 
 			bool layerNeedsUpdate = updatedData.geometry.Count > 0 || noLongerAddedGeometry.Count > 0;
 			if (!layerNeedsUpdate)
@@ -201,6 +213,18 @@ namespace MSP2050.Scripts
 			//Copies over the removed geometry
 			RemovedGeometry = updatedData.deleted == null ? new HashSet<int>() : new HashSet<int>(updatedData.deleted);
 
+			//Update issues, but only if changes received
+			if (updatedData.issues != null)
+			{
+				foreach (PlanIssueObject issue in updatedData.issues)
+				{
+					if (issue.active)
+						issues.Add(issue); //This will not update existing, so database IDs are not updated here.
+					else
+						issues.Remove(issue);
+				}
+			}
+
 			//Add an update request for when the update has been resolved
 			if (layerNeedsUpdate && !layerUpdateTimes.ContainsKey(BaseLayer))
 				layerUpdateTimes.Add(BaseLayer, Plan.StartTime);
@@ -209,14 +233,14 @@ namespace MSP2050.Scripts
 		private void updateSubEntity(SubEntity existingSubEntity, SubEntityObject newSubEntityObj)
 		{
 			// Update Entity Type
-			existingSubEntity.Entity.EntityTypes = newSubEntityObj.GetEntityType(BaseLayer);
+			existingSubEntity.m_entity.EntityTypes = newSubEntityObj.GetEntityType(BaseLayer);
 
 			//Update country
-			existingSubEntity.Entity.Country = newSubEntityObj.country;
+			existingSubEntity.m_entity.Country = newSubEntityObj.country;
 
 			//Update metadata
 			if(newSubEntityObj.data != null)
-				existingSubEntity.Entity.metaData = newSubEntityObj.data;
+				existingSubEntity.m_entity.metaData = newSubEntityObj.data;
 
 			// Update Geometry
 			existingSubEntity.SetDataToObject(newSubEntityObj);
@@ -230,37 +254,37 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < count; i++)
 			{
 				SubEntity sub = existingNewEntity.GetSubEntity(i);
-				LayerManager.Instance.RemoveEnergySubEntityReference(sub.GetDatabaseID());
+				PolicyLogicEnergy.Instance.RemoveEnergySubEntityReference(sub.GetDatabaseID());
 				sub.RemoveGameObject();
 			}
 		}
 
-		public void SubmitMarkForDeletion(SubEntity subEntity, BatchRequest batch)
+		public void SubmitMarkForDeletion(int persistentID, BatchRequest batch)
 		{
-			if (subEntity.GetPersistentID() == -1)
+			if (persistentID == -1)
 			{
 				Debug.LogError("Trying to mark subentity with persistent ID -1 for deletion. This is impossible.");
 				return;
 			}
 
 			JObject dataObject = new JObject();
-			dataObject.Add("id", subEntity.GetPersistentID());
-			dataObject.Add("plan", Plan.ID);
-			dataObject.Add("layer", ID);
+			dataObject.Add("id", persistentID);
+			dataObject.Add("plan", Plan.GetDataBaseOrBatchIDReference());
+			dataObject.Add("layer", GetDataBaseOrBatchIDReference());
 			batch.AddRequest(Server.MarkForDelete(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
 		}
 
-		public void SubmitUnmarkForDeletion(SubEntity subEntity, BatchRequest batch)
+		public void SubmitUnmarkForDeletion(int persistentID, BatchRequest batch)
 		{
-			if (subEntity.GetPersistentID() == -1)
+			if (persistentID == -1)
 			{
 				Debug.LogError("Trying to unmark subentity with persistent ID -1 for deletion. This is impossible.");
 				return;
 			}
 
 			JObject dataObject = new JObject();
-			dataObject.Add("id", subEntity.GetPersistentID());
-			dataObject.Add("plan", Plan.ID);
+			dataObject.Add("id", persistentID);
+			dataObject.Add("plan", Plan.GetDataBaseOrBatchIDReference());
 			batch.AddRequest(Server.UnmarkForDelete(), dataObject, BatchRequest.BATCH_GROUP_GEOMETRY_DELETE);
 		}
 
@@ -271,8 +295,8 @@ namespace MSP2050.Scripts
 			foreach (int subEntityID in RemovedGeometry)
 			{
 				SubEntity subEntity = BaseLayer.GetSubEntityByPersistentID(subEntityID);
-				Vector2 min = Vector2.Min(result.min, subEntity.BoundingBox.min);
-				Vector2 max = Vector2.Max(result.max, subEntity.BoundingBox.max);
+				Vector2 min = Vector2.Min(result.min, subEntity.m_boundingBox.min);
+				Vector2 max = Vector2.Max(result.max, subEntity.m_boundingBox.max);
 				result = new Rect(min, max - min);
 			}
 
@@ -306,14 +330,6 @@ namespace MSP2050.Scripts
 			if (enabled == isEnabled)
 			{
 				return;
-			}
-			if (enabled)
-			{
-				IssueManager.instance.ShowIssuesForPlan(this);
-			}
-			else
-			{
-				IssueManager.instance.HideIssuesForPlan(this);
 			}
 			isEnabled = enabled;
 		}
@@ -378,6 +394,26 @@ namespace MSP2050.Scripts
 		public void ClearNewGeometry()
 		{
 			newGeometry.Clear();
+		}
+
+		public void SubmitNewPlanLayer(BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("id", Plan.GetDataBaseOrBatchIDReference());
+			dataObject.Add("layerid", BaseLayer.m_id);
+			creationBatchCallID = batch.AddRequest<int>(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_LAYER_ADD, HandleDatabaseIDResult);
+		}
+		void HandleDatabaseIDResult(int a_result)
+		{
+			ID = a_result;
+		}
+
+		public string GetDataBaseOrBatchIDReference()
+		{
+			if (ID != -1)
+				return ID.ToString();
+			else
+				return BatchRequest.FormatCallIDReference(creationBatchCallID);
 		}
 	}
 }

@@ -134,18 +134,18 @@ namespace MSP2050.Scripts
 			int month = (int)nodeData.x;
 			GraphPoint point = graphEntry.graphPoints.GetPointByMonth(month, graphMonthInterval);
 
-			float startValue = graphEntry.activeValue.GetKpiValueForMonth(-1) ?? 0f;
+			float startValue = graphEntry.activeValue.GetKpiValueForMonth(0) ?? graphEntry.activeValue.GetKpiValueForMonth(-1) ?? 0f;
 
 			string changePercentage = KPIValue.FormatRelativePercentage(startValue, point.value);
 
-			ConvertedUnit displayUnit;
+			ConvertedUnitFloat displayUnit;
 			if (valueConversionCollection != null)
 			{
 				displayUnit = valueConversionCollection.ConvertUnit(point.value, graphEntry.activeValue.unit);
 			}
 			else
 			{
-				displayUnit = new ConvertedUnit(point.value, graphEntry.activeValue.unit, 2);
+				displayUnit = new ConvertedUnitFloat(point.value, graphEntry.activeValue.unit, 2);
 			}
 
 			return string.Format(Localisation.NumberFormatting, "{0} ({1})\n{2} ({3})",
@@ -179,7 +179,7 @@ namespace MSP2050.Scripts
 		}
 
 		//Reference set from UnityEditor
-		public void ToggleGraph(KPIValue targetValue, bool isVisible)
+		public bool ToggleGraph(KPIValue targetValue, bool isVisible)
 		{
 			if (isVisible)
 			{
@@ -188,11 +188,12 @@ namespace MSP2050.Scripts
 					PrimeGraphs();
 				}
 
-				ShowGraph(targetValue);
+				return ShowGraph(targetValue);
 			}
 			else
 			{
 				HideGraph(targetValue);
+				return true;
 			}
 		}
 
@@ -205,10 +206,10 @@ namespace MSP2050.Scripts
 				entry.series.lineColor = newGraphColor;
 				entry.series.pointColor = newGraphColor;
 			}
-			else
-			{
-				Debug.LogWarning("Got color change request for a KPI that is not currently in the active graphs list.");
-			}
+			//else
+			//{
+			//	Debug.LogWarning("Got color change request for a KPI that is not currently in the active graphs list.");
+			//}
 		}
 
 		private WMG_Series CreateGraph()
@@ -235,7 +236,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void ShowGraph(KPIValue valueToShow)
+		private bool ShowGraph(KPIValue valueToShow)
 		{
 			GraphEntry targetGraphEntry = null;
 
@@ -273,10 +274,13 @@ namespace MSP2050.Scripts
 				UpdateGraphValues(targetGraphEntry);
 
 				valueToShow.OnValueUpdated += OnKPIValueUpdated;
+				return true;
 			}
 			else
 			{
-				Debug.LogError("Could not find an inactive graph to display the value. Need to increase the number of graphs!");
+				DialogBoxManager.instance.NotificationWindow("Graph limit reached", "You have reached the maximum number of graphs. Disable some graphs to show new ones.", null);
+				//Debug.LogError("Could not find an inactive graph to display the value. Need to increase the number of graphs!");
+				return false;
 			}
 		}
 
@@ -287,10 +291,10 @@ namespace MSP2050.Scripts
 			{
 				UpdateGraphValues(entry);
 			}
-			else
-			{
-				Debug.LogError("Got a KPI Update request for a KPI that is not currently active in the graph.");
-			}
+			//else
+			//{
+			//	Debug.LogError("Got a KPI Update request for a KPI that is not currently active in the graph.");
+			//}
 		}
 
 		private void UpdateGraphValues(GraphEntry entry)
@@ -317,10 +321,10 @@ namespace MSP2050.Scripts
 				entry.activeValue.OnValueUpdated -= OnKPIValueUpdated;
 				entry.activeValue = null;
 			}
-			else
-			{
-				Debug.LogError("Got a hide request for a KPI Value which is not currently active.");
-			}
+			//else
+			//{
+			//	Debug.LogError("Got a hide request for a KPI Value which is not currently active.");
+			//}
 		}
 	}
 }

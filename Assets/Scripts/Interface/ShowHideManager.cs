@@ -13,8 +13,6 @@ namespace MSP2050.Scripts
 		[Header("Closed before children, start at 0")]
 		public GenericWindow[] fixedPriorityWindowsHigh;
 
-		public ToggleGroup m_kpiToggleGroup = null;
-
 		void Update()
 		{
 			if (Input.GetKeyDown(keyCode))
@@ -38,12 +36,6 @@ namespace MSP2050.Scripts
 						return;
 					}
 				}
-			}
-
-			if (m_kpiToggleGroup != null && m_kpiToggleGroup.AnyTogglesOn())
-			{
-				m_kpiToggleGroup.SetAllTogglesOff();
-				return;
 			}
 
 			//Dynamic priority
@@ -83,11 +75,6 @@ namespace MSP2050.Scripts
 				{
 					fixedPriorityWindowsHigh[i].Hide(); 
 				}
-			}
-
-			if (m_kpiToggleGroup != null && m_kpiToggleGroup.AnyTogglesOn())
-			{
-				m_kpiToggleGroup.SetAllTogglesOff();
 			}
 
 			//Dynamic priority

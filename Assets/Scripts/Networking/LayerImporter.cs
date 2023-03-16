@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using UnityEngine;
 
 namespace MSP2050.Scripts
 {
@@ -20,14 +18,14 @@ namespace MSP2050.Scripts
 
 		private bool loadAllLayers = false;
 
-		public bool IsCurrentlyImportingLayers 
-		{ 
-			get; 
-			private set; 
+		public bool IsCurrentlyImportingLayers
+		{
+			get;
+			private set;
 		}
 
 		public LayerImporter(LayerPickerUI layerPickerUI)
-		{ 
+		{
 			this.layerPickerUI = layerPickerUI;
 
 			if (!Main.IsDeveloper)
@@ -48,8 +46,12 @@ namespace MSP2050.Scripts
 		{
 			//Load layers
 			LayerInfo.Load(layerMeta);
-			if (Main.IsDeveloper)
+
+			var autoLoginEnabled = null != CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.AutoLogin);
+			if (Main.IsDeveloper && !autoLoginEnabled)
 			{
+				//InterfaceCanvas.Instance.loadingScreen.ShowHideLoadScreen(false);
 				layerPickerUI.CreateUI();
 				layerPickerUI.onLayersSelected = ImportLayers;
 			}
@@ -59,26 +61,7 @@ namespace MSP2050.Scripts
 			}
 
 			InterfaceCanvas.Instance.SetAccent(SessionManager.Instance.CurrentTeamColor);
-			InterfaceCanvas.Instance.activePlanWindow.OnCountriesLoaded();
-			KPIManager.Instance.CreateEnergyKPIs();
-
-			//MEL config use requires layers to be loaded (for kpi creation)
-			NetworkForm form = new NetworkForm();
-			ServerCommunication.Instance.DoRequest<CELConfig>(Server.GetCELConfig(), form, HandleCELConfigCallback);
-			ServerCommunication.Instance.DoRequest<JObject>(Server.GetMELConfig(), form, HandleMELConfigCallback);
-			ServerCommunication.Instance.DoRequest<SELGameClientConfig>(Server.GetShippingClientConfig(), form, HandleSELClientConfigCallback);
-			ServerCommunication.Instance.DoRequest<KPICategoryDefinition[]>(Server.ShippingKPIConfig(), form, HandleShippingKPIConfig);
-		}
-
-		private void HandleShippingKPIConfig(KPICategoryDefinition[] config)
-		{
-			KPIManager.Instance.CreateShippingKPIBars(config);
-		}
-
-		private void HandleMELConfigCallback(JObject melConfig)
-		{
-			KPIManager.Instance.CreateEcologyKPIs(melConfig);
-			PlanManager.Instance.LoadFishingFleets(melConfig);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.OnCountriesLoaded();
 
 			if (loadAllLayers)
 			{
@@ -86,28 +69,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void HandleCELConfigCallback(CELConfig config)
-		{
-			if(config != null)
-			{ 
-				Sprite greenSprite = config.green_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + config.green_centerpoint_sprite);
-				Sprite greySprite = config.grey_centerpoint_sprite == null ? null : Resources.Load<Sprite>(AbstractLayer.POINT_SPRITE_ROOT_FOLDER + config.grey_centerpoint_sprite);
-				Color greenColor = Util.HexToColor(config.green_centerpoint_color);
-				Color greyColor = Util.HexToColor(config.grey_centerpoint_color);
 
-				foreach (PointLayer layer in LayerManager.Instance.GetCenterPointLayers())
-				{
-					layer.EntityTypes[0].DrawSettings.PointColor = layer.greenEnergy ? greenColor : greyColor;
-					layer.EntityTypes[0].DrawSettings.PointSprite = layer.greenEnergy ? greenSprite : greySprite;
-					layer.EntityTypes[0].DrawSettings.PointSize = layer.greenEnergy ? config.green_centerpoint_size : config.grey_centerpoint_size;
-				}
-			}
-		}
-
-		private void HandleSELClientConfigCallback(SELGameClientConfig newSelConfig)
-		{
-			Main.Instance.SelConfig = newSelConfig;
-		}
 
 #if UNITY_EDITOR
 		[MenuItem("MSP 2050/Reload layer meta")]
@@ -124,10 +86,10 @@ namespace MSP2050.Scripts
 			foreach (AbstractLayer layer in LayerManager.Instance.GetLoadedLayers())
 			{
 				foreach (LayerMeta meta in layerMeta)
-					if (layer.ID == meta.layer_id)
+					if (layer.m_id == meta.layer_id)
 					{
 						foreach (KeyValuePair<int, EntityTypeValues> kvp in meta.layer_type)
-							layer.EntityTypes[kvp.Key].SetColors(Util.HexToColor(kvp.Value.polygonColor), Util.HexToColor(kvp.Value.lineColor), Util.HexToColor(kvp.Value.pointColor));
+							layer.m_entityTypes[kvp.Key].SetColors(Util.HexToColor(kvp.Value.polygonColor), Util.HexToColor(kvp.Value.lineColor), Util.HexToColor(kvp.Value.pointColor));
 						break;
 					}
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
@@ -136,11 +98,11 @@ namespace MSP2050.Scripts
 
 		public void ImportAllLayers()
 		{
-			List<AbstractLayer> layerList = LayerManager.Instance.GetAllValidLayers();
+			List<AbstractLayer> layerList = LayerManager.Instance.GetAllLayers();
 			List<int> layersToLoad = new List<int>(layerList.Count);
 			foreach (AbstractLayer layerToLoad in layerList)
 			{
-				layersToLoad.Add(layerToLoad.ID);
+				layersToLoad.Add(layerToLoad.m_id);
 			}
 			ImportLayers(layersToLoad);
 		}
@@ -149,7 +111,7 @@ namespace MSP2050.Scripts
 		{
 			// only allow a single request during loading of layers, to minimize the load on the server - think of multiple clients starting simultaneously
 			ServerCommunication.maxRequests = 1;
-			
+
 
 			IsCurrentlyImportingLayers = true;
 
@@ -160,7 +122,7 @@ namespace MSP2050.Scripts
 			foreach (int selectedLayerID in selectedLayerIDs)
 			{
 				AbstractLayer layer = LayerManager.Instance.GetLayerByID(selectedLayerID);
-				if (layer.GetGeoType() == LayerManager.GeoType.raster)
+				if (layer.GetGeoType() == LayerManager.EGeoType.Raster)
 				{
 					ImportRasterLayer((layer as RasterLayer));
 				}
@@ -176,7 +138,7 @@ namespace MSP2050.Scripts
 		private void HandleVectorLayerImport(List<SubEntityObject> layerObjects, AbstractLayer layer)
 		{
 			importLayer(layerObjects, layer);
-			LayerImportComplete();
+			LayerImportComplete(layer);
 		}
 
 		private void ImportRasterLayer(RasterLayer layer)
@@ -184,9 +146,9 @@ namespace MSP2050.Scripts
 			List<SubEntityObject> objects = new List<SubEntityObject>();
 			SubEntityObject entityObject = new SubEntityObject();
 
-			//Convert all the entity types to a 
+			//Convert all the entity types to a
 			StringBuilder typeIdString = new StringBuilder(64);
-			foreach (int entityTypeId in layer.EntityTypes.Keys)
+			foreach (int entityTypeId in layer.m_entityTypes.Keys)
 			{
 				if (typeIdString.Length > 0)
 				{
@@ -198,13 +160,14 @@ namespace MSP2050.Scripts
 			entityObject.type = typeIdString.ToString();
 			objects.Add(entityObject); // add one empty object, it doesnt need this anyways
 			LayerManager.Instance.LoadLayer(layer, objects);
-			LayerImportComplete();
+			LayerImportComplete(layer);
 		}
 
-		private void LayerImportComplete()
+		private void LayerImportComplete(AbstractLayer layer)
 		{
 			importedLayers++;
 			InterfaceCanvas.Instance.loadingScreen.SetNextLoadingItem("layers");
+			LayerManager.Instance.InvokeLayerLoaded(layer);
 
 			if (importedLayers == expectedLayers)
 			{
@@ -249,7 +212,7 @@ namespace MSP2050.Scripts
 				if (!int.TryParse(entityTypeString, out entityTypeKey))
 				{
 					UnityEngine.Debug.LogError("Invalid type in layer '" + layer.FileName + "': entity with ID '" + id + "' has type: '" + entityTypeString + "' which is not a valid integer");
-					entityTypes.Add(layer.EntityTypes.GetFirstValue());
+					entityTypes.Add(layer.m_entityTypes.GetFirstValue());
 					return entityTypes;
 				}
 
@@ -257,7 +220,7 @@ namespace MSP2050.Scripts
 				if (entityType == null)
 				{
 					UnityEngine.Debug.LogError("Invalid type in layer '" + layer.FileName + "': entity with ID '" + id + "' has type: '" + entityTypeString + "' which is an undefined type key");
-					entityTypes.Add(layer.EntityTypes.GetFirstValue());
+					entityTypes.Add(layer.m_entityTypes.GetFirstValue());
 					return entityTypes;
 				}
 
@@ -267,6 +230,17 @@ namespace MSP2050.Scripts
 			return entityTypes;
 		}
 
+	}
+
+	public class PolicySimSettings
+	{
+		[JsonProperty(ItemConverterType = typeof(PolicySettingsJsonConverter))]
+		public List<APolicyData> policy_settings;
+		[JsonProperty(ItemConverterType = typeof(SimulationSettingsJsonConverter))]
+		public List<ASimulationData> simulation_settings;
+
+		//public JArray policy_settings;
+		//public JArray simulation_settings;
 	}
 
 	public class GeometryObject

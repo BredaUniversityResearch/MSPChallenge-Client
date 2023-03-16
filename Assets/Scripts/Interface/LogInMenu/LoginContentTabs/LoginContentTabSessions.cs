@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
-using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace MSP2050.Scripts
@@ -75,15 +74,18 @@ namespace MSP2050.Scripts
 
 		IEnumerator GetServerList(int a_serverListID)
 		{
-
 			m_sessionTopLine.SetActive(false);
-			string host = "localhost";
-			if (!string.IsNullOrEmpty(m_serverAddress.text))
+			var host = CommandLineArgumentsManager.GetInstance().AutoFill(
+				CommandLineArgumentsManager.CommandLineArgumentName.ServerAddress,
+				!string.IsNullOrEmpty(m_serverAddress.text) ?
+					m_serverAddress.text.Trim(' ', '\r', '\n', '\t') : ""
+			);
+			PlayerPrefs.SetString(LOGIN_SERVER_ADRESS, host);
+			if (host == "")
 			{
-				host = m_serverAddress.text.Trim(' ', '\r', '\n', '\t');
-				PlayerPrefs.SetString(LOGIN_SERVER_ADRESS, host);
+				host = "localhost";
 			}
-			
+
 			//Sessions from server address
 			WWWForm form = new WWWForm();
 			form.AddField("visibility", 0);
@@ -92,8 +94,7 @@ namespace MSP2050.Scripts
                 ApplicationBuildIdentifier.Instance.GetManifest();
 
             form.AddField("client_timestamp", ApplicationBuildIdentifier.Instance.GetBuildTime());
-
-			RetrieveSessionListHandler handler = new RetrieveSessionListHandler(host, form);
+            RetrieveSessionListHandler handler = new RetrieveSessionListHandler(host, form);
 			yield return handler.RetrieveListAsync();
 
 			if (m_expectedServerListID == a_serverListID)
@@ -126,6 +127,35 @@ namespace MSP2050.Scripts
 					m_sessionErrorObj.text = "Failed to fetch session list from server address";
 				}
 			}
+
+			if (null == CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.AutoLogin)) yield break;
+			IEnumerable<LoginSessionEntry> entries = GetSessionEntryByAutoLogin();
+			if (!entries.Any()) yield break;
+			LoginManager.Instance.ConnectPressedForSession(entries.First().GetSession());
+		}
+		
+		private IEnumerable<LoginSessionEntry> GetSessionEntryByAutoLogin()
+		{
+			// get by session entry index.
+			var sessionEntryIndexText = CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.SessionEntryIndex);
+			if (null != sessionEntryIndexText && int.TryParse(sessionEntryIndexText, out var sessionEntryIndex) &&
+				sessionEntryIndex > 0 && sessionEntryIndex < m_sessionEntries.Count)
+			{
+				return new List<LoginSessionEntry> {m_sessionEntries[sessionEntryIndex]};
+			}
+			// or, get by config file name match
+			var configFilename = CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.ConfigFileName);
+			
+			// no match found
+			if (null == configFilename)
+				return new List<LoginSessionEntry>();
+
+			return m_sessionEntries.Where(
+				x => x.GetSession().config_file_name == configFilename
+			);
 		}
 
 		void SetSessionEntry(GameSession a_session)

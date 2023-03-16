@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,250 +8,152 @@ namespace MSP2050.Scripts
 {
 	public class LayerInterface : MonoBehaviour
 	{
-		[SerializeField]
-		private List<Sprite> icons = null; // Initialised in the inspector!!!
+		[SerializeField] private GameObject m_subcategoryPrefab;
+        [SerializeField] private GameObject m_categoryPrefab;
+        [SerializeField] private GameObject m_layerPrefab;
 
-		[SerializeField, Tooltip("Prefab used for housing all the layer toggles belonging to a certain subcategory")]
-		private GameObject layerSubcategoryToggleGroupPrefab = null;
+        [SerializeField] private Transform m_categoryParent;
+        [SerializeField] private VerticalLayoutGroup m_categoryLayoutGroup;
+        [SerializeField] private Transform m_layerParent;
+        [SerializeField] private GameObject m_layerSelectWindow;
+        [SerializeField] private TextMeshProUGUI m_layerSelectCategoryText;
+		[SerializeField] private ToggleGroup m_subcategoryToggleGroup;
+		[SerializeField] SearchBar m_searchBar; 
 
-		[SerializeField]
-		private TextMeshProUGUI layerSubcategoryToggleGroupTitle = null;
+        private Dictionary<string, LayerCategoryBar> m_categories = new Dictionary<string, LayerCategoryBar>();
+		private Dictionary<string, LayerSubCategoryBar> m_subCategories = new Dictionary<string, LayerSubCategoryBar>();
+		private List<LayerToggleBar> m_toggleBars = new List<LayerToggleBar>();
 
-		[SerializeField]
-		private RectTransform layerSubcategoryToggleGroupContainer = null;
-
-		// To get which layer corresponds to which genericLayer
-		private Dictionary<string, LayerCategoryGroup> categories;
-		private Dictionary<string, LayerSubCategoryToggleGroup> subCategories;
-		private LayerSubCategoryToggleGroup selectedSubCategory = null;
-
-		private GenericWindow layerSelect;
-
-		private LayerPanel panel;
-
-		private MenuBarToggle menuLayerToggle;
-
-		private Dictionary<string, Sprite> categoryIcon;
-
-		private static LayerInterface instance;
-
-		protected void Start()
+        protected void Start()
 		{
-			panel = InterfaceCanvas.Instance.layerPanel;
-			layerSelect = InterfaceCanvas.Instance.layerSelect;
-			categories = new Dictionary<string, LayerCategoryGroup>();
-			subCategories = new Dictionary<string, LayerSubCategoryToggleGroup>();
-
-			menuLayerToggle = InterfaceCanvas.Instance.menuBarLayers;
-
-			// This is for the menu bar toggle so that it acts correctly
-			menuLayerToggle.GetComponent<Toggle>().isOn = true;
-			//menuLayerToggle.GetComponent<Toggle>().onValueChanged.AddListener((toggleValue) => { layerSelectOpen = !toggleValue; });
-		
-			SetIcons();
-
-			instance = this;
+			InterfaceCanvas.Instance.menuBarLayers.toggle.isOn = gameObject.activeInHierarchy;
+			m_searchBar.m_ontextChange += OnSearchbarChanged;
 		}
 
-		public void NotifyLayerSelectClosing()
-		{
-			if (selectedSubCategory != null)
-			{
-				selectedSubCategory.SetVisible(false);
-				selectedSubCategory = null;
-			}
-		}
+        private void OnDisable()
+        {
+            if (InterfaceCanvas.Instance.menuBarLayers.toggle.isOn)
+            {
+                InterfaceCanvas.Instance.menuBarLayers.toggle.isOn = false;
+            }
+			m_layerSelectWindow.SetActive(false);
+        }
 
-		public static void AddLayerToInterface(AbstractLayer layer)
-		{
-			instance.addLayerToInterface(layer);
-		}
 
-		private void addLayerToInterface(AbstractLayer layer)
+		public void AddLayerToInterface(AbstractLayer layer)
 		{
-			if (layer.FileName.StartsWith("_PLAYAREA") || !layer.Toggleable)
+			if (!layer.Toggleable)
 			{
 				return;
 			}
 
-			string category = layer.Category;
-			string subcategoryID = layer.SubCategory;
+			string categoryName = LayerManager.Instance.MakeCategoryDisplayString(layer.m_category);
 
-			string categoryName = LayerManager.Instance.MakeCategoryDisplayString(category);
-
-			// Creating/Getting the group
-			LayerCategoryGroup categoryGroup = FindCategory(categoryName);
-			if (categoryGroup == null)
+			LayerCategoryBar categoryBar = null;
+			if (!m_categories.TryGetValue(categoryName, out categoryBar))
 			{
-				LayerCategoryGroup newCategoryGroup = panel.CreateLayerGroup();
-				newCategoryGroup.title.text = categoryName;
-				categories.Add(categoryName, newCategoryGroup);
-				categoryGroup = newCategoryGroup;
+				LayerCategoryBar newCategoryGroup = Instantiate(m_categoryPrefab, m_categoryParent).GetComponent<LayerCategoryBar>();
+				newCategoryGroup.SetContent(categoryName);
+				m_categories.Add(categoryName, newCategoryGroup);
+				categoryBar = newCategoryGroup;
 			}
 
-			LayerSubCategoryToggleGroup subCategory = FindSubCategory(subcategoryID);
-
-			if (subCategory == null)
+			if (!m_subCategories.ContainsKey(layer.m_subCategory))
 			{
-				subCategory = CreateSubCategory(categoryGroup, subcategoryID);
+				string subCategoryName = LayerManager.Instance.MakeCategoryDisplayString(layer.m_subCategory);
+				LayerSubCategoryBar newSubcategory = Instantiate(m_subcategoryPrefab, categoryBar.ContentParent).GetComponent<LayerSubCategoryBar>();
+				m_subCategories.Add(layer.m_subCategory, newSubcategory);
+				newSubcategory.SetContent(subCategoryName, layer.m_subCategory, LayerManager.Instance.GetSubcategoryIcon(layer.m_subCategory), OnSubcategoryClick, m_subcategoryToggleGroup);
 			}
-
-			subCategory.CreateLayerToggle(layer, subcategoryID, this);
-
-			//layerToggles.Add(tmpLayer, layerTab);
+			//m_searchBarContainer.SetAsLastSibling();
 		}
 
-		private LayerSubCategoryToggleGroup CreateSubCategory(LayerCategoryGroup categoryGroup, string subCategoryID)
+		void OnSubcategoryClick(bool a_value, string a_subcategory)
 		{
-			string subCategoryName = LayerManager.Instance.MakeCategoryDisplayString(subCategoryID);
-
-			LayerButton subcategoryToggleButton = categoryGroup.CreateLayerButton(subCategoryName);
-
-			subcategoryToggleButton.button.onClick.AddListener(() => { ToggleLayerSubcategory(subCategoryID); });
-			subcategoryToggleButton.button.onDoubleClick.AddListener(() => { ToggleAllLayersInSubcategory(subCategoryID); });
-
-			// Creating/Getting the icon
-			subcategoryToggleButton.icon.sprite = GetIcon(subCategoryID);
-			AddTooltip tooltip = subcategoryToggleButton.gameObject.AddComponent<AddTooltip>();
-			tooltip.text = subCategoryName;
-
-			GameObject subcategoryContainer = Instantiate(layerSubcategoryToggleGroupPrefab, layerSubcategoryToggleGroupContainer);
-			LayerSubCategoryToggleGroup subCategory = subcategoryContainer.GetComponent<LayerSubCategoryToggleGroup>();
-			subCategory.subcategoryButton = subcategoryToggleButton;
-			subCategory.SetVisible(false);
-			subCategory.DisplayName = subCategoryName;
-			subCategories.Add(subCategoryID, subCategory);
-
-			return subCategory;
-		}
-
-		private LayerCategoryGroup FindCategory(string name)
-		{
-			foreach (var kvp in categories)
+			if (a_value)
 			{
-				if (kvp.Value.title.text == name)
+				m_layerSelectWindow.SetActive(true);
+				m_layerSelectCategoryText.text = LayerManager.Instance.MakeCategoryDisplayString(a_subcategory);
+				List<AbstractLayer> layers = LayerManager.Instance.GetLayersInSubcategory(a_subcategory);
+				int activeBars = 0;
+				for(int i = 0; i < layers.Count; i++)
 				{
-					return kvp.Value;
+					if (layers[i].Toggleable /*|| Main.IsDeveloper*/)
+					{
+						SetOrCreateLayerEntry(layers[i], activeBars, m_layerParent);
+						activeBars++;
+					}
+
 				}
-			}
-			return null;
-		}
-
-		private LayerSubCategoryToggleGroup FindSubCategory(string subCategory)
-		{
-			LayerSubCategoryToggleGroup result;
-			subCategories.TryGetValue(subCategory, out result);
-			return result;
-		}
-
-		private void ToggleLayerSubcategory(string subcategory)
-		{
-			LayerSubCategoryToggleGroup toggleGroup;
-			if (subCategories.TryGetValue(subcategory, out toggleGroup))
-			{
-				if (selectedSubCategory != null)
+				for(; activeBars < m_toggleBars.Count; activeBars++)
 				{
-					selectedSubCategory.SetVisible(false);
-				}
-
-				if (selectedSubCategory == toggleGroup)
-				{
-					layerSelect.gameObject.SetActive(false);
-					selectedSubCategory = null;
-				}
-				else
-				{
-					layerSelect.gameObject.SetActive(true);
-					layerSubcategoryToggleGroupTitle.text = toggleGroup.DisplayName;
-					toggleGroup.SetVisible(true);
-					selectedSubCategory = toggleGroup;
-				}
-			}
-		}
-
-		private void ToggleAllLayersInSubcategory(string subCategoryID)
-		{
-			LayerSubCategoryToggleGroup toggleGroup;
-			if (subCategories.TryGetValue(subCategoryID, out toggleGroup))
-			{
-				toggleGroup.ToggleAllLayers();
-			}
-		}
-
-		public static Sprite GetIconStatic(string category)
-		{
-			return instance.GetIcon(category);
-		}
-
-		public Sprite GetIcon(string category)
-		{
-			if (categoryIcon.ContainsKey(category))
-			{
-				return categoryIcon[category];
-			}
-
-			return categoryIcon["nothing"];
-		}
-
-		private void SetIcons()
-		{
-			categoryIcon = new Dictionary<string, Sprite>();
-
-			if (icons != null)
-			{
-				for (int i = 0; i < icons.Count; i++)
-				{
-					categoryIcon.Add(icons[i].name, icons[i]);
+					m_toggleBars[activeBars].gameObject.SetActive(false);
 				}
 			}
 			else
 			{
-				Debug.LogError("Icons for layer categories are not assigned on " + gameObject.name);
+				m_layerSelectWindow.SetActive(false);
 			}
 		}
 
-		private void SetToggle(AbstractLayer layer, bool value)
+		void OnSearchbarChanged(string a_value)
 		{
-			if (layer.Toggleable)
+			if(string.IsNullOrEmpty(a_value))
 			{
-				LayerSubCategoryToggleGroup toggleGroup = FindSubCategory(layer.SubCategory);
-				if (toggleGroup != null)
+				foreach (var kvp in m_categories)
 				{
-					toggleGroup.SetLayerToggle(layer, value);
+					kvp.Value.gameObject.SetActive(true);
 				}
+				foreach (var bar in m_toggleBars)
+				{
+					bar.gameObject.SetActive(false);
+				}
+				m_categoryLayoutGroup.padding = new RectOffset(0,0,0,0);
+			}
+			else
+			{
+				ForceSubcategoriesClosed();
+				foreach (var kvp in m_categories)
+				{
+					kvp.Value.gameObject.SetActive(false);
+				}
+				int activeBars = 0;
+				foreach(AbstractLayer layer in LayerManager.Instance.GetAllLayers())
+				{
+					if (layer.Toggleable && layer.ShortName.IndexOf(a_value, StringComparison.OrdinalIgnoreCase) >= 0)
+					{
+						SetOrCreateLayerEntry(layer, activeBars, m_categoryParent);
+						activeBars++;
+					}
+
+				}
+				for (; activeBars < m_toggleBars.Count; activeBars++)
+				{
+					m_toggleBars[activeBars].gameObject.SetActive(false);
+				}
+				m_categoryLayoutGroup.padding = new RectOffset(0, 0, 6, 6);
 			}
 		}
 
-		public void OnShowLayer(AbstractLayer layer)
+		//Called from layer select window close button
+		public void ForceSubcategoriesClosed()
 		{
-			SetToggle(layer, true);
-			InterfaceCanvas.Instance.activeLayers.AddLayer(layer);
-			//activeLayerTab.UpdateInterfaceVisibility();
+			m_subcategoryToggleGroup.SetAllTogglesOff();
 		}
 
-		public void OnHideLayer(AbstractLayer layer)
+		void SetOrCreateLayerEntry(AbstractLayer a_layer, int a_index, Transform a_parent)
 		{
-			SetToggle(layer, false);
-			InterfaceCanvas.Instance.activeLayers.ToggleLayer(layer, false);
-			//activeLayerTab.UpdateInterfaceVisibility();
-		}
-
-		public void SetLayerVisibilityLock(AbstractLayer layer, bool value)
-		{
-			InterfaceCanvas.Instance.activeLayers.SetLayerVisibilityLocked(layer, value);
-		}
-
-		public void RefreshActiveLayer(AbstractLayer layer)
-		{
-			InterfaceCanvas.Instance.activeLayers.RemoveLayer(layer);
-			InterfaceCanvas.Instance.activeLayers.AddLayer(layer);
-			//activeLayerTab.UpdateInterfaceVisibility(); // This is so that if one the layertab has been closed, itll open again so you can see changes
-		}
-
-		public static void SortLayerToggles()
-		{
-			foreach (var kvp in instance.subCategories)
-				kvp.Value.SortLayerToggles();
+			if (a_index < m_toggleBars.Count)
+			{
+				m_toggleBars[a_index].SetContent(a_layer);
+				m_toggleBars[a_index].transform.SetParent(a_parent);
+			}
+			else
+			{
+				LayerToggleBar newLayerBar = Instantiate(m_layerPrefab, a_parent).GetComponent<LayerToggleBar>();
+				newLayerBar.SetContent(a_layer);
+				m_toggleBars.Add(newLayerBar);
+			}
 		}
 	}
 }

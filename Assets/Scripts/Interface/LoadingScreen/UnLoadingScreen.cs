@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace MSP2050.Scripts
 {
 	public class UnLoadingScreen : MonoBehaviour
 	{
 		[SerializeField]
-		private Text editionText = null;
+		private TextMeshProUGUI editionText = null;
 		public DynamicLogo mspIcon;
 
 		protected void Start()

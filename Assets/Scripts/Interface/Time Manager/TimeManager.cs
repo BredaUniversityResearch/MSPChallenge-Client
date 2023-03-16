@@ -44,7 +44,7 @@ namespace MSP2050.Scripts
 			}
 
 			m_timeLeftElapsed += Time.deltaTime;
-			EraHUD.instance.TimeRemaining = TimeSpan.FromSeconds(Math.Max(timeLeft - (int)m_timeLeftElapsed, 0));
+			TimeBar.instance.SetTimeRemaining(TimeSpan.FromSeconds(Math.Max(timeLeft - (int)m_timeLeftElapsed, 0)));
 		}
 
 		void Start()
@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 					TimeSpan newTimeSpan = TimeSpan.FromSeconds(newEraTime);
 					if (!GameStarted)
 					{
-						EraHUD.instance.TimeRemaining = newTimeSpan;
+						TimeBar.instance.SetTimeRemaining(newTimeSpan);
 						TimeManagerWindow.instance.timeline.eraBlocks[era].SetDurationUI(newTimeSpan);
 					}
 				}
@@ -118,7 +118,7 @@ namespace MSP2050.Scripts
 					for (int i = 0; i < ERA_COUNT; i++)
 					{
 						TimeManagerWindow.instance.eraDivision.SetEraSimulationDivision(i, division);
-						TimeBar.instance.markers[i].eraSimMarker.rectTransform.sizeDelta = new Vector2((TimeBar.instance.eraMarkerLocation.rect.width / (float)ERA_COUNT) * division, 4f);
+						//TimeBar.instance.eraMarkers[i].eraSimMarker.rectTransform.sizeDelta = new Vector2((TimeBar.instance.eraMarkerParent.rect.width / (float)ERA_COUNT) * division, 4f);
 					}
 					TimeManagerWindow.instance.eraDivision.SetSliderValue(newGameTime / 12);
 					eraGameTime = newGameTime;
@@ -133,16 +133,16 @@ namespace MSP2050.Scripts
 				{
 					if (newTimeLeft < 0)
 					{
-						EraHUD.instance.CatchingUp = true;
+						TimeBar.instance.SetCatchingUp(true);
 					}
 					else
 					{
 						if (timeLeft < 0)
-							EraHUD.instance.CatchingUp = false;
+							TimeBar.instance.SetCatchingUp(false);
 						TimeSpan newTimeSpan = TimeSpan.FromSeconds(newTimeLeft);
 						if (GameStarted)
 						{
-							EraHUD.instance.TimeRemaining = newTimeSpan;
+							TimeBar.instance.SetTimeRemaining(newTimeSpan);
 							TimeManagerWindow.instance.timeline.eraBlocks[era].SetDurationUI(newTimeSpan);
 						}
 					}
@@ -321,8 +321,8 @@ namespace MSP2050.Scripts
 				}
 
 				if (gameState != PlanningState.Setup)
-					PlanManager.Instance.MonthTick(month);
-				PlanWizard.UpdateMinSelectableTime();
+					PlanManager.MonthTick(month);
+				InterfaceCanvas.Instance.activePlanWindow.m_timeSelect.UpdateMinTime();
 
 				if (OnCurrentMonthChanged != null)
 				{
@@ -333,7 +333,7 @@ namespace MSP2050.Scripts
 			//State change
 			if (gameState != prevState)
 			{
-				EraHUD.instance.State = gameState;
+				TimeBar.instance.SetState(gameState);
 				//New state entered
 				if (gameState == PlanningState.Setup)
 				{
@@ -358,7 +358,7 @@ namespace MSP2050.Scripts
 				}
 				else if (gameState == PlanningState.End)
 				{
-					InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = false;
+					InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = false;
 				}
 
 				//Old state left
@@ -379,16 +379,16 @@ namespace MSP2050.Scripts
 		private void OnSetupPhaseStarted()
 		{
 			if (!SessionManager.Instance.AreWeGameMaster)
-				InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = false;
+				InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = false;
 		}
 
 		private void OnSetupPhaseEnded()
 		{
-			InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = true;
+			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = true;
 			//Update plans once the setup state is left, so we don't have to wait for month 1
 			TimeManagerWindow.instance.eraDivision.gameObject.SetActive(false);
-			PlanManager.Instance.MonthTick(month);
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			PlanManager.MonthTick(month);
+			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 			SetupStateExited();
 		}
 
@@ -396,20 +396,18 @@ namespace MSP2050.Scripts
 		{
 			ScreenBorderGradient.instance.SetEnabled(true);
 			ScrollingTextBand.instance.SetEnabled(true);
-			InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = false;
+			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = false;
 			SimulationStateEntered();
-			PlanDetails.UpdateStatus();
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 		}
 
 		private void OnSimulationPhaseEnded()
 		{
 			ScreenBorderGradient.instance.SetEnabled(false);
 			ScrollingTextBand.instance.SetEnabled(false);
-			InterfaceCanvas.Instance.menuBarPlanWizard.toggle.interactable = true;
+			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = true;
 			SimulationStateExited();
-			PlanDetails.UpdateStatus();
-			PlansMonitor.RefreshPlanButtonInteractablity();
+			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
 		}
 
 		public static void SetGameState(string state)

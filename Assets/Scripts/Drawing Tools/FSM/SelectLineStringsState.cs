@@ -5,171 +5,159 @@ namespace MSP2050.Scripts
 {
 	public class SelectLineStringsState : FSMState
 	{
-		protected PlanLayer planLayer;
-		protected LineStringLayer baseLayer = null;
+		private PlanLayer m_planLayer;
+		private LineStringLayer m_baseLayer = null;
 
-		protected bool selectingBox = false;
-		protected HashSet<LineStringSubEntity> currentBoxSelection = new HashSet<LineStringSubEntity>();
+		private bool m_selectingBox = false;
+		private HashSet<LineStringSubEntity> m_currentBoxSelection = new HashSet<LineStringSubEntity>();
 
-		protected LineStringSubEntity previousHover = null;
+		private LineStringSubEntity m_previousHover = null;
 		public override EEditingStateType StateType => EEditingStateType.Edit;
 
-		public SelectLineStringsState(FSM fsm, PlanLayer planLayer) : base(fsm)
+		public SelectLineStringsState(FSM a_fsm, PlanLayer a_planLayer) : base(a_fsm)
 		{
-			this.planLayer = planLayer;
-			this.baseLayer = planLayer.BaseLayer as LineStringLayer;
-			//if (layer.planLayer != null) { baseLayer = layer.planLayer.BaseLayer as LineStringLayer; }
+			m_planLayer = a_planLayer;
+			m_baseLayer = a_planLayer.BaseLayer as LineStringLayer;
 		}
 
-		public override void EnterState(Vector3 currentMousePosition)
+		public override void EnterState(Vector3 a_currentMousePosition)
 		{
-			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
+			base.EnterState(a_currentMousePosition);
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Recall);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
-			ic.SetActivePlanWindowInteractability(false);
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
+			gt.m_toolBar.SetCreateMode(false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, false);
+			gt.SetActivePlanWindowInteractability(false);
 
-			LineStringSubEntity hover = baseLayer.GetSubEntityAt(currentMousePosition) as LineStringSubEntity;
-			//if (hover == null && baseLayer != null) { hover = baseLayer.GetSubEntityAt(currentMousePosition) as LineStringSubEntity; }
+			LineStringSubEntity hover = m_baseLayer.GetSubEntityAt(a_currentMousePosition) as LineStringSubEntity;
 
 			if (hover != null)
 			{
 				HoveredSubEntity(hover, true);
 			}
 
-			previousHover = hover;
+			m_previousHover = hover;
 		}
 
-		public override void LeftClick(Vector3 worldPosition)
+		public override void LeftClick(Vector3 a_worldPosition)
 		{
-			LineStringSubEntity hover = baseLayer.GetSubEntityAt(worldPosition) as LineStringSubEntity;
-			//if (hover == null && baseLayer != null) { hover = baseLayer.GetSubEntityAt(position) as LineStringSubEntity; }
+			LineStringSubEntity hover = m_baseLayer.GetSubEntityAt(a_worldPosition) as LineStringSubEntity;
 
-			if (hover != null)
+			if (hover == null)
+				return;
+			if (m_baseLayer.IsEnergyLineLayer())
+				m_fsm.SetCurrentState(new EditEnergyLineStringsState(m_fsm, m_planLayer, new HashSet<LineStringSubEntity>() { hover }));
+			else
+				m_fsm.SetCurrentState(new EditLineStringsState(m_fsm, m_planLayer, new HashSet<LineStringSubEntity>() { hover }));
+		}
+
+		public override void MouseMoved(Vector3 a_previousPosition, Vector3 a_currentPosition, bool a_cursorIsOverUI)
+		{
+			if (m_selectingBox)
+				return;
+			LineStringSubEntity hover = null;
+			if (!a_cursorIsOverUI)
 			{
-				if (baseLayer.IsEnergyLineLayer())
-					fsm.SetCurrentState(new EditEnergyLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>() { hover }));
-				else
-					fsm.SetCurrentState(new EditLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>() { hover }));
-
+				hover = m_baseLayer.GetSubEntityAt(a_currentPosition) as LineStringSubEntity;
+				if (hover == null && m_baseLayer != null) { hover = m_baseLayer.GetSubEntityAt(a_currentPosition) as LineStringSubEntity; }
 			}
-		}
 
-		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
-		{
-			if (!selectingBox)
+			if (m_previousHover != null || hover != null)
 			{
-				LineStringSubEntity hover = null;
-				if (!cursorIsOverUI)
+				if (m_previousHover != null)
 				{
-					hover = baseLayer.GetSubEntityAt(currentPosition) as LineStringSubEntity;
-					if (hover == null && baseLayer != null) { hover = baseLayer.GetSubEntityAt(currentPosition) as LineStringSubEntity; }
+					HoveredSubEntity(m_previousHover, false);
 				}
 
-				if (previousHover != null || hover != null)
+				if (hover != null)
 				{
-					if (previousHover != null)
-					{
-						HoveredSubEntity(previousHover, false);
-					}
-
-					if (hover != null)
-					{
-						HoveredSubEntity(hover, true);
-					}
+					HoveredSubEntity(hover, true);
 				}
-
-				previousHover = hover;
 			}
+
+			m_previousHover = hover;
 		}
 
-		public override void StartedDragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		public override void StartedDragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			selectingBox = true;
-			currentBoxSelection = new HashSet<LineStringSubEntity>();
+			m_selectingBox = true;
+			m_currentBoxSelection = new HashSet<LineStringSubEntity>();
 
-			BoxSelect.DrawBoxSelection(dragStartPosition, currentPosition);
+			BoxSelect.DrawBoxSelection(a_dragStartPosition, a_currentPosition);
 		}
 
-		public override void Dragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		public override void Dragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			updateBoxSelection(dragStartPosition, currentPosition);
+			UpdateBoxSelection(a_dragStartPosition, a_currentPosition);
 		}
 
-		protected void updateBoxSelection(Vector3 dragStartPosition, Vector3 currentPosition)
+		private void UpdateBoxSelection(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			BoxSelect.DrawBoxSelection(dragStartPosition, currentPosition);
+			BoxSelect.DrawBoxSelection(a_dragStartPosition, a_currentPosition);
 
-			HashSet<LineStringSubEntity> selectionsInBox = baseLayer.GetSubEntitiesInBox(dragStartPosition, currentPosition);
-			//if (baseLayer != null) { selectionsInBox.UnionWith(baseLayer.GetSubEntitiesInBox(dragStartPosition, currentPosition)); }
+			HashSet<LineStringSubEntity> selectionsInBox = m_baseLayer.GetSubEntitiesInBox(a_dragStartPosition, a_currentPosition);
 
 			foreach (LineStringSubEntity selectionInBox in selectionsInBox)
 			{
-				if (!currentBoxSelection.Contains(selectionInBox)) { HoveredSubEntity(selectionInBox, true); }
+				if (!m_currentBoxSelection.Contains(selectionInBox)) { HoveredSubEntity(selectionInBox, true); }
 			}
 
-			foreach (LineStringSubEntity currentlySelected in currentBoxSelection)
+			foreach (LineStringSubEntity currentlySelected in m_currentBoxSelection)
 			{
 				if (!selectionsInBox.Contains(currentlySelected)) { HoveredSubEntity(currentlySelected, false); }
 			}
 
-			currentBoxSelection = selectionsInBox;
+			m_currentBoxSelection = selectionsInBox;
 		}
 
-		public override void StoppedDragging(Vector3 dragStartPosition, Vector3 dragFinalPosition)
+		public override void StoppedDragging(Vector3 a_dragStartPosition, Vector3 a_dragFinalPosition)
 		{
-			updateBoxSelection(dragStartPosition, dragFinalPosition);
+			UpdateBoxSelection(a_dragStartPosition, a_dragFinalPosition);
 
-			if (currentBoxSelection.Count > 0)
+			if (m_currentBoxSelection.Count > 0)
 			{
-				if (baseLayer.IsEnergyLineLayer())
-					fsm.SetCurrentState(new EditEnergyLineStringsState(fsm, planLayer, currentBoxSelection));
+				if (m_baseLayer.IsEnergyLineLayer())
+					m_fsm.SetCurrentState(new EditEnergyLineStringsState(m_fsm, m_planLayer, m_currentBoxSelection));
 				else
-					fsm.SetCurrentState(new EditLineStringsState(fsm, planLayer, currentBoxSelection));
+					m_fsm.SetCurrentState(new EditLineStringsState(m_fsm, m_planLayer, m_currentBoxSelection));
 			}
 
 			BoxSelect.HideBoxSelection();
-			selectingBox = false;
+			m_selectingBox = false;
 		}
 
 		public override void HandleKeyboardEvents()
 		{
-			if (Input.GetKeyDown(KeyCode.Return))
-			{
-				if (baseLayer.IsEnergyLineLayer())
-					fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, planLayer));
-				else
-					fsm.SetCurrentState(new StartCreatingLineStringState(fsm, planLayer));
-			}
+			if (!Input.GetKeyDown(KeyCode.Return))
+				return;
+			if (m_baseLayer.IsEnergyLineLayer())
+				m_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(m_fsm, m_planLayer));
+			else
+				m_fsm.SetCurrentState(new StartCreatingLineStringState(m_fsm, m_planLayer));
 		}
 
-		public override void HandleToolbarInput(FSM.ToolbarInput toolbarInput)
+		public override void HandleToolbarInput(FSM.ToolbarInput a_toolbarInput)
 		{
-			switch (toolbarInput)
+			switch (a_toolbarInput)
 			{
 				case FSM.ToolbarInput.Create:
-					if (baseLayer.IsEnergyLineLayer())
-						fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, planLayer));
+					if (m_baseLayer.IsEnergyLineLayer())
+						m_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(m_fsm, m_planLayer));
 					else
-						fsm.SetCurrentState(new StartCreatingLineStringState(fsm, planLayer));
-					break;
-				case FSM.ToolbarInput.SelectAll:
-					fsm.SetCurrentState(new EditLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>((baseLayer as LineStringLayer).GetAllSubEntities())));
+						m_fsm.SetCurrentState(new StartCreatingLineStringState(m_fsm, m_planLayer));
 					break;
 			}
 		}
 
-		public override void ExitState(Vector3 currentMousePosition)
+		public override void ExitState(Vector3 a_currentMousePosition)
 		{
-			if (previousHover != null)
+			if (m_previousHover != null)
 			{
-				HoveredSubEntity(previousHover, false);
+				HoveredSubEntity(m_previousHover, false);
 			}
 
-			foreach (LineStringSubEntity lse in currentBoxSelection)
+			foreach (LineStringSubEntity lse in m_currentBoxSelection)
 			{
 				lse.RedrawGameObject();
 			}

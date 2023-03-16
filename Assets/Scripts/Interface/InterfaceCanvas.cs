@@ -25,13 +25,10 @@ namespace MSP2050.Scripts
 		[Header("References")]
 		public TimeBar timeBar;
 		public MapScale mapScale;
-		public ToolBar toolBar;
-		public LayerPanel layerPanel;
-		public GenericWindow layerSelect;
+		public LayerInterface layerInterface;
 		public ActiveLayerWindow activeLayers;
 		public ActivePlanWindow activePlanWindow;
-		public PlanWizard planWizard;
-		public PlansMonitor plansMonitor;
+		public PlansList plansList;
 		public LoadingScreen loadingScreen;
 		public UnLoadingScreen unLoadingScreen;
 		public PropertiesWindow propertiesWindow;
@@ -40,6 +37,8 @@ namespace MSP2050.Scripts
 		public GameObject networkingBlocker;
 		public GenericWindow impactToolWindow;
 		public HEBGraph.HEBGraph ImpactToolGraph;
+		public NotificationWindow notificationWindow;
+		public GameObject mapToolsWindow;
 
 		[Header("Game Menu")]
 		public GameMenu gameMenu;
@@ -48,19 +47,19 @@ namespace MSP2050.Scripts
 		[Header("Menu Bar")]
 		public MenuBarLogo menuBarLogo;
 		public MenuBarToggle menuBarLayers;
-		public MenuBarToggle menuBarPlanWizard;
 		public MenuBarToggle menuBarObjectivesMonitor;
-		public MenuBarToggle menuBarPlansMonitor;
 		public MenuBarToggle menuBarImpactTool;
 		public MenuBarToggle menuBarActiveLayers;
 		public MenuBarToggle menuBarGameMenu;
+		public MenuBarToggle menuBarPlansList;
+		public MenuBarToggle menuBarCreatePlan;
+		public MenuBarToggle menuBarNotifications;
 
 		[Header("KPI")]
-		public KPIRoot KPIEcology;
+		public  KPIOtherValueArea KPIEcologyGroups;
 
 		[Header("Objectives")]
 		public ObjectivesMonitor objectivesMonitor;
-		public NewObjectiveWindow newObjectiveWindow;
 
 		[Header("LineMaterials")]
 		public Material[] lineMaterials;
@@ -70,24 +69,17 @@ namespace MSP2050.Scripts
 		public ColourAsset accentColour;
 		public ColourAsset regionColour;
 
-		private List<Button> ToolbarButtons = new List<Button>();
-
-		[HideInInspector]
-		public LayerInterface layerInterface;
-
-		[HideInInspector]
-		public bool ignoreLayerToggleCallback;//If this is true the layer callback labda functions will return immediately
-
 		private Dictionary<string, Button> buttonUIReferences = new Dictionary<string, Button>();
 		private Dictionary<string, Toggle> toggleUIReferences = new Dictionary<string, Toggle>();
 		private Dictionary<string, GameObject> genericUIReferences = new Dictionary<string, GameObject>();
+		private Dictionary<string, HashSet<GameObject>> tagUIReferences = new Dictionary<string, HashSet<GameObject>>();
 		public event Action<string, string[]> interactionEvent;
-		public event Action<string, GameObject> uiReferenceRegisteredEvent;
+		public event Action<string, GameObject> uiReferenceNameRegisteredEvent;
+		public event Action<string[], GameObject> uiReferenceTagsRegisteredEvent;
 
 		private void Awake()
 		{
 			singleton = this;
-			layerInterface = layerPanel.GetComponent<LayerInterface>();
 		}
 
 		private void OnDestroy()
@@ -128,20 +120,6 @@ namespace MSP2050.Scripts
 		{
 			Instance.networkingBlocker.SetActive(false);
 		}
-		
-		//====================================== Below used to be InterfaceCanvas ===============================================
-
-		public void StartEditingLayer(AbstractLayer layer)
-		{
-			ToolbarVisibility(true);
-			toolBar.ShowToolBar(true);
-			ToolbarTitleVisibility(true, FSM.ToolbarInput.Create);
-			ToolbarTitleVisibility(true, FSM.ToolbarInput.Delete);
-			ToolbarVisibility(false, FSM.ToolbarInput.Difference, FSM.ToolbarInput.Intersect, FSM.ToolbarInput.Union);
-			ToolbarTitleVisibility(false, FSM.ToolbarInput.Union);
-			toolBar.SetCreateButtonSprite(layer);
-			ToolbarEnable(true);
-		}
 
 		public static void SetLineMaterialTiling(float tiling)
 		{
@@ -155,126 +133,6 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void StopEditing()
-		{
-			ToolbarEnable(false);
-			Instance.toolBar.ShowToolBar(false);
-		}
-		
-		public void ToolbarTitleVisibility(bool enabled, FSM.ToolbarInput button)
-		{
-			for (int i = 0; i < ToolbarButtons.Count; i++)
-			{
-				if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == button)
-				{
-					ToolbarButtons[i].transform.parent.parent.Find("Label").gameObject.SetActive(enabled);
-					ToolbarButtons[i].transform.parent.gameObject.SetActive(enabled);
-				}
-			}
-		}
-
-		public void ToolbarVisibility(bool enabled, params FSM.ToolbarInput[] buttons)
-		{
-			for (int i = 0; i < ToolbarButtons.Count; i++)
-			{
-				if (buttons.Length <= 0)
-				{
-					ToolbarButtons[i].gameObject.SetActive(enabled);
-				}
-				else
-				{
-					for (int j = 0; j < buttons.Length; j++)
-					{
-						if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == buttons[j])
-						{
-							ToolbarButtons[i].gameObject.SetActive(enabled);
-						}
-					}
-				}
-			}
-		}
-
-		public void SetToolbarMode(ToolBar.DrawingMode drawingMode)
-		{
-			if (drawingMode == ToolBar.DrawingMode.Create)
-			{
-				toolBar.CreateMode();
-			}
-			else if (drawingMode == ToolBar.DrawingMode.Edit)
-			{
-				toolBar.EditMode();
-			}
-		}
-
-		public void ToolbarEnable(bool enabled, params FSM.ToolbarInput[] buttons)
-		{
-			for (int i = 0; i < ToolbarButtons.Count; i++)
-			{
-				if (buttons.Length <= 0)
-				{
-					toolBar.SetActive(ToolbarButtons[i], enabled);
-				}
-				else
-				{
-					for (int j = 0; j < buttons.Length; j++)
-					{
-						if (ToolbarButtons[i].GetComponent<ToolbarButtonType>().buttonType == buttons[j])
-						{
-							toolBar.SetActive(ToolbarButtons[i], enabled);
-						}
-					}
-				}
-			}
-		}
-		
-		public static List<EntityType> GetCurrentEntityTypeSelection()
-		{
-			return Instance.activePlanWindow.GetEntityTypeSelection();
-		}
-
-		public static int GetCurrentTeamSelection()
-		{
-			return Instance.activePlanWindow.SelectedTeam;
-		}
-
-		public void SetActiveplanWindowToSelection(List<List<EntityType>> entityTypes, int team, List<Dictionary<EntityPropertyMetaData, string>> selectedParams)
-		{
-			activePlanWindow.SetSelectedEntityTypes(entityTypes);
-			activePlanWindow.SetSelectedParameters(selectedParams);
-			if (SessionManager.Instance.AreWeGameMaster)
-			{
-				activePlanWindow.SelectedTeam = team;
-			}
-		}
-
-		public void SetTeamAndTypeToBasicIfEmpty()
-		{
-			activePlanWindow.SetEntityTypeToBasicIfEmpty();
-			if (SessionManager.Instance.AreWeGameMaster)
-				activePlanWindow.SetTeamToBasicIfEmpty();
-		}
-
-		public void SetActivePlanWindowInteractability(bool value, bool parameterValue = false)
-		{
-			activePlanWindow.SetParameterInteractability(parameterValue);
-			if (!value)
-			{
-				activePlanWindow.DeselectAllEntityTypes();
-				if (SessionManager.Instance.AreWeGameMaster)
-					activePlanWindow.SelectedTeam = -2;
-			}
-		}
-
-		public void SetActivePlanWindowChangeable(bool value)
-		{
-			activePlanWindow.SetObjectChangeInteractable(value);
-		}
-
-		public void RegisterToolbarButton(Button button)
-		{
-			ToolbarButtons.Add(button);
-		}
-
 		public void TriggerInteractionCallback(string name, string[] tags)
 		{
 			interactionEvent?.Invoke(name, tags);
@@ -283,19 +141,31 @@ namespace MSP2050.Scripts
 		public void RegisterUIReference(string name, Button button)
 		{
 			buttonUIReferences[name] = button;
-			uiReferenceRegisteredEvent?.Invoke(name, button.gameObject);
+			uiReferenceNameRegisteredEvent?.Invoke(name, button.gameObject);
 		}
 
 		public void RegisterUIReference(string name, Toggle toggle)
 		{
 			toggleUIReferences[name] = toggle;
-			uiReferenceRegisteredEvent?.Invoke(name, toggle.gameObject);
+			uiReferenceNameRegisteredEvent?.Invoke(name, toggle.gameObject);
 		}
 
 		public void RegisterUIReference(string name, GameObject ui)
 		{
 			genericUIReferences[name] = ui;
-			uiReferenceRegisteredEvent?.Invoke(name, ui.gameObject);
+			uiReferenceNameRegisteredEvent?.Invoke(name, ui.gameObject);
+		}
+
+		public void RegisterUITagsReference(string[] tags, GameObject ui)
+		{
+			foreach (string tag in tags)
+			{
+				if (tagUIReferences.TryGetValue(tag, out var list))
+					list.Add(ui);
+				else
+					tagUIReferences.Add(tag, new HashSet<GameObject>() { ui });
+			}
+			uiReferenceTagsRegisteredEvent?.Invoke(tags, ui.gameObject);
 		}
 
 		public void UnregisterUIReference(string name)
@@ -306,6 +176,20 @@ namespace MSP2050.Scripts
 				toggleUIReferences.Remove(name);
 			else if (genericUIReferences.ContainsKey(name))
 				genericUIReferences.Remove(name);
+		}
+
+		public void UnregisterUITagsReference(string[] tags, GameObject ui)
+		{
+			foreach (string tag in tags)
+			{
+				if (tagUIReferences.TryGetValue(tag, out var list))
+				{
+					if (list.Count == 0)
+						tagUIReferences.Remove(tag);
+					else
+						list.Remove(ui);
+				}
+			}
 		}
 
 		public Button GetUIButton(string name)
@@ -336,6 +220,13 @@ namespace MSP2050.Scripts
 		public GameObject GetUIGeneric(string name)
 		{
 			if (genericUIReferences.TryGetValue(name, out var result))
+				return result;
+			return null;
+		}
+
+		public HashSet<GameObject> GetUIWithTag(string tag)
+		{
+			if (tagUIReferences.TryGetValue(tag, out var result))
 				return result;
 			return null;
 		}

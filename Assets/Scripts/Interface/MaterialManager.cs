@@ -211,9 +211,9 @@ namespace MSP2050.Scripts
 			if (cam.transform.position != previousCamPosition)
 			{
 				Vector3 offset = -2 * cam.WorldToViewportPoint(patternAnchor) + patternAnchorOffset;
-				if (CameraZoom.LastZoomLocation != patternAnchor)
+				if (CameraZoom.m_lastZoomLocation != patternAnchor)
 				{
-					patternAnchor = CameraZoom.LastZoomLocation;
+					patternAnchor = CameraZoom.m_lastZoomLocation;
 					patternAnchorOffset = offset - -2 * cam.WorldToViewportPoint(patternAnchor);
 				}
 

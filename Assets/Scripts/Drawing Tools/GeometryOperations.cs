@@ -34,12 +34,12 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public static bool OverlapPolygonLine(SubEntity polygonSource, SubEntity lineTarget, out List<Vector3> intersectionCentre)
+		public static bool OverlapPolygonLine(PolygonSubEntity polygonSource, LineStringSubEntity lineTarget, out List<Vector3> intersectionCentre)
 		{
-			((PolygonSubEntity)polygonSource).ValidateWindingOrders();
+			polygonSource.ValidateWindingOrders();
 
-			List<ClipperLib.IntPoint> a0 = VectorToIntPoint(((PolygonSubEntity)polygonSource).GetPoints());
-			List<ClipperLib.IntPoint> b0 = VectorToIntPoint(((LineStringSubEntity)lineTarget).GetPoints());
+			List<ClipperLib.IntPoint> a0 = VectorToIntPoint(polygonSource.GetPoints());
+			List<ClipperLib.IntPoint> b0 = VectorToIntPoint(lineTarget.GetPoints());
 
 
 			// maybe reverse the clip and subject
@@ -68,10 +68,8 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public static bool Overlap(SubEntity source, SubEntity target, out List<Vector3> intersectionCentre)
+		public static bool Overlap(PolygonSubEntity sourcePolygon, PolygonSubEntity targetPolygon, out List<Vector3> intersectionCentre)
 		{
-			PolygonSubEntity sourcePolygon = (PolygonSubEntity)source;
-			PolygonSubEntity targetPolygon = (PolygonSubEntity)target;
 			sourcePolygon.ValidateWindingOrders();
 			targetPolygon.ValidateWindingOrders();
 
@@ -100,7 +98,7 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public static bool Overlap(HashSet<SubEntity> source, HashSet<SubEntity> target, out List<Vector3> intersectionCentre)
+		public static bool Overlap(HashSet<PolygonSubEntity> source, HashSet<PolygonSubEntity> target, out List<Vector3> intersectionCentre)
 		{
 			List<List<ClipperLib.IntPoint>> a0 = new List<List<ClipperLib.IntPoint>>();// (VectorToIntPoint(source.GetPolygon()));
 			List<List<ClipperLib.IntPoint>> b0 = new List<List<ClipperLib.IntPoint>>();// (VectorToIntPoint(target.GetPolygon()));

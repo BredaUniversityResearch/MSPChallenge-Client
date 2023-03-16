@@ -20,22 +20,22 @@ namespace MSP2050.Scripts
         public void SetupKPIValues(KPICategoryDefinition[] kpiDefinitions, int numberOfKpiMonths)
         {
             List<KPICategoryDefinition> layerCategories = new List<KPICategoryDefinition>(LayerManager.Instance.GetLayerCount());
-            foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
+            foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
             {
-                if (layer.Editable)
+                if (layer.m_editable)
                 {
                     string layerUnit = GetUnitForLayerType(layer);
                     KPICategoryDefinition layerCategory = new KPICategoryDefinition
                     {
                         categoryName = layer.FileName,
                         categoryDisplayName = layer.ShortName,
-                        categoryColor = layer.EntityTypes[0].DrawSettings.PolygonColor,
+                        categoryColor = layer.m_entityTypes[0].DrawSettings.PolygonColor,
                         categoryValueType = EKPICategoryValueType.Manual,
                         unit = layerUnit
                     };
 
-                    List<KPIValueDefinition> entityTypeCategories = new List<KPIValueDefinition>(layer.EntityTypes.Count);
-                    foreach (KeyValuePair<int, EntityType> type in layer.EntityTypes)
+                    List<KPIValueDefinition> entityTypeCategories = new List<KPIValueDefinition>(layer.m_entityTypes.Count);
+                    foreach (KeyValuePair<int, EntityType> type in layer.m_entityTypes)
                     {
                         KPIValueDefinition value = new KPIValueDefinition
                         {
@@ -62,9 +62,9 @@ namespace MSP2050.Scripts
 
         public void CalculateKPIValues(int newMonth)
         {
-            foreach (AbstractLayer layer in LayerManager.Instance.GetAllValidLayers())
+            foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
             {
-                if (layer.Editable)
+                if (layer.m_editable)
                 {
                     LayerState state = layer.GetLayerStateAtTime(mostRecentMonth);
                     for (int monthId = mostRecentMonth + 1; monthId <= newMonth; ++monthId)
@@ -96,18 +96,18 @@ namespace MSP2050.Scripts
 
         public static string GetUnitForLayerType(AbstractLayer layer)
         {
-			LayerManager.GeoType layerGeoType = layer.GetGeoType();
+			LayerManager.EGeoType layerGeoType = layer.GetGeoType();
 
 			string result;
             switch (layerGeoType)
             {
-                case LayerManager.GeoType.point:
+                case LayerManager.EGeoType.Point:
                     result = "Points";
                     break;
-                case LayerManager.GeoType.line:
+                case LayerManager.EGeoType.Line:
                     result = "km";
                     break;
-                case LayerManager.GeoType.polygon:
+                case LayerManager.EGeoType.Polygon:
                     result = "km<sup>2</sup>";
                     break;
                 default:

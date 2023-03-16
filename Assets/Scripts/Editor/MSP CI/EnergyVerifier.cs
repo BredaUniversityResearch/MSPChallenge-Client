@@ -42,7 +42,7 @@ public class EnergyVerifierObj : MonoBehaviour
 
 	public void VerifyEnergy()
 	{
-		if (LayerManager.Instance.energySubEntities == null || LayerManager.Instance.energySubEntities.Count == 0)
+		if (PolicyLogicEnergy.Instance.m_energySubEntities == null || PolicyLogicEnergy.Instance.m_energySubEntities.Count == 0)
 		{
 			Debug.Log("No energy objects found");
 			Destroy(gameObject);
@@ -56,16 +56,16 @@ public class EnergyVerifierObj : MonoBehaviour
 
 		//Setup world state and variables for verification
 		if (Main.InEditMode)
-			PlanDetails.LayersTab.ForceCancelChanges();
+			InterfaceCanvas.Instance.activePlanWindow.ForceCancel(true);
 		PlanManager.Instance.HideCurrentPlan(true);
 
 		HashSet<int> socketIDs = new HashSet<int>(); //DB ids of all sockets active at the current time
 
-		foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+		foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 		{
 			LayerManager.Instance.ShowLayer(layer);
 			layer.ResetEnergyConnections();
-			if (layer.editingType == AbstractLayer.EditingType.Socket)
+			if (layer.m_editingType == AbstractLayer.EditingType.Socket)
 			{
 				foreach (SubEntity socket in layer.GetActiveSubEntities())
 					socketIDs.Add(socket.GetDatabaseID());
@@ -73,23 +73,23 @@ public class EnergyVerifierObj : MonoBehaviour
 		}
 
 		//Have the cable layer activate all connections that are present in the current state, required for later grid checks
-		if (LayerManager.Instance.energyCableLayerGreen != null)
-			LayerManager.Instance.energyCableLayerGreen.ActivateCableLayerConnections();
-		if (LayerManager.Instance.energyCableLayerGrey != null)
-			LayerManager.Instance.energyCableLayerGrey.ActivateCableLayerConnections();
+		if (PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null)
+			PolicyLogicEnergy.Instance.m_energyCableLayerGreen.ActivateCableLayerConnections();
+		if (PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null)
+			PolicyLogicEnergy.Instance.m_energyCableLayerGrey.ActivateCableLayerConnections();
 
-		List<EnergyGrid> currentGrids = PlanManager.Instance.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);
+		List<EnergyGrid> currentGrids = PolicyLogicEnergy.Instance.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);
 
 		//CABLE CONNECTIONS =================================================================================================
 		Debug.Log("Beginning cable connection check.");
 		//Check if all cables have 2 connections
-		if (LayerManager.Instance.energyCableLayerGreen != null)
+		if (PolicyLogicEnergy.Instance.m_energyCableLayerGreen != null)
 		{
-			errors += CheckCables(LayerManager.Instance.energyCableLayerGreen);
+			errors += CheckCables(PolicyLogicEnergy.Instance.m_energyCableLayerGreen);
 		}
-		if (LayerManager.Instance.energyCableLayerGrey != null)
+		if (PolicyLogicEnergy.Instance.m_energyCableLayerGrey != null)
 		{
-			errors += CheckCables(LayerManager.Instance.energyCableLayerGrey);
+			errors += CheckCables(PolicyLogicEnergy.Instance.m_energyCableLayerGrey);
 		}
 		Debug.Log($"Cable connection check complete, {errors} errors found.");
 		errors = 0;
@@ -100,7 +100,7 @@ public class EnergyVerifierObj : MonoBehaviour
 		//Check if all sockets are part of a grid and all expected sockets in grids can be found
 		foreach (EnergyGrid grid in currentGrids)
 		{
-			foreach(EnergyPointSubEntity socket in grid.sockets)
+			foreach(EnergyPointSubEntity socket in grid.m_sockets)
 			{
 				if (!socketIDs.Remove(socket.GetDatabaseID()))
 				{
@@ -128,14 +128,14 @@ public class EnergyVerifierObj : MonoBehaviour
 		foreach (var subEnt in layer.GetAllSubEntities())
 		{
 			EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)subEnt;
-			if (cable.connections == null || cable.connections.Count == 0)
+			if (cable.Connections == null || cable.Connections.Count == 0)
 			{
 				Debug.LogError($"Cable without connections found: {cable.GetDatabaseID()}");
 				errors++;
 			}
-			if (cable.connections.Count < 2)
+			if (cable.Connections.Count < 2)
 			{
-				Debug.LogError($"Cable with missing connection found: {cable.GetDatabaseID()}. Only connected to: {cable.connections[0].point.GetDatabaseID()}");
+				Debug.LogError($"Cable with missing connection found: {cable.GetDatabaseID()}. Only connected to: {cable.Connections[0].point.GetDatabaseID()}");
 				errors++;
 			}
 		}
@@ -150,24 +150,24 @@ public class EnergyVerifierObj : MonoBehaviour
 			int gridId = grid.GetDatabaseID();
 
 			//Compare grid to the grid we get when retracing from a single source
-			EnergyGrid retracedGrid = new EnergyGrid(grid.sockets[0], null);
-			List<int> originalSockets = new List<int>(grid.sockets.Count);
-			List<int> originalSources = new List<int>(grid.sources.Count);
-			foreach (EnergyPointSubEntity socket in grid.sockets)
+			EnergyGrid retracedGrid = new EnergyGrid(grid.m_sockets[0], null);
+			List<int> originalSockets = new List<int>(grid.m_sockets.Count);
+			List<int> originalSources = new List<int>(grid.m_sources.Count);
+			foreach (EnergyPointSubEntity socket in grid.m_sockets)
 				originalSockets.Add(socket.GetDatabaseID());
 			//string originalSourceIDs = string.Join(", ", grid.sources.Select<EnergyPointSubEntity, string>(source => { return source.GetDatabaseID().ToString(); }));
 			if (!retracedGrid.SourceWiseIdentical(grid))
 			{
-				string retracedIDs = string.Join(", ", retracedGrid.sources.Select<EnergyPointSubEntity, string>(source => { return source.GetDatabaseID().ToString(); }));
+				string retracedIDs = string.Join(", ", retracedGrid.m_sources.Select<EnergyPointSubEntity, string>(source => { return source.GetDatabaseID().ToString(); }));
 				Debug.LogError($"Sources in grid with id: {gridId} were different when it was retraced in the current state.\nOriginal sources: {JsonConvert.SerializeObject(originalSources)}.\nRetraced sources: {retracedIDs}.");
 				errors++;
 			}
 			//string originalSocketIDs = string.Join(", ", grid.sockets.Select<EnergyPointSubEntity, string>(socket => { return socket.GetDatabaseID().ToString(); }));
-			foreach (EnergyPointSubEntity source in grid.sources)
+			foreach (EnergyPointSubEntity source in grid.m_sources)
 				originalSources.Add(source.GetDatabaseID());
 			if (!retracedGrid.SocketWiseIdentical(grid))
 			{
-				string retracedIDs = string.Join(", ", retracedGrid.sockets.Select<EnergyPointSubEntity, string>(socket => { return socket.GetDatabaseID().ToString(); }));
+				string retracedIDs = string.Join(", ", retracedGrid.m_sockets.Select<EnergyPointSubEntity, string>(socket => { return socket.GetDatabaseID().ToString(); }));
 				Debug.LogError($"Sockets in grid with id: {gridId} were different when it was retraced in the current state.\nOriginal sockets: {JsonConvert.SerializeObject(originalSockets)}.\nRetraced sockets: {retracedIDs}.");
 				errors++;
 			}
@@ -202,12 +202,12 @@ public class EnergyVerifierObj : MonoBehaviour
 		Debug.Log("Beginning capacity check.");
 		//Check of all energy subentities have their capacity stored on the server
 		List<int> ids = new List<int>();
-		foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+		foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 		{
 			foreach (SubEntity sub in layer.GetActiveSubEntities())
 			{
 				int id = sub.GetDatabaseID();
-				if (LayerManager.Instance.GetEnergySubEntityByID(id) == null)
+				if (PolicyLogicEnergy.Instance.GetEnergySubEntityByID(id) == null)
 				{
 					Debug.LogError($"Energy subentity with id: {id} was not found in LayerManager's energy subentities.");
 					errors++;

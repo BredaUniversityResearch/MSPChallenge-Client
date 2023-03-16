@@ -18,7 +18,7 @@ namespace MSP2050.Scripts
 			{
 				//Convert to int poly
 				List<ClipperLib.IntPoint> intpoly = VectorToIntPoint(polygon.GetPoints());
-				float weight = polygon.Entity.EntityTypes[0].investmentCost;
+				float weight = polygon.m_entity.EntityTypes[0].investmentCost;
 				//if(weight == 0)
 				//    Debug.Log(polygon.Entity.name);
 
@@ -63,7 +63,7 @@ namespace MSP2050.Scripts
 			{
 				//Convert to int poly
 				List<ClipperLib.IntPoint> intline = VectorToIntPoint(line.GetPoints());
-				float weight = line.Entity.EntityTypes[0].investmentCost;
+				float weight = line.m_entity.EntityTypes[0].investmentCost;
 				//if (weight == 0)
 				//    Debug.Log(line.Entity.name);
 

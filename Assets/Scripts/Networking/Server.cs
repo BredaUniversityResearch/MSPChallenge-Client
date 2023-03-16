@@ -130,6 +130,11 @@ namespace MSP2050.Scripts
 			return "api/game/meta";
 		}
 
+		public static string PolicySimSettings()
+		{
+			return "api/game/PolicySimSettings";
+		}
+
 		public static string LayerMetaByName()
 		{
 			return "api/layer/MetaByName";
@@ -255,7 +260,7 @@ namespace MSP2050.Scripts
 			return "api/plan/DeleteLayer";
 		}
 
-		public static string RenamePlanLayer()
+		public static string RenamePlan()
 		{
 			return "api/plan/Name";
 		}
@@ -314,6 +319,12 @@ namespace MSP2050.Scripts
 		{
 			return "api/plan/Restrictions";
 		}
+
+		public static string SetPlanPolicy()
+		{
+			return "api/plan/SetPolicy";
+		}
+
 		public static string UpdateMaxCapacity()
 		{
 			return "api/energy/UpdateMaxCapacity";
@@ -394,10 +405,10 @@ namespace MSP2050.Scripts
 			return "api/energy/AddGrid";
 		}
 
-		public static string GetCELConfig()
-		{
-			return "api/cel/GetCELConfig";
-		}
+		//public static string GetCELConfig()
+		//{
+		//	return "api/cel/GetCELConfig";
+		//}
 
 		public static string SendFishingAmount()
 		{
@@ -423,20 +434,20 @@ namespace MSP2050.Scripts
 			return "api/plan/AddApproval";
 		}
 
-		public static string GetMELConfig()
-		{
-			return "api/mel/Config";
-		}
+		//public static string GetMELConfig()
+		//{
+		//	return "api/mel/Config";
+		//}
 
-		public static string ShippingKPIConfig()
-		{
-			return "api/sel/GetKPIDefinition";
-		}
+		//public static string ShippingKPIConfig()
+		//{
+		//	return "api/sel/GetKPIDefinition";
+		//}
 
-		public static string GetShippingClientConfig()
-		{
-			return "api/sel/GetSELGameClientConfig";
-		}
+		//public static string GetShippingClientConfig()
+		//{
+		//	return "api/sel/GetSELGameClientConfig";
+		//}
 
 		public static string DeleteObjective()
 		{

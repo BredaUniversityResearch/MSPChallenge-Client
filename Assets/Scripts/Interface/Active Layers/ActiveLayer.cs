@@ -7,179 +7,144 @@ namespace MSP2050.Scripts
 {
 	public class ActiveLayer : MonoBehaviour {
 
-		public TextMeshProUGUI layerName;
-		public CustomToggle visibilityToggle, barToggle, layerTextToggle;
-		public CustomButton closeButton;
-		public CustomButton infoButton;
-		public Image toggleCheckMark, textToggleCheckMark;
-		public Sprite textToggleVisibleSprite, textToggleInvisibleSprite;
-		public Transform contentLocation, collapseArrow;
+		[SerializeField] TextMeshProUGUI m_layerName;
+		[SerializeField] CustomToggle m_visibilityToggle;
+		[SerializeField] CustomToggle m_expandToggle;
+		[SerializeField] CustomToggle m_layerTextToggle;
+		[SerializeField] CustomToggle m_pinToggle;
+		[SerializeField] CustomButton m_closeButton;
 	
-		[HideInInspector]
-		public AbstractLayer layerRepresenting;
-
 		[Header("Prefabs")]
-		public GameObject mapKeyPrefab;
-
-		[Header("Content")]
-		public List<MapKey> mapKeys;
+		[SerializeField] GameObject m_entityTypeEntryPrefab;
+		[SerializeField] Transform m_contentLocation;
+		
+		AbstractLayer m_layerRepresenting;
+		bool m_ignoreToggleCallback;
 
 		private void Start()
 		{
-			barToggle.onValueChanged.AddListener((b) => SetExpanded(b));
-		}
-
-		public void ShowCloseButton(bool show)
-		{
-			closeButton.gameObject.SetActive(show);
-		}
-
-		public void SetLayerRepresenting(AbstractLayer layer, bool forceTextHidden)
-		{
-			layerRepresenting = layer;
-			layerName.text = string.IsNullOrEmpty(layer.ShortName) ? layer.FileName : layer.ShortName;
-			CreateMapKeys();
-			if (layerRepresenting.textInfo == null)
-			{
-				layerTextToggle.gameObject.SetActive(false);
-			}
-			else
-			{
-				if (forceTextHidden && layer.LayerTextVisible)
-					layer.LayerTextVisible = false;
-				layerTextToggle.isOn = layer.LayerTextVisible;
-				textToggleCheckMark.sprite = layer.LayerTextVisible ? textToggleVisibleSprite : textToggleInvisibleSprite;
-				layerTextToggle.onValueChanged.AddListener((value) =>
-				{
-					textToggleCheckMark.sprite = value ? textToggleVisibleSprite : textToggleInvisibleSprite;
-					layerRepresenting.LayerTextVisible = value;
-					InterfaceCanvas.Instance.activeLayers.TextShowingChanged(value);
-				});
-			}
-		}
-
-		private void CreateMapKeys()
-		{
-			mapKeys = new List<MapKey>();
-
-			bool visibilityToggle = layerRepresenting.GetGeoType() != LayerManager.GeoType.raster;
-		
-			foreach (EntityType entityType in layerRepresenting.GetEntityTypesSortedByKey())
-			{
-				Texture2D pattern = MaterialManager.Instance.GetPatternOrDefault(entityType.DrawSettings.PolygonPatternName);
-
-				Color color = entityType.DrawSettings.PolygonColor;
-
-				if (layerRepresenting.GetGeoType() == LayerManager.GeoType.line)
-				{
-					color = entityType.DrawSettings.LineColor;
-				}
-				else if (layerRepresenting.GetGeoType() == LayerManager.GeoType.point)
-				{
-					color = entityType.DrawSettings.PointColor;
-				} 
-				else if (layerRepresenting.GetGeoType() == LayerManager.GeoType.raster)
-				{
-					pattern = MaterialManager.Instance.GetPatternOrDefault(((RasterLayer)layerRepresenting).rasterObject.layer_raster_pattern);
-				}
-
-				CreateMapKey(entityType, color, pattern, visibilityToggle);
-			}
-		}
-
-		private void CreateMapKey(EntityType type, Color color, Texture2D pattern, bool visibilityToggle)
-		{
-			int key = layerRepresenting.GetEntityTypeKey(type);
-
-			string mapKeyName = type.Name;
-			if (SessionManager.Instance.AreWeGameMaster)
-				mapKeyName += " (" + key + ")";		
-		
-			// Instantiate prefab
-			GameObject go = Instantiate(mapKeyPrefab);
-			go.transform.SetParent(contentLocation, false);
-
-			// Store component
-			MapKey mapKey = go.GetComponent<MapKey>();
-			mapKeys.Add(mapKey);
-
-			//Set properties
-			//mapKey.areaKey.texture = pattern;
-			//mapKey.areaKey.color = color;
-			//mapKey.lineKey.color = color;
-			//mapKey.pointKey.color = color;
-			mapKey.label.text = mapKeyName;
-			mapKey.layer = layerRepresenting;
-			mapKey.entityType = type;
-			mapKey.ID = key;
-			if (!visibilityToggle)
-				mapKey.DisableVisibilityToggle();
-
-			if (layerRepresenting.GetGeoType() == LayerManager.GeoType.polygon)
-			{
-				mapKey.areaKey.texture = pattern;
-				mapKey.areaKey.color = color;
-            
-				mapKey.outlineKey.transform.gameObject.SetActive(true);
-				Color outlineColor = type.DrawSettings.LineColor;
-				outlineColor.a = 1.0f; //Force Alpha to 1 as it is with the outline line rendering.
-				mapKey.outlineKey.color = outlineColor;
-			}
-			else if (layerRepresenting.GetGeoType() == LayerManager.GeoType.line)
-			{
-				mapKey.areaKey.transform.parent.parent.gameObject.SetActive(false);
-				mapKey.lineKey.transform.parent.gameObject.SetActive(true);
-				mapKey.pointKey.transform.parent.gameObject.SetActive(false);
-				mapKey.outlineKey.transform.gameObject.SetActive(false);
-
-				mapKey.lineKey.color = color;
-				mapKey.lineKey.sprite = InterfaceCanvas.Instance.activeLayerLineSprites[(int)type.DrawSettings.LinePatternType];
-			}
-			else if (layerRepresenting.GetGeoType() == LayerManager.GeoType.point)
-			{
-				mapKey.areaKey.transform.parent.parent.gameObject.SetActive(false);
-				mapKey.lineKey.transform.parent.gameObject.SetActive(false);
-				mapKey.pointKey.transform.parent.gameObject.SetActive(true);
-				mapKey.outlineKey.transform.gameObject.SetActive(false);
-
-				mapKey.pointKey.sprite = type.DrawSettings.PointSprite;
-				mapKey.pointKey.color = color;
-			}
-			else
-			{
-				mapKey.outlineKey.transform.gameObject.SetActive(false);
-
-				mapKey.areaKey.color = color;
-				mapKey.areaKey.texture = pattern;
-			}
-		}
-
-		public void SetExpanded(bool value)
-		{
-			if (contentLocation.gameObject.activeInHierarchy == value)
-				return;
-
-			contentLocation.gameObject.SetActive(value);
-			Vector3 oldRotation = collapseArrow.eulerAngles;
-			collapseArrow.eulerAngles = !value ? new Vector3(oldRotation.x, oldRotation.y, 90f) : new Vector3(oldRotation.x, oldRotation.y, 0f);
-			InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(value);
-		}
-
-		public void SetVisibilityLocked(bool value)
-		{
-			visibilityToggle.interactable = !value;
-			foreach (MapKey mapKey in mapKeys)
-				mapKey.SetInteractable(!value);
+			m_expandToggle.onValueChanged.AddListener((b) => SetExpanded(b));
+			m_pinToggle.onValueChanged.AddListener(OnPinToggleChanged);
+			m_visibilityToggle.onValueChanged.AddListener(OnVisibilityToggleChanged);
+			m_closeButton.onClick.AddListener(OnCloseButtonPressed);
 		}
 
 		public void Destroy()
 		{
-			if (contentLocation.gameObject.activeInHierarchy)
+			if (m_expandToggle.isOn)
 			{
 				InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(false);
 				InterfaceCanvas.Instance.activeLayers.TextShowingChanged(false);
 			}
+			LayerManager.Instance.m_onLayerVisibilityLockChanged -= OnLayerVisibilityLockChanged;
 			Destroy(gameObject);
+		}
+
+		public void SetLayerRepresenting(AbstractLayer a_layer, bool a_forceTextHidden, bool a_pinnedInvisible = false)
+		{
+			m_layerRepresenting = a_layer;
+			m_visibilityToggle.isOn = !a_pinnedInvisible;
+			m_pinToggle.isOn = a_pinnedInvisible;
+			m_layerName.text = string.IsNullOrEmpty(a_layer.ShortName) ? a_layer.FileName : a_layer.ShortName;
+			LayerManager.Instance.m_onLayerVisibilityLockChanged += OnLayerVisibilityLockChanged;
+			foreach (EntityType entityType in m_layerRepresenting.GetEntityTypesSortedByKey())
+			{
+				ActiveLayerEntityType mapKey = Instantiate(m_entityTypeEntryPrefab, m_contentLocation).GetComponent<ActiveLayerEntityType>();
+				mapKey.SetContent(m_layerRepresenting, entityType);
+			}
+			if (m_layerRepresenting.m_textInfo == null)
+			{
+				m_layerTextToggle.gameObject.SetActive(false);
+			}
+			else
+			{
+				if (a_forceTextHidden && a_layer.LayerTextVisible)
+					a_layer.LayerTextVisible = false;
+				m_layerTextToggle.isOn = a_layer.LayerTextVisible;
+				m_layerTextToggle.onValueChanged.AddListener((value) =>
+				{
+					m_layerRepresenting.LayerTextVisible = value;
+					InterfaceCanvas.Instance.activeLayers.TextShowingChanged(value);
+				});
+			}
+			bool interactable = !LayerManager.Instance.IsLayerVisibilityLocked(a_layer);
+			m_visibilityToggle.interactable = interactable;
+			m_closeButton.interactable = interactable;
+		}
+
+		void OnPinToggleChanged(bool a_value)
+		{
+			m_visibilityToggle.gameObject.SetActive(a_value);
+			m_closeButton.gameObject.SetActive(!a_value);
+		}
+
+		void OnVisibilityToggleChanged(bool a_value)
+		{
+			if (m_ignoreToggleCallback)
+				return;
+
+			m_ignoreToggleCallback = true;
+			if (a_value)
+			{
+				LayerManager.Instance.ShowLayer(m_layerRepresenting);
+			}
+			else
+			{
+				LayerManager.Instance.HideLayer(m_layerRepresenting);
+			}
+			m_ignoreToggleCallback = false;
+		}
+
+		void OnCloseButtonPressed()
+		{
+			//if (PlanManager.Instance.planViewing == null || !PlanManager.Instance.planViewing.IsLayerpartOfPlan(m_layerRepresenting))
+			//{
+				InterfaceCanvas.Instance.activeLayers.RemoveLayer(m_layerRepresenting);
+				LayerManager.Instance.HideLayer(m_layerRepresenting);
+			//}
+		}
+
+		public void SetExpanded(bool a_value)
+		{
+			if (m_ignoreToggleCallback)
+				return;
+
+			m_ignoreToggleCallback = true;
+			m_expandToggle.isOn = a_value;
+			m_ignoreToggleCallback = false;
+			m_contentLocation.gameObject.SetActive(a_value);
+			InterfaceCanvas.Instance.activeLayers.LayerExpansionChanged(a_value);
+		}
+
+		public void SetTextActive(bool a_active)
+		{
+			m_layerTextToggle.isOn = a_active;
+		}
+
+		public void OnLayerVisibilityChanged(bool a_visible)
+		{
+			if (m_ignoreToggleCallback)
+				return;
+
+			m_ignoreToggleCallback = true;
+			if (m_pinToggle.isOn)
+			{
+				m_visibilityToggle.isOn = a_visible;
+			}
+			else if (!a_visible)
+			{
+				InterfaceCanvas.Instance.activeLayers.RemoveLayer(m_layerRepresenting);
+			}
+			m_ignoreToggleCallback = false;
+		}
+
+		void OnLayerVisibilityLockChanged(AbstractLayer a_layer, bool a_locked)
+		{
+			if (a_layer == m_layerRepresenting)
+			{
+				m_visibilityToggle.interactable = !a_locked;
+				m_closeButton.interactable = !a_locked;
+			}
 		}
 	}
 }

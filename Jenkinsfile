@@ -6,7 +6,6 @@ def COLOR_MAP = [
 ]
 
 pipeline {
-	
 	environment {
 		// Unity tool installation
 		UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2020.3.31f1\\Editor\\Unity.exe"

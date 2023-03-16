@@ -9,27 +9,24 @@ namespace MSP2050.Scripts
 {
 	public class GenericWindow : MonoBehaviour
 	{
+		const float BORDER_OFFSET = 16f;
+		const float LEFT_OFFSET = 64f;
+
 		public RectTransform windowTransform;
 		public LayoutElement contentLayout;
 		public TextMeshProUGUI title;
-		public Transform contentLocation;
 		public bool shouldCenter;
+		public bool shouldMaximize;
 
 		// Buttons
 		public Button exitButton;
-		public Button cancelButton;
-		public Button acceptButton;
 
 		public ResizeHandle resizeHandle;
 		public DragHandle dragHandle;
 		public List<IOnResizeHandler> secondaryResizeHandlers;
 
 		[Header("Prefabs")]
-		public GameObject genericContentPrefab;
 		public GameObject modalBackgroundPrefab;
-
-		public delegate void CloseWindow();
-		public CloseWindow CloseWindowDelegate = null;
 
 		public delegate bool AttemptHideWindowDelegate();
 		private AttemptHideWindowDelegate onAttemptHideWindowDelegate;
@@ -55,6 +52,8 @@ namespace MSP2050.Scripts
 			{
 				dragHandle.onHandleDragged = HandleDrag;
 			}
+			if(exitButton != null)
+				exitButton.onClick.AddListener(Hide);
 		}
 
 		void OnEnable()
@@ -62,6 +61,18 @@ namespace MSP2050.Scripts
 			if (shouldCenter)
 			{
 				CenterWindow();
+			}
+			if(shouldMaximize)
+			{
+				Vector3[] corners = new Vector3[4];
+				Vector3[] contentCorners = new Vector3[4];
+				float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
+				windowTransform.GetWorldCorners(corners);
+				contentLayout.GetComponent<RectTransform>().GetWorldCorners(contentCorners);
+				float containerSizeVer = (corners[1].y - corners[0].y) - (contentCorners[1].y - contentCorners[0].y); 
+				float containerSizeHor = (corners[2].x - corners[1].x) - (contentCorners[2].x - contentCorners[1].x); 
+				contentLayout.preferredWidth = (Screen.width - containerSizeHor) / InterfaceCanvas.Instance.canvas.scaleFactor - LEFT_OFFSET - BORDER_OFFSET;
+				contentLayout.preferredHeight = (Screen.height - containerSizeVer) / InterfaceCanvas.Instance.canvas.scaleFactor - 2 * BORDER_OFFSET;
 			}
 		}
 
@@ -76,8 +87,8 @@ namespace MSP2050.Scripts
 			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
 			Vector3[] corners = new Vector3[4];
 			windowTransform.GetWorldCorners(corners);
-			//40f = topbar size
-			SetPosition(new Vector2((corners[1].x - corners[2].x) * 0.5f * (1f / scale), (corners[1].y - corners[0].y - 40f) * 0.5f * (1f / scale)));
+			windowTransform.anchoredPosition = new Vector2(Mathf.Round(((corners[1].x - corners[2].x) / scale + (LEFT_OFFSET - BORDER_OFFSET))*0.5f),
+				Mathf.Round((corners[1].y - corners[0].y) * 0.5f / scale));
 		}
 		
 		public void SetTitle(string text) {
@@ -86,20 +97,7 @@ namespace MSP2050.Scripts
 
 		public void SetPosition(Vector2 pos) {
 			windowTransform.anchoredPosition = pos;
-		}
-
-		public Vector2 GetPosition()
-		{
-			return windowTransform.anchoredPosition;
-		}
-
-		public void SetWidth(float width) {
-			windowTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mathf.Clamp(width, 150f, 800f));
-		}
-
-		public Vector2 GetSize()
-		{
-			return windowTransform.sizeDelta;
+			LimitPosition();
 		}
 
 		public void Hide() 
@@ -157,33 +155,47 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void HandleResize(PointerEventData data, RectTransform handleRect, ResizeHandle.RescaleDirection direction)
+		public void HandleResize(PointerEventData data, RectTransform handleRect, ResizeHandle.RescaleDirectionHor hor, ResizeHandle.RescaleDirectionVer ver)
 		{
 			Vector3[] corners = new Vector3[4];
+			Vector3[] contentCorners = new Vector3[4];
 			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
 			windowTransform.GetWorldCorners(corners);
+			contentLayout.GetComponent<RectTransform>().GetWorldCorners(contentCorners);
 
 			//Vertical
-			if (direction == ResizeHandle.RescaleDirection.Vertical || direction == ResizeHandle.RescaleDirection.Both)
+			if (ver == ResizeHandle.RescaleDirectionVer.Down)
 			{
-				float containerSize = (corners[1].y - corners[0].y) - contentLayout.preferredHeight * scale; //Size of the area of the window not part of contentlayout
-				float target = corners[1].y - (data.position.y - handleRect.sizeDelta.y * 0.5f);
-				float max = corners[1].y;
-				//float max = corners[1].y  + Screen.height * 0.5f - containerSize;
-				contentLayout.preferredHeight = Mathf.Max(0, Mathf.Min(target, max) - containerSize) / scale;
+				float containerSize = (corners[1].y - corners[0].y) - (contentCorners[1].y - contentCorners[0].y); //Size of the area of the window not part of contentlayout
+				float target = corners[1].y - (data.position.y /*- handleRect.sizeDelta.y * 0.5f*/) - containerSize;
+				float max = corners[1].y - containerSize - BORDER_OFFSET;
+				contentLayout.preferredHeight = Mathf.Round(Mathf.Max(0, Mathf.Min(target, max)) / scale);
+			}
+			else if (ver == ResizeHandle.RescaleDirectionVer.Up)
+			{
+				float containerSize = (corners[1].y - corners[0].y) - (contentCorners[1].y - contentCorners[0].y); //Size of the area of the window not part of contentlayout
+				float target = data.position.y - corners[0].y - containerSize;
+				float max = Screen.height - Mathf.Max(corners[0].y, BORDER_OFFSET) - containerSize - BORDER_OFFSET;
+				contentLayout.preferredHeight = Mathf.Round(Mathf.Max(0, Mathf.Min(target, max)) / scale);
 			}
 
 			//Horizontal
-			if (direction == ResizeHandle.RescaleDirection.Horizontal || direction == ResizeHandle.RescaleDirection.Both)
+			if (hor == ResizeHandle.RescaleDirectionHor.Right)
 			{
-				float containerSize = (corners[2].x - corners[1].x) - contentLayout.preferredWidth * scale; //Size of the area of the window not part of contentlayout
-				float target = -(corners[1].x - (data.position.x /*- handleRect.sizeDelta.x * 0.5f*/));
-				float max = Screen.width - corners[1].x;
-				//float max = corners[1].x + Screen.width * 0.5f  - containerSize;
-				contentLayout.preferredWidth = Mathf.Max(0, Mathf.Min(target, max) - containerSize) / scale;
+				float containerSize = (corners[2].x - corners[1].x) - (contentCorners[2].x - contentCorners[1].x); //Size of the area of the window not part of contentlayout
+				float target = data.position.x - corners[0].x - containerSize;
+				float max = Screen.width - corners[0].x - containerSize - BORDER_OFFSET;
+				contentLayout.preferredWidth = Mathf.Round( Mathf.Max(0, Mathf.Min(target, max)) / scale);
+			}
+			else if (hor == ResizeHandle.RescaleDirectionHor.Left)
+			{
+				float containerSize = (corners[2].x - corners[1].x) - (contentCorners[2].x - contentCorners[1].x); //Size of the area of the window not part of contentlayout
+				float target =  corners[2].x - data.position.x - containerSize;
+				float max = corners[1].x - containerSize - BORDER_OFFSET;
+				contentLayout.preferredWidth = Mathf.Round(Mathf.Max(0, Mathf.Min(target, max)) / scale);
 			}
 
-			if(secondaryResizeHandlers != null)
+			if (secondaryResizeHandlers != null)
 				foreach (IOnResizeHandler handler in secondaryResizeHandlers)
 					handler.OnResize();
 		}
@@ -201,18 +213,14 @@ namespace MSP2050.Scripts
 
 			float unscaledWidth = contentLayout.preferredWidth * oldScale;
 			float unscaledHeight = contentLayout.preferredHeight * oldScale;	
-			contentLayout.preferredWidth = Mathf.Min(unscaledWidth, topRight.x - bottomLeft.x) / scale;
-			contentLayout.preferredHeight = Mathf.Min(unscaledHeight, topRight.y - bottomLeft.y) / scale;
+			contentLayout.preferredWidth = Mathf.Round(Mathf.Min(unscaledWidth, topRight.x - bottomLeft.x) / scale);
+			contentLayout.preferredHeight = Mathf.Round(Mathf.Min(unscaledHeight, topRight.y - bottomLeft.y) / scale);
 
 			if (updatePosition)
 			{
 				//Force rebuild the layout so the position update will be correct.
 				LayoutRebuilder.ForceRebuildLayoutImmediate(windowTransform);
-
-				transform.position = new Vector3(
-					Mathf.Clamp(transform.position.x, 0f, Screen.width - (windowTransform.rect.width * scale)),
-					Mathf.Clamp(transform.position.y, (windowTransform.rect.height * scale), Screen.height - (41f * scale)),
-					transform.position.z);
+				LimitPosition();
 			}
 
 			if (secondaryResizeHandlers != null)
@@ -220,20 +228,10 @@ namespace MSP2050.Scripts
 					handler.OnResize();
 		}
 
-		public void SetMinWindowWidth(float width)
-		{
-			contentLayout.minWidth = width;
-		}
-
 		public void HandleDrag(PointerEventData eventData, RectTransform handleRect)
 		{
 			transform.position += (Vector3)eventData.delta;
-
-			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-			transform.position = new Vector3(
-				Mathf.Clamp(transform.position.x, 0f, Screen.width - (windowTransform.rect.width * scale)),
-				Mathf.Clamp(transform.position.y, (windowTransform.rect.height * scale), Screen.height - (41f * scale)),
-				transform.position.z);
+			LimitPosition();
 		}
 
 		public IEnumerator LimitPositionEndFrame()
@@ -246,8 +244,8 @@ namespace MSP2050.Scripts
 		{
 			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
 			transform.position = new Vector3(
-				Mathf.Clamp(transform.position.x, 0f, Screen.width - (windowTransform.rect.width * scale)),
-				Mathf.Clamp(transform.position.y, (windowTransform.rect.height * scale), Screen.height - (41f * scale)),
+				Mathf.Round(Mathf.Clamp(transform.position.x, LEFT_OFFSET * scale, Screen.width - ((windowTransform.rect.width + BORDER_OFFSET) * scale))),
+				Mathf.Round(Mathf.Clamp(transform.position.y, ((windowTransform.rect.height + BORDER_OFFSET) * scale), Screen.height - (BORDER_OFFSET * scale))),
 				transform.position.z);
 		}
 

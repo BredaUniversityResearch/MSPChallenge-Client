@@ -6,101 +6,116 @@ namespace MSP2050.Scripts
 {
 	class StartCreatingEnergyLineStringState : StartCreatingLineStringState
 	{
-		bool validPointTooltip = false;
+		private bool m_validPointTooltip = false;
 
-		public StartCreatingEnergyLineStringState(FSM fsm, PlanLayer planLayer) : base(fsm, planLayer)
+		public StartCreatingEnergyLineStringState(FSM a_fsm, PlanLayer a_planLayer) : base(a_fsm, a_planLayer)
 		{}
 
-		public override void EnterState(Vector3 currentMousePosition)
+		public override void EnterState(Vector3 a_currentMousePosition)
 		{
 			//All points are non-reference
-			foreach (AbstractLayer layer in LayerManager.Instance.energyLayers)
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
 			{
-				if (layer.greenEnergy == planLayer.BaseLayer.greenEnergy)
+				if (layer.m_greenEnergy != m_planLayer.BaseLayer.m_greenEnergy)
+					continue;
+				if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
 				{
-					if (layer.editingType == AbstractLayer.EditingType.SourcePolygon)
-					{
-						//Get and add the centerpoint layer
-						EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;
-						LayerManager.Instance.AddNonReferenceLayer(polyLayer.centerPointLayer, false); //Redrawing a centerpoint layer doesn't work, so manually redraw active entities
-						foreach (Entity entity in polyLayer.centerPointLayer.activeEntities)
-							entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
-					}
-					else if (layer.editingType == AbstractLayer.EditingType.SourcePoint ||
-					         layer.editingType == AbstractLayer.EditingType.Socket ||
-					         layer.editingType == AbstractLayer.EditingType.Transformer)
-					{
-						LayerManager.Instance.AddNonReferenceLayer(layer, true);
-					}
+					//Get and add the centerpoint layer
+					EnergyPolygonLayer polyLayer = (EnergyPolygonLayer)layer;
+					LayerManager.Instance.AddNonReferenceLayer(polyLayer.m_centerPointLayer, false); //Redrawing a centerpoint layer doesn't work, so manually redraw active entities
+					foreach (Entity entity in polyLayer.m_centerPointLayer.m_activeEntities)
+						entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
+				}
+				else if (layer.m_editingType == AbstractLayer.EditingType.SourcePoint ||
+					layer.m_editingType == AbstractLayer.EditingType.Socket ||
+					layer.m_editingType == AbstractLayer.EditingType.Transformer)
+				{
+					LayerManager.Instance.AddNonReferenceLayer(layer, true);
 				}
 			}
-			base.EnterState(currentMousePosition);
+			base.EnterState(a_currentMousePosition);
 		}
 
 		//Overriden to change cursor when not on a valid starting point
-		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
+		public override void MouseMoved(Vector3 a_previousPosition, Vector3 a_currentPosition, bool a_cursorIsOverUI)
 		{
-			if (!cursorIsOverUI)
+			if (!a_cursorIsOverUI)
 			{
-				EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(currentPosition);
-				if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
+				EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(a_currentPosition);
+				if (point == null || !point.CanCableStartAtSubEntity(m_planLayer.BaseLayer.m_greenEnergy))
 				{
-					fsm.SetCursor(FSM.CursorType.Invalid);
-					if (!showingToolTip || validPointTooltip)
+					m_fsm.SetCursor(FSM.CursorType.Invalid);
+					if (!m_showingToolTip || m_validPointTooltip)
 					{
 						TooltipManager.ForceSetToolTip("Select valid starting point");
-						validPointTooltip = false;
+						m_validPointTooltip = false;
 					}
 				}
 				else
 				{
-					fsm.SetCursor(FSM.CursorType.Add);
-					if (!showingToolTip || !validPointTooltip)
+					m_fsm.SetCursor(FSM.CursorType.Add);
+					if (!m_showingToolTip || !m_validPointTooltip)
 					{
-						List<EntityType> entityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
+						List<EntityType> entityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 						StringBuilder sb = new StringBuilder("Creating: " + entityTypes[0].Name);
 						for (int i = 1; i < entityTypes.Count; i++)
 							sb.Append("\n& " + entityTypes[i].Name);
 						TooltipManager.ForceSetToolTip(sb.ToString());
-						validPointTooltip = true;
+						m_validPointTooltip = true;
 					}
 				}
-				showingToolTip = true;
+				m_showingToolTip = true;
 			}
 			else
 			{
-				fsm.SetCursor(FSM.CursorType.Default);
-				if (showingToolTip)
+				m_fsm.SetCursor(FSM.CursorType.Default);
+				if (m_showingToolTip)
 					TooltipManager.HideTooltip();
-				showingToolTip = false;
+				m_showingToolTip = false;
 
 			}
 		}
 
-		public override void LeftMouseButtonUp(Vector3 startPosition, Vector3 finalPosition)
+		public override void LeftMouseButtonUp(Vector3 a_startPosition, Vector3 a_finalPosition)
 		{        
-			EnergyPointSubEntity point = LayerManager.Instance.GetEnergyPointAtPosition(finalPosition);
-			if (point == null || !point.CanCableStartAtSubEntity(planLayer.BaseLayer.greenEnergy))
+			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(a_finalPosition);
+			if (point == null || !point.CanCableStartAtSubEntity(m_planLayer.BaseLayer.m_greenEnergy))
 				return;
 
-			LineStringEntity entity = baseLayer.CreateNewEnergyLineStringEntity(point.GetPosition(), new List<EntityType>() { baseLayer.EntityTypes.GetFirstValue() }, point, planLayer);
-			baseLayer.activeEntities.Add(entity);
-			entity.EntityTypes = InterfaceCanvas.GetCurrentEntityTypeSelection();
+			LineStringEntity entity = m_baseLayer.CreateNewEnergyLineStringEntity(point.GetPosition(), new List<EntityType>() { m_baseLayer.m_entityTypes.GetFirstValue() }, point, m_planLayer);
+			m_baseLayer.m_activeEntities.Add(entity);
+			entity.EntityTypes = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.GetEntityTypeSelection();
 			LineStringSubEntity subEntity = entity.GetSubEntity(0) as LineStringSubEntity;
+			subEntity.m_edited = true;
 
 			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
-			fsm.SetCurrentState(new CreatingEnergyLineStringState(fsm, planLayer, subEntity));
-			fsm.AddToUndoStack(new CreateEnergyLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Create));
+			m_fsm.SetCurrentState(new CreatingEnergyLineStringState(m_fsm, m_planLayer, subEntity));
+			m_fsm.AddToUndoStack(new CreateEnergyLineStringOperation(subEntity, m_planLayer, UndoOperation.EditMode.Create));
  
 			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 		}
 
-		public override void ExitState(Vector3 currentMousePosition)
+		public override void ExitState(Vector3 a_currentMousePosition)
 		{
-			LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { PlanDetails.LayersTab.CurrentlyEditingBaseLayer }, false, true);
-			base.ExitState(currentMousePosition);
+			AbstractLayer baseLayer = InterfaceCanvas.Instance.activePlanWindow.CurrentlyEditingBaseLayer;
+			if (baseLayer == null)
+				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { }, false, true);
+			else
+				LayerManager.Instance.SetNonReferenceLayers(new HashSet<AbstractLayer>() { baseLayer }, false, true);
+
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
+			{
+				if (layer.m_greenEnergy == m_planLayer.BaseLayer.m_greenEnergy && layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
+				{
+					foreach (Entity entity in ((EnergyPolygonLayer)layer).m_centerPointLayer.m_activeEntities)
+					{
+						entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default);
+					}
+				}
+			}
+
+			base.ExitState(a_currentMousePosition);
 		}
 
 	}
 }
-

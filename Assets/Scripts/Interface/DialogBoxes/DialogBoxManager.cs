@@ -61,7 +61,7 @@ namespace MSP2050.Scripts
 			return dialogBox;
 		}
 
-		public DialogBox NotificationWindow(string title, string description, UnityAction button, string buttonText = "")
+		public DialogBox NotificationWindow(string title, string description, UnityAction button, string buttonText = "Continue")
 		{
 			DialogBox dialogBox = (DialogBox)Instantiate(dialogBoxPrefab, transform, false);
 			dialogBox.transform.SetAsLastSibling();

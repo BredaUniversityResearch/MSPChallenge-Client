@@ -6,7 +6,7 @@ namespace MSP2050.Scripts
 	public class KPIEnergyGridDisplay: MonoBehaviour
 	{
 		[SerializeField]
-		private KPIGroups kpiGroups = null;
+		private KPIOtherValueArea kpiGroups = null;
 
 		private int targetTeamId = -1;
 		private KPIValueCollection targetKPICollection = null;
@@ -30,7 +30,7 @@ namespace MSP2050.Scripts
 				targetKPICollection.OnKPIValuesUpdated -= OnTargetCollectionValuesUpdated;
 			}
 
-			targetKPICollection = KPIManager.Instance.GetKPIValuesForCategory(EKPICategory.Energy, targetTeamId);
+			targetKPICollection = SimulationManager.Instance.GetKPIValuesForSimulation(SimulationManager.CEL_SIM_NAME, targetTeamId);
 
 			if (targetKPICollection != null)
 			{
@@ -58,7 +58,7 @@ namespace MSP2050.Scripts
 
 		private void ShowGridsForCountry(int teamId)
 		{
-			List<EnergyGrid> grids = PlanManager.Instance.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);//Or should this be current month -1
+			List<EnergyGrid> grids = PolicyLogicEnergy.Instance.GetEnergyGridsAtTime(TimeManager.Instance.GetCurrentMonth(), EnergyGrid.GridColor.Either);//Or should this be current month -1
 			kpiGroups.SetBarsToGrids(grids, teamId);
 		}
 	}

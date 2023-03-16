@@ -8,196 +8,171 @@ namespace MSP2050.Scripts
 		private const float INSERT_POINT_DELAY = 0.5f;
 
 		//protected LineStringLayer layer;
-		protected LineStringLayer baseLayer;
-		protected PlanLayer planLayer;
+		protected LineStringLayer m_baseLayer;
+		protected PlanLayer m_planLayer;
 
-		protected bool draggingSelection = false;
-		protected Dictionary<LineStringSubEntity, Dictionary<int, Vector3>> selectionDragStart = null;
+		protected bool m_draggingSelection = false;
+		protected Dictionary<LineStringSubEntity, Dictionary<int, Vector3>> m_selectionDragStart = null;
 
-		protected bool selectingBox = false;
-		protected Dictionary<LineStringSubEntity, HashSet<int>> currentBoxSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
+		protected bool m_selectingBox = false;
+		protected Dictionary<LineStringSubEntity, HashSet<int>> m_currentBoxSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
 
-		protected HashSet<LineStringSubEntity> selectedSubEntities = new HashSet<LineStringSubEntity>();
-		protected Dictionary<LineStringSubEntity, HashSet<int>> selectedPoints = new Dictionary<LineStringSubEntity, HashSet<int>>();
-		private Dictionary<LineStringSubEntity, HashSet<int>> highlightedPoints = new Dictionary<LineStringSubEntity, HashSet<int>>();
+		protected HashSet<LineStringSubEntity> m_selectedSubEntities = new HashSet<LineStringSubEntity>();
+		protected Dictionary<LineStringSubEntity, HashSet<int>> m_selectedPoints = new Dictionary<LineStringSubEntity, HashSet<int>>();
+		private Dictionary<LineStringSubEntity, HashSet<int>> m_highlightedPoints = new Dictionary<LineStringSubEntity, HashSet<int>>();
 
-		bool insertingPointsDisabled = true;
-		protected bool selectedRemovedEntity = false;
-		float stateEnteredTime = float.MinValue;
-		Vector3 reEnableInsertingPointsPosition;
+		private bool m_insertingPointsDisabled = true;
+		private bool m_selectedRemovedEntity = false;
+		private float m_stateEnteredTime = float.MinValue;
+		private Vector3 m_reEnableInsertingPointsPosition;
 
-		LineStringSubEntity insertPointPreviewSubEntity = null;
-		int insertPointPreviewIndex = -1;
+		private LineStringSubEntity m_insertPointPreviewSubEntity = null;
+		private int m_insertPointPreviewIndex = -1;
 		public override EEditingStateType StateType => EEditingStateType.Edit;
 
-		public EditLineStringsState(FSM fsm, PlanLayer planLayer, HashSet<LineStringSubEntity> selectedSubEntities) : base(fsm)
+		public EditLineStringsState(FSM a_fsm, PlanLayer a_planLayer, HashSet<LineStringSubEntity> a_selectedSubEntities) : base(a_fsm)
 		{
-			this.planLayer = planLayer;
-			this.baseLayer = planLayer.BaseLayer as LineStringLayer;
-			//if (layer.planLayer != null)
-			//{
-			//    planLayer = layer.planLayer;
-			//    baseLayer = planLayer.BaseLayer as LineStringLayer;
-			//}
-			SetSelectedSubEntities(selectedSubEntities);
+			m_planLayer = a_planLayer;
+			m_baseLayer = a_planLayer.BaseLayer as LineStringLayer;
+			SetSelectedSubEntities(a_selectedSubEntities);
 		}
 
-		public override void EnterState(Vector3 currentMousePosition)
+		public override void EnterState(Vector3 a_currentMousePosition)
 		{
-			base.EnterState(currentMousePosition);
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
+			base.EnterState(a_currentMousePosition);
+			ToolBar toolbar = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar;
 
-			ic.SetToolbarMode(ToolBar.DrawingMode.Edit);
-			ic.ToolbarEnable(true, FSM.ToolbarInput.Delete);
-			ic.ToolbarEnable(false, FSM.ToolbarInput.Abort);
-			if (planLayer.BaseLayer is ShippingLineStringLayer)
+			toolbar.SetCreateMode(false);
+			toolbar.SetButtonInteractable(FSM.ToolbarInput.Delete, true);
+			if (m_planLayer.BaseLayer is ShippingLineStringLayer)
 			{
-				ic.ToolbarVisibility(true, FSM.ToolbarInput.ChangeDirection);
-				ic.ToolbarEnable(true, FSM.ToolbarInput.ChangeDirection);
+				toolbar.SetButtonActive(FSM.ToolbarInput.ChangeDirection, true);
+				toolbar.SetButtonInteractable(FSM.ToolbarInput.ChangeDirection, true);
 			}
-			//InterfaceCanvas.SetActivePlanWindowInteractability(true, true);
 
-			foreach (LineStringSubEntity lse in selectedSubEntities)
+			foreach (LineStringSubEntity lse in m_selectedSubEntities)
 			{
 				lse.RedrawGameObject(SubEntityDrawMode.Selected);
 			}
 
 			UpdateActivePlanWindowToSelection();
 
-			insertingPointsDisabled = true;
-			stateEnteredTime = Time.time;
-			reEnableInsertingPointsPosition = currentMousePosition;
+			m_insertingPointsDisabled = true;
+			m_stateEnteredTime = Time.time;
+			m_reEnableInsertingPointsPosition = a_currentMousePosition;
 
-			fsm.SetSnappingEnabled(true);
-			IssueManager.instance.SetIssueInteractability(false);
+			m_fsm.SetSnappingEnabled(true);
+			IssueManager.Instance.SetIssueInteractability(false);
 		}
-	
-		public void SetSelectedSubEntities(HashSet<LineStringSubEntity> subEntities)
+
+		private void SetSelectedSubEntities(HashSet<LineStringSubEntity> a_subEntities)
 		{
-			selectedSubEntities = subEntities;
-			InterfaceCanvas ic = InterfaceCanvas.Instance;
+			m_selectedSubEntities = a_subEntities;
+			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
 			//Check if this is a line marked for removal, this limits editing and enables recall
 			if (this is EditEnergyLineStringsState)
-				foreach (LineStringSubEntity line in subEntities)
+				foreach (LineStringSubEntity line in a_subEntities)
 				{
 					EnergyLineStringSubEntity energyLine = line as EnergyLineStringSubEntity;
-					selectedRemovedEntity = line.IsPlannedForRemoval();
-					bool canRecall = selectedRemovedEntity;
+					m_selectedRemovedEntity = line.IsPlannedForRemoval();
+					bool canRecall = m_selectedRemovedEntity;
 					//If a point connected to this line was moved or removed it cannot be recalled
-					if (selectedRemovedEntity)
-						foreach (Connection con in energyLine.connections)
+					if (m_selectedRemovedEntity)
+						foreach (Connection con in energyLine.Connections)
 							if (con.point.IsPlannedForRemoval() || !con.point.IsNotShownInPlan())
 								canRecall = false;
-					ic.ToolbarEnable(canRecall, FSM.ToolbarInput.Recall);
+					gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, canRecall);
 					break;
 				}
 			else
-				foreach (LineStringSubEntity line in subEntities)
+				foreach (LineStringSubEntity line in a_subEntities)
 				{
-					selectedRemovedEntity = line.IsPlannedForRemoval();
-					ic.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
+					m_selectedRemovedEntity = line.IsPlannedForRemoval();
+					gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, m_selectedRemovedEntity);
 					break;
 				}
-			ic.SetActivePlanWindowChangeable(!selectedRemovedEntity);
-			foreach (LineStringSubEntity line in subEntities)
+			gt.SetActivePlanWindowInteractability(!m_selectedRemovedEntity);
+			foreach (LineStringSubEntity line in a_subEntities)
 				line.SetInFrontOfLayer(true);
 		}
 
-		private void RedrawObject(LineStringSubEntity entity)
+		private void RedrawObject(LineStringSubEntity a_entity)
 		{
-			SubEntityDrawMode drawMode = selectedSubEntities.Contains(entity) ? SubEntityDrawMode.Selected : SubEntityDrawMode.Default;
+			SubEntityDrawMode drawMode = m_selectedSubEntities.Contains(a_entity) ? SubEntityDrawMode.Selected : SubEntityDrawMode.Default;
 			HashSet<int> selectedPointsForEntity;
 			HashSet<int> highlightedPointsForEntity;
-			selectedPoints.TryGetValue(entity, out selectedPointsForEntity);
-			highlightedPoints.TryGetValue(entity, out highlightedPointsForEntity);
-			entity.RedrawGameObject(drawMode, selectedPointsForEntity, highlightedPointsForEntity);
+			m_selectedPoints.TryGetValue(a_entity, out selectedPointsForEntity);
+			m_highlightedPoints.TryGetValue(a_entity, out highlightedPointsForEntity);
+			a_entity.RedrawGameObject(drawMode, selectedPointsForEntity, highlightedPointsForEntity);
 		}
 
-		//private void updateRecallAvailability()
-		//{
-		//    bool anyRecallableSubEntities = false;
-		//    if (selectedSubEntities != null && selectedSubEntities.Count > 0 && planLayer != null)
-		//    {
-		//        foreach (LineStringSubEntity subEntity in selectedSubEntities)
-		//        {
-		//            if (planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID()))
-		//            {
-		//                anyRecallableSubEntities = true;
-		//            }
-		//        }
-		//    }
-		//    InterfaceCanvas.ToolbarEnable(anyRecallableSubEntities, FSM.ToolbarInput.Recall);
-		//}
-
-		private void previewInsertPoint(Vector3 position)
+		private void PreviewInsertPoint(Vector3 a_position)
 		{
 			int lineA, lineB;
-			getLineAt(position, selectedSubEntities, out insertPointPreviewSubEntity, out lineA, out lineB);
-			if (lineA != -1)
-			{
-				insertPointPreviewIndex = insertPointPreviewSubEntity.AddPointBetween(position, lineA, lineB);
+			GetLineAt(a_position, m_selectedSubEntities, out m_insertPointPreviewSubEntity, out lineA, out lineB);
+			if (lineA == -1)
+				return;
+			m_insertPointPreviewIndex = m_insertPointPreviewSubEntity.AddPointBetween(a_position, lineA, lineB);
 
-				insertPointPreviewSubEntity.RedrawGameObject(SubEntityDrawMode.Selected, new HashSet<int>() { insertPointPreviewIndex }, null);
-			}
+			m_insertPointPreviewSubEntity.RedrawGameObject(SubEntityDrawMode.Selected, new HashSet<int>() { m_insertPointPreviewIndex }, null);
 		}
 
-		private void getLineAt(Vector3 position, HashSet<LineStringSubEntity> selectedSubEntities, out LineStringSubEntity subEntity, out int lineA, out int lineB)
+		private void GetLineAt(Vector3 a_position, HashSet<LineStringSubEntity> a_selectedSubEntities, out LineStringSubEntity a_subEntity, out int a_lineA, out int a_lineB)
 		{
 			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
 
-			lineA = -1;
-			lineB = -1;
-			subEntity = null;
+			a_lineA = -1;
+			a_lineB = -1;
+			a_subEntity = null;
 			float closestDistanceSquared = float.MaxValue;
 
-			foreach (LineStringSubEntity lsse in selectedSubEntities)
+			foreach (LineStringSubEntity lsse in a_selectedSubEntities)
 			{
 				int lsseLineA, lsseLineB;
 				float closestDistSq;
-				lsse.GetLineAt(position, out lsseLineA, out lsseLineB, out closestDistSq);
+				lsse.GetLineAt(a_position, out lsseLineA, out lsseLineB, out closestDistSq);
 				if (lsseLineA != -1 && closestDistSq < closestDistanceSquared)
 				{
-					lineA = lsseLineA;
-					lineB = lsseLineB;
-					subEntity = lsse;
+					a_lineA = lsseLineA;
+					a_lineB = lsseLineB;
+					a_subEntity = lsse;
 					closestDistanceSquared = closestDistSq;
 				}
 			}
 		}
 
-		private void removeInsertPointPreview()
+		private void RemoveInsertPointPreview()
 		{
-			insertPointPreviewSubEntity.RemovePoints(new HashSet<int>() { insertPointPreviewIndex });
+			m_insertPointPreviewSubEntity.RemovePoints(new HashSet<int>() { m_insertPointPreviewIndex });
 
 			HashSet<int> originalSelection = null;
-			if (selectedPoints.ContainsKey(insertPointPreviewSubEntity))
+			if (m_selectedPoints.ContainsKey(m_insertPointPreviewSubEntity))
 			{
-				originalSelection = selectedPoints[insertPointPreviewSubEntity];
+				originalSelection = m_selectedPoints[m_insertPointPreviewSubEntity];
 			}
-			insertPointPreviewSubEntity.RedrawGameObject(SubEntityDrawMode.Selected, originalSelection, null);
-			insertPointPreviewSubEntity = null;
-			insertPointPreviewIndex = -1;
+			m_insertPointPreviewSubEntity.RedrawGameObject(SubEntityDrawMode.Selected, originalSelection, null);
+			m_insertPointPreviewSubEntity = null;
+			m_insertPointPreviewIndex = -1;
 		}
 
-		private bool clickingWouldInsertAPoint(Vector3 position)
+		private bool ClickingWouldInsertAPoint(Vector3 a_position)
 		{
-			if (insertingPointsDisabled) { return false; }
+			if (m_insertingPointsDisabled) return false;
 
-			Dictionary<LineStringSubEntity, HashSet<int>> point = getPointAt(position, selectedSubEntities);
+			Dictionary<LineStringSubEntity, HashSet<int>> point = GetPointAt(a_position, m_selectedSubEntities);
 			if (point != null)
 			{
 				return false;
 			}
 
-			int lineA, lineB;
 			LineStringSubEntity subEntity;
-			getLineAt(position, selectedSubEntities, out subEntity, out lineA, out lineB);
+			GetLineAt(a_position, m_selectedSubEntities, out subEntity, out var lineA, out _);
 
 			return lineA != -1;
 		}
 
-		private Dictionary<LineStringSubEntity, HashSet<int>> getPointAt(Vector3 position, HashSet<LineStringSubEntity> selectedSubEntities)
+		private Dictionary<LineStringSubEntity, HashSet<int>> GetPointAt(Vector3 a_position, HashSet<LineStringSubEntity> a_selectedSubEntities)
 		{
 			float threshold = VisualizationUtil.Instance.GetSelectMaxDistance();
 			threshold *= threshold;
@@ -206,16 +181,15 @@ namespace MSP2050.Scripts
 			LineStringSubEntity closestLineStringSubEntity = null;
 			float closestDistanceSquared = float.MaxValue;
 
-			foreach (LineStringSubEntity subEntity in selectedSubEntities)
+			foreach (LineStringSubEntity subEntity in a_selectedSubEntities)
 			{
 				float closestDistSq;
-				int point = subEntity.GetPointAt(position, out closestDistSq);
-				if (point != -1 && closestDistSq < closestDistanceSquared)
-				{
-					closestPoint = point;
-					closestLineStringSubEntity = subEntity;
-					closestDistanceSquared = closestDistSq;
-				}
+				int point = subEntity.GetPointAt(a_position, out closestDistSq);
+				if (point == -1 || !(closestDistSq < closestDistanceSquared))
+					continue;
+				closestPoint = point;
+				closestLineStringSubEntity = subEntity;
+				closestDistanceSquared = closestDistSq;
 			}
 
 			if (closestPoint == -1)
@@ -227,104 +201,106 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		protected LineStringSubEntity createNewPlanLineString(int persistentID, SubEntityDataCopy dataCopy)
+		protected LineStringSubEntity CreateNewPlanLineString(int a_persistentID, SubEntityDataCopy a_dataCopy)
 		{
-			LineStringEntity newEntity = baseLayer.CreateNewLineStringEntity(dataCopy.entityTypeCopy, planLayer);
-			LineStringSubEntity newSubEntity = baseLayer.IsEnergyLineLayer() ? new EnergyLineStringSubEntity(newEntity) : new LineStringSubEntity(newEntity);
-			newSubEntity.SetPersistentID(persistentID);
+			LineStringEntity newEntity = m_baseLayer.CreateNewLineStringEntity(a_dataCopy.m_entityTypeCopy, m_planLayer);
+			LineStringSubEntity newSubEntity = m_baseLayer.IsEnergyLineLayer() ? new EnergyLineStringSubEntity(newEntity) : new LineStringSubEntity(newEntity);
+			newSubEntity.SetPersistentID(a_persistentID);
 			newEntity.AddSubEntity(newSubEntity);
-			newSubEntity.SetDataToCopy(dataCopy);
+			newSubEntity.SetDataToCopy(a_dataCopy);
+			newSubEntity.m_edited = true;
 
-			fsm.AddToUndoStack(new CreateLineStringOperation(newSubEntity, planLayer, UndoOperation.EditMode.Modify, true));
-			newSubEntity.DrawGameObject(baseLayer.LayerGameObject.transform);
+			m_fsm.AddToUndoStack(new CreateLineStringOperation(newSubEntity, m_planLayer, UndoOperation.EditMode.Modify, true));
+			newSubEntity.DrawGameObject(m_baseLayer.LayerGameObject.transform);
 			return newSubEntity;
 		}
 
-		protected void switchSelectionFromBaseLineStringToDuplicate(LineStringSubEntity baseLineString, LineStringSubEntity duplicate)
+		protected void SwitchSelectionFromBaseLineStringToDuplicate(LineStringSubEntity a_baseLineString, LineStringSubEntity a_duplicate)
 		{
-			selectedSubEntities.Add(duplicate);
-			duplicate.SetInFrontOfLayer(true);
-			if (selectedPoints.ContainsKey(baseLineString)) { selectedPoints.Add(duplicate, selectedPoints[baseLineString]); }
-			HashSet<int> duplicateSelection = selectedPoints.ContainsKey(duplicate) ? selectedPoints[duplicate] : null;
-			selectedSubEntities.Remove(baseLineString);
-			baseLineString.SetInFrontOfLayer(false);
-			selectedPoints.Remove(baseLineString);
+			m_selectedSubEntities.Add(a_duplicate);
+			a_duplicate.SetInFrontOfLayer(true);
+			if (m_selectedPoints.ContainsKey(a_baseLineString)) { m_selectedPoints.Add(a_duplicate, m_selectedPoints[a_baseLineString]); }
+			HashSet<int> duplicateSelection = m_selectedPoints.ContainsKey(a_duplicate) ? m_selectedPoints[a_duplicate] : null;
+			m_selectedSubEntities.Remove(a_baseLineString);
+			a_baseLineString.SetInFrontOfLayer(false);
+			m_selectedPoints.Remove(a_baseLineString);
 
 			//Change active geom 
-			baseLayer.AddPreModifiedEntity(baseLineString.Entity);
-			baseLayer.activeEntities.Remove(baseLineString.Entity as LineStringEntity);
-			baseLayer.activeEntities.Add(duplicate.Entity as LineStringEntity);
+			m_baseLayer.AddPreModifiedEntity(a_baseLineString.m_entity);
+			m_baseLayer.m_activeEntities.Remove(a_baseLineString.m_entity as LineStringEntity);
+			m_baseLayer.m_activeEntities.Add(a_duplicate.m_entity as LineStringEntity);
 
 			//Redraw based on activity changes
-			duplicate.RedrawGameObject(SubEntityDrawMode.Selected, duplicateSelection);
-			baseLineString.RedrawGameObject();
+			a_duplicate.RedrawGameObject(SubEntityDrawMode.Selected, duplicateSelection);
+			a_baseLineString.RedrawGameObject();
 		}
 
-		protected virtual LineStringSubEntity startModifyingSubEntity(LineStringSubEntity subEntity, bool insideUndoBatch)
+		protected virtual LineStringSubEntity StartModifyingSubEntity(LineStringSubEntity a_subEntity, bool a_insideUndoBatch)
 		{
-			if (planLayer == subEntity.Entity.PlanLayer)
+			if (m_planLayer == a_subEntity.m_entity.PlanLayer)
 			{
-				fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
+				m_fsm.AddToUndoStack(new ModifyLineStringOperation(a_subEntity, m_planLayer, a_subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
+				a_subEntity.m_edited = true;
 			}
 			else
 			{
-				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
+				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 
-				LineStringSubEntity duplicate = createNewPlanLineString(subEntity.GetPersistentID(), subEntity.GetDataCopy());
-				switchSelectionFromBaseLineStringToDuplicate(subEntity, duplicate);
-				subEntity = duplicate;
+				LineStringSubEntity duplicate = CreateNewPlanLineString(a_subEntity.GetPersistentID(), a_subEntity.GetDataCopy());
+				SwitchSelectionFromBaseLineStringToDuplicate(a_subEntity, duplicate);
+				a_subEntity = duplicate;
 
-				if (!insideUndoBatch) { fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
+				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}
-			return subEntity;
+			return a_subEntity;
 		}
 
-		public override void LeftClick(Vector3 worldPosition)
+		public override void LeftClick(Vector3 a_worldPosition)
 		{
-			if (insertPointPreviewSubEntity != null)
+			if (m_insertPointPreviewSubEntity != null)
 			{
-				removeInsertPointPreview();
+				RemoveInsertPointPreview();
 			}
-			if (!selectedRemovedEntity)
+			if (!m_selectedRemovedEntity)
 			{
 				// case 1: clicked on a point: select the point
-				Dictionary<LineStringSubEntity, HashSet<int>> point = getPointAt(worldPosition, selectedSubEntities);
+				Dictionary<LineStringSubEntity, HashSet<int>> point = GetPointAt(a_worldPosition, m_selectedSubEntities);
 				if (point != null)
 				{
 					//If we are an energy layer, ignore the first and last points
 					foreach (var kvp in point)
 						if (this is EditEnergyLineStringsState && kvp.Key.AreFirstOrLastPoints(kvp.Value))
-							selectPoints(point, false);
-					selectPoints(point, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+							SelectPoints(point, false);
+					SelectPoints(point, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 					return;
 				}
 
 				// case 2: clicked on a line + shift isn't pressed: add a point on the line and select the new point
-				if (!insertingPointsDisabled && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+				if (!m_insertingPointsDisabled && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
 				{
 					AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 
 					int lineA, lineB;
 					LineStringSubEntity subEntity;
-					getLineAt(worldPosition, selectedSubEntities, out subEntity, out lineA, out lineB);
+					GetLineAt(a_worldPosition, m_selectedSubEntities, out subEntity, out lineA, out lineB);
 					if (lineA != -1)
 					{
-						subEntity = startModifyingSubEntity(subEntity, false);
-						subEntity.restrictionNeedsUpdate = true;
+						subEntity = StartModifyingSubEntity(subEntity, false);
+						subEntity.m_restrictionNeedsUpdate = true;
 
-						int newPoint = subEntity.AddPointBetween(worldPosition, lineA, lineB);
+						int newPoint = subEntity.AddPointBetween(a_worldPosition, lineA, lineB);
 
 						Dictionary<LineStringSubEntity, HashSet<int>> newSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
 						newSelection.Add(subEntity, new HashSet<int>() { newPoint });
 
-						selectPoints(newSelection, false);
+						SelectPoints(newSelection, false);
 						return;
 					}
 				}
 
 				// case 3: clicked on a selected linestring: do nothing
-				LineStringSubEntity clickedSubEntity = getSubEntityFromSelection(worldPosition, selectedSubEntities);
-				if (clickedSubEntity == null && baseLayer != null) { clickedSubEntity = baseLayer.GetSubEntityAt(worldPosition) as LineStringSubEntity; }
+				LineStringSubEntity clickedSubEntity = GetSubEntityFromSelection(a_worldPosition, m_selectedSubEntities);
+				if (clickedSubEntity == null && m_baseLayer != null) { clickedSubEntity = m_baseLayer.GetSubEntityAt(a_worldPosition) as LineStringSubEntity; }
 
 				if (clickedSubEntity != null)
 				{
@@ -334,13 +310,13 @@ namespace MSP2050.Scripts
 				// case 4: clicked on a linestring that is not selected + shift is pressed: add linestring to selected linestrings
 				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 				{
-					clickedSubEntity = baseLayer.GetSubEntityAt(worldPosition) as LineStringSubEntity;
+					clickedSubEntity = m_baseLayer.GetSubEntityAt(a_worldPosition) as LineStringSubEntity;
 
 					if (clickedSubEntity != null)
 					{
 						if (clickedSubEntity.IsPlannedForRemoval())
 							return;
-						selectedSubEntities.Add(clickedSubEntity);
+						m_selectedSubEntities.Add(clickedSubEntity);
 						clickedSubEntity.SetInFrontOfLayer(true);
 						clickedSubEntity.RedrawGameObject(SubEntityDrawMode.Selected);
 						UpdateActivePlanWindowToSelection();
@@ -350,20 +326,20 @@ namespace MSP2050.Scripts
 			}
 
 			// case 5: clicked somewhere else: deselect all and go back to selecting state
-			fsm.SetCurrentState(new SelectLineStringsState(fsm, planLayer));
+			m_fsm.SetCurrentState(new SelectLineStringsState(m_fsm, m_planLayer));
 		}
 
-		protected LineStringSubEntity getSubEntityFromSelection(Vector2 position, HashSet<LineStringSubEntity> selection)
+		protected LineStringSubEntity GetSubEntityFromSelection(Vector2 a_position, HashSet<LineStringSubEntity> a_selection)
 		{
 			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 
-			Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
+			Rect positionBounds = new Rect(a_position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
 			List<LineStringSubEntity> collisions = new List<LineStringSubEntity>();
 
-			foreach (LineStringSubEntity subEntity in selection)
+			foreach (LineStringSubEntity subEntity in a_selection)
 			{
-				if (positionBounds.Overlaps(subEntity.BoundingBox))
+				if (positionBounds.Overlaps(subEntity.m_boundingBox))
 				{
 					collisions.Add(subEntity);
 				}
@@ -373,7 +349,7 @@ namespace MSP2050.Scripts
 
 			foreach (LineStringSubEntity collision in collisions)
 			{
-				if (collision.CollidesWithPoint(position, maxDistance))
+				if (collision.CollidesWithPoint(a_position, maxDistance))
 				{
 					return collision;
 				}
@@ -382,76 +358,75 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public override void DoubleClick(Vector3 position)
+		public override void DoubleClick(Vector3 a_position)
 		{
-			if (selectedRemovedEntity)
+			if (m_selectedRemovedEntity)
 				return;
 
-			LineStringSubEntity clickedSubEntity = getSubEntityFromSelection(position, selectedSubEntities);
-			if (clickedSubEntity != null)
+			LineStringSubEntity clickedSubEntity = GetSubEntityFromSelection(a_position, m_selectedSubEntities);
+			if (clickedSubEntity == null)
+				return;
+			HashSet<int> allPoints = new HashSet<int>();
+			for (int i = 0; i < clickedSubEntity.GetPointCount(); ++i)
 			{
-				HashSet<int> allPoints = new HashSet<int>();
-				for (int i = 0; i < clickedSubEntity.GetPointCount(); ++i)
-				{
-					allPoints.Add(i);
-				}
-				Dictionary<LineStringSubEntity, HashSet<int>> newSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
-				newSelection.Add(clickedSubEntity, allPoints);
-				selectPoints(newSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+				allPoints.Add(i);
 			}
+			Dictionary<LineStringSubEntity, HashSet<int>> newSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
+			newSelection.Add(clickedSubEntity, allPoints);
+			SelectPoints(newSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 		}
 
-		protected void selectPoints(Dictionary<LineStringSubEntity, HashSet<int>> newSelection, bool keepPreviousSelection)
+		protected void SelectPoints(Dictionary<LineStringSubEntity, HashSet<int>> a_newSelection, bool a_keepPreviousSelection)
 		{
-			if (!keepPreviousSelection)
+			if (!a_keepPreviousSelection)
 			{
-				foreach (var kvp in selectedPoints)
+				foreach (var kvp in m_selectedPoints)
 				{
 					kvp.Key.RedrawGameObject(SubEntityDrawMode.Selected);
 				}
 
-				foreach (var kvp in newSelection)
+				foreach (var kvp in a_newSelection)
 				{
 					kvp.Key.RedrawGameObject(SubEntityDrawMode.Selected, kvp.Value);
 				}
 
-				selectedPoints = newSelection;
+				m_selectedPoints = a_newSelection;
 			}
 			else
 			{
-				mergeSelectionBIntoSelectionA(selectedPoints, newSelection);
+				MergeSelectionBIntoSelectionA(m_selectedPoints, a_newSelection);
 
-				foreach (var kvp in selectedPoints)
+				foreach (var kvp in m_selectedPoints)
 				{
 					kvp.Key.RedrawGameObject(SubEntityDrawMode.Selected, kvp.Value);
 				}
 			}
 
-			InterfaceCanvas.Instance.ToolbarEnable(selectedRemovedEntity, FSM.ToolbarInput.Recall);
-			InterfaceCanvas.Instance.SetActivePlanWindowChangeable(!selectedRemovedEntity);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, m_selectedRemovedEntity);
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetActivePlanWindowInteractability(!m_selectedRemovedEntity);
 		}
 
-		private void mergeSelectionBIntoSelectionA(Dictionary<LineStringSubEntity, HashSet<int>> a, Dictionary<LineStringSubEntity, HashSet<int>> b)
+		private void MergeSelectionBIntoSelectionA(Dictionary<LineStringSubEntity, HashSet<int>> a_a, Dictionary<LineStringSubEntity, HashSet<int>> a_b)
 		{
-			foreach (var kvp in b)
+			foreach (var kvp in a_b)
 			{
-				if (!a.ContainsKey(kvp.Key))
+				if (!a_a.ContainsKey(kvp.Key))
 				{
-					a.Add(kvp.Key, kvp.Value);
+					a_a.Add(kvp.Key, kvp.Value);
 				}
 				else
 				{
 					foreach (int index in kvp.Value)
 					{
-						a[kvp.Key].Add(index);
+						a_a[kvp.Key].Add(index);
 					}
 				}
 			}
 		}
 
-		private bool draggingWouldMoveCurrentSelection(Vector3 dragStart)
+		private bool DraggingWouldMoveCurrentSelection(Vector3 a_dragStart)
 		{
-			Dictionary<LineStringSubEntity, HashSet<int>> point = getPointAt(dragStart, selectedSubEntities);
+			Dictionary<LineStringSubEntity, HashSet<int>> point = GetPointAt(a_dragStart, m_selectedSubEntities);
 			if (point != null)
 			{
 				LineStringSubEntity lsse = null;
@@ -462,243 +437,229 @@ namespace MSP2050.Scripts
 					foreach (int i in kvp.Value) { pointIndex = i; }
 				}
 
-				return selectedPoints.ContainsKey(lsse) && selectedPoints[lsse].Contains(pointIndex);
+				return m_selectedPoints.ContainsKey(lsse) && m_selectedPoints[lsse].Contains(pointIndex);
 			}
 
-			LineStringSubEntity subEntity = getSubEntityFromSelection(dragStart, selectedSubEntities);
+			LineStringSubEntity subEntity = GetSubEntityFromSelection(a_dragStart, m_selectedSubEntities);
 
-			return subEntity != null && selectedPoints.ContainsKey(subEntity) && selectedPoints[subEntity].Count == subEntity.GetPointCount();
+			return subEntity != null && m_selectedPoints.ContainsKey(subEntity) && m_selectedPoints[subEntity].Count == subEntity.GetPointCount();
 		}
 
-		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
+		public override void MouseMoved(Vector3 a_previousPosition, Vector3 a_currentPosition, bool a_cursorIsOverUI)
 		{
-			if (insertingPointsDisabled)
+			if (m_insertingPointsDisabled)
 			{
-				reEnableInsertingPointsPosition = currentPosition;
+				m_reEnableInsertingPointsPosition = a_currentPosition;
 			}
 
-			if (insertPointPreviewSubEntity != null)
+			if (m_insertPointPreviewSubEntity != null)
 			{
-				removeInsertPointPreview();
+				RemoveInsertPointPreview();
 			}
 
-			if (!draggingSelection && !selectingBox)
+			if (m_draggingSelection || m_selectingBox)
+				return;
+			if (a_cursorIsOverUI)
 			{
-				if (cursorIsOverUI)
+				m_fsm.SetCursor(FSM.CursorType.Default);
+			}
+			else if (!m_selectedRemovedEntity)
+			{
+				if (ClickingWouldInsertAPoint(a_currentPosition))
 				{
-					fsm.SetCursor(FSM.CursorType.Default);
+					PreviewInsertPoint(a_currentPosition);
+					m_fsm.SetCursor(FSM.CursorType.Insert);
 				}
-				else if (!selectedRemovedEntity)
+				else
 				{
-					if (clickingWouldInsertAPoint(currentPosition))
+					if (DraggingWouldMoveCurrentSelection(a_currentPosition))
 					{
-						previewInsertPoint(currentPosition);
-						fsm.SetCursor(FSM.CursorType.Insert);
+						m_fsm.SetCursor(FSM.CursorType.Move);
 					}
 					else
 					{
-						if (draggingWouldMoveCurrentSelection(currentPosition))
+						Dictionary<LineStringSubEntity, HashSet<int>> point = GetPointAt(a_currentPosition, m_selectedSubEntities);
+						UpdateHighlightingPoints(point);
+						if (point != null)
 						{
-							fsm.SetCursor(FSM.CursorType.Move);
+							m_fsm.SetCursor(FSM.CursorType.Move);
 						}
 						else
 						{
-							Dictionary<LineStringSubEntity, HashSet<int>> point = getPointAt(currentPosition, selectedSubEntities);
-							UpdateHighlightingPoints(point);
-							if (point != null)
-							{
-								fsm.SetCursor(FSM.CursorType.Move);
-							}
-							else
-							{
-								fsm.SetCursor(FSM.CursorType.Default);
-							}
+							m_fsm.SetCursor(FSM.CursorType.Default);
 						}
 					}
 				}
 			}
 		}
 
-		private void UpdateHighlightingPoints(Dictionary<LineStringSubEntity, HashSet<int>> newHighlightedPoints)
+		private void UpdateHighlightingPoints(Dictionary<LineStringSubEntity, HashSet<int>> a_newHighlightedPoints)
 		{
-			Dictionary<LineStringSubEntity, HashSet<int>> oldHighlightedPoints = highlightedPoints;
-			if (newHighlightedPoints != null)
-			{
-				highlightedPoints = newHighlightedPoints;
-			}
-			else
-			{
-				highlightedPoints = new Dictionary<LineStringSubEntity, HashSet<int>>();
-			}
+			Dictionary<LineStringSubEntity, HashSet<int>> oldHighlightedPoints = m_highlightedPoints;
+			m_highlightedPoints = a_newHighlightedPoints ?? new Dictionary<LineStringSubEntity, HashSet<int>>();
 
 			foreach (KeyValuePair<LineStringSubEntity, HashSet<int>> kvp in oldHighlightedPoints)
 			{
-				if (!highlightedPoints.ContainsKey(kvp.Key))
+				if (!m_highlightedPoints.ContainsKey(kvp.Key))
 				{
 					RedrawObject(kvp.Key);
 				}
 			}
 
-			foreach (KeyValuePair<LineStringSubEntity, HashSet<int>> kvp in highlightedPoints)
+			foreach (KeyValuePair<LineStringSubEntity, HashSet<int>> kvp in m_highlightedPoints)
 			{
 				RedrawObject(kvp.Key);
 			}
 		}
 
-		private void createUndoForDraggedSelection()
+		private void CreateUndoForDraggedSelection()
 		{
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
-			HashSet<LineStringSubEntity> selectedPointsKeys = new HashSet<LineStringSubEntity>(selectedPoints.Keys);
+			HashSet<LineStringSubEntity> selectedPointsKeys = new HashSet<LineStringSubEntity>(m_selectedPoints.Keys);
 			foreach (LineStringSubEntity subEntity in selectedPointsKeys)
 			{
-				startModifyingSubEntity(subEntity, true);
+				StartModifyingSubEntity(subEntity, true);
 			}
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
-		public override void StartedDragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		public override void StartedDragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			if (insertPointPreviewSubEntity != null)
+			if (m_insertPointPreviewSubEntity != null)
 			{
-				removeInsertPointPreview();
+				RemoveInsertPointPreview();
 			}
-			if (selectedRemovedEntity)
+			if (m_selectedRemovedEntity)
 				return;
 
-			if (draggingWouldMoveCurrentSelection(dragStartPosition))
+			if (DraggingWouldMoveCurrentSelection(a_dragStartPosition))
 			{
-				draggingSelection = true;
+				m_draggingSelection = true;
 			}
 			else
 			{
-				Dictionary<LineStringSubEntity, HashSet<int>> point = getPointAt(dragStartPosition, selectedSubEntities);
+				Dictionary<LineStringSubEntity, HashSet<int>> point = GetPointAt(a_dragStartPosition, m_selectedSubEntities);
 				if (point != null)
 				{
-					draggingSelection = true;
-					selectPoints(point, false);
+					m_draggingSelection = true;
+					SelectPoints(point, false);
 				}
 			}
 
-			if (draggingSelection)
+			if (m_draggingSelection)
 			{
-				createUndoForDraggedSelection();
+				CreateUndoForDraggedSelection();
 
 				// if the user is dragging a point, this offset is used to make sure the user is dragging the center of the point (to make snapping work correctly)
-				Vector3 offset = getSelectionDragOffset(dragStartPosition);
+				Vector3 offset = GetSelectionDragOffset(a_dragStartPosition);
 
-				selectionDragStart = new Dictionary<LineStringSubEntity, Dictionary<int, Vector3>>();
-				foreach (var kvp in selectedPoints)
+				m_selectionDragStart = new Dictionary<LineStringSubEntity, Dictionary<int, Vector3>>();
+				foreach (var kvp in m_selectedPoints)
 				{
 					Dictionary<int, Vector3> dragStartEntry = new Dictionary<int, Vector3>();
 					foreach (int index in kvp.Value)
 					{
 						dragStartEntry.Add(index, kvp.Key.GetPointPosition(index) + offset);
 					}
-					selectionDragStart.Add(kvp.Key, dragStartEntry);
+					m_selectionDragStart.Add(kvp.Key, dragStartEntry);
 				}
 			}
 			else
 			{
-				selectPoints(new Dictionary<LineStringSubEntity, HashSet<int>>(), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+				SelectPoints(new Dictionary<LineStringSubEntity, HashSet<int>>(), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 
-				selectingBox = true;
-				currentBoxSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
+				m_selectingBox = true;
+				m_currentBoxSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
 
-				BoxSelect.DrawBoxSelection(dragStartPosition, currentPosition);
+				BoxSelect.DrawBoxSelection(a_dragStartPosition, a_currentPosition);
 			}
 		}
 
-		private Vector3 getSelectionDragOffset(Vector3 dragStartPosition)
+		private Vector3 GetSelectionDragOffset(Vector3 a_dragStartPosition)
 		{
 			Vector3 closestPoint = Vector3.zero;
 			float closestPointSqrDistance = float.MaxValue;
 
-			foreach (var kvp in selectedPoints)
+			foreach (var kvp in m_selectedPoints)
 			{
 				foreach (int index in kvp.Value)
 				{
 					Vector3 selectedPoint = kvp.Key.GetPointPosition(index);
-					float sqrDistance = (selectedPoint - dragStartPosition).sqrMagnitude;
-					if (sqrDistance < closestPointSqrDistance)
-					{
-						closestPoint = selectedPoint;
-						closestPointSqrDistance = sqrDistance;
-					}
+					float sqrDistance = (selectedPoint - a_dragStartPosition).sqrMagnitude;
+					if (!(sqrDistance < closestPointSqrDistance))
+						continue;
+					closestPoint = selectedPoint;
+					closestPointSqrDistance = sqrDistance;
 				}
 			}
 
 			float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
 			if (closestPointSqrDistance < maxDistance * maxDistance)
 			{
-				return dragStartPosition - closestPoint;
+				return a_dragStartPosition - closestPoint;
 			}
-			else
-			{
-				return Vector3.zero;
-			}
+			return Vector3.zero;
 		}
 
-		public override void Dragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		public override void Dragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			if (selectedRemovedEntity)
+			if (m_selectedRemovedEntity)
 				return;
 
-			if (draggingSelection)
+			if (m_draggingSelection)
 			{
-				UpdateSelectionDragPositions(currentPosition - dragStartPosition);
+				UpdateSelectionDragPositions(a_currentPosition - a_dragStartPosition);
 			}
-			else if (selectingBox)
+			else if (m_selectingBox)
 			{
-				UpdateBoxSelection(dragStartPosition, currentPosition);
+				UpdateBoxSelection(a_dragStartPosition, a_currentPosition);
 			}
 		}
 
-		protected virtual void UpdateSelectionDragPositions(Vector3 offset)
+		protected virtual void UpdateSelectionDragPositions(Vector3 a_offset)
 		{
-			foreach (var kvp in selectedPoints)
+			foreach (var kvp in m_selectedPoints)
 			{
 				foreach (int selectedPoint in kvp.Value)
 				{
-					kvp.Key.SetPointPosition(selectedPoint, selectionDragStart[kvp.Key][selectedPoint] + offset);
+					kvp.Key.SetPointPosition(selectedPoint, m_selectionDragStart[kvp.Key][selectedPoint] + a_offset);
 				}
 				if (kvp.Value.Count != kvp.Key.GetPointCount())
-					kvp.Key.restrictionNeedsUpdate = true;
+					kvp.Key.m_restrictionNeedsUpdate = true;
 				kvp.Key.RedrawGameObject(SubEntityDrawMode.Selected, kvp.Value, null);
 			}
 		}
 
-		protected void UpdateBoxSelection(Vector3 dragStartPosition, Vector3 currentPosition)
+		protected void UpdateBoxSelection(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			BoxSelect.DrawBoxSelection(dragStartPosition, currentPosition);
+			BoxSelect.DrawBoxSelection(a_dragStartPosition, a_currentPosition);
 
-			Dictionary<LineStringSubEntity, HashSet<int>> selectionsInBox = getPointsInBox(dragStartPosition, currentPosition, selectedSubEntities);
+			Dictionary<LineStringSubEntity, HashSet<int>> selectionsInBox = GetPointsInBox(a_dragStartPosition, a_currentPosition, m_selectedSubEntities);
 			foreach (var kvp in selectionsInBox)
 			{
 				LineStringSubEntity subEntity = kvp.Key;
 				bool redraw = false;
-				if (!currentBoxSelection.ContainsKey(subEntity)) { redraw = true; }
+				if (!m_currentBoxSelection.ContainsKey(subEntity)) { redraw = true; }
 				else
 				{
-					HashSet<int> currentPoints = currentBoxSelection[subEntity];
+					HashSet<int> currentPoints = m_currentBoxSelection[subEntity];
 					foreach (int pointIndex in kvp.Value)
 					{
-						if (!currentPoints.Contains(pointIndex))
-						{
-							redraw = true;
-							break;
-						}
+						if (currentPoints.Contains(pointIndex))
+							continue;
+						redraw = true;
+						break;
 					}
 				}
-				if (redraw)
-				{
-					HashSet<int> alreadySelected = selectedPoints.ContainsKey(subEntity) ? selectedPoints[subEntity] : null;
-					subEntity.RedrawGameObject(SubEntityDrawMode.Selected, alreadySelected, new HashSet<int>(kvp.Value));
-				}
+				if (!redraw)
+					continue;
+				HashSet<int> alreadySelected = m_selectedPoints.ContainsKey(subEntity) ? m_selectedPoints[subEntity] : null;
+				subEntity.RedrawGameObject(SubEntityDrawMode.Selected, alreadySelected, new HashSet<int>(kvp.Value));
 			}
 
-			foreach (var kvp in currentBoxSelection)
+			foreach (var kvp in m_currentBoxSelection)
 			{
 				LineStringSubEntity subEntity = kvp.Key;
 				bool redraw = false;
@@ -709,32 +670,30 @@ namespace MSP2050.Scripts
 					HashSet<int> boxPoints = selectionsInBox[subEntity];
 					foreach (int pointIndex in kvp.Value)
 					{
-						if (!boxPoints.Contains(pointIndex))
-						{
-							redraw = true;
-							hoverPoints = new HashSet<int>(boxPoints);
-							break;
-						}
+						if (boxPoints.Contains(pointIndex))
+							continue;
+						redraw = true;
+						hoverPoints = new HashSet<int>(boxPoints);
+						break;
 					}
 				}
-				if (redraw)
-				{
-					HashSet<int> alreadySelected = selectedPoints.ContainsKey(subEntity) ? selectedPoints[subEntity] : null;
-					subEntity.RedrawGameObject(SubEntityDrawMode.Selected, alreadySelected, hoverPoints);
-				}
+				if (!redraw)
+					continue;
+				HashSet<int> alreadySelected = m_selectedPoints.ContainsKey(subEntity) ? m_selectedPoints[subEntity] : null;
+				subEntity.RedrawGameObject(SubEntityDrawMode.Selected, alreadySelected, hoverPoints);
 			}
 
-			currentBoxSelection = selectionsInBox;
+			m_currentBoxSelection = selectionsInBox;
 		}
 
-		private Dictionary<LineStringSubEntity, HashSet<int>> getPointsInBox(Vector3 boxCornerA, Vector3 boxCornerB, HashSet<LineStringSubEntity> selectedSubEntities)
+		private Dictionary<LineStringSubEntity, HashSet<int>> GetPointsInBox(Vector3 a_boxCornerA, Vector3 a_boxCornerB, HashSet<LineStringSubEntity> a_selectedSubEntities)
 		{
-			Vector3 min = Vector3.Min(boxCornerA, boxCornerB);
-			Vector3 max = Vector3.Max(boxCornerA, boxCornerB);
+			Vector3 min = Vector3.Min(a_boxCornerA, a_boxCornerB);
+			Vector3 max = Vector3.Max(a_boxCornerA, a_boxCornerB);
 
 			Dictionary<LineStringSubEntity, HashSet<int>> result = new Dictionary<LineStringSubEntity, HashSet<int>>();
 
-			foreach (LineStringSubEntity subEntity in selectedSubEntities)
+			foreach (LineStringSubEntity subEntity in a_selectedSubEntities)
 			{
 				HashSet<int> points = subEntity.GetPointsInBox(min, max);
 				if (points != null)
@@ -746,46 +705,46 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public override void StoppedDragging(Vector3 dragStartPosition, Vector3 dragFinalPosition)
+		public override void StoppedDragging(Vector3 a_dragStartPosition, Vector3 a_dragFinalPosition)
 		{
-			if (draggingSelection)
+			if (m_draggingSelection)
 			{
 				AudioMain.Instance.PlaySound(AudioMain.ITEM_MOVED);
 
-				UpdateSelectionDragPositions(dragFinalPosition - dragStartPosition);
-				draggingSelection = false;
+				UpdateSelectionDragPositions(a_dragFinalPosition - a_dragStartPosition);
+				m_draggingSelection = false;
 			}
-			else if (selectingBox)
+			else if (m_selectingBox)
 			{
-				UpdateBoxSelection(dragStartPosition, dragFinalPosition);
+				UpdateBoxSelection(a_dragStartPosition, a_dragFinalPosition);
 
-				selectPoints(currentBoxSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+				SelectPoints(m_currentBoxSelection, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
 
 				BoxSelect.HideBoxSelection();
-				selectingBox = false;
-				currentBoxSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
+				m_selectingBox = false;
+				m_currentBoxSelection = new Dictionary<LineStringSubEntity, HashSet<int>>();
 			}
 		}
 
-		protected virtual void deleteSelection()
+		protected virtual void DeleteSelection()
 		{
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
-			if (selectedPoints.Count == 0)
+			if (m_selectedPoints.Count == 0)
 			{
 				//Delete all selected
-				foreach (LineStringSubEntity subEntity in selectedSubEntities)
+				foreach (LineStringSubEntity subEntity in m_selectedSubEntities)
 				{
-					if (subEntity.Entity.PlanLayer == planLayer)
+					if (subEntity.m_entity.PlanLayer == m_planLayer)
 					{
-						fsm.AddToUndoStack(new RemoveLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Modify));
-						baseLayer.RemoveSubEntity(subEntity);
+						m_fsm.AddToUndoStack(new RemoveLineStringOperation(subEntity, m_planLayer, UndoOperation.EditMode.Modify));
+						m_baseLayer.RemoveSubEntity(subEntity);
 						subEntity.RemoveGameObject();
 					}
 					else
 					{
-						fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, planLayer, planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
-						baseLayer.RemoveSubEntity(subEntity);
+						m_fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, m_planLayer, m_planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
+						m_baseLayer.RemoveSubEntity(subEntity);
 						subEntity.RedrawGameObject();
 					}
 				}
@@ -793,161 +752,127 @@ namespace MSP2050.Scripts
 			else
 			{
 				//Delete selected points
-				List<LineStringSubEntity> selectedPointsKeys = new List<LineStringSubEntity>(selectedPoints.Keys);
+				List<LineStringSubEntity> selectedPointsKeys = new List<LineStringSubEntity>(m_selectedPoints.Keys);
 				foreach (LineStringSubEntity subEntity in selectedPointsKeys)
 				{
-					if (subEntity.GetPointCount() - selectedPoints[subEntity].Count < 2)
+					if (subEntity.GetPointCount() - m_selectedPoints[subEntity].Count < 2)
 					{
 						// remove linestring if it has fewer than 2 points left after deletion
-						if (subEntity.Entity.PlanLayer == planLayer)
+						if (subEntity.m_entity.PlanLayer == m_planLayer)
 						{
-							fsm.AddToUndoStack(new RemoveLineStringOperation(subEntity, planLayer, UndoOperation.EditMode.Modify));
-							baseLayer.RemoveSubEntity(subEntity);
+							m_fsm.AddToUndoStack(new RemoveLineStringOperation(subEntity, m_planLayer, UndoOperation.EditMode.Modify));
+							m_baseLayer.RemoveSubEntity(subEntity);
 							subEntity.RemoveGameObject();
 						}
 						else
 						{
-							fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, planLayer, planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
-							baseLayer.RemoveSubEntity(subEntity);
+							m_fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, m_planLayer, m_planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID())));
+							m_baseLayer.RemoveSubEntity(subEntity);
 							subEntity.RedrawGameObject();
 						}
 
-						selectedSubEntities.Remove(subEntity);
+						m_selectedSubEntities.Remove(subEntity);
 						subEntity.SetInFrontOfLayer(false);
 					}
 					else
 					{
-						LineStringSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
+						LineStringSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
 
-						subEntityToModify.RemovePoints(selectedPoints[subEntityToModify]);
+						subEntityToModify.RemovePoints(m_selectedPoints[subEntityToModify]);
 
-						subEntity.restrictionNeedsUpdate = true;
+						subEntity.m_restrictionNeedsUpdate = true;
 						subEntityToModify.RedrawGameObject();
 					}
 				}
 			}
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
-			fsm.SetCurrentState(new SelectLineStringsState(fsm, planLayer));
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.SetCurrentState(new SelectLineStringsState(m_fsm, m_planLayer));
 		}
 
-		private void undoDeleteForSelection()
+		private void UndoDeleteForSelection()
 		{
-			if (selectedRemovedEntity)
+			if (!m_selectedRemovedEntity)
+				return;
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			foreach (LineStringSubEntity subEntity in m_selectedSubEntities)
 			{
-				fsm.AddToUndoStack(new BatchUndoOperationMarker());
-				foreach (LineStringSubEntity subEntity in selectedSubEntities)
-				{
-					if (planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID()))
-					{
-						fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, planLayer, true));
-						planLayer.RemovedGeometry.Remove(subEntity.GetPersistentID());
-						subEntity.RestoreDependencies();
-						subEntity.RedrawGameObject(SubEntityDrawMode.Selected, selectedPoints.ContainsKey(subEntity) ? selectedPoints[subEntity] : null);
-					}
-				}
-				fsm.AddToUndoStack(new BatchUndoOperationMarker());
-				fsm.SetCurrentState(new SelectLineStringsState(fsm, planLayer));
+				if (!m_planLayer.RemovedGeometry.Contains(subEntity.GetPersistentID()))
+					continue;
+				m_fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(subEntity, m_planLayer, true));
+				m_planLayer.RemovedGeometry.Remove(subEntity.GetPersistentID());
+				subEntity.RestoreDependencies();
+				subEntity.RedrawGameObject(SubEntityDrawMode.Selected, m_selectedPoints.ContainsKey(subEntity) ? m_selectedPoints[subEntity] : null);
 			}
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.SetCurrentState(new SelectLineStringsState(m_fsm, m_planLayer));
 		}
 
 		private void ChangeSelectionDirection()
 		{
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
-			LineStringSubEntity[] localSelectedEntities = new LineStringSubEntity[selectedSubEntities.Count];
-			selectedSubEntities.CopyTo(localSelectedEntities);
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			LineStringSubEntity[] localSelectedEntities = new LineStringSubEntity[m_selectedSubEntities.Count];
+			m_selectedSubEntities.CopyTo(localSelectedEntities);
 			foreach (LineStringSubEntity subEntity in localSelectedEntities)
 			{
 				string oldDirection;
-				if (subEntity.Entity.DoesPropertyExist(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY))
-				{
-					oldDirection = subEntity.Entity.GetMetaData(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY);
-				}
-				else
-				{
-					oldDirection = ShippingLineStringEntity.DIRECTION_DEFAULT;
-				}
+				oldDirection = subEntity.m_entity.DoesPropertyExist(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY) ?
+					subEntity.m_entity.GetMetaData(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY) :
+					ShippingLineStringEntity.DIRECTION_DEFAULT;
 
 				string newDirection = ShippingLineStringEntity.CycleToNextDirection(oldDirection);
 
-				LineStringSubEntity newSubEntity = startModifyingSubEntity(subEntity, true);
+				LineStringSubEntity newSubEntity = StartModifyingSubEntity(subEntity, true);
 
-				fsm.AddToUndoStack(new UndoOperationChangeMeta(newSubEntity.Entity, ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY, oldDirection, newDirection));
+				m_fsm.AddToUndoStack(new UndoOperationChangeMeta(newSubEntity.m_entity, ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY, oldDirection, newDirection));
 
-				newSubEntity.Entity.SetMetaData(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY, newDirection);
+				newSubEntity.m_entity.SetMetaData(ShippingLineStringEntity.SHIPPING_DIRECTION_META_KEY, newDirection);
 
-				newSubEntity.Entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Selected);
+				newSubEntity.m_entity.RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Selected);
 			}
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
-
-		//private void simplifySelection()
-		//{
-		//	InterfaceCanvas.CreateSingleValueWindow("Simplify line string", "tolerance", "0.5", 200, (value) =>
-		//	{
-		//		fsm.AddToUndoStack(new BatchUndoOperationMarker());
-
-		//		foreach (LineStringSubEntity subEntity in selectedSubEntities)
-		//		{
-		//			fsm.AddToUndoStack(new ModifyLineStringOperation(subEntity, planLayer, subEntity.GetDataCopy(), UndoOperation.EditMode.Modify));
-		//			subEntity.Simplify(Util.ParseToFloat(value, 0.5f));
-		//			subEntity.RedrawGameObject(SubEntityDrawMode.Selected);
-		//		}
-
-		//		fsm.AddToUndoStack(new BatchUndoOperationMarker());
-		//	});
-		//}
 
 		public override void HandleKeyboardEvents()
 		{
 			// hasn't got anything to do with keyboard events; added here because this function is called every frame
-			if (insertingPointsDisabled && Time.time - stateEnteredTime > INSERT_POINT_DELAY)
+			if (m_insertingPointsDisabled && Time.time - m_stateEnteredTime > INSERT_POINT_DELAY)
 			{
-				insertingPointsDisabled = false;
-				MouseMoved(reEnableInsertingPointsPosition, reEnableInsertingPointsPosition, false);
+				m_insertingPointsDisabled = false;
+				MouseMoved(m_reEnableInsertingPointsPosition, m_reEnableInsertingPointsPosition, false);
 			}
 
 			if (Input.GetKeyDown(KeyCode.Delete))
 			{
-				deleteSelection();
+				DeleteSelection();
 			}
 
-			if (Input.GetKeyDown(KeyCode.Return))
-			{
-				if (baseLayer.IsEnergyLineLayer())
-					fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, planLayer));
-				else
-					fsm.SetCurrentState(new StartCreatingLineStringState(fsm, planLayer));
-			}
+			if (!Input.GetKeyDown(KeyCode.Return))
+				return;
+			if (m_baseLayer.IsEnergyLineLayer())
+				m_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(m_fsm, m_planLayer));
+			else
+				m_fsm.SetCurrentState(new StartCreatingLineStringState(m_fsm, m_planLayer));
 		}
 
-		public override void HandleToolbarInput(FSM.ToolbarInput toolbarInput)
+		public override void HandleToolbarInput(FSM.ToolbarInput a_toolbarInput)
 		{
-			switch (toolbarInput)
+			switch (a_toolbarInput)
 			{
 				case FSM.ToolbarInput.Create:
-					if (baseLayer.IsEnergyLineLayer())
-						fsm.SetCurrentState(new StartCreatingEnergyLineStringState(fsm, planLayer));
+					if (m_baseLayer.IsEnergyLineLayer())
+						m_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(m_fsm, m_planLayer));
 					else
-						fsm.SetCurrentState(new StartCreatingLineStringState(fsm, planLayer));
+						m_fsm.SetCurrentState(new StartCreatingLineStringState(m_fsm, m_planLayer));
 					break;
 				case FSM.ToolbarInput.Delete:
-					deleteSelection();
+					DeleteSelection();
 					break;
 				case FSM.ToolbarInput.Abort:
-					fsm.SetCurrentState(new SelectLineStringsState(fsm, planLayer));
-					break;
-				//case FSM.ToolbarInput.Simplify:
-				//	simplifySelection();
-				//	break;
-				case FSM.ToolbarInput.SelectAll:
-					if (baseLayer.IsEnergyLineLayer())
-						fsm.SetCurrentState(new EditEnergyLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>((baseLayer as LineStringLayer).GetAllSubEntities())));
-					else
-						fsm.SetCurrentState(new EditLineStringsState(fsm, planLayer, new HashSet<LineStringSubEntity>((baseLayer as LineStringLayer).GetAllSubEntities())));
+					m_fsm.SetCurrentState(new SelectLineStringsState(m_fsm, m_planLayer));
 					break;
 				case FSM.ToolbarInput.Recall:
-					undoDeleteForSelection();
+					UndoDeleteForSelection();
 					break;
 				case FSM.ToolbarInput.ChangeDirection:
 					ChangeSelectionDirection();
@@ -955,21 +880,21 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void HandleEntityTypeChange(List<EntityType> newTypes)
+		public override void HandleEntityTypeChange(List<EntityType> a_newTypes)
 		{
 			List<LineStringSubEntity> subEntitiesWithDifferentTypes = new List<LineStringSubEntity>();
 
 			//Find subentities with changed entity types
-			foreach (LineStringSubEntity subEntity in selectedSubEntities)
+			foreach (LineStringSubEntity subEntity in m_selectedSubEntities)
 			{
-				if (subEntity.Entity.EntityTypes.Count != newTypes.Count)
+				if (subEntity.m_entity.EntityTypes.Count != a_newTypes.Count)
 				{
 					subEntitiesWithDifferentTypes.Add(subEntity);
 					continue;
 				}
-				foreach (EntityType type in subEntity.Entity.EntityTypes)
+				foreach (EntityType type in subEntity.m_entity.EntityTypes)
 				{
-					if (!newTypes.Contains(type))
+					if (!a_newTypes.Contains(type))
 					{
 						subEntitiesWithDifferentTypes.Add(subEntity);
 						break;
@@ -979,26 +904,26 @@ namespace MSP2050.Scripts
 
 			if (subEntitiesWithDifferentTypes.Count == 0) { return; }
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
 			foreach (LineStringSubEntity subEntity in subEntitiesWithDifferentTypes)
 			{
-				LineStringSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.EntityTypes = newTypes;
-				subEntityToModify.RedrawGameObject(SubEntityDrawMode.Selected, selectedPoints.ContainsKey(subEntityToModify) ? selectedPoints[subEntityToModify] : null);
+				LineStringSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
+				subEntityToModify.m_entity.EntityTypes = a_newTypes;
+				subEntityToModify.RedrawGameObject(SubEntityDrawMode.Selected, m_selectedPoints.ContainsKey(subEntityToModify) ? m_selectedPoints[subEntityToModify] : null);
 			}
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
-		public override void HandleTeamChange(int newTeam)
+		public override void HandleTeamChange(int a_newTeam)
 		{
 			List<LineStringSubEntity> subEntitiesWithDifferentTeam = new List<LineStringSubEntity>();
 
 			//Find subentities with changed entity types
-			foreach (LineStringSubEntity subEntity in selectedSubEntities)
+			foreach (LineStringSubEntity subEntity in m_selectedSubEntities)
 			{
-				if (subEntity.Entity.Country != newTeam)
+				if (subEntity.m_entity.Country != a_newTeam)
 				{
 					subEntitiesWithDifferentTeam.Add(subEntity);
 				}
@@ -1006,25 +931,25 @@ namespace MSP2050.Scripts
 
 			if (subEntitiesWithDifferentTeam.Count == 0) { return; }
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
 			foreach (LineStringSubEntity subEntity in subEntitiesWithDifferentTeam)
 			{
-				LineStringSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.Country = newTeam;
+				LineStringSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
+				subEntityToModify.m_entity.Country = a_newTeam;
 			}
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
-		public override void HandleParameterChange(EntityPropertyMetaData parameter, string newValue)
+		public override void HandleParameterChange(EntityPropertyMetaData a_parameter, string a_newValue)
 		{
 			List<LineStringSubEntity> subEntitiesWithDifferentParams = new List<LineStringSubEntity>();
 
 			//Find subentities with changed entity types
-			foreach (LineStringSubEntity subEntity in selectedSubEntities)
+			foreach (LineStringSubEntity subEntity in m_selectedSubEntities)
 			{
-				if (subEntity.Entity.GetPropertyMetaData(parameter) != newValue)
+				if (subEntity.m_entity.GetPropertyMetaData(a_parameter) != a_newValue)
 				{
 					subEntitiesWithDifferentParams.Add(subEntity);
 				}
@@ -1032,32 +957,29 @@ namespace MSP2050.Scripts
 
 			if (subEntitiesWithDifferentParams.Count == 0) { return; }
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 
 			foreach (LineStringSubEntity subEntity in subEntitiesWithDifferentParams)
 			{
-				LineStringSubEntity subEntityToModify = startModifyingSubEntity(subEntity, true);
-				subEntityToModify.Entity.SetPropertyMetaData(parameter, newValue);
+				LineStringSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
+				subEntityToModify.m_entity.SetPropertyMetaData(a_parameter, a_newValue);
 			}
 
-			fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
-		public override void ExitState(Vector3 currentMousePosition)
+		public override void ExitState(Vector3 a_currentMousePosition)
 		{
-			foreach (LineStringSubEntity lsse in selectedSubEntities)
+			foreach (LineStringSubEntity lsse in m_selectedSubEntities)
 			{
 				lsse.SetInFrontOfLayer(false);
 				lsse.RedrawGameObject();
 			}
-			selectedSubEntities = new HashSet<LineStringSubEntity>();
+			m_selectedSubEntities = new HashSet<LineStringSubEntity>();
 
 			BoxSelect.HideBoxSelection();
 
-			IssueManager.instance.SetIssueInteractability(true);
-
-			// make sure the entity type dropdown shows a valid value
-			//InterfaceCanvas.SetCurrentEntityTypeSelection(InterfaceCanvas.GetCurrentEntityTypeSelection());
+			IssueManager.Instance.SetIssueInteractability(true);
 		}
 
 		private void UpdateActivePlanWindowToSelection()
@@ -1066,24 +988,24 @@ namespace MSP2050.Scripts
 			int? selectedTeam = null;
 			List<Dictionary<EntityPropertyMetaData, string>> selectedParams = new List<Dictionary<EntityPropertyMetaData, string>>();
 
-			foreach (LineStringSubEntity lse in selectedSubEntities)
+			foreach (LineStringSubEntity lse in m_selectedSubEntities)
 			{
-				selectedEntityTypes.Add(lse.Entity.EntityTypes);
-				if (selectedTeam.HasValue && lse.Entity.Country != selectedTeam.Value)
+				selectedEntityTypes.Add(lse.m_entity.EntityTypes);
+				if (selectedTeam.HasValue && lse.m_entity.Country != selectedTeam.Value)
 					selectedTeam = -1;
 				else
-					selectedTeam = lse.Entity.Country;
+					selectedTeam = lse.m_entity.Country;
 
 				Dictionary<EntityPropertyMetaData, string> parameters = new Dictionary<EntityPropertyMetaData, string>();
-				foreach (EntityPropertyMetaData p in baseLayer.propertyMetaData)
+				foreach (EntityPropertyMetaData p in m_baseLayer.m_propertyMetaData)
 				{
 					if (p.ShowInEditMode)
-						parameters.Add(p, lse.Entity.GetPropertyMetaData(p));
+						parameters.Add(p, lse.m_entity.GetPropertyMetaData(p));
 				}
 				selectedParams.Add(parameters);
 			}
 
-			InterfaceCanvas.Instance.SetActiveplanWindowToSelection(
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
 				selectedParams);

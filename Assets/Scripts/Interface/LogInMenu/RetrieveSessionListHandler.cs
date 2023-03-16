@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Policy;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -31,13 +32,33 @@ namespace MSP2050.Scripts
 
 		public IEnumerator RetrieveListAsync()
 		{
-			string address = $"https://{hostname}/ServerManager/api/getsessionslist.php";
-			yield return TryRetrieveSessionList(address);
-			if (!Success)
+			UriBuilder baseUrl;
+			try
 			{
-				address = $"http://{hostname}/ServerManager/api/getsessionslist.php";
-				yield return TryRetrieveSessionList(address);
+				baseUrl = new UriBuilder(new Uri(hostname)); // not that Uri() only accepts "hostname" with a scheme
 			}
+			catch (UriFormatException e) // exception! meaning "hostname" does not include a scheme
+			{
+				// so create one. We use a secure base URL by default, unlike UriBuilder
+				baseUrl = new UriBuilder($"{Uri.UriSchemeHttps}://{hostname}");
+			}
+			string scheme = baseUrl.Scheme;
+			string host = baseUrl.Host;
+
+			string address = $"{scheme}://{host}/ServerManager/api/getsessionslist.php";
+			yield return TryRetrieveSessionList(address);
+
+			// yes, we succeeded
+			if (Success ||
+				// or, we already tried an insecure URL
+				baseUrl.Scheme == Uri.UriSchemeHttp)
+			{
+				yield break;
+			}
+
+			// ok, then let's try the insecure URL
+			address = $"{Uri.UriSchemeHttp}://{host}/ServerManager/api/getsessionslist.php";
+			yield return TryRetrieveSessionList(address);
 		}
 
 		private IEnumerator TryRetrieveSessionList(string fullAddress)

@@ -20,7 +20,7 @@ namespace MSP2050.Scripts
 			AbstractLayer layer = LayerManager.Instance.FindLayerByFilename(category.name);
 			if (layer != null)
 			{
-				switch (layer.LayerKPICategory)
+				switch (layer.m_layerKpiCategory)
 				{
 					case ELayerKPICategory.Ecology:
 						result = ecologyCategoryContainer;
@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
 						result = base.GetTargetContainerForCategory(category);
 						break;
 					default:
-						Debug.LogError("Unimplemented layer KPI category type " + layer.LayerKPICategory);
+						Debug.LogError("Unimplemented layer KPI category type " + layer.m_layerKpiCategory);
 						goto case ELayerKPICategory.Miscellaneous;
 				}
 
