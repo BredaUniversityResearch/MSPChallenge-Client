@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		public int m_id;
 		public string FileName { get; set; }
 		public string ShortName { get; set; }
-		private string Media { get; set; }
+		public string Media { get; private set; }
 		public string Group { get; set; }
 		public string Tooltip { get; set; }
 		public string m_category;
