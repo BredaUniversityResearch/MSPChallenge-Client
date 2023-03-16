@@ -1329,6 +1329,9 @@ namespace MSP2050.Scripts
 			//Add previous plan layer entities and excluded entities
 			for (int i = a_index - 1; i > m_lastImplementedPlanIndex; i--)
 			{
+				if (!m_planLayers[i].Plan.InInfluencingState)
+					continue;
+
 				for (int entityIndex = 0; entityIndex < m_planLayers[i].GetNewGeometryCount(); ++entityIndex)
 				{
 					Entity entity = m_planLayers[i].GetNewGeometryByIndex(entityIndex);
