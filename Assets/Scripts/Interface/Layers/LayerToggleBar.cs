@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Toggle m_toggle;
 		[SerializeField] TextMeshProUGUI m_name;
 		[SerializeField] AddTooltip m_tooltip;
+		[SerializeField] Button m_infoButton;
 
 		AbstractLayer m_layer;
 		bool m_ignoreToggleCallback;
@@ -19,6 +20,7 @@ namespace MSP2050.Scripts
 			m_toggle.onValueChanged.AddListener(OnToggleChanged);
 			LayerManager.Instance.m_onLayerVisibilityChanged += OnLayerVisibilityChanged;
 			LayerManager.Instance.m_onLayerVisibilityLockChanged += OnLayerVisibilityLockChanged;
+			m_infoButton.onClick.AddListener(OnInfoButtonClicked);
 		}
 
 		public void SetContent(AbstractLayer a_layer)
@@ -30,6 +32,7 @@ namespace MSP2050.Scripts
 			m_toggle.interactable = !LayerManager.Instance.IsLayerVisibilityLocked(a_layer);
 			m_toggle.isOn = LayerManager.Instance.LayerIsVisible(a_layer);
 			m_tooltip.SetText(a_layer.Tooltip);
+			m_infoButton.gameObject.SetActive(!string.IsNullOrEmpty(m_layer.Media));
 		}
 
 		void OnToggleChanged(bool a_value)
@@ -61,6 +64,12 @@ namespace MSP2050.Scripts
 			{
 				m_toggle.interactable = !a_locked;
 			}
+		}
+
+		void OnInfoButtonClicked()
+		{
+			string mediaUrl = MediaUrl.Parse(m_layer.Media);
+			InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl);
 		}
 	}
 }
