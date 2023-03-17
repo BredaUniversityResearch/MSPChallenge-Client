@@ -300,7 +300,7 @@ namespace MSP2050.Scripts
 		private void UpdateGraphValues(GraphEntry entry)
 		{
 			entry.graphPoints.Clear();
-			for (int i = 0; i < entry.activeValue.MostRecentMonth; i += graphMonthInterval)
+			for (int i = 0; i <= entry.activeValue.MostRecentMonth; i += graphMonthInterval)
 			{
 				entry.graphPoints.AddPoint(i, (float)(entry.activeValue.GetKpiValueForMonth(i) ?? 0f));
 			}
