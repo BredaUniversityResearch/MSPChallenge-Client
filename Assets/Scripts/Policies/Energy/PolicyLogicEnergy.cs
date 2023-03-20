@@ -4,8 +4,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using GeoJSON.Net.Feature;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
