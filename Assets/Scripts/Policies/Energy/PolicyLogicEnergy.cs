@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using GeoJSON.Net.Feature;
+using static UnityEditor.Experimental.GraphView.GraphView;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
@@ -347,11 +349,15 @@ namespace MSP2050.Scripts
 			if (m_energyCableLayerGreen != null || m_energyCableLayerGrey != null)
 			{
 				foreach (AbstractLayer energyLayer in m_energyLayers)
+				{
 					energyLayer.ResetCurrentGrids();
+					energyLayer.SetEntitiesActiveUpTo(plan);
+				}
 
 				List<EnergyGrid> grids = GetEnergyGridsAtTime(plan.StartTime, EnergyGrid.GridColor.Either);
 				if (m_energyCableLayerGreen != null)
 				{
+					m_energyCableLayerGreen.ActivateCableLayerConnections();
 					Dictionary<int, List<DirectionalConnection>> network = m_energyCableLayerGreen.GetCableNetworkForPlan(plan);
 					foreach (EnergyGrid grid in grids)
 						if (grid.IsGreen)
@@ -359,6 +365,7 @@ namespace MSP2050.Scripts
 				}
 				if (m_energyCableLayerGrey != null)
 				{
+					m_energyCableLayerGrey.ActivateCableLayerConnections();
 					Dictionary<int, List<DirectionalConnection>> network = m_energyCableLayerGrey.GetCableNetworkForPlan(plan);
 					foreach (EnergyGrid grid in grids)
 						if (!grid.IsGreen)
