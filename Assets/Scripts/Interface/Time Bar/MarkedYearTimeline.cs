@@ -17,9 +17,6 @@ namespace MSP2050.Scripts
 		private GameObject markedYearPrefab = null;
 
 		[SerializeField]
-		private int yearSpacing = 5;
-
-		[SerializeField]
 		private Slider monthSelectorSlider = null;
 
 		[SerializeField]
@@ -31,7 +28,7 @@ namespace MSP2050.Scripts
 		private void Start()
 		{
 			TimeManager.Instance.OnCurrentMonthChanged += OnCurrentMonthChanged;
-			SetupYearMarkers(yearSpacing);
+			SetupYearMarkers(SessionManager.Instance.MspGlobalData.YearsPerEra);
 		}
 
 		//Callback set in Unity Editor.
