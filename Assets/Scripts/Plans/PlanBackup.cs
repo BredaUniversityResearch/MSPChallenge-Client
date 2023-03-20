@@ -348,12 +348,7 @@ namespace MSP2050.Scripts
 
 		private void HandleDatabaseIDResults(List<PlanIssueObject> results)
 		{
-			foreach (PlanIssueObject issue in results)
-			{
-				PlanIssueObject target = m_planLayer.issues.FirstOrDefault(obj => obj.GetIssueHash() == issue.GetIssueHash());
-				if (target == null) continue;
-				target.issue_database_id = issue.issue_database_id;
-			}
+			m_planLayer.issues = new HashSet<PlanIssueObject>(results, new IssueObjectEqualityComparer());
 		}		
 	}
 }
