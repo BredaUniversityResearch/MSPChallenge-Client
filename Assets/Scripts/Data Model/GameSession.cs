@@ -12,7 +12,6 @@ namespace MSP2050.Scripts
 
 		public int id;
 		public string name;
-		public int game_config_version_id;
 		public int game_server_id;
 		public int watchdog_server_id;
 		public int game_creation_time;
