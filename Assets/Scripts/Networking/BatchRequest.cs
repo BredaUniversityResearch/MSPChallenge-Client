@@ -58,9 +58,7 @@ namespace MSP2050.Scripts
 
 		public int AddRequest(string a_endPoint, JObject a_data, int a_group)
 		{
-			if (m_status == EBatchStatus.Failed)
-				return -1;
-
+			if (m_status != EBatchStatus.Setup) return -1; // you can only add requests during Setup state
 			int id = m_nextCallID++;
 			m_callQueue.Add(new QueuedBatchCall(id, a_endPoint, a_data.ToString(), a_group));
 			return id;
@@ -68,25 +66,20 @@ namespace MSP2050.Scripts
 
 		public int AddRequest<T>(string a_endPoint, JObject a_data, int a_group, Action<T> a_callback)
 		{
-			if (m_status == EBatchStatus.Failed)
-				return -1;
-
-			int id = m_nextCallID++;
+			int id = AddRequest(a_endPoint, a_data, a_group);
+			if (-1 == id) return -1;
 			if (a_callback != null)
 				m_callbacks.Add(id, new TypedCallback<T>(a_callback));
-			m_callQueue.Add(new QueuedBatchCall(id, a_endPoint, a_data.ToString(), a_group));
 			return id;
 		}
 
 		public void ExecuteBatch(Action<BatchRequest> a_successCallback, Action<BatchRequest> a_failureCallback)
 		{
+			if (m_status != EBatchStatus.Setup) return; // do not execute it again, once it is executed 
+			
 			m_successCallback = a_successCallback;
 			m_failureCallback = a_failureCallback;
-			ExecuteBatch();
-		}
-
-		private void ExecuteBatch()
-		{
+			
 			//All add requests are in, execute the batch
 			m_status = EBatchStatus.AwaitingResults;
 
@@ -119,6 +112,7 @@ namespace MSP2050.Scripts
 			return delegate(string a_message) {
 				if (a_request.retriesRemaining > 0)
 				{
+					m_status = EBatchStatus.AwaitingResults;				
 					ServerCommunication.Instance.RetryRequest(a_request);
 				}
 				else
