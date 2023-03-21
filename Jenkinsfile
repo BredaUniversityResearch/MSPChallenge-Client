@@ -46,20 +46,17 @@ pipeline {
 						echo "Fetching tags"
 						bat '''git fetch --all --tags'''
 				}
-		}
+		}		
 		
 		stage('Build Pull Request') {
-		
-			when { 
-					expression { env.BRANCH_NAME.startsWith('PR') }
-				}
+			when {branch comparator: 'REGEXP', pattern: '(bugfix.*|hotfix.*|MSP.*|PR.*)'}
 			steps {
-				script {
+				script {			
 					echo "Launching Windows Development Build..."
 					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinDevFolder%\\MSP-Challenge.exe" -customBuildName "MSP-Challenge" -executeMethod ProjectBuilder.WindowsDevBuilder'''
 				}
 			}
-		}
+		}	
 		
 		stage('Build Dev Branch') {
 		
@@ -96,7 +93,7 @@ pipeline {
 					echo "Launching Windows Release Build..."
 					bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinFolder%\\MSP-Challenge.exe" -customBuildName "MSP-Challenge" -executeMethod ProjectBuilder.WindowsBuilder
 						echo "Zipping build..."
-						7z a -tzip -r "%output%\\%WINDOWS_BUILD_NAME%" "%CD%\\%output%\\%outputDevFolder%\\*"
+						7z a -tzip -r "%output%\\%WINDOWS_BUILD_NAME%" "%CD%\\%output%\\%outputWinFolder%\\*"
 						echo "Uploading release build artifact to Nexus..."
 						"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_BUILD_NAME%.zip"'''
 						
