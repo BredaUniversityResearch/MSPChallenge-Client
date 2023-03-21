@@ -212,7 +212,7 @@ namespace MSP2050.Scripts
 					changedPlan.SubmitState(newState, batch);
 					batch.ExecuteBatch(HideBlocker, SubmissionFailure);
 				}
-			}, (_) => {
+			}, delegate {
 				InterfaceCanvas.HideNetworkingBlocker();
 			});
 		}
