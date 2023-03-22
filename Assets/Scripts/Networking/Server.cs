@@ -524,16 +524,6 @@ namespace MSP2050.Scripts
 			return "api/security/RequestToken";
 		}
 
-		public static string StartBatch()
-		{
-			return "api/batch/StartBatch";
-		}
-
-		public static string AddToBatch()
-		{
-			return "api/batch/AddToBatch";
-		}
-
 		public static string ExecuteBatch()
 		{
 			return "api/batch/ExecuteBatch";
