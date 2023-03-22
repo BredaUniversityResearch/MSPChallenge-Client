@@ -267,7 +267,7 @@ namespace MSP2050.Scripts
 
 		private void SubmitChanges()
 		{
-			BatchRequest batch = new BatchRequest(true);
+			BatchRequest batch = new BatchRequest();
 
 			//Newly created plans are not locked
 			if (m_interactionMode != EInteractionMode.EditExisting)
@@ -302,7 +302,7 @@ namespace MSP2050.Scripts
 
 		void SubmitRestoration()
 		{
-			BatchRequest batch = new BatchRequest(true);
+			BatchRequest batch = new BatchRequest();
 			m_currentPlan.Description = m_planDescription.text;
 			m_currentPlan.Name = m_planName.text;
 			m_currentPlan.SendMessage("Restored the plans status to: " + Plan.PlanState.DESIGN.GetDisplayName(), batch);

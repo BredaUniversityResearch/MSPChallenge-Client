@@ -39,7 +39,6 @@ namespace MSP2050.Scripts
 		private int m_batchID;
 		private int m_nextCallID = 1;
 		private bool m_executeWhenReady;
-		private bool m_async;
 
 		private Dictionary<int, ITypedCallback> m_callbacks; //callID to callback function
 		private List<QueuedBatchCall> m_callQueue; //Calls that are awaiting a batchID to be sent
@@ -48,9 +47,8 @@ namespace MSP2050.Scripts
 		private Action<BatchRequest> m_failureCallback;
 		private Action<BatchRequest> m_successCallback;
 
-		public BatchRequest(bool a_async = false)
+		public BatchRequest()
 		{
-			m_async = a_async;
 			m_callbacks = new Dictionary<int, ITypedCallback>();
 			m_callQueue = new List<QueuedBatchCall>();
 			m_outstandingCallRequests = new HashSet<int>();
@@ -198,18 +196,8 @@ namespace MSP2050.Scripts
 
 				NetworkForm form = new NetworkForm();
 				form.AddField("batch_id", m_batchID);
-				form.AddField("async", m_async.ToString());
-
-				if (m_async)
-				{
-					UpdateManager.Instance.WsServerCommunicationInteractor?.RegisterBatchRequestCallbacks(m_batchID, HandleBatchSuccess,
-						CreateHandleBatchFailureAction(ServerCommunication.Instance.DoRequest(Server.ExecuteBatch(), form))); // todo : handle error of executebatch
-				}
-				else
-				{
-					ServerCommunication.Instance.DoRequest<BatchExecutionResult>(Server.ExecuteBatch(), form, HandleBatchSuccess,
-						HandleBatchFailure);
-				}
+				UpdateManager.Instance.WsServerCommunicationInteractor?.RegisterBatchRequestCallbacks(m_batchID, HandleBatchSuccess,
+					CreateHandleBatchFailureAction(ServerCommunication.Instance.DoRequest(Server.ExecuteBatch(), form)));
 			}
 			else
 			{
@@ -235,11 +223,6 @@ namespace MSP2050.Scripts
 					}
 				}
 			};
-		}
-
-		private void HandleBatchFailure(ARequest a_request, string a_message)
-		{
-			CreateHandleBatchFailureAction(a_request)(a_message);
 		}
 
 		private void HandleBatchSuccess(BatchExecutionResult a_batchResult)
