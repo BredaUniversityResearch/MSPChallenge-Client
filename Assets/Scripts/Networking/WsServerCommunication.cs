@@ -7,8 +7,8 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using UnityEngine;
 using Websocket.Client;
-using BatchRequestSuccessCallbacks = System.Collections.Generic.Dictionary<System.Guid, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
-using BatchRequestFailureCallbacks = System.Collections.Generic.Dictionary<System.Guid, System.Action<string>>;
+using BatchRequestSuccessCallbacks = System.Collections.Generic.Dictionary<int, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
+using BatchRequestFailureCallbacks = System.Collections.Generic.Dictionary<int, System.Action<string>>;
 using BatchRequestResultAndSuccessCallback =
 	System.Collections.Generic.KeyValuePair<MSP2050.Scripts.BatchExecutionResult, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
 using BatchRequestResultAndFailureCallback = System.Collections.Generic.KeyValuePair<string, System.Action<string>>;
@@ -19,9 +19,9 @@ namespace MSP2050.Scripts
 	{
 		public void Start();
 		public void Stop();
-		public void RegisterBatchRequestCallbacks(Guid a_batchGuid, Action<BatchExecutionResult> a_successCallback,
+		public void RegisterBatchRequestCallbacks(int a_batchId, Action<BatchExecutionResult> a_successCallback,
 			System.Action<string> a_failureCallback);
-		public void UnregisterBatchRequestCallbacks(Guid a_batchGuid);
+		public void UnregisterBatchRequestCallbacks(int a_batchId);
 		public bool? IsConnected();
 	}
 
@@ -63,7 +63,7 @@ namespace MSP2050.Scripts
 		[SuppressMessage("ReSharper", "InconsistentNaming")] // need to match json
 		private class BatchRequestResultHeaderData
 		{
-			public Guid batch_guid;
+			public int batch_id;
 		}
 
 		public WsServerCommunication(int a_gameSessionId, int a_teamId, int a_userId,
@@ -149,23 +149,23 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void RegisterBatchRequestCallbacks(Guid a_batchGuid, Action<BatchExecutionResult> a_successCallback,
+		public void RegisterBatchRequestCallbacks(int a_batchId, Action<BatchExecutionResult> a_successCallback,
 			Action<string> a_failureCallback)
 		{
-			UnregisterBatchRequestCallbacks(a_batchGuid);
-			m_batchRequestSuccessCallbacks.Add(a_batchGuid, a_successCallback);
-			m_batchRequestFailureCallbacks.Add(a_batchGuid, a_failureCallback);
+			UnregisterBatchRequestCallbacks(a_batchId);
+			m_batchRequestSuccessCallbacks.Add(a_batchId, a_successCallback);
+			m_batchRequestFailureCallbacks.Add(a_batchId, a_failureCallback);
 		}
 
-		public void UnregisterBatchRequestCallbacks(Guid a_batchGuid)
+		public void UnregisterBatchRequestCallbacks(int a_batchId)
 		{
-			if (m_batchRequestSuccessCallbacks.ContainsKey(a_batchGuid))
+			if (m_batchRequestSuccessCallbacks.ContainsKey(a_batchId))
 			{
-				m_batchRequestSuccessCallbacks.Remove(a_batchGuid);
+				m_batchRequestSuccessCallbacks.Remove(a_batchId);
 			}
-			if (m_batchRequestFailureCallbacks.ContainsKey(a_batchGuid))
+			if (m_batchRequestFailureCallbacks.ContainsKey(a_batchId))
 			{
-				m_batchRequestFailureCallbacks.Remove(a_batchGuid);
+				m_batchRequestFailureCallbacks.Remove(a_batchId);
 			}
 		}
 
@@ -195,7 +195,7 @@ namespace MSP2050.Scripts
 			{
 				BatchRequestResultAndFailureCallback pair =
 					new BatchRequestResultAndFailureCallback(a_result.message,
-						m_batchRequestFailureCallbacks[headerData.batch_guid]);
+						m_batchRequestFailureCallbacks[headerData.batch_id]);
 				m_batchRequestResultAndFailureCallbackQueue.Enqueue(pair);
 				return;
 			}
@@ -205,11 +205,11 @@ namespace MSP2050.Scripts
 				BatchExecutionResult batchExecutionResult = a_result.payload.ToObject<BatchExecutionResult>(serializer);
 				BatchRequestResultAndSuccessCallback pair =
 					new BatchRequestResultAndSuccessCallback(batchExecutionResult,
-						m_batchRequestSuccessCallbacks[headerData.batch_guid]);
+						m_batchRequestSuccessCallbacks[headerData.batch_id]);
 				m_batchRequestResultAndSuccessCallbackQueue.Enqueue(pair);
 			}
 
-			UnregisterBatchRequestCallbacks(headerData.batch_guid);
+			UnregisterBatchRequestCallbacks(headerData.batch_id);
 		}
 
 		private void ProcessGameLatestPayload(RequestResult a_result,
