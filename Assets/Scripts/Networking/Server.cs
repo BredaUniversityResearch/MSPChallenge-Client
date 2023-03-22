@@ -310,7 +310,7 @@ namespace MSP2050.Scripts
 			return "api/energy/UpdateConnection";
 		}
 
-		public static string DeleteEnergyConection()
+		public static string DeleteEnergyConnection()
 		{
 			return "api/energy/DeleteConnection";
 		}

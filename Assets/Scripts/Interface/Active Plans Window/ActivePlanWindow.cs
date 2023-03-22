@@ -539,6 +539,10 @@ namespace MSP2050.Scripts
 			SetEntriesToPolicies();
 			SetEntriesToLayers();
 			RefreshSectionActivity();
+			if (m_approvalContent.IsOpen)
+			{
+				m_approvalContent.RefreshContent(m_currentPlan);
+			}
 		}
 
 		public void RefreshIssueText()
