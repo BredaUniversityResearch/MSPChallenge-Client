@@ -26,7 +26,7 @@ namespace MSP2050.Scripts
 			RefreshContent(a_content);
 		}
 
-		void RefreshContent(Plan a_content)
+		public void RefreshContent(Plan a_content)
 		{
 			int nextIndex = 0;
 

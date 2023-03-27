@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 			//Delete cable
 			dataObject = new JObject();
 			dataObject.Add("cable", m_databaseID);
-			a_batch.AddRequest(Server.DeleteEnergyConection(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
+			a_batch.AddRequest(Server.DeleteEnergyConnection(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_DELETE);
 
 			return base.SubmitDelete(a_batch);
 		}
