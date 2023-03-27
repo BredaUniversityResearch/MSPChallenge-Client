@@ -31,12 +31,12 @@ namespace MSP2050.Scripts
 		public IEnumerator RetrieveListAsync()
 		{
 			var hostnameToUse = hostname;
-			// note that Uri() only accepts "hostname" with a scheme, or without if :port is added,
-			//   but then it messes up parsing
-			// So to prevent errors, force scheme https manually, it there is no scheme			
+			// note that Uri() only accepts "hostname" with a scheme, or without the scheme if :port is added,
+			//   but then it messes up parsing, so to prevent errors, always force a scheme https if absent
 			if (!(hostname.StartsWith(Uri.UriSchemeHttp) || hostname.StartsWith(Uri.UriSchemeHttps)))
 			{
-				hostnameToUse = "https://" + hostname; // we use https as default
+				// we use https as default
+				hostnameToUse = "https://" + hostname;
 			}
 			
 			// This should not go wrong, and if it does we get an UriFormatException
@@ -44,7 +44,8 @@ namespace MSP2050.Scripts
 
 			var scheme = baseUrl.Scheme;
 			var host = baseUrl.Host;
-			var port = baseUrl.Port; // if a port was specified, use it, otherwise it will the default
+			// if a port was specified, use it, otherwise it will be the default
+			var port = baseUrl.Port;
 
 			var address = $"{scheme}://{host}:{port}/ServerManager/api/getsessionslist.php";
 			yield return TryRetrieveSessionList(address);

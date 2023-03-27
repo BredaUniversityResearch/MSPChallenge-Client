@@ -57,7 +57,8 @@ namespace MSP2050.Scripts
 
 		public int AddRequest(string a_endPoint, JObject a_data, int a_group)
 		{
-			if (m_status != EBatchStatus.Setup) return -1; // you can only add requests during Setup state
+			// you can only add requests during Setup state
+			if (m_status != EBatchStatus.Setup) return -1;
 			int id = m_nextCallID++;
 			m_callQueue.Add(new QueuedBatchCall(id, a_endPoint, a_data.ToString(), a_group));
 			return id;
@@ -74,7 +75,8 @@ namespace MSP2050.Scripts
 
 		public void ExecuteBatch(Action<BatchRequest> a_successCallback, Action<BatchRequest> a_failureCallback)
 		{
-			if (m_status != EBatchStatus.Setup) return; // do not execute it again, once it is executed 
+			// do not execute it again, once it is executed 
+			if (m_status != EBatchStatus.Setup) return;
 			
 			m_successCallback = a_successCallback;
 			m_failureCallback = a_failureCallback;
