@@ -21,7 +21,7 @@ namespace MSP2050.Scripts
 				{
 					patternMaterials.Add(pattern, new PatternMaterials(pattern));
 				}
-				return patternMaterials[pattern].GetMaterial(color, polygonMaterialInnerGlow, true, innerGlowTexture);
+				return patternMaterials[pattern].GetMaterial(color, MaterialManager.Instance.polygonMaterialInnerGlow, true, innerGlowTexture);
 			}
 
 			public void UpdateScales()
@@ -88,28 +88,44 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static Camera cam;
-		private static Vector3 previousCamPosition;
-		private static int previousScreenWidth;
-		private static int previousScreenHeight;
+		private static MaterialManager singleton;
+		public static MaterialManager Instance
+		{
+			get
+			{
+				if (singleton == null)
+					singleton = FindObjectOfType<MaterialManager>();
+				return singleton;
+			}
+		}
 
-		private static Vector3 patternAnchor = Vector3.zero;
-		private static Vector3 patternAnchorOffset = Vector3.zero;
+		private Camera cam;
+		private Vector3 previousCamPosition;
+		private int previousScreenWidth;
+		private int previousScreenHeight;
 
-		private static Material polygonMaterialDefault;
-		private static Material polygonMaterialInnerGlow;
+		private Vector3 patternAnchor = Vector3.zero;
+		private Vector3 patternAnchorOffset = Vector3.zero;
 
-		private static Dictionary<PolygonLayer, Texture2D> innerGlowTextures = new Dictionary<PolygonLayer, Texture2D>();
-		private static Dictionary<PolygonLayer, Rect> innerGlowTextureBounds = new Dictionary<PolygonLayer, Rect>();
+		private Material polygonMaterialDefault;
+		private Material polygonMaterialInnerGlow;
 
-		private static Dictionary<Texture2D, PatternMaterials> patternMaterials = new Dictionary<Texture2D, PatternMaterials>(); // pattern texture is used as the key
-		private static Dictionary<Texture2D, InnerGlowPatternMaterials> patternMaterialsWithInnerGlow = new Dictionary<Texture2D, InnerGlowPatternMaterials>(); // inner glow texture is used as the key
+		private Dictionary<PolygonLayer, Texture2D> innerGlowTextures = new Dictionary<PolygonLayer, Texture2D>();
+		private Dictionary<PolygonLayer, Rect> innerGlowTextureBounds = new Dictionary<PolygonLayer, Rect>();
 
-		private static Dictionary<string, Texture2D> patterns = new Dictionary<string, Texture2D>(32);
-		private static /*readonly*/ Texture2D defaultPattern = null;
+		private Dictionary<Texture2D, PatternMaterials> patternMaterials = new Dictionary<Texture2D, PatternMaterials>(); // pattern texture is used as the key
+		private Dictionary<Texture2D, InnerGlowPatternMaterials> patternMaterialsWithInnerGlow = new Dictionary<Texture2D, InnerGlowPatternMaterials>(); // inner glow texture is used as the key
+
+		private Dictionary<string, Texture2D> patterns = new Dictionary<string, Texture2D>(32);
+		private Texture2D defaultPattern = null;
 
 		void Awake()
 		{
+			if (singleton != null && singleton != this)
+				Destroy(this);
+			else
+				singleton = this;
+
 			cam = Camera.main;
 			polygonMaterialDefault = Resources.Load<Material>("Polygon Material");
 			polygonMaterialInnerGlow = Resources.Load<Material>("Polygon Material Inner Glow");
@@ -126,7 +142,12 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void UpdateMaterialScales()
+		void OnDestroy()
+		{
+			singleton = null;
+		}
+
+		private void UpdateMaterialScales()
 		{
 			foreach (var kvp in patternMaterials)
 			{
@@ -139,7 +160,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private static void UpdateMaterialOffsets(Vector4 offset)
+		private void UpdateMaterialOffsets(Vector4 offset)
 		{
 			foreach (var kvp in patternMaterials)
 			{
@@ -152,7 +173,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static Texture2D GetPatternOrDefault(string patternName)
+		public Texture2D GetPatternOrDefault(string patternName)
 		{
 			Texture2D result;
 			if (patternName == null || !patterns.TryGetValue(patternName, out result))
@@ -163,7 +184,7 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static Material GetDefaultPolygonMaterial(string patternName, Color color)
+		public Material GetDefaultPolygonMaterial(string patternName, Color color)
 		{
 			Texture2D pattern = GetPatternOrDefault(patternName);
 
@@ -174,7 +195,7 @@ namespace MSP2050.Scripts
 			return patternMaterials[pattern].GetMaterial(color, polygonMaterialDefault, false);
 		}
 
-		public static Material GetInnerGlowPolygonMaterial(Texture2D innerGlowTexture, string patternName, Color color)
+		public Material GetInnerGlowPolygonMaterial(Texture2D innerGlowTexture, string patternName, Color color)
 		{
 			Texture2D pattern = GetPatternOrDefault(patternName);
 
@@ -185,14 +206,14 @@ namespace MSP2050.Scripts
 			return patternMaterialsWithInnerGlow[innerGlowTexture].GetMaterial(pattern, color);
 		}
 
-		public static void Update()
+		public void Update()
 		{
 			if (cam.transform.position != previousCamPosition)
 			{
 				Vector3 offset = -2 * cam.WorldToViewportPoint(patternAnchor) + patternAnchorOffset;
-				if (CameraZoom.LastZoomLocation != patternAnchor)
+				if (CameraZoom.m_lastZoomLocation != patternAnchor)
 				{
-					patternAnchor = CameraZoom.LastZoomLocation;
+					patternAnchor = CameraZoom.m_lastZoomLocation;
 					patternAnchorOffset = offset - -2 * cam.WorldToViewportPoint(patternAnchor);
 				}
 
@@ -210,7 +231,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static Texture2D GetInnerGlowTexture(PolygonLayer layer, int radius, int iterations, float multiplier, float pixelSize)
+		public Texture2D GetInnerGlowTexture(PolygonLayer layer, int radius, int iterations, float multiplier, float pixelSize)
 		{
 			if (!innerGlowTextures.ContainsKey(layer))
 			{
@@ -219,7 +240,7 @@ namespace MSP2050.Scripts
 			return innerGlowTextures[layer];
 		}
 
-		public static Rect GetInnerGlowTextureBounds(PolygonLayer layer, int radius, int iterations, float multiplier, float pixelSize)
+		public Rect GetInnerGlowTextureBounds(PolygonLayer layer, int radius, int iterations, float multiplier, float pixelSize)
 		{
 			if (!innerGlowTextureBounds.ContainsKey(layer))
 			{
@@ -228,9 +249,9 @@ namespace MSP2050.Scripts
 			return innerGlowTextureBounds[layer];
 		}
 
-		public static void CalculateInnerGlowTextureData(PolygonLayer layer, int radius, int iterations, float multiplier, float pixelSize)
+		public void CalculateInnerGlowTextureData(PolygonLayer layer, int radius, int iterations, float multiplier, float pixelSize)
 		{
-			//float pixelSize = VisualizationUtil.VisualizationSettings.InnerGlowPixelSize;
+			//float pixelSize = VisualizationUtil.Instance.VisualizationSettings.InnerGlowPixelSize;
 			Rect textureBounds = layer.GetLayerBounds();
 			int w = Mathf.CeilToInt(textureBounds.size.x / pixelSize);
 			int h = Mathf.CeilToInt(textureBounds.size.y / pixelSize);

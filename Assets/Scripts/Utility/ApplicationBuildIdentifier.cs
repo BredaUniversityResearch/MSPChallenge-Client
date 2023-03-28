@@ -5,79 +5,112 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-	/// <summary>
-	/// Small scriptable object that acts as the build identifier. Contains information about the build date.
-	/// </summary>
-	[CreateAssetMenu]
-public class ApplicationBuildIdentifier : ScriptableObject
+public class ApplicationBuildIdentifier : MonoBehaviour
 {
-	//Actual file reside in Assets/Resources/
-	private const string BUILD_IDENTIFIER_ASSET_PATH = "BuildIdentifier";
-
-	[SerializeField] private string buildTime;
-	[SerializeField] private string gitTag;
-
-#if UNITY_CLOUD_BUILD
-public static void UpdateBuildInformation(UnityEngine.CloudBuild.BuildManifestObject manifest)
-{
-    ApplicationBuildIdentifier identifier = Resources.Load<ApplicationBuildIdentifier>(BUILD_IDENTIFIER_ASSET_PATH);
-    identifier.UpdateBuildTime();
-    manifest.SetValue("buildNumber", identifier.gitTag);
-    manifest.SetValue("buildStartTime", identifier.buildTime);
-}
-#endif
-
-	public static ApplicationBuildIdentifier FindBuildIdentifier()
+	private static ApplicationBuildIdentifier singleton;
+	public static ApplicationBuildIdentifier Instance
 	{
-		ApplicationBuildIdentifier identifier = Resources.Load<ApplicationBuildIdentifier>(BUILD_IDENTIFIER_ASSET_PATH);
-		UnityCloudBuildManifest manifest = UnityCloudBuildManifest.Load();
-
-		if(manifest != null)
+		get
 		{
-			identifier.buildTime = manifest.GetBuildTime();
-			identifier.gitTag = manifest.GetGitTag();
+			if (singleton == null)
+				singleton = FindObjectOfType<ApplicationBuildIdentifier>();
+			return singleton;
+		}
+	}
+	private string buildTime = "2023-01-01 13:24:12Z";
+	private string gitTag = "";
+	private bool hasInformation = false;
+
+    public static void UpdateBuildInformation(UnityManifest manifest)
+    {
+        manifest.SetGitTag(UpdateTag());
+        manifest.SetBuildTime(UpdateTime());
+		manifest.Save();
+    }
+
+    void Awake()
+	{
+		if (singleton != null && singleton != this)
+		{
+			Destroy(this);
+			return;
+		}
+		else
+		{
+			singleton = this;
+			DontDestroyOnLoad(gameObject);
 		}
 
-		return identifier;
+        singleton.GetManifest();
 	}
 
-	public void UpdateBuildTime()
+    public static string UpdateTime()
 	{
-		buildTime = System.DateTime.Now.ToString("u", CultureInfo.InvariantCulture);
-		gitTag = RunGitCommand();
+		string buildTime = System.DateTime.Now.ToString("u", CultureInfo.InvariantCulture);
+        return buildTime;
 	}
 
-	public string RunGitCommand()
+	public static string UpdateTag()
 	{
-		string result = "";
-		var proc = new Process
+        string gitTag = "";
+
+		Process proc = new Process
 		{
 			StartInfo = new ProcessStartInfo()
 			{
 				FileName = "git",
-				Arguments = $"git describe --tags `git rev-list --tags --max-count=1`",
+				Arguments = "rev-list --tags --max-count=1",
 				UseShellExecute = false,
 				RedirectStandardOutput = true,
-				CreateNoWindow = true,
+			}
+		};
+
+		proc.Start();
+		string commitId = proc.StandardOutput.ReadToEnd();
+
+		proc = new Process
+		{
+			StartInfo = new ProcessStartInfo()
+			{
+				FileName = "git",
+				Arguments = $"describe --tags \"{commitId.Trim()}\"",
+				UseShellExecute = false,
+				RedirectStandardOutput = true,
 			}
 		};
 
 		proc.Start();
 		while (!proc.StandardOutput.EndOfStream)
 		{
-			result += $"{proc.StandardOutput.ReadLine()},";
+			gitTag += $"{proc.StandardOutput.ReadLine()},";
 		}
 		proc.WaitForExit();
-		return result;
+
+        gitTag = gitTag.Remove(gitTag.Length - 1);
+
+		return gitTag;
 	}
+
+    public void GetManifest()
+    {
+        UnityManifest manifest = UnityManifest.Load();
+
+        gitTag = manifest.buildNumber;
+        buildTime = manifest.buildStartTime;
+        hasInformation = true;
+    }
 
 	public string GetBuildTime()
-	{
+    {
 		return buildTime;
-	}
-
+    }
 	public string GetGitTag()
 	{
 		return gitTag;
 	}
+	public bool GetHasInformation()
+    {
+		return hasInformation;
+    }
+
 }

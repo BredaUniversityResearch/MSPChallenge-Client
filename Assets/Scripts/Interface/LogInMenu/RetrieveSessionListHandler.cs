@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -31,26 +30,40 @@ namespace MSP2050.Scripts
 
 		public IEnumerator RetrieveListAsync()
 		{
-			//string address = $"http://{hostname}/api/getsessionslist.php";
-			//yield return TryRetrieveSessionList(address);
-			//if (!Success)
-			//{
-			//    address = $"http://{hostname}/stable/servermanager/api/getsessionslist.php";
-			//    yield return TryRetrieveSessionList(address);
-			//    if (!Success)
-			//    {
-			//        address = $"http://{hostname}/ServerManager/api/getsessionslist.php";
-			//  yield return TryRetrieveSessionList(address);
-			//    }
-			//}
-
-			string address = $"https://{hostname}/ServerManager/api/getsessionslist.php";
-			yield return TryRetrieveSessionList(address);
-			if (!Success)
+			var hostnameToUse = hostname;
+			// note that Uri() only accepts "hostname" with a scheme, or without the scheme if :port is added,
+			//   but then it messes up parsing, so to prevent errors, always force a scheme https if absent
+			if (!(hostname.StartsWith(Uri.UriSchemeHttp) || hostname.StartsWith(Uri.UriSchemeHttps)))
 			{
-				address = $"http://{hostname}/ServerManager/api/getsessionslist.php";
-				yield return TryRetrieveSessionList(address);
+				// we use https as default
+				hostnameToUse = "https://" + hostname;
 			}
+			
+			// This should not go wrong, and if it does we get an UriFormatException
+			UriBuilder baseUrl = new UriBuilder(new Uri(hostnameToUse));
+
+			var scheme = baseUrl.Scheme;
+			var host = baseUrl.Host;
+			// if a port was specified, use it, otherwise it will be the default
+			var port = baseUrl.Port;
+
+			var address = $"{scheme}://{host}:{port}/ServerManager/api/getsessionslist.php";
+			yield return TryRetrieveSessionList(address);
+
+			// yes, we succeeded
+			if (Success ||
+				// or, we already tried an insecure URL
+				baseUrl.Scheme == Uri.UriSchemeHttp)
+			{
+				yield break;
+			}
+
+			// ok, then let's try the insecure URLs
+			// meaning, if we tried the default https port, then we need to switch to port 80 for http,
+			//   also meaning that if a non-default value was given, just try that again, but on a http scheme
+			if (port == 443) port = 80;
+			address = $"{Uri.UriSchemeHttp}://{host}:{port}/ServerManager/api/getsessionslist.php";
+			yield return TryRetrieveSessionList(address);
 		}
 
 		private IEnumerator TryRetrieveSessionList(string fullAddress)

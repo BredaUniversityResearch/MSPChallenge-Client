@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
@@ -21,27 +22,25 @@ namespace MSP2050.Scripts
 		[Header("Rect")]
 		public RectTransform thisRect;
 
-		[Header("Objective Prefab")]
+		[Header("Objectives")]
 		public MonitorObjective objectivePrefab;
 		public Transform objectiveLocation;
+		[SerializeField] NewObjectiveWindow newObjectivesWindow;
+		[SerializeField] Button newObjectivesButton;
+
 		private List<MonitorObjective> objectives = new List<MonitorObjective>(16);
 
 		[Header("Filters")]
-		[SerializeField]
-		private KPICountrySelector filterCountrySelector = null;
-		[SerializeField]
-		private CustomDropdown filterStateDropdown = null;
-		[SerializeField]
-		private EraDropdown filterEraDeadline = null;
+		[SerializeField] KPICountrySelector filterCountrySelector = null;
+		[SerializeField] CustomDropdown filterStateDropdown = null;
+		[SerializeField]  EraDropdown filterEraDeadline = null;
 
 		private ECompletionStateFilter completionFilterState = ECompletionStateFilter.AnyState;
 
-		public MenuBarToggle objectivesToggle;
-		public ToolbarCounter objectivesToggleCounter;
-
 		private void Start()
 		{
-			SetWindowActive(false); //Hide the window immediately. We can't set the state to disabled in the editor since we need all the constructors to run (including Awake & Start)
+			newObjectivesButton.onClick.AddListener(newObjectivesWindow.OpenToNewObjective);
+			gameObject.SetActive(false); //Hide the window immediately. We can't set the state to disabled in the editor since we need all the constructors to run (including Awake & Start)
 
 			filterCountrySelector.onTeamSelectionChanged.AddListener(OnCountryFilterChanged);
 			filterEraDeadline.OnValueChanged.AddListener(OnDeadlineFilterChanged);
@@ -54,11 +53,6 @@ namespace MSP2050.Scripts
 
 		}
 
-		public void SetWindowActive(bool activeState)
-		{
-			gameObject.SetActive(activeState);
-		}
-
 		private void OnEnable()
 		{
 			thisGenericWindow.CenterWindow();
@@ -67,9 +61,9 @@ namespace MSP2050.Scripts
 
 		private void OnDisable()
 		{
-			if (objectivesToggle.toggle.isOn)
+			if (InterfaceCanvas.Instance.menuBarObjectivesMonitor.toggle.isOn)
 			{
-				objectivesToggle.toggle.isOn = false;
+				InterfaceCanvas.Instance.menuBarObjectivesMonitor.toggle.isOn = false;
 			}
 		}
 
@@ -90,16 +84,11 @@ namespace MSP2050.Scripts
 				ObjectiveDetails objectiveDetails = new ObjectiveDetails(objectiveObject);
 				if (existingObjective != null)
 				{
-					existingObjective.SetObjectiveDetails(objectiveDetails);
+					existingObjective.SetObjectiveDetails(objectiveDetails, this);
 				}
 				else
 				{
 					CreateObjective(objectiveDetails);
-				}
-
-				if (!gameObject.activeSelf)
-				{
-					objectivesToggleCounter?.AddValue();
 				}
 			}
 
@@ -112,8 +101,7 @@ namespace MSP2050.Scripts
 			objectives.Add(obj);
 
 			// Track objective if 
-			obj.SetOwner(this);
-			obj.SetObjectiveDetails(details);
+			obj.SetObjectiveDetails(details, this);
 		
 			SortObjectives();
 
@@ -154,32 +142,8 @@ namespace MSP2050.Scripts
 					break;
 			}
 
-			//UpdateCompletionStateFilterText();
 			FilterObjectives();
 		}
-
-		//private void UpdateCompletionStateFilterText()
-		//{
-		//	string text;
-		//	switch (completionFilterState)
-		//	{
-		//	case ECompletionStateFilter.Completed:
-		//		text = "Completed";
-		//		break;
-		//	case ECompletionStateFilter.InProgress:
-		//		text = "In progress";
-		//		break;
-		//	case ECompletionStateFilter.AnyState:
-		//		text = "Any state";
-		//		break;
-		//	default:
-		//		Debug.LogError("Unknown completion state filter state " + completionFilterState);
-		//		text = "???";
-		//		break;
-		//	}
-
-		//	filterCycleStateButtonText.text = text;
-		//}
 
 		private void OnDeadlineFilterChanged(int selectedDeadlineIndex)
 		{
@@ -210,7 +174,7 @@ namespace MSP2050.Scripts
 
 		private void SortObjectives()
 		{
-			int currentTeamId = TeamManager.CurrentUserTeamID;
+			int currentTeamId = SessionManager.Instance.CurrentUserTeamID;
 			for (int i = 0; i < objectives.Count; i++)
 			{
 				if (objectives[i].TeamId != currentTeamId)
@@ -223,6 +187,11 @@ namespace MSP2050.Scripts
 		public void OnObjectiveUIStateChanged()
 		{
 			FilterObjectives();
+		}
+
+		public void CopyObjective(ObjectiveDetails objective)
+		{
+			newObjectivesWindow.CloneObjective(objective);
 		}
 	}
 }

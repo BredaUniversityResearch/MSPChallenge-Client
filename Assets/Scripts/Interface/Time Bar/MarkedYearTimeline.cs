@@ -1,4 +1,5 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -29,21 +30,8 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			GameState.OnCurrentMonthChanged += OnCurrentMonthChanged;
-
-			if (Main.MspGlobalData != null)
-			{
-				SetupYearMarkers(yearSpacing);
-			}
-			else
-			{
-				Main.OnGlobalDataLoaded += OnMspGlobalDataLoaded;
-			}
-		}
-
-		private void OnDestroy()
-		{
-			GameState.OnCurrentMonthChanged -= OnCurrentMonthChanged;
+			TimeManager.Instance.OnCurrentMonthChanged += OnCurrentMonthChanged;
+			SetupYearMarkers(yearSpacing);
 		}
 
 		//Callback set in Unity Editor.
@@ -70,40 +58,19 @@ namespace MSP2050.Scripts
 		{
 			if (availableSliderRangeFill != null)
 			{
-				availableSliderRangeFill.anchorMax = new Vector2((float)newCurrentMonth / (float)Main.MspGlobalData.session_end_month, availableSliderRangeFill.anchorMax.y);
+				availableSliderRangeFill.anchorMax = new Vector2((float)newCurrentMonth / (float)SessionManager.Instance.MspGlobalData.session_end_month, availableSliderRangeFill.anchorMax.y);
 			}
-		}
-
-		private void OnMspGlobalDataLoaded()
-		{
-			Main.OnGlobalDataLoaded -= OnMspGlobalDataLoaded;
-			SetupYearMarkers(yearSpacing);
 		}
 
 		private void SetupYearMarkers(int labelSpacingInYears)
 		{
-			int numYears = Main.MspGlobalData.session_num_years;
+			int numYears = SessionManager.Instance.MspGlobalData.session_num_years;
 			float desiredSubdivisions = ((float)numYears / labelSpacingInYears);
 			int numLabels = Mathf.FloorToInt(desiredSubdivisions) + 1;
 			for (int i = 0; i < numLabels; ++i)
 			{
-				int year = Main.MspGlobalData.start + (labelSpacingInYears * i);
-				RectTransform label = CreateYearLabel(year.ToString());
-
-				float percentage = (float)i / (desiredSubdivisions);
-				label.anchorMin = new Vector2(percentage, label.anchorMin.y);
-				label.anchorMax = new Vector2(percentage, label.anchorMax.y);
-
-				//Offset the first and last labels
-				if (i == 0)
-				{
-					label.localPosition = new Vector3(label.sizeDelta.x / 2f, label.localPosition.y);
-				}
-				else if (i == numLabels - 1 && (label.anchorMax.x > 0.98f))
-				{
-					//Only offset the last label if the label would show at roughly the end point.
-					label.localPosition = new Vector3(-label.sizeDelta.x / 2f, label.localPosition.y);
-				}
+				int year = SessionManager.Instance.MspGlobalData.start + (labelSpacingInYears * i);
+				CreateYearLabel(year.ToString(), i / desiredSubdivisions);
 			}
 
 			if (monthSelectorSlider != null)
@@ -114,19 +81,34 @@ namespace MSP2050.Scripts
 				monthSelectorSlider.onValueChanged.AddListener(OnSliderValueChanged);
 			}
 
-			SetLatestAvailableMonth(GameState.GetCurrentMonth());
+			SetLatestAvailableMonth(TimeManager.Instance.GetCurrentMonth());
 		}
 
-		private RectTransform CreateYearLabel(string labelText)
+		private void CreateYearLabel(string labelText, float xAnchorPos)
 		{
 			GameObject label = Instantiate(markedYearPrefab, transform);
-			Text labelTextComponent = label.GetComponent<Text>();
+			TextMeshProUGUI labelTextComponent = label.GetComponentInChildren<TextMeshProUGUI>();
 			if (labelTextComponent != null)
 			{
 				labelTextComponent.text = labelText;
+				if(xAnchorPos < 0.01f)
+				{
+					RectTransform textRect = labelTextComponent.GetComponent<RectTransform>();
+					textRect.pivot = new Vector2(0f, 0f);
+					textRect.anchoredPosition = new Vector2(-4f, 0f);
+					labelTextComponent.alignment = TextAlignmentOptions.MidlineLeft;
+				}
+				else if(xAnchorPos > 0.99f)
+				{
+					RectTransform textRect = labelTextComponent.GetComponent<RectTransform>();
+					textRect.pivot = new Vector2(1f, 0f);
+					textRect.anchoredPosition = new Vector2(4f, 0f);
+					labelTextComponent.alignment = TextAlignmentOptions.MidlineRight;
+				}
 			}
-
-			return label.GetComponent<RectTransform>();
+			RectTransform labelRect = label.GetComponent<RectTransform>();
+			labelRect.anchorMin = new Vector2(xAnchorPos, labelRect.anchorMin.y);
+			labelRect.anchorMax = new Vector2(xAnchorPos, labelRect.anchorMax.y);
 		}
 
 		private void OnSliderValueChanged(float newMonthValue)

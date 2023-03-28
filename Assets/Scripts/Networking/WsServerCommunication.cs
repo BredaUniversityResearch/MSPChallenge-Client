@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.WebSockets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using UnityEngine;
 using Websocket.Client;
-using BatchRequestSuccessCallbacks = System.Collections.Generic.Dictionary<int, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
-using BatchRequestFailureCallbacks = System.Collections.Generic.Dictionary<int, System.Action<string>>;
+using BatchRequestSuccessCallbacks = System.Collections.Generic.Dictionary<System.Guid, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
+using BatchRequestFailureCallbacks = System.Collections.Generic.Dictionary<System.Guid, System.Action<string>>;
 using BatchRequestResultAndSuccessCallback =
 	System.Collections.Generic.KeyValuePair<MSP2050.Scripts.BatchExecutionResult, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
 using BatchRequestResultAndFailureCallback = System.Collections.Generic.KeyValuePair<string, System.Action<string>>;
@@ -18,57 +19,58 @@ namespace MSP2050.Scripts
 	{
 		public void Start();
 		public void Stop();
-		public void RegisterBatchRequestCallbacks(int batchId, Action<BatchExecutionResult> successCallback,
-			System.Action<string> failureCallback);
-		public void UnregisterBatchRequestCallbacks(int batchId);
+		public void RegisterBatchRequestCallbacks(Guid a_batchGuid, Action<BatchExecutionResult> a_successCallback,
+			System.Action<string> a_failureCallback);
+		public void UnregisterBatchRequestCallbacks(Guid a_batchGuid);
 		public bool? IsConnected();
 	}
 
 	public class WsServerCommunication : IWsServerCommunicationInteractor
 	{
-		private const string ApiTokenHeader = ServerCommunication.ApiTokenHeader;
-		private const string GameSessionIdHeader = "GameSessionId";
-		private bool? m_IsConnected = null;
+		private const string API_TOKEN_HEADER = ServerCommunication.ApiTokenHeader;
+		private const string GAME_SESSION_ID_HEADER = "GameSessionId";
+		private bool? m_isConnected = null;
 
-		private readonly int m_TeamId;
-		private readonly int m_UserId;
-		private double m_LastUpdateTimestamp = 0;
-		private readonly IWebsocketClient m_Client;
+		private readonly int m_teamId;
+		private readonly int m_userId;
+		private double m_lastUpdateTimestamp = 0;
+		private readonly IWebsocketClient m_client;
 
-		private BatchRequestSuccessCallbacks m_BatchRequestSuccessCallbacks = new BatchRequestSuccessCallbacks();
-		private BatchRequestFailureCallbacks m_BatchRequestFailureCallbacks = new BatchRequestFailureCallbacks();
+		private BatchRequestSuccessCallbacks m_batchRequestSuccessCallbacks = new BatchRequestSuccessCallbacks();
+		private BatchRequestFailureCallbacks m_batchRequestFailureCallbacks = new BatchRequestFailureCallbacks();
 
-		private Queue<BatchRequestResultAndSuccessCallback> m_BatchRequestResultAndSuccessCallbackQueue =
+		private Queue<BatchRequestResultAndSuccessCallback> m_batchRequestResultAndSuccessCallbackQueue =
 			new Queue<BatchRequestResultAndSuccessCallback>();
-		private Queue<BatchRequestResultAndFailureCallback> m_BatchRequestResultAndFailureCallbackQueue =
+		private Queue<BatchRequestResultAndFailureCallback> m_batchRequestResultAndFailureCallbackQueue =
 			new Queue<BatchRequestResultAndFailureCallback>();
 
-		private class UpdateRequest : ServerCommunication.Request<UpdateObject>
+		private class UpdateRequest : Request<UpdateObject>
 		{
-			public UpdateRequest(string url, Action<UpdateObject> successCallback) :
-				base(url, successCallback, HandleUpdateFailCallback, 1)
+			public UpdateRequest(string a_url, Action<UpdateObject> a_successCallback) :
+				base(a_url, a_successCallback, HandleUpdateFailCallback, 1)
 			{
 			}
 
-			public override void CreateRequest(Dictionary<string, string> defaultHeaders)
+			public override void CreateRequest(Dictionary<string, string> a_defaultHeaders)
 			{
 			}
 
-			private static void HandleUpdateFailCallback(ServerCommunication.ARequest request, string message)
+			private static void HandleUpdateFailCallback(ARequest a_request, string a_message)
 			{
 			}
 		}
 
+		[SuppressMessage("ReSharper", "InconsistentNaming")] // need to match json
 		private class BatchRequestResultHeaderData
 		{
-			public int batch_id;
+			public Guid batch_guid;
 		}
 
-		public WsServerCommunication(int gameSessionId, int teamId, int userId,
-			Action<UpdateObject> updateSuccessCallback)
+		public WsServerCommunication(int a_gameSessionId, int a_teamId, int a_userId,
+			Action<UpdateObject> a_updateSuccessCallback)
 		{
-			this.m_TeamId = teamId;
-			this.m_UserId = userId;
+			m_teamId = a_teamId;
+			m_userId = a_userId;
 
 			var factory = new System.Func<ClientWebSocket>(() => {
 				var client = new ClientWebSocket {
@@ -76,39 +78,39 @@ namespace MSP2050.Scripts
 						KeepAliveInterval = TimeSpan.FromSeconds(5)
 					}
 				};
-				client.Options.SetRequestHeader(ApiTokenHeader, ServerCommunication.GetApiAccessToken());
-				client.Options.SetRequestHeader(GameSessionIdHeader, gameSessionId.ToString());
+				client.Options.SetRequestHeader(API_TOKEN_HEADER, ServerCommunication.Instance.GetApiAccessToken());
+				client.Options.SetRequestHeader(GAME_SESSION_ID_HEADER, a_gameSessionId.ToString());
 				return client;
 			});
 
 			Debug.Log(Server.WsServerUri);
-			m_Client = new WebsocketClient(Server.WsServerUri, factory);
-			m_Client.ErrorReconnectTimeout = TimeSpan.FromSeconds(5);
-			m_Client.DisconnectionHappened.Subscribe(x => {
-				m_IsConnected = false;
+			m_client = new WebsocketClient(Server.WsServerUri, factory);
+			m_client.ErrorReconnectTimeout = TimeSpan.FromSeconds(5);
+			m_client.DisconnectionHappened.Subscribe(a_x => {
+				m_isConnected = false;
 			});
-			m_Client.ReconnectionHappened.Subscribe(reconnectionInfo => {
-				if (!m_Client.IsStarted)
+			m_client.ReconnectionHappened.Subscribe(a_reconnectionInfo => {
+				if (!m_client.IsStarted)
 				{
 					return;
 				}
 				SendStartingData();
-				m_IsConnected = true;
+				m_isConnected = true;
 			});
-			m_Client.MessageReceived.Subscribe(responseMessage => {
+			m_client.MessageReceived.Subscribe(a_responseMessage => {
 				MemoryTraceWriter traceWriter = new MemoryTraceWriter();
 				traceWriter.LevelFilter = System.Diagnostics.TraceLevel.Warning;
 				bool processPayload = false;
-				ServerCommunication.RequestResult result = null;
+				RequestResult result = null;
 				try
 				{
-					result = JsonConvert.DeserializeObject<ServerCommunication.RequestResult>(
-						responseMessage.ToString(), new JsonSerializerSettings {
+					result = JsonConvert.DeserializeObject<RequestResult>(
+						a_responseMessage.ToString(), new JsonSerializerSettings {
 							TraceWriter = traceWriter,
-							Error = (sender, errorArgs) => {
-								Debug.LogError("Unable to deserialize: '" + responseMessage.ToString() + "'");
-								Util.HandleDeserializationError(sender, errorArgs);
-								Debug.LogError("Deserialization error: " + errorArgs.ErrorContext.Error);
+							Error = (a_sender, a_errorArgs) => {
+								Debug.LogError("Unable to deserialize: '" + a_responseMessage.ToString() + "'");
+								Util.HandleDeserializationError(a_sender, a_errorArgs);
+								Debug.LogError("Deserialization error: " + a_errorArgs.ErrorContext.Error);
 
 							},
 							Converters = new List<JsonConverter> {new JsonConverterBinaryBool()}
@@ -119,13 +121,13 @@ namespace MSP2050.Scripts
 					Debug.LogError(
 						$"Error deserializing message from request to url: {Server.WsServerUri.AbsoluteUri}\nError message: {e.Message}");
 				}
-				ProcessPayload(result, updateSuccessCallback);
+				ProcessPayload(result, a_updateSuccessCallback);
 			});
 		}
 
 		public bool? IsConnected()
 		{
-			return m_IsConnected;
+			return m_isConnected;
 		}
 
 		public void Update()
@@ -135,133 +137,133 @@ namespace MSP2050.Scripts
 
 		private void ProcessBatchRequests()
 		{
-			while (m_BatchRequestResultAndSuccessCallbackQueue.Count > 0)
+			while (m_batchRequestResultAndSuccessCallbackQueue.Count > 0)
 			{
-				BatchRequestResultAndSuccessCallback pair = m_BatchRequestResultAndSuccessCallbackQueue.Dequeue();
+				BatchRequestResultAndSuccessCallback pair = m_batchRequestResultAndSuccessCallbackQueue.Dequeue();
 				pair.Value.Invoke(pair.Key);
 			}
-			while (m_BatchRequestResultAndFailureCallbackQueue.Count > 0)
+			while (m_batchRequestResultAndFailureCallbackQueue.Count > 0)
 			{
-				BatchRequestResultAndFailureCallback pair = m_BatchRequestResultAndFailureCallbackQueue.Dequeue();
+				BatchRequestResultAndFailureCallback pair = m_batchRequestResultAndFailureCallbackQueue.Dequeue();
 				pair.Value.Invoke(pair.Key);
 			}
 		}
 
-		public void RegisterBatchRequestCallbacks(int batchId, Action<BatchExecutionResult> successCallback,
-			Action<string> failureCallback)
+		public void RegisterBatchRequestCallbacks(Guid a_batchGuid, Action<BatchExecutionResult> a_successCallback,
+			Action<string> a_failureCallback)
 		{
-			UnregisterBatchRequestCallbacks(batchId);
-			m_BatchRequestSuccessCallbacks.Add(batchId, successCallback);
-			m_BatchRequestFailureCallbacks.Add(batchId, failureCallback);
+			UnregisterBatchRequestCallbacks(a_batchGuid);
+			m_batchRequestSuccessCallbacks.Add(a_batchGuid, a_successCallback);
+			m_batchRequestFailureCallbacks.Add(a_batchGuid, a_failureCallback);
 		}
 
-		public void UnregisterBatchRequestCallbacks(int batchId)
+		public void UnregisterBatchRequestCallbacks(Guid a_batchGuid)
 		{
-			if (m_BatchRequestSuccessCallbacks.ContainsKey(batchId))
+			if (m_batchRequestSuccessCallbacks.ContainsKey(a_batchGuid))
 			{
-				m_BatchRequestSuccessCallbacks.Remove(batchId);
+				m_batchRequestSuccessCallbacks.Remove(a_batchGuid);
 			}
-			if (m_BatchRequestFailureCallbacks.ContainsKey(batchId))
+			if (m_batchRequestFailureCallbacks.ContainsKey(a_batchGuid))
 			{
-				m_BatchRequestFailureCallbacks.Remove(batchId);
+				m_batchRequestFailureCallbacks.Remove(a_batchGuid);
 			}
 		}
 
-		private void ProcessPayload(ServerCommunication.RequestResult result,
-			Action<UpdateObject> updateSuccessCallback)
+		private void ProcessPayload(RequestResult a_result,
+			Action<UpdateObject> a_updateSuccessCallback)
 		{
-			switch (result.header_type)
+			switch (a_result.header_type)
 			{
 				case "Game/Latest":
-					ProcessGameLatestPayload(result, updateSuccessCallback);
+					ProcessGameLatestPayload(a_result, a_updateSuccessCallback);
 					break;
 				case "Batch/ExecuteBatch":
-					ProcessBatchExecuteBatchPayload(result);
+					ProcessBatchExecuteBatchPayload(a_result);
 					break;
 				default:
 					throw new NotImplementedException();
 			}
 		}
 
-		private void ProcessBatchExecuteBatchPayload(ServerCommunication.RequestResult result)
+		private void ProcessBatchExecuteBatchPayload(RequestResult a_result)
 		{
 			JsonSerializer serializer = new JsonSerializer();
 			serializer.Converters.Add(new JsonConverterBinaryBool());
 			BatchRequestResultHeaderData headerData =
-				result.header_data.ToObject<BatchRequestResultHeaderData>(serializer);
-			if (!result.success)
+				a_result.header_data.ToObject<BatchRequestResultHeaderData>(serializer);
+			if (!a_result.success)
 			{
 				BatchRequestResultAndFailureCallback pair =
-					new BatchRequestResultAndFailureCallback(result.message,
-						m_BatchRequestFailureCallbacks[headerData.batch_id]);
-				m_BatchRequestResultAndFailureCallbackQueue.Enqueue(pair);
+					new BatchRequestResultAndFailureCallback(a_result.message,
+						m_batchRequestFailureCallbacks[headerData.batch_guid]);
+				m_batchRequestResultAndFailureCallbackQueue.Enqueue(pair);
 				return;
 			}
 
 			// new scope
 			{
-				BatchExecutionResult batchExecutionResult = result.payload.ToObject<BatchExecutionResult>(serializer);
+				BatchExecutionResult batchExecutionResult = a_result.payload.ToObject<BatchExecutionResult>(serializer);
 				BatchRequestResultAndSuccessCallback pair =
 					new BatchRequestResultAndSuccessCallback(batchExecutionResult,
-						m_BatchRequestSuccessCallbacks[headerData.batch_id]);
-				m_BatchRequestResultAndSuccessCallbackQueue.Enqueue(pair);
+						m_batchRequestSuccessCallbacks[headerData.batch_guid]);
+				m_batchRequestResultAndSuccessCallbackQueue.Enqueue(pair);
 			}
 
-			UnregisterBatchRequestCallbacks(headerData.batch_id);
+			UnregisterBatchRequestCallbacks(headerData.batch_guid);
 		}
 
-		private void ProcessGameLatestPayload(ServerCommunication.RequestResult result,
-			Action<UpdateObject> updateSuccessCallback)
+		private void ProcessGameLatestPayload(RequestResult a_result,
+			Action<UpdateObject> a_updateSuccessCallback)
 		{
-			if (!result.success)
+			if (!a_result.success)
 			{
 				return;
 			}
 
-			UpdateRequest request = new UpdateRequest(Server.Url, updateSuccessCallback);
+			UpdateRequest request = new UpdateRequest(Server.Url, a_updateSuccessCallback);
 			try
 			{
 				//Parse payload to expected type
-				UpdateObject updateObject = request.ToObject(result.payload);
+				UpdateObject updateObject = request.ToObject(a_result.payload);
 				// there is mismatch between the expected update time and given by the server
-				if (Math.Abs(updateObject.prev_update_time - m_LastUpdateTimestamp) > Double.Epsilon)
+				if (Math.Abs(updateObject.prev_update_time - m_lastUpdateTimestamp) > Double.Epsilon)
 				{
 					SendStartingData(); // re-sync with server
 					return;
 				}
 				// last update time matches, update it to the new one given by the server, continue processing
-				Debug.Log("got update, prev: " + m_LastUpdateTimestamp + ", new: " + updateObject.update_time);
-				m_LastUpdateTimestamp = updateObject.update_time;
+				Debug.Log("got update, prev: " + m_lastUpdateTimestamp + ", new: " + updateObject.update_time);
+				m_lastUpdateTimestamp = updateObject.update_time;
 			}
 			catch (System.Exception e)
 			{
 				Debug.LogError("Exception in ProcessGameLatestPayload: " + e.Message + "\n" + e.StackTrace);
-				Debug.LogError("update payload: " + result.payload);
+				Debug.LogError("update payload: " + a_result.payload);
 				// do not update lastUpdateTimestamp and do not process payload
 				return;
 			}
-			Debug.Log(result.payload.ToString().Substring(0, 80));
-			request.ProcessPayload(result.payload);
+			Debug.Log(a_result.payload.ToString().Substring(0, 80));
+			request.ProcessPayload(a_result.payload);
 		}
 
 		public void Stop()
 		{
-			m_Client.Stop(WebSocketCloseStatus.NormalClosure, "Websocket connection closed");
-			m_Client.IsReconnectionEnabled = false;
+			m_client.Stop(WebSocketCloseStatus.NormalClosure, "Websocket connection closed");
+			m_client.IsReconnectionEnabled = false;
 		}
 
 		public void Start()
 		{
-			m_Client.Start();
+			m_client.Start();
 		}
 
 		private void SendStartingData()
 		{
 			JObject obj = new JObject();
-			obj.Add("team_id", m_TeamId);
-			obj.Add("user", m_UserId);
-			obj.Add("last_update_time", m_LastUpdateTimestamp);
-			m_Client.Send(obj.ToString());
+			obj.Add("team_id", m_teamId);
+			obj.Add("user", m_userId);
+			obj.Add("last_update_time", m_lastUpdateTimestamp);
+			m_client.Send(obj.ToString());
 		}
 	}
 }

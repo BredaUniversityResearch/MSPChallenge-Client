@@ -4,70 +4,69 @@ namespace MSP2050.Scripts
 {
 	public class ZoomToAreaState : FSMState
 	{
-		FSM.CursorType previousCursorType;
-		MapScaleToolButton stateToggle;
+		private FSM.CursorType m_previousCursorType;
+		private CustomToggle m_stateToggle;
 
-		public ZoomToAreaState(FSM fsm, MapScaleToolButton mapScaleToolButton) : base(fsm)
+		public ZoomToAreaState(FSM a_fsm, CustomToggle a_mapScaleToolButton) : base(a_fsm)
 		{
-			this.stateToggle = mapScaleToolButton;
+			m_stateToggle = a_mapScaleToolButton;
 		}
 
-		public override void EnterState(Vector3 currentMousePosition)
+		public override void EnterState(Vector3 a_currentMousePosition)
 		{
-			base.EnterState(currentMousePosition);
+			base.EnterState(a_currentMousePosition);
 
 			//Cache previous cursor & Set cursor
-			previousCursorType = fsm.CurrentCursorType;
-			fsm.SetCursor(FSM.CursorType.ZoomToArea);
-			stateToggle.SetSelected(true);
-		}
+			m_previousCursorType = m_fsm.CurrentCursorType;
+			m_fsm.SetCursor(FSM.CursorType.ZoomToArea);
+			m_stateToggle.isOn = true;
+        }
 
-		public override void ExitState(Vector3 currentMousePosition)
+		public override void ExitState(Vector3 a_currentMousePosition)
 		{
-			base.ExitState(currentMousePosition);
+			base.ExitState(a_currentMousePosition);
 			BoxSelect.HideBoxSelection();
-			fsm.SetCursor(previousCursorType);
-			stateToggle.SetSelected(false);
+			m_fsm.SetCursor(m_previousCursorType);
+			m_stateToggle.isOn = false;
 		}
 
-		public override void StartedDragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		public override void StartedDragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			BoxSelect.DrawBoxSelection(dragStartPosition, currentPosition);
+			BoxSelect.DrawBoxSelection(a_dragStartPosition, a_currentPosition);
 		}
 
-		public override void Dragging(Vector3 dragStartPosition, Vector3 currentPosition)
+		public override void Dragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
 		{
-			BoxSelect.DrawBoxSelection(dragStartPosition, currentPosition);
+			BoxSelect.DrawBoxSelection(a_dragStartPosition, a_currentPosition);
 		}
 
-		public override void StoppedDragging(Vector3 dragStartPosition, Vector3 dragFinalPosition)
+		public override void StoppedDragging(Vector3 a_dragStartPosition, Vector3 a_dragFinalPosition)
 		{
 			float xmin, width, ymin, height;
-			if (dragStartPosition.x < dragFinalPosition.x)
+			if (a_dragStartPosition.x < a_dragFinalPosition.x)
 			{
-				xmin = dragStartPosition.x;
-				width = Mathf.Max(1f, dragFinalPosition.x - dragStartPosition.x);
+				xmin = a_dragStartPosition.x;
+				width = Mathf.Max(1f, a_dragFinalPosition.x - a_dragStartPosition.x);
 			}
 			else
 			{
-				xmin = dragFinalPosition.x;
-				width = Mathf.Max(1f, dragStartPosition.x - dragFinalPosition.x);
+				xmin = a_dragFinalPosition.x;
+				width = Mathf.Max(1f, a_dragStartPosition.x - a_dragFinalPosition.x);
 			}
-			if (dragStartPosition.y < dragFinalPosition.y)
+			if (a_dragStartPosition.y < a_dragFinalPosition.y)
 			{
-				ymin = dragStartPosition.y;
-				height = Mathf.Max(1f, dragFinalPosition.y - dragStartPosition.y);
+				ymin = a_dragStartPosition.y;
+				height = Mathf.Max(1f, a_dragFinalPosition.y - a_dragStartPosition.y);
 			}
 			else
 			{
-				ymin = dragFinalPosition.y;
-				height = Mathf.Max(1f, dragStartPosition.y - dragFinalPosition.y);
+				ymin = a_dragFinalPosition.y;
+				height = Mathf.Max(1f, a_dragStartPosition.y - a_dragFinalPosition.y);
 			}
 
 			CameraManager.Instance.ZoomToBounds(new Rect(xmin, ymin, width, height), 1f);
-			fsm.SetInterruptState(null);
+			m_fsm.SetInterruptState(null);
 		}
 
 	}
 }
-

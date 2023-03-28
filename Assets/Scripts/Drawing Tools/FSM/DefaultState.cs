@@ -5,114 +5,83 @@ namespace MSP2050.Scripts
 {
 	public class DefaultState : FSMState
 	{
-		private Entity currentHover = null;
+		private Entity m_currentHover = null;
 
-		public DefaultState(FSM fsm) : base(fsm)
+		public DefaultState(FSM a_fsm) : base(a_fsm)
 		{
 		}
 
-		public override void MouseMoved(Vector3 previousPosition, Vector3 currentPosition, bool cursorIsOverUI)
+		public override void MouseMoved(Vector3 a_previousPosition, Vector3 a_currentPosition, bool a_cursorIsOverUI)
 		{
-			List<AbstractLayer> visibleLayers = LayerManager.GetVisibleLayersSortedByDepth();
+			List<AbstractLayer> visibleLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth();
 
 			Entity hover = null;
-			if (!cursorIsOverUI)
+			if (!a_cursorIsOverUI)
 			{
 				foreach (AbstractLayer layer in visibleLayers)
 				{
-					if (!layer.Selectable)
+					if (!layer.m_selectable)
 					{
 						continue;
 					}
 
-					Entity layerHover = layer.GetEntityAt(currentPosition);
-					if (layerHover != null)
-					{
-						hover = layerHover;
-						break;
-					}
+					Entity layerHover = layer.GetEntityAt(a_currentPosition);
+					if (layerHover == null)
+						continue;
+					hover = layerHover;
+					break;
 				}
 			}
 
-			if (hover != currentHover)
+			if (hover == m_currentHover)
+				return;
+			if (m_currentHover != null)
 			{
-				if (currentHover != null)
-				{
-					HoveredSubEntity(currentHover.GetSubEntity(0), false);
+				HoveredSubEntity(m_currentHover.GetSubEntity(0), false);
 
-				}
-
-				if (hover != null && hover.Layer.Selectable == true)
-				{
-					HoveredSubEntity(hover.GetSubEntity(0), true);
-				}
-
-				currentHover = hover;
 			}
+
+			if (hover != null && hover.Layer.m_selectable == true)
+			{
+				HoveredSubEntity(hover.GetSubEntity(0), true);
+			}
+
+			m_currentHover = hover;
 		}
 
-		public override void LeftClick(Vector3 worldPosition)
+		public override void LeftClick(Vector3 a_worldPosition)
 		{
-			List<AbstractLayer> loadedLayers = LayerManager.GetVisibleLayersSortedByDepth(); // change this back to loaded layers by depth, for the layerprobe
-			Vector3 windowPosition = Input.mousePosition;
-			windowPosition.y -= Screen.height;
-
+			List<AbstractLayer> loadedLayers = LayerManager.Instance.GetVisibleLayersSortedByDepth(); // change this back to loaded layers by depth, for the layerprobe
+			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
+			Vector3 windowPosition = new Vector3(Input.mousePosition.x / scale, (Input.mousePosition.y - Screen.height) / scale);
 
 			if (Input.GetKey(KeyCode.LeftAlt))
 			{
 				List<SubEntity> subEntities = new List<SubEntity>();
 				foreach (AbstractLayer layer in loadedLayers)
 				{
-					if (!layer.Selectable) { continue; }
+					if (!layer.m_selectable) { continue; }
 
-					foreach (SubEntity entity in layer.GetSubEntitiesAt(worldPosition))
+					foreach (SubEntity entity in layer.GetSubEntitiesAt(a_worldPosition))
 					{
-						if (entity.planState != SubEntityPlanState.NotShown)
+						if (entity.PlanState != SubEntityPlanState.NotShown)
 							subEntities.Add(entity);
 					}
 				}
 				if (subEntities.Count > 0)
-					UIManager.CreateLayerProbeWindow(subEntities, worldPosition, windowPosition);
+					InterfaceCanvas.Instance.layerProbeWindow.ShowLayerProbeWindow(subEntities, a_worldPosition, windowPosition);
 			}
-			else if (currentHover != null)
+			else if (m_currentHover != null)
 			{
-				UIManager.CreatePropertiesWindow(currentHover.GetSubEntity(0), worldPosition, windowPosition);
+				InterfaceCanvas.Instance.propertiesWindow.ShowPropertiesWindow(m_currentHover.GetSubEntity(0), a_worldPosition, windowPosition);
 			}
-		
-
-			//// This is if we dont want to be able to layer probe if no layers are visible at that position
-			//if (currentHover != null)
-			//{
-			//    List<Entity> entities = new List<Entity>();
-			//    List<Layer> loadedLayers = LayerManager.GetLoadedLayersSortedByDepth();
-
-			//    foreach (Layer layer in loadedLayers)
-			//    {
-			//        foreach (Entity entity in layer.GetEntitiesAt(position))
-			//        {
-			//            entities.Add(entity);
-			//        }
-			//    }
-
-			//    position = Input.mousePosition;
-			//    position.y -= Screen.height;
-
-			//    if (entities.Count > 1)
-			//    {
-			//        UIManager.CreateLayerProbeWindow(entities, position + Vector3.one);
-			//    }
-			//    else
-			//    {
-			//        UIManager.CreatePropertiesWindow(currentHover, position + Vector3.one);
-			//    }
-			//}
 		}
 
-		public override void ExitState(Vector3 currentMousePosition)
+		public override void ExitState(Vector3 a_currentMousePosition)
 		{
-			if (currentHover != null)
+			if (m_currentHover != null)
 			{
-				HoveredSubEntity(currentHover.GetSubEntity(0), true);           
+				HoveredSubEntity(m_currentHover.GetSubEntity(0), true);           
 			}
 		}
 	}

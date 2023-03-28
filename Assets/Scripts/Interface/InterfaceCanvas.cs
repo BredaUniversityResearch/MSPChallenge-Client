@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using ColourPalette;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using System;
 
 namespace MSP2050.Scripts
 {
@@ -12,8 +15,6 @@ namespace MSP2050.Scripts
 		{
 			get
 			{
-				//if (singleton == null)
-				//    singleton = (InterfaceCanvas)FindObjectOfType(typeof(InterfaceCanvas));
 				return singleton;
 			}
 		}
@@ -21,23 +22,13 @@ namespace MSP2050.Scripts
 		[HideInInspector]
 		public Canvas canvas;
 
-		[Header("Prefabs")]
-		[SerializeField]
-		private Transform genericWindowParent = null;
-		[SerializeField]
-		private GameObject genericWindowPrefab = null;
-
 		[Header("References")]
-		public List<GenericWindow> genericWindow = new List<GenericWindow>();
 		public TimeBar timeBar;
 		public MapScale mapScale;
-		public ToolBar toolBar;
-		public LayerPanel layerPanel;
-		public GenericWindow layerSelect;
+		public LayerInterface layerInterface;
 		public ActiveLayerWindow activeLayers;
 		public ActivePlanWindow activePlanWindow;
-		public PlanWizard planWizard;
-		public PlansMonitor plansMonitor;
+		public PlansList plansList;
 		public LoadingScreen loadingScreen;
 		public UnLoadingScreen unLoadingScreen;
 		public PropertiesWindow propertiesWindow;
@@ -46,6 +37,8 @@ namespace MSP2050.Scripts
 		public GameObject networkingBlocker;
 		public GenericWindow impactToolWindow;
 		public HEBGraph.HEBGraph ImpactToolGraph;
+		public NotificationWindow notificationWindow;
+		public GameObject mapToolsWindow;
 
 		[Header("Game Menu")]
 		public GameMenu gameMenu;
@@ -54,19 +47,19 @@ namespace MSP2050.Scripts
 		[Header("Menu Bar")]
 		public MenuBarLogo menuBarLogo;
 		public MenuBarToggle menuBarLayers;
-		public MenuBarToggle menuBarPlanWizard;
 		public MenuBarToggle menuBarObjectivesMonitor;
-		public MenuBarToggle menuBarPlansMonitor;
 		public MenuBarToggle menuBarImpactTool;
 		public MenuBarToggle menuBarActiveLayers;
 		public MenuBarToggle menuBarGameMenu;
+		public MenuBarToggle menuBarPlansList;
+		public MenuBarToggle menuBarCreatePlan;
+		public MenuBarToggle menuBarNotifications;
 
 		[Header("KPI")]
-		public KPIRoot KPIEcology;
+		public  KPIOtherValueArea KPIEcologyGroups;
 
 		[Header("Objectives")]
 		public ObjectivesMonitor objectivesMonitor;
-		public NewObjectiveWindow newObjectiveWindow;
 
 		[Header("LineMaterials")]
 		public Material[] lineMaterials;
@@ -75,16 +68,28 @@ namespace MSP2050.Scripts
 		[Header("Colours")]
 		public ColourAsset accentColour;
 		public ColourAsset regionColour;
-		public RegionSettingsAsset regionSettings;
+
+		private Dictionary<string, Button> buttonUIReferences = new Dictionary<string, Button>();
+		private Dictionary<string, Toggle> toggleUIReferences = new Dictionary<string, Toggle>();
+		private Dictionary<string, GameObject> genericUIReferences = new Dictionary<string, GameObject>();
+		private Dictionary<string, HashSet<GameObject>> tagUIReferences = new Dictionary<string, HashSet<GameObject>>();
+		public event Action<string, string[]> interactionEvent;
+		public event Action<string, GameObject> uiReferenceNameRegisteredEvent;
+		public event Action<string[], GameObject> uiReferenceTagsRegisteredEvent;
 
 		private void Awake()
 		{
 			singleton = this;
 		}
 
+		private void OnDestroy()
+		{
+			singleton = null;
+		}
+
 		void Start()
 		{
-			canvas.scaleFactor = GameSettings.UIScale;
+			canvas.scaleFactor = (GameSettings.Instance.UIScale + 1f) / 4f;
 			menuBarActiveLayers.toggle.isOn = true;
 			for (int i = 0; i < lineMaterials.Length; i++)
 			{
@@ -92,16 +97,11 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetRegionWithName(string name)
+		public void SetRegion(MspGlobalData globalData)
 		{
-			SetRegion(regionSettings.GetRegionInfo(name));
-		}
-
-		public void SetRegion(RegionInfo region)
-		{
-			menuBarLogo.SetRegionLogo(region);
-			gameMenu.SetRegion(region);
-			regionColour.SetValue(region.colour);
+			menuBarLogo.SetRegionLetter(globalData.edition_letter);
+			gameMenu.SetRegion(globalData);
+			regionColour.SetValue(globalData.edition_colour);
 		}
 
 		public void SetAccent(Color a_color)
@@ -110,153 +110,15 @@ namespace MSP2050.Scripts
 
 		}
 
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		public GenericWindow CreateGenericWindow () {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			return window;
+		public static void ShowNetworkingBlocker()
+		{
+			Instance.networkingBlocker.transform.SetAsLastSibling();
+			Instance.networkingBlocker.SetActive(true);
 		}
 
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="centered">Center the window?</param>
-		public GenericWindow CreateGenericWindow(bool centered, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			if (centered) {
-				window.CenterWindow();
-			}
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="title">The text in the title bar of the window</param>
-		public GenericWindow CreateGenericWindow(string title, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetTitle(title);
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="title">The text in the title bar of the window</param>
-		/// <param name="centered">Center the window?</param>
-		public GenericWindow CreateGenericWindow(string title, bool centered, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetTitle(title);
-
-			if (centered) {
-				window.CenterWindow();
-			}
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="width">The width of the window</param>
-		public GenericWindow CreateGenericWindow(float width, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetWidth(width);
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="centered">Center the window?</param>
-		/// <param name="width">The width of the window</param>
-		public GenericWindow CreateGenericWindow(bool centered, float width, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetWidth(width);
-
-			if (centered) {
-				window.CenterWindow();
-			}
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="title">The text in the title bar of the window</param>
-		/// <param name="width">The width of the window</param>
-		public GenericWindow CreateGenericWindow(string title, float width, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetTitle(title);
-			window.SetWidth(width);
-
-			return window;
-		}
-
-		/// <summary>
-		/// Create a generic window
-		/// </summary>
-		/// <param name="title">The text in the title bar of the window</param>
-		/// <param name="centered">Center the window?</param>
-		/// <param name="width">The width of the window</param>
-		public GenericWindow CreateGenericWindow(string title, bool centered, float width, bool isProperty = false) {
-
-			GenericWindow window = GenerateGenericWindow();
-
-			window.SetTitle(title);
-			window.SetWidth(width);
-
-			if (centered) {
-				window.CenterWindow();
-			}
-
-			return window;
-		}
-
-		/// <summary>
-		/// Generate window
-		/// </summary>
-		private GenericWindow GenerateGenericWindow() {
-			// Instantiate prefab
-			GameObject go = Instantiate(genericWindowPrefab);
-
-			// Store component
-			GenericWindow window = go.GetComponent<GenericWindow>();
-
-			// Add to list
-			genericWindow.Add(window);
-
-			// Assign parent
-			go.transform.SetParent(genericWindowParent, false);		
-
-			return window;
-		}
-
-		/// <summary>
-		/// Remove window from list and destroy the gameobject
-		/// </summary>
-		public void DestroyGenericWindow(GenericWindow window) {
-			genericWindow.Remove(window);
-			Destroy(window.gameObject);
+		public static void HideNetworkingBlocker()
+		{
+			Instance.networkingBlocker.SetActive(false);
 		}
 
 		public static void SetLineMaterialTiling(float tiling)
@@ -271,15 +133,102 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static void ShowNetworkingBlocker()
+		public void TriggerInteractionCallback(string name, string[] tags)
 		{
-			Instance.networkingBlocker.transform.SetAsLastSibling();
-			Instance.networkingBlocker.SetActive(true);
+			interactionEvent?.Invoke(name, tags);
 		}
 
-		public static void HideNetworkingBlocker()
+		public void RegisterUIReference(string name, Button button)
 		{
-			Instance.networkingBlocker.SetActive(false);
+			buttonUIReferences[name] = button;
+			uiReferenceNameRegisteredEvent?.Invoke(name, button.gameObject);
+		}
+
+		public void RegisterUIReference(string name, Toggle toggle)
+		{
+			toggleUIReferences[name] = toggle;
+			uiReferenceNameRegisteredEvent?.Invoke(name, toggle.gameObject);
+		}
+
+		public void RegisterUIReference(string name, GameObject ui)
+		{
+			genericUIReferences[name] = ui;
+			uiReferenceNameRegisteredEvent?.Invoke(name, ui.gameObject);
+		}
+
+		public void RegisterUITagsReference(string[] tags, GameObject ui)
+		{
+			foreach (string tag in tags)
+			{
+				if (tagUIReferences.TryGetValue(tag, out var list))
+					list.Add(ui);
+				else
+					tagUIReferences.Add(tag, new HashSet<GameObject>() { ui });
+			}
+			uiReferenceTagsRegisteredEvent?.Invoke(tags, ui.gameObject);
+		}
+
+		public void UnregisterUIReference(string name)
+		{
+			if (buttonUIReferences.ContainsKey(name))
+				buttonUIReferences.Remove(name);
+			else if (toggleUIReferences.ContainsKey(name))
+				toggleUIReferences.Remove(name);
+			else if (genericUIReferences.ContainsKey(name))
+				genericUIReferences.Remove(name);
+		}
+
+		public void UnregisterUITagsReference(string[] tags, GameObject ui)
+		{
+			foreach (string tag in tags)
+			{
+				if (tagUIReferences.TryGetValue(tag, out var list))
+				{
+					if (list.Count == 0)
+						tagUIReferences.Remove(tag);
+					else
+						list.Remove(ui);
+				}
+			}
+		}
+
+		public Button GetUIButton(string name)
+		{
+			if (buttonUIReferences.TryGetValue(name, out var result))
+				return result;
+			return null;
+		}
+
+		public Toggle GetUIToggle(string name)
+		{
+			if (toggleUIReferences.TryGetValue(name, out var result))
+				return result;
+			return null;
+		}
+
+		public GameObject GetUIObject(string name)
+		{
+			if (genericUIReferences.TryGetValue(name, out var result))
+				return result;
+			if (buttonUIReferences.TryGetValue(name, out var result1))
+				return result1.gameObject;
+			if (toggleUIReferences.TryGetValue(name, out var result2))
+				return result2.gameObject;
+			return null;
+		}
+
+		public GameObject GetUIGeneric(string name)
+		{
+			if (genericUIReferences.TryGetValue(name, out var result))
+				return result;
+			return null;
+		}
+
+		public HashSet<GameObject> GetUIWithTag(string tag)
+		{
+			if (tagUIReferences.TryGetValue(tag, out var result))
+				return result;
+			return null;
 		}
 	}
 }

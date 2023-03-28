@@ -10,7 +10,7 @@ namespace MSP2050.Scripts
 	{
 		public GenericWindow thisGenericWindow;
 
-		public Image logo;
+		public DynamicLogo logo;
 		public TextMeshProUGUI editionText;
 
 		public Button continueGame, options, credits, exit, tutorial, serverLogin;
@@ -27,7 +27,6 @@ namespace MSP2050.Scripts
 			continueGame.onClick.AddListener(delegate () { gameObject.SetActive(false); });
 			credits.onClick.AddListener(delegate () 
 			{
-				float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
 				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow("https://community.mspchallenge.info/wiki/Credits");
 				thisGenericWindow.Hide();
 			});
@@ -35,7 +34,7 @@ namespace MSP2050.Scripts
 			tutorial.onClick.AddListener(() => 
 			{
 				gameObject.SetActive(false);
-				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow("https://community.mspchallenge.info/wiki/Tutorial");
+				TutorialManager.Instance.StartTutorial(Resources.Load<TutorialData>("MainTutorialData"));
 			});
 			exit.onClick.AddListener(() => 
 			{
@@ -58,10 +57,10 @@ namespace MSP2050.Scripts
 			thisGenericWindow.DestroyModalWindow();
 		}
 
-		public void SetRegion(RegionInfo region)
+		public void SetRegion(MspGlobalData globalData)
 		{
-			logo.sprite = region.sprite;
-			editionText.text = region.editionPostFix;
+			logo.SetContent(globalData.edition_colour, globalData.edition_letter);
+			editionText.text = globalData.edition_name;
 		}
 	
 		public IEnumerator LateUpdatePosition()

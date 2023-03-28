@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(MapKey))]
+[CustomEditor(typeof(ActiveLayerEntityType))]
 public class MapKeyEditor : Editor
 {
 

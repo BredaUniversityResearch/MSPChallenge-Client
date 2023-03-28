@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -14,7 +15,8 @@ namespace MSP2050.Scripts
 		public readonly string unit;
 		public readonly Color graphColor;
 		public readonly int targetCountryId;
-		private readonly float?[] kpiValuesPerMonth;
+		private readonly Dictionary<int, float?> kpiValuesPerMonth;
+		private readonly int numberOfKpiMonths; // excl. the setup month
 
 		public event Action<KPIValue> OnValueUpdated;
 
@@ -27,68 +29,56 @@ namespace MSP2050.Scripts
 		public KPIValue(string owningCategory, int numberOfKpiMonths, string valueName, string valueUnit, Color valueGraphColor, string valueDisplayName, int targetCountryId)
 		{
 			owningCategoryName = owningCategory;
+			this.numberOfKpiMonths = numberOfKpiMonths;
 			name = valueName;
 			displayName = (!string.IsNullOrEmpty(valueDisplayName)) ? valueDisplayName : valueName;
 			unit = valueUnit;
 			graphColor = valueGraphColor;
 			this.targetCountryId = targetCountryId;
-			
-			kpiValuesPerMonth = new float?[numberOfKpiMonths];
-			MostRecentMonth = 0;
-		}
 
-		private void FillUpPrevNullValues(int monthId, float value)
-		{
-			float prevValue = value;
-			for (int m = 0; m < monthId; ++m)
+			kpiValuesPerMonth = new Dictionary<int, float?>(numberOfKpiMonths + 1);
+			kpiValuesPerMonth[-1] = null; // setup month
+			for (var n = 0; n < numberOfKpiMonths; n++)
 			{
-				if (kpiValuesPerMonth[m] == null)
-				{
-					kpiValuesPerMonth[m] = prevValue;
-				}
-				prevValue = kpiValuesPerMonth[m].Value;
+				kpiValuesPerMonth[n] = null;
 			}
+
+			MostRecentMonth = -1;
 		}
 
 		public void UpdateValue(int monthId, float value)
 		{
-			if (monthId < 0 || monthId >= kpiValuesPerMonth.Length)
+			if (!kpiValuesPerMonth.ContainsKey(monthId))
 			{
-				Debug.LogWarning("Received KPI value (" + name + ") for month " + monthId +
-					" which is out of bounds (0, " + kpiValuesPerMonth.Length + ") and has been discarded");
+				Debug.LogWarning("Received KPI value (" + name + ") for month " + monthId + " which is out of bounds (0, " + numberOfKpiMonths + ") and has been discarded");
 				return;
 			}
-			FillUpPrevNullValues(monthId, value);
 			kpiValuesPerMonth[monthId] = value;
 			if (monthId > MostRecentMonth)
 			{
 				MostRecentMonth = monthId;
 			}
+
 			if (OnValueUpdated != null)
 			{
 				OnValueUpdated(this);
 			}
 		}
 
-		public float GetKpiValueForMonth(int monthId)
+		public float? GetKpiValueForMonth(int monthId)
 		{
-			if (monthId < 0 || monthId > kpiValuesPerMonth.Length)
+			if (monthId > MostRecentMonth || !kpiValuesPerMonth.ContainsKey(monthId))
 			{
-				return -1.0f;
+				return null;
 			}
-			if (monthId > MostRecentMonth) {
-				monthId = MostRecentMonth;
-			}
-			if (null == kpiValuesPerMonth[monthId])
-			{
-				// default values were zero before...
-				//   so if no value is set, return 0, later should be corrected to the actual value
-				return 0.0f;
-			}
-			return kpiValuesPerMonth[monthId].Value;
+			//if (monthId > MostRecentMonth)
+			//{
+			//	return kpiValuesPerMonth[MostRecentMonth];
+			//}
+			return kpiValuesPerMonth[monthId];
 		}
 
-		public float GetKpiValueForMostRecentMonth()
+		public float? GetKpiValueForMostRecentMonth()
 		{
 			return GetKpiValueForMonth(MostRecentMonth);
 		}

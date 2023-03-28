@@ -10,7 +10,7 @@ namespace MSP2050.Scripts
 		{
 			shippingKPIs = new Dictionary<int, KPIValueCollectionShipping>();
 			AddKPIForCountry(0);
-			foreach (Team team in TeamManager.GetTeams())
+			foreach (Team team in SessionManager.Instance.GetTeams())
 			{
 				if (!team.IsManager)
 				{
@@ -32,7 +32,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void ProcessReceivedKPIData(EcologyKPIObject[] shippingData)
+		public void ProcessReceivedKPIData(KPIObject[] shippingData)
 		{
 			foreach (KeyValuePair<int, KPIValueCollectionShipping> kvp in shippingKPIs)
 			{

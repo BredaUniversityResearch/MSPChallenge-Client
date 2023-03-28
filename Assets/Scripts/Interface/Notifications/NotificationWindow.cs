@@ -14,31 +14,23 @@ namespace MSP2050.Scripts
 		[SerializeField]
 		private RectTransform notificationContainer = null;
 
-		[SerializeField]
-		private Animator animator = null;
-
-		[SerializeField]
-		private CustomButton headerButton = null;
-
-        [SerializeField]
-        private TextMeshProUGUI notificationAmount = null;
-
         private void Awake()
 		{
-            gameObject.SetActive(false);
-            PlayerNotifications.OnAddNotification += OnAddNewNotification;
+			gameObject.SetActive(false);
+			InterfaceCanvas.Instance.menuBarNotifications.toggle.isOn = false;
+			PlayerNotifications.OnAddNotification += OnAddNewNotification;
 			PlayerNotifications.OnRemoveNotification += OnRemoveNotification;
-
-			headerButton.onClick.AddListener(ToggleVisibility);
-
-			SetNotificationElementOpen(false);
 		}
 
 		private void OnDestroy()
 		{
 			PlayerNotifications.OnAddNotification -= OnAddNewNotification;
 			PlayerNotifications.OnRemoveNotification -= OnRemoveNotification;
-			headerButton.onClick.RemoveListener(ToggleVisibility);
+		}
+
+		private void OnDisable()
+		{
+			InterfaceCanvas.Instance.menuBarNotifications.toggle.isOn = false;
 		}
 
 		private void OnAddNewNotification(NotificationData data)
@@ -52,10 +44,7 @@ namespace MSP2050.Scripts
 			}
 
 			element.InitializeForData(data);
-			SetNotificationElementOpen(true);
-            gameObject.SetActive(true);
-            notificationAmount.text = notificationsByIdentifier.Count.ToString();
-
+			InterfaceCanvas.Instance.menuBarNotifications.toggle.isOn = true;
         }
 
 		private void OnRemoveNotification(string identifier)
@@ -65,30 +54,7 @@ namespace MSP2050.Scripts
 			{
 				notificationsByIdentifier.Remove(identifier);
 				Destroy(entry.gameObject);
-
-				if (notificationsByIdentifier.Count == 0)
-				{
-					SetNotificationElementOpen(false);
-                    gameObject.SetActive(false);
-				}
-                else
-                    notificationAmount.text = notificationsByIdentifier.Count.ToString();
             }
-		}
-
-		private void SetNotificationElementOpen(bool openState)
-		{
-			animator.SetBool("Open", openState);
-		}
-
-		private bool IsNotificationElementOpen()
-		{
-			return animator.GetBool("Open");
-		}
-
-		private void ToggleVisibility()
-		{
-			SetNotificationElementOpen(!IsNotificationElementOpen());
 		}
 	}
 }

@@ -6,9 +6,9 @@ namespace MSP2050.Scripts
 	{ 
 		public TextMeshProUGUI text;
 
-		public void SetRegionLogo(RegionInfo region)
+		public void SetRegionLetter(string letter)
 		{
-			text.text = region.letter;
+			text.text = letter;
 		}
 	}
 }

@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 			return new ShippingLineStringEntity(this, obj);
 		}
 
-		public override Entity CreateEntity(PlanLayer planLayer, List<EntityType> entityType)
+		protected override Entity CreateEntity(PlanLayer planLayer, List<EntityType> entityType)
 		{
 			return new ShippingLineStringEntity(this, planLayer, entityType);
 		}
@@ -32,22 +32,22 @@ namespace MSP2050.Scripts
             SubEntity result = null;
             float closestDistance = float.MaxValue;
 
-            float maxDistance = VisualizationUtil.GetSelectMaxDistance();
+            float maxDistance = VisualizationUtil.Instance.GetSelectMaxDistance();
             Rect positionBounds = new Rect(position - Vector2.one * maxDistance, Vector2.one * maxDistance * 2);
 
-            foreach (LineStringEntity entity in activeEntities)
+            foreach (LineStringEntity entity in m_activeEntities)
             {
                 List<LineStringSubEntity> subEntities = entity.GetSubEntities();
 				foreach (LineStringSubEntity subEntity in subEntities)
 				{
-					if (subEntity.planState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.BoundingBox))
+					if (subEntity.PlanState != SubEntityPlanState.NotShown && positionBounds.Overlaps(subEntity.m_boundingBox))
 					{
 						//This is not particularly performant, but I blame designers.
 						//Despite insistence on shipping lane width being visual only, it turned out not to be.....
 
 						float width = defaultWidth;
-						if (subEntity.Entity.DoesPropertyExist(ShippingLineStringEntity.SHIPPING_LANE_WIDTH_META_KEY))
-							width = Util.ParseToFloat(subEntity.Entity.GetMetaData(ShippingLineStringEntity.SHIPPING_LANE_WIDTH_META_KEY), defaultWidth);
+						if (subEntity.m_entity.DoesPropertyExist(ShippingLineStringEntity.SHIPPING_LANE_WIDTH_META_KEY))
+							width = Util.ParseToFloat(subEntity.m_entity.GetMetaData(ShippingLineStringEntity.SHIPPING_LANE_WIDTH_META_KEY), defaultWidth);
 						width *= 0.5f;
 						float dist = subEntity.DistanceToPoint(position) - width;
 						if (dist < 0)

@@ -5,77 +5,133 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public static class LayerManager
+	public class LayerManager : MonoBehaviour
 	{
-		public enum GeoType { polygon, line, point, raster }
+		public enum EGeoType { Polygon, Line, Point, Raster }
 
-		private static List<AbstractLayer> layers = new List<AbstractLayer>();
-		private static HashSet<AbstractLayer> loadedLayers = new HashSet<AbstractLayer>();
-		private static HashSet<AbstractLayer> visibleLayers = new HashSet<AbstractLayer>();
-		private static List<PointLayer> energyPointLayers = new List<PointLayer>();
-		private static HashSet<AbstractLayer> nonReferenceLayers; //Layers that are drawn as normal during edit mode
-
-		public static LineStringLayer energyCableLayerGreen;
-		public static LineStringLayer energyCableLayerGrey;
-		public static PolygonLayer EEZLayer;
-		public static List<AbstractLayer> energyLayers = new List<AbstractLayer>(); //Does not include sourcepolygonpoints
-		public static List<AbstractLayer> protectedAreaLayers = new List<AbstractLayer>();
-		public static Dictionary<int, int> sourceCountries = new Dictionary<int, int>();
-
-		public static Dictionary<int, SubEntity> energySubEntities;
-
-		private static Dictionary<string, List<string>> categorySubcategories = new Dictionary<string, List<string>>();
-		private static bool finishedImporting = false;
-
-		public static AbstractLayer highLightedLayer;
-
-		static LayerManager()
+		private static LayerManager Singleton;
+		public static LayerManager Instance
 		{
-			visibleLayers.Clear();
+			get
+			{
+				if (Singleton == null)
+					Singleton = FindObjectOfType<LayerManager>();
+				return Singleton;
+			}
 		}
 
-		public static void AddLayer(AbstractLayer layer)
+		[SerializeField] private List<Sprite> m_subcategoryIcons = null;
+		private Dictionary<string, Sprite> m_subcategoryIconDict;
+
+		private List<AbstractLayer> m_layers = new List<AbstractLayer>();
+		private HashSet<AbstractLayer> m_loadedLayers = new HashSet<AbstractLayer>();
+		private HashSet<AbstractLayer> m_visibleLayers = new HashSet<AbstractLayer>();
+		private HashSet<AbstractLayer> m_visibilityLockedLayers = new HashSet<AbstractLayer>();
+		private HashSet<AbstractLayer> m_nonReferenceLayers; //Layers that are drawn as normal during edit mode
+
+		public PolygonLayer m_eezLayer;
+		public List<AbstractLayer> m_protectedAreaLayers = new List<AbstractLayer>();
+		private Dictionary<string, List<AbstractLayer>> m_subcategoryToLayers = new Dictionary<string, List<AbstractLayer>>();
+
+		private Dictionary<string, List<string>> m_categorySubcategories = new Dictionary<string, List<string>>();
+		private bool m_finishedImporting = false;
+
+		public AbstractLayer m_highLightedLayer;
+
+		public delegate void OnLayerVisibilityChanged(AbstractLayer a_layer, bool a_visible);
+		public event OnLayerVisibilityChanged m_onLayerVisibilityChanged;
+		public event OnLayerVisibilityChanged m_onLayerVisibilityLockChanged;
+
+		[HideInInspector] public event Action<AbstractLayer> OnLayerLoaded;
+		[HideInInspector] public event Action<Plan> OnVisibleLayersUpdatedToPlan;
+		[HideInInspector] public event Action OnVisibleLayersUpdatedToBase;
+		[HideInInspector] public event Action<int> OnVisibleLayersUpdatedToTime;
+
+		private void Start()
 		{
-			finishedImporting = false;
-			while (layer.ID >= layers.Count)
-			{
-				layers.Add(null);
-			}
-			layers[layer.ID] = layer;
-			if (layer.IsEnergyLineLayer())
-			{
-				if (layer.greenEnergy)
-					energyCableLayerGreen = layer as LineStringLayer;
-				else
-					energyCableLayerGrey = layer as LineStringLayer;
-			}
-			if (layer.editingType != AbstractLayer.EditingType.Normal && layer.editingType != AbstractLayer.EditingType.SourcePolygonPoint)
-				energyLayers.Add(layer);
-			if (layer.FileName == Main.MspGlobalData.countries)
-				EEZLayer = layer as PolygonLayer;
+			if (Singleton != null && Singleton != this)
+				Destroy(this);
+			else
+				Singleton = this;
+			SetSubcategoryIcons();
 		}
 
-		public static void FinishedImportingLayers()
+		private void OnDestroy()
+		{
+			Singleton = null;
+		}
+
+		public void AddLayer(AbstractLayer a_layer)
+		{
+			m_finishedImporting = false;
+			while (a_layer.m_id >= m_layers.Count)
+			{
+				m_layers.Add(null);
+			}
+			m_layers[a_layer.m_id] = a_layer;
+
+			if (a_layer.FileName == SessionManager.Instance.MspGlobalData.countries)
+				m_eezLayer = a_layer as PolygonLayer;
+			if(m_subcategoryToLayers.TryGetValue(a_layer.m_subCategory, out var entry))
+			{
+				entry.Add(a_layer);
+			}
+			else
+			{
+				m_subcategoryToLayers.Add(a_layer.m_subCategory, new List<AbstractLayer>() { a_layer });
+			}
+		}
+
+		public void FinishedImportingLayers()
 		{
 			PopulateAllCountryIDs();
-			finishedImporting = true;
+			m_finishedImporting = true;
 			Debug.Log("All layers imported (" + GetValidLayerCount() + ")");
+
+			foreach(var kvp in m_subcategoryToLayers)
+			{
+				kvp.Value.Sort((a_x, a_y) => a_x.ShortName.CompareTo(a_y.ShortName));
+			}
+		}
+
+		private void SetSubcategoryIcons()
+		{
+			m_subcategoryIconDict = new Dictionary<string, Sprite>();
+
+			if (m_subcategoryIcons != null)
+			{
+				for (int i = 0; i < m_subcategoryIcons.Count; i++)
+				{
+					m_subcategoryIconDict.Add(m_subcategoryIcons[i].name, m_subcategoryIcons[i]);
+				}
+			}
+			else
+			{
+				Debug.LogError("Icons for layer categories are not assigned on " + gameObject.name);
+			}
+		}
+		public Sprite GetSubcategoryIcon(string a_subcategory)
+		{
+			if (m_subcategoryIconDict.TryGetValue(a_subcategory, out var result))
+			{
+				return result;
+			}
+			return null;
 		}
 
 
-		//Todo EEZLayers should be replaced by Teritorial waters, but this requires extra steps
-		public static void PopulateAllCountryIDs()
+		public void PopulateAllCountryIDs()
 		{
-			if (EEZLayer == null)
+			if (m_eezLayer == null)
 				return;
 
 			//Set the EEZs own country id
-			foreach (Entity ent in EEZLayer.Entities)
+			foreach (Entity ent in m_eezLayer.Entities)
 				ent.Country = ent.EntityTypes[0].value;
 
-			foreach (AbstractLayer tLayer in loadedLayers)
+			foreach (AbstractLayer tLayer in m_loadedLayers)
 			{
-				if (tLayer.ID == EEZLayer.ID)
+				if (tLayer.m_id == m_eezLayer.m_id)
 					continue;
 
 				if (tLayer is PointLayer)
@@ -84,14 +140,14 @@ namespace MSP2050.Scripts
 					{
 						if (tPointEntity.Country > 0)
 							continue;
-						foreach (PolygonEntity tCountryEntity in EEZLayer.Entities)
+						foreach (PolygonEntity tCountryEntity in m_eezLayer.Entities)
 						{
-							if (Util.PolygonPointIntersection(tCountryEntity.GetPolygonSubEntity(), tPointEntity.GetPointSubEntity()))
-							{
-								//the .value from EntityType in EEZLayers is the ID
-								tPointEntity.Country = tCountryEntity.EntityTypes[0].value;
-								break; //Early out skip to the next PointEntity
-							}
+							if (!Util.PolygonPointIntersection(tCountryEntity.GetPolygonSubEntity(),
+								tPointEntity.GetPointSubEntity()))
+								continue;
+							//the .value from EntityType in EEZLayers is the ID
+							tPointEntity.Country = tCountryEntity.EntityTypes[0].value;
+							break; //Early out skip to the next PointEntity
 						}
 					}
 					continue;
@@ -102,14 +158,14 @@ namespace MSP2050.Scripts
 					{
 						if (tPolyEntity.Country > 0)
 							continue;
-						foreach (PolygonEntity tCountryEntity in EEZLayer.Entities)
+						foreach (PolygonEntity tCountryEntity in m_eezLayer.Entities)
 						{
-							if (Util.PolygonPolygonIntersection(tCountryEntity.GetPolygonSubEntity(), tPolyEntity.GetPolygonSubEntity()))
-							{
-								//the .value from EntityType in EEZLayers is the ID
-								tPolyEntity.Country = tCountryEntity.EntityTypes[0].value;
-								break; //Early out skip to the next PolyEntity
-							}
+							if (!Util.PolygonPolygonIntersection(tCountryEntity.GetPolygonSubEntity(),
+								tPolyEntity.GetPolygonSubEntity()))
+								continue;
+							//the .value from EntityType in EEZLayers is the ID
+							tPolyEntity.Country = tCountryEntity.EntityTypes[0].value;
+							break; //Early out skip to the next PolyEntity
 						}
 					}
 					continue;
@@ -120,36 +176,29 @@ namespace MSP2050.Scripts
 					{
 						if (tLineStringEntity.Country > 0)
 							continue;
-						foreach (PolygonEntity tCountryEntity in EEZLayer.Entities)
+						foreach (PolygonEntity tCountryEntity in m_eezLayer.Entities)
 						{
-							if (Util.PolygonLineIntersection(tCountryEntity.GetPolygonSubEntity(), tLineStringEntity.GetLineStringSubEntity()))
-							{
-								//the .value from EntityType in EEZLayers is the ID
-								tLineStringEntity.Country = tCountryEntity.EntityTypes[0].value;
-								break; //Early out skip to the next LineStringEntity
-							}
+							if (!Util.PolygonLineIntersection(tCountryEntity.GetPolygonSubEntity(),
+								tLineStringEntity.GetLineStringSubEntity()))
+								continue;
+							//the .value from EntityType in EEZLayers is the ID
+							tLineStringEntity.Country = tCountryEntity.EntityTypes[0].value;
+							break; //Early out skip to the next LineStringEntity
 						}
 					}
-					continue;
 				}
 			}
 		}
 
-		public static bool AllLayersImported()
+		public int GetLayerCount()
 		{
-			PopulateAllCountryIDs();
-			return finishedImporting;
+			return m_layers.Count;
 		}
 
-		public static int GetLayerCount()
-		{
-			return layers.Count;
-		}
-
-		public static int GetValidLayerCount()
+		private int GetValidLayerCount()
 		{
 			int result = 0;
-			foreach (AbstractLayer layer in layers)
+			foreach (AbstractLayer layer in m_layers)
 			{
 				if (layer != null)
 				{
@@ -159,35 +208,19 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static AbstractLayer GetLayerByID(int layerID)
+		public AbstractLayer GetLayerByID(int a_layerID)
 		{
-			return layers[layerID];
+			return m_layers[a_layerID];
 		}
 
-		public static List<AbstractLayer> GetLoadedLayers(string category, string subcategory)
+		public List<AbstractLayer> GetLoadedLayers(string a_category, string a_subcategory)
 		{
 			List<AbstractLayer> result = new List<AbstractLayer>();
-			foreach (AbstractLayer layer in layers)
+			foreach (AbstractLayer layer in m_layers)
 			{
-				if (loadedLayers.Contains(layer))
-				{
-					if (layer.Category == category && layer.SubCategory == subcategory)
-					{
-						result.Add(layer);
-					}
-				}
-			}
-
-			return result;
-		}
-
-
-		public static List<AbstractLayer> GetLoadedLayers()
-		{
-			List<AbstractLayer> result = new List<AbstractLayer>();
-			foreach (AbstractLayer layer in layers)
-			{
-				if (loadedLayers.Contains(layer))
+				if (!m_loadedLayers.Contains(layer))
+					continue;
+				if (layer.m_category == a_category && layer.m_subCategory == a_subcategory)
 				{
 					result.Add(layer);
 				}
@@ -196,11 +229,26 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static AbstractLayer FindFirstLayerContainingName(string name)
+
+		public List<AbstractLayer> GetLoadedLayers()
 		{
-			foreach (AbstractLayer layer in loadedLayers)
+			List<AbstractLayer> result = new List<AbstractLayer>();
+			foreach (AbstractLayer layer in m_layers)
 			{
-				if (layer.FileName.IndexOf(name, StringComparison.InvariantCultureIgnoreCase) != -1)
+				if (m_loadedLayers.Contains(layer))
+				{
+					result.Add(layer);
+				}
+			}
+
+			return result;
+		}
+
+		public AbstractLayer FindFirstLayerContainingName(string a_name)
+		{
+			foreach (AbstractLayer layer in m_loadedLayers)
+			{
+				if (layer.FileName.IndexOf(a_name, StringComparison.InvariantCultureIgnoreCase) != -1)
 				{
 					return layer;
 				}
@@ -208,11 +256,11 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public static AbstractLayer FindLayerByFilename(string name)
+		public AbstractLayer FindLayerByFilename(string a_name)
 		{
-			foreach (AbstractLayer layer in loadedLayers)
+			foreach (AbstractLayer layer in m_loadedLayers)
 			{
-				if (layer.FileName.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+				if (layer.FileName.Equals(a_name, StringComparison.InvariantCultureIgnoreCase))
 				{
 					return layer;
 				}
@@ -220,11 +268,11 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public static AbstractLayer GetLoadedLayer(int ID)
+		public AbstractLayer GetLoadedLayer(int a_id)
 		{
-			AbstractLayer layer = GetLayerByID(ID);
+			AbstractLayer layer = GetLayerByID(a_id);
 
-			if (loadedLayers.Contains(layer))
+			if (m_loadedLayers.Contains(layer))
 			{
 				return layer;
 			}
@@ -232,10 +280,10 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public static List<AbstractLayer> GetAllValidLayers()
+		public List<AbstractLayer> GetAllLayers()
 		{
 			List<AbstractLayer> result = new List<AbstractLayer>();
-			foreach (AbstractLayer layer in layers)
+			foreach (AbstractLayer layer in m_layers)
 			{
 				if (layer != null)
 				{
@@ -246,17 +294,17 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static List<AbstractLayer> GetAllValidLayersOfGroup(string group)
+		public List<AbstractLayer> GetAllLayersOfGroup(string a_group)
 		{
-			if (group == string.Empty)
+			if (a_group == string.Empty)
 			{
-				return GetAllValidLayers();
+				return GetAllLayers();
 			}
 
 			List<AbstractLayer> result = new List<AbstractLayer>();
-			foreach (AbstractLayer layer in layers)
+			foreach (AbstractLayer layer in m_layers)
 			{
-				if (layer != null && layer.Group == group)
+				if (layer != null && layer.Group == a_group)
 				{
 					result.Add(layer);
 				}
@@ -265,125 +313,122 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static Dictionary<string, List<string>> GetCategorySubcategories()
+		public Dictionary<string, List<string>> GetCategorySubcategories()
 		{
-			return categorySubcategories;
+			return m_categorySubcategories;
 		}
 
-		public static void LoadLayer(AbstractLayer layer, List<SubEntityObject> layerObjects)
+		public void LoadLayer(AbstractLayer a_layer, List<SubEntityObject> a_layerObjects)
 		{
-			layer.LoadLayerObjects(layerObjects);
+			a_layer.LoadLayerObjects(a_layerObjects);
 
-			layer.DrawGameObject();
+			a_layer.DrawGameObject();
 
-			if (!layer.Dirty)
+			if (!a_layer.m_dirty)
 			{
-				loadedLayers.Add(layer);
+				m_loadedLayers.Add(a_layer);
 
-				AddToCategories(layer.Category, layer.SubCategory);
+				AddToCategories(a_layer.m_category, a_layer.m_subCategory);
 
-				LayerInterface.AddLayerToInterface(layer);
+				InterfaceCanvas.Instance.layerInterface.AddLayerToInterface(a_layer);
 
-				if (layer.ActiveOnStart)
+				if (a_layer.ActiveOnStart)
 				{
-					ShowLayer(layer);
+					ShowLayer(a_layer);
 				}
-				else if (Main.LayerSelectedForCurrentExpertise(layer.FileName))
+				else if (Main.Instance.LayerSelectedForCurrentExpertise(a_layer.FileName))
 				{
-					InterfaceCanvas.Instance.activeLayers.AddLayer(layer, false);
+					InterfaceCanvas.Instance.activeLayers.AddPinnedInvisibleLayer(a_layer);
 				}
 
-				layer.Loaded = true;
+				a_layer.m_loaded = true;
 			}
 			else
 			{
-				Debug.LogError("(Corrupt) Layer has been found dirty: " + layer.ShortName);
+				Debug.LogError("(Corrupt) Layer has been found dirty: " + a_layer.ShortName);
 			}
 		}
 
-		public static void UpdateAllVisibleLayersTo(Plan plan)
-		{
-			foreach (AbstractLayer layer in visibleLayers)
-			{
-				layer.SetEntitiesActiveUpTo(plan);
-			}
-		}
-
-		public static void ShowLayer(AbstractLayer layer, bool shownInUI = true, bool toggleValuePlanMonitor = true)
+		public void ShowLayer(AbstractLayer a_layer)
 		{
 			bool needsUpdateAndRedraw = false;
-			foreach (EntityType entityType in layer.EntityTypes.Values)
+			foreach (EntityType entityType in a_layer.m_entityTypes.Values)
 			{
-				bool newNeed = layer.SetEntityTypeVisibility(entityType, true);
+				bool newNeed = a_layer.SetEntityTypeVisibility(entityType, true);
 				needsUpdateAndRedraw = needsUpdateAndRedraw || newNeed;
 			}
 
-			if (!visibleLayers.Contains(layer))
+			if (!m_visibleLayers.Contains(a_layer))
 			{
 				//Performs a more elaborate update and redraw, so no other is needed
 				needsUpdateAndRedraw = false;
 
-				if (PlanManager.planViewing != null || PlanManager.timeViewing < 0)
-					layer.SetEntitiesActiveUpTo(PlanManager.planViewing);
+				if (PlanManager.Instance.m_planViewing != null || PlanManager.Instance.m_timeViewing < 0)
+					a_layer.SetEntitiesActiveUpTo(PlanManager.Instance.m_planViewing);
 				else
-					layer.SetEntitiesActiveUpToTime(PlanManager.timeViewing);
+					a_layer.SetEntitiesActiveUpToTime(PlanManager.Instance.m_timeViewing);
 
-				layer.LayerGameObject.SetActive(true);
-				visibleLayers.Add(layer);
-				layer.LayerShown();
-				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
-				layer.UpdateScale(CameraManager.Instance.gameCamera);
+				a_layer.LayerGameObject.SetActive(true);
+				m_visibleLayers.Add(a_layer);
+				a_layer.LayerShown();
+				a_layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
+				a_layer.UpdateScale(CameraManager.Instance.gameCamera);
 
-				if (shownInUI && layer.Toggleable)
+				if (a_layer.Toggleable)
 				{
 					//Show in Layer Select and Active Layers
-					UIManager.OnShowLayer(layer);
+					if (m_onLayerVisibilityChanged != null)
+						m_onLayerVisibilityChanged.Invoke(a_layer, true);
 				}
 			}
 
 			if (needsUpdateAndRedraw)
-				layer.SetActiveToCurrentPlanAndRedraw();
+				a_layer.SetActiveToCurrentPlanAndRedraw();
 
 			UpdateVisibleLayerIndexForAllTypes();
 		}
 
-		public static void HideAllVisibleLayers()
+		public void SetLayerVisibilityLock(AbstractLayer a_layer, bool a_locked)
 		{
-			//We need a copy since we will be modifying the collection
-			List<AbstractLayer> list = new List<AbstractLayer>(visibleLayers);
-			for (int i = 0; i < list.Count; ++i)
-			{
-				AbstractLayer layer = list[i];
-				if (layer.Toggleable)
-				{
-					HideLayer(layer);
-				}
-			}
+			if (a_locked)
+				m_visibilityLockedLayers.Add(a_layer);
+			else
+				m_visibilityLockedLayers.Remove(a_layer);
+			m_onLayerVisibilityLockChanged.Invoke(a_layer, a_locked);
 		}
 
-		public static void HideLayer(AbstractLayer layer)
+		public bool IsLayerVisibilityLocked(AbstractLayer a_layer)
+		{
+			return m_visibilityLockedLayers.Contains(a_layer);
+		}
+
+		public void HideLayer(AbstractLayer a_layer)
 		{
 			//Layer that is being edited cannot be hidden
-			if (Main.InEditMode && PlanDetails.LayersTab.CurrentlyEditingBaseLayer == layer)
+			if (Main.InEditMode && InterfaceCanvas.Instance.activePlanWindow.CurrentlyEditingBaseLayer == a_layer)
 				return;
 
-			if (visibleLayers.Contains(layer))
+			if (m_visibleLayers.Contains(a_layer))
 			{
-				layer.LayerGameObject.SetActive(false);
-				visibleLayers.Remove(layer);
-				layer.LayerHidden();
+				a_layer.LayerGameObject.SetActive(false);
+				m_visibleLayers.Remove(a_layer);
+				a_layer.LayerHidden();
 
 				//hide in Layer Select and Active Layers
-				UIManager.OnHideLayer(layer);
+				if (a_layer.Toggleable)
+				{
+					if (m_onLayerVisibilityChanged != null)
+						m_onLayerVisibilityChanged.Invoke(a_layer, false);
+				}
 			}
 
 			UpdateVisibleLayerIndexForAllTypes();
 		}
 
-		private static void UpdateVisibleLayerIndexForAllTypes()
+		private void UpdateVisibleLayerIndexForAllTypes()
 		{
 			Dictionary<Type, int> visibleLayerIndexByType = new Dictionary<Type, int>();
-			foreach (AbstractLayer layer in visibleLayers)
+			foreach (AbstractLayer layer in m_visibleLayers)
 			{
 				int layerIndex = 0;
 				visibleLayerIndexByType.TryGetValue(layer.GetType(), out layerIndex);
@@ -395,208 +440,117 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public static List<EnergyLineStringSubEntity> ForceEnergyLayersActiveUpTo(Plan plan)
-		{
-			//Call setactiveupto on all energy layers not yet active and clear connections
-			foreach (AbstractLayer energyLayer in energyLayers)
-			{
-				if (!plan.IsLayerpartOfPlan(energyLayer))
-					energyLayer.SetEntitiesActiveUpTo(plan);
-				energyLayer.ResetEnergyConnections();
-			}
-
-			List<EnergyLineStringSubEntity> cablesToRemove = new List<EnergyLineStringSubEntity>();
-
-			//Have the cable layer activate all connections that are present in the current state
-			if (energyCableLayerGreen != null)
-			{
-				if (plan.GetPlanLayerForLayer(energyCableLayerGreen) != null) //Only remove invalid cables if the plan contains a cable layer
-				{
-					List<EnergyLineStringSubEntity> newCablesToRemove = energyCableLayerGreen.RemoveInvalidCables();
-					if (newCablesToRemove != null)
-						cablesToRemove = newCablesToRemove;
-				}
-				energyCableLayerGreen.ActivateCableLayerConnections();
-			}
-			if (energyCableLayerGrey != null)
-			{
-				if (plan.GetPlanLayerForLayer(energyCableLayerGrey) != null) //Only remove invalid cables if the plan contains a cable layer
-				{
-					List<EnergyLineStringSubEntity> newCablesToRemove = energyCableLayerGrey.RemoveInvalidCables();
-					if (newCablesToRemove != null && newCablesToRemove.Count > 0)
-						cablesToRemove.AddRange(newCablesToRemove);
-				}
-				energyCableLayerGrey.ActivateCableLayerConnections();
-			}
-			return cablesToRemove;
-		}
-
-		public static void RestoreRemovedCables(List<EnergyLineStringSubEntity> removedCables)
-		{
-			if (energyCableLayerGreen != null)
-			{
-				energyCableLayerGreen.RestoreInvalidCables(removedCables);
-			}
-			if (energyCableLayerGrey != null)
-			{
-				energyCableLayerGrey.RestoreInvalidCables(removedCables);
-			}
-		}
-
 		/// <summary>
 		/// Sets entities in visible layers active to plan and shows layers in the plan that were not visible.
 		/// </summary>
-		/// <param name="plan"></param>
-		public static void UpdateVisibleLayersToPlan(Plan plan)
+		/// <param name="a_plan"></param>
+		public void UpdateVisibleLayersToPlan(Plan a_plan)
 		{
-			foreach (AbstractLayer layer in visibleLayers)
+			foreach (AbstractLayer layer in m_visibleLayers)
 			{
-				layer.SetEntitiesActiveUpTo(plan);
+				layer.SetEntitiesActiveUpTo(a_plan);
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
 
-			foreach (PlanLayer planLayer in plan.PlanLayers)
-				if (!visibleLayers.Contains(planLayer.BaseLayer))
+			foreach (PlanLayer planLayer in a_plan.PlanLayers)
+				if (!m_visibleLayers.Contains(planLayer.BaseLayer))
 					ShowLayer(planLayer.BaseLayer);
 
-			if (energyCableLayerGreen != null || energyCableLayerGrey != null)
-			{
-				foreach (AbstractLayer energyLayer in energyLayers)
-					energyLayer.ResetCurrentGrids();
-
-				List<EnergyGrid> grids = PlanManager.GetEnergyGridsAtTime(plan.StartTime, EnergyGrid.GridColor.Either);
-				if (energyCableLayerGreen != null)
-				{
-					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGreen.GetCableNetworkForPlan(plan);
-					foreach (EnergyGrid grid in grids)
-						if (grid.IsGreen)
-							grid.SetAsCurrentGridForContent(network);
-				}
-				if (energyCableLayerGrey != null)
-				{
-					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGrey.GetCableNetworkForPlan(plan);
-					foreach (EnergyGrid grid in grids)
-						if (!grid.IsGreen)
-							grid.SetAsCurrentGridForContent(network);
-				}
-			}
+			if (OnVisibleLayersUpdatedToPlan != null)
+				OnVisibleLayersUpdatedToPlan(a_plan);
 		}
 
-		public static void UpdateVisibleLayersToBase()
+		public void UpdateVisibleLayersToBase()
 		{
-			foreach (AbstractLayer layer in visibleLayers)
+			foreach (AbstractLayer layer in m_visibleLayers)
 			{
 				//layer.SetEntitiesActiveUpToCurrentTime();
 				layer.SetEntitiesActiveUpTo(-1);
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
-			if (energyCableLayerGreen != null || energyCableLayerGrey != null)
-			{
-				foreach (AbstractLayer energyLayer in energyLayers)
-					energyLayer.ResetCurrentGrids();
-			}
+			if (OnVisibleLayersUpdatedToBase != null)
+				OnVisibleLayersUpdatedToBase();
 		}
 
-		public static void UpdateVisibleLayersToTime(int month)
+		public void UpdateVisibleLayersToTime(int a_month)
 		{
-			foreach (AbstractLayer layer in visibleLayers)
+			foreach (AbstractLayer layer in m_visibleLayers)
 			{
-				layer.SetEntitiesActiveUpToTime(month);
+				layer.SetEntitiesActiveUpToTime(a_month);
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
-		
-			if (energyCableLayerGreen != null || energyCableLayerGrey != null)
-			{
-				foreach (AbstractLayer energyLayer in energyLayers)
-					energyLayer.ResetCurrentGrids();
-
-				List<EnergyGrid> grids = PlanManager.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
-				if (energyCableLayerGreen != null)
-				{
-					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGreen.GetCableNetworkAtTime(month);
-					foreach (EnergyGrid grid in grids)
-						if (grid.IsGreen)
-							grid.SetAsCurrentGridForContent(network);
-				}
-				if (energyCableLayerGrey != null)
-				{
-					Dictionary<int, List<DirectionalConnection>> network = energyCableLayerGrey.GetCableNetworkAtTime(month);
-					foreach (EnergyGrid grid in grids)
-						if (!grid.IsGreen)
-							grid.SetAsCurrentGridForContent(network);
-				}
-			}
+			if (OnVisibleLayersUpdatedToTime != null)
+				OnVisibleLayersUpdatedToTime(a_month);
 		}
 
-		public static void UpdateLayerToPlan(AbstractLayer baseLayer, Plan plan, bool showIfHidden)
+		public void UpdateLayerToPlan(AbstractLayer a_baseLayer, Plan a_plan, bool a_showIfHidden)
 		{
-			if (visibleLayers.Contains(baseLayer))
+			if (m_visibleLayers.Contains(a_baseLayer))
 			{
-				baseLayer.SetEntitiesActiveUpTo(plan);
-				baseLayer.RedrawGameObjects(CameraManager.Instance.gameCamera);
+				a_baseLayer.SetEntitiesActiveUpTo(a_plan);
+				a_baseLayer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
-			else if (showIfHidden)
-				ShowLayer(baseLayer);
+			else if (a_showIfHidden)
+				ShowLayer(a_baseLayer);
 		}
 
-		public static void RedrawVisibleLayers()
+		public void RedrawVisibleLayers()
 		{
-			foreach (AbstractLayer layer in visibleLayers)
+			foreach (AbstractLayer layer in m_visibleLayers)
 			{
 				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
 		}
 
-		public static bool LayerIsVisible(AbstractLayer layer)
+		public bool LayerIsVisible(AbstractLayer a_layer)
 		{
-			return visibleLayers.Contains(layer);
+			return m_visibleLayers.Contains(a_layer);
 		}
 
-		public static IEnumerable<AbstractLayer> GetVisibleLayers()
+		public IEnumerable<AbstractLayer> GetVisibleLayers()
 		{
-			return visibleLayers;
+			return m_visibleLayers;
 		}
 
-		public static List<AbstractLayer> GetVisibleLayersSortedByDepth()
+		public List<AbstractLayer> GetVisibleLayersSortedByDepth()
 		{
-			List<AbstractLayer> result = new List<AbstractLayer>(visibleLayers);
-			result.Sort((x, y) => y.Depth.CompareTo(x.Depth));
+			List<AbstractLayer> result = new List<AbstractLayer>(m_visibleLayers);
+			result.Sort((a_x, a_y) => a_y.Depth.CompareTo(a_x.Depth));
 			return result;
 		}
 
-		public static List<AbstractLayer> GetLoadedLayersSortedByDepth()
+		private List<AbstractLayer> GetLoadedLayersSortedByDepth()
 		{
-			List<AbstractLayer> result = new List<AbstractLayer>(loadedLayers);
-			result.Sort((x, y) => y.Depth.CompareTo(x.Depth));
+			List<AbstractLayer> result = new List<AbstractLayer>(m_loadedLayers);
+			result.Sort((a_x, a_y) => a_y.Depth.CompareTo(a_x.Depth));
 			return result;
 		}
 
-		public static void UpdateLayerScales(Camera targetCamera)
+		public void UpdateLayerScales(Camera a_targetCamera)
 		{
-			foreach (AbstractLayer layer in visibleLayers)
+			foreach (AbstractLayer layer in m_visibleLayers)
 			{
 				if (layer.LayerGameObject.activeInHierarchy)
 				{
-					layer.UpdateScale(targetCamera);
+					layer.UpdateScale(a_targetCamera);
 				}
 			}
 		}
 
-		public static SubEntity GetSubEntity(AbstractLayer layer, int subEntityID)
+		public SubEntity GetSubEntity(AbstractLayer a_layer, int a_subEntityID)
 		{
-			for (int i = 0; i < layer.GetEntityCount(); i++)
+			for (int i = 0; i < a_layer.GetEntityCount(); i++)
 			{
-				Entity entity = layer.GetEntity(i);
+				Entity entity = a_layer.GetEntity(i);
 
 				for (int j = 0; j < entity.GetSubEntityCount(); j++)
 				{
 					SubEntity tmpEntity = entity.GetSubEntity(j);
-					if (tmpEntity.HasDatabaseID())
+					if (!tmpEntity.HasDatabaseID())
+						continue;
+					if (tmpEntity.GetDatabaseID() == a_subEntityID)
 					{
-						if (tmpEntity.GetDatabaseID() == subEntityID)
-						{
-							return tmpEntity;
-						}
+						return tmpEntity;
 					}
 				}
 			}
@@ -604,260 +558,49 @@ namespace MSP2050.Scripts
 			return null; // This means it it doesnt exist
 		}
 
-		public static void ReorderLayers()
+		public void ReorderLayers()
 		{
 			List<AbstractLayer> layersInOrder = GetLoadedLayersSortedByDepth();
 			layersInOrder.Reverse();
 
 			for (int i = 0; i < layersInOrder.Count; i++)
 			{
-				layersInOrder[i].Order = i;
-				layersInOrder[i].LayerGameObject.transform.position = new Vector3(0, 0, -layersInOrder[i].Order);
+				layersInOrder[i].m_order = i;
+				layersInOrder[i].LayerGameObject.transform.position = new Vector3(0, 0, -layersInOrder[i].m_order);
 			}
 		}
 
-		private static void moveGeometry(AbstractLayer from, AbstractLayer to, int offset)
+		private void AddToCategories(string a_category, string a_subcategory)
 		{
-			NetworkForm form = new NetworkForm();
-
-			form.AddField("old", from.ID);
-			form.AddField("new", to.ID);
-			form.AddField("offset", offset);
-
-			ServerCommunication.DoRequest(Server.MergeLayer(), form);
-		}
-
-		public delegate void AddNewLayerCallback(AbstractLayer layer);
-
-		//public static void AddNewLayer(string name, GeoType type, AddNewLayerCallback addNewLayerCallback)
-		//{
-		//	NetworkForm form = new NetworkForm();
-
-		//	form.AddField("name", name);
-		//	form.AddField("geotype", type.ToString());
-
-		//	ServerCommunication.DoRequest(Server.NewLayer(), form, (www2) => { handleNewLayerCallback(www2, addNewLayerCallback); });
-		//}
-
-		//private static void handleNewLayerCallback(UnityWebRequest www, AddNewLayerCallback addNewLayerCallback)
-		//{
-		//	int layerID = Util.ParseToInt(www.downloadHandler.text);
-
-		//	GetNewLayerMeta(layerID, addNewLayerCallback);
-		//}
-
-		//private static void GetNewLayerMeta(int layerID, AddNewLayerCallback addNewLayerCallback)
-		//{
-		//	NetworkForm form = new NetworkForm();
-
-		//	ServerCommunication.DoRequest(Server.LayerMeta(layerID), form, (www2) => { handleGetNewLayerMetaCallback(www2, addNewLayerCallback); });
-		//}
-
-		//private static void handleGetNewLayerMetaCallback(UnityWebRequest www, AddNewLayerCallback addNewLayerCallback)
-		//{
-		//	List<LayerMeta> layerMeta = LayerInfo.Load(www);
-
-		//	int layerID = layerMeta[0].layer_id;
-
-		//	LoadLayer(layerID, new List<SubEntityObject>());
-
-		//	AbstractLayer layer = GetLayerByID(layerID);
-		//	addNewLayerCallback(layer);
-		//}
-
-		public static void ResetAll()
-		{
-			layers.Clear();
-			loadedLayers.Clear();
-			visibleLayers.Clear();
-			finishedImporting = false;
-		}
-
-		//public static void MergeAllVisibleLayers()
-		//{
-		//	List<AbstractLayer> mergeLayers = new List<AbstractLayer>(visibleLayers);
-		//	for (int i = mergeLayers.Count - 1; i >= 0; --i)
-		//	{
-		//		if (!mergeLayers[i].Selectable) { mergeLayers.RemoveAt(i); }
-		//	}
-
-		//	if (mergeLayers.Count < 2)
-		//	{
-		//		Debug.LogError("Unable to merge the visible layers: less than 2 layers selected");
-		//		return;
-		//	}
-
-		//	bool geoTypeDefined = false;
-		//	GeoType geoType = GeoType.polygon;
-		//	foreach (AbstractLayer layer in mergeLayers)
-		//	{
-		//		if (!geoTypeDefined) { geoType = layer.GetGeoType(); geoTypeDefined = true; }
-		//		else
-		//		{
-		//			if (geoType != layer.GetGeoType())
-		//			{
-		//				Debug.LogError("Unable to merge the visible layers: not all layers have the same type");
-		//				return;
-		//			}
-		//		}
-		//	}
-
-		//	Debug.Log("Merging visible layers");
-		//	AddNewLayer("Merged layer", geoType, (layer) => mergedLayerCreated(layer, mergeLayers));
-		//}
-
-		private static void AddToCategories(string category, string subcategory)
-		{
-			if (!categorySubcategories.ContainsKey(category))
+			if (!m_categorySubcategories.ContainsKey(a_category))
 			{
-				categorySubcategories.Add(category, new List<string>());
+				m_categorySubcategories.Add(a_category, new List<string>());
 			}
 
-			if (!categorySubcategories[category].Contains(subcategory))
+			if (!m_categorySubcategories[a_category].Contains(a_subcategory))
 			{
-				categorySubcategories[category].Add(subcategory);
+				m_categorySubcategories[a_category].Add(a_subcategory);
 			}
-
-		}
-
-		private static void mergedLayerCreated(AbstractLayer newLayer, List<AbstractLayer> mergeLayers)
-		{
-			newLayer.EntityTypes = new Dictionary<int, EntityType>();//new List<EntityType>();
-			foreach (AbstractLayer l in mergeLayers)
-			{
-				int offset = newLayer.EntityTypes.Count;
-
-				string layerName = l.GetShortName();// l.ShortName != "" ? l.ShortName : l.FileName;
-				if (l.EntityTypes.Count == 1)
-				{
-					//newLayer.EntityTypes.Add(l.EntityTypes[0].GetClone(layerName));
-					foreach (var kvp in l.EntityTypes)
-					{
-						newLayer.EntityTypes.Add(kvp.Key + offset, kvp.Value.GetClone(layerName));
-					}
-				}
-				else
-				{
-					foreach (var kvp in l.EntityTypes)
-					{
-						newLayer.EntityTypes.Add(kvp.Key + offset, kvp.Value.GetClone(layerName + ": " + kvp.Value.Name));
-					}
-				}
-
-				// move geometry locally on client
-
-				//TODO: resupport this if required
-				//l.MoveAllGeometryTo(newLayer, offset);
-
-				// move geometry on server
-				moveGeometry(l, newLayer, offset);
-			}
-
-			HashSet<string> names = new HashSet<string>();
-			foreach (var kvp in newLayer.EntityTypes)
-			{
-				if (!names.Contains(kvp.Value.Name))
-				{
-					names.Add(kvp.Value.Name);
-				}
-				else
-				{
-					int number = 2;
-					while (names.Contains(kvp.Value.Name + " " + number))
-					{
-						number++;
-					}
-					kvp.Value.Name = kvp.Value.Name + " " + number;
-					names.Add(kvp.Value.Name);
-				}
-			}
-
-			newLayer.Category = mergeLayers[0].Category;
-			newLayer.SubCategory = mergeLayers[0].SubCategory;
-			newLayer.Depth = mergeLayers[0].Depth;
-
-			newLayer.SubmitMetaData();
-
-			newLayer.DrawGameObject();
-
-			//foreach (Layer l in mergeLayers)
-			//{
-			//    DeleteLayer(l);
-			//}
-
-			//ShowLayer(newLayer);
-		}
-
-		public static void AddEnergyPointLayer(PointLayer layer)
-		{
-			energyPointLayers.Add(layer);
-		}
-
-		public static EnergyPointSubEntity GetEnergyPointAtPosition(Vector3 pos)
-		{
-			foreach (PointLayer p in energyPointLayers)
-				if (visibleLayers.Contains(p) || (p.sourcePolyLayer != null && visibleLayers.Contains(p.sourcePolyLayer)))
-					foreach (SubEntity e in p.GetSubEntitiesAt(pos))
-						if (e is EnergyPointSubEntity)
-							return (e as EnergyPointSubEntity);
-			return null;
-		}
-
-		public static List<PointLayer> GetCenterPointLayers()
-		{
-			List<PointLayer> result = new List<PointLayer>();
-			foreach (PointLayer layer in energyPointLayers)
-				if (layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
-					result.Add(layer);
-			return result;
-		}
-
-		public static void RemoveEnergySubEntityReference(int ID)
-		{
-			if (ID == -1)
-				return;
-			if (energySubEntities != null)
-				energySubEntities.Remove(ID);
-		}
-		public static void AddEnergySubEntityReference(int ID, SubEntity subent)
-		{
-			if (ID == -1)
-				return;
-			if (energySubEntities == null)
-				energySubEntities = new Dictionary<int, SubEntity>();
-			if (!energySubEntities.ContainsKey(ID))
-				energySubEntities.Add(ID, subent);
-		}
-		public static SubEntity GetEnergySubEntityByID(int ID, bool getSourcePointIfPoly = false)
-		{
-			SubEntity result = null;
-			if (energySubEntities != null)
-				energySubEntities.TryGetValue(ID, out result);
-			if (getSourcePointIfPoly && result is EnergyPolygonSubEntity)
-				result = ((EnergyPolygonSubEntity)result).sourcePoint;
-			return result;
 		}
 
 		/// <summary>
 		/// Use with care. Is quite an expensive call to make.
 		/// </summary>
-		/// <param name="persistentId"></param>
+		/// <param name="a_persistentId"></param>
 		/// <returns></returns>
-		public static SubEntity FindSubEntityByPersistentID(int persistentId)
+		public SubEntity FindSubEntityByPersistentID(int a_persistentId)
 		{
 			SubEntity result = null;
-			for (int i = 0; i < layers.Count; ++i)
+			for (int i = 0; i < m_layers.Count; ++i)
 			{
-				AbstractLayer layer = layers[i];
-				if (layer != null)
-				{
-					SubEntity foundEntity = layer.GetSubEntityByPersistentID(persistentId);
-					if (foundEntity != null)
-					{
-						result = foundEntity;
-						break;
-					}
-				}
+				AbstractLayer layer = m_layers[i];
+				if (layer == null)
+					continue;
+				SubEntity foundEntity = layer.GetSubEntityByPersistentID(a_persistentId);
+				if (foundEntity == null)
+					continue;
+				result = foundEntity;
+				break;
 			}
 			return result;
 		}
@@ -867,74 +610,73 @@ namespace MSP2050.Scripts
 		/// Takes plan's time into account.
 		/// Doesn't run in edit mode.
 		/// </summary>
-		/// <param name="plan"></param>
-		public static void UpdateVisibleLayersFromPlan(Plan plan)
+		/// <param name="a_plan"></param>
+		public void UpdateVisibleLayersFromPlan(Plan a_plan)
 		{
-			//Dont update layers while in edit mode, quickly causes errors
-			if (Main.InEditMode || Main.EditingPlanDetailsContent)
+			//Dont update layers while in edit mode, this is handled in ActivePlanWindow
+			if (Main.InEditMode)
 				return;
 
 			//Only update if we are viewing the plan or one further in the future
-			if (PlanManager.planViewing == null ||
-			    (PlanManager.planViewing.StartTime < plan.StartTime ||
-			     (PlanManager.planViewing.StartTime == plan.StartTime && PlanManager.planViewing.ID < plan.ID)))
+			if (PlanManager.Instance.m_planViewing == null ||
+			    (PlanManager.Instance.m_planViewing.StartTime < a_plan.StartTime ||
+			     (PlanManager.Instance.m_planViewing.StartTime == a_plan.StartTime && PlanManager.Instance.m_planViewing.ID < a_plan.ID)))
 				return;
 
 			//Only update if already visible
-			foreach (PlanLayer layer in plan.PlanLayers)		
-				if (visibleLayers.Contains(layer.BaseLayer))
-					layer.BaseLayer.SetEntitiesActiveUpTo(PlanManager.planViewing);
+			foreach (PlanLayer layer in a_plan.PlanLayers)
+				if (m_visibleLayers.Contains(layer.BaseLayer))
+					layer.BaseLayer.SetEntitiesActiveUpTo(PlanManager.Instance.m_planViewing);
 		}
 
-		public static void AddNonReferenceLayer(AbstractLayer layer, bool redrawLayer)
+		public void AddNonReferenceLayer(AbstractLayer a_layer, bool a_redrawLayer)
 		{
-			if (nonReferenceLayers == null)
-				nonReferenceLayers = new HashSet<AbstractLayer>() { layer };
+			if (m_nonReferenceLayers == null)
+				m_nonReferenceLayers = new HashSet<AbstractLayer>() { a_layer };
 			else
-				nonReferenceLayers.Add(layer);
-			if (redrawLayer)
-				layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
+				m_nonReferenceLayers.Add(a_layer);
+			if (a_redrawLayer)
+				a_layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
 
-		public static void SetNonReferenceLayers(HashSet<AbstractLayer> layers, bool redrawNewLayers, bool redrawOldLayers)
+		public void SetNonReferenceLayers(HashSet<AbstractLayer> a_layers, bool a_redrawNewLayers, bool a_redrawOldLayers)
 		{
-			HashSet<AbstractLayer> oldLayers = nonReferenceLayers;
-			nonReferenceLayers = layers;
-			if (redrawOldLayers && oldLayers != null)
+			HashSet<AbstractLayer> oldLayers = m_nonReferenceLayers;
+			m_nonReferenceLayers = a_layers;
+			if (a_redrawOldLayers && oldLayers != null)
 			{
 				foreach (AbstractLayer layer in oldLayers)
 					layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 
-				if (redrawNewLayers)
-				{
-					//Dont redraw layers that were also in old layers
-					foreach (AbstractLayer layer in nonReferenceLayers)
-						if(!oldLayers.Contains(layer))
-							layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
-				}
+				if (!a_redrawNewLayers)
+					return;
+				//Dont redraw layers that were also in old layers
+				foreach (AbstractLayer layer in m_nonReferenceLayers)
+					if(!oldLayers.Contains(layer))
+						layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
-			else if (redrawNewLayers)
+			else if (a_redrawNewLayers)
 			{
-				foreach (AbstractLayer layer in nonReferenceLayers)              
+				foreach (AbstractLayer layer in m_nonReferenceLayers)
 					layer.RedrawGameObjects(CameraManager.Instance.gameCamera);
 			}
 		}
 
-		public static bool IsReferenceLayer(AbstractLayer layer)
+		public bool IsReferenceLayer(AbstractLayer a_layer)
 		{
-			if (nonReferenceLayers == null)
+			if (m_nonReferenceLayers == null)
 				return false;
-			return !nonReferenceLayers.Contains(layer);
+			return !m_nonReferenceLayers.Contains(a_layer);
 		}
 
-		public static void ClearNonReferenceLayers()
+		public void ClearNonReferenceLayers()
 		{
-			nonReferenceLayers = null;
+			m_nonReferenceLayers = null;
 		}
 
-		public static string MakeCategoryDisplayString(string subcategory)
+		public string MakeCategoryDisplayString(string a_subcategory)
 		{
-			StringBuilder result = new StringBuilder(subcategory);
+			StringBuilder result = new StringBuilder(a_subcategory);
 			result.Replace('_', ' ');
 			result[0] = char.ToUpperInvariant(result[0]);
 			for (int i = 1; i < result.Length; ++i)
@@ -946,6 +688,20 @@ namespace MSP2050.Scripts
 			}
 
 			return result.ToString();
+		}
+
+		public List<AbstractLayer> GetLayersInSubcategory(string a_subcategory)
+		{
+			if (m_subcategoryToLayers.TryGetValue(a_subcategory, out List<AbstractLayer> layers))
+			{
+				return layers;
+			}
+			return null;
+		}
+
+		public void InvokeLayerLoaded(AbstractLayer a_layer)
+		{
+			OnLayerLoaded.Invoke(a_layer);
 		}
 	}
 }

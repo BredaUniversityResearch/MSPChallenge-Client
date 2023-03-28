@@ -13,14 +13,14 @@ namespace MSP2050.Scripts
 		private const string DIRECTION_REVERSE = "Reverse";
 		private const string DIRECTION_BIDIRECTIONAL = "Bidirectional";
 
-		public static string CycleToNextDirection(string direction)
+		public static string CycleToNextDirection(string a_direction)
 		{
 			string result;
-			if (direction == DIRECTION_BIDIRECTIONAL)
+			if (a_direction == DIRECTION_BIDIRECTIONAL)
 			{
 				result = DIRECTION_FORWARD;
 			}
-			else if (direction == DIRECTION_FORWARD)
+			else if (a_direction == DIRECTION_FORWARD)
 			{
 				result = DIRECTION_REVERSE;
 			}
@@ -31,24 +31,24 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public ShippingLineStringEntity(LineStringLayer layer, SubEntityObject layerObject) 
-			: base(layer, layerObject)
+		public ShippingLineStringEntity(LineStringLayer a_layer, SubEntityObject a_layerObject) 
+			: base(a_layer, a_layerObject)
 		{
 		}
 
-		public ShippingLineStringEntity(LineStringLayer layer, PlanLayer planLayer, List<EntityType> entityType)
-			: base(layer, planLayer, entityType)
+		public ShippingLineStringEntity(LineStringLayer a_layer, PlanLayer a_planLayer, List<EntityType> a_entityType)
+			: base(a_layer, a_planLayer, a_entityType)
 		{
 		}
 
-		public override void OverrideDrawSettings(SubEntityDrawMode drawMode, ref SubEntityDrawSettings settings, ref bool meshDirtyFromOverride)
+		public override void OverrideDrawSettings(SubEntityDrawMode a_drawMode, ref SubEntityDrawSettings a_settings, ref bool a_meshDirtyFromOverride)
 		{
-			base.OverrideDrawSettings(drawMode, ref settings, ref meshDirtyFromOverride);
+			base.OverrideDrawSettings(a_drawMode, ref a_settings, ref a_meshDirtyFromOverride);
 
-			settings = settings.GetClone();
-			SetShippingDirectionIcon(drawMode, settings);
-			SetShippingLineIconCount(drawMode, settings);
-			settings.FixedWidth = true;
+			a_settings = a_settings.GetClone();
+			SetShippingDirectionIcon(a_drawMode, a_settings);
+			SetShippingLineIconCount(a_drawMode, a_settings);
+			a_settings.FixedWidth = true;
 
             EntityPropertyMetaData propertyMeta = Layer.FindPropertyMetaDataByName(SHIPPING_LANE_WIDTH_META_KEY);
             float defaultValue = 1f;
@@ -58,57 +58,61 @@ namespace MSP2050.Scripts
             }
             if (DoesPropertyExist(SHIPPING_LANE_WIDTH_META_KEY))
 			{
-				settings.LineWidth = Util.ParseToFloat(GetMetaData(SHIPPING_LANE_WIDTH_META_KEY), defaultValue);
+				a_settings.LineWidth = Util.ParseToFloat(GetMetaData(SHIPPING_LANE_WIDTH_META_KEY), defaultValue);
 			}
 			else
 			{
-				settings.LineWidth = defaultValue;
+				a_settings.LineWidth = defaultValue;
 			}
 
 			//Force recreate of line string so the icons get drawn correctly.
-			meshDirtyFromOverride = true;
+			a_meshDirtyFromOverride = true;
 		}
 
-		private void SetShippingDirectionIcon(SubEntityDrawMode drawMode, SubEntityDrawSettings settings)
+		private void SetShippingDirectionIcon(SubEntityDrawMode a_drawMode, SubEntityDrawSettings a_settings)
 		{
 			if (DoesPropertyExist(SHIPPING_DIRECTION_META_KEY))
 			{
 				string directionMetaData = GetMetaData(SHIPPING_DIRECTION_META_KEY);
 				if (directionMetaData == DIRECTION_BIDIRECTIONAL)
 				{
-					settings.LineIcon = null; //No icon.
+					a_settings.LineIcon = null; //No icon.
 				}
 				else if (directionMetaData == DIRECTION_FORWARD)
 				{
-					settings.LineIcon = "ShippingLaneUnidirectional";
+					a_settings.LineIcon = "ShippingLaneUnidirectional";
 				}
 				else if (directionMetaData == DIRECTION_REVERSE)
 				{
-					settings.LineIcon = "ShippingLaneUnidirectionalReverse";
+					a_settings.LineIcon = "ShippingLaneUnidirectionalReverse";
 				}
 				else
 				{
 					Debug.Log("Could associate direction " + directionMetaData + " with a valid icon");
 				}
 
-				settings.LineIconColor = Main.SelConfig.directionality_icon_color;
+				//settings.LineIconColor = Main.Instance.SelConfig.directionality_icon_color;
+				if(SimulationManager.Instance.TryGetSettings(SimulationManager.SEL_SIM_NAME, out var selSettings))
+				{
+					a_settings.LineIconColor = ((SimulationSettingsSEL)selSettings).directionality_icon_color;
+				}
 			}
 			else
 			{
-				settings.LineIcon = null;
+				a_settings.LineIcon = null;
 			}
 		}
 
-		private void SetShippingLineIconCount(SubEntityDrawMode drawMode, SubEntityDrawSettings settings)
+		private void SetShippingLineIconCount(SubEntityDrawMode a_drawMode, SubEntityDrawSettings a_settings)
 		{
-			if (drawMode == SubEntityDrawMode.Selected || drawMode == SubEntityDrawMode.Hover)
+			if (a_drawMode == SubEntityDrawMode.Selected || a_drawMode == SubEntityDrawMode.Hover)
 			{
 				//Draw one icon for each segment please.
-				settings.LineIconCount = -1;
+				a_settings.LineIconCount = -1;
 			}
 			else
 			{
-				settings.LineIconCount = 1;
+				a_settings.LineIconCount = 1;
 			}
 		}
 	}

@@ -6,58 +6,53 @@ namespace MSP2050.Scripts
 {
 	public class LayerProbeWindow : MonoBehaviour
 	{
-		[SerializeField]
-		private GenericWindow window = null;
-		[SerializeField]
-		private Transform contentLocation = null;
-		[SerializeField]
-		private GameObject layerProbeEntryPrefab = null;
+		[SerializeField] GenericWindow window = null;
+		[SerializeField] Transform contentLocation = null;
+		[SerializeField] GameObject layerProbeEntryPrefab = null;
 
-		private void Start()
-		{
-			gameObject.SetActive(false);
-		}
+		List<LayerProbeEntry> m_entries = new List<LayerProbeEntry>();
+		Vector3 m_worldSamplePos;
+		Vector3 m_windowPos;
 
 		public void ShowLayerProbeWindow(List<SubEntity> subentities, Vector3 worldSamplePosition, Vector3 windowPosition)
 		{
 			gameObject.SetActive(true);
+			m_worldSamplePos = worldSamplePosition;
+			m_windowPos = windowPosition;
 
-			//Remove old entries
-			foreach (Transform child in contentLocation)		
-				GameObject.Destroy(child.gameObject);		
-
-			//Add new entries
+			int activeEntries = 0;
 			for (int i = 0; i < subentities.Count; i++)
 			{
-				SubEntity tmpSubentity = subentities[i]; 
-				LayerProbeEntry entry = GameObject.Instantiate(layerProbeEntryPrefab).GetComponent<LayerProbeEntry>();
-				entry.SetToSubEntity(tmpSubentity);
-				entry.transform.SetParent(contentLocation, false);
-				entry.barButton.onClick.AddListener(() =>
+				if (i < m_entries.Count)
 				{
-					UIManager.CreatePropertiesWindow(tmpSubentity, worldSamplePosition, windowPosition);
-				});
+					m_entries[i].SetToSubEntity(subentities[i]);
+				}
+				else
+				{
+					LayerProbeEntry newEntry = Instantiate(layerProbeEntryPrefab, contentLocation).GetComponent<LayerProbeEntry>();
+					newEntry.Initialise(OnEntryClicked);
+					newEntry.SetToSubEntity(subentities[i]);
+					m_entries.Add(newEntry);
+				}
+				activeEntries++;
+			}
+			for (; activeEntries < m_entries.Count; activeEntries++)
+			{
+				m_entries[activeEntries].gameObject.SetActive(false);
 			}
 
-			//Clamp and position window
-			//Vector3 clampedPosition = new Vector3(
-			//	Mathf.Clamp(windowPosition.x, 0, Screen.width - window.GetSize().x),
-			//	Mathf.Clamp(windowPosition.y, -Screen.height + window.GetSize().y, 0),
-			//	windowPosition.z);
-			//      window.SetPosition(clampedPosition);
 			StartCoroutine(RepositionOnFrameEnd(windowPosition));
+		}
+
+		void OnEntryClicked(SubEntity a_subEntity)
+		{
+			InterfaceCanvas.Instance.propertiesWindow.ShowPropertiesWindow(a_subEntity, m_worldSamplePos, m_windowPos);
 		}
 
 		IEnumerator RepositionOnFrameEnd(Vector3 position)
 		{
 			yield return new WaitForEndOfFrame();
-
-			Rect rect = window.windowTransform.rect;
-			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-			window.SetPosition(new Vector3(
-				Mathf.Clamp(position.x / scale, 0f, (Screen.width - (rect.width * scale)) / scale),
-				Mathf.Clamp(position.y / scale, (-Screen.height + (rect.height * scale)) / scale, 0f),
-				position.z));
+			window.SetPosition(new Vector2(position.x, position.y));
 		}
 	}
 }

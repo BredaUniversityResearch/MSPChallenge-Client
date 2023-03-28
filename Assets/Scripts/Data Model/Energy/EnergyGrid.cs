@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace MSP2050.Scripts
 {
@@ -12,206 +12,164 @@ namespace MSP2050.Scripts
 		public enum GridColor { Green, Grey, Either };
 		public enum GridPlanState { Normal, Hidden, Added, Removed, Changed };
 
-		public List<EnergyPointSubEntity> sources;
-		public List<EnergyPointSubEntity> sockets;
-		public long sourcePower;     //Only power from sources
-		public long sharedPower;     //Power from negative expected power
-		public long AvailablePower { get { return sourcePower + sharedPower; } }
+		public List<EnergyPointSubEntity> m_sources;
+		public List<EnergyPointSubEntity> m_sockets;
+		public long m_sourcePower;     //Only power from sources
+		public long m_sharedPower;     //Power from negative expected power
+		public long AvailablePower { get { return m_sourcePower + m_sharedPower; } }
 
-		public long maxCountryCapacity;
-		public GridEnergyDistribution energyDistribution; // <countryid, (expectedEnergy, actualEnergy, maximum, sourceinput)>
-		public GridActualAndWasted actualAndWasted;
-		public bool distributionOnly;   //Has only the distribution been changed, or also the sources?
-		public Plan plan;
+		public long m_maxCountryCapacity;
+		public GridEnergyDistribution m_energyDistribution; // <countryid, (expectedEnergy, actualEnergy, maximum, sourceinput)>
+		public GridActualAndWasted m_actualAndWasted;
+		public bool m_distributionOnly;   //Has only the distribution been changed, or also the sources?
+		public Plan m_plan;
 
-		public string name = "New Grid";
-		public int persistentID = -1;
-		private int databaseID;
-		private bool databaseIDSet;
-		private int creationBatchCallID; //ID of the PostEmptyGrid call in the batch
+		public string m_name = "New Grid";
+		public int m_persistentID = -1;
+		private int m_databaseID;
+		private bool m_databaseIDSet;
+		private int m_creationBatchCallID; //ID of the PostEmptyGrid call in the batch
 
 		/// <summary>
 		/// Makes a value copy of the given energy grid, with the new plan.
 		/// </summary>
-		public EnergyGrid(EnergyGrid gridToDuplicate, Plan plan)
+		public EnergyGrid(EnergyGrid a_gridToDuplicate, Plan a_plan)
 		{
-			sources = new List<EnergyPointSubEntity>(gridToDuplicate.sources);
-			sockets = new List<EnergyPointSubEntity>(gridToDuplicate.sockets);
-			sourcePower = gridToDuplicate.sourcePower;
-			sharedPower = gridToDuplicate.sharedPower;
-			maxCountryCapacity = gridToDuplicate.maxCountryCapacity;
-			this.plan = plan;
-			energyDistribution = new GridEnergyDistribution(gridToDuplicate.energyDistribution);
-			persistentID = gridToDuplicate.persistentID;
-			name = gridToDuplicate.name;
+			m_sources = new List<EnergyPointSubEntity>(a_gridToDuplicate.m_sources);
+			m_sockets = new List<EnergyPointSubEntity>(a_gridToDuplicate.m_sockets);
+			m_sourcePower = a_gridToDuplicate.m_sourcePower;
+			m_sharedPower = a_gridToDuplicate.m_sharedPower;
+			m_maxCountryCapacity = a_gridToDuplicate.m_maxCountryCapacity;
+			m_plan = a_plan;
+			m_energyDistribution = new GridEnergyDistribution(a_gridToDuplicate.m_energyDistribution);
+			m_persistentID = a_gridToDuplicate.m_persistentID;
+			m_name = a_gridToDuplicate.m_name;
 		}
 
 		/// <summary>
 		/// Goes through the energy network from the starting points connections and creates a new grid
 		/// </summary>
-		/// <param name="startSocket">A point in the grid</param>
-		public EnergyGrid(EnergyPointSubEntity startSocket, Plan plan)
+		/// <param name="a_startSocket">A point in the grid</param>
+		public EnergyGrid(EnergyPointSubEntity a_startSocket, Plan a_plan)
 		{
-			this.plan = plan;
-			DetermineContents(startSocket);
+			m_plan = a_plan;
+			DetermineContents(a_startSocket);
 		}
 
 		/// <summary>
 		/// Creates a new grid where the sources, sockets and max capacities are calculated from the given network. 
 		/// Expected values are taken from the GridObject.
 		/// </summary>
-		public EnergyGrid(GridObject gridObject, Plan plan)
+		public EnergyGrid(GridObject a_gridObject, Plan a_plan)
 		{
-			this.plan = plan;
-			SetDatabaseID(gridObject.id);
-			persistentID = gridObject.persistent;
-			distributionOnly = gridObject.distribution_only;
-			name = gridObject.name;
-			energyDistribution = new GridEnergyDistribution(new Dictionary<int, CountryEnergyAmount>());
+			m_plan = a_plan;
+			SetDatabaseID(a_gridObject.id);
+			m_persistentID = a_gridObject.persistent;
+			m_distributionOnly = a_gridObject.distribution_only;
+			m_name = a_gridObject.name;
+			m_energyDistribution = new GridEnergyDistribution(new Dictionary<int, CountryEnergyAmount>());
 
 			//Find all sources
-			sources = new List<EnergyPointSubEntity>();
-			sourcePower = 0;
-			foreach (GeomIDObject source in gridObject.sources)
+			m_sources = new List<EnergyPointSubEntity>();
+			m_sourcePower = 0;
+			foreach (GeomIDObject source in a_gridObject.sources)
 			{
-				EnergyPointSubEntity subEnt = LayerManager.GetEnergySubEntityByID(source.geometry_id, true) as EnergyPointSubEntity;
+				EnergyPointSubEntity subEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(source.geometry_id, true) as EnergyPointSubEntity;
 				if (subEnt != null)
 				{
-					sources.Add(subEnt);
-					if (energyDistribution.distribution.ContainsKey(subEnt.Entity.Country))
-						energyDistribution.distribution[subEnt.Entity.Country].sourceInput += subEnt.Capacity;
+					m_sources.Add(subEnt);
+					if (m_energyDistribution.m_distribution.ContainsKey(subEnt.m_entity.Country))
+						m_energyDistribution.m_distribution[subEnt.m_entity.Country].m_sourceInput += subEnt.Capacity;
 					else
-						energyDistribution.distribution.Add(subEnt.Entity.Country, new CountryEnergyAmount(0, subEnt.Capacity));
-					sourcePower += subEnt.Capacity;
+						m_energyDistribution.m_distribution.Add(subEnt.m_entity.Country, new CountryEnergyAmount(0, subEnt.Capacity));
+					m_sourcePower += subEnt.Capacity;
 				}
 				else
-					Debug.LogError(String.Format("Grid (id: {0}) is expecting source with db id: {1}, but it can't be found.", databaseID, source.geometry_id));
+					Debug.LogError(String.Format("Grid (id: {0}) is expecting source with db id: {1}, but it can't be found.", m_databaseID, source.geometry_id));
 			}
 
 			//Find all sockets
-			sockets = new List<EnergyPointSubEntity>();
-			foreach (GeomIDObject socket in gridObject.sockets)
+			m_sockets = new List<EnergyPointSubEntity>();
+			foreach (GeomIDObject socket in a_gridObject.sockets)
 			{
-				EnergyPointSubEntity subEnt = LayerManager.GetEnergySubEntityByID(socket.geometry_id) as EnergyPointSubEntity;
+				EnergyPointSubEntity subEnt = PolicyLogicEnergy.Instance.GetEnergySubEntityByID(socket.geometry_id) as EnergyPointSubEntity;
 				if (subEnt != null)
 				{
-					sockets.Add(subEnt);
+					m_sockets.Add(subEnt);
 					long newMaximum = subEnt.Capacity;
-					if (energyDistribution.distribution.ContainsKey(subEnt.Entity.Country))
-						newMaximum = energyDistribution.distribution[subEnt.Entity.Country].maximum += subEnt.Capacity; //Add maxcap to country cap and store new value
+					if (m_energyDistribution.m_distribution.ContainsKey(subEnt.m_entity.Country))
+						newMaximum = m_energyDistribution.m_distribution[subEnt.m_entity.Country].m_maximum += subEnt.Capacity; //Add maxcap to country cap and store new value
 					else
-						energyDistribution.distribution.Add(subEnt.Entity.Country, new CountryEnergyAmount(subEnt.Capacity));
-					if (newMaximum > maxCountryCapacity)
-						maxCountryCapacity = newMaximum;
+						m_energyDistribution.m_distribution.Add(subEnt.m_entity.Country, new CountryEnergyAmount(subEnt.Capacity));
+					if (newMaximum > m_maxCountryCapacity)
+						m_maxCountryCapacity = newMaximum;
 				}
 				else
-					Debug.LogError(String.Format("Grid (id: {0}) is expecting socket with db id: {1}, but it can't be found.", databaseID, socket.geometry_id));
+					Debug.LogError(String.Format("Grid (id: {0}) is expecting socket with db id: {1}, but it can't be found.", m_databaseID, socket.geometry_id));
 			}
 
-			//if(sockets.Count < 2 && sources.Count == 0)
-			//{
-			//	Debug.LogError($"Grid received with a single socket and no sources. This should be impossible. Grid id: {databaseID}");
-			//}
-
 			//Set expected values to those in the GridObject
-			sharedPower = 0;
-			foreach (CountryExpectedObject countryExpected in gridObject.energy)
+			m_sharedPower = 0;
+			foreach (CountryExpectedObject countryExpected in a_gridObject.energy)
 			{
 				CountryEnergyAmount energyAmount;
-				if (!energyDistribution.distribution.TryGetValue(countryExpected.country_id, out energyAmount))
+				if (!m_energyDistribution.m_distribution.TryGetValue(countryExpected.country_id, out energyAmount))
 				{
 					energyAmount = new CountryEnergyAmount(countryExpected.expected, countryExpected.expected, countryExpected.expected);
-					energyDistribution.distribution.Add(countryExpected.country_id, energyAmount);
+					m_energyDistribution.m_distribution.Add(countryExpected.country_id, energyAmount);
 				}
 
-				energyAmount.expected = countryExpected.expected;
+				energyAmount.m_expected = countryExpected.expected;
 				if (countryExpected.expected < 0)
 				{
-					sharedPower -= countryExpected.expected;
+					m_sharedPower -= countryExpected.expected;
 				}
 			}
 		}
 
-		private void DetermineContents(EnergyPointSubEntity startSocket)
+		private void DetermineContents(EnergyPointSubEntity a_startSocket)
 		{
 			//Setup data structures
-			sources = new List<EnergyPointSubEntity>();
-			sockets = new List<EnergyPointSubEntity>();
+			m_sources = new List<EnergyPointSubEntity>();
+			m_sockets = new List<EnergyPointSubEntity>();
 			HashSet<EnergyPointSubEntity> visited = new HashSet<EnergyPointSubEntity>();
 			Stack<EnergyPointSubEntity> stack = new Stack<EnergyPointSubEntity>();
 
 			//Add starting point
-			stack.Push(startSocket);
-			sockets.Add(startSocket);
-			visited.Add(startSocket);
+			stack.Push(a_startSocket);
+			m_sockets.Add(a_startSocket);
+			visited.Add(a_startSocket);
 
 			//Find all sockets and sources in the grid
 			while (stack.Count > 0)
 			{
 				EnergyPointSubEntity current = stack.Pop();
-				foreach (Connection con in current.connections)
+				foreach (Connection con in current.Connections)
 				{
 					EnergyPointSubEntity other = con.cable.GetConnection(!con.connectedToFirst).point;
-					if (!visited.Contains(other))
+					if (visited.Contains(other))
+						continue;
+					stack.Push(other);
+					visited.Add(other);
+					if (other.m_entity.Layer.m_editingType == AbstractLayer.EditingType.Socket)
+						m_sockets.Add(other);
+					else if (other.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePoint || other.m_entity.Layer.m_editingType == AbstractLayer.EditingType.SourcePolygonPoint)
 					{
-						stack.Push(other);
-						visited.Add(other);
-						if (other.Entity.Layer.editingType == AbstractLayer.EditingType.Socket)
-							sockets.Add(other);
-						else if (other.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePoint || other.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
-						{
-							sources.Add(other);
-							sourcePower += other.Capacity;
-						}
+						m_sources.Add(other);
+						m_sourcePower += other.Capacity;
 					}
 				}
 			}
 		}
-
-		//private void DetermineContents(EnergyPointSubEntity startSocket, Dictionary<int, List<EnergyPointSubEntity>> network)
-		//{
-		//	//Setup data structures
-		//	sources = new List<EnergyPointSubEntity>();
-		//	sockets = new List<EnergyPointSubEntity>();
-		//	HashSet<int> visited = new HashSet<int>();
-		//	Stack<EnergyPointSubEntity> stack = new Stack<EnergyPointSubEntity>();
-
-		//	//Add starting point
-		//	stack.Push(startSocket);
-		//	sockets.Add(startSocket);
-		//	visited.Add(startSocket.GetDatabaseID());
-
-		//	//Find all sockets and sources in the grid
-		//	while (stack.Count > 0)
-		//	{
-		//		EnergyPointSubEntity current = stack.Pop();
-
-		//		foreach (EnergyPointSubEntity other in network[current.GetDatabaseID()])
-		//		{
-		//			if (!visited.Contains(other.GetDatabaseID()))
-		//			{
-		//				stack.Push(other);
-		//				visited.Add(other.GetDatabaseID());
-		//				if (other.Entity.Layer.editingType == AbstractLayer.EditingType.Socket)
-		//					sockets.Add(other);
-		//				else if (other.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePoint || other.Entity.Layer.editingType == AbstractLayer.EditingType.SourcePolygonPoint)
-		//				{
-		//					sources.Add(other);
-		//					sourcePower += other.Capacity;
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
-
+		
 		public void SetAsCurrentGridForContent()
 		{
 			HashSet<int> visited = new HashSet<int>();
 			Stack<EnergyPointSubEntity> stack = new Stack<EnergyPointSubEntity>();
 
 			//Add starting point
-			stack.Push(sockets[0]);
-			visited.Add(sockets[0].GetDatabaseID());
+			stack.Push(m_sockets[0]);
+			visited.Add(m_sockets[0].GetDatabaseID());
 
 			//Find all sockets and sources in the grid
 			while (stack.Count > 0)
@@ -219,64 +177,59 @@ namespace MSP2050.Scripts
 				EnergyPointSubEntity current = stack.Pop();
 				current.CurrentGrid = this;
 
-				foreach (Connection con in current.connections)
+				foreach (Connection con in current.Connections)
 				{
-					if (!visited.Contains(con.cable.GetDatabaseID()))
-					{
-						con.cable.CurrentGrid = this;
-						visited.Add(con.cable.GetDatabaseID());
-						EnergyPointSubEntity other = con.cable.GetConnection(!con.connectedToFirst).point;
-						if (!visited.Contains(other.GetDatabaseID()))
-						{
-							stack.Push(other);
-							visited.Add(other.GetDatabaseID());
-						}
-					}
+					if (visited.Contains(con.cable.GetDatabaseID()))
+						continue;
+					con.cable.CurrentGrid = this;
+					visited.Add(con.cable.GetDatabaseID());
+					EnergyPointSubEntity other = con.cable.GetConnection(!con.connectedToFirst).point;
+					if (visited.Contains(other.GetDatabaseID()))
+						continue;
+					stack.Push(other);
+					visited.Add(other.GetDatabaseID());
 				}
 			}
 		}
 
-		public void SetAsLastRunGridForContent(Dictionary<int, List<DirectionalConnection>> cableNetwork)
+		public void SetAsLastRunGridForContent(Dictionary<int, List<DirectionalConnection>> a_cableNetwork)
 		{
-			if (cableNetwork == null)
+			if (a_cableNetwork == null)
 				return;
 
 			HashSet<int> visited = new HashSet<int>();
 			Stack<EnergyPointSubEntity> stack = new Stack<EnergyPointSubEntity>();
 
 			//Add starting point
-			stack.Push(sockets[0]);
-			visited.Add(sockets[0].GetDatabaseID());
+			stack.Push(m_sockets[0]);
+			visited.Add(m_sockets[0].GetDatabaseID());
 			while (stack.Count > 0)
 			{
 				EnergyPointSubEntity current = stack.Pop();
 				current.LastRunGrid = this;
 
-				if (cableNetwork.ContainsKey(current.GetDatabaseID()))
+				if (!a_cableNetwork.ContainsKey(current.GetDatabaseID()))
+					continue;
+				foreach (DirectionalConnection other in a_cableNetwork[current.GetDatabaseID()])
 				{
-					foreach (DirectionalConnection other in cableNetwork[current.GetDatabaseID()])
-					{
-						if (!visited.Contains(other.cable.GetDatabaseID()))
-						{
-							other.cable.LastRunGrid = this;
-							visited.Add(other.cable.GetDatabaseID());
-							if (!visited.Contains(other.point.GetDatabaseID()))
-							{
-								stack.Push(other.point);
-								visited.Add(other.point.GetDatabaseID());
-							}
-						}
-					}
+					if (visited.Contains(other.cable.GetDatabaseID()))
+						continue;
+					other.cable.LastRunGrid = this;
+					visited.Add(other.cable.GetDatabaseID());
+					if (visited.Contains(other.point.GetDatabaseID()))
+						continue;
+					stack.Push(other.point);
+					visited.Add(other.point.GetDatabaseID());
 				}
 			}
 		}
 
-		public void SetAsCurrentGridForContent(Dictionary<int, List<DirectionalConnection>> cableNetwork)
+		public void SetAsCurrentGridForContent(Dictionary<int, List<DirectionalConnection>> a_cableNetwork)
 		{
-			if (cableNetwork == null)
+			if (a_cableNetwork == null)
 				return;
 
-			if (sockets.Count == 0)
+			if (m_sockets.Count == 0)
 			{
 				//Without any sockets can't do anything.
 				Debug.LogWarning("Tried to focus a grid that has no sockets.");
@@ -287,28 +240,25 @@ namespace MSP2050.Scripts
 			Stack<EnergyPointSubEntity> stack = new Stack<EnergyPointSubEntity>();
 
 			//Add starting point
-			stack.Push(sockets[0]);
-			visited.Add(sockets[0].GetDatabaseID());
+			stack.Push(m_sockets[0]);
+			visited.Add(m_sockets[0].GetDatabaseID());
 			while (stack.Count > 0)
 			{
 				EnergyPointSubEntity current = stack.Pop();
 				current.CurrentGrid = this;
 
-				if (cableNetwork.ContainsKey(current.GetDatabaseID()))
+				if (!a_cableNetwork.ContainsKey(current.GetDatabaseID()))
+					continue;
+				foreach (DirectionalConnection other in a_cableNetwork[current.GetDatabaseID()])
 				{
-					foreach (DirectionalConnection other in cableNetwork[current.GetDatabaseID()])
-					{
-						if (!visited.Contains(other.cable.GetDatabaseID()))
-						{
-							other.cable.CurrentGrid = this;
-							visited.Add(other.cable.GetDatabaseID());
-							if (!visited.Contains(other.point.GetDatabaseID()))
-							{
-								stack.Push(other.point);
-								visited.Add(other.point.GetDatabaseID());
-							}
-						}
-					}
+					if (visited.Contains(other.cable.GetDatabaseID()))
+						continue;
+					other.cable.CurrentGrid = this;
+					visited.Add(other.cable.GetDatabaseID());
+					if (visited.Contains(other.point.GetDatabaseID()))
+						continue;
+					stack.Push(other.point);
+					visited.Add(other.point.GetDatabaseID());
 				}
 			}
 		}
@@ -316,86 +266,77 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Sends the grid to the server, including the name but not the energy distribution.
 		/// </summary>
-		public void SubmitEmptyGridToServer(BatchRequest batch)
+		public void SubmitEmptyGridOrName(BatchRequest a_batch)
 		{
-			if (databaseIDSet)
+			if (m_databaseIDSet)
+			{
+				JObject dataObject2 = new JObject();
+				dataObject2.Add("id", m_databaseID);
+				dataObject2.Add("name", m_name);
+				a_batch.AddRequest(Server.UpdateGridName(), dataObject2, BatchRequest.BATCH_GROUP_GRID_ADD);
 				return;
+			}
 
 			//Add new grid on server and get databaseID
 			JObject dataObject = new JObject();
-			dataObject.Add("name", name);
-			dataObject.Add("plan", plan.ID);
-			dataObject.Add("distribution_only", JsonConvert.SerializeObject(distributionOnly));
-			if (persistentID != -1)
-				dataObject.Add("persistent", persistentID);
-			creationBatchCallID = batch.AddRequest<int>(Server.AddEnergyGrid(), dataObject, BatchRequest.BATCH_GROUP_GRID_ADD, AddGridCallback);
+			dataObject.Add("name", m_name);
+			dataObject.Add("plan", m_plan.GetDataBaseOrBatchIDReference());
+			dataObject.Add("distribution_only", JsonConvert.SerializeObject(m_distributionOnly));
+			if (m_persistentID != -1)
+				dataObject.Add("persistent", m_persistentID);
+			m_creationBatchCallID = a_batch.AddRequest<int>(Server.AddEnergyGrid(), dataObject, BatchRequest.BATCH_GROUP_GRID_ADD, AddGridCallback);
 		}
 
-		public void AddGridCallback(int newDatabaseID)
+		private void AddGridCallback(int a_newDatabaseID)
 		{
-			SetDatabaseID(newDatabaseID);
-			if (persistentID == -1)
-				persistentID = databaseID;
+			SetDatabaseID(a_newDatabaseID);
+			if (m_persistentID == -1)
+				m_persistentID = m_databaseID;
 		}
 
-		public void SetDatabaseID(int value)
+		public void SetDatabaseID(int a_value)
 		{
-			databaseID = value;
-			databaseIDSet = true;
-			PlanManager.AddEnergyGrid(this);
+			m_databaseID = a_value;
+			m_databaseIDSet = true;
+			PolicyLogicEnergy.Instance.AddEnergyGrid(this);
 		}
 
 		public int GetDatabaseID()
 		{
-			return databaseID;
+			return m_databaseID;
 		}
 
 		public bool DatabaseIDSet()
 		{
-			return databaseIDSet;
+			return m_databaseIDSet;
 		}
 
-		public static void SubmitGridDeletionToServer(int databaseID, BatchRequest batch)
+		public static void SubmitGridDeletionToServer(int a_databaseID, BatchRequest a_batch)
 		{
 			//Delete grid by databbaseID
 			JObject dataObject = new JObject();
-			dataObject.Add("id", databaseID);
-			batch.AddRequest(Server.DeleteGrid(), dataObject, BatchRequest.BATCH_GROUP_GRID_DELETE);
+			dataObject.Add("id", a_databaseID);
+			a_batch.AddRequest(Server.DeleteGrid(), dataObject, BatchRequest.BATCH_GROUP_GRID_DELETE);
 		}
 
 		/// <summary>
 		/// Submits the expected energy values of the countries in the grid to the server.
 		/// </summary>
-		public void SubmitEnergyDistribution(BatchRequest batch)
+		public void SubmitEnergyDistribution(BatchRequest a_batch)
 		{
-			string dbOrBatchID = databaseIDSet ? databaseID.ToString() : BatchRequest.FormatCallIDReference(creationBatchCallID);
-
-			//Update grid_socket
-			//string socketsString = "";
-			//foreach (EnergyPointSubEntity socket in sockets)
-			//	socketsString += socket.GetDatabaseID().ToString() + ",";
-			//if (socketsString.Length > 0)
-			//	socketsString = socketsString.Substring(0, socketsString.Length - 1);
-
-			List<string> socketIDs = new List<string>(sockets.Count);
-			foreach (EnergyPointSubEntity socket in sockets)
+			string dbOrBatchID = m_databaseIDSet ? m_databaseID.ToString() : BatchRequest.FormatCallIDReference(m_creationBatchCallID);
+			
+			List<string> socketIDs = new List<string>(m_sockets.Count);
+			foreach (EnergyPointSubEntity socket in m_sockets)
 				socketIDs.Add(socket.GetDataBaseOrBatchIDReference());
 
 			JObject dataObject = new JObject();
 			dataObject.Add("id", dbOrBatchID);
 			dataObject.Add("sockets", JToken.FromObject(socketIDs));
-			//dataObject.Add("sockets", JToken.FromObject(socketIDs));
-			batch.AddRequest(Server.UpdateGridSockets(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
+			a_batch.AddRequest(Server.UpdateGridSockets(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
 
-			//Update grid_source
-			//string sourceString = "";
-			//foreach (EnergyPointSubEntity source in sources)
-			//	sourceString += source.GetDatabaseID().ToString() + ",";
-			//if (sourceString.Length > 0)
-			//	sourceString = sourceString.Substring(0, sourceString.Length - 1);
-
-			List<string> sourceIDs = new List<string>(sources.Count);
-			foreach (EnergyPointSubEntity source in sources)
+			List<string> sourceIDs = new List<string>(m_sources.Count);
+			foreach (EnergyPointSubEntity source in m_sources)
 				sourceIDs.Add(source.GetDataBaseOrBatchIDReference());
 
 			dataObject = new JObject();
@@ -403,55 +344,39 @@ namespace MSP2050.Scripts
 			if (sourceIDs.Count > 0)
 				//dataObject.Add("sources", JToken.FromObject(sourceIDs));
 				dataObject.Add("sources", JToken.FromObject(sourceIDs));
-			batch.AddRequest(Server.UpdateGridSources(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
+			a_batch.AddRequest(Server.UpdateGridSources(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
 
 			//Update grid_energy 
-			List<EnergyExpected> expected = new List<EnergyExpected>(energyDistribution.distribution.Count);
-			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in energyDistribution.distribution)
-				expected.Add(new EnergyExpected(kvp.Key, kvp.Value.expected));
+			List<EnergyExpected> expected = new List<EnergyExpected>(m_energyDistribution.m_distribution.Count);
+			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in m_energyDistribution.m_distribution)
+				expected.Add(new EnergyExpected(kvp.Key, kvp.Value.m_expected));
 
 			dataObject = new JObject();
 			dataObject.Add("id", dbOrBatchID);
 			dataObject.Add("expected", JToken.FromObject(expected));
 			//dataObject.Add("expected", JToken.FromObject(expected));
-			batch.AddRequest(Server.UpdateGridEnergy(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
+			a_batch.AddRequest(Server.UpdateGridEnergy(), dataObject, BatchRequest.BATCH_GROUP_GRID_CONTENT);
 
-		}
-
-		/// <summary>
-		/// Sets the grids name. Sends it to the server if it already has a database id. 
-		/// Otherwise it will automatically be sent when the grid is sent to the server.
-		/// </summary>
-		public void SetName(string newName)
-		{
-			if (databaseIDSet)
-			{
-				//Submit new name to server (for databaseID)
-				NetworkForm form = new NetworkForm();
-				form.AddField("id", databaseID);
-				form.AddField("name", name);
-				ServerCommunication.DoRequest(Server.UpdateGridName(), form);
-			}
 		}
 
 		/// <summary>
 		/// Creates a new distribution with the right countries.
 		/// Maximum is set correctly, expected is set to a valid estimation.
 		/// </summary>
-		public void CalculateInitialDistribution(EnergyGrid oldGrid = null)
+		public void CalculateInitialDistribution(EnergyGrid a_oldGrid = null)
 		{
-			if (energyDistribution != null)
+			if (m_energyDistribution != null)
 				return;
 
 			long totalCountryCapacity = 0;
-			maxCountryCapacity = 0;
+			m_maxCountryCapacity = 0;
 			Dictionary<int, CountryEnergyAmount> distribution = new Dictionary<int, CountryEnergyAmount>();
 
 			//Add sockets and calculate socket capacities
-			foreach (EnergyPointSubEntity socket in sockets)
+			foreach (EnergyPointSubEntity socket in m_sockets)
 			{
-				int country = socket.Entity.Country;
-				if (country <= TeamManager.AM_ID)
+				int country = socket.m_entity.Country;
+				if (country <= SessionManager.AM_ID)
 					Debug.LogError("Socket (ID: " + socket.GetDatabaseID() + ") has an invalid country (" + country);
 
 				if (!distribution.ContainsKey(country))
@@ -461,16 +386,16 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					distribution[country].maximum += socket.Capacity;
+					distribution[country].m_maximum += socket.Capacity;
 					totalCountryCapacity += socket.Capacity;
 				}
 			}
 
 			//Add sources and determine source input
-			foreach (EnergyPointSubEntity source in sources)
+			foreach (EnergyPointSubEntity source in m_sources)
 			{
-				int country = source.Entity.Country;
-				if (country <= TeamManager.AM_ID)
+				int country = source.m_entity.Country;
+				if (country <= SessionManager.AM_ID)
 					Debug.LogError("Source (ID: " + source.GetDatabaseID() + ") has an invalid country (" + country);
 
 				if (!distribution.ContainsKey(country))
@@ -478,39 +403,40 @@ namespace MSP2050.Scripts
 					distribution.Add(country, new CountryEnergyAmount(0, source.Capacity));
 				}
 				else
-					distribution[country].sourceInput += source.Capacity;
+					distribution[country].m_sourceInput += source.Capacity;
 			}
 
 			//Spread power from sources over countries as expected power
-			if (oldGrid == null)
+			if (a_oldGrid == null)
 			{
 				foreach (KeyValuePair<int, CountryEnergyAmount> kvp in distribution)
 				{
 					//Calculate a new estimation for expected value
-					kvp.Value.expected = Math.Min(kvp.Value.maximum, kvp.Value.maximum / totalCountryCapacity * sourcePower);
-					if (kvp.Value.maximum > maxCountryCapacity)
-						maxCountryCapacity = kvp.Value.maximum;
+					kvp.Value.m_expected = Math.Min(kvp.Value.m_maximum, kvp.Value.m_maximum / totalCountryCapacity * m_sourcePower);
+					if (kvp.Value.m_maximum > m_maxCountryCapacity)
+						m_maxCountryCapacity = kvp.Value.m_maximum;
 				}
 			}
 			else
 			{
 				Dictionary<int, double> fractionReceived = new Dictionary<int, double>();
-				long oldTotal = oldGrid.AvailablePower;
-				long newTotal = sourcePower;
+				long oldTotal = a_oldGrid.AvailablePower;
+				long newTotal = m_sourcePower;
 				if (!Mathf.Approximately(oldTotal, 0))
 				{
-					foreach (KeyValuePair<int, CountryEnergyAmount> kvp in oldGrid.energyDistribution.distribution)
+					foreach (KeyValuePair<int, CountryEnergyAmount> kvp in a_oldGrid.m_energyDistribution.m_distribution)
 					{
-						if (kvp.Value.expected < 0)
+						if (kvp.Value.m_expected < 0)
 						{
-							long sentValue = Math.Max(-distribution[kvp.Key].maximum, kvp.Value.expected);
+							long sentValue = Math.Max(-distribution[kvp.Key].m_maximum, kvp.Value.m_expected);
 							newTotal += -sentValue;
-							distribution[kvp.Key].expected = sentValue;
+							m_sharedPower -= sentValue;
+							distribution[kvp.Key].m_expected = sentValue;
 							fractionReceived.Add(kvp.Key, -1f);
 						}
 						else
 						{
-							fractionReceived.Add(kvp.Key, (double)kvp.Value.expected / (double)oldTotal);
+							fractionReceived.Add(kvp.Key, (double)kvp.Value.m_expected / (double)oldTotal);
 						}
 					}
 				}
@@ -522,90 +448,39 @@ namespace MSP2050.Scripts
 					{
 						if (fractionReceived[kvp.Key] >= 0)
 						{
-							kvp.Value.expected = Math.Min(kvp.Value.maximum, (long)(fractionReceived[kvp.Key] * (double)newTotal));
+							kvp.Value.m_expected = Math.Min(kvp.Value.m_maximum, (long)(fractionReceived[kvp.Key] * (double)newTotal));
 						}
 					}
 					else
-						kvp.Value.expected = 0;
+						kvp.Value.m_expected = 0;
 	
-					if (kvp.Value.maximum > maxCountryCapacity)
-						maxCountryCapacity = kvp.Value.maximum;
+					if (kvp.Value.m_maximum > m_maxCountryCapacity)
+						m_maxCountryCapacity = kvp.Value.m_maximum;
 				}
 			}
 
-			energyDistribution = new GridEnergyDistribution(distribution);
-		}
-
-		/// <summary>
-		/// Creates a new distribution with the right countries and maximum.
-		/// </summary>
-		public void CalculateInitialMaximum()
-		{
-			if (energyDistribution != null)
-				return;
-
-			long totalCountryCapacity = 0;
-			maxCountryCapacity = 0;
-			Dictionary<int, CountryEnergyAmount> distribution = new Dictionary<int, CountryEnergyAmount>();
-
-			//Add sockets and calculate socket capacities
-			foreach (EnergyPointSubEntity socket in sockets)
-			{
-				if (!distribution.ContainsKey(socket.Entity.Country))
-				{
-					distribution.Add(socket.Entity.Country, new CountryEnergyAmount(socket.Capacity));
-					totalCountryCapacity += socket.Capacity;
-				}
-				else
-				{
-					distribution[socket.Entity.Country].maximum += socket.Capacity;
-					totalCountryCapacity += socket.Capacity;
-				}
-			}
-
-			//Add sources and determine source input
-			foreach (EnergyPointSubEntity source in sources)
-			{
-				if (!distribution.ContainsKey(source.Entity.Country))
-				{
-					distribution.Add(source.Entity.Country, new CountryEnergyAmount(0, source.Capacity));
-				}
-				else
-					distribution[source.Entity.Country].sourceInput += source.Capacity;
-			}
-
-			//Determine maxCountryCapacity
-			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in distribution)
-			{
-				if (kvp.Value.maximum > maxCountryCapacity)
-					maxCountryCapacity = kvp.Value.maximum;
-			}
-
-			energyDistribution = new GridEnergyDistribution(distribution);
+			m_energyDistribution = new GridEnergyDistribution(distribution);
 		}
 
 		public bool IsGreen
 		{
 			get
 			{
-				if (sockets.Count > 0)
+				if (m_sockets.Count > 0)
 				{
-					return sockets[0].Entity.GreenEnergy;
+					return m_sockets[0].m_entity.GreenEnergy;
 				}
-				else
-				{
-					return false;
-				}
+				return false;
 			}
 		}
 
-		public bool MatchesColor(GridColor color)
+		public bool MatchesColor(GridColor a_color)
 		{
-			if (color == GridColor.Either)
+			if (a_color == GridColor.Either)
 				return true;
-			else if (color == GridColor.Green && IsGreen)
+			if (a_color == GridColor.Green && IsGreen)
 				return true;
-			else if (color == GridColor.Grey && !IsGreen)
+			if (a_color == GridColor.Grey && !IsGreen)
 				return true;
 			return false;
 		}
@@ -614,18 +489,18 @@ namespace MSP2050.Scripts
 		{
 			get
 			{
-				if (sources != null && sources.Count > 0)
+				if (m_sources != null && m_sources.Count > 0)
 					return true;
-				if (energyDistribution.distribution.Count > 1)
+				if (m_energyDistribution.m_distribution.Count > 1)
 					return true;
 				return false;
 			}
 		}
 
-		public bool CountryHasSocketInGrid(int countryID)
+		public bool CountryHasSocketInGrid(int a_countryID)
 		{
-			foreach (EnergyPointSubEntity socket in sockets)
-				if (socket.Entity.Country == countryID)
+			foreach (EnergyPointSubEntity socket in m_sockets)
+				if (socket.m_entity.Country == a_countryID)
 					return true;
 			return false;
 		}
@@ -635,98 +510,94 @@ namespace MSP2050.Scripts
 		/// Assumes the grid was fetched by calling GetGridsAtPlan, meaning this grid is the latest instance of its persistentID at the plan.
 		/// The targetplan time will always be equal to or earlier than the grid's plan.
 		/// </summary>
-		public GridPlanState GetGridPlanStateAtPlan(Plan targetPlan)
+		public GridPlanState GetGridPlanStateAtPlan(Plan a_targetPlan)
 		{
-			// Check if the grid is relevant at all ======================================
-			//if (!ShouldBeShown)
-			//	return GridPlanState.Hidden;
-
 			// If grid is part of plan, it is sure to be relevant ========================
-			if (targetPlan == plan)
+			if (a_targetPlan == m_plan)
 			{
 				//Can't be removed because they would not be part of this plan
-				if (persistentID == -1 || persistentID == databaseID)
+				if (m_persistentID == -1 || m_persistentID == m_databaseID)
 					return GridPlanState.Added;
 				return GridPlanState.Changed;
 			}
 
 			//A previous grid that was removed by geom changes in this plan
-			if (targetPlan.removedGrids != null && targetPlan.removedGrids.Contains(persistentID))
-				return GridPlanState.Removed;
+			if(a_targetPlan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var energyData))
+			{
+				if (energyData.removedGrids != null && energyData.removedGrids.Contains(m_persistentID))
+					return GridPlanState.Removed;
+			}
 
 			// Check if the grid is relevant for the plan's country ======================
 			bool countryInGrid = false;
-			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in energyDistribution.distribution)
+			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in m_energyDistribution.m_distribution)
 			{
-				if (kvp.Key == targetPlan.Country 
-				    || TeamManager.AM_ID == targetPlan.Country
-				    || TeamManager.GM_ID == targetPlan.Country)
-				{
-					countryInGrid = true;
-					break;
-				}
+				if (kvp.Key != a_targetPlan.Country
+					&& SessionManager.AM_ID != a_targetPlan.Country
+					&& SessionManager.GM_ID != a_targetPlan.Country)
+					continue;
+				countryInGrid = true;
+				break;
 			}
 
 			//Not part of targetPlan, depends on the plan's country if we are relevant
 			if (countryInGrid)
 				return GridPlanState.Normal;
-			else
-				return GridPlanState.Hidden;
+			return GridPlanState.Hidden;
 		}
 
-		public bool SocketWiseIdentical(EnergyGrid other)
+		public bool SocketWiseIdentical(EnergyGrid a_other)
 		{
-			if (other.sockets.Count != sockets.Count)
+			if (a_other.m_sockets.Count != m_sockets.Count)
 				return false;
 
 			bool identical = true;
-			foreach (EnergyPointSubEntity newSocket in sockets)
+			foreach (EnergyPointSubEntity newSocket in m_sockets)
 			{
 				bool presentInOld = false;//Is newSocket present in oldGrid
-				foreach (EnergyPointSubEntity oldSocket in other.sockets)
+				foreach (EnergyPointSubEntity oldSocket in a_other.m_sockets)
 					if (newSocket.GetPersistentID() == oldSocket.GetPersistentID()
-					    && newSocket.Entity.EntityTypes[0] == oldSocket.Entity.EntityTypes[0]
-					    && newSocket.Entity.Country == oldSocket.Entity.Country)
+					    && newSocket.m_entity.EntityTypes[0] == oldSocket.m_entity.EntityTypes[0]
+					    && newSocket.m_entity.Country == oldSocket.m_entity.Country)
 					{
 						presentInOld = true;
 						break;
 					}
-				if (!presentInOld)
-				{
-					identical = false;
-					break;
-				}
+				if (presentInOld)
+					continue;
+				identical = false;
+				break;
 			}
 			return identical;
 		}
 
-		public bool SocketWiseIdentical(EnergyGrid other, out bool partiallyIdentical)
+		public bool SocketWiseIdentical(EnergyGrid a_other, out bool a_partiallyIdentical)
 		{
-			bool possiblyIdentical = other.sockets.Count == sockets.Count;
+			bool possiblyIdentical = a_other.m_sockets.Count == m_sockets.Count;
 			bool identical = possiblyIdentical;//If the #sockets don't match, they can never be identaical, but still partial
-			partiallyIdentical = false;
-			foreach (EnergyPointSubEntity newSocket in sockets)
+			a_partiallyIdentical = false;
+			foreach (EnergyPointSubEntity newSocket in m_sockets)
 			{
 				bool presentInOld = false;//Is newSocket present in oldGrid
-				foreach (EnergyPointSubEntity oldSocket in other.sockets)
+				foreach (EnergyPointSubEntity oldSocket in a_other.m_sockets)
 					if (newSocket.GetPersistentID() == oldSocket.GetPersistentID()
-					    && newSocket.Entity.EntityTypes[0] == oldSocket.Entity.EntityTypes[0]
-					    && newSocket.Entity.Country == oldSocket.Entity.Country)
+					    && newSocket.m_entity.EntityTypes[0] == oldSocket.m_entity.EntityTypes[0]
+					    && newSocket.m_entity.Country == oldSocket.m_entity.Country)
 					{
 						presentInOld = true;
-						partiallyIdentical = true;
+						a_partiallyIdentical = true;
 						break;
 					}
-				if (!presentInOld && partiallyIdentical)
+				if (!presentInOld && a_partiallyIdentical)
 				{
 					identical = false;
 					break; //We already found a partial match, and this socket is not in the old grid, no use in continueing
 				}
-				else if (partiallyIdentical && !possiblyIdentical)
+				if (a_partiallyIdentical && !possiblyIdentical)
 				{
 					break; //These grids can't be identical and we already found a partial match, no use in continueing
 				}
-				else if (!presentInOld)
+				if (!presentInOld)
 				{
 					//The grids arent identical, but might still be partially identical
 					identical = false;
@@ -736,68 +607,59 @@ namespace MSP2050.Scripts
 			return identical;
 		}
 
-		public bool SourceWiseIdentical(EnergyGrid other)
+		public bool SourceWiseIdentical(EnergyGrid a_other)
 		{
 			bool result = false;
-			if (sources.Count == other.sources.Count)
+			if (m_sources.Count != a_other.m_sources.Count)
+				return result;
+			result = true;
+			Dictionary<int, SourceSummary> dict = new Dictionary<int, SourceSummary>();
+			List<SourceSummary> newSources = new List<SourceSummary>();
+			foreach (EnergyPointSubEntity newSource in m_sources)
 			{
-				result = true;
-				Dictionary<int, SourceSummary> dict = new Dictionary<int, SourceSummary>();
-				foreach (EnergyPointSubEntity newSource in sources)
-				{
-					//Grids with new geom will never be identical to existing ones (even if it IS the same)
-					if (newSource.GetPersistentID() == -1)
-						return false;
-					dict.Add(newSource.GetPersistentID(), 
-						new SourceSummary(newSource.Entity.Country, 
-							newSource.sourcePolygon == null ? newSource.Entity.EntityTypes[0] : newSource.sourcePolygon.Entity.EntityTypes[0], 
-							newSource.Capacity));
-				}
-				foreach (EnergyPointSubEntity oldSource in other.sources)
-				{
-					SourceSummary pair;
-					if (!dict.TryGetValue(oldSource.GetPersistentID(), out pair)
-					    || pair.type != (oldSource.sourcePolygon == null ? oldSource.Entity.EntityTypes[0] : oldSource.sourcePolygon.Entity.EntityTypes[0])
-					    || pair.country != oldSource.Entity.Country
-					    || pair.capacity != oldSource.Capacity)
-					{ 
-						result = false;
-						break;
-					}
-				}
-			}
-			return result;
-		}
-
-		public Dictionary<int, string> GetSocketNamesPerCountry()
-		{
-			Dictionary<int, string> result = new Dictionary<int, string>();
-			foreach (EnergyPointSubEntity socket in sockets)
-			{
-				if (socket.Entity.name != "")
-				{
-					if (result.ContainsKey(socket.Entity.Country))
-						result[socket.Entity.Country] += ", " + socket.Entity.name;
-					else
-						result.Add(socket.Entity.Country, socket.Entity.name);
-				}
+				SourceSummary summary = new SourceSummary(newSource.m_entity.Country,
+					newSource.m_sourcePolygon == null ? newSource.m_entity.EntityTypes[0] : newSource.m_sourcePolygon.m_entity.EntityTypes[0],
+					newSource.Capacity);
+				if (newSource.GetPersistentID() == -1)
+					newSources.Add(summary);
 				else
+					dict.Add(newSource.GetPersistentID(), summary);
+			}
+			foreach (EnergyPointSubEntity oldSource in a_other.m_sources)
+			{
+				SourceSummary pair;
+				if(oldSource.GetPersistentID() == -1)
 				{
-					if (result.ContainsKey(socket.Entity.Country))
-						result[socket.Entity.Country] += ", Unnamed";
-					else
-						result.Add(socket.Entity.Country, "Unnamed");
+					bool found = false;
+					foreach(SourceSummary sourceSummary in newSources)
+					{
+						if (sourceSummary.Matches(oldSource.m_entity.Country, oldSource.m_sourcePolygon == null ? oldSource.m_entity.EntityTypes[0] : oldSource.m_sourcePolygon.m_entity.EntityTypes[0], oldSource.Capacity))
+						{
+							found = true;
+							break;
+						}
+					}
+					if (found)
+						continue;
+					result = false;
+					break;
+				}
+				if (!dict.TryGetValue(oldSource.GetPersistentID(), out pair)
+					|| !pair.Matches(oldSource.m_entity.Country, oldSource.m_sourcePolygon == null ? oldSource.m_entity.EntityTypes[0] : oldSource.m_sourcePolygon.m_entity.EntityTypes[0], oldSource.Capacity))
+				{ 
+					result = false;
+					break;
 				}
 			}
 			return result;
 		}
-
+		
 		public void ShowGridOnMap()
 		{
 			bool green = IsGreen;
-			foreach (AbstractLayer layer in LayerManager.energyLayers)
-				if (layer.greenEnergy == green)
-					LayerManager.ShowLayer(layer);
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
+				if (layer.m_greenEnergy == green)
+					LayerManager.Instance.ShowLayer(layer);
         
 			CameraManager.Instance.ZoomToBounds(GetGridRect());
 		}
@@ -806,12 +668,12 @@ namespace MSP2050.Scripts
 		{
 			Vector3 min = Vector3.one * float.MaxValue;
 			Vector3 max = Vector3.one * float.MinValue;
-			foreach (EnergyPointSubEntity socket in sockets)
+			foreach (EnergyPointSubEntity socket in m_sockets)
 			{
 				min = Vector3.Min(min, socket.GetPosition());
 				max = Vector3.Max(max, socket.GetPosition());
 			}
-			foreach (EnergyPointSubEntity source in sources)
+			foreach (EnergyPointSubEntity source in m_sources)
 			{
 				min = Vector3.Min(min, source.GetPosition());
 				max = Vector3.Max(max, source.GetPosition());
@@ -821,68 +683,69 @@ namespace MSP2050.Scripts
 
 		public void HighlightSockets()
 		{
-			foreach (EnergyPointSubEntity socket in sockets)
+			foreach (EnergyPointSubEntity socket in m_sockets)
 				HighlightManager.instance.HighlightPointSubEntity(socket);
 		}
 	}
 
 	public class CountryEnergyAmount
 	{
-		public long expected;
-		public long maximum;
-		public long sourceInput;
-		public CountryEnergyAmount(long maximum, long sourceInput = 0, long expected = 0)
+		public long m_expected;
+		public long m_maximum;
+		public long m_sourceInput;
+		public CountryEnergyAmount(long a_maximum, long a_sourceInput = 0, long a_expected = 0)
 		{
-			this.maximum = maximum;
-			this.sourceInput = sourceInput;
-			this.expected = expected;
+			m_maximum = a_maximum;
+			m_sourceInput = a_sourceInput;
+			m_expected = a_expected;
 		}
 	}
 
 	public class GridEnergyDistribution
 	{
-		public Dictionary<int, CountryEnergyAmount> distribution;
-		public GridEnergyDistribution(Dictionary<int, CountryEnergyAmount> distribution)
+		public Dictionary<int, CountryEnergyAmount> m_distribution;
+		public GridEnergyDistribution(Dictionary<int, CountryEnergyAmount> a_distribution)
 		{
-			this.distribution = distribution;
+			m_distribution = a_distribution;
 		}
 
 		/// <summary>
 		/// Makes a value copy of another GridEnergyDistribution
 		/// </summary>
-		public GridEnergyDistribution(GridEnergyDistribution distributionToCopy)
+		public GridEnergyDistribution(GridEnergyDistribution a_distributionToCopy)
 		{
-			distribution = new Dictionary<int, CountryEnergyAmount>();
-			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in distributionToCopy.distribution)
-				distribution.Add(kvp.Key, new CountryEnergyAmount(kvp.Value.maximum, kvp.Value.sourceInput, kvp.Value.expected));
+			m_distribution = new Dictionary<int, CountryEnergyAmount>();
+			foreach (KeyValuePair<int, CountryEnergyAmount> kvp in a_distributionToCopy.m_distribution)
+				m_distribution.Add(kvp.Key, new CountryEnergyAmount(kvp.Value.m_maximum, kvp.Value.m_sourceInput, kvp.Value.m_expected));
 		}
 	}
 
 	public class GridActualAndWasted
 	{
-		public Dictionary<int, long> socketActual;
-		public Dictionary<int, long> sourceActual;
-		public long wasted;
-		public long totalReceived;
+		public Dictionary<int, long> m_socketActual;
+		public Dictionary<int, long> m_sourceActual;
+		public long m_wasted;
+		public long m_totalReceived;
 
-		public GridActualAndWasted(int country, long socketActual)
+		public GridActualAndWasted(int a_country, long a_socketActual)
 		{
-			this.socketActual = new Dictionary<int, long>() { { country, socketActual } };
-			this.sourceActual = new Dictionary<int, long>();
-			totalReceived = socketActual;
+			m_socketActual = new Dictionary<int, long>() { { a_country, a_socketActual } };
+			m_sourceActual = new Dictionary<int, long>();
+			m_totalReceived = a_socketActual;
 		}
 	}
 
 	[Serializable]
+	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match json?
 	public class EnergyExpected
 	{
 		public int country_id;
 		public long energy_expected;
 
-		public EnergyExpected(int country_id, long energy_expected)
+		public EnergyExpected(int a_countryID, long a_energyExpected)
 		{
-			this.country_id = country_id;
-			this.energy_expected = energy_expected;
+			country_id = a_countryID;
+			energy_expected = a_energyExpected;
 		}
 	}
 }

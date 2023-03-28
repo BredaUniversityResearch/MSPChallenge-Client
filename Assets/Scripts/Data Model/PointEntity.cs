@@ -7,16 +7,16 @@ namespace MSP2050.Scripts
 	{
 		List<PointSubEntity> pointSubEntities;
 
-		public PointEntity(PointLayer layer, PlanLayer planLayer, Vector3 point, List<EntityType> entityType, EnergyPolygonSubEntity sourcepoly) : base(layer, entityType, sourcepoly == null ? planLayer.Plan.Country : sourcepoly.Entity.Country)
+		public PointEntity(PointLayer layer, PlanLayer planLayer, Vector3 point, List<EntityType> entityType, EnergyPolygonSubEntity sourcepoly) : base(layer, entityType, sourcepoly == null ? planLayer.Plan.Country : sourcepoly.m_entity.Country)
 		{
 			PlanLayer = planLayer;
 			if (layer.IsEnergyPointLayer())
 			{
 				pointSubEntities = new List<PointSubEntity>() { new EnergyPointSubEntity(this, point, sourcepoly) };
-				//if (layer.editingType == AbstractLayer.EditingType.Socket && LayerManager.EEZLayer != null)
+				//if (layer.editingType == AbstractLayer.EditingType.Socket && LayerManager.Instance.EEZLayer != null)
 				//{
 				//    //Determine country based on the EEZ we were placed in
-				//    List<Entity> eez = LayerManager.EEZLayer.GetEntitiesAt(point);
+				//    List<Entity> eez = LayerManager.Instance.EEZLayer.GetEntitiesAt(point);
 				//    if (eez != null && eez.Count > 0)
 				//    {
 				//        country = eez[0].country;

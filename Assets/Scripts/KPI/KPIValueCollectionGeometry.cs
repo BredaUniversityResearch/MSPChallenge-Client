@@ -15,13 +15,13 @@ namespace MSP2050.Scripts
 		public void UpdateLayerValues(AbstractLayer layer, LayerState state, int month)
 		{
 			float total = 0;
-			Dictionary<EntityType, float> totalByEntityType = new Dictionary<EntityType, float>(layer.EntityTypes.Count);
-			foreach (EntityType type in layer.EntityTypes.Values)
+			Dictionary<EntityType, float> totalByEntityType = new Dictionary<EntityType, float>(layer.m_entityTypes.Count);
+			foreach (EntityType type in layer.m_entityTypes.Values)
 			{
 				totalByEntityType.Add(type, 0.0f);
 			}
 			
-			LayerManager.GeoType layerGeoType = layer.GetGeoType();
+			LayerManager.EGeoType layerGeoType = layer.GetGeoType();
 			foreach (Entity entity in state.baseGeometry)
             {
                 if (countryId != 0 && entity.Country != countryId)
@@ -31,15 +31,15 @@ namespace MSP2050.Scripts
 				float subEntityTotal;
 				switch (layerGeoType)
 				{
-				case LayerManager.GeoType.polygon:
+				case LayerManager.EGeoType.Polygon:
 					PolygonSubEntity polygonEntity = (PolygonSubEntity)subEntity;
 					subEntityTotal = polygonEntity.SurfaceAreaSqrKm;
 					break;
-				case LayerManager.GeoType.line:
+				case LayerManager.EGeoType.Line:
 					LineStringSubEntity lineEntity = (LineStringSubEntity)subEntity;
 					subEntityTotal = lineEntity.LineLengthKm;
 					break;
-				case LayerManager.GeoType.point:
+				case LayerManager.EGeoType.Point:
 					subEntityTotal = 1.0f;
 					break;
 				default:
@@ -49,7 +49,7 @@ namespace MSP2050.Scripts
 				}
 
 				total += subEntityTotal;
-				foreach (EntityType type in subEntity.Entity.EntityTypes)
+				foreach (EntityType type in subEntity.m_entity.EntityTypes)
 				{
 					float entityTypeValue;
 					totalByEntityType.TryGetValue(type, out entityTypeValue);

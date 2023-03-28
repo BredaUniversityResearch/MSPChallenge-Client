@@ -8,10 +8,10 @@ namespace MSP2050.Scripts
 
 		[SerializeField] private Image icon = null;
 		[SerializeField] private TextMeshProUGUI nameText = null;
-		[SerializeField] private InputField valueInput = null;
+		[SerializeField] private CustomInputField valueInput = null;
 		[SerializeField] private TextMeshProUGUI unit = null;
 
-		public ActivePlanWindow.ParameterChangeCallback parameterChangedCallback;
+		public AP_GeometryTool.ParameterChangeCallback parameterChangedCallback;
 		private EntityPropertyMetaData parameter;
 	
 		void Start ()
@@ -46,6 +46,7 @@ namespace MSP2050.Scripts
 			valueInput.contentType = parameter.ContentType;
 			nameText.text = parameter.DisplayName;
 			unit.text = parameter.Unit;
+			unit.gameObject.SetActive(!string.IsNullOrEmpty(parameter.Unit));
 			SetInteractable(false);
 			if (!string.IsNullOrEmpty(parameter.SpriteName))
 				icon.sprite = Resources.Load<Sprite>(parameter.SpriteName);

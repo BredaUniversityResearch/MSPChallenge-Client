@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Joins;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -12,7 +13,8 @@ namespace MSP2050.Scripts
 
 		public enum PlanState { DESIGN = 0, CONSULTATION = 1, APPROVAL = 2, APPROVED = 3, IMPLEMENTED = 4, DELETED = 5 };
 
-		public int ID;
+		public int creationBatchCallID; //ID of the PostPlan call in the batch
+		public int ID = -1;
 		public string Name;
 		public string Description;
 		public int StartTime;
@@ -22,18 +24,27 @@ namespace MSP2050.Scripts
 		public int LockedBy;
 
 		public List<PlanLayer> PlanLayers { get; private set; }
-
 		public Dictionary<int, EPlanApprovalState> countryApproval;
-		public List<EnergyGrid> energyGrids;
-		public HashSet<int> removedGrids; //persis ID of removed grids
-		public FishingDistributionDelta fishingDistributionDelta;
-		public bool energyPlan;
-		public bool shippingPlan;
-		public bool ecologyPlan;
-		public bool energyError; 
-		public bool altersEnergyDistribution; 
+		private Dictionary<string, APolicyPlanData> m_policies = new Dictionary<string, APolicyPlanData>();
+		public Dictionary<string, APolicyPlanData> Policies => m_policies;
+
+		public List<PlanMessage> PlanMessages { get; private set; }
+		private static HashSet<int> m_receivedPlanMessages = new HashSet<int>();
+		public delegate void OnMessageReceived(PlanMessage a_message);
+		public event OnMessageReceived OnMessageReceivedCallback;
 
 		private bool requestingLock;
+
+		public Plan()
+		{
+			State = Plan.PlanState.DESIGN;
+			Country = SessionManager.Instance.CurrentUserTeamID;
+			ConstructionStartTime = -100;
+			StartTime = -100;
+			LockedBy = -1;
+			PlanMessages = new List<PlanMessage>();
+			PlanLayers = new List<PlanLayer>();
+		}
 
 		public Plan(PlanObject planObject, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
@@ -44,7 +55,6 @@ namespace MSP2050.Scripts
 			StartTime = planObject.startdate;
 			State = StringToPlanState(planObject.state);
 			Country = planObject.country;
-			//Owner = TeamManager.GetTeamByIndex(planObject.user);
 
 			//Set locked state
 			int lockedByUser = -1;
@@ -59,7 +69,7 @@ namespace MSP2050.Scripts
 				foreach (ApprovalObject obj in planObject.votes)
 					countryApproval.Add(obj.country, obj.vote);
 			}
-
+			PlanMessages = new List<PlanMessage>();
 
 			//=================================== PLANLAYERS =====================================
 
@@ -85,36 +95,7 @@ namespace MSP2050.Scripts
 
 			//=================================== PLAN TYPE =====================================
 
-			//Determine plan type
-			if (planObject.type != null)
-			{
-				string[] types = planObject.type.Split(',');
-				energyPlan = types[0] == "1" && Main.IsSimulationConfigured(ESimulationType.CEL); //MSP-1856, Energy plans only valid when CEL is configured.
-				ecologyPlan = types[1] == "1";
-				shippingPlan = types[2] == "1";
-			}
-
-			if (ecologyPlan)
-			{
-				if (planObject.fishing == null)
-				{
-					fishingDistributionDelta = new FishingDistributionDelta(); //If null, it cant pick the right constructor automatically
-				}
-				else
-				{
-					fishingDistributionDelta = new FishingDistributionDelta(planObject.fishing);
-				}
-			}
-
-			if (energyPlan)
-			{
-				//removedGrids = planObject.deleted_grids;
-				//energyGrids = new List<EnergyGrid>();
-				//foreach (GridObject obj in planObject.grids)
-				//	energyGrids.Add(new EnergyGrid(obj, this));
-				altersEnergyDistribution = planObject.alters_energy_distribution;
-			}
-			energyError = planObject.energy_error == "1";
+			PolicyManager.Instance.RunPlanUpdate(planObject.policies, this, APolicyLogic.EPolicyUpdateStage.General);
 		}
 
 		public bool IsRequestingLock()
@@ -129,7 +110,7 @@ namespace MSP2050.Scripts
 
 		public void AttemptLock(PlanLockAction actionOnSuccess, PlanLockAction actionOnFail)
 		{
-			if (PlanManager.UserHasPlanLocked(TeamManager.CurrentSessionID))
+			if (PlanManager.Instance.UserHasPlanLocked(SessionManager.Instance.CurrentSessionID))
 			{
 				if (actionOnFail != null)
 					actionOnFail(this);
@@ -140,26 +121,25 @@ namespace MSP2050.Scripts
 			requestingLock = true;
 			NetworkForm form = new NetworkForm();
 			form.AddField("id", ID);
-			form.AddField("user", TeamManager.CurrentSessionID.ToString());
-			ServerCommunication.DoRequest<string>(Server.LockPlan(), form, (_) => HandleAttemptLockSuccess(actionOnSuccess), (r,m) => HandleAttemptLockFailure(actionOnFail, r, m));
+			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
+			ServerCommunication.Instance.DoRequest<string>(Server.LockPlan(), form, (_) => HandleAttemptLockSuccess(actionOnSuccess), (r,m) => HandleAttemptLockFailure(actionOnFail, r, m));
 		}
 
 		private void HandleAttemptLockSuccess(PlanLockAction actionOnSuccess)
 		{
-			LockedBy = TeamManager.CurrentSessionID;
-			PlanDetails.LockStateChanged(this, IsLocked);
-			PlanManager.PlanLockUpdated(this);
+			LockedBy = SessionManager.Instance.CurrentSessionID;
+			InterfaceCanvas.Instance.plansList.UpdatePlan(this);
 			if (actionOnSuccess != null)
 				actionOnSuccess(this);
 			requestingLock = false;
 		}
 
-		private void HandleAttemptLockFailure(PlanLockAction actionOnFail, ServerCommunication.ARequest request, string message)
+		private void HandleAttemptLockFailure(PlanLockAction actionOnFail, ARequest request, string message)
 		{
 			if (request.retriesRemaining > 0)
 			{
 				Debug.Log($"Request failed with message: {message}.. Retrying {request.retriesRemaining} more times.");
-				ServerCommunication.RetryRequest(request);
+				ServerCommunication.Instance.RetryRequest(request);
 			}
 			else
 			{
@@ -174,56 +154,31 @@ namespace MSP2050.Scripts
 
 		public void AttemptUnlock()
 		{
-			AttemptUnlock(false);
+			AttemptUnlock(false, null);
 		}
 
-		public void AttemptUnlock(bool forceUnlock)
+		public bool HasPolicyErrors()
 		{
-			AttemptUnlock(forceUnlock, null);
-		}
-
-		public void AttemptUnlock(bool forceUnlock, Action<string> callback)
-		{
-			NetworkForm form = new NetworkForm();
-			form.AddField("id", ID);
-			form.AddField("force_unlock", forceUnlock ? "1" : "0");
-			form.AddField("user", TeamManager.CurrentSessionID.ToString());
-			ServerCommunication.DoRequest<string>(Server.UnlockPlan(), form, callback, ServerCommunication.EWebRequestFailureResponse.Crash);
-		}
-
-		public void AttemptUnlock(BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
-			dataObject.Add("force_unlock", 0);
-			dataObject.Add("user", TeamManager.CurrentSessionID.ToString());
-			batch.AddRequest(Server.UnlockPlan(), dataObject, BatchRequest.BATCH_GROUP_UNLOCK);
-		}
-
-		public bool HasErrors()
-		{
-			return energyError || IssueManager.instance.HasError(this);
+			if (Policies != null)
+			{
+				foreach (var kvp in Policies)
+				{
+					if (kvp.Value.logic.HasError(kvp.Value))
+						return true;
+				}
+			}
+			return false;
 		}
 
 		public void UpdatePlan(PlanObject updatedData, Dictionary<AbstractLayer, int> layerUpdateTimes)
 		{
 			//=================================== BASE INFO UPDATE =====================================
-			bool nameOrDescriptionChanged = false, timeChanged = false, stateChanged = false, forceMonitorUpdate = false;
+			bool stateChanged = false;
 			bool inTimelineBefore = ShouldBeVisibleInTimeline;
+			bool wasInfluencing = InInfluencingState;
 
-			//Handle name
-			if (updatedData.name != Name)
-			{
-				Name = updatedData.name;
-				nameOrDescriptionChanged = true;
-			}
-
-			//Handle description
-			if (updatedData.description != Description)
-			{
-				Description = updatedData.description;
-				nameOrDescriptionChanged = true;
-			}
+			Name = updatedData.name;
+			Description = updatedData.description;
 
 			//Handle locks
 			int lockedByUser = -1;
@@ -232,9 +187,13 @@ namespace MSP2050.Scripts
 			if (lockedByUser != LockedBy)
 			{
 				LockedBy = lockedByUser;
-				PlanManager.PlanLockUpdated(this);
-				PlanDetails.LockStateChanged(this, IsLocked);
 				stateChanged = true;
+				if (Main.InEditMode && Main.CurrentlyEditingPlan == this && lockedByUser != SessionManager.Instance.CurrentSessionID)
+				{
+					InterfaceCanvas.Instance.activePlanWindow.ForceCancel(true);
+					DialogBoxManager.instance.NotificationWindow("Plan Unexpectedly Unlocked", "Plan has been unlocked by an external party. All changes have been discarded.", null);
+				}
+				//PlanManager.Instance.PlanLockUpdated(this);
 			}
 
 			//Handle state
@@ -244,12 +203,10 @@ namespace MSP2050.Scripts
 			{
 				if (State != PlanState.DESIGN)
 				{
-					bool editingLayers = Main.CurrentlyEditingPlan != null && Main.CurrentlyEditingPlan.ID == updatedData.id;
-					bool editingContent = Main.EditingPlanDetailsContent && PlanDetails.GetSelectedPlan().ID == updatedData.id;
 					//Cancel editing if we were editing it before
-					if (editingLayers || editingContent)
+					if (Main.CurrentlyEditingPlan != null && Main.CurrentlyEditingPlan.ID == updatedData.id)
 					{
-						PlanDetails.instance.CancelEditingContent();
+						InterfaceCanvas.Instance.activePlanWindow.ForceCancel(true);
 
 						if (State == PlanState.DELETED)
 						{
@@ -265,32 +222,29 @@ namespace MSP2050.Scripts
 				if (State == PlanState.DELETED) //was deleted, disable and remove plan layers
 				{
 					//Stop viewing plan if we were before
-					if (PlanManager.planViewing != null)
-						if (PlanManager.planViewing.ID == ID)
-							PlanManager.HideCurrentPlan();
+					if (PlanManager.Instance.m_planViewing != null && PlanManager.Instance.m_planViewing.ID == ID)
+						PlanManager.Instance.HideCurrentPlan();
 
 					//Remove planlayers from their respective layers (AFTER REDRAWING)
 					foreach (PlanLayer layer in PlanLayers)
 					{
 						layer.BaseLayer.RemovePlanLayer(layer);
-						IssueManager.instance.DeleteIssuesForPlanLayer(layer);
+						layer.issues = new HashSet<PlanIssueObject>(new IssueObjectEqualityComparer());
 					}
 				}
 				else if (State == PlanState.IMPLEMENTED)
 				{
 					foreach (PlanLayer layer in PlanLayers)
-						IssueManager.instance.DeleteIssuesForPlanLayer(layer);
+						layer.issues = new HashSet<PlanIssueObject>();
 					//Stop viewing plan if we were before
-					if (PlanManager.planViewing != null)
-						if (PlanManager.planViewing.ID == ID)
-							PlanManager.HideCurrentPlan();
+					if (PlanManager.Instance.m_planViewing != null && PlanManager.Instance.m_planViewing.ID == ID)
+						PlanManager.Instance.HideCurrentPlan();
 				}
 				else if (oldState == PlanState.DELETED) //was deleted before, re-enable and add layers to base
 				{
 					foreach (PlanLayer layer in PlanLayers)
 					{
 						layer.BaseLayer.AddPlanLayer(layer);
-						IssueManager.instance.InitialiseIssuesForPlanLayer(layer);
 					}
 				}
 
@@ -323,16 +277,13 @@ namespace MSP2050.Scripts
 			if (updatedData.startdate != StartTime)
 			{
 				StartTime = updatedData.startdate;
-				PlanManager.UpdatePlanTime(this);
+				PlanManager.Instance.UpdatePlanTime(this);
 				if (State != PlanState.DELETED)
+				{
 					foreach (PlanLayer planLayer in PlanLayers)
 						planLayer.BaseLayer.UpdatePlanLayerTime(planLayer);
-				timeChanged = true;
+				}
 			}
-
-			bool typeChanged = false;
-			bool layersChanged = false;
-			//PlanLayerUpdateTracker planLayerUpdateTracker = new PlanLayerUpdateTracker();
 
 			//Do not update if we have the plan locked, no one could have changed it.
 			//This persists if we stop editing until all data has been sent.
@@ -343,7 +294,7 @@ namespace MSP2050.Scripts
 				HashSet<PlanLayer> removedPlanLayers = new HashSet<PlanLayer>(PlanLayers);
 				foreach (PlanLayerObject updatedLayer in updatedData.layers)
 				{
-					PlanLayer planLayer = getPlanLayerForID(updatedLayer.layerid);
+					PlanLayer planLayer = getPlanLayerForBaseID(updatedLayer.original);
 					if (planLayer == null)
 					{
 						//Create new planLayer
@@ -351,9 +302,7 @@ namespace MSP2050.Scripts
 						PlanLayers.Add(planLayer);
 						if (State != PlanState.DELETED)
 							planLayer.BaseLayer.AddPlanLayer(planLayer);
-						PlanManager.PlanLayerAdded(this, planLayer);
 						planLayer.DrawGameObjects();
-						layersChanged = true;
 					}
 					else
 					{
@@ -367,10 +316,8 @@ namespace MSP2050.Scripts
 				foreach (PlanLayer removedPlanLayer in removedPlanLayers)
 				{
 					PlanLayers.Remove(removedPlanLayer);
-					PlanManager.PlanLayerRemoved(this, removedPlanLayer);
 					removedPlanLayer.BaseLayer.RemovePlanLayerAndEntities(removedPlanLayer);
 					removedPlanLayer.RemoveGameObjects();
-					layersChanged = true;
 				}
 
 				//Update construction start time
@@ -379,212 +326,81 @@ namespace MSP2050.Scripts
 					if (planLayer.BaseLayer.AssemblyTime > maxConstructionTime)
 						maxConstructionTime = planLayer.BaseLayer.AssemblyTime;
 				ConstructionStartTime = StartTime - maxConstructionTime;
-				//}
 
-				////Do not update geometry or type if it is being edited. It is locked by this user anyway.
-				//if (Main.CurrentlyEditingPlan == null || Main.CurrentlyEditingPlan.ID != updatedData.id)
-				//{
-				//=================================== PLAN TYPE UPDATE =====================================
-
-				bool newEnergyPlan = false;
-				bool newEcologyPlan = false;
-				bool newShippingPlan = false;
-				if (updatedData.type != null)
-				{
-					string[] types = updatedData.type.Split(',');
-					newEnergyPlan = types[0] == "1";
-					newEcologyPlan = types[1] == "1";
-					newShippingPlan = types[2] == "1";
-					typeChanged = true;
-				}
-
-				//Update energy
-				if (energyPlan && !newEnergyPlan)
-				{
-					//If error changed, plandetails needs update
-					if (energyError)
-						stateChanged = true;
-
-					energyGrids = null;
-					energyError = false;
-					altersEnergyDistribution = false;
-					forceMonitorUpdate = true;
-				}
-				else if (newEnergyPlan)
-				{
-					bool oldEnergyError = energyError;
-					energyError = updatedData.energy_error == "1";
-					altersEnergyDistribution = updatedData.alters_energy_distribution;
-					forceMonitorUpdate = true;
-
-					//If error changed, plandetails needs update
-					if (energyError != oldEnergyError)
-						stateChanged = true;
-				}
-				energyPlan = newEnergyPlan;
-
-				//Update fishing
-				if (ecologyPlan && !newEcologyPlan)
-					fishingDistributionDelta = null;
-				else if (newEcologyPlan)
-					fishingDistributionDelta = new FishingDistributionDelta(updatedData.fishing);
-				ecologyPlan = newEcologyPlan;
-
-				//Update shipping
-				shippingPlan = newShippingPlan;
+				//=================================== POLICY UPDATE =====================================
+				PolicyManager.Instance.RunPlanUpdate(updatedData.policies, this, APolicyLogic.EPolicyUpdateStage.General);
 			}
-			//ServerCommunication.WaitForCondition(planLayerUpdateTracker.CompletedPlanLayerUpdates, () => planUpdateTracker.CompletedUpdate());
 
-			LayerManager.UpdateVisibleLayersFromPlan(this);
-			PlanManager.UpdatePlanInUI(this, nameOrDescriptionChanged, timeChanged, stateChanged, layersChanged, typeChanged, forceMonitorUpdate, oldStartTime, oldState, inTimelineBefore);
+			LayerManager.Instance.UpdateVisibleLayersFromPlan(this);
+			PlanManager.Instance.UpdatePlanInUI(this, stateChanged, oldStartTime, inTimelineBefore);
+			if(wasInfluencing != InInfluencingState)
+			{
+				PlanManager.Instance.OnPlanInfluencingChanged(this, !wasInfluencing);
+			}
 		}
 
-		public void UpdateGrids(HashSet<int> deleted, List<GridObject> newGrids)
+		public void ReceiveMessage(PlanMessageObject a_message)
 		{
-			//Don't update grids if we have the plan locked. Prevents updates while editing.
-			if (!IsLockedByUs)
+			if (m_receivedPlanMessages.Contains(a_message.message_id))
+				return;
+			m_receivedPlanMessages.Add(a_message.message_id);
+
+			PlanMessage newMessage = new PlanMessage() { message = a_message.message, team = SessionManager.Instance.GetTeamByTeamID(a_message.team_id), time = a_message.time, user_name = a_message.user_name };
+			PlanMessages.Add(newMessage);
+			if(OnMessageReceivedCallback != null)
 			{
-				removedGrids = deleted;
-				energyGrids = new List<EnergyGrid>();
-				foreach (GridObject obj in newGrids)
-					energyGrids.Add(new EnergyGrid(obj, this));
+				OnMessageReceivedCallback.Invoke(newMessage);
 			}
 		}
 
 		public PlanLayer GetPlanLayerForLayer(AbstractLayer baseLayer)
 		{
+			if (baseLayer == null)
+				return null;
+
 			foreach (PlanLayer planLayer in PlanLayers)
-				if (planLayer.BaseLayer.ID == baseLayer.ID)
+				if (planLayer.BaseLayer.m_id == baseLayer.m_id)
 					return planLayer;
 
 			return null;
 		}
 
-		public PlanLayer getPlanLayerForID(int planLayerID)
+		public PlanLayer GetPlanLayerForLayer(int baseLayerID)
 		{
 			foreach (PlanLayer planLayer in PlanLayers)
-				if (planLayer.ID == planLayerID)
+				if (planLayer.BaseLayer.m_id == baseLayerID)
 					return planLayer;
 
 			return null;
 		}
 
-		public void SetState(PlanState newState, BatchRequest batch)
+		public void AddNewPlanLayerFor(AbstractLayer a_layer)
 		{
-			if (newState == State)
-				return;
-			if (newState == PlanState.APPROVAL)
-			{
-				//makes sure approval is reset if we move to the approval state
-				//SubmitRequiredApproval(batch); //todo: reenable
-			}
-
-			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
-			dataObject.Add("state", newState.ToString());
-			dataObject.Add("user", TeamManager.CurrentSessionID.ToString());
-			batch.AddRequest(Server.SetPlanState(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			PlanLayer planLayer = new PlanLayer(this, a_layer);
+			PlanLayers.Add(planLayer);
+			planLayer.BaseLayer.AddPlanLayer(planLayer);
+			planLayer.DrawGameObjects();
 		}
 
-		public static void SendPlan(string planName, List<AbstractLayer> layers, int time, string type, bool altersEnergyDistribution)
+		public PlanLayer getPlanLayerForBaseID(int baseLayerID)
 		{
-			NetworkForm form = new NetworkForm();
-			form.AddField("country", TeamManager.CurrentUserTeamID);
-			form.AddField("name", planName);
-			form.AddField("time", time);
+			foreach (PlanLayer planLayer in PlanLayers)
+				if (planLayer.BaseLayer.m_id == baseLayerID)
+					return planLayer;
 
-			if (layers != null && layers.Count > 0)
-			{
-				List<int> layerIDs = new List<int>(layers.Count);
-				foreach (AbstractLayer layer in layers)
-					layerIDs.Add(layer.ID);
-				Debug.Log(JToken.FromObject(layerIDs).ToString());
-				form.AddField("layers", JToken.FromObject(layerIDs));
-			}
-			form.AddField("type", type);
-			form.AddField("alters_energy_distribution", altersEnergyDistribution ? 1 : 0);
-			Debug.Log(form.ToString());
-			ServerCommunication.DoRequest<int>(Server.PostPlan(), form, PlanPostedCallback);
+			return null;
 		}
 
-		static void PlanPostedCallback(int newPlanID)
-		{
-			PlanManager.ViewPlanWithIDWhenReceived(newPlanID);
-		}
-
-		public static void SetPlanType(int planId, string type, BatchRequest batch)
+		public void SendPlanCreation(BatchRequest a_batch)
 		{
 			JObject dataObject = new JObject();
-
-			dataObject.Add("id", planId);
-			dataObject.Add("type", type);
-
-			batch.AddRequest(Server.SetPlanType(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			dataObject.Add("country", Country);
+			creationBatchCallID = a_batch.AddRequest<int>(Server.PostPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CREATE, HandleDatabaseIDResult);
 		}
 
-		public static void SetEnergyDistribution(int planId, bool altersEnergyDistribution, BatchRequest batch)
+		void HandleDatabaseIDResult(int a_result)
 		{
-			JObject dataObject = new JObject();
-
-			dataObject.Add("id", planId);
-			dataObject.Add("alters_energy_distribution", altersEnergyDistribution ? 1 : 0);
-
-			batch.AddRequest(Server.SetPlanEnergyDistribution(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-		}
-
-		public void SetDescription(string newDescription, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-
-			dataObject.Add("id", ID);
-			dataObject.Add("description", string.IsNullOrEmpty(newDescription) ? " " : newDescription);
-
-			batch.AddRequest(Server.SetPlanDescription(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-		}
-
-		public void RenamePlan(string newName, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
-			dataObject.Add("name", newName);
-			batch.AddRequest(Server.RenamePlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-		}
-
-		public void ChangePlanDate(int newDate, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
-			dataObject.Add("date", newDate);
-			batch.AddRequest(Server.ChangePlanDate(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-		}
-
-		public void AddNewPlanLayer(AbstractLayer layer, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
-			dataObject.Add("layerid", layer.ID);
-			batch.AddRequest(Server.AddPlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-		}
-
-		public void RemovePlanLayer(PlanLayer planLayerToRemove, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("id", planLayerToRemove.ID);
-			batch.AddRequest(Server.DeletePlanLayer(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
-		}
-
-		public void SubmitRequiredApproval(BatchRequest batch, Dictionary<int, EPlanApprovalState> newApproval)
-		{
-			JObject dataObject = new JObject();
-			if (newApproval.Count > 0)
-			{
-				List<int> countries = new List<int>(newApproval.Count);
-				foreach (KeyValuePair<int, EPlanApprovalState> kvp in newApproval)
-					countries.Add(kvp.Key);
-				dataObject.Add("countries", JToken.FromObject(countries));
-			}
-			dataObject.Add("id", ID);
-			batch.AddRequest(Server.AddApproval(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			ID = a_result;
 		}
 
 		public Rect GetBounds()
@@ -612,34 +428,23 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		/// <summary>
-		/// Duplicates (value copies) the given energy grid and adds it to this plan.
-		/// </summary>
-		public EnergyGrid DuplicateEnergyGridToPlan(EnergyGrid gridToDuplicate)
-		{
-			EnergyGrid duplicate = new EnergyGrid(gridToDuplicate, this);
-			duplicate.distributionOnly = true;
-			energyGrids.Add(duplicate);
-			return duplicate;
-		}
-
-		public Dictionary<int, EPlanApprovalState> CalculateRequiredApproval(HashSet<int> countriesAffectedByRemovedGrids)
+		public void CalculateRequiredApproval()
 		{
 			bool requireAMApproval = false;
 			EApprovalType requiredApprovalLevel = EApprovalType.NotDependent;
-			Dictionary<int, EPlanApprovalState>  newCountryApproval = new Dictionary<int, EPlanApprovalState>();
+			countryApproval = new Dictionary<int, EPlanApprovalState>();
 
 			//Store this so we don't have to find removed geometry twice per layer
 			List<List<SubEntity>> removedGeom = new List<List<SubEntity>>();
 
-			//Check required approval for layers in plan
+			//Check required approval level for layers in plan
 			for (int i = 0; i < PlanLayers.Count; i++)
 			{
 				//Check removed geometry
 				List<SubEntity> removedSubEntities = PlanLayers[i].GetInstancesOfRemovedGeometry();
 				foreach (SubEntity t in removedSubEntities)
 				{
-					foreach (EntityType type in t.Entity.EntityTypes)
+					foreach (EntityType type in t.m_entity.EntityTypes)
 					{
 						if (type.requiredApproval == EApprovalType.AreaManager)
 							requireAMApproval = true;
@@ -663,115 +468,72 @@ namespace MSP2050.Scripts
 			}
 
 			if (requireAMApproval)
-				newCountryApproval.Add(TeamManager.AM_ID, EPlanApprovalState.Maybe);
+				countryApproval.Add(SessionManager.AM_ID, EPlanApprovalState.Maybe);
 
-			if (ecologyPlan)
+			//Check required approval for policies
+			foreach(var kvp in Policies)
 			{
-				SetupEcologyApproval(newCountryApproval, ref requiredApprovalLevel);
+				kvp.Value.logic.GetRequiredApproval(kvp.Value, this, countryApproval, ref requiredApprovalLevel);
 			}
 
-			//If not all approval required yet, check energy required approval
-			if (energyPlan && requiredApprovalLevel < EApprovalType.AllCountries)
-			{
-				//Removed grids
-				if (countriesAffectedByRemovedGrids != null)
-					foreach (int i in countriesAffectedByRemovedGrids)
-						if (!newCountryApproval.ContainsKey(i))
-							newCountryApproval.Add(i, EPlanApprovalState.Maybe);
-
-				//Added grids
-				if (energyGrids != null)
-					foreach (EnergyGrid grid in energyGrids)
-					foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.energyDistribution.distribution)
-						if (!newCountryApproval.ContainsKey(countryAmount.Key))
-							newCountryApproval.Add(countryAmount.Key, EPlanApprovalState.Maybe);
-			}
-
-			//All team approval required, there is no chance for AM approval
 			if (requiredApprovalLevel >= EApprovalType.AllCountries)
 			{
-				foreach (KeyValuePair<int, Team> kvp in TeamManager.GetTeamsByID())
-					if (!kvp.Value.IsManager && kvp.Value.ID != TeamManager.CurrentUserTeamID)
-						newCountryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
-				return newCountryApproval;
+				//All team approval required, there is no chance for AM approval
+				foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
+					if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID)
+						countryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
 			}
-
-			if (requiredApprovalLevel > 0 && LayerManager.EEZLayer != null)
+			else
 			{
-				List<PolygonEntity> EEZs = LayerManager.EEZLayer.Entities;
-				int userCountry = TeamManager.CurrentUserTeamID;
-				for (int i = 0; i < PlanLayers.Count; i++)
+				//Actually check the geometry to add required approval based on level
+				if (requiredApprovalLevel > 0 && LayerManager.Instance.m_eezLayer != null)
 				{
-					//The overlap function depends on the layer type
-					Func<PolygonSubEntity, SubEntity, bool> overlapCheck;
-					if (PlanLayers[i].BaseLayer is PolygonLayer)
-						overlapCheck = (a, b) => Util.PolygonPolygonIntersection(a, b as PolygonSubEntity);
-					else if (PlanLayers[i].BaseLayer is LineStringLayer)
-						overlapCheck = (a, b) => Util.PolygonLineIntersection(a, b as LineStringSubEntity);
-					else
-						overlapCheck = (a, b) => Util.PolygonPointIntersection(a, b as PointSubEntity);
-
-					//Check for new geometry
-					for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
+					List<PolygonEntity> EEZs = LayerManager.Instance.m_eezLayer.Entities;
+					int userCountry = SessionManager.Instance.CurrentUserTeamID;
+					for (int i = 0; i < PlanLayers.Count; i++)
 					{
-						Entity t = PlanLayers[i].GetNewGeometryByIndex(entityIndex);
-						if (t.Country != userCountry && !newCountryApproval.ContainsKey(t.Country))
-							newCountryApproval.Add(t.Country, EPlanApprovalState.Maybe);
-						foreach (PolygonEntity eez in EEZs)
-							if (eez.Country != userCountry && !newCountryApproval.ContainsKey(eez.Country) && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
-								newCountryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
+						//The overlap function depends on the layer type
+						Func<PolygonSubEntity, SubEntity, bool> overlapCheck;
+						if (PlanLayers[i].BaseLayer is PolygonLayer)
+							overlapCheck = (a, b) => Util.PolygonPolygonIntersection(a, b as PolygonSubEntity);
+						else if (PlanLayers[i].BaseLayer is LineStringLayer)
+							overlapCheck = (a, b) => Util.PolygonLineIntersection(a, b as LineStringSubEntity);
+						else
+							overlapCheck = (a, b) => Util.PolygonPointIntersection(a, b as PointSubEntity);
+
+						//Check for new geometry
+						for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
+						{
+							Entity t = PlanLayers[i].GetNewGeometryByIndex(entityIndex);
+							if (t.Country != userCountry && !countryApproval.ContainsKey(t.Country))
+								countryApproval.Add(t.Country, EPlanApprovalState.Maybe);
+							foreach (PolygonEntity eez in EEZs)
+								if (eez.Country != userCountry && !countryApproval.ContainsKey(eez.Country) && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
+									countryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
+						}
 					}
 				}
-			}
 
-			//Check for removed geometry. Only the country which owns the geometry will need to give their approval.
-			for (int i = 0; i < PlanLayers.Count; i++)
-			{
-				foreach (SubEntity t in removedGeom[i])
+				//Check for removed geometry. Only the country which owns the geometry will need to give their approval.
+				for (int i = 0; i < PlanLayers.Count; i++)
 				{
-					if (t.Entity.Country != Entity.INVALID_COUNTRY_ID && t.Entity.Country != TeamManager.CurrentUserTeamID && !newCountryApproval.ContainsKey(t.Entity.Country))
+					foreach (SubEntity t in removedGeom[i])
 					{
-						newCountryApproval.Add(t.Entity.Country, EPlanApprovalState.Maybe);
+						if (t.m_entity.Country != Entity.INVALID_COUNTRY_ID && t.m_entity.Country != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(t.m_entity.Country))
+						{
+							countryApproval.Add(t.m_entity.Country, EPlanApprovalState.Maybe);
+						}
 					}
 				}
 			}
 
 			//Remove owner from required approval
-			if (newCountryApproval.ContainsKey(Country))
-				newCountryApproval.Remove(Country);
-			if (newCountryApproval.ContainsKey(-1))
-				newCountryApproval.Remove(-1);
-			if (newCountryApproval.ContainsKey(TeamManager.GM_ID))
-				newCountryApproval.Remove(TeamManager.GM_ID);
-
-			return newCountryApproval;
-		}
-
-		private void SetupEcologyApproval(Dictionary<int, EPlanApprovalState> approvalStates, ref EApprovalType requiredApprovalLevel)
-		{
-			if (fishingDistributionDelta == null)
-			{
-				Debug.LogError("Need to calculate Ecology approval for a plan without fishing distributions.");
-				return;
-			}
-
-			bool hasChangedFishingValue = false;
-			foreach (KeyValuePair<string, Dictionary<int, float>> fishingFleets in fishingDistributionDelta.GetValuesByFleet())
-			{
-				foreach (KeyValuePair<int, float> fishingValues in fishingFleets.Value)
-				{
-					if (!approvalStates.ContainsKey(fishingValues.Key))
-					{
-						approvalStates.Add(fishingValues.Key, EPlanApprovalState.Maybe);
-						hasChangedFishingValue = true;
-					}
-				}
-			}
-
-			if (hasChangedFishingValue && requiredApprovalLevel < EApprovalType.EEZ)
-			{
-				requiredApprovalLevel = EApprovalType.EEZ;
-			}
+			if (countryApproval.ContainsKey(Country))
+				countryApproval.Remove(Country);
+			if (countryApproval.ContainsKey(-1))
+				countryApproval.Remove(-1);
+			if (countryApproval.ContainsKey(SessionManager.GM_ID))
+				countryApproval.Remove(SessionManager.GM_ID);
 		}
 
 		public bool NeedsApproval()
@@ -803,7 +565,7 @@ namespace MSP2050.Scripts
 		{
 			get
 			{
-				return (InInfluencingState && StartTime >= 0) || TeamManager.CurrentUserTeamID == Country || TeamManager.AreWeManager;
+				return (InInfluencingState && StartTime >= 0) || SessionManager.Instance.CurrentUserTeamID == Country || SessionManager.Instance.AreWeManager;
 			}
 		}
 
@@ -817,12 +579,12 @@ namespace MSP2050.Scripts
 
 		public bool IsLockedByUs
 		{
-			get { return TeamManager.CurrentSessionID == LockedBy; }
+			get { return SessionManager.Instance.CurrentSessionID == LockedBy; }
 		}
 
 		public bool RequiresTimeChange
 		{
-			get { return State == PlanState.DELETED && ConstructionStartTime <= GameState.GetCurrentMonth(); }
+			get { return State == PlanState.DELETED && ConstructionStartTime <= TimeManager.Instance.GetCurrentMonth(); }
 		}
 
 		public static PlanState StringToPlanState(string state)
@@ -838,28 +600,10 @@ namespace MSP2050.Scripts
 			return PlanState.DESIGN;
 		}
 
-		public void SubmitEnergyError(bool value, bool checkDependencies, BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("id", ID);
-			dataObject.Add("error", value ? 1 : 0);
-			dataObject.Add("check_dependent_plans", checkDependencies ? 1 : 0);
-			batch.AddRequest(Server.SetEnergyError(), dataObject, BatchRequest.BATCH_GROUP_ENERGY_ERROR);
-		}
-
-		public void SubmitRemovedGrids(BatchRequest batch)
-		{
-			JObject dataObject = new JObject();
-			dataObject.Add("plan", ID);
-			if(removedGrids!= null && removedGrids.Count > 0)
-				dataObject.Add("delete", JToken.FromObject(removedGrids));
-			batch.AddRequest(Server.SetPlanRemovedGrids(), dataObject, BatchRequest.BATCH_GROUP_PLAN_GRID_CHANGE);
-		}
-
 		public bool IsLayerpartOfPlan(AbstractLayer layer)
 		{
 			foreach (PlanLayer pl in PlanLayers)
-				if (pl.BaseLayer.ID == layer.ID)
+				if (pl.BaseLayer.m_id == layer.m_id)
 					return true;
 			return false;
 		}
@@ -892,46 +636,8 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public bool CheckForInvalidCables()
-		{
-			foreach (PlanLayer planLayer in PlanLayers)
-			{
-				//Check all new geometry in cable layers
-				if (planLayer.BaseLayer.IsEnergyLineLayer() && planLayer.GetNewGeometryCount() > 0)
-				{
-					//Create layer states for energy layers of a marching color, ignoring the cable layer
-					Dictionary<AbstractLayer, LayerState> energyLayerStates = new Dictionary<AbstractLayer, LayerState>();
-					foreach (AbstractLayer energyLayer in LayerManager.energyLayers)
-						if (energyLayer.greenEnergy == planLayer.BaseLayer.greenEnergy && energyLayer.ID != planLayer.BaseLayer.ID)
-							energyLayerStates.Add(energyLayer, energyLayer.GetLayerStateAtPlan(this));
-
-					foreach (Entity entity in planLayer.GetNewGeometry())
-					{
-						//Check the 2 connections for valid points
-						EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)entity.GetSubEntity(0);
-						foreach (Connection conn in cable.connections)
-						{
-							bool found = false;
-							AbstractLayer targetPointLayer = conn.point.sourcePolygon == null ? conn.point.Entity.Layer : conn.point.sourcePolygon.Entity.Layer;
-							foreach (Entity existingEntity in energyLayerStates[targetPointLayer].baseGeometry)
-							{
-								if (existingEntity.DatabaseID == conn.point.GetDatabaseID())
-								{
-									found = true;
-									break;
-								}
-							}
-							if (!found)
-								return true;
-						}
-					}
-				}
-			}
-			return false;
-		}
-
 		public void ZoomToPlan()
-		{ 
+		{
 			if(RectValid())
 				CameraManager.Instance.ZoomToBounds(GetPlanRect());
 		}
@@ -958,30 +664,232 @@ namespace MSP2050.Scripts
 				List<SubEntity> removedSubEntities = PlanLayers[i].GetInstancesOfRemovedGeometry();
 				foreach (SubEntity subEntity in removedSubEntities)
 				{
-					min = Vector3.Min(min, subEntity.BoundingBox.min);
-					max = Vector3.Max(max, subEntity.BoundingBox.max);
+					min = Vector3.Min(min, subEntity.m_boundingBox.min);
+					max = Vector3.Max(max, subEntity.m_boundingBox.max);
 				}
 				//Check new geometry
 				for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
 				{
 					SubEntity subEntity = PlanLayers[i].GetNewGeometryByIndex(entityIndex).GetSubEntity(0);
-					min = Vector3.Min(min, subEntity.BoundingBox.min);
-					max = Vector3.Max(max, subEntity.BoundingBox.max);
+					min = Vector3.Min(min, subEntity.m_boundingBox.min);
+					max = Vector3.Max(max, subEntity.m_boundingBox.max);
 				}
 			}
-			return new Rect(min, max - min); 
+			return new Rect(min, max - min);
+		}
+
+		public bool ContainsPolicy(string a_policyType)
+		{
+			return Policies.ContainsKey(a_policyType);	
+		}
+
+		public bool TryGetPolicyData<T>(string a_policyType, out T a_result) where T : APolicyPlanData
+		{
+			if(Policies.TryGetValue(a_policyType, out var temp))
+			{
+				a_result = (T)temp;
+				return true;
+			}
+			a_result = null;
+			return false;
+		}
+
+		public void SetPolicyData(APolicyPlanData a_data)
+		{
+			Policies[a_data.logic.Name] = a_data;
+		}
+
+		public void AddPolicyData(APolicyPlanData a_data)
+		{
+			Policies.Add(a_data.logic.Name, a_data);
+		}
+
+		public string GetDataBaseOrBatchIDReference()
+		{
+			if (ID != -1)
+				return ID.ToString();
+			else
+				return BatchRequest.FormatCallIDReference(creationBatchCallID);
+		}
+
+		public bool HasErrors()
+		{
+			return GetMaximumIssueSeverity() <= ERestrictionIssueType.Error;
+		}
+
+		public ERestrictionIssueType GetMaximumIssueSeverity()
+		{
+			if (HasPolicyErrors())
+				return ERestrictionIssueType.Error;
+
+			ERestrictionIssueType maxSeverity = ERestrictionIssueType.None;
+			foreach(PlanLayer planlayer in PlanLayers)
+			{
+				if (maxSeverity == ERestrictionIssueType.Error)
+					break;
+				if(planlayer.issues != null)
+				{
+					foreach(PlanIssueObject issue in planlayer.issues)
+					{
+						if (issue.type < maxSeverity)
+						{
+							maxSeverity = issue.type;
+						}
+					}
+				}
+			}
+			return maxSeverity;
+		}
+
+		public int GetMaximumIssueSeverityAndCount(out ERestrictionIssueType a_severity)
+		{
+			a_severity = ERestrictionIssueType.None;
+			int count = 0;
+			//ERestrictionIssueType newSeverity;
+			if (Policies != null)
+			{
+				foreach (var kvp in Policies)
+				{
+					count += kvp.Value.logic.GetMaximumIssueSeverityAndCount(kvp.Value, out var newSeverity);
+					if(newSeverity < a_severity)
+						a_severity = newSeverity;
+				}
+			}
+
+			foreach (PlanLayer planlayer in PlanLayers)
+			{
+				if (planlayer.issues != null)
+				{
+					count += planlayer.issues.Count;
+					if (a_severity > ERestrictionIssueType.Error)
+					{
+						foreach (PlanIssueObject issue in planlayer.issues)
+						{
+							if (issue.type < a_severity)
+							{
+								a_severity = issue.type;
+							}
+						}
+					}
+				}
+			}
+			return count;
+		}
+
+		#region ServerCommunication
+		public void AttemptUnlock(bool forceUnlock, Action<string> callback = null)
+		{
+			NetworkForm form = new NetworkForm();
+			form.AddField("id", ID);
+			form.AddField("force_unlock", forceUnlock ? "1" : "0");
+			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
+			ServerCommunication.Instance.DoRequest<string>(Server.UnlockPlan(), form, callback, ServerCommunication.EWebRequestFailureResponse.Crash);
+		}
+
+		public void AttemptUnlock(BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("id", ID);
+			dataObject.Add("force_unlock", 0);
+			dataObject.Add("user", SessionManager.Instance.CurrentSessionID.ToString());
+			batch.AddRequest(Server.UnlockPlan(), dataObject, BatchRequest.BATCH_GROUP_UNLOCK);
+		}
+
+		public void SubmitState(PlanState newState, BatchRequest batch)
+		{
+			if (newState == State)
+				return;
+			if (newState == PlanState.APPROVAL)
+			{
+				//makes sure approval is reset if we move to the approval state
+				//SubmitRequiredApproval(batch); //todo: reenable
+			}
+
+			JObject dataObject = new JObject();
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
+			dataObject.Add("state", newState.ToString());
+			dataObject.Add("user", SessionManager.Instance.CurrentSessionID.ToString());
+			batch.AddRequest(Server.SetPlanState(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+		}
+
+		public void SubmitDescription(BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
+			dataObject.Add("description", string.IsNullOrEmpty(Description) ? " " : Description);
+
+			batch.AddRequest(Server.SetPlanDescription(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+		}
+
+		public void SubmitName(BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
+			dataObject.Add("name", Name);
+			batch.AddRequest(Server.RenamePlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+		}
+
+		public void SubmitPlanDate(BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
+			dataObject.Add("date", StartTime);
+			batch.AddRequest(Server.ChangePlanDate(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+		}
+
+		public void SubmitRemovePlanLayer(PlanLayer planLayerToRemove, BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("id", planLayerToRemove.ID);
+			batch.AddRequest(Server.DeletePlanLayer(), dataObject, BatchRequest.BATCH_GROUP_LAYER_REMOVE);
+		}
+
+		public void SubmitRequiredApproval(BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+			if (countryApproval.Count > 0)
+			{
+				List<int> countries = new List<int>(countryApproval.Count);
+				foreach (KeyValuePair<int, EPlanApprovalState> kvp in countryApproval)
+					countries.Add(kvp.Key);
+				dataObject.Add("countries", JToken.FromObject(countries));
+			}
+			dataObject.Add("id", GetDataBaseOrBatchIDReference());
+			batch.AddRequest(Server.AddApproval(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 
 		public void AddSystemMessage(string text)
 		{
 			NetworkForm form = new NetworkForm();
-			form.AddField("plan", ID);
-			form.AddField("team_id", TeamManager.GM_ID);
+			form.AddField("plan", GetDataBaseOrBatchIDReference());
+			form.AddField("team_id", SessionManager.GM_ID);
 			form.AddField("user_name", "[SYSTEM]");
 			form.AddField("text", text);
 
-			ServerCommunication.DoRequest(Server.PostPlanFeedback(), form);
+			ServerCommunication.Instance.DoRequest(Server.PostPlanFeedback(), form);
 		}
+
+		public void SendMessage(string text)
+		{
+			NetworkForm form = new NetworkForm();
+			form.AddField("plan", GetDataBaseOrBatchIDReference());
+			form.AddField("team_id", SessionManager.Instance.CurrentUserTeamID);
+			form.AddField("user_name", SessionManager.Instance.CurrentUserName);
+			form.AddField("text", text);
+			ServerCommunication.Instance.DoRequest(Server.PostPlanFeedback(), form);
+		}
+
+		public void SendMessage(string text, BatchRequest batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("plan", GetDataBaseOrBatchIDReference());
+			dataObject.Add("team_id", SessionManager.Instance.CurrentUserTeamID);
+			dataObject.Add("user_name", SessionManager.Instance.CurrentUserName);
+			dataObject.Add("text", text);
+			batch.AddRequest(Server.PostPlanFeedback(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+		}
+		#endregion
 	}
 
 	public class PlanLayerUpdateTracker

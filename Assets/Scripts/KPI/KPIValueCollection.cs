@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace MSP2050.Scripts
 {
@@ -7,7 +8,7 @@ namespace MSP2050.Scripts
         public readonly int countryId;
         private readonly Dictionary<string, KPIValue> values = new Dictionary<string, KPIValue>(); //Includes categories.
 		private readonly List<KPICategory> valueCategories = new List<KPICategory>();
-		protected int MostRecentMonthReceived
+		public int MostRecentMonthReceived
 		{
 			get;
 			private set;
@@ -71,10 +72,12 @@ namespace MSP2050.Scripts
 			return false;
 		}
 
-		public void ProcessReceivedKPIData(IEnumerable<EcologyKPIObject> receivedKpiData)
+		public void ProcessReceivedKPIData(IEnumerable<KPIObject> receivedKpiData)
 		{
+			if (receivedKpiData.Count() == 0) return;
+
 			int mostRecentMonth = -1;
-			foreach (EcologyKPIObject kpiData in receivedKpiData)
+			foreach (KPIObject kpiData in receivedKpiData)
 			{
 				TryUpdateKPIValue(kpiData);
 				if (kpiData.month > mostRecentMonth)
@@ -107,7 +110,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void TryUpdateKPIValue(EcologyKPIObject kpi)
+		private void TryUpdateKPIValue(KPIObject kpi)
 		{
 			TryUpdateKPIValue(kpi.name, kpi.month, kpi.value);
 		}
@@ -139,7 +142,7 @@ namespace MSP2050.Scripts
 					float valueSum = 0.0f;
 					foreach (KPIValue childValue in category.GetChildValues())
 					{
-						valueSum += childValue.GetKpiValueForMonth(i);
+						valueSum += childValue.GetKpiValueForMonth(i) ?? 0f;
 					}
 
 					if (category.categoryValueType == EKPICategoryValueType.Sum)

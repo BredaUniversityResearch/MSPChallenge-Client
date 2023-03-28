@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		{
 			//Keep track of layer states so we can use the area of energy layers in KPIs
 			List<LayerState> layerStates = new List<LayerState>();
-			foreach (AbstractLayer layer in LayerManager.energyLayers)
+			foreach (AbstractLayer layer in PolicyLogicEnergy.Instance.m_energyLayers)
             {
                 //Start layer state in previous month so we get the right new and removed geometry
                 LayerState newLayerState = layer.GetLayerStateAtTime(month-1);
@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
                 layerStates.Add(newLayerState);
 			}
 
-			List<EnergyGrid> grids = PlanManager.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
+			List<EnergyGrid> grids = PolicyLogicEnergy.Instance.GetEnergyGridsAtTime(month, EnergyGrid.GridColor.Either);
 			CalculateKPIValues(month, gridDataForMonth, grids, layerStates);
 		}
 
@@ -85,7 +85,7 @@ namespace MSP2050.Scripts
 
 				if (state.layer.IsEnergyLineLayer())
 				{
-					if (state.layer.greenEnergy)
+					if (state.layer.m_greenEnergy)
 						greenNetwork = state.GetCableNetworkForState();
 					else
 						greyNetwork = state.GetCableNetworkForState();
@@ -104,50 +104,50 @@ namespace MSP2050.Scripts
                     {
                         if (grid.IsGreen)
                         {
-                            foreach (var kvp in gridActual[id].socketActual)
+                            foreach (var kvp in gridActual[id].m_socketActual)
                             {
                                 usedGreen += kvp.Value; //could be a negative number
                                 long actualSourcePower = 0;
-                                gridActual[id].sourceActual.TryGetValue(kvp.Key, out actualSourcePower);
+                                gridActual[id].m_sourceActual.TryGetValue(kvp.Key, out actualSourcePower);
                                 sharedGreen += Math.Max(0, actualSourcePower - kvp.Value);
                             }
-                            foreach (var kvp in grid.energyDistribution.distribution)
+                            foreach (var kvp in grid.m_energyDistribution.m_distribution)
                             {
-                                productionGreen += kvp.Value.sourceInput;
+                                productionGreen += kvp.Value.m_sourceInput;
                             }
-                            wastedGreen += gridActual[id].wasted;
+                            wastedGreen += gridActual[id].m_wasted;
                         }
                         else
                         {
-                            foreach (var kvp in gridActual[id].socketActual)
+                            foreach (var kvp in gridActual[id].m_socketActual)
                             {
                                 usedGrey += kvp.Value; //could be a negative number
                                 long actualSourcePower = 0;
-                                gridActual[id].sourceActual.TryGetValue(kvp.Key, out actualSourcePower);
+                                gridActual[id].m_sourceActual.TryGetValue(kvp.Key, out actualSourcePower);
                                 sharedGrey += Math.Max(0, actualSourcePower - kvp.Value);
                             }
-                            foreach (var kvp in grid.energyDistribution.distribution)
-                                productionGrey += kvp.Value.sourceInput;
-                            wastedGrey += gridActual[id].wasted;
+                            foreach (var kvp in grid.m_energyDistribution.m_distribution)
+                                productionGrey += kvp.Value.m_sourceInput;
+                            wastedGrey += gridActual[id].m_wasted;
                         }
                     }
                 }
                 //Specific country
                 else
                 {
-                    if (!gridActual.ContainsKey(id) || !grid.energyDistribution.distribution.ContainsKey(countryId)) //!gridActual[id].socketActual.ContainsKey(countryId))
+                    if (!gridActual.ContainsKey(id) || !grid.m_energyDistribution.m_distribution.ContainsKey(countryId)) //!gridActual[id].socketActual.ContainsKey(countryId))
                         continue;
                     if (grid.IsGreen)
                     {
                         long actualReceivedPower = 0; //could be a negative number
                         long actualSourcePower = 0;
-                        gridActual[id].socketActual.TryGetValue(countryId, out actualReceivedPower);
-                        gridActual[id].sourceActual.TryGetValue(countryId, out actualSourcePower);
+                        gridActual[id].m_socketActual.TryGetValue(countryId, out actualReceivedPower);
+                        gridActual[id].m_sourceActual.TryGetValue(countryId, out actualSourcePower);
 
                         usedGreen += actualReceivedPower; 
                         sharedGreen += Math.Max(0, actualSourcePower - actualReceivedPower);
-                        productionGreen += grid.energyDistribution.distribution[countryId].sourceInput;
-                        wastedGreen += gridActual[id].wasted;
+                        productionGreen += grid.m_energyDistribution.m_distribution[countryId].m_sourceInput;
+                        wastedGreen += gridActual[id].m_wasted;
 
                         //Set all lastRunGrid for geometry in grid
                         grid.SetAsLastRunGridForContent(greenNetwork);
@@ -156,13 +156,13 @@ namespace MSP2050.Scripts
                     {
                         long actualReceivedPower = 0; //could be a negative number
                         long actualSourcePower = 0;
-                        gridActual[id].socketActual.TryGetValue(countryId, out actualReceivedPower);
-                        gridActual[id].sourceActual.TryGetValue(countryId, out actualSourcePower);
+                        gridActual[id].m_socketActual.TryGetValue(countryId, out actualReceivedPower);
+                        gridActual[id].m_sourceActual.TryGetValue(countryId, out actualSourcePower);
 
                         usedGrey += actualReceivedPower; 
                         sharedGrey += Math.Max(0, actualSourcePower - actualReceivedPower);
-                        productionGrey += grid.energyDistribution.distribution[countryId].sourceInput;
-                        wastedGrey += gridActual[id].wasted;
+                        productionGrey += grid.m_energyDistribution.m_distribution[countryId].m_sourceInput;
+                        wastedGrey += gridActual[id].m_wasted;
 
                         //Set all lastRunGrid for geometry in grid
                         grid.SetAsLastRunGridForContent(greyNetwork);
@@ -217,7 +217,7 @@ namespace MSP2050.Scripts
 			if (!t.Layer.IsEnergyLayer())
 				return EnergyKPI.EnergyType.NoEnergy;
 
-			switch (t.Layer.editingType)
+			switch (t.Layer.m_editingType)
 			{
 				case AbstractLayer.EditingType.Cable:
 					if (t.GreenEnergy)

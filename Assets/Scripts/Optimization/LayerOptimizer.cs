@@ -31,7 +31,10 @@ namespace MSP2050.Scripts
 
 		public void Start()
 		{
-			LayerImporter.OnDoneImporting += OptimizeLayers;
+			if (Main.Instance.GameLoaded)
+				OptimizeLayers();
+			else
+				Main.Instance.OnFinishedLoadingLayers += OptimizeLayers;
 		}
 
 		public void Update()
@@ -54,7 +57,7 @@ namespace MSP2050.Scripts
 
 		public void OptimizeLayers()
 		{
-			foreach (AbstractLayer layer in LayerManager.GetLoadedLayers())        
+			foreach (AbstractLayer layer in LayerManager.Instance.GetLoadedLayers())        
 				if (layer.Optimized && layer is PolygonLayer)
 					OptimizePolygonLayer(layer as PolygonLayer);
 		}
@@ -68,8 +71,8 @@ namespace MSP2050.Scripts
 			tLineParent.transform.SetParent(target.LayerGameObject.transform, false);
 			Gradient gradient = new Gradient();
 			Color outlineColor = Color.black;
-			if(target.EntityTypes != null)
-				outlineColor = target.EntityTypes.GetFirstValue().DrawSettings.LineColor;
+			if(target.m_entityTypes != null)
+				outlineColor = target.m_entityTypes.GetFirstValue().DrawSettings.LineColor;
 			gradient.SetKeys(
 				new GradientColorKey[] { new GradientColorKey(outlineColor, 0.0f), new GradientColorKey(outlineColor, 1.0f) },
 				new GradientAlphaKey[] { new GradientAlphaKey(1f, 0.0f), new GradientAlphaKey(1f, 1.0f) }
@@ -81,10 +84,10 @@ namespace MSP2050.Scripts
 			{
 				if (mat == null)
 				{
-					mat = MaterialManager.GetDefaultPolygonMaterial(sub.DrawSettings.PolygonPatternName, sub.DrawSettings.PolygonColor);
+					mat = MaterialManager.Instance.GetDefaultPolygonMaterial(sub.DrawSettings.PolygonPatternName, sub.DrawSettings.PolygonColor);
 				}
 
-				Mesh mesh = VisualizationUtil.CreatePolygon(sub.GetPoints(), sub.GetHoles(), sub.Entity.patternRandomOffset, sub.DrawSettings.InnerGlowEnabled, target.InnerGlowBounds);
+				Mesh mesh = VisualizationUtil.Instance.CreatePolygon(sub.GetPoints(), sub.GetHoles(), sub.m_entity.patternRandomOffset, sub.DrawSettings.InnerGlowEnabled, target.m_innerGlowBounds);
 
 				//Add mesh to combined one
 				combine[i].mesh = mesh;

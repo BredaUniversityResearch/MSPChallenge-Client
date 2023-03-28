@@ -59,13 +59,20 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			m_CanvasGroups.ForEach(delegate(CanvasGroup a_Group)
+			foreach(CanvasGroup group in m_CanvasGroups)
 			{
-				m_OriginalAlphas.Add(a_Group.alpha);
-				a_Group.alpha *= m_AlphaFactorOnStart;
-				a_Group.interactable = m_InteractableOnStart;
-				a_Group.blocksRaycasts = m_BlockRaycastsOnStart;
-			});
+				m_OriginalAlphas.Add(group.alpha);
+				group.alpha *= m_AlphaFactorOnStart;
+				group.interactable = m_InteractableOnStart;
+				group.blocksRaycasts = m_BlockRaycastsOnStart;
+			}
+			//m_CanvasGroups.ForEach(delegate(CanvasGroup a_Group)
+			//{
+			//	m_OriginalAlphas.Add(a_Group.alpha);
+			//	a_Group.alpha *= m_AlphaFactorOnStart;
+			//	a_Group.interactable = m_InteractableOnStart;
+			//	a_Group.blocksRaycasts = m_BlockRaycastsOnStart;
+			//});
 		}
 
 		protected override void OnNotifyConnection(bool a_Connected)
@@ -84,13 +91,20 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			foreach (var (group, i) in m_CanvasGroups.Select((a_Group, i) => (@group: a_Group, i)))
+			for(int i = 0; i < m_CanvasGroups.Count && i < m_OriginalAlphas.Count; i++)
 			{
-				group.alpha = a_Connected ? m_OriginalAlphas[i] * m_AlphaFactorOnConnected :
+				m_CanvasGroups[i].alpha = a_Connected ? m_OriginalAlphas[i] * m_AlphaFactorOnConnected :
 					m_OriginalAlphas[i] * m_AlphaFactorOnDisconnected;
-				group.interactable = a_Connected ? m_InteractableOnConnected : m_InteractableOnDisconnected;
-				group.blocksRaycasts = a_Connected ? m_BlockRaycastsOnConnected : m_BlockRaycastsOnDisconnected;
+				m_CanvasGroups[i].interactable = a_Connected ? m_InteractableOnConnected : m_InteractableOnDisconnected;
+				m_CanvasGroups[i].blocksRaycasts = a_Connected ? m_BlockRaycastsOnConnected : m_BlockRaycastsOnDisconnected;
 			}
+			//foreach (var (group, i) in m_CanvasGroups.Select((a_Group, i) => (@group: a_Group, i)))
+			//{
+			//	group.alpha = a_Connected ? m_OriginalAlphas[i] * m_AlphaFactorOnConnected :
+			//		m_OriginalAlphas[i] * m_AlphaFactorOnDisconnected;
+			//	group.interactable = a_Connected ? m_InteractableOnConnected : m_InteractableOnDisconnected;
+			//	group.blocksRaycasts = a_Connected ? m_BlockRaycastsOnConnected : m_BlockRaycastsOnDisconnected;
+			//}
 		}
 	}
 }

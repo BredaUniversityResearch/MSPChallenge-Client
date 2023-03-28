@@ -39,7 +39,7 @@ namespace MSP2050.Scripts
 				if (transval > 0f) {
 					transval -= Time.deltaTime * 3f;
 					for (int i = 0; i < graphics.Length; i++)
-						graphics[i].color = Color.Lerp(defaultColors[i], overrideTargetColor ? fadeToColor : TeamManager.CurrentTeamColor, transval);
+						graphics[i].color = Color.Lerp(defaultColors[i], overrideTargetColor ? fadeToColor : SessionManager.Instance.CurrentTeamColor, transval);
 				}
 			}
 		}
@@ -49,7 +49,7 @@ namespace MSP2050.Scripts
 			if (selectable.interactable && !lockColor)
 			{
 				for (int i = 0; i < graphics.Length; i++)
-					graphics[i].color = overrideTargetColor ? fadeToColor : TeamManager.CurrentTeamColor;
+					graphics[i].color = overrideTargetColor ? fadeToColor : SessionManager.Instance.CurrentTeamColor;
 			}
 
 			pointerOnButton = true;

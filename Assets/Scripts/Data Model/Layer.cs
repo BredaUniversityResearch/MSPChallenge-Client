@@ -1,26 +1,67 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace MSP2050.Scripts
 {
 	public abstract class Layer<T> : AbstractLayer where T : Entity
 	{
-		public List<T> initialEntities				{ get; private set; }	//Entities that existed on the base original layer
-		public List<T> Entities						{ get; private set; }	//Entities that exist at the games current time
-		public HashSet<T> activeEntities;									//Entities at the time of currently active plan
-		public HashSet<T> preModifiedEntities		{ get; private set; }	//Lastest geometry with the same persisID as new geometry in the current active planlayer
-		public HashSet<int> preExistingPersisIDs	{ get; private set; }	//Persistent IDs that existed before the current plan
+		protected List<T> InitialEntities { get; private set; }	//Entities that existed on the base original layer
+		public List<T> Entities { get; private set; } //Entities that exist at the games current time
+		public HashSet<T> m_activeEntities; //Entities at the time of currently active plan
+		public HashSet<T> PreModifiedEntities { get; private set; }	//Lastest geometry with the same persisID as new geometry in the current active planlayer
+		private HashSet<int> PreExistingPersisIDs
+		{ 
+			get;
+			set;
+		}	//Persistent IDs that existed before the current plan
+		
+		public override bool LayerTextVisible
+		{
+			get => m_layerTextVisible;
+			set {
+				if (value == m_layerTextVisible)
+					return;
+				m_layerTextVisible = value;
+				if (value)
+				{
+					foreach (T entity in Entities)
+					{
+						SubEntity sub = entity.GetSubEntity(0);
+						if (sub.TextMeshVisibleAtZoom)
+							sub.SetTextMeshActivity(true);
+					}
 
-		protected Layer(LayerMeta layerMeta)
-			: base(layerMeta)
+					foreach (PlanLayer p in m_planLayers)
+					{
+						for (int i = 0; i < p.GetNewGeometryCount(); ++i)
+						{
+							SubEntity sub = p.GetNewGeometryByIndex(i).GetSubEntity(0);
+							if (sub.TextMeshVisibleAtZoom)
+								sub.SetTextMeshActivity(true);
+						}
+					}
+
+				}
+				else
+				{
+					foreach (T entity in Entities)                    
+						entity.GetSubEntity(0).SetTextMeshActivity(false);                   
+
+					foreach (PlanLayer p in m_planLayers)                  
+						for (int i = 0; i < p.GetNewGeometryCount(); ++i)
+							p.GetNewGeometryByIndex(i).GetSubEntity(0).SetTextMeshActivity(false);
+				}
+			}
+		}		
+
+		protected Layer(LayerMeta a_layerMeta)
+			: base(a_layerMeta)
 		{
 			Entities = new List<T>();
-			initialEntities = new List<T>();
-			activeEntities = new HashSet<T>();
+			InitialEntities = new List<T>();
+			m_activeEntities = new HashSet<T>();
 
 			Initialise();
 		}
@@ -28,107 +69,103 @@ namespace MSP2050.Scripts
 		public override void Initialise()
 		{
 			Entities.Clear();
-			initialEntities.Clear();
-			activeEntities.Clear();
+			InitialEntities.Clear();
+			m_activeEntities.Clear();
 		}
 
 		public override bool IsEnergyPointLayer()
 		{
-			return editingType == EditingType.Transformer || editingType == EditingType.Socket || editingType == EditingType.SourcePoint || editingType == EditingType.SourcePolygonPoint;
+			return m_editingType == EditingType.Transformer || m_editingType == EditingType.Socket || m_editingType == EditingType.SourcePoint || m_editingType == EditingType.SourcePolygonPoint;
 		}
 
 		public override bool IsEnergyLineLayer()
 		{
-			return editingType == EditingType.Cable;
+			return m_editingType == EditingType.Cable;
 		}
 
 		public override bool IsEnergyPolyLayer()
 		{
-			return editingType == EditingType.SourcePolygon;
+			return m_editingType == EditingType.SourcePolygon;
 		}
 
 		public override bool IsEnergyLayer()
 		{
-			return editingType != EditingType.Normal;
+			return m_editingType != EditingType.Normal;
 		}
 
-		public override void LoadLayerObjects(List<SubEntityObject> layerObjects)
+		public override void LoadLayerObjects(List<SubEntityObject> a_layerObjects)
 		{
 		}
 
-		public override List<EntityType> GetEntityTypesByKeys(params int[] keys)
+		public override List<EntityType> GetEntityTypesByKeys(params int[] a_keys)
 		{
 			List<EntityType> types = new List<EntityType>();
 
-			foreach (int key in keys)
+			foreach (int key in a_keys)
 			{
-				if (EntityTypes.ContainsKey(key))
+				if (m_entityTypes.ContainsKey(key))
 				{
-					types.Add(EntityTypes[key]);
+					types.Add(m_entityTypes[key]);
 				}
 			}
 			return types;
 		}
 
-		public override EntityType GetEntityTypeByKey(int key)
+		public override EntityType GetEntityTypeByKey(int a_key)
 		{
-			if (EntityTypes.ContainsKey(key))
+			return m_entityTypes.ContainsKey(a_key) ? m_entityTypes[a_key] : null;
+
+		}
+
+		public override EntityType GetEntityTypeByName(string a_name)
+		{
+			foreach (var kvp in m_entityTypes)
 			{
-				return EntityTypes[key];
+				if (kvp.Value.Name == a_name) { return kvp.Value; }
 			}
 
 			return null;
 		}
 
-		public override EntityType GetEntityTypeByName(string name)
+		public override int GetEntityTypeKey(EntityType a_entityType)
 		{
-			foreach (var kvp in EntityTypes)
+			foreach (var kvp in this.m_entityTypes)
 			{
-				if (kvp.Value.Name == name) { return kvp.Value; }
-			}
-
-			return null;
-		}
-
-		public override int GetEntityTypeKey(EntityType entityType)
-		{
-			foreach (var kvp in this.EntityTypes)
-			{
-				if (kvp.Value.Name == entityType.Name)
+				if (kvp.Value.Name == a_entityType.Name)
 				{
 					return kvp.Key;
 				}
 			}
 
-			if (entityType == null) { Debug.LogError("Entity type error in " + FileName); }
-			Debug.LogError("Failed to find key from entity type " + entityType.Name + " in " + FileName);
+			if (a_entityType == null) { Debug.LogError("Entity type error in " + FileName); }
+			Debug.LogError("Failed to find key from entity type " + a_entityType.Name + " in " + FileName);
 
 			return 0;
 		}
 
-		public override void RemoveSubEntity(SubEntity subEntity, bool uncreate = false)
+		public override void RemoveSubEntity(SubEntity a_subEntity, bool a_uncreate = false)
 		{
-			T entity = (T)subEntity.Entity;
-			subEntity.RemoveDependencies();
-			int persisID = subEntity.GetPersistentID();
+			T entity = (T)a_subEntity.m_entity;
+			a_subEntity.RemoveDependencies();
+			int persisID = a_subEntity.GetPersistentID();
 
 			//If it wasnt in the curren't plan, simply add to removed geom
-			if (entity.PlanLayer == currentPlanLayer)
+			if (entity.PlanLayer == m_currentPlanLayer)
 			{
 				if (entity.GetSubEntityCount() != 1)
 				{
 					//If there are no other subentities left in the entity
 					throw new Exception("Entity has an invalid subentity count. Count: " + entity.GetSubEntityCount() + " on entity with database ID " + entity.DatabaseID);
 				}
-				currentPlanLayer.RemoveNewGeometry(entity);
-				activeEntities.Remove(entity);
+				m_currentPlanLayer.RemoveNewGeometry(entity);
+				m_activeEntities.Remove(entity);
 
 				//If the entity wasn't created in this plan, active the last entity with that persisID and add it to removedgeom
-				if (!subEntity.Entity.Layer.IsPersisIDCurrentlyNew(persisID))
+				if (!a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(persisID))
 				{
-					if (!uncreate) //We are uncreating, only reactivate previous version, don't add to removed geom
+					if (!a_uncreate) //We are uncreating, only reactivate previous version, don't add to removed geom
 					{
-						AddPreModifiedEntity(subEntity.Entity);
+						AddPreModifiedEntity(a_subEntity.m_entity);
 						entity.PlanLayer.RemovedGeometry.Add(persisID);
 					}
 					ActivateLastEntityWith(persisID);
@@ -136,67 +173,67 @@ namespace MSP2050.Scripts
 			}
 			else //Was on another layer and removed by this plan. It's removed and displayed with (-) icons.
 			{
-				currentPlanLayer.RemovedGeometry.Add(persisID);
-				AddPreModifiedEntity(subEntity.Entity);
+				m_currentPlanLayer.RemovedGeometry.Add(persisID);
+				AddPreModifiedEntity(a_subEntity.m_entity);
 			}
 			entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
 
-		public override void RestoreSubEntity(SubEntity subEntity, bool recreate = false)
+		public override void RestoreSubEntity(SubEntity a_subEntity, bool a_recreate = false)
 		{
-			T entity = (T)subEntity.Entity;
+			T entity = (T)a_subEntity.m_entity;
 			//entity.RestoreSubEntity(subEntity);
-			subEntity.RestoreDependencies();
-			int persistentID = subEntity.GetPersistentID();
+			a_subEntity.RestoreDependencies();
+			int persistentID = a_subEntity.GetPersistentID();
 
-			if (entity.PlanLayer == currentPlanLayer)
+			if (entity.PlanLayer == m_currentPlanLayer)
 			{
 				//This entity used to be inactive, and is now made active
 				if (entity.GetSubEntityCount() == 1)
 				{
-					currentPlanLayer.AddNewGeometry(entity);
+					m_currentPlanLayer.AddNewGeometry(entity);
 
 					// If another object was being displayed because of the deletion, deactivate it and show this instead
-					if (!subEntity.Entity.Layer.IsPersisIDCurrentlyNew(persistentID))
+					if (!a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(persistentID))
 					{
-						if (!recreate) //We are only recreating a newer version, the ID isn't in removedgeom
+						if (!a_recreate) //We are only recreating a newer version, the ID isn't in removedgeom
 						{
-							RemovePreModifiedEntity(subEntity.Entity);
+							RemovePreModifiedEntity(a_subEntity.m_entity);
 							entity.PlanLayer.RemovedGeometry.Remove(persistentID);
 						}
 						DeactivateCurrentEntityWith(persistentID);
 					}
 
 					//Only add to activeentities after calling DeactivateCurrentEntityWith
-					activeEntities.Add(entity);
+					m_activeEntities.Add(entity);
 				}
 			}
 			else //Was on another layer and removed by this plan
 			{
-				currentPlanLayer.RemovedGeometry.Remove(persistentID);
-				RemovePreModifiedEntity(subEntity.Entity);
+				m_currentPlanLayer.RemovedGeometry.Remove(persistentID);
+				RemovePreModifiedEntity(a_subEntity.m_entity);
 			}
 			entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
 		}
 
 		public override List<EntityType> GetEntityTypesSortedByKey()
 		{
-			List<int> keys = new List<int>(EntityTypes.Keys);
+			List<int> keys = new List<int>(m_entityTypes.Keys);
 			keys.Sort();
 
 			List<EntityType> result = new List<EntityType>();
 			foreach (int key in keys)
 			{
-				result.Add(EntityTypes[key]);
+				result.Add(m_entityTypes[key]);
 			}
 			return result;
 		}
 
-		public override HashSet<Entity> GetEntitiesOfType(EntityType type)
+		public override HashSet<Entity> GetEntitiesOfType(EntityType a_type)
 		{
 			HashSet<Entity> result = new HashSet<Entity>();
 
-			int typeID = GetEntityTypeKey(type);
+			int typeID = GetEntityTypeKey(a_type);
 			foreach (T entity in Entities)
 			{
 				if (entity.GetEntityTypeKeys().Contains(typeID))
@@ -207,12 +244,12 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public override HashSet<Entity> GetActiveEntitiesOfType(EntityType type)
+		public override HashSet<Entity> GetActiveEntitiesOfType(EntityType a_type)
 		{
 			HashSet<Entity> result = new HashSet<Entity>();
 
-			int typeID = GetEntityTypeKey(type);
-			foreach (T entity in activeEntities)
+			int typeID = GetEntityTypeKey(a_type);
+			foreach (T entity in m_activeEntities)
 			{
 				if (entity.GetEntityTypeKeys().Contains(typeID))
 				{
@@ -233,72 +270,31 @@ namespace MSP2050.Scripts
 			LayerGameObject.SetActive(false);
 			LayerGameObject.transform.SetParent(LayerRoot);
 
-			LayerGameObject.transform.position = new Vector3(0, 0, -Order);
+			LayerGameObject.transform.position = new Vector3(0, 0, -m_order);
 			if (!(this is RasterLayer))
 				DrawGameObjects(LayerGameObject.transform);
 		}
 
-		protected override void DrawGameObjects(Transform layerTransform)
+		protected override void DrawGameObjects(Transform a_layerTransform)
 		{
 			foreach (T entity in Entities)
 			{
-				entity.DrawGameObjects(layerTransform);
+				entity.DrawGameObjects(a_layerTransform);
 			}
 		}
 
-		public override void RedrawGameObjects(Camera targetCamera, SubEntityDrawMode drawMode, bool forceScaleUpdate = false)
+		protected override void RedrawGameObjects(Camera a_targetCamera, SubEntityDrawMode a_drawMode, bool a_forceScaleUpdate = false)
 		{
 			//Doesn't redraw geometry removed from Entities
 
-			foreach (T entity in initialEntities)
-				entity.RedrawGameObjects(targetCamera, drawMode, forceScaleUpdate);
+			foreach (T entity in InitialEntities)
+				entity.RedrawGameObjects(a_targetCamera, a_drawMode, a_forceScaleUpdate);
 
-			foreach (PlanLayer p in planLayers)
+			foreach (PlanLayer p in m_planLayers)
 			{
 				for (int i = 0; i < p.GetNewGeometryCount(); ++i)
 				{
-					p.GetNewGeometryByIndex(i).RedrawGameObjects(targetCamera, drawMode, forceScaleUpdate);
-				}
-			}
-		}
-
-		public override bool LayerTextVisible
-		{
-			get { return layerTextVisible; }
-			set
-			{
-				if (value != layerTextVisible)
-				{
-					layerTextVisible = value;
-					if (value)
-					{
-						foreach (T entity in Entities)
-						{
-							SubEntity sub = entity.GetSubEntity(0);
-							if (sub.TextMeshVisibleAtZoom)
-								sub.SetTextMeshActivity(true);
-						}
-
-						foreach (PlanLayer p in planLayers)
-						{
-							for (int i = 0; i < p.GetNewGeometryCount(); ++i)
-							{
-								SubEntity sub = p.GetNewGeometryByIndex(i).GetSubEntity(0);
-								if (sub.TextMeshVisibleAtZoom)
-									sub.SetTextMeshActivity(true);
-							}
-						}
-
-					}
-					else
-					{
-						foreach (T entity in Entities)                    
-							entity.GetSubEntity(0).SetTextMeshActivity(false);                   
-
-						foreach (PlanLayer p in planLayers)                  
-							for (int i = 0; i < p.GetNewGeometryCount(); ++i)
-								p.GetNewGeometryByIndex(i).GetSubEntity(0).SetTextMeshActivity(false);
-					}
+					p.GetNewGeometryByIndex(i).RedrawGameObjects(a_targetCamera, a_drawMode, a_forceScaleUpdate);
 				}
 			}
 		}
@@ -308,21 +304,21 @@ namespace MSP2050.Scripts
 			NetworkForm form = new NetworkForm();
 
 			form.AddField("icon", "");
-			form.AddField("category", Category);
-			form.AddField("subcategory", SubCategory);
-			form.AddField("type", MetaToJSON());
+			form.AddField("category", m_category);
+			form.AddField("subcategory", m_subCategory);
+			form.AddField("type", MetaToJson());
 			form.AddField("depth", Depth.ToString());
 			form.AddField("short", ShortName);
-			form.AddField("id", ID);
+			form.AddField("id", m_id);
 
-			ServerCommunication.DoRequest(Server.PostLayerMeta(), form);
+			ServerCommunication.Instance.DoRequest(Server.PostLayerMeta(), form);
 		}
 
-		protected override string MetaToJSON()
+		protected override string MetaToJson()
 		{
 			Dictionary<int, EntityTypeValues> types = new Dictionary<int, EntityTypeValues>();
 
-			foreach (var kvp in EntityTypes)
+			foreach (var kvp in m_entityTypes)
 			{
 				EntityTypeValues type = kvp.Value.DrawSettings.ToEntityTypeValues();
 				kvp.Value.CopyEntityTypeValues(type);
@@ -349,28 +345,28 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public override List<Entity> GetEntitiesAt(Vector2 position)
+		public override List<Entity> GetEntitiesAt(Vector2 a_position)
 		{
-			List<SubEntity> subEntities = GetSubEntitiesAt(position);
+			List<SubEntity> subEntities = GetSubEntitiesAt(a_position);
 			List<Entity> result = new List<Entity>();
 			foreach (SubEntity subEntity in subEntities)
 			{
-				if (!result.Contains(subEntity.Entity))
+				if (!result.Contains(subEntity.m_entity))
 				{
-					result.Add(subEntity.Entity);
+					result.Add(subEntity.m_entity);
 				}
 			}
 			return result;
 		}
 
-		public override SubEntity GetSubEntityByDatabaseID(int id)
+		public override SubEntity GetSubEntityByDatabaseID(int a_id)
 		{
 			for (int i = 0; i < GetEntityCount(); i++)
 			{
 				Entity entity = GetEntity(i);
 				for (int j = 0; j < entity.GetSubEntityCount(); j++)
 				{
-					if (entity.GetSubEntity(j).GetDatabaseID() == id)
+					if (entity.GetSubEntity(j).GetDatabaseID() == a_id)
 					{
 						return entity.GetSubEntity(j);
 					}
@@ -380,14 +376,14 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public override SubEntity GetSubEntityByPersistentID(int persistentID)
+		public override SubEntity GetSubEntityByPersistentID(int a_persistentID)
 		{
 			for (int i = 0; i < GetEntityCount(); i++)
 			{
 				Entity entity = GetEntity(i);
 				for (int j = 0; j < entity.GetSubEntityCount(); j++)
 				{
-					if (entity.GetSubEntity(j).GetPersistentID() == persistentID)
+					if (entity.GetSubEntity(j).GetPersistentID() == a_persistentID)
 					{
 						return entity.GetSubEntity(j);
 					}
@@ -401,25 +397,15 @@ namespace MSP2050.Scripts
 			return Entities.Count;
 		}
 
-		public override Entity GetEntity(int index)
+		public override Entity GetEntity(int a_index)
 		{
-			return Entities[index];
+			return Entities[a_index];
 		}
-
-		//public override int GetActiveEntityCount()
-		//{
-		//    return activeEntities.Count;
-		//}
-
-		//public override Entity GetActiveEntity(int index)
-		//{
-		//    return activeEntities[index];
-		//}
 
 		public override HashSet<SubEntity> GetActiveSubEntities()
 		{
 			HashSet<SubEntity> result = new HashSet<SubEntity>();
-			foreach (T entity in activeEntities)
+			foreach (T entity in m_activeEntities)
 			{
 				if (!result.Add(entity.GetSubEntity(0)))
 				{
@@ -429,18 +415,18 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public override void UpdateScale(Camera targetCamera)
+		public override void UpdateScale(Camera a_targetCamera)
 		{ }
-		public override Entity CreateEntity(SubEntityObject obj)
+		public override Entity CreateEntity(SubEntityObject a_obj)
 		{ return null; }
-		public override Entity GetEntityAt(Vector2 position)
+		public override Entity GetEntityAt(Vector2 a_position)
 		{ return null; }
-		public override SubEntity GetSubEntityAt(Vector2 position)
+		public override SubEntity GetSubEntityAt(Vector2 a_position)
 		{ return null; }
-		public override List<SubEntity> GetSubEntitiesAt(Vector2 position)
+		public override List<SubEntity> GetSubEntitiesAt(Vector2 a_position)
 		{ return null; }
-		public override LayerManager.GeoType GetGeoType()
-		{ return LayerManager.GeoType.line; }
+		public override  LayerManager.EGeoType GetGeoType()
+		{ return  LayerManager.EGeoType.Line; }
 
 		//Called when the layer is shown by the layermanager
 		public override void LayerShown()
@@ -473,36 +459,36 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public override PlanLayer CurrentPlanLayer()
 		{
-			return currentPlanLayer;
+			return m_currentPlanLayer;
 		}
 
 		/// <summary>
 		/// Adds the planlayer and makes sure the layers are sorted by implementation time (and then by the plan's db id)
 		/// </summary>
-		public override int AddPlanLayer(PlanLayer planLayer)
+		public override int AddPlanLayer(PlanLayer a_planLayer)
 		{
-			if (planLayer.Plan.State == Plan.PlanState.DELETED)
+			if (a_planLayer.Plan.State == Plan.PlanState.DELETED)
 				Debug.LogError("Archived PlanLayer added to layer.");
 
-			if (planLayers.Count == 0)
+			if (m_planLayers.Count == 0)
 			{
-				planLayers.Add(planLayer);
+				m_planLayers.Add(a_planLayer);
 				return 0;
 			}
 
-			for (int i = 0; i < planLayers.Count; i++)
-				if (planLayers[i].Plan.StartTime > planLayer.Plan.StartTime ||
-				    (planLayers[i].Plan.StartTime == planLayer.Plan.StartTime && planLayers[i].Plan.ID > planLayer.Plan.ID)) //If plan time is the same, sort by databaseID of the plan
+			for (int i = 0; i < m_planLayers.Count; i++)
+				if (m_planLayers[i].Plan.StartTime > a_planLayer.Plan.StartTime ||
+				    (m_planLayers[i].Plan.StartTime == a_planLayer.Plan.StartTime && m_planLayers[i].Plan.ID > a_planLayer.Plan.ID)) //If plan time is the same, sort by databaseID of the plan
 				{
-					if (i <= lastImplementedPlanIndex)
+					if (i <= m_lastImplementedPlanIndex)
 						Debug.LogError("PlanLayer added with an index lower than last implemented plan. Plans before the current time should be impossible.");
-					planLayers.Insert(i, planLayer);
+					m_planLayers.Insert(i, a_planLayer);
 					return i;
 				}
 
 			//The planlayer should be the last element
-			planLayers.Add(planLayer);
-			return planLayers.Count - 1;
+			m_planLayers.Add(a_planLayer);
+			return m_planLayers.Count - 1;
 		}
 
 		/// <summary>
@@ -510,38 +496,38 @@ namespace MSP2050.Scripts
 		/// Moves the given plan layer to the correct time. Makes sure layers stay sorted.
 		/// </summary>
 		/// <returns>The given layer's new index. Can be use to get the PlanState for that layer.</returns>
-		public override int UpdatePlanLayerTime(PlanLayer planLayer)
+		public override int UpdatePlanLayerTime(PlanLayer a_planLayer)
 		{
-			planLayers.Remove(planLayer);
-			return AddPlanLayer(planLayer);
+			m_planLayers.Remove(a_planLayer);
+			return AddPlanLayer(a_planLayer);
 		}
 
-		public override Entity AddObject(SubEntityObject obj)
+		public override Entity AddObject(SubEntityObject a_obj)
 		{
-			T entity = (T)CreateEntity(obj);
+			T entity = (T)CreateEntity(a_obj);
 			Entities.Add(entity);
-			initialEntities.Add(entity);
+			InitialEntities.Add(entity);
 			return entity;
 		}
 
-		public override void RemovePlanLayer(PlanLayer planLayer)
+		public override void RemovePlanLayer(PlanLayer a_planLayer)
 		{
-			planLayers.Remove(planLayer);
+			m_planLayers.Remove(a_planLayer);
 		}
 
 		/// <summary>
 		/// Removes the planlayer from this layer. Removes the planlayer's entities from active entities
 		/// </summary>
-		public override void RemovePlanLayerAndEntities(PlanLayer planLayer)
+		public override void RemovePlanLayerAndEntities(PlanLayer a_planLayer)
 		{
 			//If the removed planLayer was the current planlayer, set the one before active
 			//All the planlayers active geom is deleted anyway, so no need to setActiveTo
-			if (planLayer == currentPlanLayer)
+			if (a_planLayer == m_currentPlanLayer)
 			{
 				int index = 0;
-				for (int i = 0; i < planLayers.Count; i++)
+				for (int i = 0; i < m_planLayers.Count; i++)
 				{
-					if (planLayers[i] == planLayer)
+					if (m_planLayers[i] == a_planLayer)
 					{
 						index = i;
 						break;
@@ -549,26 +535,26 @@ namespace MSP2050.Scripts
 				}
 				if (index > 0)
 				{
-					currentPlanLayer = planLayers[index - 1];
-					currentPlanLayer.SetEnabled(true);
+					m_currentPlanLayer = m_planLayers[index - 1];
+					m_currentPlanLayer.SetEnabled(true);
 				}
 				else
-					currentPlanLayer = null;
+					m_currentPlanLayer = null;
 			}
-			planLayers.Remove(planLayer);
-			for (int i = 0; i < planLayer.GetNewGeometryCount(); ++i)
+			m_planLayers.Remove(a_planLayer);
+			for (int i = 0; i < a_planLayer.GetNewGeometryCount(); ++i)
 			{
-				Entity entity = planLayer.GetNewGeometryByIndex(i);
-				activeEntities.Remove((T)entity);
+				Entity entity = a_planLayer.GetNewGeometryByIndex(i);
+				m_activeEntities.Remove((T)entity);
 			}
 		}
 
-		public override void SetEntitiesActiveUpToTime(int month)
+		public override void SetEntitiesActiveUpToTime(int a_month)
 		{
-			for (int i = planLayers.Count-1; i >= 0; i--)
+			for (int i = m_planLayers.Count-1; i >= 0; i--)
 			{
 				//Find last plan at time (or a StartingPlan)
-				if (planLayers[i].Plan.StartTime < 0 || planLayers[i].Plan.StartTime <= month)
+				if (m_planLayers[i].Plan.StartTime < 0 || m_planLayers[i].Plan.StartTime <= a_month)
 				{
 					//Since we are viewing a time, dont show removed geom and dont show geometry in last plan if it's not influencing.
 					SetEntitiesActiveUpTo(i, false, false);
@@ -580,28 +566,28 @@ namespace MSP2050.Scripts
 			SetEntitiesActiveUpToInitialTime();
 		}
 
-		public override void SetEntitiesActiveUpTo(Plan plan)
+		public override void SetEntitiesActiveUpTo(Plan a_plan)
 		{
-			if (plan != null)
+			if (a_plan != null)
 			{
-				int index = planLayers.Count - 1;
+				int index = m_planLayers.Count - 1;
 				bool showRemoved = false;
-				for (int i = 0; i < planLayers.Count; i++)
+				for (int i = 0; i < m_planLayers.Count; i++)
 				{
-					if (planLayers[i].Plan == plan)
+					if (m_planLayers[i].Plan == a_plan)
 					{
 						index = i;
 						showRemoved = true;
 						break;
 					}
-					else if (planLayers[i].Plan.StartTime > plan.StartTime || (planLayers[i].Plan.StartTime == plan.StartTime && plan.ID < planLayers[i].Plan.ID))
+					if (m_planLayers[i].Plan.StartTime > a_plan.StartTime || (a_plan.ID != -1 && m_planLayers[i].Plan.StartTime == a_plan.StartTime && a_plan.ID < m_planLayers[i].Plan.ID))
 					{
 						//Checked plan has higher startime or equal startime but higher ID, meaning it would be later in the list
 						index = i - 1;
 						break;
 					}
 				}
-				SetEntitiesActiveUpTo(index, showRemoved, plan.IsLayerpartOfPlan(this));
+				SetEntitiesActiveUpTo(index, showRemoved, a_plan.IsLayerpartOfPlan(this));
 			}
 			else
 				SetEntitiesActiveUpTo(-1);
@@ -610,170 +596,169 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Sets activeEntities to encompass all entities from the base and plan layers that will be active at the given time.
 		/// </summary>
-		public override void SetEntitiesActiveUpTo(int index, bool showRemovedInLatestPlan = true, bool showCurrentIfNotInfluencing = true)
+		public override void SetEntitiesActiveUpTo(int a_index, bool a_showRemovedInLatestPlan = true, bool a_showCurrentIfNotInfluencing = true)
 		{
-			if (index < 0)
+			if (a_index < 0)
 			{
 				SetEntitiesActiveUpToCurrentTime();
 			}
-			else if (index <= lastImplementedPlanIndex)
+			else if (a_index <= m_lastImplementedPlanIndex)
 			{
 				//Plan is in the past, go back to initial geom
-				SetEntitiesActiveUpToAdv(index, initialEntities, -1, showRemovedInLatestPlan, showCurrentIfNotInfluencing);
+				SetEntitiesActiveUpToAdv(a_index, InitialEntities, -1, a_showRemovedInLatestPlan, a_showCurrentIfNotInfluencing);
 			}
 			else
 			{
 				//Plan is in the future, go back to current state
-				SetEntitiesActiveUpToAdv(index, Entities, lastImplementedPlanIndex, showRemovedInLatestPlan, showCurrentIfNotInfluencing);
+				SetEntitiesActiveUpToAdv(a_index, Entities, m_lastImplementedPlanIndex, a_showRemovedInLatestPlan, a_showCurrentIfNotInfluencing);
 			}
 		}
 
-		private void SetEntitiesActiveUpToAdv(int index, List<T> baseEntities, int baseIndex, bool showRemovedInLatestPlan, bool showCurrentIfNotInfluencing)
+		private void SetEntitiesActiveUpToAdv(int a_index, List<T> a_baseEntities, int a_baseIndex, bool a_showRemovedInLatestPlan, bool a_showCurrentIfNotInfluencing)
 		{
-			if (currentPlanLayer != null)
+			if (m_currentPlanLayer != null)
 			{
-				currentPlanLayer.SetEnabled(false);
+				m_currentPlanLayer.SetEnabled(false);
 			}
-			currentPlanLayer = planLayers[index];
-			currentPlanLayer.SetEnabled(true);
+			m_currentPlanLayer = m_planLayers[a_index];
+			m_currentPlanLayer.SetEnabled(true);
 
 			//Go through plans backwards from lastPlanIndex
 			//Add addedgeometry to the activeEntities and keep a hashset of persistentIDs that should be excluded
-			HashSet<int> excludedPersistentIDs = new HashSet<int>(currentPlanLayer.RemovedGeometry);
+			HashSet<int> excludedPersistentIDs = new HashSet<int>(m_currentPlanLayer.RemovedGeometry);
 			//Keeps IDs that were removed in the most recent plan
-			HashSet<int> removedDisplayedIDs = showRemovedInLatestPlan ? new HashSet<int>(currentPlanLayer.RemovedGeometry) : new HashSet<int>(); 
+			HashSet<int> removedDisplayedIDs = a_showRemovedInLatestPlan ? new HashSet<int>(m_currentPlanLayer.RemovedGeometry) : new HashSet<int>(); 
 			HashSet<int> preModifiedPersisIDs = new HashSet<int>();
-			activeEntities = new HashSet<T>();
-			preModifiedEntities = new HashSet<T>();
-			preExistingPersisIDs = new HashSet<int>();
+			m_activeEntities = new HashSet<T>();
+			PreModifiedEntities = new HashSet<T>();
+			PreExistingPersisIDs = new HashSet<int>();
 
 			//Add current plan layer's entities if they are influencing or part of the plan we're viewing
-			if (showCurrentIfNotInfluencing || currentPlanLayer.Plan.InInfluencingState)
+			if (a_showCurrentIfNotInfluencing || m_currentPlanLayer.Plan.InInfluencingState)
 			{
-				for (int i = 0; i < currentPlanLayer.GetNewGeometryCount(); ++i)
+				for (int i = 0; i < m_currentPlanLayer.GetNewGeometryCount(); ++i)
 				{
-					Entity entity = currentPlanLayer.GetNewGeometryByIndex(i);
+					Entity entity = m_currentPlanLayer.GetNewGeometryByIndex(i);
 					if (IsEntityTypeVisible(entity.EntityTypes))
 					{
-						activeEntities.Add((T)entity);
+						m_activeEntities.Add((T)entity);
 					}
-					int PersisID = entity.GetSubEntity(0).GetPersistentID();
-					excludedPersistentIDs.Add(PersisID);
-					preModifiedPersisIDs.Add(PersisID);
+					int persisID = entity.GetSubEntity(0).GetPersistentID();
+					excludedPersistentIDs.Add(persisID);
+					preModifiedPersisIDs.Add(persisID);
 				}
 			}
 
 			//Add previous plan layer entities and excluded entities
-			for (int i = index - 1; i > baseIndex; i--)
+			for (int i = a_index - 1; i > a_baseIndex; i--)
 			{
-				if (!planLayers[i].Plan.InInfluencingState) //Plans in DESIGN and DELETES states are ignored
+				if (!m_planLayers[i].Plan.InInfluencingState) //Plans in DESIGN and DELETES states are ignored
 					continue;
-				for (int entityIndex = 0; entityIndex < planLayers[i].GetNewGeometryCount(); ++entityIndex)
+				for (int entityIndex = 0; entityIndex < m_planLayers[i].GetNewGeometryCount(); ++entityIndex)
 				{
-					Entity entity = planLayers[i].GetNewGeometryByIndex(entityIndex);
-					int ID = entity.GetSubEntity(0).GetPersistentID();
-					preExistingPersisIDs.Add(ID);
-					if (removedDisplayedIDs.Contains(ID)) //Makes geometry active that was removed in the most recent plan
+					Entity entity = m_planLayers[i].GetNewGeometryByIndex(entityIndex);
+					int id = entity.GetSubEntity(0).GetPersistentID();
+					PreExistingPersisIDs.Add(id);
+					if (removedDisplayedIDs.Contains(id)) //Makes geometry active that was removed in the most recent plan
 					{
 						T typedEntity = (T)entity;
 						if (IsEntityTypeVisible(entity.EntityTypes))
 						{
-							activeEntities.Add(typedEntity);
+							m_activeEntities.Add(typedEntity);
 						}
-						preModifiedEntities.Add(typedEntity);
-						removedDisplayedIDs.Remove(ID);
+						PreModifiedEntities.Add(typedEntity);
+						removedDisplayedIDs.Remove(id);
 					}
 					else
 					{
-						if (preModifiedPersisIDs.Contains(ID)) //Finds the last previous instances of newgeometry
+						if (preModifiedPersisIDs.Contains(id)) //Finds the last previous instances of newgeometry
 						{
-							preModifiedEntities.Add(entity as T);
-							preModifiedPersisIDs.Remove(ID);
+							PreModifiedEntities.Add(entity as T);
+							preModifiedPersisIDs.Remove(id);
 						}
-						if (!excludedPersistentIDs.Contains(ID))//Makes geometry active that was not removed or replaced yet
+						if (!excludedPersistentIDs.Contains(id))//Makes geometry active that was not removed or replaced yet
 						{
 							if (IsEntityTypeVisible(entity.EntityTypes))
 							{
-								activeEntities.Add(entity as T);
+								m_activeEntities.Add(entity as T);
 							}
-							excludedPersistentIDs.Add(ID);
+							excludedPersistentIDs.Add(id);
 						}
 					}
 				}
-				excludedPersistentIDs.UnionWith(planLayers[i].RemovedGeometry);
+				excludedPersistentIDs.UnionWith(m_planLayers[i].RemovedGeometry);
 			}
 
 			//Add geom from the base layer that has not been removed or altered
-			foreach (T entity in baseEntities)
+			foreach (T entity in a_baseEntities)
 			{
-				int ID = entity.GetSubEntity(0).GetPersistentID();
-				preExistingPersisIDs.Add(ID);
-				if (preModifiedPersisIDs.Contains(ID)) //Finds the previous instances of newgeometry
-					preModifiedEntities.Add(entity);
+				int id = entity.GetSubEntity(0).GetPersistentID();
+				PreExistingPersisIDs.Add(id);
+				if (preModifiedPersisIDs.Contains(id)) //Finds the previous instances of newgeometry
+					PreModifiedEntities.Add(entity);
 
-				bool isRemovedEntity = removedDisplayedIDs.Contains(ID);
-				if (isRemovedEntity || !excludedPersistentIDs.Contains(ID))
+				bool isRemovedEntity = removedDisplayedIDs.Contains(id);
+				if (!isRemovedEntity && excludedPersistentIDs.Contains(id))
+					continue;
+				if (IsEntityTypeVisible(entity.EntityTypes))
 				{
-					if (IsEntityTypeVisible(entity.EntityTypes))
-					{
-						activeEntities.Add(entity);
-					}
-					if (isRemovedEntity)
-					{
-						preModifiedEntities.Add(entity);
-					}
+					m_activeEntities.Add(entity);
+				}
+				if (isRemovedEntity)
+				{
+					PreModifiedEntities.Add(entity);
 				}
 			}
 		}
 
 		public override void SetEntitiesActiveUpToCurrentTime()
 		{
-			if (currentPlanLayer != null)
-				currentPlanLayer.SetEnabled(false);
-			currentPlanLayer = null;
+			if (m_currentPlanLayer != null)
+				m_currentPlanLayer.SetEnabled(false);
+			m_currentPlanLayer = null;
 
 			//active entities copies Entities (but not the reference)
-			activeEntities = new HashSet<T>();
+			m_activeEntities = new HashSet<T>();
 			for (int i = 0; i < Entities.Count; ++i)
 			{
 				Entity ent = Entities[i];
 				if (IsEntityTypeVisible(ent.EntityTypes))
 				{
-					activeEntities.Add((T)ent);
+					m_activeEntities.Add((T)ent);
 				}
 			}
 
-			preExistingPersisIDs = new HashSet<int>();
-			preModifiedEntities = new HashSet<T>();
+			PreExistingPersisIDs = new HashSet<int>();
+			PreModifiedEntities = new HashSet<T>();
 		}
 
 		void SetEntitiesActiveUpToInitialTime()
 		{
-			if (currentPlanLayer != null)
-				currentPlanLayer.SetEnabled(false);
-			currentPlanLayer = null;
+			if (m_currentPlanLayer != null)
+				m_currentPlanLayer.SetEnabled(false);
+			m_currentPlanLayer = null;
 
 			//active entities copies initialEntities (but not the reference)
-			activeEntities = new HashSet<T>();
-			for (int i = 0; i < initialEntities.Count; ++i)
+			m_activeEntities = new HashSet<T>();
+			for (int i = 0; i < InitialEntities.Count; ++i)
 			{
-				Entity ent = initialEntities[i];
-				activeEntities.Add((T)ent);
+				Entity ent = InitialEntities[i];
+				m_activeEntities.Add((T)ent);
 			}
 
-			preExistingPersisIDs = new HashSet<int>();
-			preModifiedEntities = new HashSet<T>();
+			PreExistingPersisIDs = new HashSet<int>();
+			PreModifiedEntities = new HashSet<T>();
 		}
 
-		public override bool IsIDInActiveGeometry(int ID)
+		public override bool IsIDInActiveGeometry(int a_id)
 		{
-			if (activeEntities == null)
+			if (m_activeEntities == null)
 				return false;
 
-			foreach (T entity in activeEntities)
+			foreach (T entity in m_activeEntities)
 			{
 				for (int i = 0; i < entity.GetSubEntityCount(); i++)
-					if (entity.GetSubEntity(i).GetDatabaseID() == ID)
+					if (entity.GetSubEntity(i).GetDatabaseID() == a_id)
 						return true;
 			}
 			return false;
@@ -782,25 +767,25 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Did an object with the given persistentID exist before the current plan?
 		/// </summary>
-		public override bool IsPersisIDCurrentlyNew(int persisID)
+		public override bool IsPersisIDCurrentlyNew(int a_persisID)
 		{
-			return !preExistingPersisIDs.Contains(persisID);
+			return !PreExistingPersisIDs.Contains(a_persisID);
 		}
 
-		public void AddPreModifiedEntity(Entity entity)
+		public void AddPreModifiedEntity(Entity a_entity)
 		{
-			preModifiedEntities.Add(entity as T);
+			PreModifiedEntities.Add(a_entity as T);
 		}
 
-		private void RemovePreModifiedEntity(Entity entity)
+		private void RemovePreModifiedEntity(Entity a_entity)
 		{
-			preModifiedEntities.Remove(entity as T);
+			PreModifiedEntities.Remove(a_entity as T);
 		}
 
-		public override bool IsDatabaseIDPreModified(int dataBaseID)
+		public override bool IsDatabaseIDPreModified(int a_dataBaseID)
 		{
-			foreach (T entity in preModifiedEntities)
-				if (entity.GetSubEntity(0).GetDatabaseID() == dataBaseID)
+			foreach (T entity in PreModifiedEntities)
+				if (entity.GetSubEntity(0).GetDatabaseID() == a_dataBaseID)
 					return true;
 			return false;
 		}
@@ -808,43 +793,41 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Goes back from the current planlayer and activates the first Entity with the given persistent ID encountered.
 		/// </summary>
-		public override void ActivateLastEntityWith(int persistentID)
+		public override void ActivateLastEntityWith(int a_persistentID)
 		{
-			foreach (T entity in preModifiedEntities)
+			foreach (T entity in PreModifiedEntities)
 				for (int j = 0; j < entity.GetSubEntityCount(); j++)
 				{
 					SubEntity subEnt = entity.GetSubEntity(j);
-					if (subEnt.GetPersistentID() == persistentID)
-					{
-						activeEntities.Add(entity);
-						entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
-						if (subEnt.IsNotAffectedByPlan())
-							subEnt.RestoreDependencies();
-						return;
-					}
+					if (subEnt.GetPersistentID() != a_persistentID)
+						continue;
+					m_activeEntities.Add(entity);
+					entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
+					if (subEnt.IsNotAffectedByPlan())
+						subEnt.RestoreDependencies();
+					return;
 				}
 		}
 
 		/// <summary>
 		/// Removes the entity with the given persistent ID from active geometry and redraws it.
 		/// </summary>
-		public override void DeactivateCurrentEntityWith(int persistentID)
+		public override void DeactivateCurrentEntityWith(int a_persistentID)
 		{
 			//for (int i = 0; i < activeEntities.Count; i++)
-			foreach (T entity in activeEntities)
+			foreach (T entity in m_activeEntities)
 			{
 				//T entity = activeEntities[i];
 				for (int j = 0; j < entity.GetSubEntityCount(); j++)
 				{
 					SubEntity subEnt = entity.GetSubEntity(j);
-					if (subEnt.GetPersistentID() == persistentID)
-					{
-						activeEntities.Remove(entity);
-						if (subEnt.IsNotAffectedByPlan())
-							subEnt.RemoveDependencies();
-						entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
-						return;
-					}
+					if (subEnt.GetPersistentID() != a_persistentID)
+						continue;
+					m_activeEntities.Remove(entity);
+					if (subEnt.IsNotAffectedByPlan())
+						subEnt.RemoveDependencies();
+					entity.RedrawGameObjects(CameraManager.Instance.gameCamera);
+					return;
 				}
 			}
 		}
@@ -854,16 +837,16 @@ namespace MSP2050.Scripts
 		/// Sets lastImplementedPlanIndex to reflect this update.
 		/// Returns a dictionary with the investment cost per country if we are an energylayer
 		/// </summary>
-		public override void AdvanceTimeTo(int time)
+		public override void AdvanceTimeTo(int a_time)
 		{
-			if (planLayers.Count <= lastImplementedPlanIndex + 1 || planLayers[lastImplementedPlanIndex + 1].Plan.StartTime > time)
+			if (m_planLayers.Count <= m_lastImplementedPlanIndex + 1 || m_planLayers[m_lastImplementedPlanIndex + 1].Plan.StartTime > a_time)
 				return;
 
-			int newPlanIndex = lastImplementedPlanIndex;
+			int newPlanIndex = m_lastImplementedPlanIndex;
 
 			//Find index of the most recent plan at the given planTime
-			for (int i = planLayers.Count - 1; i > lastImplementedPlanIndex; i--)
-				if (planLayers[i].Plan.StartTime <= time)
+			for (int i = m_planLayers.Count - 1; i > m_lastImplementedPlanIndex; i--)
+				if (m_planLayers[i].Plan.StartTime <= a_time)
 				{
 					newPlanIndex = i;
 					break;
@@ -875,9 +858,9 @@ namespace MSP2050.Scripts
 		/// Merges plans up to the given index with the base layer (client side).
 		/// Ends with lastImplementedPlanIndex equal to the given index
 		/// </summary>
-		protected override void MergePlanWithBaseUpToIndex(int newPlanIndex)
+		protected override void MergePlanWithBaseUpToIndex(int a_newPlanIndex)
 		{
-			if (newPlanIndex <= lastImplementedPlanIndex)
+			if (a_newPlanIndex <= m_lastImplementedPlanIndex)
 				return;
 
 			List<T> newEntities = new List<T>();
@@ -885,19 +868,18 @@ namespace MSP2050.Scripts
 
 			//Go through plans backwards from lastPlanIndex to get the state at the given time
 			HashSet<int> excludedPersistentIDs = new HashSet<int>();
-			for (int i = newPlanIndex; i > lastImplementedPlanIndex; i--)
+			for (int i = a_newPlanIndex; i > m_lastImplementedPlanIndex; i--)
 			{
-				for (int entityIndex = 0; entityIndex < planLayers[i].GetNewGeometryCount(); ++entityIndex)
+				for (int entityIndex = 0; entityIndex < m_planLayers[i].GetNewGeometryCount(); ++entityIndex)
 				{
-					Entity entity = planLayers[i].GetNewGeometryByIndex(entityIndex);
+					Entity entity = m_planLayers[i].GetNewGeometryByIndex(entityIndex);
 
-					if (!excludedPersistentIDs.Contains(entity.GetSubEntity(0).GetPersistentID()))
-					{
-						newEntities.Add(entity as T);
-						excludedPersistentIDs.Add(entity.GetSubEntity(0).GetPersistentID());
-					}
+					if (excludedPersistentIDs.Contains(entity.GetSubEntity(0).GetPersistentID()))
+						continue;
+					newEntities.Add(entity as T);
+					excludedPersistentIDs.Add(entity.GetSubEntity(0).GetPersistentID());
 				}
-				excludedPersistentIDs.UnionWith(planLayers[i].RemovedGeometry);
+				excludedPersistentIDs.UnionWith(m_planLayers[i].RemovedGeometry);
 			}
 
 			//Find entities to be removed
@@ -914,188 +896,108 @@ namespace MSP2050.Scripts
 			foreach (T entity in newEntities)
 				Entities.Add(entity);
 
-			lastImplementedPlanIndex = newPlanIndex;
-			if (LayerManager.LayerIsVisible(this) && PlanManager.planViewing == null && PlanManager.timeViewing < 0)
-			{
-				SetEntitiesActiveUpToCurrentTime();
-				RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default, true);
-			}
+			m_lastImplementedPlanIndex = a_newPlanIndex;
+			if (!LayerManager.Instance.LayerIsVisible(this) || PlanManager.Instance.m_planViewing != null ||
+				PlanManager.Instance.m_timeViewing >= 0)
+				return;
+			SetEntitiesActiveUpToCurrentTime();
+			RedrawGameObjects(CameraManager.Instance.gameCamera, SubEntityDrawMode.Default, true);
 		}
 
-		/// <summary>
-		/// Merges the current plan's changes with the baselayer and submits the changes to the server.
-		/// Layer should be reactivated and redrawn after the function is done.
-		/// </summary>
-		public override void MergePlanWithBaseAndSubmitChanges(FSM fsm)
-		{
-			//UNSAFE TO USE UNTIL REWRITTEN
-
-			//SubmitCallbackTracker tracker = new SubmitCallbackTracker();
-			//List<EnergyLineStringSubEntity> addedCables = new List<EnergyLineStringSubEntity>();
-
-			////Make a hashset with all removed persistent IDs
-			//HashSet<int> removedFromBase = new HashSet<int>(currentPlanLayer.RemovedGeometry);
-			//List<T> removedFromBaseEntities = new List<T>();
-			//for (int entityIndex = 0; entityIndex < currentPlanLayer.GetNewGeometryCount(); ++entityIndex)
-			//{
-			//	Entity entity = currentPlanLayer.GetNewGeometryByIndex(entityIndex);
-
-			//	for (int i = 0; i < entity.GetSubEntityCount(); i++)
-			//		removedFromBase.Add(entity.GetSubEntity(i).GetPersistentID());
-			//}
-
-			////Submit deleted geometry
-			//foreach (T entity in Entities)
-			//{
-			//	bool removed = false;
-			//	//If one of the subentities' persistent ID is in removed geom
-			//	for (int i = 0; i < entity.GetSubEntityCount(); i++)
-			//		if (removedFromBase.Contains(entity.GetSubEntity(i).GetPersistentID()))
-			//		{
-			//			removed = true;
-			//			break;
-			//		}
-			//	//Remove all subentities in the object
-			//	if (removed)
-			//	{
-			//		removedFromBaseEntities.Add(entity);
-			//		for (int i = 0; i < entity.GetSubEntityCount(); i++)
-			//		{
-			//			SubEntity removedSubEntity = entity.GetSubEntity(i);
-			//			if (removedFromBase.Contains(removedSubEntity.GetPersistentID()))
-			//			{
-			//				removedSubEntity.SubmitDelete();
-			//				entity.RemoveSubEntity(removedSubEntity);
-			//				removedSubEntity.RemoveGameObject();
-			//			}
-			//		}
-			//	}
-			//}
-
-			////Remove geometry from baselayer
-			//foreach (T removedEntity in removedFromBaseEntities)
-			//	Entities.Remove(removedEntity);
-
-			////Submit new geometry
-			//for (int entityIndex = 0; entityIndex < currentPlanLayer.GetNewGeometryCount(); ++entityIndex)
-			//{
-			//	Entity entity = currentPlanLayer.GetNewGeometryByIndex(entityIndex);
-			//	entity.PlanLayer = null;
-			//	for (int i = 0; i < entity.GetSubEntityCount(); i++)
-			//	{
-			//		SubEntity newSubEntity = entity.GetSubEntity(i);
-			//		tracker.StartedSubmission();
-			//		newSubEntity.SubmitNew(tracker);
-			//		//If it's a cable it will need another submit
-			//		if (newSubEntity is EnergyLineStringSubEntity)
-			//			addedCables.Add(newSubEntity as EnergyLineStringSubEntity);
-			//	}
-			//	Entities.Add(entity as T);
-			//}
-
-			//ServerCommunication.WaitForCondition(tracker.CompletedAllSubmissions, () => FSM.SubmitConnections(addedCables));
-
-			//currentPlanLayer.ClearNewGeometry();
-			//currentPlanLayer.RemovedGeometry = new HashSet<int>();
-			//fsm.ClearUndoRedo();
-			//RedrawGameObjects(SubEntityDrawMode.Default);
-		}
-
-		public override LayerState GetLayerStateAtTime(int month, Plan treatAsInfluencingState = null)
+		public override LayerState GetLayerStateAtTime(int a_month, Plan a_treatAsInfluencingState = null)
 		{
 			int planIndex = -1;
-			for (int i = 0; i < planLayers.Count; i++)
+			for (int i = 0; i < m_planLayers.Count; i++)
 			{
-				if (planLayers[i].Plan.InInfluencingState || planLayers[i].Plan == treatAsInfluencingState)
+				if (!m_planLayers[i].Plan.InInfluencingState && m_planLayers[i].Plan != a_treatAsInfluencingState)
+					continue;
+				if (m_planLayers[i].Plan.StartTime <= a_month)
 				{
-					if (planLayers[i].Plan.StartTime <= month)
-					{
-						planIndex = i;
-					}
-					else
-					{
-						break;
-					}
+					planIndex = i;
+				}
+				else
+				{
+					break;
 				}
 			}
 			return GetLayerStateAtIndex(planIndex);
 		}
 
-		public override LayerState GetLayerStateAtPlan(Plan plan)
+		public override LayerState GetLayerStateAtPlan(Plan a_plan)
 		{
 			int planIndex = -1;
-			if (plan != null)
-				for (int i = 0; i < planLayers.Count; i++)
+			if (a_plan == null)
+				return GetLayerStateAtIndex(planIndex);
+			for (int i = 0; i < m_planLayers.Count; i++)
+			{
+				if (m_planLayers[i].Plan == a_plan)
 				{
-					if (planLayers[i].Plan == plan)
-					{
-						planIndex = i;
-						break;
-					}
-					else if (planLayers[i].Plan.StartTime > plan.StartTime || (planLayers[i].Plan.StartTime == plan.StartTime && plan.ID < planLayers[i].Plan.ID))
-					{
-						//Checked plan has higher startime or equal startime but higher ID, meaning it would be later in the list
-						planIndex = i - 1;
-						break;
-					}
-					else
-						planIndex = i;
+					planIndex = i;
+					break;
 				}
+				if (m_planLayers[i].Plan.StartTime > a_plan.StartTime || (m_planLayers[i].Plan.StartTime == a_plan.StartTime && a_plan.ID < m_planLayers[i].Plan.ID))
+				{
+					//Checked plan has higher startime or equal startime but higher ID, meaning it would be later in the list
+					planIndex = i - 1;
+					break;
+				}
+				planIndex = i;
+			}
 
 			return GetLayerStateAtIndex(planIndex);
 		}
 
-		public override LayerState GetLayerStateAtIndex(int planIndex)
+		public override LayerState GetLayerStateAtIndex(int a_planIndex)
 		{
 			//See SetEntitiesActiveUpTo for a commented (more elaborate) version of this function
 			List<Entity> geometry = new List<Entity>();
 
 			//If planindex = -1. only return base geometry
-			if (planIndex == -1)
+			if (a_planIndex == -1)
 			{
-				foreach (T entity in initialEntities)
+				foreach (T entity in InitialEntities)
 					geometry.Add(entity);
 			}
 			//If planindex is the last implemented one, return the current entities
-			else if (planIndex == lastImplementedPlanIndex)
+			else if (a_planIndex == m_lastImplementedPlanIndex)
 			{
 				foreach (T entity in Entities)
 					geometry.Add(entity);
 			}
 			else
 			{
-				HashSet<int> excludedPersistentIDs = new HashSet<int>(planLayers[planIndex].RemovedGeometry);
+				HashSet<int> excludedPersistentIDs = new HashSet<int>(m_planLayers[a_planIndex].RemovedGeometry);
 				bool addCurrent = false;
 
-				for (int entityIndex = 0; entityIndex < planLayers[planIndex].GetNewGeometryCount(); ++entityIndex)
+				for (int entityIndex = 0; entityIndex < m_planLayers[a_planIndex].GetNewGeometryCount(); ++entityIndex)
 				{
-					Entity entity = planLayers[planIndex].GetNewGeometryByIndex(entityIndex);
+					Entity entity = m_planLayers[a_planIndex].GetNewGeometryByIndex(entityIndex);
 					geometry.Add((T)entity);
 					excludedPersistentIDs.Add(entity.GetSubEntity(0).GetPersistentID());
 				}
 
 				//Add previous plan layer entities and excluded entities
-				for (int i = planIndex - 1; i >= 0; i--)
+				for (int i = a_planIndex - 1; i >= 0; i--)
 				{
 					//If we reach the last implemented plan, stop and add the current state instead of the initial one
-					if (i == lastImplementedPlanIndex)
+					if (i == m_lastImplementedPlanIndex)
 					{
 						addCurrent = true;
 						break;
 					}
-					if (!planLayers[i].Plan.InInfluencingState) //Plans in DESIGN and DELETES states are ignored
+					if (!m_planLayers[i].Plan.InInfluencingState) //Plans in DESIGN and DELETES states are ignored
 						continue;
-					for (int entityIndex = 0; entityIndex < planLayers[i].GetNewGeometryCount(); ++entityIndex)
+					for (int entityIndex = 0; entityIndex < m_planLayers[i].GetNewGeometryCount(); ++entityIndex)
 					{
-						Entity entity = planLayers[i].GetNewGeometryByIndex(entityIndex);
-						int ID = entity.GetSubEntity(0).GetPersistentID();
-						if (!excludedPersistentIDs.Contains(ID))//Makes geometry active that was not removed or replaced yet
+						Entity entity = m_planLayers[i].GetNewGeometryByIndex(entityIndex);
+						int id = entity.GetSubEntity(0).GetPersistentID();
+						if (!excludedPersistentIDs.Contains(id))//Makes geometry active that was not removed or replaced yet
 						{
 							geometry.Add(entity as T);
-							excludedPersistentIDs.Add(ID);
+							excludedPersistentIDs.Add(id);
 						}
 					}
-					excludedPersistentIDs.UnionWith(planLayers[i].RemovedGeometry);
+					excludedPersistentIDs.UnionWith(m_planLayers[i].RemovedGeometry);
 				}
 
 				if (addCurrent)
@@ -1108,34 +1010,33 @@ namespace MSP2050.Scripts
 				else
 				{
 					//Add geom from the initial layer that has not been removed or altered
-					foreach (T entity in initialEntities)
+					foreach (T entity in InitialEntities)
 						if (!excludedPersistentIDs.Contains(entity.GetSubEntity(0).GetPersistentID()))
 							geometry.Add(entity);
 				}
 			}
 
-			return new LayerState(geometry, planIndex, this);
+			return new LayerState(geometry, a_planIndex, this);
 		}
 
 		/// <summary>
 		/// Should be called on socket layer.
-		/// Returns a list of all grids for the current state. 
+		/// Returns a list of all updated/new grids for the given plan. 
 		/// Grids will have the same name, persisID and distribution if they existed in the given previousEnergyPlan.
 		/// Grids that will be there after the plan are removed from removedGrids.
 		/// </summary>
-		public override List<EnergyGrid> DetermineGrids(Plan plan, List<EnergyGrid> gridsInPlanPreviously, List<EnergyGrid> gridsBeforePlan, HashSet<int> removedGridsBefore, out HashSet<int> removedGridsAfter)
+		public override List<EnergyGrid> DetermineChangedGridsInPlan(Plan a_plan, List<EnergyGrid> a_gridsInPlanPreviously, List<EnergyGrid> a_gridsBeforePlan, HashSet<int> a_removedGrids)
 		{
-			removedGridsAfter = new HashSet<int>(removedGridsBefore);
-			if (editingType != EditingType.Socket)
+			if (m_editingType != EditingType.Socket)
 			{
 				return null;
 			}
 
-			if ((currentPlanLayer == null || currentPlanLayer.Plan.ID != plan.ID) && planLayers.Count > 0)
+			if ((m_currentPlanLayer == null || m_currentPlanLayer.Plan.ID != a_plan.ID) && m_planLayers.Count > 0)
 			{
-				SetEntitiesActiveUpTo(plan);
+				SetEntitiesActiveUpTo(a_plan);
 			}
-			if (currentPlanLayer == null)
+			if (m_currentPlanLayer == null)
 			{
 				return new List<EnergyGrid>();
 			}
@@ -1144,106 +1045,104 @@ namespace MSP2050.Scripts
 			List<EnergyGrid> result = new List<EnergyGrid>();
 			HashSet<SubEntity> visitedSockets = new HashSet<SubEntity>();
 
-			foreach (T entity in activeEntities)
+			foreach (T entity in m_activeEntities)
 			{
 				//If not visited, create new grid
-				if (!visitedSockets.Contains(entity.GetSubEntity(0)) && !currentPlanLayer.RemovedGeometry.Contains(entity.GetSubEntity(0).GetPersistentID()))
+				if (visitedSockets.Contains(entity.GetSubEntity(0)) ||
+					m_currentPlanLayer.RemovedGeometry.Contains(entity.GetSubEntity(0).GetPersistentID()))
+					continue;
+				EnergyGrid newGrid = new EnergyGrid((EnergyPointSubEntity)entity.GetSubEntity(0), a_plan);
+				foreach (EnergyPointSubEntity socket in newGrid.m_sockets)
+					visitedSockets.Add(socket);
+
+				//Determine if the new grid is the same as one of the old ones, if so: take over distribution and persistentID
+				bool identicalGridFound = false;
+				bool initialDistributionSet = false;
+
+				//======================= PREVIOUS VERSION OF THIS PLAN ========================
+
+				//Look for grids that were already in this plan that are identical to the new one.
+				//If one is found add it to the results. We don't care about partial identicality.
+
+				if (a_gridsInPlanPreviously != null)
 				{
-					EnergyGrid newGrid = new EnergyGrid((EnergyPointSubEntity)entity.GetSubEntity(0), plan);
-					foreach (EnergyPointSubEntity socket in newGrid.sockets)
-						visitedSockets.Add(socket);
-
-					//Determine if the new grid is the same as one of the old ones, if so: take over distribution and persistentID
-					bool identicalGridFound = false;
-					bool initialDistributionSet = false;
-
-					//======================= PREVIOUS VERSION OF THIS PLAN ========================
-
-					//Look for grids that were already in this plan that are identical to the new one.
-					//If one is found add it to the results. We don't care about partial identicality.
-
-					if (gridsInPlanPreviously != null)
+					foreach (EnergyGrid oldGrid in a_gridsInPlanPreviously)
 					{
-						foreach (EnergyGrid oldGrid in gridsInPlanPreviously)
+						if (!oldGrid.MatchesColor(m_greenEnergy ? EnergyGrid.GridColor.Green : EnergyGrid.GridColor.Grey))
+							continue;
+						if (!newGrid.SocketWiseIdentical(oldGrid))
+							continue;
+						//Sockets are identical, are the sources?
+						identicalGridFound = newGrid.SourceWiseIdentical(oldGrid);
+
+						if (identicalGridFound)
 						{
-							if (!oldGrid.MatchesColor(greenEnergy ? EnergyGrid.GridColor.Green : EnergyGrid.GridColor.Grey))
-								continue;
-							if (newGrid.SocketWiseIdentical(oldGrid))
-							{
-								//Sockets are identical, are the sources?
-								identicalGridFound = newGrid.SourceWiseIdentical(oldGrid);
-
-								if (identicalGridFound)
-								{
-									//If sources also identical, take over values from previous version of this plan
-									initialDistributionSet = true;
-									newGrid.name = oldGrid.name;
-									newGrid.distributionOnly = oldGrid.distributionOnly;
-									if (oldGrid.DatabaseIDSet())
-										newGrid.SetDatabaseID(oldGrid.GetDatabaseID());
-									newGrid.persistentID = oldGrid.persistentID;
-									if (removedGridsAfter.Contains(oldGrid.persistentID))
-										removedGridsAfter.Remove(oldGrid.persistentID);
-									newGrid.CalculateInitialDistribution(oldGrid);
-									result.Add(newGrid);
-								}
-								break;
-							}
+							//If sources also identical, take over values from previous version of this plan
+							initialDistributionSet = true;
+							newGrid.m_name = oldGrid.m_name;
+							newGrid.m_distributionOnly = oldGrid.m_distributionOnly;
+							if (oldGrid.DatabaseIDSet())
+								newGrid.SetDatabaseID(oldGrid.GetDatabaseID());
+							newGrid.m_persistentID = oldGrid.m_persistentID;
+							if (a_removedGrids.Contains(oldGrid.m_persistentID))
+								a_removedGrids.Remove(oldGrid.m_persistentID);
+							newGrid.CalculateInitialDistribution(oldGrid);
+							result.Add(newGrid);
 						}
+						break;
 					}
-
-					//============================== PREVIOUS PLANS ================================
-					//Even if we already found an identical grid, go through here to find grids that we removed
-					if (gridsBeforePlan != null)
-					{
-						foreach (EnergyGrid oldGrid in gridsBeforePlan)
-						{
-							if (!oldGrid.MatchesColor(greenEnergy ? EnergyGrid.GridColor.Green : EnergyGrid.GridColor.Grey))
-								continue;
-
-							if (newGrid.SocketWiseIdentical(oldGrid))
-							{
-								//If identicalgridfound we already found the grid and are only looking for partials
-								//Since this matches exactly, there will be no partials
-								if (identicalGridFound)
-									break;
-
-								//If sources are also identical, it was unchanged, don't add it to results
-								identicalGridFound = newGrid.SourceWiseIdentical(oldGrid);
-
-								if (identicalGridFound)
-								{
-									//Oldgrid is still present, remove its ID from removed IDs
-									if (removedGridsAfter.Contains(oldGrid.persistentID))
-										removedGridsAfter.Remove(oldGrid.persistentID);
-								}							
-								else	//Grids are not sourcewise identical, so take over values from previous one
-								{
-									initialDistributionSet = true;
-									newGrid.name = oldGrid.name;
-									newGrid.persistentID = oldGrid.persistentID;
-									newGrid.CalculateInitialDistribution(oldGrid);
-								}
-								break; //We found a socketwise identical grid, no use in continueing to look for matches
-							}
-						}
-					}
-					//============================== SECTION END ================================
-
-					//No exactly identical grid was found, so this grid is new and can be added to results. this occurs in 2 cases:
-					// 1. No matching grids were found.
-					// 2. A socketwise match was found, but sources differed. We add a new grid with the same persistentID. (initialDistributionSet is true)
-					if (!identicalGridFound)
-					{
-						if (!initialDistributionSet)
-							newGrid.CalculateInitialDistribution();
-						else if (removedGridsAfter.Contains(newGrid.persistentID))
-							removedGridsAfter.Remove(newGrid.persistentID);
-						result.Add(newGrid);
-					}
-					else if (removedGridsAfter.Contains(newGrid.persistentID))
-						removedGridsAfter.Remove(newGrid.persistentID);
 				}
+
+				//============================== PREVIOUS PLANS ================================
+				//Even if we already found an identical grid, go through here to find grids that we removed
+				if (a_gridsBeforePlan != null)
+				{
+					foreach (EnergyGrid oldGrid in a_gridsBeforePlan)
+					{
+						if (!oldGrid.MatchesColor(m_greenEnergy ? EnergyGrid.GridColor.Green : EnergyGrid.GridColor.Grey))
+							continue;
+
+						if (!newGrid.SocketWiseIdentical(oldGrid))
+							continue;
+						//If identicalgridfound we already found the grid and are only looking for partials
+						//Since this matches exactly, there will be no partials
+						if (identicalGridFound)
+							break;
+
+						//If sources are also identical, it was unchanged, don't add it to results
+						identicalGridFound = newGrid.SourceWiseIdentical(oldGrid);
+
+						if (identicalGridFound)
+						{
+							//Oldgrid is still present, remove its ID from removed IDs
+							if (a_removedGrids.Contains(oldGrid.m_persistentID))
+								a_removedGrids.Remove(oldGrid.m_persistentID);
+						}							
+						else	//Grids are not sourcewise identical, so take over values from previous one
+						{
+							initialDistributionSet = true;
+							newGrid.m_name = oldGrid.m_name;
+							newGrid.m_persistentID = oldGrid.m_persistentID;
+							newGrid.CalculateInitialDistribution(oldGrid);
+						}
+						break; //We found a socketwise identical grid, no use in continueing to look for matches
+					}
+				}
+				//============================== SECTION END ================================
+
+				//No exactly identical grid was found, so this grid is new and can be added to results. this occurs in 2 cases:
+				// 1. No matching grids were found.
+				// 2. A socketwise match was found, but sources differed. We add a new grid with the same persistentID. (initialDistributionSet is true)
+				if (!identicalGridFound)
+				{
+					if (!initialDistributionSet)
+						newGrid.CalculateInitialDistribution();
+					else if (a_removedGrids.Contains(newGrid.m_persistentID))
+						a_removedGrids.Remove(newGrid.m_persistentID);
+					result.Add(newGrid);
+				}
+				else if (a_removedGrids.Contains(newGrid.m_persistentID))
+					a_removedGrids.Remove(newGrid.m_persistentID);
 			}
 			return result;
 		}
@@ -1256,7 +1155,7 @@ namespace MSP2050.Scripts
 			if (!IsEnergyLineLayer())
 				return;
 
-			foreach (T entity in activeEntities)
+			foreach (T entity in m_activeEntities)
 				for (int i = 0; i < entity.GetSubEntityCount(); i++)
 				{
 					SubEntity subEntity = entity.GetSubEntity(i);
@@ -1271,19 +1170,19 @@ namespace MSP2050.Scripts
 		/// </summary>
 		public override List<EnergyLineStringSubEntity> RemoveInvalidCables()
 		{
-			if (!IsEnergyLineLayer() || currentPlanLayer == null)
+			if (!IsEnergyLineLayer() || m_currentPlanLayer == null)
 				return null;
 
 			List<EnergyLineStringSubEntity> cablesToRemove = new List<EnergyLineStringSubEntity>();
 
-			foreach (Entity entity in currentPlanLayer.GetNewGeometry())
+			foreach (Entity entity in m_currentPlanLayer.GetNewGeometry())
 			{
 				//Check the 2 connections for valid points
 				EnergyLineStringSubEntity cable = (EnergyLineStringSubEntity)entity.GetSubEntity(0);
-				foreach (Connection conn in cable.connections)
+				foreach (Connection conn in cable.Connections)
 				{
 					//If point is not in active entities, remove the cable.
-					if (!conn.point.Entity.Layer.IsIDInActiveGeometry(conn.point.GetDatabaseID()))
+					if (!conn.point.m_entity.Layer.IsIDInActiveGeometry(conn.point.GetDatabaseID()))
 					{
 						cablesToRemove.Add(cable);
 						break;
@@ -1294,9 +1193,9 @@ namespace MSP2050.Scripts
 			foreach (EnergyLineStringSubEntity cable in cablesToRemove)
 			{
 				//Remove from new geometry
-				currentPlanLayer.RemoveNewGeometry(cable.Entity);
+				m_currentPlanLayer.RemoveNewGeometry(cable.m_entity);
 				//Remove from active entities
-				activeEntities.Remove((T)cable.Entity);
+				m_activeEntities.Remove((T)cable.m_entity);
 				//Remove GO
 				cable.RemoveGameObject();
 				//Actual removal from the server is done with the batch submit
@@ -1307,16 +1206,15 @@ namespace MSP2050.Scripts
 			return cablesToRemove;
 		}
 
-		public override void RestoreInvalidCables(List<EnergyLineStringSubEntity> cables)
+		public override void RestoreInvalidCables(List<EnergyLineStringSubEntity> a_cables)
 		{
-			foreach (EnergyLineStringSubEntity cable in cables)
+			foreach (EnergyLineStringSubEntity cable in a_cables)
 			{
-				if (cable.Entity.Layer == this)
-				{
-					cable.Entity.PlanLayer.AddNewGeometry(cable.Entity);
-					cable.DrawGameObject(LayerGameObject.transform);
-					activeEntities.Add((T)cable.Entity);
-				}
+				if (cable.m_entity.Layer != this)
+					continue;
+				cable.m_entity.PlanLayer.AddNewGeometry(cable.m_entity);
+				cable.DrawGameObject(LayerGameObject.transform);
+				m_activeEntities.Add((T)cable.m_entity);
 			}
 		}
 
@@ -1328,7 +1226,7 @@ namespace MSP2050.Scripts
 			if (IsEnergyLineLayer())
 				return;
 
-			foreach (T entity in activeEntities)
+			foreach (T entity in m_activeEntities)
 				for (int i = 0; i < entity.GetSubEntityCount(); i++)
 					entity.GetSubEntity(i).ClearConnections();
 		}
@@ -1344,20 +1242,20 @@ namespace MSP2050.Scripts
 			foreach (T entity in Entities)
 				((IEnergyDataHolder)entity.GetSubEntity(0)).CurrentGrid = null;
 
-			for(int i = lastImplementedPlanIndex + 1; i < planLayers.Count; i++)
-				foreach(Entity entity in planLayers[i].GetNewGeometry())
+			for(int i = m_lastImplementedPlanIndex + 1; i < m_planLayers.Count; i++)
+				foreach(Entity entity in m_planLayers[i].GetNewGeometry())
 					((IEnergyDataHolder)entity.GetSubEntity(0)).CurrentGrid = null;
 		}
 
-		public Dictionary<int, List<DirectionalConnection>> GetCableNetworkAtTime(int month)
+		public Dictionary<int, List<DirectionalConnection>> GetCableNetworkAtTime(int a_month)
 		{
-			if (!IsEnergyLineLayer() || planLayers.Count == 0)
+			if (!IsEnergyLineLayer() || m_planLayers.Count == 0)
 				return null;
 
-			for (int i = planLayers.Count - 1; i >= 0; i--)
+			for (int i = m_planLayers.Count - 1; i >= 0; i--)
 			{
 				//Find last plan at time
-				if (planLayers[i].Plan.StartTime >= month)
+				if (m_planLayers[i].Plan.StartTime >= a_month)
 				{
 					return GetCableNetworkAtPlanIndex(i);
 				}
@@ -1369,21 +1267,21 @@ namespace MSP2050.Scripts
 		/// Gets the cable network at the time of a given plan. Doesn't alter the state of the layer or plan itself.
 		/// </summary>
 		/// <returns> Per point db ID, a list of connected ables and points. </returns>
-		public Dictionary<int, List<DirectionalConnection>> GetCableNetworkForPlan(Plan plan)
+		public Dictionary<int, List<DirectionalConnection>> GetCableNetworkForPlan(Plan a_plan)
 		{
-			if (!IsEnergyLineLayer() || plan == null || planLayers.Count == 0)
+			if (!IsEnergyLineLayer() || a_plan == null || m_planLayers.Count == 0)
 				return null;
 
 			//Find the index of the plan
 			int index = -1;
-			for (int i = 0; i < planLayers.Count; i++)
+			for (int i = 0; i < m_planLayers.Count; i++)
 			{
-				if (planLayers[i].Plan.ID == plan.ID)
+				if (m_planLayers[i].Plan.ID == a_plan.ID)
 				{
 					index = i;
 					break;
 				}
-				else if (planLayers[i].Plan.StartTime > plan.StartTime || (planLayers[i].Plan.StartTime == plan.StartTime && plan.ID < planLayers[i].Plan.ID))
+				if (m_planLayers[i].Plan.StartTime > a_plan.StartTime || (m_planLayers[i].Plan.StartTime == a_plan.StartTime && a_plan.ID < m_planLayers[i].Plan.ID))
 				{
 					//Checked plan has higher startime or equal startime but higher ID, meaning it would be later in the list
 					index = i - 1;
@@ -1397,23 +1295,23 @@ namespace MSP2050.Scripts
 			return GetCableNetworkAtPlanIndex(index);
 		}
 
-		private Dictionary<int, List<DirectionalConnection>> GetCableNetworkAtPlanIndex(int index)
+		private Dictionary<int, List<DirectionalConnection>> GetCableNetworkAtPlanIndex(int a_index)
 		{  
 			Dictionary<int, List<DirectionalConnection>> network = new Dictionary<int, List<DirectionalConnection>>();
-			HashSet<int> excludedPersistentIDs = new HashSet<int>(planLayers[index].RemovedGeometry);
+			HashSet<int> excludedPersistentIDs = new HashSet<int>(m_planLayers[a_index].RemovedGeometry);
 
-			for (int entityIndex = 0; entityIndex < planLayers[index].GetNewGeometryCount(); ++entityIndex)
+			for (int entityIndex = 0; entityIndex < m_planLayers[a_index].GetNewGeometryCount(); ++entityIndex)
 			{
-				Entity entity = planLayers[index].GetNewGeometryByIndex(entityIndex);
+				Entity entity = m_planLayers[a_index].GetNewGeometryByIndex(entityIndex);
 
 				EnergyLineStringSubEntity cable = (entity.GetSubEntity(0) as EnergyLineStringSubEntity);
-				if (cable.connections == null || cable.connections.Count < 2)
+				if (cable.Connections == null || cable.Connections.Count < 2)
 				{
 					Debug.LogError("Cable without connections in current plan layer. Ignored for grids. ID: " + cable.GetDatabaseID().ToString());
 					continue;
 				}
-				EnergyPointSubEntity p0 = cable.connections[0].point;
-				EnergyPointSubEntity p1 = cable.connections[1].point;
+				EnergyPointSubEntity p0 = cable.Connections[0].point;
+				EnergyPointSubEntity p1 = cable.Connections[1].point;
 
 				//Add connections from p0 to p1 and vive versa to network
 				if (network.ContainsKey(p0.GetDatabaseID()))
@@ -1429,52 +1327,26 @@ namespace MSP2050.Scripts
 			}
 
 			//Add previous plan layer entities and excluded entities
-			for (int i = index - 1; i > lastImplementedPlanIndex; i--)
+			for (int i = a_index - 1; i > m_lastImplementedPlanIndex; i--)
 			{
-				for (int entityIndex = 0; entityIndex < planLayers[i].GetNewGeometryCount(); ++entityIndex)
+				if (!m_planLayers[i].Plan.InInfluencingState)
+					continue;
+
+				for (int entityIndex = 0; entityIndex < m_planLayers[i].GetNewGeometryCount(); ++entityIndex)
 				{
-					Entity entity = planLayers[i].GetNewGeometryByIndex(entityIndex);
+					Entity entity = m_planLayers[i].GetNewGeometryByIndex(entityIndex);
 
-					int ID = entity.GetSubEntity(0).GetPersistentID();
-					if (!excludedPersistentIDs.Contains(ID))//Makes geometry active that was not removed or replaced yet
-					{
-						EnergyLineStringSubEntity cable = (entity.GetSubEntity(0) as EnergyLineStringSubEntity);
-						if (cable.connections == null || cable.connections.Count < 2)
-						{
-							Debug.LogError("Cable without connections in previous plan layer. Ignored for grids. ID: " + cable.GetDatabaseID().ToString());
-							continue;
-						}
-						EnergyPointSubEntity p0 = cable.connections[0].point;
-						EnergyPointSubEntity p1 = cable.connections[1].point;
-
-						//Add connections from p0 to p1 and vice versa to network
-						if (network.ContainsKey(p0.GetDatabaseID()))
-							network[p0.GetDatabaseID()].Add(new DirectionalConnection(cable, p1));
-						else
-							network.Add(p0.GetDatabaseID(), new List<DirectionalConnection> { new DirectionalConnection(cable, p1 )});
-						if (network.ContainsKey(p1.GetDatabaseID()))
-							network[p1.GetDatabaseID()].Add(new DirectionalConnection(cable, p0));
-						else
-							network.Add(p1.GetDatabaseID(), new List<DirectionalConnection> { new DirectionalConnection(cable, p0 )});
-
-						excludedPersistentIDs.Add(ID);
-					}
-				}
-				excludedPersistentIDs.UnionWith(planLayers[i].RemovedGeometry);
-			}
-
-			//Add geom from the base layer that has not been removed or altered
-			foreach (T entity in Entities)
-				if (!excludedPersistentIDs.Contains(entity.GetSubEntity(0).GetPersistentID()))
-				{
+					int id = entity.GetSubEntity(0).GetPersistentID();
+					if (excludedPersistentIDs.Contains(id)) //Makes geometry active that was not removed or replaced yet
+						continue;
 					EnergyLineStringSubEntity cable = (entity.GetSubEntity(0) as EnergyLineStringSubEntity);
-					if (cable.connections == null || cable.connections.Count < 2)
+					if (cable.Connections == null || cable.Connections.Count < 2)
 					{
-						Debug.LogError("Cable without connections in base data. Ignored for grids. ID: " + cable.GetDatabaseID().ToString());
+						Debug.LogError("Cable without connections in previous plan layer. Ignored for grids. ID: " + cable.GetDatabaseID().ToString());
 						continue;
 					}
-					EnergyPointSubEntity p0 = cable.connections[0].point;
-					EnergyPointSubEntity p1 = cable.connections[1].point;
+					EnergyPointSubEntity p0 = cable.Connections[0].point;
+					EnergyPointSubEntity p1 = cable.Connections[1].point;
 
 					//Add connections from p0 to p1 and vice versa to network
 					if (network.ContainsKey(p0.GetDatabaseID()))
@@ -1485,7 +1357,36 @@ namespace MSP2050.Scripts
 						network[p1.GetDatabaseID()].Add(new DirectionalConnection(cable, p0));
 					else
 						network.Add(p1.GetDatabaseID(), new List<DirectionalConnection> { new DirectionalConnection(cable, p0 )});
+
+					excludedPersistentIDs.Add(id);
 				}
+				excludedPersistentIDs.UnionWith(m_planLayers[i].RemovedGeometry);
+			}
+
+			//Add geom from the base layer that has not been removed or altered
+			foreach (T entity in Entities)
+			{
+				if (excludedPersistentIDs.Contains(entity.GetSubEntity(0).GetPersistentID()))
+					continue;
+				EnergyLineStringSubEntity cable = (entity.GetSubEntity(0) as EnergyLineStringSubEntity);
+				if (cable.Connections == null || cable.Connections.Count < 2)
+				{
+					Debug.LogError("Cable without connections in base data. Ignored for grids. ID: " + cable.GetDatabaseID().ToString());
+					continue;
+				}
+				EnergyPointSubEntity p0 = cable.Connections[0].point;
+				EnergyPointSubEntity p1 = cable.Connections[1].point;
+
+				//Add connections from p0 to p1 and vice versa to network
+				if (network.ContainsKey(p0.GetDatabaseID()))
+					network[p0.GetDatabaseID()].Add(new DirectionalConnection(cable, p1));
+				else
+					network.Add(p0.GetDatabaseID(), new List<DirectionalConnection> { new DirectionalConnection(cable, p1 )});
+				if (network.ContainsKey(p1.GetDatabaseID()))
+					network[p1.GetDatabaseID()].Add(new DirectionalConnection(cable, p0));
+				else
+					network.Add(p1.GetDatabaseID(), new List<DirectionalConnection> { new DirectionalConnection(cable, p0 )});
+			}
 
 			return network;
 		}
@@ -1494,21 +1395,21 @@ namespace MSP2050.Scripts
 		/// Gets the cable network at the time of a given plan. Doesn't alter the state of the layer or plan itself.
 		/// </summary>
 		/// <returns> Per point db ID, a list of connected cables. </returns>
-		public Dictionary<int, List<EnergyLineStringSubEntity>> GetNodeConnectionsForPlan(Plan plan, Dictionary<int, List<EnergyLineStringSubEntity>> networkToMerge = null)
+		public Dictionary<int, List<EnergyLineStringSubEntity>> GetNodeConnectionsForPlan(Plan a_plan, Dictionary<int, List<EnergyLineStringSubEntity>> a_networkToMerge = null)
 		{
-			if (!IsEnergyLineLayer() || plan == null || planLayers.Count == 0)
-				return networkToMerge;
+			if (!IsEnergyLineLayer() || a_plan == null || m_planLayers.Count == 0)
+				return a_networkToMerge;
 
 			//Find the index of the plan
 			int index = -1;
-			for (int i = 0; i < planLayers.Count; i++)
+			for (int i = 0; i < m_planLayers.Count; i++)
 			{
-				if (planLayers[i].Plan == plan)
+				if (m_planLayers[i].Plan == a_plan)
 				{
 					index = i;
 					break;
 				}
-				else if (planLayers[i].Plan.StartTime > plan.StartTime || (planLayers[i].Plan.StartTime == plan.StartTime && plan.ID < planLayers[i].Plan.ID))
+				if (m_planLayers[i].Plan.StartTime > a_plan.StartTime || (m_planLayers[i].Plan.StartTime == a_plan.StartTime && a_plan.ID < m_planLayers[i].Plan.ID))
 				{
 					//Checked plan has higher startime or equal startime but higher ID, meaning it would be later in the list
 					index = i - 1;
@@ -1517,23 +1418,23 @@ namespace MSP2050.Scripts
 			}
 
 			if (index < 0) //No base plan for cables exists
-				return networkToMerge;
+				return a_networkToMerge;
 
-			Dictionary<int, List<EnergyLineStringSubEntity>> network = networkToMerge == null ? new Dictionary<int, List<EnergyLineStringSubEntity>>() : networkToMerge;
-			HashSet<int> excludedPersistentIDs = new HashSet<int>(planLayers[index].RemovedGeometry);
+			Dictionary<int, List<EnergyLineStringSubEntity>> network = a_networkToMerge == null ? new Dictionary<int, List<EnergyLineStringSubEntity>>() : a_networkToMerge;
+			HashSet<int> excludedPersistentIDs = new HashSet<int>(m_planLayers[index].RemovedGeometry);
 
-			for (int entityIndex = 0; entityIndex < planLayers[index].GetNewGeometryCount(); ++entityIndex)
+			for (int entityIndex = 0; entityIndex < m_planLayers[index].GetNewGeometryCount(); ++entityIndex)
 			{
-				Entity entity = planLayers[index].GetNewGeometryByIndex(entityIndex);
+				Entity entity = m_planLayers[index].GetNewGeometryByIndex(entityIndex);
 
 				EnergyLineStringSubEntity subEnt = (entity.GetSubEntity(0) as EnergyLineStringSubEntity);
-				if (subEnt.connections.Count < 2)
+				if (subEnt.Connections.Count < 2)
 				{
 					Debug.LogError("Cable with less than 2 connections encountered when removing energy layer. Cable ID: " + subEnt.GetDatabaseID());
 					continue;
 				}
-				EnergyPointSubEntity p0 = subEnt.connections[0].point;
-				EnergyPointSubEntity p1 = subEnt.connections[1].point;
+				EnergyPointSubEntity p0 = subEnt.Connections[0].point;
+				EnergyPointSubEntity p1 = subEnt.Connections[1].point;
 
 				//Add connections from p0 to p1 and vice versa to network
 				if (network.ContainsKey(p0.GetDatabaseID()))
@@ -1549,38 +1450,37 @@ namespace MSP2050.Scripts
 			}
 
 			//Add previous plan layer entities and excluded entities
-			for (int i = index - 1; i > lastImplementedPlanIndex; i--)
+			for (int i = index - 1; i > m_lastImplementedPlanIndex; i--)
 			{
-				for (int entityIndex = 0; entityIndex < planLayers[i].GetNewGeometryCount(); ++entityIndex)
+				for (int entityIndex = 0; entityIndex < m_planLayers[i].GetNewGeometryCount(); ++entityIndex)
 				{
-					Entity entity = planLayers[i].GetNewGeometryByIndex(entityIndex);
+					Entity entity = m_planLayers[i].GetNewGeometryByIndex(entityIndex);
 
-					int ID = entity.GetSubEntity(0).GetPersistentID();
-					if (!excludedPersistentIDs.Contains(ID))//Makes geometry active that was not removed or replaced yet
+					int id = entity.GetSubEntity(0).GetPersistentID();
+					if (excludedPersistentIDs.Contains(id)) //Makes geometry active that was not removed or replaced yet
+						continue;
+					EnergyLineStringSubEntity subEnt = (entity.GetSubEntity(0) as EnergyLineStringSubEntity);
+					if (subEnt.Connections.Count < 2)
 					{
-						EnergyLineStringSubEntity subEnt = (entity.GetSubEntity(0) as EnergyLineStringSubEntity);
-						if (subEnt.connections.Count < 2)
-						{
-							Debug.LogError("Cable with less than 2 connections encountered when removing energy layer. Cable ID: " + subEnt.GetDatabaseID());
-							continue;
-						}
-						EnergyPointSubEntity p0 = subEnt.connections[0].point;
-						EnergyPointSubEntity p1 = subEnt.connections[1].point;
-
-						//Add connections from p0 to p1 and vice versa to network
-						if (network.ContainsKey(p0.GetDatabaseID()))
-							network[p0.GetDatabaseID()].Add(subEnt);
-						else
-							network.Add(p0.GetDatabaseID(), new List<EnergyLineStringSubEntity> { subEnt });
-						if (network.ContainsKey(p1.GetDatabaseID()))
-							network[p1.GetDatabaseID()].Add(subEnt);
-						else
-							network.Add(p1.GetDatabaseID(), new List<EnergyLineStringSubEntity> { subEnt });
-
-						excludedPersistentIDs.Add(ID);
+						Debug.LogError("Cable with less than 2 connections encountered when removing energy layer. Cable ID: " + subEnt.GetDatabaseID());
+						continue;
 					}
+					EnergyPointSubEntity p0 = subEnt.Connections[0].point;
+					EnergyPointSubEntity p1 = subEnt.Connections[1].point;
+
+					//Add connections from p0 to p1 and vice versa to network
+					if (network.ContainsKey(p0.GetDatabaseID()))
+						network[p0.GetDatabaseID()].Add(subEnt);
+					else
+						network.Add(p0.GetDatabaseID(), new List<EnergyLineStringSubEntity> { subEnt });
+					if (network.ContainsKey(p1.GetDatabaseID()))
+						network[p1.GetDatabaseID()].Add(subEnt);
+					else
+						network.Add(p1.GetDatabaseID(), new List<EnergyLineStringSubEntity> { subEnt });
+
+					excludedPersistentIDs.Add(id);
 				}
-				excludedPersistentIDs.UnionWith(planLayers[i].RemovedGeometry);
+				excludedPersistentIDs.UnionWith(m_planLayers[i].RemovedGeometry);
 			}
 
 			//Add geom from the base layer that has not been removed or altered
@@ -1588,11 +1488,11 @@ namespace MSP2050.Scripts
 				if (!excludedPersistentIDs.Contains(entity.GetSubEntity(0).GetPersistentID()))
 				{
 					EnergyLineStringSubEntity subEnt = (entity.GetSubEntity(0) as EnergyLineStringSubEntity);
-					if (subEnt.connections.Count < 2)
+					if (subEnt.Connections.Count < 2)
 						continue;
 
-					EnergyPointSubEntity p0 = subEnt.connections[0].point;
-					EnergyPointSubEntity p1 = subEnt.connections[1].point;
+					EnergyPointSubEntity p0 = subEnt.Connections[0].point;
+					EnergyPointSubEntity p1 = subEnt.Connections[1].point;
 
 					//Add connections from p0 to p1 and vice versa to network
 					if (network.ContainsKey(p0.GetDatabaseID()))
@@ -1611,16 +1511,16 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Returns the latest instances of geometry with the given persistent IDs before the given planlayer.
 		/// </summary>
-		public override List<SubEntity> GetFirstInstancesOfPersisIDBeforePlan(PlanLayer planLayer, HashSet<int> persistentIDs)
+		public override List<SubEntity> GetFirstInstancesOfPersisIDBeforePlan(PlanLayer a_planLayer, HashSet<int> a_persistentIDs)
 		{
 			//Required for alternative method
 			List<SubEntity> result = new List<SubEntity>();
 
-			if (currentPlanLayer != null && currentPlanLayer.ID == planLayer.ID)
+			if (m_currentPlanLayer != null && m_currentPlanLayer.ID == a_planLayer.ID)
 			{
-				foreach (T t in preModifiedEntities)
+				foreach (T t in PreModifiedEntities)
 				{
-					if (persistentIDs.Contains(t.PersistentID))
+					if (a_persistentIDs.Contains(t.PersistentID))
 					{
 						result.Add(t.GetSubEntity(0));
 					}
@@ -1629,24 +1529,23 @@ namespace MSP2050.Scripts
 			else
 			{
 				//This is an alternative method for if the assumption that the planlayer is active doesn't hold in the future.
-				int targetsLeft = persistentIDs.Count;
-				HashSet<int> targetIDs = new HashSet<int>(persistentIDs);
+				int targetsLeft = a_persistentIDs.Count;
+				HashSet<int> targetIDs = new HashSet<int>(a_persistentIDs);
 
 
 				//Find the index of the layer
 				int index = -1;
-				for (int i = 0; i < planLayers.Count; i++)
+				for (int i = 0; i < m_planLayers.Count; i++)
 				{
-					if (planLayers[i].ID == planLayer.ID)
-					{
-						index = i;
-						break;
-					}
+					if (m_planLayers[i].Plan.ID != a_planLayer.Plan.ID)
+						continue;
+					index = i;
+					break;
 				}
 
 				for (int i = index - 1; i >= 0 && targetsLeft > 0; i--)
 				{
-					foreach (Entity entity in planLayers[i].GetNewGeometry())
+					foreach (Entity entity in m_planLayers[i].GetNewGeometry())
 					{
 						SubEntity subEnt = entity.GetSubEntity(0);
 						if (targetIDs.Contains(subEnt.GetPersistentID()))
@@ -1658,7 +1557,9 @@ namespace MSP2050.Scripts
 					}
 				}
 
-				if (targetsLeft > 0)
+				if (targetsLeft <= 0)
+					return result;
+				{
 					foreach (Entity entity in Entities)
 					{
 						SubEntity subEnt = entity.GetSubEntity(0);
@@ -1671,6 +1572,7 @@ namespace MSP2050.Scripts
 							targetIDs.Remove(subEnt.GetPersistentID());
 						}
 					}
+				}
 			}
 			return result;
 		}
@@ -1678,14 +1580,19 @@ namespace MSP2050.Scripts
 
 	class SourceSummary
 	{
-		public int country;
-		public EntityType type;
-		public long capacity;
-		public SourceSummary(int country, EntityType type, long capacity)
+		private int m_country;
+		private EntityType m_type;
+		private long m_capacity;
+		public SourceSummary(int a_country, EntityType a_type, long a_capacity)
 		{
-			this.country = country;
-			this.type = type;
-			this.capacity = capacity;
+			m_country = a_country;
+			m_type = a_type;
+			m_capacity = a_capacity;
+		}
+
+		public bool Matches(int a_country, EntityType a_type, long a_capacity)
+		{
+			return m_country == a_country && m_type == a_type && m_capacity == a_capacity;
 		}
 	}
 }

@@ -81,7 +81,6 @@ namespace MSP2050.Scripts
 
 		private static void UpdateUrl()
 		{
-			//Url = string.Format("{0}{1}/{2}/", protocol, host, endpoint);
 			Url = host;
 			UrlWithoutSession = Url;
 			if (gameSessionId > 0)
@@ -131,6 +130,11 @@ namespace MSP2050.Scripts
 			return "api/game/meta";
 		}
 
+		public static string PolicySimSettings()
+		{
+			return "api/game/PolicySimSettings";
+		}
+
 		public static string LayerMetaByName()
 		{
 			return "api/layer/MetaByName";
@@ -151,30 +155,15 @@ namespace MSP2050.Scripts
 			return "api/geometry/Post";
 		}
 
-		//public static string PostGeometrySub() //Updated to new name below
-		//{
-		//	return "api/geometry/AdminSubtractive";
-		//}
-
 		public static string PostGeometrySub()
 		{
 			return "api/geometry/PostSubtractive";
 		}
 
-		//public static string UpdateGeometry() //Updated to new name below
-		//{
-		//	return "api/geometry/AdminUpdate";
-		//}
-
 		public static string UpdateGeometry()
 		{
 			return "api/geometry/Update";
 		}
-
-		//public static string DeleteGeometry() //Updated to new name below
-		//{
-		//	return "api/geometry/AdminDelete";
-		//}
 
 		public static string DeleteGeometry()
 		{
@@ -235,12 +224,7 @@ namespace MSP2050.Scripts
 		{
 			return "api/user/CloseSession";
 		}
-
-		public static string SetEndAndStartDate()
-		{
-			return "api/game/SetStartEndDate";
-		}
-
+		
 		public static string IsServerOnline()
 		{
 			return "api/game/isOnline";
@@ -276,7 +260,7 @@ namespace MSP2050.Scripts
 			return "api/plan/DeleteLayer";
 		}
 
-		public static string RenamePlanLayer()
+		public static string RenamePlan()
 		{
 			return "api/plan/Name";
 		}
@@ -326,7 +310,7 @@ namespace MSP2050.Scripts
 			return "api/energy/UpdateConnection";
 		}
 
-		public static string DeleteEnergyConection()
+		public static string DeleteEnergyConnection()
 		{
 			return "api/energy/DeleteConnection";
 		}
@@ -335,6 +319,12 @@ namespace MSP2050.Scripts
 		{
 			return "api/plan/Restrictions";
 		}
+
+		public static string SetPlanPolicy()
+		{
+			return "api/plan/SetPolicy";
+		}
+
 		public static string UpdateMaxCapacity()
 		{
 			return "api/energy/UpdateMaxCapacity";
@@ -415,10 +405,10 @@ namespace MSP2050.Scripts
 			return "api/energy/AddGrid";
 		}
 
-		public static string GetCELConfig()
-		{
-			return "api/cel/GetCELConfig";
-		}
+		//public static string GetCELConfig()
+		//{
+		//	return "api/cel/GetCELConfig";
+		//}
 
 		public static string SendFishingAmount()
 		{
@@ -444,20 +434,20 @@ namespace MSP2050.Scripts
 			return "api/plan/AddApproval";
 		}
 
-		public static string GetMELConfig()
-		{
-			return "api/mel/Config";
-		}
+		//public static string GetMELConfig()
+		//{
+		//	return "api/mel/Config";
+		//}
 
-		public static string ShippingKPIConfig()
-		{
-			return "api/sel/GetKPIDefinition";
-		}
+		//public static string ShippingKPIConfig()
+		//{
+		//	return "api/sel/GetKPIDefinition";
+		//}
 
-		public static string GetShippingClientConfig()
-		{
-			return "api/sel/GetSELGameClientConfig";
-		}
+		//public static string GetShippingClientConfig()
+		//{
+		//	return "api/sel/GetSELGameClientConfig";
+		//}
 
 		public static string DeleteObjective()
 		{
@@ -532,16 +522,6 @@ namespace MSP2050.Scripts
 		public static string RenewApiToken()
 		{
 			return "api/security/RequestToken";
-		}
-
-		public static string StartBatch()
-		{
-			return "api/batch/StartBatch";
-		}
-
-		public static string AddToBatch()
-		{
-			return "api/batch/AddToBatch";
 		}
 
 		public static string ExecuteBatch()

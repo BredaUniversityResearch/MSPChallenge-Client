@@ -1,51 +1,48 @@
-﻿using UnityEngine;
+﻿using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace MSP2050.Scripts
 {
 	public class MenuBarToggle : MonoBehaviour
 	{
-		public enum Selection { Logo, Layers, PlanWizard, ObjectivesMonitor, PlansMonitor, ImpactTool, ActiveLayers, GameMenu };
+		public enum Selection { Logo, Layers, PlansList, ObjectivesMonitor, ImpactTool, ActiveLayers, GameMenu, CreatePlan, Notifications, MapTools, Other };
 
 		[Header("Connects to the correct toggle")]
 		public Selection connectTo;
-	
+
+		[ShowIf("connectTo", Selection.Other)]
+		public GameObject otherWindow;
+
 		public CustomToggle toggle;
 
 		void Start()
 		{
 			toggle = GetComponent<CustomToggle>();
 
-			switch (connectTo) {
+			switch (connectTo) 
+			{
 				case Selection.Logo:
-					if (Main.MspGlobalData != null)               
-						SetRegionButtonCallback();                
-					else               
-						Main.OnGlobalDataLoaded += GlobalDataLoaded;               
+					SetRegionButtonCallback();                          
 					break;
 				case Selection.Layers:
-					toggle.isOn = InterfaceCanvas.Instance.layerPanel.gameObject.activeSelf; // Init
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerPanel.gameObject.SetActive(toggle.isOn));
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerPanel.DisableLayerSelect(toggle.isOn));
+					toggle.isOn = InterfaceCanvas.Instance.layerInterface.gameObject.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.layerInterface.gameObject.SetActive(toggle.isOn));
 					break;
-				case Selection.PlanWizard:
-					toggle.isOn = InterfaceCanvas.Instance.planWizard.gameObject.activeSelf; // Init
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.planWizard.gameObject.SetActive(toggle.isOn));
-					toggle.onValueChanged.AddListener((bool b) => { if (b) InterfaceCanvas.Instance.planWizard.SetToPlan(null); } );
+				case Selection.PlansList:
+					toggle.isOn = InterfaceCanvas.Instance.plansList.gameObject.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.plansList.gameObject.SetActive(toggle.isOn));
 					break;
 				case Selection.ObjectivesMonitor:
-					if (InterfaceCanvas.Instance.objectivesMonitor) {
+					if (InterfaceCanvas.Instance.objectivesMonitor) 
+					{
 						toggle.isOn = false; // Init
-						toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.objectivesMonitor.SetWindowActive(toggle.isOn));
+						toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.objectivesMonitor.gameObject.SetActive(toggle.isOn));
 					}
-					break;
-				case Selection.PlansMonitor:
-					toggle.isOn = InterfaceCanvas.Instance.plansMonitor.gameObject.activeSelf; // Init
-					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.plansMonitor.gameObject.SetActive(toggle.isOn));
 					break;
 				case Selection.ImpactTool:
 					toggle.isOn = InterfaceCanvas.Instance.impactToolWindow.gameObject.activeSelf;
 					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.impactToolWindow.gameObject.SetActive(toggle.isOn));
-					Main.OnGlobalDataLoaded += GlobalDataLoaded;
+					toggle.gameObject.SetActive(SessionManager.Instance.MspGlobalData.dependencies != null);
 					break;
 				case Selection.ActiveLayers:
 					toggle.isOn = InterfaceCanvas.Instance.activeLayers.gameObject.activeSelf; // Init
@@ -55,6 +52,21 @@ namespace MSP2050.Scripts
 					toggle.isOn = InterfaceCanvas.Instance.gameMenu.gameObject.activeSelf; // Init
 					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.gameMenu.gameObject.SetActive(toggle.isOn));
 					break;
+				case Selection.CreatePlan:
+					toggle.onValueChanged.AddListener((b) => PlanManager.Instance.BeginPlanCreation());
+					break;
+				case Selection.Notifications:
+					toggle.isOn = InterfaceCanvas.Instance.notificationWindow.gameObject.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.notificationWindow.gameObject.SetActive(toggle.isOn));
+					break;
+				case Selection.MapTools:
+					toggle.isOn = InterfaceCanvas.Instance.mapToolsWindow.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.mapToolsWindow.SetActive(toggle.isOn));
+					break;
+				case Selection.Other:
+					toggle.isOn = otherWindow.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => otherWindow.SetActive(toggle.isOn));
+					break;
 			}
 		}
 
@@ -62,20 +74,6 @@ namespace MSP2050.Scripts
 		public void ToggleValue()
 		{
 			toggle.isOn = !toggle.isOn;
-
-		}
-
-		void GlobalDataLoaded()
-		{
-			if (connectTo == Selection.Logo)
-			{
-				Main.OnGlobalDataLoaded -= GlobalDataLoaded;
-				SetRegionButtonCallback();
-			}
-			else if (connectTo == Selection.ImpactTool)
-			{
-				toggle.gameObject.SetActive(Main.MspGlobalData.dependencies != null); // Make sure this toggle is visible based on whether or not we have the data.
-			}
 		}
 
 		void SetRegionButtonCallback()
@@ -83,7 +81,7 @@ namespace MSP2050.Scripts
 			toggle.onValueChanged.AddListener((b) =>
 			{
 				float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(Main.MspGlobalData.region_base_url + '/' + TeamManager.CurrentTeam.name);
+				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(SessionManager.Instance.MspGlobalData.region_base_url + '/' + SessionManager.Instance.CurrentTeam.name);
 			});
 	
 		}

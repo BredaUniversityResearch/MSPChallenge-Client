@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public ConvertedUnit ConvertUnit(float currentValue, string unit)
+		public ConvertedUnitFloat ConvertUnit(float currentValue, string unit)
 		{
 			ValueConversionUnit converter = null;
 			if (!string.IsNullOrEmpty(unit))
@@ -30,12 +30,39 @@ namespace MSP2050.Scripts
 				conversionUnits.TryGetValue(unit, out converter);
 			}
 
-			return converter != null? converter.ConvertUnit(currentValue) : new ConvertedUnit(currentValue, unit, 0);
+			return converter != null? converter.ConvertUnit(currentValue) : new ConvertedUnitFloat(currentValue, unit, 0);
+		}
+
+		public ConvertedUnitLong ConvertUnit(long currentValue, string unit)
+		{
+			ValueConversionUnit converter = null;
+			if (!string.IsNullOrEmpty(unit))
+			{
+				conversionUnits.TryGetValue(unit, out converter);
+			}
+
+			return converter != null ? converter.ConvertUnit(currentValue) : new ConvertedUnitLong(currentValue, unit, 0);
 		}
 
 		public void ParseUnit(string input, string baseUnitIdentifier, out float amount)
 		{
 			amount = 0.0f;
+
+			ValueConversionUnit converter = null;
+			if (!string.IsNullOrEmpty(baseUnitIdentifier))
+			{
+				conversionUnits.TryGetValue(baseUnitIdentifier, out converter);
+			}
+
+			if (converter != null)
+			{
+				converter.ParseUnit(input, out amount);
+			}
+		}
+
+		public void ParseUnit(string input, string baseUnitIdentifier, out long amount)
+		{
+			amount = 0l;
 
 			ValueConversionUnit converter = null;
 			if (!string.IsNullOrEmpty(baseUnitIdentifier))

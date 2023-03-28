@@ -1,266 +1,313 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
+using System;
+using UnityEngine.Serialization;
 
 namespace MSP2050.Scripts
 {
-	public static class PlanManager
+	public class PlanManager : MonoBehaviour
 	{
 		public enum PlanViewState { All, Base, Changes, Time };
 
-		private static List<Plan> plans = new List<Plan>();
-		private static Dictionary<int, PlanLayer> planLayers = new Dictionary<int, PlanLayer>();
-		private static Dictionary<int, EnergyGrid> energyGrids = new Dictionary<int, EnergyGrid>();
-		private static HashSet<Plan> unseenPlanChanges = new HashSet<Plan>();
+		private static PlanManager Singleton;
+		public static PlanManager Instance
+		{
+			get
+			{
+				if (Singleton == null)
+					Singleton = FindObjectOfType<PlanManager>();
+				return Singleton;
+			}
+		}
 
-		//Fishing
-		public static List<string> fishingFleets;
-		public static float initialFishingMapping;
-		public static float fishingDisplayScale;
-		public static float shippingDisplayScale = 10000; // = 10km
+		private List<Plan> m_plans = new List<Plan>();
+		public List<Plan> Plans => m_plans;
 
-		[CanBeNull]
-		public static FishingDistributionDelta initialFishingValues;
+		public delegate void PlansEventDelegate(Plan a_plan);
+		public delegate void PlansUpdateEventDelegate(Plan a_plan, int a_oldTime);
+		public event PlansEventDelegate OnPlanVisibleInUIEvent;
+		public event PlansUpdateEventDelegate OnPlanUpdateInUIEvent;
+		public event PlansUpdateEventDelegate OnPlanHideInUIEvent;
+		public event PlansEventDelegate OnViewingPlanChanged;
 
 		//Viewing & Viewstates
-		public static PlanViewState planViewState = PlanViewState.All;
-		public static Plan planViewing;
-		public static int timeViewing = -1; //Used if planViewing is null. -1 is current time.
-		public static bool inPlanUIChange;
-		private static int planToViewOnUpdate;
+		[FormerlySerializedAs("planViewState")]
+		[HideInInspector] public PlanViewState m_planViewState = PlanViewState.All;
+		public Plan m_planViewing;
+		[FormerlySerializedAs("timeViewing")]
+		[HideInInspector] public int m_timeViewing = -1; //Used if planViewing is null. -1 is current time.
+		private bool m_ignoreRedrawOnViewStateChange = false;
 
-		private static bool ignoreRedrawOnViewStateChange = false;
-
-		public static Plan ProcessReceivedPlan(PlanObject planObject, Dictionary<AbstractLayer, int> layerUpdateTimes)
+		private void Start()
 		{
-			int planID = planObject.id;
+			if (Singleton != null && Singleton != this)
+				Destroy(this);
+			else
+				Singleton = this;
+		}
+
+		private void OnDestroy()
+		{
+			Singleton = null;
+		}
+
+		public Plan ProcessReceivedPlan(PlanObject a_planObject, Dictionary<AbstractLayer, int> a_layerUpdateTimes)
+		{
+			int planID = a_planObject.id;
 			Plan targetPlan = GetPlanWithID(planID);
 
 			if (targetPlan != null)
 			{
-				targetPlan.UpdatePlan(planObject, layerUpdateTimes);
+				targetPlan.UpdatePlan(a_planObject, a_layerUpdateTimes);
+				if(!InterfaceCanvas.Instance.plansList.ContainsPlan(targetPlan))
+					AddPlanToUI(targetPlan);
 			}
 			else
 			{
-				targetPlan = new Plan(planObject, layerUpdateTimes);
+				targetPlan = new Plan(a_planObject, a_layerUpdateTimes);
 				AddPlan(targetPlan);
-				PlanAdded(targetPlan);
-				//tracker.CompletedUpdate();
+				AddPlanToUI(targetPlan);
 			}
 
-			RestrictionAreaManager.instance.ProcessReceivedRestrictions(targetPlan, planObject.restriction_settings);
 			return targetPlan;
 		}
 
-		public static void AddPlan(Plan newPlan)
+		public void AddPlan(Plan a_newPlan)
 		{
-			if (plans.Count == 0)
+			if (m_plans.Count == 0)
 			{
-				plans.Add(newPlan);
+				m_plans.Add(a_newPlan);
 				return;
 			}
 
-			for (int i = 0; i < plans.Count; i++)
-				if (plans[i].StartTime > newPlan.StartTime)
+			for (int i = 0; i < m_plans.Count; i++)
+				if (m_plans[i].StartTime > a_newPlan.StartTime)
 				{
-					plans.Insert(i, newPlan);
+					m_plans.Insert(i, a_newPlan);
 					return;
 				}
 
-			plans.Add(newPlan);
+			m_plans.Add(a_newPlan);
 		}
 
-		public static void UpdatePlanTime(Plan updatedPlan)
+		public void RemovePlan(Plan a_plan)
 		{
-			plans.Remove(updatedPlan);
-			AddPlan(updatedPlan);
+			m_plans.Remove(a_plan);
 		}
 
-		public static void SetPlanViewState(PlanManager.PlanViewState state, bool redraw = true)
+		public void UpdatePlanTime(Plan a_updatedPlan)
 		{
-			bool needsRedraw = redraw && (!ignoreRedrawOnViewStateChange && planViewState != state);
-			planViewState = state;
+			m_plans.Remove(a_updatedPlan);
+			AddPlan(a_updatedPlan);
+		}
+
+		public void SetPlanViewState(PlanViewState a_state, bool a_redraw = true)
+		{
+			bool needsRedraw = a_redraw && (!m_ignoreRedrawOnViewStateChange && m_planViewState != a_state);
+			m_planViewState = a_state;
 			if (needsRedraw)
-				LayerManager.RedrawVisibleLayers();
+				LayerManager.Instance.RedrawVisibleLayers();
 		}
 
-		public static void ShowWorldAt(int time)
+		public void ShowWorldAt(int a_time)
 		{
-			if (timeViewing == time || planViewing != null)
+			if (m_timeViewing == a_time || m_planViewing != null)
 				return;
-			if (time == -1)
-				LayerManager.UpdateVisibleLayersToBase();
+			if (a_time == -1)
+				LayerManager.Instance.UpdateVisibleLayersToBase();
 			else
-				LayerManager.UpdateVisibleLayersToTime(time);
-			timeViewing = time;
+				LayerManager.Instance.UpdateVisibleLayersToTime(a_time);
+			m_timeViewing = a_time;
 		}
 
-		public static void ShowPlan(Plan plan)
+		public void ShowPlan(Plan a_plan)
 		{
-			if (Main.InEditMode || Main.EditingPlanDetailsContent)
+			if (Main.InEditMode)
 				return;
-
-			//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
-			UIManager.ignoreLayerToggleCallback = true;
-			if (planViewing != null)
+			
+			if (a_plan.State == Plan.PlanState.DELETED)
 			{
-				PlansMonitor.SetViewPlanFrameState(planViewing, false);
+				//Ask if player wants to return plan to design (and change time if required)
+				Plan targetPlan = a_plan; //cache plan for callbacks
+				if(a_plan.RequiresTimeChange)
+				{
+					DialogBoxManager.instance.NotificationWindow("Restore archived plan",
+						"The selected plan has been archived and its construction start time has passed. To restore the plan, change its implementation date.",
+						() => ShowArchivedPlan(targetPlan));
+				}
+				else
+				{
+					DialogBoxManager.instance.ConfirmationWindow("Restore archived plan",
+						"The selected plan has been archived. Would you like to restore the plan to the Design state?",
+						() => { }, () => ShowArchivedPlan(targetPlan));
+				}
 			}
-			planViewing = plan;
-			timeViewing = -1;
-			PlansMonitor.SetViewPlanFrameState(planViewing, true);
-			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
-			LayerManager.UpdateVisibleLayersToPlan(plan);
-			UIManager.ignoreLayerToggleCallback = false;
-			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(plan);
+			else
+			{
+				//InterfaceCanvas.Instance.viewTimeWindow.CloseWindow(false);
+				m_planViewing = a_plan;
+				m_timeViewing = -1;
+				InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
+				LayerManager.Instance.UpdateVisibleLayersToPlan(a_plan);
+				InterfaceCanvas.Instance.activePlanWindow.SetToPlan(a_plan);
+				IssueManager.Instance.SetIssueInstancesToPlan(a_plan);
+				if (OnViewingPlanChanged != null)
+				{
+					OnViewingPlanChanged.Invoke(a_plan);
+				}
+			}
 		}
 
-		public static void HideCurrentPlan(bool updateLayers = true)
+		void ShowArchivedPlan(Plan a_plan)
 		{
-			if (Main.InEditMode || Main.EditingPlanDetailsContent)
+			InterfaceCanvas.ShowNetworkingBlocker();
+			a_plan.AttemptLock((a_lockedPlan) =>
+			{
+				if (a_lockedPlan.RequiresTimeChange)
+				{
+					InterfaceCanvas.HideNetworkingBlocker();
+					m_planViewing = a_lockedPlan;
+					m_timeViewing = -1;
+					InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);//Needs to be done before redraw
+					LayerManager.Instance.UpdateVisibleLayersToBase();
+					InterfaceCanvas.Instance.activePlanWindow.SetToPlan(a_lockedPlan);
+					if (OnViewingPlanChanged != null)
+					{
+						OnViewingPlanChanged.Invoke(a_lockedPlan);
+					}
+				}
+				else
+				{
+					AP_StateSelect.SubmitPlanRecovery(a_lockedPlan);
+					if (OnViewingPlanChanged != null)
+					{
+						OnViewingPlanChanged.Invoke(null);
+					}
+				}
+			}, null);
+		}
+
+		public void HideCurrentPlan(bool a_updateLayers = true)
+		{
+			if (Main.InEditMode)
 				return;
 
-			UIManager.ignoreLayerToggleCallback = true;
-			if (planViewing != null)
-			{
-				PlansMonitor.SetViewPlanFrameState(planViewing, false);
-			}
-			planViewing = null;
+			m_planViewing = null;
 
 			//Doesnt have to redraw as we'll do so when updating layers to base anyway
-			ignoreRedrawOnViewStateChange = true;
-			InterfaceCanvas.Instance.activePlanWindow.viewAllToggle.isOn = true;
-			ignoreRedrawOnViewStateChange = false;
+			m_ignoreRedrawOnViewStateChange = true;
+			TimeBar.instance.SetViewMode(PlanViewState.All);
+			m_ignoreRedrawOnViewStateChange = false;
 
-			if(updateLayers)
-				LayerManager.UpdateVisibleLayersToBase();
-			UIManager.ignoreLayerToggleCallback = false;
+			if (a_updateLayers)
+				LayerManager.Instance.UpdateVisibleLayersToBase();
 			InterfaceCanvas.Instance.activePlanWindow.CloseWindow();
 			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Normal, false);
+			IssueManager.Instance.HidePlanIssueInstances();
+			if (OnViewingPlanChanged != null)
+			{
+				OnViewingPlanChanged.Invoke(null);
+			}
 		}
 
-		public static SubEntityPlanState GetSubEntityPlanState(SubEntity subEntity)
+		public SubEntityPlanState GetSubEntityPlanState(SubEntity a_subEntity)
 		{
 			//added, moved, removed, notinplan, notshown
-			PlanLayer currentPlanLayer = subEntity.Entity.Layer.CurrentPlanLayer();
-			bool layerInPlan = planViewing == null || planViewing.IsLayerpartOfPlan(subEntity.Entity.Layer);
+			PlanLayer currentPlanLayer = a_subEntity.m_entity.Layer.CurrentPlanLayer();
+			bool layerInPlan = m_planViewing == null || m_planViewing.IsLayerpartOfPlan(a_subEntity.m_entity.Layer);
+			if(!a_subEntity.m_entity.Layer.Toggleable || (!a_subEntity.m_entity.Layer.m_editable && a_subEntity.m_entity.Layer.ActiveOnStart))
+				return SubEntityPlanState.NotInPlan;
 
-			if (planViewState == PlanViewState.All)
+			if (m_planViewState == PlanViewState.All)
 			{
 				if (currentPlanLayer == null) //Only show the base layer
 				{
-					if (subEntity.Entity.Layer.IsIDInActiveGeometry(subEntity.GetDatabaseID()))
+					if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 						return SubEntityPlanState.NotInPlan;
-					else
-						return SubEntityPlanState.NotShown;
+					return SubEntityPlanState.NotShown;
 				}
 				if (!layerInPlan)
 				{
-					if (subEntity.Entity.Layer.IsIDInActiveGeometry(subEntity.GetDatabaseID()))
+					if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 						return SubEntityPlanState.NotInPlan;
-					else
-						return SubEntityPlanState.NotShown;
+					return SubEntityPlanState.NotShown;
 				}
-				if (currentPlanLayer.IsDatabaseIDInNewGeometry(subEntity.GetDatabaseID()))
+				if (currentPlanLayer.IsDatabaseIDInNewGeometry(a_subEntity.GetDatabaseID()))
 				{
-					if (!currentPlanLayer.BaseLayer.IsEntityTypeVisible(subEntity.Entity.EntityTypes))
+					if (!currentPlanLayer.BaseLayer.IsEntityTypeVisible(a_subEntity.m_entity.EntityTypes))
 						return SubEntityPlanState.NotShown;
-					if (subEntity.Entity.Layer.IsPersisIDCurrentlyNew(subEntity.GetPersistentID()))
+					if (a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(a_subEntity.GetPersistentID()))
 						return SubEntityPlanState.Added;
 					return SubEntityPlanState.Moved;
 				}
-				if (subEntity.Entity.Layer.IsIDInActiveGeometry(subEntity.GetDatabaseID()))
-				{
-					if (currentPlanLayer.IsPersistentIDInRemovedGeometry(subEntity.GetPersistentID()))
-						return SubEntityPlanState.Removed;
-					return SubEntityPlanState.NotInPlan;
-				}
+				if (!a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
+					return SubEntityPlanState.NotShown;
+				if (currentPlanLayer.IsPersistentIDInRemovedGeometry(a_subEntity.GetPersistentID()))
+					return SubEntityPlanState.Removed;
+				return SubEntityPlanState.NotInPlan;
 			}
-			else if (planViewState == PlanViewState.Base)
+			if (m_planViewState == PlanViewState.Base)
 			{
 				if (currentPlanLayer == null) //Only show the base layer
 				{
-					if (subEntity.Entity.Layer.IsIDInActiveGeometry(subEntity.GetDatabaseID()))
+					if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 						return SubEntityPlanState.NotInPlan;
-					else
-						return SubEntityPlanState.NotShown;
+					return SubEntityPlanState.NotShown;
 				}
 				if (!layerInPlan)
 				{
-					if (subEntity.Entity.Layer.IsIDInActiveGeometry(subEntity.GetDatabaseID()))
+					if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 						return SubEntityPlanState.NotInPlan;
-					else
-						return SubEntityPlanState.NotShown;
-				}
-				if (currentPlanLayer.IsPersistentIDInRemovedGeometry(subEntity.GetPersistentID()) || subEntity.Entity.Layer.IsDatabaseIDPreModified(subEntity.GetDatabaseID()))
-					return SubEntityPlanState.NotInPlan;
-				if (subEntity.Entity.Layer.IsPersisIDCurrentlyNew(subEntity.GetPersistentID()) || currentPlanLayer.IsDatabaseIDInNewGeometry(subEntity.GetDatabaseID()))
 					return SubEntityPlanState.NotShown;
-				if (subEntity.Entity.Layer.IsIDInActiveGeometry(subEntity.GetDatabaseID()))
+				}
+				if (currentPlanLayer.IsPersistentIDInRemovedGeometry(a_subEntity.GetPersistentID()) || a_subEntity.m_entity.Layer.IsDatabaseIDPreModified(a_subEntity.GetDatabaseID()))
+					return SubEntityPlanState.NotInPlan;
+				if (a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(a_subEntity.GetPersistentID()) || currentPlanLayer.IsDatabaseIDInNewGeometry(a_subEntity.GetDatabaseID()))
+					return SubEntityPlanState.NotShown;
+				if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 					return SubEntityPlanState.NotInPlan;
 			}
-			else if (planViewState == PlanViewState.Changes)
+			else if (m_planViewState == PlanViewState.Changes)
 			{
 				if (currentPlanLayer == null) //Only show the base layer
 					return SubEntityPlanState.NotShown;
 				if (!layerInPlan)
 					return SubEntityPlanState.NotShown;
-				if (currentPlanLayer.IsDatabaseIDInNewGeometry(subEntity.GetDatabaseID()))
+				if (currentPlanLayer.IsDatabaseIDInNewGeometry(a_subEntity.GetDatabaseID()))
 				{
-					if (!currentPlanLayer.BaseLayer.IsEntityTypeVisible(subEntity.Entity.EntityTypes))
+					if (!currentPlanLayer.BaseLayer.IsEntityTypeVisible(a_subEntity.m_entity.EntityTypes))
 						return SubEntityPlanState.NotShown;
-					if (subEntity.Entity.Layer.IsPersisIDCurrentlyNew(subEntity.GetPersistentID()))
+					if (a_subEntity.m_entity.Layer.IsPersisIDCurrentlyNew(a_subEntity.GetPersistentID()))
 						return SubEntityPlanState.Added;
 					return SubEntityPlanState.Moved;
 				}
-				if (subEntity.Entity.Layer.IsIDInActiveGeometry(subEntity.GetDatabaseID()) && currentPlanLayer.IsPersistentIDInRemovedGeometry(subEntity.GetPersistentID()))
+				if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()) && currentPlanLayer.IsPersistentIDInRemovedGeometry(a_subEntity.GetPersistentID()))
 					return SubEntityPlanState.Removed;
 			}
 			else //PlanViewState.Time
 			{
-				if (subEntity.Entity.Layer.IsIDInActiveGeometry(subEntity.GetDatabaseID()))
+				if (a_subEntity.m_entity.Layer.IsIDInActiveGeometry(a_subEntity.GetDatabaseID()))
 					return SubEntityPlanState.NotInPlan;
-				else
-					return SubEntityPlanState.NotShown;
+				return SubEntityPlanState.NotShown;
 			}
 			return SubEntityPlanState.NotShown;
 		}
 
-		public static void ViewPlanOnMap(Plan plan)
+		public int GetPlanCount()
 		{
-			foreach (PlanLayer planLayer in plan.PlanLayers)
-				LayerManager.ShowLayer(planLayer.BaseLayer);
-
-			CameraManager.Instance.ZoomToBounds(plan.GetBounds());
+			return m_plans.Count;
 		}
 
-		public static void ViewPlanLayerOnMap(PlanLayer planLayer)
+		public Plan GetPlanAtIndex(int a_index)
 		{
-			LayerManager.ShowLayer(planLayer.BaseLayer);
-			CameraManager.Instance.ZoomToBounds(planLayer.GetBounds());
-		}
-	
-		public static void RequestForceUnlockPlan(Plan plan)
-		{
-			plan.AttemptUnlock(true);
+			return m_plans[a_index];
 		}
 
-		public static int GetPlanCount()
+		public Plan GetPlanWithID(int a_planID)
 		{
-			return plans.Count;
-		}
-
-		public static Plan GetPlanAtIndex(int index)
-		{
-			return plans[index];
-		}
-
-		public static Plan GetPlanWithID(int planID)
-		{
-			foreach (Plan plan in plans)
+			foreach (Plan plan in m_plans)
 			{
-				if (plan.ID == planID)
+				if (plan.ID == a_planID)
 				{
 					return plan;
 				}
@@ -268,14 +315,14 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public static List<Plan> GetAllPlansFrom(int month)
+		public List<Plan> GetAllPlansFrom(int a_month)
 		{
 			List<Plan> result = new List<Plan>();
-			for (int i = plans.Count - 1; i >= 0; i--)
+			for (int i = m_plans.Count - 1; i >= 0; i--)
 			{
-				if (plans[i].StartTime < month)
+				if (m_plans[i].StartTime < a_month)
 					break;
-				result.Add(plans[i]);
+				result.Add(m_plans[i]);
 			}
 			return result;
 		}
@@ -283,24 +330,24 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Returns plan layers for a base layer from a specific month onwards
 		/// </summary>
-		/// <param name="baseLayer">The base layer we need to get the geometry from</param>
-		/// <param name="planStartTime">Exclusive from what date on we want to get the layers</param>
-		/// <param name="onlyInfluencingPlans">Only plans that are in the influencing state</param>
+		/// <param name="a_baseLayer">The base layer we need to get the geometry from</param>
+		/// <param name="a_planStartTime">Exclusive from what date on we want to get the layers</param>
+		/// <param name="a_onlyInfluencingPlans">Only plans that are in the influencing state</param>
 		/// <returns></returns>
-		public static List<PlanLayer> GetPlanLayersForBaseLayerFrom(AbstractLayer baseLayer, int planStartTime, bool onlyInfluencingPlans)
+		public List<PlanLayer> GetPlanLayersForBaseLayerFrom(AbstractLayer a_baseLayer, int a_planStartTime, bool a_onlyInfluencingPlans)
 		{
 			List<PlanLayer> result = new List<PlanLayer>(32);
 			//Iterate forwards so the list is in order from first occuring layer to last occuring layer. This helps us with checks in the future
-			for (int i = 0; i < plans.Count; ++i)
+			for (int i = 0; i < m_plans.Count; ++i)
 			{
-				Plan plan = plans[i];
-				if (plan.StartTime <= planStartTime ||
-				    (onlyInfluencingPlans && !plan.InInfluencingState))
+				Plan plan = m_plans[i];
+				if (plan.StartTime <= a_planStartTime ||
+					(a_onlyInfluencingPlans && !plan.InInfluencingState))
 				{
 					continue;
 				}
 
-				PlanLayer planLayer = plan.GetPlanLayerForLayer(baseLayer);
+				PlanLayer planLayer = plan.GetPlanLayerForLayer(a_baseLayer);
 				if (planLayer != null)
 				{
 					result.Add(planLayer);
@@ -309,508 +356,100 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public static Plan FindFirstPlanChangingGeometry(int fromMonth, int entityPersistentId, AbstractLayer baseLayer)
-		{
-			Plan result = null;
-			for (int i = 0; i < plans.Count; ++i)
-			{
-				Plan plan = plans[i];
-				if (plan.StartTime <= fromMonth)
-				{
-					continue;
-				}
-
-				PlanLayer planLayer = plan.GetPlanLayerForLayer(baseLayer);
-				if (planLayer != null)
-				{
-					if (planLayer.IsPersistentIDInNewGeometry(entityPersistentId) ||
-					    planLayer.IsPersistentIDInRemovedGeometry(entityPersistentId))
-					{
-						result = plan;
-						break;
-					}
-				}
-			}
-			return result;
-		}
-
-		public static PlanLayer GetPlanLayer(int ID)
-		{
-			if (planLayers.ContainsKey(ID))
-				return planLayers[ID];
-			else
-				return null;
-		}
-
-		public static bool RemovePlanLayer(PlanLayer planLayer)
-		{
-			return planLayers.Remove(planLayer.ID);
-		}
-
-		public static void AddEnergyGrid(EnergyGrid energyGrid)
-		{
-			energyGrids[energyGrid.GetDatabaseID()] = energyGrid;
-		}
-
-		public static EnergyGrid GetEnergyGrid(int ID)
-		{
-			if (!energyGrids.ContainsKey(ID))
-			{
-				Debug.LogError("Retrieving on non-existing key: " + ID);
-				Debug.LogError("Keys available: " + string.Join(", ", energyGrids.Keys));
-			}
-			return energyGrids[ID];
-		}
-
-		public static bool RemoveEnergyGridr(EnergyGrid energyGrid)
-		{
-			return energyGrids.Remove(energyGrid.GetDatabaseID());
-		}
-
 		/// <summary>
 		/// Called whenever a new month starts
 		/// </summary>
-		/// <param name="newMonth">month that just started</param>
-		public static void MonthTick(int newMonth)
+		/// <param name="a_newMonth">month that just started</param>
+		public static void MonthTick(int a_newMonth)
 		{
 			//Advance time on layers (merging approved ones) 
-			foreach (AbstractLayer layer in LayerManager.GetAllValidLayers())
-				layer.AdvanceTimeTo(newMonth);
+			foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
+				layer.AdvanceTimeTo(a_newMonth);
 		}
 
-		/// <summary>
-		/// Returns a list of energy grids that are active right before the given plan would be implemented.
-		/// </summary>
-		/// <param name="plan"> Plan before which grids are calced </param>
-		/// <param name="removedGridIds"> Persistent IDs of grids that have been removed in at this plan's point</param>
-		/// <param name="includePlanItself"> Is the given plan included </param>
-		/// <param name="forDisplaying"> Is the given plan included even if it's in design</param>
-		/// <returns></returns>
-		public static List<EnergyGrid> GetEnergyGridsBeforePlan(Plan plan, out HashSet<int> removedGridIds, EnergyGrid.GridColor color, bool includePlanItself = false, bool forDisplaying = false)
+		private void AddPlanToUI(Plan a_plan)
 		{
-			List<EnergyGrid> result = new List<EnergyGrid>();
-			removedGridIds = new HashSet<int>();
-			HashSet<int> ignoredGridIds = new HashSet<int>();
-			HashSet<int> previousGridIDsLookingFor = new HashSet<int>();
-
-			//Find the index of the given plan
-			int planIndex = 0;
-			for (; planIndex < plans.Count; planIndex++)
-				if (plans[planIndex] == plan)
-					break;
-
-			//Handle plan itself if conditions are met
-			if (includePlanItself && plan.energyPlan && plan.energyGrids != null && (plan.InInfluencingState || (forDisplaying && plan.State == Plan.PlanState.DESIGN)))
-			{
-				foreach (EnergyGrid grid in plan.energyGrids)
-				{
-					if (!grid.MatchesColor(color))
-						continue;
-					if (grid.persistentID == -1 || (!removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
-					{
-						result.Add(grid);
-						ignoredGridIds.Add(grid.persistentID);
-					}
-				}
-				removedGridIds.UnionWith(plans[planIndex].removedGrids);
-				if (forDisplaying)
-					previousGridIDsLookingFor = new HashSet<int>(plans[planIndex].removedGrids);
-			}
-
-			//Add all grids whose persistentID is not in ignoredgrids
-			for (int i = planIndex - 1; i >= 0; i--)
-			{
-				if (plans[i].energyPlan && plans[i].InInfluencingState)
-				{
-					foreach (EnergyGrid grid in plans[i].energyGrids)
-					{
-						if (!grid.MatchesColor(color))
-							continue;
-						if (previousGridIDsLookingFor.Contains(grid.persistentID))
-						{
-							//If we were looking for this persis ID, add it even if in ignored or removed
-							result.Add(grid);
-							ignoredGridIds.Add(grid.persistentID);
-							previousGridIDsLookingFor.Remove(grid.persistentID);
-						}
-						else if (grid.persistentID == -1 || (!removedGridIds.Contains(grid.persistentID) && !ignoredGridIds.Contains(grid.persistentID)))
-						{
-							result.Add(grid);
-							ignoredGridIds.Add(grid.persistentID);
-						}
-					}
-					removedGridIds.UnionWith(plans[i].removedGrids);
-				}
-			}
-
-			return result;
-		}
-
-		public static List<EnergyGrid> GetEnergyGridsBeforePlan(Plan plan, EnergyGrid.GridColor color, bool includePlanItself = false, bool forDisplaying = false)
-		{
-			HashSet<int> ignoredGridIds;
-			return GetEnergyGridsBeforePlan(plan, out ignoredGridIds, color, includePlanItself, forDisplaying);
-		}
-
-		public static List<EnergyGrid> GetEnergyGridsAtTime(int time, EnergyGrid.GridColor color)
-		{
-			if (plans.Count == 0)
-			{
-				return new List<EnergyGrid>(0);
-			}
-
-			for (int i = 0; i < plans.Count; i++)
-				if (plans[i].StartTime > time)
-					return GetEnergyGridsBeforePlan(plans[i], color);
-
-			return GetEnergyGridsBeforePlan(plans[plans.Count - 1], color, true);
-		}
-
-		private static void SetInitialFishingValuesFromPlans()
-		{
-			if (initialFishingValues != null)
-			{
-				return; // already set.
-			}
-			foreach (Plan plan in plans)
-			{
-				if (plan.fishingDistributionDelta == null)
-				{
-					continue;
-				}
-				foreach (KeyValuePair<string, Dictionary<int, float>> values in plan.fishingDistributionDelta.GetValuesByFleet())
-				{
-					var fleetName = values.Key;
-					if (initialFishingValues != null && initialFishingValues.HasFinishingValue(fleetName))
-					{
-						continue; // already there, skip it
-					}
-					// gonna set fishing values, make sure initialFishingValues is initialised. Assuming a fleet always has values
-					if (initialFishingValues == null)
-					{
-						initialFishingValues = new FishingDistributionDelta();
-					}
-					foreach (var item in values.Value)
-					{
-						initialFishingValues.SetFishingValue(fleetName, item.Key, item.Value); // add it the initial value
-					}
-				}
-			}
-		}
-
-		public static FishingDistributionSet GetFishingDistributionForPreviousPlan(Plan referencePlan)
-		{
-			SetInitialFishingValuesFromPlans();
-			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
-			foreach(Plan plan in plans)
-			{
-				if (plan.ID == referencePlan.ID)
-				{
-					break;
-				}
-				else
-				{
-					if (plan.ecologyPlan && plan.fishingDistributionDelta != null)
-					{
-						result.ApplyValues(plan.fishingDistributionDelta);
-					}
-				}
-			}
-
-			return result;
-		}
-
-		public static FishingDistributionSet GetFishingDistributionAtTime(int timeMonth)
-		{
-			SetInitialFishingValuesFromPlans();
-			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
-			foreach (Plan plan in plans)
-			{
-				if (plan.StartTime > timeMonth)
-				{
-					break;
-				}
-
-				if (plan.State == Plan.PlanState.IMPLEMENTED && plan.ecologyPlan && plan.fishingDistributionDelta != null)
-				{
-					result.ApplyValues(plan.fishingDistributionDelta);
-				}
-			}
-
-			return result;
-		}
-
-		/////////////////////////////////////////
-		// EVENT HANDLERS, MOSTLY FOR UI STUFF //
-		/////////////////////////////////////////
-
-		private static void PlanAdded(Plan plan)
-		{
-			//Add planLayers to manager, but don't add to UI individually (done in a batch by plan)
-			foreach (PlanLayer planLayer in plan.PlanLayers)
-				PlanLayerAdded(plan, planLayer, false);
-
 			//Show plan if it isnt a hidden plan
-			if (plan.StartTime >= 0 || TeamManager.AreWeGameMaster)
+			if (a_plan.StartTime < 0 && !SessionManager.Instance.AreWeGameMaster)
+				return;
+			InterfaceCanvas.Instance.plansList.AddPlanToList(a_plan);
+			if (a_plan.ShouldBeVisibleInTimeline)
 			{
-				PlansMonitor.AddPlan(plan);
-				if (plan.ShouldBeVisibleInTimeline)
-				{
-					SetPlanUnseenChanges(plan, true);
-					PlansTimeline.AddNewPlan(plan);
-				}
+				OnPlanVisibleInUIEvent(a_plan);
 			}
 		}
 
-		public static void UpdatePlanInUI(Plan plan, bool nameOrDescriptionChanged, bool timeChanged, bool stateChanged, bool layersChanged, bool typeChanged, bool forceMonitorUpdate, int oldTime, Plan.PlanState oldState, bool inTimelineBefore)
+		public void OnPlanInfluencingChanged(Plan a_plan, bool a_nowInfluencing)
 		{
-			bool timeLineUpdated = false;
-			bool inTimelineNow = plan.ShouldBeVisibleInTimeline;
-
-			if (nameOrDescriptionChanged)
+			//if editing, check if edited plan affected by this change, redo energy backup and distr
+			if(Main.InEditMode && a_plan.StartTime <= Main.CurrentlyEditingPlan.StartTime)
 			{
-				PlanDetails.UpdateNameAndDescription(plan);
-				if (planViewing == plan && !Main.InEditMode && !Main.EditingPlanDetailsContent)
-					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();			
+				InterfaceCanvas.Instance.activePlanWindow.OnPreviousPlanChangedInfluence();
 			}
-			if (stateChanged)
+		}
+
+		public void UpdatePlanInUI(Plan a_plan, bool a_stateChanged, int a_oldTime, bool a_inTimelineBefore)
+		{
+			bool inTimelineNow = a_plan.ShouldBeVisibleInTimeline;
+
+			if (a_stateChanged)
 			{
 				//Didn't see icon before, should see now
-				if (!inTimelineBefore && inTimelineNow)
+				if (!a_inTimelineBefore && inTimelineNow)
 				{
-					PlansTimeline.AddNewPlan(plan);
-					timeLineUpdated = true;
+					OnPlanVisibleInUIEvent(a_plan);
 				}
 				//Saw plan before, shouldn't see now
-				else if (inTimelineBefore && !inTimelineNow)
+				else if (a_inTimelineBefore && !inTimelineNow)
 				{
-					PlansTimeline.RemoveExistingPlan(plan, oldTime);
-					timeLineUpdated = true;
+					OnPlanHideInUIEvent(a_plan, a_oldTime);
 				}
 			}
 
 			//Update edit button availability in active plan window
-			if((stateChanged || layersChanged) && planViewing == plan)
-				InterfaceCanvas.Instance.activePlanWindow.UpdateEditButtonActivity();
-
-			if (timeChanged)
+			if (m_planViewing == a_plan && !Main.InEditMode)
 			{
-				//Plan didnt change influencing state and should be visible to this client: update
-				if (!timeLineUpdated && inTimelineNow)
-					PlansTimeline.UpdatePlan(plan, oldTime);
-				PlanDetails.ChangeDate(plan);
-				if (planViewing == plan && !Main.InEditMode && !Main.EditingPlanDetailsContent)
+				InterfaceCanvas.Instance.activePlanWindow.RefreshContent();
+				if (!a_plan.ShouldBeVisibleInUI)
 				{
-					InterfaceCanvas.Instance.activePlanWindow.UpdateNameAndDate();							
-					InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
-					LayerManager.UpdateVisibleLayersToPlan(plan);
+					HideCurrentPlan();
 				}
-			}
-			if (stateChanged || timeChanged || nameOrDescriptionChanged || forceMonitorUpdate)
-			{
-				PlansMonitor.UpdatePlan(plan, nameOrDescriptionChanged, timeChanged, stateChanged);
-				SetPlanUnseenChanges(plan, plan.ShouldBeVisibleInUI);
+				InterfaceCanvas.Instance.timeBar.UpdatePlanViewing();
+				LayerManager.Instance.UpdateVisibleLayersToPlan(a_plan);
 			}
 
-			//These changes don't require a general update, only plandetails if they are being viewed
-			if (plan == PlanDetails.GetSelectedPlan())
-			{
-				if (!plan.ShouldBeVisibleInUI)
-					PlanDetails.SelectPlan(null);
-				else
-				{
-					if (stateChanged)
-						PlanDetails.UpdateStatus();
-					if (typeChanged)
-						PlanDetails.UpdateTabAvailability();
-				}
-				PlanDetails.UpdateTabContent();
-			}
+			InterfaceCanvas.Instance.plansList.UpdatePlan(a_plan);
+			OnPlanUpdateInUIEvent(a_plan, a_oldTime);
 		}
 
-		public static void PlanLockUpdated(Plan plan)
+		public bool UserHasPlanLocked(int a_sessionID)
 		{
-			PlansMonitor.SetLockIcon(plan, plan.IsLocked);
-			if((Main.InEditMode && Main.CurrentlyEditingPlan == plan) || (Main.EditingPlanDetailsContent && PlanDetails.GetSelectedPlan() == plan))
-			{
-				PlanDetails.instance.CancelEditingContent();
-				DialogBoxManager.instance.NotificationWindow("Plan Unexpectedly Unlocked", "Plan has been unlocked by an external party. All changes have been discarded.", null);
-			}
-		}
-
-		public static bool UserHasPlanLocked(int sessionID)
-		{
-			foreach (Plan plan in plans)
-				if (plan.LockedBy == sessionID)
+			foreach (Plan plan in m_plans)
+				if (plan.LockedBy == a_sessionID)
 					return true;
 			return false;
 		}
 
-		public static void SetPlanUnseenChanges(Plan plan, bool unseenChanges)
+		public void BeginPlanCreation()
 		{
-			if (unseenChanges)
-			{
-				//Check if viewing in plansdetails
-				if (PlanDetails.IsOpen && PlanDetails.GetSelectedPlan() == plan)
-					return;
-
-				if(!unseenPlanChanges.Contains(plan))
-					unseenPlanChanges.Add(plan);
-				PlansMonitor.SetPlanUnseenChanges(plan, unseenChanges);
-				PlansMonitor.SetUnseenChangesCounter(unseenPlanChanges.Count);
-			}
-			else
-			{
-				if (unseenPlanChanges.Contains(plan))
-					unseenPlanChanges.Remove(plan);
-				PlansMonitor.SetPlanUnseenChanges(plan, unseenChanges);
-				PlansMonitor.SetUnseenChangesCounter(unseenPlanChanges.Count);
-			}
-		}
-
-		public static void PlanLayerAdded(Plan plan, PlanLayer addedLayer, bool addToUI = true)
-		{
-			planLayers[addedLayer.ID] = addedLayer;
-			IssueManager.instance.InitialiseIssuesForPlanLayer(addedLayer);
-			if (addToUI)
-				PlansMonitor.AddPlanLayer(plan, addedLayer);
-
-			//Sets entities active and redraws if the layer is visible
-			//LayerManager.UpdateLayerToPlan(addedLayer.BaseLayer, plan, plan == planViewing);
-		}
-
-		public static void PlanLayerRemoved(Plan plan, PlanLayer removedLayer)
-		{
-			PlansMonitor.RemovePlanLayer(plan, removedLayer);
-			IssueManager.instance.DeleteIssuesForPlanLayer(removedLayer);
-			//HidePlanLayer(removedLayer);
-			RemovePlanLayer(removedLayer);
-		}
-
-		public static void LoadFishingFleets(JObject melConfig)
-		{
-			fishingFleets = new List<string>();
-			try
-			{
-				JEnumerable<JToken> results = melConfig["fishing"].Children();
-				foreach (JToken token in results)
-					fishingFleets.Add(token.ToObject<FishingFleet>().name);
-				initialFishingMapping = melConfig["initialFishingMapping"].ToObject<float>();
-				fishingDisplayScale = melConfig["fishingDisplayScale"].ToObject<float>();
-			}
-			catch
-			{
-				Debug.Log("Fishing fleets json does not match expected format.");
-			}
-
-			initialFishingValues = null;
-		}
-
-		public static void ViewPlanWithIDWhenReceived(int targetPlanID)
-		{
-			bool found = false;
-			foreach (Plan plan in plans)
-			{
-				if (plan.ID == targetPlanID)
-				{
-					found = true;
-					ShowPlan(plan);
-					PlanDetails.SelectPlan(plan);
-				}
-			}
-
-			if(!found)
-				planToViewOnUpdate = targetPlanID;
-		}
-
-		public static void CheckIfExpectedplanReceived()
-		{
-			if (planToViewOnUpdate == -1)
+			if (Main.InEditMode || Main.Instance.PreventPlanChange)
 				return;
-
-			foreach (Plan plan in plans)
-			{
-				if (plan.ID == planToViewOnUpdate)
-				{
-					planToViewOnUpdate = -1;
-					ShowPlan(plan);
-					PlanDetails.SelectPlan(plan);
-				}
-			}
+			if(m_planViewing != null)
+				HideCurrentPlan();
+			InterfaceCanvas.Instance.activePlanWindow.SetToPlan(null);
 		}
 
-		//public static List<Plan> DetermineFuturePlanEnergyOverlap(Plan plan)
-		//{
-		//	List<Plan> result = new List<Plan>();
-		//	int planIndex = 0;
-		//	for (; planIndex < plans.Count; planIndex++)
-		//		if (plans[planIndex].ID == plan.ID)
-		//			break;
-
-		//	planIndex++;
-		//	for (; planIndex < plans.Count; planIndex++)
-		//	{
-		//		bool matchFound = false;
-		//		foreach (EnergyGrid grid in plans[planIndex].energyGrids)
-		//		{
-		//			if (plan.removedGrids.Contains(grid.persistentID))
-		//			{
-		//				matchFound = true;
-		//				break;
-		//			}
-		//		}
-		//		if (!matchFound && plan.removedGrids.Overlaps(plans[planIndex].removedGrids))
-		//		{
-		//			matchFound = true;
-		//		}
-		//		if (matchFound)
-		//			result.Add(plans[planIndex]);
-		//	}
-
-		//	return result;
-		//}
-
-		//public static List<Plan> DetermineFuturePlanEnergyDependency(Plan plan)
-		//{
-		//	List<Plan> result = new List<Plan>();
-		//	//For all grids we changed the geometry of, invalidate later instances of that plan
-		//	int planIndex = 0;
-		//	for (; planIndex < plans.Count; planIndex++)
-		//		if (plans[planIndex].ID == plan.ID)
-		//			break;
-
-		//	//For every grid
-		//	foreach (EnergyGrid grid in plan.energyGrids)
-		//	{
-		//		if (grid.distributionOnly)
-		//			continue;
-		//		//For every future plan
-		//		for (int i = planIndex + 1; i < plans.Count; i++)
-		//		{
-		//			//If grids overlap, put error in plan
-		//			bool matchFound = plans[i].removedGrids.Contains(grid.persistentID);
-		//			if (!matchFound)
-		//			{
-		//				foreach (EnergyGrid otherGrid in plans[i].energyGrids)
-		//				{
-		//					if (otherGrid.persistentID == grid.persistentID)
-		//					{
-		//						matchFound = true;
-		//						break;
-		//					}
-		//				}
-		//			}
-		//			if (matchFound)
-		//				result.Add(plans[i]);
-		//		}
-		//	}
-		//	return result;
-		//}
-	}
-
-	public class FishingFleet
-	{
-		public string name;
-		public float scalar;
+		public void ForceSetPlanViewing(Plan a_plan)
+		{
+			m_planViewing = a_plan;
+			m_timeViewing = -1;
+			InterfaceCanvas.Instance.timeBar.SetViewMode(TimeBar.WorldViewMode.Plan, false);//Needs to be done before redraw
+			LayerManager.Instance.UpdateVisibleLayersToPlan(a_plan);
+			IssueManager.Instance.SetIssueInstancesToPlan(a_plan);
+			if(OnViewingPlanChanged != null)
+			{
+				OnViewingPlanChanged.Invoke(a_plan);
+			}
+		}
 	}
 }

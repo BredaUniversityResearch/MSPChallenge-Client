@@ -3,96 +3,39 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public class PrefabObjectPool : MonoBehaviour
+	public class PrefabObjectPool<T> where T : MonoBehaviour
 	{
-		private GameObject prefabToUse;
-		private Transform activeContainer;
-		private Transform inactiveContainer;
+		private GameObject m_entryPrefab;
+		private Transform m_prefabParent;
 
-		private HashSet<GameObject> activeList = new HashSet<GameObject>();
-		private Stack<GameObject> inactiveList = new Stack<GameObject>(4);
+		private List<T> m_entries = new List<T>();
+		int m_nextIndex;
 
-		public static PrefabObjectPool Create(GameObject ownerGameObject, GameObject prefab, Transform activeContainer, Transform inactiveContainer)
+		public PrefabObjectPool(GameObject a_prefab, Transform a_prefabParent)
 		{
-			PrefabObjectPool pool = ownerGameObject.AddComponent<PrefabObjectPool>();
-			pool.hideFlags = HideFlags.HideAndDontSave;
-			pool.Initialise(prefab, activeContainer, inactiveContainer);
-			return pool;
+			this.m_entryPrefab = a_prefab;
+			this.m_prefabParent = a_prefabParent;
 		}
 
-		private void OnDestroy()
+		public T Get()
 		{
-			foreach(GameObject activeEntry in activeList)
+			if (m_nextIndex < m_entries.Count)
 			{
-				if (activeEntry != null)
-				{
-					activeEntry.GetComponent<PrefabObjectPoolTracker>().SetOwningPool(null);
-					Destroy(activeEntry);
-				}
-			}
-			activeList.Clear();
-
-			while (inactiveList.Count > 0)
-			{
-				if (inactiveList.Peek() != null)
-				{
-					GameObject inactiveEntry = inactiveList.Pop();
-					inactiveEntry.GetComponent<PrefabObjectPoolTracker>().SetOwningPool(null);
-					Destroy(inactiveEntry);
-				}
-			}
-		}
-
-		private void Initialise(GameObject prefab, Transform activeContainer, Transform inactiveContainer)
-		{
-			this.prefabToUse = prefab;
-			this.activeContainer = activeContainer;
-			this.inactiveContainer = inactiveContainer;
-		}
-
-		public GameObject Get()
-		{
-			if (inactiveList.Count == 0)
-			{
-				InstantiateFromPrefab(1);
+				m_nextIndex++;
+				return m_entries[m_nextIndex - 1];
 			}
 
-			GameObject result = inactiveList.Pop();
-			result.transform.SetParent(activeContainer, false);
-
-			activeList.Add(result);
-
+			T result = GameObject.Instantiate(m_entryPrefab, m_prefabParent).GetComponent<T>();
+			m_entries.Add(result);
+			m_nextIndex++;
 			return result;
 		}
 
-		public void Release(GameObject instance)
-		{
-			if (activeList.Contains(instance))
-			{
-				instance.SetActive(false);
-				instance.transform.SetParent(inactiveContainer, false);
-
-				activeList.Remove(instance);
-				inactiveList.Push(instance);
-			}
-			else
-			{
-				Debug.LogError("Trying to release an object to the PrefabObjectPool that is not owned by the object pool", gameObject);
-			}
-		}
-
-		private void InstantiateFromPrefab(int objectCountToInstantiate)
-		{
-			for (int i = 0; i < objectCountToInstantiate; ++i)
-			{
-				GameObject result = Instantiate(prefabToUse, inactiveContainer);
-				result.SetActive(false);
-				PrefabObjectPoolTracker tracker = result.AddComponent<PrefabObjectPoolTracker>();
-				tracker.SetOwningPool(this);
-				tracker.hideFlags = HideFlags.DontSave;
-
-				inactiveList.Push(result);
-			}
+		public void ReleaseAll()
+        {
+			for (int i = 0; i < m_nextIndex; i++)
+				m_entries[i].gameObject.SetActive(false);
+			m_nextIndex = 0;
 		}
 	}
 }

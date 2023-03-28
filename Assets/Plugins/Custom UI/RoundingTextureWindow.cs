@@ -16,6 +16,7 @@ namespace RoundingEditorUtility
 		[SerializeField] float m_startAlpha;
 		[SerializeField] List<AlphaSettingLayer> m_layers;
 		[SerializeField] ESliceSection m_slices;
+		[SerializeField] bool m_includeCornersInSideSlices = true;
 
 		[SerializeField] string m_outputFilePath;
 		[Button("Select output File")]
@@ -33,12 +34,17 @@ namespace RoundingEditorUtility
 		}
 
 		[Button("Generate File")]
-		public void CreateTexture()
+		public void Generate()
+		{
+			CreateTexture(m_roundingSize, m_startAlpha, m_layers, m_slices, m_outputFilePath, m_includeCornersInSideSlices);
+		}
+
+		public static bool CreateTexture(int m_roundingSize, float m_startAlpha, List<AlphaSettingLayer> m_layers, ESliceSection m_slices, string m_outputFilePath, bool m_includeCornersInSideSlices)
 		{
 			if (m_slices == 0)
 			{
 				EditorUtility.DisplayDialog("No slice selected", "A sprite cannot be selected without any selected slices", "Confirm");
-				return;
+				return false;
 			}
 			bool overwriting = false;
 			if (File.Exists(m_outputFilePath))
@@ -48,7 +54,7 @@ namespace RoundingEditorUtility
 					overwriting = true;
 				}
 				else
-					return;
+					return false;
 			}
 
 			int totalSize = m_roundingSize * 2 + 1;
@@ -113,8 +119,18 @@ namespace RoundingEditorUtility
 				smd = new SpriteMetaData();
 				smd.alignment = 9;
 				smd.pivot = new Vector2(0.5f, 0.5f);
-				smd.border = new Vector4(m_roundingSize, 0, m_roundingSize, m_roundingSize);
-				smd.rect = Rect.MinMaxRect(0, m_roundingSize, totalSize, totalSize);
+				if (m_includeCornersInSideSlices)
+				{
+					smd.border = new Vector4(m_roundingSize, 0, m_roundingSize, m_roundingSize);
+					smd.rect = Rect.MinMaxRect(0, m_roundingSize, totalSize, totalSize);
+				}
+				else
+				{
+					smd.border = new Vector4(0f, 0f, 0f, 1f);
+					//smd.border = Vector4.zero;
+					smd.rect = Rect.MinMaxRect(m_roundingSize, m_roundingSize, m_roundingSize+1, totalSize);
+				}
+
 				smd.name = fileName + "_Top";
 				newData.Add(smd);
 			}
@@ -124,8 +140,16 @@ namespace RoundingEditorUtility
 				smd = new SpriteMetaData();
 				smd.alignment = 9;
 				smd.pivot = new Vector2(0.5f, 0.5f);
-				smd.border = new Vector4(m_roundingSize, m_roundingSize, m_roundingSize, 0);
-				smd.rect = Rect.MinMaxRect(0, 0, totalSize, totalSize - m_roundingSize);
+				if (m_includeCornersInSideSlices)
+				{
+					smd.border = new Vector4(m_roundingSize, m_roundingSize, m_roundingSize, 0);
+					smd.rect = Rect.MinMaxRect(0, 0, totalSize, totalSize - m_roundingSize);
+				}
+				else
+				{
+					smd.border = new Vector4(0f, 1f, 0f, 0f);
+					smd.rect = Rect.MinMaxRect(m_roundingSize, 0, m_roundingSize + 1, m_roundingSize+1);
+				}
 				smd.name = fileName + "_Bottom";
 				newData.Add(smd);
 			}
@@ -135,8 +159,17 @@ namespace RoundingEditorUtility
 				smd = new SpriteMetaData();
 				smd.alignment = 9;
 				smd.pivot = new Vector2(0.5f, 0.5f);
-				smd.border = new Vector4(m_roundingSize, m_roundingSize, 0, m_roundingSize);
-				smd.rect = Rect.MinMaxRect(0, 0, totalSize - m_roundingSize, totalSize);
+				if (m_includeCornersInSideSlices)
+				{
+					smd.border = new Vector4(m_roundingSize, m_roundingSize, 0, m_roundingSize);
+					smd.rect = Rect.MinMaxRect(0, 0, totalSize - m_roundingSize, totalSize);
+				}
+				else
+				{
+					smd.border = new Vector4(0f, 0f, 1f, 0f);
+					//smd.border = Vector4.zero;
+					smd.rect = Rect.MinMaxRect(0, m_roundingSize, m_roundingSize + 1, m_roundingSize+1);
+				}
 				smd.name = fileName + "_Left";
 				newData.Add(smd);
 			}
@@ -146,8 +179,17 @@ namespace RoundingEditorUtility
 				smd = new SpriteMetaData();
 				smd.alignment = 9;
 				smd.pivot = new Vector2(0.5f, 0.5f);
-				smd.border = new Vector4(0, m_roundingSize, m_roundingSize, m_roundingSize);
-				smd.rect = Rect.MinMaxRect(m_roundingSize, 0, totalSize, totalSize);
+				if (m_includeCornersInSideSlices)
+				{
+					smd.border = new Vector4(0, m_roundingSize, m_roundingSize, m_roundingSize);
+					smd.rect = Rect.MinMaxRect(m_roundingSize, 0, totalSize, totalSize);
+				}
+				else
+				{
+					smd.border = new Vector4(1f, 0f, 0f, 0f);
+					//smd.border = Vector4.zero;
+					smd.rect = Rect.MinMaxRect(m_roundingSize, m_roundingSize, totalSize, m_roundingSize+1);
+				}
 				smd.name = fileName + "_Right";
 				newData.Add(smd);
 			}
@@ -198,6 +240,7 @@ namespace RoundingEditorUtility
 
 			ti.spritesheet = newData.ToArray();
 			AssetDatabase.ImportAsset(m_outputFilePath, ImportAssetOptions.ForceUpdate);
+			return true;
 		}
 
 		[SerializeField, ReadOnly, PreviewField(300f, Sirenix.OdinInspector.ObjectFieldAlignment.Left)] Texture2D m_previewTexture;
@@ -253,8 +296,8 @@ namespace RoundingEditorUtility
 
 	public abstract class AlphaSettingLayer
 	{
-		[SerializeField] EAlphaBlendType m_blendType;
-		[SerializeField] ESectors m_sectors;
+		public EAlphaBlendType m_blendType;
+		public ESectors m_sectors;
 
 		public abstract void SetAlpha(ref float[,] a_alphaArray);
 
@@ -347,32 +390,49 @@ namespace RoundingEditorUtility
 	public class AlphaCurveLayer : AlphaSettingLayer
 	{
 		[SerializeField] AnimationCurve m_fillCurve;
+		[SerializeField] bool m_circularDistance;
 
 		public override void SetAlpha(ref float[,] a_alphaArray)
 		{
 			int roundingSize = (a_alphaArray.GetLength(0) - 1) / 2;
+			float roundingSizeF = (float)roundingSize;
 
-			for (int y = 0; y < roundingSize; y++)
+			if (m_circularDistance)
 			{
-				for (int x = 0; x < roundingSize; x++)
+				for (int y = 0; y < roundingSize; y++)
 				{
-					float alpha = m_fillCurve.Evaluate(Mathf.Sqrt((roundingSize - x) * (roundingSize - x) + (roundingSize - y) * (roundingSize - y)));
-					SetSectorAlpha(ref a_alphaArray, x, y, alpha);
+					for (int x = 0; x < roundingSize; x++)
+					{
+						float alpha = m_fillCurve.Evaluate(Mathf.Sqrt((roundingSize - x) * (roundingSize - x) + (roundingSize - y) * (roundingSize - y)) / roundingSizeF);
+						SetSectorAlpha(ref a_alphaArray, x, y, alpha);
+					}
+				}
+			}
+			else
+			{
+				for (int y = 0; y < roundingSize; y++)
+				{
+					for (int x = 0; x < roundingSize; x++)
+					{
+						float alpha = m_fillCurve.Evaluate(System.Math.Max(roundingSize - x, roundingSize - y) / roundingSizeF);
+						SetSectorAlpha(ref a_alphaArray, x, y, alpha);
+					}
 				}
 			}
 			for (int i = 0; i < roundingSize; i++)
 			{
-				float alpha = m_fillCurve.Evaluate(roundingSize - i);
+				float alpha = m_fillCurve.Evaluate((roundingSize - i) / roundingSizeF);
 				SetCenterLineAlpha(ref a_alphaArray, i, alpha);
 			}
+
 			SetCenterAlpha(ref a_alphaArray, m_fillCurve.Evaluate(0));
 		}
 	}
 
 	public class AlphaCircleLayer : AlphaSettingLayer
 	{
-		[SerializeField] float m_circleFadeEnd;
-		[SerializeField] float m_circleFadeStart;
+		public float m_circleFadeEnd;
+		public float m_circleFadeStart;
 
 		public override void SetAlpha(ref float[,] a_alphaArray)
 		{

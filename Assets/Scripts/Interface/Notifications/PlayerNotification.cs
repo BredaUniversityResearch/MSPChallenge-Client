@@ -43,16 +43,14 @@ namespace MSP2050.Scripts
 				string.Format("Plan {0} requires an approval decision from your team", targetPlan.Name));
 			data.buttonText = "Open Plan Monitor";
 			data.onButtonPress = () => {
-				if (Main.InEditMode || Main.EditingPlanDetailsContent)
+				if (Main.InEditMode)
 				{
 					DialogBoxManager.instance.NotificationWindow("Editing plan content", "Other plans cannot be viewed while editing a plan's content.", () => { }, "Dismiss");
 				}
 				else
 				{
-					InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn = true;
-					PlanDetails.SelectPlan(targetPlan);
-					PlansMonitor.instance.planDetails.TabSelect(PlanDetails.EPlanDetailsTab.Feedback);
-					PlansMonitor.instance.plansMinMax.Maximize();
+					PlanManager.Instance.ShowPlan(targetPlan);
+					InterfaceCanvas.Instance.activePlanWindow.m_approvalToggle.IsOn = true;
 				}
 			};
 			AddNotification(data);
@@ -71,16 +69,14 @@ namespace MSP2050.Scripts
 			{
 				buttonText = "View Plan",
 				onButtonPress = () => {
-					if (Main.InEditMode || Main.EditingPlanDetailsContent)
+					if (Main.InEditMode )
 					{
 						DialogBoxManager.instance.NotificationWindow("Editing plan content", "Other plans cannot be viewed while editing a plan's content.", () => { }, "Dismiss");
 					}
 					else
 					{
-						InterfaceCanvas.Instance.menuBarPlansMonitor.toggle.isOn = true;
-						PlanDetails.SelectPlan(targetPlan);
-						PlansMonitor.instance.planDetails.TabSelect(PlanDetails.EPlanDetailsTab.Issues);
-						PlansMonitor.instance.plansMinMax.Maximize();
+						PlanManager.Instance.ShowPlan(targetPlan);
+						InterfaceCanvas.Instance.activePlanWindow.m_issuesToggle.IsOn = true;
 					}
 				}
 			};
