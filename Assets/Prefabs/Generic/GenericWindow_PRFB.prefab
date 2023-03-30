@@ -20,7 +20,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2983748765997623167
 RectTransform:
   m_ObjectHideFlags: 0
@@ -888,11 +888,16 @@ MonoBehaviour:
   contentLayout: {fileID: 6336532179708197428}
   title: {fileID: 3652869524993439764}
   shouldCenter: 0
+  shouldMaximize: 0
+  helpWindowsManager: {fileID: 6749917003443084999, guid: 9a8f47df284e5c8479fb8a969518a8c2,
+    type: 3}
   exitButton: {fileID: 4114593782919656793}
+  helpButton: {fileID: 7508243685172921892}
   resizeHandle: {fileID: 0}
   dragHandle: {fileID: 0}
   modalBackgroundPrefab: {fileID: 1000011243080540, guid: aaad443b563e5c84eb12758bc00ead2c,
     type: 3}
+  helpWindowPrefab: {fileID: 0}
 --- !u!114 &1101998165243983064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -917,7 +922,8 @@ MonoBehaviour:
   m_uiElement: {fileID: 0}
   m_tags:
   - Window
-  m_registerReference: 1
+  m_registerNameReference: 1
+  m_registerTagsReference: 0
 --- !u!1 &6458752967876495786
 GameObject:
   m_ObjectHideFlags: 0

@@ -20,6 +20,7 @@ namespace MSP2050.Scripts
 
 		// Buttons
 		public Button exitButton;
+		public Button helpButton;
 
 		public ResizeHandle resizeHandle;
 		public DragHandle dragHandle;
@@ -27,6 +28,7 @@ namespace MSP2050.Scripts
 
 		[Header("Prefabs")]
 		public GameObject modalBackgroundPrefab;
+		public GameObject helpWindowPrefab;
 
 		public delegate bool AttemptHideWindowDelegate();
 		private AttemptHideWindowDelegate onAttemptHideWindowDelegate;
@@ -52,8 +54,14 @@ namespace MSP2050.Scripts
 			{
 				dragHandle.onHandleDragged = HandleDrag;
 			}
-			if(exitButton != null)
+			if (exitButton != null)
+			{
 				exitButton.onClick.AddListener(Hide);
+			}
+			if (helpButton != null)
+            {
+				helpButton.onClick.AddListener(HelpWindow);
+            }
 		}
 
 		void OnEnable()
@@ -106,6 +114,11 @@ namespace MSP2050.Scripts
 			{
 				gameObject.SetActive(false);
 			}
+		}
+
+		public void HelpWindow()
+		{
+			HelpWindowsManager.Instance.InstantiateHelpWindow(helpWindowPrefab);
 		}
 
 		public void Hide(bool unityCallbackToggleValue)
