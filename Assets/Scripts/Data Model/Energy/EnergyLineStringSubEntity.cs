@@ -144,11 +144,9 @@ namespace MSP2050.Scripts
 			//Make sure we dont add connections multiple times
 			foreach (Connection con in Connections)
 				if (con.point == a_newCon.point)
-				{ 
-					//Debug.Log("Duplicate connections added to cable");
+				{
 					return;
 				}
-
 			Connections.Add(a_newCon);
 		}
 
