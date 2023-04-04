@@ -142,7 +142,7 @@ namespace MSP2050.Scripts
 
 		private bool OnAttemptHideWindow()
 		{
-			if (m_interactionMode != EInteractionMode.View && m_interactionMode != EInteractionMode.RestoreArchived)
+			if (m_interactionMode != EInteractionMode.View)
 			{
 				if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
 				{
