@@ -94,5 +94,13 @@ namespace MSP2050.Scripts
 			}
 
 		}
+
+		private void OnRectTransformDimensionsChange()
+		{
+			foreach(GenericWindow window in GetComponentsInChildren<GenericWindow>())
+			{
+				window.StartCoroutine(window.LimitSizeAndPositionEndFrame());
+			}
+		}
 	}
 }

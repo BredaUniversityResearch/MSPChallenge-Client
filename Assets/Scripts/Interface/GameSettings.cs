@@ -196,11 +196,14 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Returns the size of the new resolution
 		/// </summary>
-		public Vector2 SetResolution(int level, bool updateGameScale = true, bool save = true)
+		public void SetResolution(int level, bool updateGameScale = true, bool save = true)
 		{
+			if (!Fullscreen)
+				return;
+
 			if (Resolutions.Count == 0)
 			{
-				return Vector2.one;
+				return;
 			}
 
 			if (level < 0 || level > Resolutions.Count)
@@ -228,8 +231,6 @@ namespace MSP2050.Scripts
 
 			if (updateGameScale)
 				UpdateFullGameScale();
-
-			return Resolutions[DisplayResolution];
 		}
 
 		private void UpdateFullGameScale()
@@ -249,28 +250,10 @@ namespace MSP2050.Scripts
 			}
 
 			Fullscreen = fullscreen;
-			Screen.fullScreen = fullscreen;
-			if(save)
+			//Screen.fullScreen = fullscreen;
+			Screen.fullScreenMode = fullscreen ? FullScreenMode.ExclusiveFullScreen : FullScreenMode.Windowed;
+			if (save)
 				SavePlayerPrefs();
-		}
-
-		//public void SetQualityLevel(int level, bool save = true)
-		//{
-		//	if (level < 0 || level > 3)
-		//	{
-		//		Debug.Log("Invalid Quality Setting, defaulting to 0");
-		//		level = 0;
-		//	}
-
-		//	GraphicsSettings = level;
-		//	QualitySettings.SetQualityLevel(GraphicsSettings);
-		//	if(save)
-		//		SavePlayerPrefs();
-		//}
-
-		public static float GetMaxUIScaleForWidth(float screenWidth)
-		{
-			return Mathf.Max(0, (screenWidth - 900f)) / 1000f + 1f;
 		}
 	}
 }
