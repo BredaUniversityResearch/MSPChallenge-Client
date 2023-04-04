@@ -33,7 +33,6 @@ namespace MSP2050.Scripts
 		public UnLoadingScreen unLoadingScreen;
 		public PropertiesWindow propertiesWindow;
 		public LayerProbeWindow layerProbeWindow;
-		public WebViewWindow webViewWindow;
 		public GameObject networkingBlocker;
 		public GenericWindow impactToolWindow;
 		public HEBGraph.HEBGraph ImpactToolGraph;

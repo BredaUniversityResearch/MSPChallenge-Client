@@ -1,4 +1,5 @@
 ﻿using ColourPalette;
+using System.Security.Policy;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,7 +26,7 @@ namespace MSP2050.Scripts
 			{
 				infoButton.onClick.AddListener(() =>
 				{
-					InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(MediaUrl.Parse(type.media));
+					Application.OpenURL(MediaUrl.Parse(type.media));
 				});
 			}
 			else

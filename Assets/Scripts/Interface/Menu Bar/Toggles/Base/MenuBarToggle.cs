@@ -80,8 +80,7 @@ namespace MSP2050.Scripts
 		{
 			toggle.onValueChanged.AddListener((b) =>
 			{
-				float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
-				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(SessionManager.Instance.MspGlobalData.region_base_url + '/' + SessionManager.Instance.CurrentTeam.name);
+				Application.OpenURL(SessionManager.Instance.MspGlobalData.region_base_url + '/' + SessionManager.Instance.CurrentTeam.name);
 			});
 	
 		}
