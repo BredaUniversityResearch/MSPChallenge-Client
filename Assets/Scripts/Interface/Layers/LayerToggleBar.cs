@@ -68,8 +68,7 @@ namespace MSP2050.Scripts
 
 		void OnInfoButtonClicked()
 		{
-			string mediaUrl = MediaUrl.Parse(m_layer.Media);
-			InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl);
+			Application.OpenURL(MediaUrl.Parse(m_layer.Media));
 		}
 	}
 }
