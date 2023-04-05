@@ -62,7 +62,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void UpdateUpdateImageSizesDelayed()
+		private void OnRectTransformDimensionsChange()
 		{
 			StartCoroutine(UpdateUpdateImageSizesDelayedHelper());
 		}
@@ -96,6 +96,7 @@ namespace MSP2050.Scripts
 				height = width / bgAspect;
 			}
 
+			//todo: new Vector2(width, height); - SCREEN SIZE / 2, APPLY ON LINE 61
 			m_bgRect.sizeDelta = new Vector2(width, height);
 			m_maskedImage.sizeDelta = new Vector2(width, height);
 			//m_maskOrigin = new Vector2(width / 2f, height / 2f);
