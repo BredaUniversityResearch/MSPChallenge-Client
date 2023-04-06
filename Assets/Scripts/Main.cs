@@ -38,6 +38,7 @@ namespace MSP2050.Scripts
 		[HideInInspector] public bool fsmActive;
 
 		private bool interceptQuit = true;
+		private bool m_Quiting = false;
 		private bool preventPlanChange = false;
 
 		private ProjectionInfo mspCoordinateProjection;
@@ -140,6 +141,7 @@ namespace MSP2050.Scripts
 		{
 			if (Instance != null)
 			{
+				Instance.m_Quiting = true;
 				NetworkForm form = new NetworkForm();
 				form.AddField("session_id", SessionManager.Instance.CurrentSessionID);
 				ServerCommunication.Instance.DoPriorityRequest(Server.CloseSession(), form, Instance.CloseSessionSuccess, Instance.CloseSessionFail);
@@ -154,7 +156,7 @@ namespace MSP2050.Scripts
 		protected void Update()
 		{
 			fsm?.Update();
-			ServerCommunication.Instance.UpdateCommunication();
+			ServerCommunication.Instance.UpdateCommunication(!m_Quiting);
 			MaterialManager.Instance.Update();
 		}
 
