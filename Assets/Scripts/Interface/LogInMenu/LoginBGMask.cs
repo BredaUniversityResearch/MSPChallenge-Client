@@ -17,7 +17,7 @@ namespace MSP2050.Scripts
 		private bool m_active;
 		private bool m_movingDown;
 		private float m_maskPosition = 0.5f;
-		//private Vector2 m_maskOrigin;
+		private Vector2 m_maskImageOffset;
 
 		void Update()
 		{
@@ -57,12 +57,11 @@ namespace MSP2050.Scripts
 						m_mask.anchorMax = new Vector2(01f, m_maskPosition);
 					}
 				}
-				//m_maskedImage.position = m_maskOrigin;
-				m_maskedImage.position = Vector2.zero;
+				m_maskedImage.position = m_maskImageOffset;
 			}
 		}
 
-		public void UpdateUpdateImageSizesDelayed()
+		private void OnRectTransformDimensionsChange()
 		{
 			StartCoroutine(UpdateUpdateImageSizesDelayedHelper());
 		}
@@ -96,9 +95,9 @@ namespace MSP2050.Scripts
 				height = width / bgAspect;
 			}
 
+			m_maskImageOffset = new Vector2((canvasRect.sizeDelta.x- width) / 2f, (canvasRect.sizeDelta.y- height) / 2f);
 			m_bgRect.sizeDelta = new Vector2(width, height);
 			m_maskedImage.sizeDelta = new Vector2(width, height);
-			//m_maskOrigin = new Vector2(width / 2f, height / 2f);
 		}
 
 		public void SetMaskActive(bool a_active)
