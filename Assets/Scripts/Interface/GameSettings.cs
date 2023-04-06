@@ -250,7 +250,6 @@ namespace MSP2050.Scripts
 			}
 
 			Fullscreen = fullscreen;
-			//Screen.fullScreen = fullscreen;
 			Screen.fullScreenMode = fullscreen ? FullScreenMode.ExclusiveFullScreen : FullScreenMode.Windowed;
 			if (save)
 				SavePlayerPrefs();
