@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] Toggle m_toggle;
 		[SerializeField] TextMeshProUGUI m_name;
+		[SerializeField] AddTooltip m_tooltip;
 
 		AbstractLayer m_layer;
 		AP_LayerSelectLayer[] m_dependencies;
@@ -24,6 +25,7 @@ namespace MSP2050.Scripts
 			m_dependentOnUs = new List<AP_LayerSelectLayer>();
 			m_layer = a_layer;
 			m_name.text = m_layer.ShortName;
+			m_tooltip.SetText(a_layer.Tooltip);
 			m_toggle.onValueChanged.AddListener(OnToggleChanged);
 			m_callback = a_callback;
 		}
