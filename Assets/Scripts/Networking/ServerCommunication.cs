@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 	public class ServerCommunication : MonoBehaviour
 	{
 		//consts / enums
-		public const string ApiTokenHeader = "MSPAPIToken";
+		public const string ApiTokenHeader = "Msp-Api-Token";
 		public static readonly int[] REQUEST_TIMEOUT = { 1, 10, 30 };
 		public enum EWebRequestFailureResponse { Log, Error, Crash }
 		public const uint DEFAULT_MAX_REQUESTS = 5;
