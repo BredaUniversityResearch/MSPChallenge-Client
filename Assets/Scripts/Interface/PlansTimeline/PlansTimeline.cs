@@ -9,9 +9,6 @@ namespace MSP2050.Scripts
 {
 	public class PlansTimeline : MonoBehaviour
 	{
-		// Date Marker
-		public RawImage dateMarkerGraphic;
-
 		// Tracks
 		public GameObject trackPrefab;
 		public RectTransform trackLocation;
@@ -29,7 +26,6 @@ namespace MSP2050.Scripts
 		protected void Awake()
 		{
 			trackLocation.sizeDelta = new Vector2(trackLocation.sizeDelta.x, 1f);
-			dateMarkerGraphic.uvRect = new Rect(0f, 0f, 1f, 1f);
 			tracks = new List<TimelineTrack>(16);
 
 			teamTrackID = new Dictionary<int, int>();
@@ -84,7 +80,6 @@ namespace MSP2050.Scripts
 			track.timeline = this;
 
 			trackLocation.sizeDelta = new Vector2(trackLocation.sizeDelta.x, trackLocation.sizeDelta.y + 16f);
-			dateMarkerGraphic.uvRect = new Rect(0f, 0f, 1f, dateMarkerGraphic.uvRect.height + 1f);
 		}
 
 		public void IsolateButtonGroup(bool dir)

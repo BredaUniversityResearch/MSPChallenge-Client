@@ -12,7 +12,7 @@ namespace MSP2050.Scripts
 		public Button button;
 		public RectTransform rect;
 		public LayoutElement layout;
-		public Image large, multiplPlansIcon;
+		public Image large/*, multiplPlansIcon*/;
 		public TextMeshProUGUI monthNameText; //Only used for inspect buttons
 
 		private TimelineTrack track;
@@ -27,10 +27,10 @@ namespace MSP2050.Scripts
 		public void SetButtonColor(Color col)
 		{
 			large.color = col;
-			if (multiplPlansIcon != null)
-			{
-				multiplPlansIcon.gameObject.SetActive(false);
-			}
+			//if (multiplPlansIcon != null)
+			//{
+			//	multiplPlansIcon.gameObject.SetActive(false);
+			//}
 		}
 
 		public void SetMonth(int month, Transform parentBar)
@@ -65,7 +65,7 @@ namespace MSP2050.Scripts
 			}
 			if (plans.Count > 1)
 			{
-				multiplPlansIcon.gameObject.SetActive(true);
+				//multiplPlansIcon.gameObject.SetActive(true);
 				SetToolTip("Multiple plans, " + Util.MonthToYearText(month));
 			}
 		}
@@ -78,7 +78,7 @@ namespace MSP2050.Scripts
 			plans.Remove(plan);
 			if (plans.Count == 1)
 			{
-				multiplPlansIcon.gameObject.SetActive(false);
+				//multiplPlansIcon.gameObject.SetActive(false);
 				SetToolTip(plans[0].Name + ", " + Util.MonthToYearText(month));
 			}
 			else if (plans.Count == 0)
