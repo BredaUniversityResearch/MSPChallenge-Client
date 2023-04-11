@@ -63,7 +63,7 @@ namespace MSP2050.Scripts
 			{
 				m_latestNewsBar.SetActive(true);
 				m_noNewsEntry.SetActive(false);
-				m_newsData.Sort((a, b) => a.date.CompareTo(b.date));
+				m_newsData.Sort((a, b) => b.date.CompareTo(a.date));
 
 				foreach (LoginNewsData entryData in m_newsData)
 				{
