@@ -99,7 +99,6 @@ namespace MSP2050.Scripts
 
 		public void SetRegion(MspGlobalData globalData)
 		{
-			menuBarLogo.SetRegionLetter(globalData.edition_letter);
 			gameMenu.SetRegion(globalData);
 			regionColour.SetValue(globalData.edition_colour);
 		}

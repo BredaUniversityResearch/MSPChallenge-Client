@@ -15,7 +15,12 @@ namespace MSP2050.Scripts
 
 		public CustomToggle toggle;
 
-		void Start()
+		private void Start()
+		{
+			Initilise();
+		}
+
+		protected void Initilise()
 		{
 			toggle = GetComponent<CustomToggle>();
 

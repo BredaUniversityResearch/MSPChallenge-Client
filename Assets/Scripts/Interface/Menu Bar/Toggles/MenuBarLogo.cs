@@ -1,14 +1,15 @@
-﻿using TMPro;
+﻿using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
 	public class MenuBarLogo : MenuBarToggle
 	{ 
-		public TextMeshProUGUI text;
+		public Image m_logoImage;
 
-		public void SetRegionLetter(string letter)
+		private void Start()
 		{
-			text.text = letter;
+			m_logoImage.color = SessionManager.Instance.CurrentTeam.color;
+			Initilise();
 		}
 	}
 }
