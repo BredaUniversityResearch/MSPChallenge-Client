@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 		private void Start()
 		{
 			m_logoImage.color = SessionManager.Instance.CurrentTeam.color;
-			Initilise();
+			Initialise();
 		}
 	}
 }

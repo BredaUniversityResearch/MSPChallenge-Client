@@ -17,10 +17,10 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			Initilise();
+			Initialise();
 		}
 
-		protected void Initilise()
+		protected void Initialise()
 		{
 			toggle = GetComponent<CustomToggle>();
 
