@@ -35,6 +35,7 @@ namespace MSP2050.Scripts
 		public LayerProbeWindow layerProbeWindow;
 		public GameObject networkingBlocker;
 		public GenericWindow impactToolWindow;
+		public TeamWindow teamWindow;
 		public HEBGraph.HEBGraph ImpactToolGraph;
 		public NotificationWindow notificationWindow;
 		public GameObject mapToolsWindow;

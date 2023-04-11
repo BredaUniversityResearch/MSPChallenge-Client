@@ -224,7 +224,12 @@ namespace MSP2050.Scripts
 		{
 			return "api/user/CloseSession";
 		}
-		
+
+		public static string GetUserList()
+		{
+			return "api/user/list";
+		}
+
 		public static string IsServerOnline()
 		{
 			return "api/game/isOnline";
