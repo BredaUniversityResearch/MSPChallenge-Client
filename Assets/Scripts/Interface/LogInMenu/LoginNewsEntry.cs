@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 
 		public void SetContent(LoginNewsData a_data)
 		{
-			m_titleText.text = a_data.date + " " + a_data.title;
+			m_titleText.text = a_data.date.ToString("dd/MM/yy") + " " + a_data.title;
 			m_contentText.text = a_data.content;
 			m_moreInfoLink = a_data.more_info_link;
 			m_contentImage.gameObject.SetActive(false);
@@ -81,7 +81,7 @@ namespace MSP2050.Scripts
 	public class LoginNewsData
 	{
 		public string title;
-		public string date;
+		public DateTime date;
 		public string content;
 		public string image_link;
 		public string more_info_link;

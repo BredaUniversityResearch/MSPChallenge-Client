@@ -142,7 +142,7 @@ namespace MSP2050.Scripts
 
 		private bool OnAttemptHideWindow()
 		{
-			if (m_interactionMode != EInteractionMode.View && m_interactionMode != EInteractionMode.RestoreArchived)
+			if (m_interactionMode != EInteractionMode.View)
 			{
 				if (m_cancelChangesConfirmationWindow == null || !m_cancelChangesConfirmationWindow.isActiveAndEnabled)
 				{
@@ -267,7 +267,7 @@ namespace MSP2050.Scripts
 
 		private void SubmitChanges()
 		{
-			BatchRequest batch = new BatchRequest(true);
+			BatchRequest batch = new BatchRequest();
 
 			//Newly created plans are not locked
 			if (m_interactionMode != EInteractionMode.EditExisting)
@@ -302,7 +302,7 @@ namespace MSP2050.Scripts
 
 		void SubmitRestoration()
 		{
-			BatchRequest batch = new BatchRequest(true);
+			BatchRequest batch = new BatchRequest();
 			m_currentPlan.Description = m_planDescription.text;
 			m_currentPlan.Name = m_planName.text;
 			m_currentPlan.SendMessage("Restored the plans status to: " + Plan.PlanState.DESIGN.GetDisplayName(), batch);
@@ -539,6 +539,10 @@ namespace MSP2050.Scripts
 			SetEntriesToPolicies();
 			SetEntriesToLayers();
 			RefreshSectionActivity();
+			if (m_approvalContent.IsOpen)
+			{
+				m_approvalContent.RefreshContent(m_currentPlan);
+			}
 		}
 
 		public void RefreshIssueText()

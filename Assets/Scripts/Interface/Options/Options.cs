@@ -20,6 +20,7 @@ namespace MSP2050.Scripts
         // Graphics
         public CustomSlider uiScale;
         public CustomDropdown displayResolution;
+        public GameObject displayResolutionContainer;
         public Toggle fullscreenToggle;
         public UnityEvent onDisplaySettingsChange;
 
@@ -66,7 +67,7 @@ namespace MSP2050.Scripts
             //Callbacks
             uiScale.m_onRelease.AddListener(OnUIScaleSliderUp);
 			displayResolution.onValueChanged.AddListener(OnResolutionChanged);
-			fullscreenToggle.onValueChanged.AddListener(b => GameSettings.Instance.SetFullscreen(b));
+			fullscreenToggle.onValueChanged.AddListener(OnFullscreenChange);
 			developerModeToggle.onValueChanged.AddListener((value) => { Main.IsDeveloper = value; });
 			masterVolume.onValueChanged.AddListener((value) => { GameSettings.Instance.SetMasterVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
 			soundEffects.onValueChanged.AddListener((value) => { GameSettings.Instance.SetSFXVolume(value); playSoundEffect(AudioMain.VOLUME_TEST); });
@@ -105,6 +106,12 @@ namespace MSP2050.Scripts
             SetOptions();
         }
 
+        private void OnFullscreenChange(bool a_fullscreen)
+		{
+            GameSettings.Instance.SetFullscreen(a_fullscreen);
+            displayResolutionContainer.SetActive(GameSettings.Instance.Fullscreen);
+        }
+
         private void SetBuildInformation()
         {
             if (!ApplicationBuildIdentifier.Instance.GetHasInformation())
@@ -126,6 +133,7 @@ namespace MSP2050.Scripts
             oldMasterVolume = GameSettings.Instance.GetMasterVolume();
             oldSoundEffects = GameSettings.Instance.GetSFXVolume();
             oldFullscreen = GameSettings.Instance.Fullscreen;
+            displayResolutionContainer.SetActive(oldFullscreen);
 
             if (Application.isEditor) // This is to fix it for the editor, it only ever displays one resolution
                 oldDisplayResolution = 0;
@@ -136,6 +144,7 @@ namespace MSP2050.Scripts
             displayResolution.value = oldDisplayResolution;
             masterVolume.value = oldMasterVolume;
             soundEffects.value = oldSoundEffects;
+            fullscreenToggle.isOn = oldFullscreen;
         }
 
         private void OnResolutionChanged(int resolutionIndex)

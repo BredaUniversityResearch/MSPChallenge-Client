@@ -27,7 +27,7 @@ namespace MSP2050.Scripts
 			continueGame.onClick.AddListener(delegate () { gameObject.SetActive(false); });
 			credits.onClick.AddListener(delegate () 
 			{
-				InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow("https://community.mspchallenge.info/wiki/Credits");
+				Application.OpenURL("https://community.mspchallenge.info/wiki/Credits");
 				thisGenericWindow.Hide();
 			});
 			options.onClick.AddListener(delegate () { InterfaceCanvas.Instance.options.gameObject.SetActive(true); });

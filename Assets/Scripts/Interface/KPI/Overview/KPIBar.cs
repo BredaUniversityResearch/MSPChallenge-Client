@@ -39,14 +39,21 @@ namespace MSP2050.Scripts
 			m_barToggleCallback = a_barToggleCallback;
 		}
 
-		public void SetActual(float val)
+		public void SetActual(float? val)
 		{
-			ConvertedUnitFloat convertedValue = GetConvertedValue(val);
+			if (val.HasValue)
+			{
+				ConvertedUnitFloat convertedValue = GetConvertedValue(val.Value);
 
-			m_actual.UpdateValue(convertedValue);
+				m_actual.UpdateValue(convertedValue);
 
-			string changePercentage = KPIValue.FormatRelativePercentage(m_startingValue, val);
-			m_actual.UpdateTooltip(changePercentage);
+				string changePercentage = KPIValue.FormatRelativePercentage(m_startingValue, val.Value);
+				m_actual.UpdateTooltip(changePercentage);
+			}
+			else
+			{
+				m_actual.SetUnknown();
+			}
 		}
 
 		private ConvertedUnitFloat GetConvertedValue(float value)

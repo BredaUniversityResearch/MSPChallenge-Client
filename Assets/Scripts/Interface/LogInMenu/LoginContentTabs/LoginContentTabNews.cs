@@ -63,6 +63,7 @@ namespace MSP2050.Scripts
 			{
 				m_latestNewsBar.SetActive(true);
 				m_noNewsEntry.SetActive(false);
+				m_newsData.Sort((a, b) => b.date.CompareTo(a.date));
 
 				foreach (LoginNewsData entryData in m_newsData)
 				{
@@ -156,7 +157,7 @@ namespace MSP2050.Scripts
 			m_newsData.Add(new LoginNewsData()
 			{
 				title = a_data.parse.title,
-				date = DateTime.Parse(a_date, new DateTimeFormatInfo()).ToString("dd/MM"),
+				date = DateTime.Parse(a_date, new DateTimeFormatInfo()),
 				content = HtmlToRichText(a_data.parse.text.First.First.ToString()),
 				more_info_link = $"https://community.mspchallenge.info/wiki/{a_data.parse.title}",
 				image_link = a_data.parse.images != null && a_data.parse.images.Length > 0 ? $"https://community.mspchallenge.info/wiki/{a_data.parse.title}#/media/File:{a_data.parse.images[0]}" : null

@@ -224,7 +224,12 @@ namespace MSP2050.Scripts
 		{
 			return "api/user/CloseSession";
 		}
-		
+
+		public static string GetUserList()
+		{
+			return "api/user/list";
+		}
+
 		public static string IsServerOnline()
 		{
 			return "api/game/isOnline";
@@ -310,7 +315,7 @@ namespace MSP2050.Scripts
 			return "api/energy/UpdateConnection";
 		}
 
-		public static string DeleteEnergyConection()
+		public static string DeleteEnergyConnection()
 		{
 			return "api/energy/DeleteConnection";
 		}
@@ -522,16 +527,6 @@ namespace MSP2050.Scripts
 		public static string RenewApiToken()
 		{
 			return "api/security/RequestToken";
-		}
-
-		public static string StartBatch()
-		{
-			return "api/batch/StartBatch";
-		}
-
-		public static string AddToBatch()
-		{
-			return "api/batch/AddToBatch";
 		}
 
 		public static string ExecuteBatch()

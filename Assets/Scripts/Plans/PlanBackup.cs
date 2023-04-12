@@ -199,12 +199,13 @@ namespace MSP2050.Scripts
 					}
 					if (planlayer.issues != null)
 					{
+						PlanLayer localLayerRef = planlayer;
 						JObject dataObject = new JObject();
 						dataObject.Add("added", JToken.FromObject(planlayer.issues));
 						dataObject.Add("plan", planlayer.Plan.GetDataBaseOrBatchIDReference());
 						dataObject.Add("planlayer_id", planlayer.GetDataBaseOrBatchIDReference());
 						dataObject.Add("removed", JToken.FromObject(new int[0]));
-						a_batch.AddRequest(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES);
+						a_batch.AddRequest<List<PlanIssueObject>>(Server.SendIssues(), dataObject, BatchRequest.BATCH_GROUP_ISSUES, (a) => HandleDatabaseIDResults(a, localLayerRef));
 					}
 				}
 			}
@@ -222,6 +223,11 @@ namespace MSP2050.Scripts
 					entity.GetSubEntity(0).FinishEditing();
 				}
 			}
+		}
+
+		private void HandleDatabaseIDResults(List<PlanIssueObject> results, PlanLayer a_layer)
+		{
+			a_layer.issues = new HashSet<PlanIssueObject>(results, new IssueObjectEqualityComparer());
 		}
 
 		public bool TryGetOriginalPlanLayerFor(AbstractLayer a_layer, out PlanLayer a_planLayer)
@@ -346,14 +352,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void HandleDatabaseIDResults(List<PlanIssueObject> results)
+		private void HandleDatabaseIDResults(List<PlanIssueObject> a_results)
 		{
-			foreach (PlanIssueObject issue in results)
-			{
-				PlanIssueObject target = m_planLayer.issues.FirstOrDefault(obj => obj.GetIssueHash() == issue.GetIssueHash());
-				if (target == null) continue;
-				target.issue_database_id = issue.issue_database_id;
-			}
+			m_planLayer.issues = new HashSet<PlanIssueObject>(a_results, new IssueObjectEqualityComparer());
 		}		
 	}
 }

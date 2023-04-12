@@ -65,6 +65,8 @@ namespace MSP2050.Scripts
 			}
 
 			KPIValueCollection collection = SimulationManager.Instance.GetKPIValuesForSimulation(m_targetSimulation, targetTeamId);
+			TimeManager.Instance.OnCurrentMonthChanged += OnCurrentMonthChanged;
+			displayMonth = TimeManager.Instance.GetCurrentMonth();
 
 			if (collection != null)
 			{
@@ -135,9 +137,19 @@ namespace MSP2050.Scripts
 
 			if (targetCollection != null)
 			{
-				UpdateDisplayValues(targetCollection, automaticallyFollowLatestMonth ? targetCollection.MostRecentMonthReceived : displayMonth);
+				UpdateDisplayValues(targetCollection, automaticallyFollowLatestMonth ? TimeManager.Instance.GetCurrentMonth() : displayMonth);
+				//UpdateDisplayValues(targetCollection, automaticallyFollowLatestMonth ? targetCollection.MostRecentMonthReceived : displayMonth);
 				targetCollection.OnKPIValuesUpdated += OnKPIValuesUpdated;
 				targetCollection.OnKPIValueDefinitionsChanged += OnKPIValueDefinitionsChanged;
+			}
+		}
+
+		private void OnCurrentMonthChanged(int oldCurrentMonth, int newCurrentMonth)
+		{
+			if (automaticallyFollowLatestMonth)
+			{
+				displayMonth = newCurrentMonth;
+				UpdateDisplayValues(targetCollection, newCurrentMonth);
 			}
 		}
 
@@ -149,10 +161,10 @@ namespace MSP2050.Scripts
 
 		private void OnKPIValuesUpdated(KPIValueCollection sourceCollection, int previousMostRecentMonthReceived, int mostRecentMonthReceived)
 		{
-			if (automaticallyFollowLatestMonth)
-			{
-				displayMonth = mostRecentMonthReceived;
-			}
+			//if (automaticallyFollowLatestMonth)
+			//{
+			//	displayMonth = mostRecentMonthReceived;
+			//}
 
 			if (displayMonth == mostRecentMonthReceived)
 			{
@@ -186,7 +198,7 @@ namespace MSP2050.Scripts
 				}
 
 				bar.SetStartValue((float)(value.GetKpiValueForMonth(0) ?? value.GetKpiValueForMonth(-1) ?? 0f));
-				bar.SetActual((float)(value.GetKpiValueForMonth(month) ?? 0f)/*, value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId*/);
+				bar.SetActual(value.GetKpiValueForMonth(month)/*, value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId*/);
 			}
 
 			foreach (KPICategory category in valueCollection.GetCategories()) //Categories also have entries
@@ -200,7 +212,7 @@ namespace MSP2050.Scripts
 					bar = CreateKPIBar(m_entryPrefab, group.EntryParent, category);
 				}
 				bar.SetStartValue((float)(category.GetKpiValueForMonth(0) ?? category.GetKpiValueForMonth(-1) ?? 0f));
-				bar.SetActual((float)(category.GetKpiValueForMonth(month) ?? 0f)/*, category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId*/);
+				bar.SetActual(category.GetKpiValueForMonth(month)/*, category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId*/);
 				bar.transform.SetAsLastSibling();
 				group.PositionSeparator();
 			}

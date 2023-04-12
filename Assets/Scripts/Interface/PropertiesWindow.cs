@@ -107,11 +107,7 @@ namespace MSP2050.Scripts
 						entryContent,
 						() =>
 						{
-							Vector3[] corners = new Vector3[4];
-							window.windowTransform.GetWorldCorners(corners);
-
-							string mediaUrl = MediaUrl.Parse(entityTypes[iCopy].media);
-							InterfaceCanvas.Instance.webViewWindow.CreateWebViewWindow(mediaUrl);
+							Application.OpenURL(MediaUrl.Parse(entityTypes[iCopy].media));
 						}
 					);
 				}

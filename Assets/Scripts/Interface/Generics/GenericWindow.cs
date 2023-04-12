@@ -240,6 +240,32 @@ namespace MSP2050.Scripts
 			LimitPosition();
 		}
 
+		public IEnumerator LimitSizeAndPositionEndFrame()
+		{
+			yield return new WaitForEndOfFrame();
+			if (resizeHandle != null)
+			{
+				Vector3[] corners = new Vector3[4];
+				Vector3[] contentCorners = new Vector3[4];
+				float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
+				windowTransform.GetWorldCorners(corners);
+				contentLayout.GetComponent<RectTransform>().GetWorldCorners(contentCorners);			
+
+				if (resizeHandle.rescaleDirectionHor != ResizeHandle.RescaleDirectionHor.None && windowTransform.rect.width * scale > Screen.width - (LEFT_OFFSET + BORDER_OFFSET)*scale)
+				{
+					float containerSizeHor = (corners[2].x - corners[1].x) - (contentCorners[2].x - contentCorners[1].x);
+					contentLayout.preferredWidth = (Screen.width - containerSizeHor) / InterfaceCanvas.Instance.canvas.scaleFactor - LEFT_OFFSET - BORDER_OFFSET;
+				}
+				if (resizeHandle.rescaleDirectionVer != ResizeHandle.RescaleDirectionVer.None && windowTransform.rect.height * scale > Screen.height - 2 * BORDER_OFFSET * scale)
+				{
+					float containerSizeVer = (corners[1].y - corners[0].y) - (contentCorners[1].y - contentCorners[0].y);
+					contentLayout.preferredHeight = (Screen.height - containerSizeVer) / InterfaceCanvas.Instance.canvas.scaleFactor - 2 * BORDER_OFFSET;
+				}
+			}
+			LayoutRebuilder.ForceRebuildLayoutImmediate(windowTransform);
+			LimitPosition();
+		}
+
 		public void LimitPosition()
 		{
 			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;

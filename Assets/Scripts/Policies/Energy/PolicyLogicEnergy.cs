@@ -347,11 +347,15 @@ namespace MSP2050.Scripts
 			if (m_energyCableLayerGreen != null || m_energyCableLayerGrey != null)
 			{
 				foreach (AbstractLayer energyLayer in m_energyLayers)
+				{
 					energyLayer.ResetCurrentGrids();
+					energyLayer.SetEntitiesActiveUpTo(plan);
+				}
 
 				List<EnergyGrid> grids = GetEnergyGridsAtTime(plan.StartTime, EnergyGrid.GridColor.Either);
 				if (m_energyCableLayerGreen != null)
 				{
+					m_energyCableLayerGreen.ActivateCableLayerConnections();
 					Dictionary<int, List<DirectionalConnection>> network = m_energyCableLayerGreen.GetCableNetworkForPlan(plan);
 					foreach (EnergyGrid grid in grids)
 						if (grid.IsGreen)
@@ -359,6 +363,7 @@ namespace MSP2050.Scripts
 				}
 				if (m_energyCableLayerGrey != null)
 				{
+					m_energyCableLayerGrey.ActivateCableLayerConnections();
 					Dictionary<int, List<DirectionalConnection>> network = m_energyCableLayerGrey.GetCableNetworkForPlan(plan);
 					foreach (EnergyGrid grid in grids)
 						if (!grid.IsGreen)
@@ -464,7 +469,9 @@ namespace MSP2050.Scripts
 			Connection conn1 = new Connection(cable, point1, true);
 			Connection conn2 = new Connection(cable, point2, false);
 
-			//Cables store connections and attach them to points when editing starts
+			//Cables store connections and attach them to points when editing starts		
+			if (cable.Connections.Count > 1)
+				cable.Connections.Clear(); //We already had connections previously, but it has been updated so clear the old one
 			cable.AddConnection(conn1);
 			cable.AddConnection(conn2);
 		}

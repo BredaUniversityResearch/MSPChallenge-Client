@@ -21,6 +21,18 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(true);
 			label.text = name;
 			value.text = valueText;
+			if (valueButton != null)
+			{
+				Uri uriResult;
+				bool isLink = Uri.TryCreate(valueText, UriKind.Absolute, out uriResult)
+					&& (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+				valueButton.interactable = isLink;
+				if (isLink)
+				{
+					valueButton.onClick.RemoveAllListeners();
+					valueButton.onClick.AddListener(() => Application.OpenURL(valueText));
+				}
+			}
 		}
 
 		public void SetContent(string name, string valueText, UnityAction callBack)

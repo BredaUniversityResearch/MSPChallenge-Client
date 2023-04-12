@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace MSP2050.Scripts
@@ -72,7 +73,15 @@ namespace MSP2050.Scripts
 			if (currentTokenRequest.isDone)
 			{
 				string jsonResponse = currentTokenRequest.downloadHandler.text;
-				RequestResult response = JsonConvert.DeserializeObject<RequestResult>(jsonResponse);
+				RequestResult response = null;
+				try
+				{
+					response = JsonConvert.DeserializeObject<RequestResult>(jsonResponse);	
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Failed to deserialize " + Server.CheckApiAccess() + " request, error: " + e.Message);
+				}
 				if (response != null && response.success == true)
 				{
 					ApiTokenCheckAccessResponse payload = response.payload.ToObject<ApiTokenCheckAccessResponse>();
@@ -129,8 +138,16 @@ namespace MSP2050.Scripts
 			if (renewTokenRequest.isDone)
 			{
 				string responseText = renewTokenRequest.downloadHandler.text;
-				RequestResult response = JsonConvert.DeserializeObject<RequestResult>(responseText);
-				if (response.success)
+				RequestResult response = null;
+				try
+				{
+					response = JsonConvert.DeserializeObject<RequestResult>(responseText);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Failed to deserialize " + Server.RenewApiToken() + " request, error: " + e.Message);
+				}
+				if (response != null && response.success)
 				{
 					currentAccessToken = response.payload.ToObject<ApiTokenResponse>().token;
 				}
