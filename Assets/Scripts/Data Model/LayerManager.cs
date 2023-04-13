@@ -88,10 +88,10 @@ namespace MSP2050.Scripts
 			m_finishedImporting = true;
 			Debug.Log("All layers imported (" + GetValidLayerCount() + ")");
 
-			foreach(var kvp in m_subcategoryToLayers)
-			{
-				kvp.Value.Sort((a_x, a_y) => a_x.ShortName.CompareTo(a_y.ShortName));
-			}
+			//foreach(var kvp in m_subcategoryToLayers)
+			//{
+			//	kvp.Value.Sort((a_x, a_y) => a_x.ShortName.CompareTo(a_y.ShortName));
+			//}
 		}
 
 		private void SetSubcategoryIcons()
