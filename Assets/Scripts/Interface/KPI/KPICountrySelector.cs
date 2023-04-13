@@ -41,7 +41,6 @@ namespace MSP2050.Scripts
 				int teamId = team.ID;
 				button.SetToggleChangeHandler((b) => OnToggleChanged(b, teamId));
 
-				//m_buttonsByTeam.Add(teamId, button);
 				if (teamId == currentTeam.ID || (currentTeam.IsManager && currentSelectedTeam.Count == 0))
 				{
 					button.SetSelected(true);
@@ -52,7 +51,6 @@ namespace MSP2050.Scripts
 				KPICountrySelection button = Instantiate(m_countryButtonPrefab, m_countryButtonParent).GetComponent<KPICountrySelection>();
 				button.SetTeamColor(Color.white, m_toggleGroup);
 				button.SetToggleChangeHandler((b) => OnToggleChanged(b, 0));
-				//m_buttonsByTeam.Add(0, button);
 			}
 			m_toggleGroup.allowSwitchOff = false;
 		}
@@ -62,15 +60,14 @@ namespace MSP2050.Scripts
 			if (a_selected)
 			{
 				currentSelectedTeam.Add(a_teamId);
+				if (onTeamSelectionChanged != null)
+				{
+					onTeamSelectionChanged.Invoke(a_teamId);
+				}
 			}
 			else
 			{
 				currentSelectedTeam.Remove(a_teamId);
-			}
-
-			if (onTeamSelectionChanged != null)
-			{
-				onTeamSelectionChanged.Invoke(a_teamId);
 			}
 		}
 

@@ -17,7 +17,6 @@ namespace MSP2050.Scripts
 		}
 
 		public GenericWindow thisGenericWindow;
-		public GameObject raycastBlocker;
 
 		[Header("Rect")]
 		public RectTransform thisRect;
@@ -25,6 +24,7 @@ namespace MSP2050.Scripts
 		[Header("Objectives")]
 		public MonitorObjective objectivePrefab;
 		public Transform objectiveLocation;
+		[SerializeField] GameObject noObjectivesText;
 		[SerializeField] NewObjectiveWindow newObjectivesWindow;
 		[SerializeField] Button newObjectivesButton;
 
@@ -153,6 +153,7 @@ namespace MSP2050.Scripts
 		private void FilterObjectives()
 		{
 			int selectedDeadlineMonth = filterEraDeadline.GetSelectedMonth();
+			bool objectiveVisible = false;
 			for (int i = 0; i < objectives.Count; i++)
 			{
 				if (objectives[i].TeamId != -1)
@@ -163,8 +164,10 @@ namespace MSP2050.Scripts
 					                (IsCompletionStateFilterEnabled(ECompletionStateFilter.InProgress) || details.completed) && 
 					                (selectedDeadlineMonth == -1 || selectedDeadlineMonth == details.deadlineMonth);
 					objectives[i].gameObject.SetActive(isActive);
+					objectiveVisible = objectiveVisible || isActive;
 				}
 			}
+			noObjectivesText.SetActive(!objectiveVisible);
 		}
 
 		private bool IsCompletionStateFilterEnabled(ECompletionStateFilter filterState)

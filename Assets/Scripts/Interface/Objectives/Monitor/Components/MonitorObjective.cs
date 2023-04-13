@@ -12,7 +12,6 @@ namespace MSP2050.Scripts
 		[SerializeField] TextMeshProUGUI date;
 		[SerializeField] Image countryImage;
 		[SerializeField] Toggle completedToggle = null; //GM / AM
-		[SerializeField] TextMeshProUGUI completedLabel = null;     //All other clients that don't have permission to change the completed state.
 		[SerializeField] Button cloneButton;
 		[SerializeField] Button deleteButton;
 
@@ -52,7 +51,6 @@ namespace MSP2050.Scripts
 
 			ObjectiveDetails = details;
 			completedToggle.isOn = details.completed;
-			completedLabel.text = details.completed ? "Completed" : "In progress";
 
 			date.text = Util.MonthToYearText(details.deadlineMonth);
 			Team team = SessionManager.Instance.FindTeamByID(details.appliesToCountry);

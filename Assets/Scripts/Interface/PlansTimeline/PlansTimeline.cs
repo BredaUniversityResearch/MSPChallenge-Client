@@ -9,14 +9,6 @@ namespace MSP2050.Scripts
 {
 	public class PlansTimeline : MonoBehaviour
 	{
-		// Fold Button
-		public Button foldButton;
-		public RectTransform foldButtonRect;
-		public GameObject foldParent;
-
-		// Date Marker
-		public RawImage dateMarkerGraphic;
-
 		// Tracks
 		public GameObject trackPrefab;
 		public RectTransform trackLocation;
@@ -31,13 +23,9 @@ namespace MSP2050.Scripts
 
 		private Dictionary<int, int> teamTrackID;
 
-		[SerializeField]
-		private bool foldOnStart = true;
-
 		protected void Awake()
 		{
 			trackLocation.sizeDelta = new Vector2(trackLocation.sizeDelta.x, 1f);
-			dateMarkerGraphic.uvRect = new Rect(0f, 0f, 1f, 1f);
 			tracks = new List<TimelineTrack>(16);
 
 			teamTrackID = new Dictionary<int, int>();
@@ -45,12 +33,6 @@ namespace MSP2050.Scripts
 			PlanManager.Instance.OnPlanVisibleInUIEvent += OnAddNewPlan;
 			PlanManager.Instance.OnPlanUpdateInUIEvent += OnUpdatePlan;
 			PlanManager.Instance.OnPlanHideInUIEvent += OnRemoveExistingPlan;
-
-			if (foldOnStart)
-			{
-				gameObject.SetActive(false);
-				Fold();
-			}
 
 			CreateTracks();
 		}
@@ -84,16 +66,6 @@ namespace MSP2050.Scripts
 			tracks[trackID].RemoveTrackEvent(plan, oldPlanTime);
 		}
 
-		public void Fold()
-		{
-			if (foldButtonRect != null && foldParent != null)
-			{
-				Vector3 rot = foldButtonRect.eulerAngles;
-				foldButtonRect.eulerAngles = (rot.z == 0) ? new Vector3(rot.x, rot.y, 90f) : new Vector3(rot.x, rot.y, 0f);
-				foldParent.SetActive(!foldParent.activeSelf);
-			}
-		}
-
 		private void CreateTrack(Color col)
 		{
 			GameObject go = Instantiate(trackPrefab);
@@ -108,7 +80,6 @@ namespace MSP2050.Scripts
 			track.timeline = this;
 
 			trackLocation.sizeDelta = new Vector2(trackLocation.sizeDelta.x, trackLocation.sizeDelta.y + 16f);
-			dateMarkerGraphic.uvRect = new Rect(0f, 0f, 1f, dateMarkerGraphic.uvRect.height + 1f);
 		}
 
 		public void IsolateButtonGroup(bool dir)
