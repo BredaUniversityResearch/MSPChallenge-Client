@@ -21,6 +21,15 @@ namespace MSP2050.Scripts
 			EnergyGridReceivedEvent.Event -= OnEnergyGridReceived;
 		}
 
+		private void OnEnable()
+		{
+			//Refresh content when opened if not valid previously
+			if(targetTeamId != -1 && targetKPICollection == null)
+			{
+				SetBarsToEnergyGridsForCountry(targetTeamId);
+			}
+		}
+
 		//Callback for use within the Unity UI.
 		public void SetBarsToEnergyGridsForCountry(int country)
 		{

@@ -6,7 +6,6 @@ namespace MSP2050.Scripts
 {
 	public class TimelineTrack : MonoBehaviour
 	{
-		public Image[] trackColor;
 		public GameObject buttonPrefab, inspectButtonPrefab;
 		public Dictionary<int, TimelineButton> timelineButtons = new Dictionary<int, TimelineButton>(); 
 		public RectTransform buttonLocation;
@@ -14,6 +13,7 @@ namespace MSP2050.Scripts
 
 		private RectTransform rect;
 		private bool inspectingGroup;
+		Color trackColor;
 		private RectTransform Rect
 		{
 			get
@@ -38,10 +38,7 @@ namespace MSP2050.Scripts
 
 		public void SetTrackColor(Color col)
 		{
-			for (int i = 0; i < trackColor.Length; i++)
-			{
-				trackColor[i].color = col;
-			}
+			trackColor = col;
 		}
 
 		// Register the plan in a dictionairy
@@ -101,7 +98,7 @@ namespace MSP2050.Scripts
 
 			go.transform.SetParent(buttonLocation, false);
         
-			eventButton.SetButtonColor(trackColor[0].color);
+			eventButton.SetButtonColor(trackColor);
 			eventButton.SetMonth(month, timeline.timeLineUtil.yearMarkers[year]);
 			eventButton.button.onClick.AddListener(() => CallEventButton(eventButton));
 
@@ -121,7 +118,7 @@ namespace MSP2050.Scripts
 			TimelineButton eventButton = go.GetComponent<TimelineButton>();
 
 			eventButton.transform.SetParent(timeline.groupButtonLocation, false);
-			eventButton.SetButtonColor(trackColor[0].color);
+			eventButton.SetButtonColor(trackColor);
 			eventButton.button.onClick.AddListener(() => CallEventButton(eventButton));
 			eventButton.AddPlan(plan);
 			eventButton.monthNameText.text = Util.MonthToMonthText(plan.StartTime, true);

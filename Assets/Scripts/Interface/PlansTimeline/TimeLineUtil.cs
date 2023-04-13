@@ -9,11 +9,12 @@ namespace MSP2050.Scripts
 		public GameObject spacerPrefab;
 		public GameObject yearPrefab;
 		public GameObject markedYearPrefab;
-		public int markedYearInterval;
 		[HideInInspector] public List<Transform> yearMarkers;
+		int markedYearInterval;
 
 		private void Awake()
 		{
+			markedYearInterval = SessionManager.Instance.MspGlobalData.YearsPerEra;
 			CreateTimeLine();
 		}
 
