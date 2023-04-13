@@ -49,6 +49,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				m_wasShippingPlanBeforeEditing = false;
+				m_backup = null;
 			}
 		}
 

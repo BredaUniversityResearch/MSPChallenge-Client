@@ -57,10 +57,7 @@ namespace MSP2050.Scripts
 
 		public void UpdateDistributions()
 		{
-			if (currentDistributionsForPlan != m_plan)
-			{
-				DestroyDistributions();
-			}
+			DestroyDistributions();
 
 			for (int i = 0; i < m_plan.PlanLayers.Count; ++i)
 			{
