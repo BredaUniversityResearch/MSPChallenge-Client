@@ -349,7 +349,7 @@ namespace MSP2050.Scripts
 
 		public Vector3 GetWorldMousePosition()
 		{
-			Vector3 position = Camera.main.ScreenPointToRay(Input.mousePosition).origin;
+			Vector3 position = CameraManager.Instance.gameCamera.ScreenPointToRay(Input.mousePosition).origin;
 			position.z = 0;
 
 			if (m_snappingEnabled) { position = GetSnappedMousePosition(position); }
