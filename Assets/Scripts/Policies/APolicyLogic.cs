@@ -51,6 +51,8 @@ namespace MSP2050.Scripts
 		public virtual void StopEditingPlan(Plan a_plan) { }
 		public virtual void EditedPlanTimeChanged(Plan a_plan) { }
 		public virtual void PreviousPlanChangedInfluence(Plan a_plan) { }
+		public virtual void OnPlanLayerAdded(PlanLayer a_layer) { }
+		public virtual void OnPlanLayerRemoved(PlanLayer a_layer) { }
 
 		//Update order: 0
 		public abstract void HandleGeneralUpdate(APolicyData a_updateData, EPolicyUpdateStage a_stage);
