@@ -257,5 +257,21 @@ namespace MSP2050.Scripts
 				}
 			}
 		}
+
+		public void OnPlanLayerAdded(PlanLayer a_layer) 
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.OnPlanLayerAdded(a_layer);
+			}
+		}
+
+		public void OnPlanLayerRemoved(PlanLayer a_layer) 
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.OnPlanLayerRemoved(a_layer);
+			}
+		}
 	}
 }

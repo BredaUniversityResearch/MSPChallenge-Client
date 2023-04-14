@@ -37,6 +37,11 @@ namespace MSP2050.Scripts
 				}
 			}
 
+			public void RemovePlanSettings(Plan a_plan)
+			{
+				m_perPlanSettings.RemoveAll(a_obj => a_obj.m_plan == a_plan);
+			}
+
 			public void FindSettingsForPlan(Plan a_referencePlan, List<RestrictionAreaSetting> a_result)
 			{
 				PerPlanEntry entry = FindSettingsForPlan(a_referencePlan);
@@ -172,8 +177,28 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public void ClearSettingsForPlan(Plan a_plan)
+		{
+			foreach (var kvp in m_restrictionSettings)
+			{
+				kvp.Value.RemovePlanSettings(a_plan);
+			}
+		}
+
+		public void ClearSettingsForPlanLayer(PlanLayer a_planLayer)
+		{
+			foreach (var entityIdTypePair in a_planLayer.BaseLayer.m_entityTypes)
+			{
+				if (m_restrictionSettings.TryGetValue(entityIdTypePair.Value, out var typeSettings))
+				{
+					typeSettings.RemovePlanSettings(a_planLayer.Plan);
+				}
+			}
+		}
+
 		public void SetRestrictionsToObject(Plan a_targetPlan, IEnumerable<RestrictionAreaObject> a_planObjectRestrictionSettings)
 		{
+			ClearSettingsForPlan(a_targetPlan);
 			if (a_planObjectRestrictionSettings == null)
 				return;
 			foreach (RestrictionAreaObject restrictionObj in a_planObjectRestrictionSettings)

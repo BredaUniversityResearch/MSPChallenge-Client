@@ -49,6 +49,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				m_wasShippingPlanBeforeEditing = false;
+				m_backup = null;
 			}
 		}
 
@@ -80,6 +81,11 @@ namespace MSP2050.Scripts
 		public override void AddToPlan(Plan a_plan)
 		{
 			a_plan.AddPolicyData(new PolicyPlanDataShipping(this));
+		}
+
+		public override void OnPlanLayerRemoved(PlanLayer a_layer) 
+		{
+			RestrictionAreaManager.Instance.ClearSettingsForPlanLayer(a_layer);
 		}
 	}
 }
