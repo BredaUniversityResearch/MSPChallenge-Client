@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] private TextMeshProUGUI m_titleText;
 		[SerializeField] private TextMeshProUGUI m_contentText;
+		[SerializeField] private TextMeshProUGUI m_readMoreText;
 		[SerializeField] private RawImage m_contentImage;
 		[SerializeField] private CustomButton m_readMoreButton;
 		[SerializeField] private float m_imageMarginRight;
@@ -30,6 +31,7 @@ namespace MSP2050.Scripts
 			m_moreInfoLink = a_data.more_info_link;
 			m_contentImage.gameObject.SetActive(false);
 			m_contentText.margin = new Vector4(m_contentText.margin.x, m_contentText.margin.y, m_noImageMarginRight, m_contentText.margin.w);
+			m_readMoreText.margin = new Vector4(m_readMoreText.margin.x, m_readMoreText.margin.y, m_noImageMarginRight, m_readMoreText.margin.w);
 			//if (!string.IsNullOrEmpty(a_data.image_link))
 			//	StartCoroutine(DownloadImage(a_data.image_link));
 		}
@@ -42,6 +44,7 @@ namespace MSP2050.Scripts
 			m_contentImage.gameObject.SetActive(true);
 			m_contentImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)a_texture.width / (float)a_texture.height;
 			m_contentText.margin = new Vector4(m_contentText.margin.x, m_contentText.margin.y, m_imageMarginRight, m_contentText.margin.w);
+			m_readMoreText.margin = new Vector4(m_readMoreText.margin.x, m_readMoreText.margin.y, m_imageMarginRight, m_readMoreText.margin.w);
 		}
 
 		//public IEnumerator DownloadImage(string a_url)
