@@ -76,7 +76,7 @@ namespace MSP2050.Scripts
 					m_newsEntries.Add(newEntry);
 				}
 
-				for (int i = 0; i < 3 && i < m_newsData.Count; i++)
+				for (int i = 0; i < 2 && i < m_newsData.Count; i++)
 				{
 					if (i != 0)
 						Instantiate(m_latestNewsSpacerPrefab, m_latestNewsEntryParent);
