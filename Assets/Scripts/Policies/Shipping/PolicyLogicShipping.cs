@@ -82,5 +82,10 @@ namespace MSP2050.Scripts
 		{
 			a_plan.AddPolicyData(new PolicyPlanDataShipping(this));
 		}
+
+		public override void OnPlanLayerRemoved(PlanLayer a_layer) 
+		{
+			RestrictionAreaManager.Instance.ClearSettingsForPlanLayer(a_layer);
+		}
 	}
 }

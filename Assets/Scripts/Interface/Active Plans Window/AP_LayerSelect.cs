@@ -116,7 +116,6 @@ namespace MSP2050.Scripts
 			foreach (PlanLayer pl in m_plan.PlanLayers)
 			{
 				originalLayers.Add(pl.BaseLayer);
-				//m_layerObjects[pl.BaseLayer].SetValue(true);
 			}
 
 			HashSet<AbstractLayer> added = new HashSet<AbstractLayer>(m_currentLayers);
@@ -131,11 +130,13 @@ namespace MSP2050.Scripts
 					existingPlanLayer.DrawGameObjects();
 					addedLayer.AddPlanLayer(existingPlanLayer);
 					addedLayer.SetEntitiesActiveUpTo(m_plan);
+					PolicyManager.Instance.OnPlanLayerAdded(existingPlanLayer);
 				}
 				else
 				{
-					m_plan.AddNewPlanLayerFor(addedLayer);
+					PlanLayer newLayer = m_plan.AddNewPlanLayerFor(addedLayer);
 					addedLayer.SetEntitiesActiveUpTo(m_plan);
+					PolicyManager.Instance.OnPlanLayerAdded(newLayer);
 				}
 			}
 			HashSet<AbstractLayer> removed = new HashSet<AbstractLayer>(originalLayers);
@@ -173,6 +174,7 @@ namespace MSP2050.Scripts
 
 				removedPlanLayer.RemoveGameObjects();
 				m_plan.PlanLayers.Remove(removedPlanLayer);
+				PolicyManager.Instance.OnPlanLayerRemoved(removedPlanLayer);
 			}
 
 			//Update energy policy data

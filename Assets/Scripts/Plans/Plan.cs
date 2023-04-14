@@ -374,12 +374,13 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		public void AddNewPlanLayerFor(AbstractLayer a_layer)
+		public PlanLayer AddNewPlanLayerFor(AbstractLayer a_layer)
 		{
 			PlanLayer planLayer = new PlanLayer(this, a_layer);
 			PlanLayers.Add(planLayer);
 			planLayer.BaseLayer.AddPlanLayer(planLayer);
 			planLayer.DrawGameObjects();
+			return planLayer;
 		}
 
 		public PlanLayer getPlanLayerForBaseID(int baseLayerID)

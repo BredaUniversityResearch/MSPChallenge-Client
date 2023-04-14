@@ -93,6 +93,7 @@ namespace MSP2050.Scripts
 		{
 			m_distributions.DestroyAllGroups();
 			distributionGroups.Clear();
+			distributionItemEntries.Clear();
 		}
 
 		private void SetDistributionSlider(AbstractLayer a_baseLayer, EntityType a_entityType, int a_teamId, float a_restrictionSize)

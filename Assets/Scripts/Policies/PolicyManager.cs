@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reactive.Joins;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -255,6 +256,22 @@ namespace MSP2050.Scripts
 				{
 					kvp.Value.logic.GetIssueText(kvp.Value, a_issueText);
 				}
+			}
+		}
+
+		public void OnPlanLayerAdded(PlanLayer a_layer) 
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.OnPlanLayerAdded(a_layer);
+			}
+		}
+
+		public void OnPlanLayerRemoved(PlanLayer a_layer) 
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.OnPlanLayerRemoved(a_layer);
 			}
 		}
 	}
