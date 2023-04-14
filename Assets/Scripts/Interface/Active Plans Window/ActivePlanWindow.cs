@@ -64,6 +64,11 @@ namespace MSP2050.Scripts
 		[SerializeField] AP_PolicySelect m_policySelect;
 		[SerializeField] GameObject m_noPoliciesEntry;
 
+		[Header("Help Windows")]
+		[SerializeField] GameObject m_helpWindowCreation; 
+		[SerializeField] GameObject m_helpWindowEditing;
+		[SerializeField] GameObject m_helpWindowView;
+
 		private List<AP_ContentToggle> m_layerToggles = new List<AP_ContentToggle>();
 		private Dictionary<string, AP_ContentToggle> m_policyToggles = new Dictionary<string, AP_ContentToggle>(); //popouts can be reached through toggles
 		private AP_ContentToggle m_selectedContentToggle;
@@ -108,6 +113,7 @@ namespace MSP2050.Scripts
 			}
 
 			m_window.OnAttemptHideWindow = OnAttemptHideWindow;
+			m_window.getHelpWindowPrefabDelegate = OnHelpWindowOpened;
 			m_startEditingButton.onClick.AddListener(OnEditButtonPressed);
 			m_acceptEditButton.onClick.AddListener(OnAcceptButton);
 			m_cancelEditButton.onClick.AddListener(OnCancelButton);
@@ -156,6 +162,19 @@ namespace MSP2050.Scripts
 				PlanManager.Instance.HideCurrentPlan();
 			}
 			return true;
+		}
+
+		GameObject OnHelpWindowOpened()
+		{
+			switch(m_interactionMode)
+			{
+				case EInteractionMode.SetupNew:
+					return m_helpWindowCreation;
+				case EInteractionMode.View:
+					return m_helpWindowView;
+				default:
+					return m_helpWindowEditing;
+			}
 		}
 
 		void OnCancelButton()

@@ -41,6 +41,8 @@ namespace MSP2050.Scripts
 				onAttemptHideWindowDelegate = value;
 			}
 		}
+		public delegate GameObject GetHelpWindowPrefabDelegate();
+		public GetHelpWindowPrefabDelegate getHelpWindowPrefabDelegate;
 
 		private GameObject modalBackground;
 
@@ -118,7 +120,14 @@ namespace MSP2050.Scripts
 
 		public void HelpWindow()
 		{
-			HelpWindowsManager.Instance.InstantiateHelpWindow(helpWindowPrefab);
+			if (helpWindowPrefab != null)
+			{
+				HelpWindowsManager.Instance.InstantiateHelpWindow(helpWindowPrefab);
+			}
+			else if(getHelpWindowPrefabDelegate != null)
+			{
+				HelpWindowsManager.Instance.InstantiateHelpWindow(getHelpWindowPrefabDelegate());
+			}
 		}
 
 		public void Hide(bool unityCallbackToggleValue)
