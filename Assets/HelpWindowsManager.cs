@@ -8,8 +8,8 @@ public class HelpWindowsManager : MonoBehaviour
     private static HelpWindowsManager m_instance;
     public static HelpWindowsManager Instance => m_instance;
 
-    private Button closeButton;
-    private GameObject helpWindowObject;
+    private Button m_closeButton;
+    private GameObject m_helpWindowObject;
 
     private void Awake()
 	{
@@ -23,13 +23,13 @@ public class HelpWindowsManager : MonoBehaviour
 
     public void InstantiateHelpWindow(GameObject helpWindow)
     {
-        helpWindowObject = Instantiate(helpWindow, this.transform);
-        closeButton = GetComponentInChildren<CustomButton>();
-        closeButton.onClick.AddListener(OnCloseButtonClick);
+        m_helpWindowObject = Instantiate(helpWindow, this.transform);
+        m_closeButton = GetComponentInChildren<CustomButton>();
+        m_closeButton.onClick.AddListener(OnCloseButtonClick);
     }
 
     private void OnCloseButtonClick()
     {
-        Destroy(helpWindowObject);
+        Destroy(m_helpWindowObject);
     }
 }
