@@ -42,6 +42,9 @@ namespace MSP2050.Scripts
 			});
 			serverLogin.onClick.AddListener(() =>
 			{
+				NetworkForm form = new NetworkForm();
+				form.AddField("session_id", SessionManager.Instance.CurrentSessionID);
+				ServerCommunication.Instance.DoPriorityRequest(Server.CloseSession(), form, null, null);
 				SceneManager.LoadScene(0);
 			});
 		}
