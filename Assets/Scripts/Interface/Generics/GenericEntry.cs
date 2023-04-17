@@ -41,6 +41,7 @@ namespace MSP2050.Scripts
 			label.text = name;
 			if(value != null)
 				value.text = valueText;
+			valueButton.onClick.RemoveAllListeners();
 			valueButton.onClick.AddListener(callBack);
 		}
 
