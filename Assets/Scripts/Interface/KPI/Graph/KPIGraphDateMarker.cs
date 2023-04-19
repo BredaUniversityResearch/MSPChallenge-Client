@@ -35,7 +35,8 @@ namespace MSP2050.Scripts
 
 		void OnEnable()
 		{
-			StartCoroutine(DelayedResize());
+			if(rawImage != null)
+				StartCoroutine(DelayedResize());
 		}
 
 		IEnumerator DelayedResize()
@@ -47,10 +48,6 @@ namespace MSP2050.Scripts
 
 		private void OnDestroy()
 		{
-			//if (shouldFollowCurrentDate)
-			//{
-			//	TimeManager.Instance.OnCurrentMonthChanged -= OnMonthChanged;
-			//}
 			if (matchingWindow != null)
 				matchingWindow.UnRegisterResizeHandler(this);
 		}
@@ -74,9 +71,11 @@ namespace MSP2050.Scripts
 
 		public void OnResize()
 		{
+			if (rawImage == null)
+				return;
+
 			Vector3[] corners = new Vector3[4];
 			targetTransform.GetWorldCorners(corners);
-			//rawImage.uvRect.height = (corners[1].y - corners[0].y) / imageRepetitions;
 			rawImage.uvRect = new Rect(0, 0, 1f, (corners[1].y - corners[0].y) / imageRepetitions);
 		}
 	}

@@ -36,6 +36,8 @@ namespace MSP2050.Scripts
 
 		private float m_timeLeftElapsed = 0f;
 
+		public int MonthsPerEra => eraGameTime;
+
 		public void Update()
 		{
 			if (CurrentState != PlanningState.Play)

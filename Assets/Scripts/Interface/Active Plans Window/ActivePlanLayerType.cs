@@ -24,6 +24,7 @@ namespace MSP2050.Scripts
 
 			if (!string.IsNullOrEmpty(type.media))
 			{
+				infoButton.onClick.RemoveAllListeners();
 				infoButton.onClick.AddListener(() =>
 				{
 					Application.OpenURL(MediaUrl.Parse(type.media));

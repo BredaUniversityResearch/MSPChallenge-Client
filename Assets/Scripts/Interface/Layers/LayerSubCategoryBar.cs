@@ -32,5 +32,10 @@ namespace MSP2050.Scripts
 		{
 			m_clickCallback?.Invoke(a_value, m_subcategoryName);
 		}
+
+		public void SetToggled(bool a_value)
+		{
+			m_toggle.isOn = a_value;
+		}
 	}
 }

@@ -526,8 +526,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
-    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010e00000063006f006c006f00720048006900670068006c006900670068007400010000002d010d00000063006f006c006f007200440069007300610062006c0065006400
+    SerializedFormat: 2
+    SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
     - {fileID: 11400000, guid: dbe24502a18c5e546a327941d209c921, type: 2}
@@ -535,7 +535,16 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 10
+      Data: 0
+    - Name: colorHighlight
+      Entry: 10
+      Data: 1
+    - Name: colorDisabled
+      Entry: 6
+      Data: 
   targetGraphics:
   - {fileID: 3483903461278239092}
   useHighlightColor: 1
@@ -723,7 +732,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 888.88, y: 500.88}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8289442004022545375
 CanvasRenderer:
@@ -787,6 +796,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_titleText: {fileID: 2740979438500733055}
   m_contentText: {fileID: 6774595400451655238}
+  m_readMoreText: {fileID: 3483903461278239092}
   m_contentImage: {fileID: 3627340906270970446}
   m_readMoreButton: {fileID: 2186550340559611378}
   m_imageMarginRight: 324

@@ -35,6 +35,7 @@ namespace MSP2050.Scripts
 		public LayerProbeWindow layerProbeWindow;
 		public GameObject networkingBlocker;
 		public GenericWindow impactToolWindow;
+		public TeamWindow teamWindow;
 		public HEBGraph.HEBGraph ImpactToolGraph;
 		public NotificationWindow notificationWindow;
 		public GameObject mapToolsWindow;
@@ -98,7 +99,6 @@ namespace MSP2050.Scripts
 
 		public void SetRegion(MspGlobalData globalData)
 		{
-			menuBarLogo.SetRegionLetter(globalData.edition_letter);
 			gameMenu.SetRegion(globalData);
 			regionColour.SetValue(globalData.edition_colour);
 		}

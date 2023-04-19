@@ -30,7 +30,18 @@ namespace MSP2050.Scripts
 			m_searchBar.m_ontextChange += OnSearchbarChanged;
 		}
 
-        private void OnDisable()
+		private void OnEnable()
+		{
+			if(m_subCategories != null)
+			{
+				foreach(var kvp in m_subCategories)
+				{
+					kvp.Value.SetToggled(false);
+				}
+			}
+		}
+
+		private void OnDisable()
         {
             if (InterfaceCanvas.Instance.menuBarLayers.toggle.isOn)
             {

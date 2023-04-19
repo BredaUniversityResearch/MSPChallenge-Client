@@ -63,7 +63,7 @@ namespace MSP2050.Scripts
 			{
 				m_latestNewsBar.SetActive(true);
 				m_noNewsEntry.SetActive(false);
-				m_newsData.Sort((a, b) => a.date.CompareTo(b.date));
+				m_newsData.Sort((a, b) => b.date.CompareTo(a.date));
 
 				foreach (LoginNewsData entryData in m_newsData)
 				{
@@ -76,7 +76,7 @@ namespace MSP2050.Scripts
 					m_newsEntries.Add(newEntry);
 				}
 
-				for (int i = 0; i < 3 && i < m_newsData.Count; i++)
+				for (int i = 0; i < 2 && i < m_newsData.Count; i++)
 				{
 					if (i != 0)
 						Instantiate(m_latestNewsSpacerPrefab, m_latestNewsEntryParent);

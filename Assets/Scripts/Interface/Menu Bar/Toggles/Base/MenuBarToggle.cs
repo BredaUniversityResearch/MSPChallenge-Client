@@ -15,14 +15,20 @@ namespace MSP2050.Scripts
 
 		public CustomToggle toggle;
 
-		void Start()
+		private void Start()
+		{
+			Initialise();
+		}
+
+		protected void Initialise()
 		{
 			toggle = GetComponent<CustomToggle>();
 
 			switch (connectTo) 
 			{
 				case Selection.Logo:
-					SetRegionButtonCallback();                          
+					toggle.isOn = InterfaceCanvas.Instance.teamWindow.gameObject.activeSelf; // Init
+					toggle.onValueChanged.AddListener((b) => InterfaceCanvas.Instance.teamWindow.gameObject.SetActive(toggle.isOn));
 					break;
 				case Selection.Layers:
 					toggle.isOn = InterfaceCanvas.Instance.layerInterface.gameObject.activeSelf; // Init
@@ -74,15 +80,6 @@ namespace MSP2050.Scripts
 		public void ToggleValue()
 		{
 			toggle.isOn = !toggle.isOn;
-		}
-
-		void SetRegionButtonCallback()
-		{
-			toggle.onValueChanged.AddListener((b) =>
-			{
-				Application.OpenURL(SessionManager.Instance.MspGlobalData.region_base_url + '/' + SessionManager.Instance.CurrentTeam.name);
-			});
-	
 		}
 	}
 }
