@@ -17,6 +17,8 @@ namespace MSP2050.Scripts
 
 		void Start()
 		{
+			if (null != CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.AutoLogin)) return;
 			ServerCommunication.Instance.DoExternalAPICall<WikiSocialsListResult>(GetSocialsListURL, OnWikiSocialsQuerySuccess, OnWikiSocialsQueryFail);
 			gameObject.SetActive(false);
 		}
