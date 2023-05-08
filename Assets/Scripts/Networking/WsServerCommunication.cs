@@ -79,7 +79,9 @@ namespace MSP2050.Scripts
 					}
 				};
 				client.Options.SetRequestHeader(API_TOKEN_HEADER, ServerCommunication.Instance.GetApiAccessToken());
+				client.Options.SetRequestHeader("MSPAPIToken", ServerCommunication.Instance.GetApiAccessToken()); // backwards compatible
 				client.Options.SetRequestHeader(GAME_SESSION_ID_HEADER, a_gameSessionId.ToString());
+				client.Options.SetRequestHeader("GameSessionId", a_gameSessionId.ToString()); // backwards compatible
 				return client;
 			});
 
