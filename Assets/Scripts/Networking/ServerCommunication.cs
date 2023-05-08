@@ -376,7 +376,10 @@ namespace MSP2050.Scripts
 	
 		private Dictionary<string, string> GetAuthenticationHeaders()
 		{
-			return new Dictionary<string, string> {{ApiTokenHeader, tokenHandler.GetAccessToken() }};
+			return new Dictionary<string, string> {
+				{ ApiTokenHeader, tokenHandler.GetAccessToken() },
+				{ "MSPAPIToken", tokenHandler.GetAccessToken() } // backwards compatible
+			};
 		}
 
 		public void AddDefaultHeaders(UnityWebRequest request)
