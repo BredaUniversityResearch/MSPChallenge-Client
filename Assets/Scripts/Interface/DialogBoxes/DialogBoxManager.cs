@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using TMPro;
 
 namespace MSP2050.Scripts
 {
@@ -78,6 +79,19 @@ namespace MSP2050.Scripts
 			dialogBox.rb.onClick.AddListener(() => DestroyDialogBox(dialogBox));
 
 			boxes.Add(dialogBox);
+			return dialogBox;
+		}
+
+		public DialogBox NotificationListWindow(string title, string description, List<string> list, UnityAction button, string buttonText = "Continue")
+		{
+			DialogBox dialogBox = NotificationWindow(title, description, button, buttonText);
+
+			foreach(string entry in list)
+			{
+				TextMeshProUGUI text = Instantiate(dialogBox.listPrefab, dialogBox.listParent).GetComponent<TextMeshProUGUI>();
+				text.text = entry;
+			}
+
 			return dialogBox;
 		}
 
