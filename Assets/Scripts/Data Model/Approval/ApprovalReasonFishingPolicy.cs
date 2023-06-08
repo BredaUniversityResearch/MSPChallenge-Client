@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -15,6 +16,16 @@ namespace MSP2050.Scripts
 		public string FormatAsText(string a_teamName)
 		{
 			return $"{a_teamName}'s fishing effort for the {m_fleet} fleet was altered.";
+		}
+
+		public string FormatGroupText(List<IApprovalReason> a_group, string a_teamName)
+		{
+			return FormatAsText(a_teamName);
+		}
+
+		public bool ShouldBeGrouped(IApprovalReason a_other)
+		{
+			return false;
 		}
 	}
 }

@@ -85,6 +85,7 @@ namespace MSP2050.Scripts
 		public DialogBox NotificationListWindow(string title, string description, List<string> list, UnityAction button, string buttonText = "Continue")
 		{
 			DialogBox dialogBox = NotificationWindow(title, description, button, buttonText);
+			dialogBox.windowRect.sizeDelta = new Vector2(600f, 0f);
 
 			foreach(string entry in list)
 			{

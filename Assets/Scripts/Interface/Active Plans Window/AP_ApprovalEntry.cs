@@ -71,11 +71,31 @@ namespace MSP2050.Scripts
 		{
 			if (m_plan.countryApprovalReasons != null && m_plan.countryApprovalReasons.TryGetValue(m_currentTeam.ID, out var reasons))
 			{
-				List<string> explanations = new List<string>(reasons.Count);
+				List<List<IApprovalReason>> groupedReasons = new List<List<IApprovalReason>>();
 				foreach (IApprovalReason reason in reasons)
 				{
-					explanations.Add(reason.FormatAsText(m_currentTeam.name));
+					bool found = false;
+					foreach (List<IApprovalReason> group in groupedReasons)
+					{
+						if (group[0].ShouldBeGrouped(reason))
+						{
+							group.Add(reason);
+							found = true;
+							break;
+						}
+					}
+					if(!found)
+					{
+						groupedReasons.Add(new List<IApprovalReason>() { reason });
+					}
 				}
+
+				List<string> explanations = new List<string>(reasons.Count);
+				foreach (List<IApprovalReason> group in groupedReasons)
+				{
+					explanations.Add(group[0].FormatGroupText(group, m_currentTeam.name));
+				}
+
 				DialogBoxManager.instance.NotificationListWindow("Approval requirements",
 					$"This plan requires the {m_currentTeam.name} team's approval for the following reasons:\n\n",
 					explanations, null);

@@ -14,5 +14,6 @@ namespace MSP2050.Scripts
 		public TextMeshProUGUI rbDescriptor;
 		public Transform listParent;
 		public GameObject listPrefab;
+		public RectTransform windowRect;
 	}
 }

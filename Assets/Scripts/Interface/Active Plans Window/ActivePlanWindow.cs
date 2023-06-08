@@ -390,6 +390,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				m_currentPlan = plan;
+				m_currentPlan.CalculateRequiredApproval(true);
 				m_interactionMode = EInteractionMode.View;
 			}
 			if (m_countryIndicator != null)

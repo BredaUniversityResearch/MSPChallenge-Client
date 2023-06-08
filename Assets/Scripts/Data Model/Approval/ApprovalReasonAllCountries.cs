@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -22,6 +23,21 @@ namespace MSP2050.Scripts
 				return $"Geometry of type {m_type.Name} was removed, which requires approval from all countries.";
 			else
 				return $"Geometry of type {m_type.Name} was added or moved, which requires approval from all countries.";
+		}
+
+		public string FormatGroupText(List<IApprovalReason> a_group, string a_teamName)
+		{
+			bool single = a_group.Count == 1;
+			if (m_removed)
+				return $"{a_group.Count} piece{(single ? "" : "s")} of geometry of type {m_type.Name} {(single ? "was" : "were")} removed, which requires approval from all countries.";
+			else
+				return $"{a_group.Count} piece{(single ? "" : "s")} of geometry of type {m_type.Name} {(single ? "was" : "were")} added or moved, which requires approval from all countries.";
+		}
+
+		public bool ShouldBeGrouped(IApprovalReason a_other)
+		{
+			ApprovalReasonAllCountries otherCast = a_other as ApprovalReasonAllCountries;
+			return otherCast != null && otherCast.m_removed == m_removed && otherCast.m_type == m_type;
 		}
 	}
 }
