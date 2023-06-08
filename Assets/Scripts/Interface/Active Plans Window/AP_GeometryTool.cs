@@ -78,7 +78,6 @@ namespace MSP2050.Scripts
 			{
 				LayerManager.Instance.SetLayerVisibilityLock(m_currentlyEditingLayer.BaseLayer, false);
 				ConstraintManager.Instance.CheckConstraints(m_plan);
-				//ConstraintManager.Instance.CheckConstraintsForLayer(m_plan, m_currentlyEditingLayer);
 				IssueManager.Instance.SetIssueInstancesToPlan(m_plan);
 				m_APWindow.RefreshIssueText();
 			}
