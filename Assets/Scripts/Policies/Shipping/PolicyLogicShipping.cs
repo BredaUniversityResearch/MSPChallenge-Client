@@ -73,7 +73,7 @@ namespace MSP2050.Scripts
 			RestrictionAreaManager.Instance.SubmitSettingsForPlan(a_plan, a_batch);
 		}
 
-		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
+		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, Dictionary<int, List<IApprovalReason>> a_approvalReasons, ref EApprovalType a_requiredApprovalLevel, bool a_reasonOnly)
 		{ 
 			//TODO CHECK: is it possible to change restriction size for other teams, if so: should it require approval?
 		}

@@ -25,6 +25,7 @@ namespace MSP2050.Scripts
 
 		public List<PlanLayer> PlanLayers { get; private set; }
 		public Dictionary<int, EPlanApprovalState> countryApproval;
+		public Dictionary<int, List<IApprovalReason>> countryApprovalReasons;
 		private Dictionary<string, APolicyPlanData> m_policies = new Dictionary<string, APolicyPlanData>();
 		public Dictionary<string, APolicyPlanData> Policies => m_policies;
 
@@ -429,11 +430,13 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public void CalculateRequiredApproval()
+		public void CalculateRequiredApproval(bool a_reasonOnly = true)
 		{
 			bool requireAMApproval = false;
 			EApprovalType requiredApprovalLevel = EApprovalType.NotDependent;
-			countryApproval = new Dictionary<int, EPlanApprovalState>();
+			if(!a_reasonOnly)
+				countryApproval = new Dictionary<int, EPlanApprovalState>();
+			countryApprovalReasons = new Dictionary<int, List<IApprovalReason>>();
 
 			//Store this so we don't have to find removed geometry twice per layer
 			List<List<SubEntity>> removedGeom = new List<List<SubEntity>>();
@@ -448,7 +451,27 @@ namespace MSP2050.Scripts
 					foreach (EntityType type in t.m_entity.EntityTypes)
 					{
 						if (type.requiredApproval == EApprovalType.AreaManager)
+						{
 							requireAMApproval = true;
+							if (countryApprovalReasons.TryGetValue(SessionManager.AM_ID, out var reasons))
+								reasons.Add(new ApprovalReasonRemovedGeom(t));
+							else
+								countryApprovalReasons.Add(SessionManager.AM_ID, new List<IApprovalReason> { new ApprovalReasonRemovedGeom(t) });
+						}
+						else if (type.requiredApproval == EApprovalType.AllCountries)
+						{
+							requiredApprovalLevel = EApprovalType.AllCountries;
+							foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
+							{
+								if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID)
+								{
+									if (countryApprovalReasons.TryGetValue(kvp.Value.ID, out var reasons))
+										reasons.Add(new ApprovalReasonAllCountries(type, t.m_entity, true));
+									else
+										countryApprovalReasons.Add(kvp.Value.ID, new List<IApprovalReason> { new ApprovalReasonAllCountries(type, t.m_entity, true) });
+								}
+							}
+						}
 						else if (type.requiredApproval > requiredApprovalLevel)
 							requiredApprovalLevel = type.requiredApproval;
 					}
@@ -460,7 +483,27 @@ namespace MSP2050.Scripts
 					foreach (EntityType type in t.EntityTypes)
 					{
 						if (type.requiredApproval == EApprovalType.AreaManager)
+						{
 							requireAMApproval = true;
+							if (countryApprovalReasons.TryGetValue(SessionManager.AM_ID, out var reasons))
+								reasons.Add(new ApprovalReasonNewGeom(t,false));
+							else
+								countryApprovalReasons.Add(SessionManager.AM_ID, new List<IApprovalReason> { new ApprovalReasonNewGeom(t, false) });
+						}
+						else if (type.requiredApproval == EApprovalType.AllCountries)
+						{
+							requiredApprovalLevel = EApprovalType.AllCountries;
+							foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
+							{
+								if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID)
+								{
+									if (countryApprovalReasons.TryGetValue(kvp.Value.ID, out var reasons))
+										reasons.Add(new ApprovalReasonAllCountries(type, t, false));
+									else
+										countryApprovalReasons.Add(kvp.Value.ID, new List<IApprovalReason> { new ApprovalReasonAllCountries(type, t, false) });
+								}
+							}
+						}
 						else if (type.requiredApproval > requiredApprovalLevel)
 							requiredApprovalLevel = type.requiredApproval;
 					}
@@ -468,21 +511,28 @@ namespace MSP2050.Scripts
 				removedGeom.Add(removedSubEntities);
 			}
 
-			if (requireAMApproval)
+			if (requireAMApproval && !a_reasonOnly)
 				countryApproval.Add(SessionManager.AM_ID, EPlanApprovalState.Maybe);
 
 			//Check required approval for policies
 			foreach(var kvp in Policies)
 			{
-				kvp.Value.logic.GetRequiredApproval(kvp.Value, this, countryApproval, ref requiredApprovalLevel);
+				kvp.Value.logic.GetRequiredApproval(kvp.Value, this, countryApproval, countryApprovalReasons, ref requiredApprovalLevel, a_reasonOnly);
 			}
 
 			if (requiredApprovalLevel >= EApprovalType.AllCountries)
 			{
-				//All team approval required, there is no chance for AM approval
-				foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
-					if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID)
-						countryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
+				if (!a_reasonOnly)
+				{
+					//All team approval required, there is no chance for AM approval
+					foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
+					{
+						if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(kvp.Value.ID))
+						{
+							countryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
+						}
+					}
+				}
 			}
 			else
 			{
@@ -506,11 +556,29 @@ namespace MSP2050.Scripts
 						for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
 						{
 							Entity t = PlanLayers[i].GetNewGeometryByIndex(entityIndex);
-							if (t.Country != userCountry && !countryApproval.ContainsKey(t.Country))
-								countryApproval.Add(t.Country, EPlanApprovalState.Maybe);
+							if (t.Country != userCountry)
+							{
+								if (countryApprovalReasons.TryGetValue(t.Country, out var reasons))
+									reasons.Add(new ApprovalReasonNewGeom(t, false));
+								else
+									countryApprovalReasons.Add(t.Country, new List<IApprovalReason> { new ApprovalReasonNewGeom(t, false) });
+
+								if (!a_reasonOnly && !countryApproval.ContainsKey(t.Country))
+									countryApproval.Add(t.Country, EPlanApprovalState.Maybe);
+							}
 							foreach (PolygonEntity eez in EEZs)
-								if (eez.Country != userCountry && !countryApproval.ContainsKey(eez.Country) && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
-									countryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
+							{
+								if (eez.Country != userCountry && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
+								{
+									if (countryApprovalReasons.TryGetValue(eez.Country, out var reasons))
+										reasons.Add(new ApprovalReasonNewGeom(t, true));
+									else
+										countryApprovalReasons.Add(eez.Country, new List<IApprovalReason> { new ApprovalReasonNewGeom(t, true) });
+
+									if (!a_reasonOnly && !countryApproval.ContainsKey(eez.Country))
+										countryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
+								}
+							}
 						}
 					}
 				}
@@ -520,21 +588,30 @@ namespace MSP2050.Scripts
 				{
 					foreach (SubEntity t in removedGeom[i])
 					{
-						if (t.m_entity.Country != Entity.INVALID_COUNTRY_ID && t.m_entity.Country != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(t.m_entity.Country))
+						if (t.m_entity.Country != Entity.INVALID_COUNTRY_ID && t.m_entity.Country != SessionManager.Instance.CurrentUserTeamID)
 						{
-							countryApproval.Add(t.m_entity.Country, EPlanApprovalState.Maybe);
+							if (countryApprovalReasons.TryGetValue(t.m_entity.Country, out var reasons))
+								reasons.Add(new ApprovalReasonRemovedGeom(t));
+							else
+								countryApprovalReasons.Add(t.m_entity.Country, new List<IApprovalReason> { new ApprovalReasonRemovedGeom(t) });
+
+							if (!a_reasonOnly && !countryApproval.ContainsKey(t.m_entity.Country))
+								countryApproval.Add(t.m_entity.Country, EPlanApprovalState.Maybe);
 						}
 					}
 				}
 			}
 
-			//Remove owner from required approval
-			if (countryApproval.ContainsKey(Country))
-				countryApproval.Remove(Country);
-			if (countryApproval.ContainsKey(-1))
-				countryApproval.Remove(-1);
-			if (countryApproval.ContainsKey(SessionManager.GM_ID))
-				countryApproval.Remove(SessionManager.GM_ID);
+			if (!a_reasonOnly)
+			{
+				//Remove owner from required approval
+				if (countryApproval.ContainsKey(Country))
+					countryApproval.Remove(Country);
+				if (countryApproval.ContainsKey(-1))
+					countryApproval.Remove(-1);
+				if (countryApproval.ContainsKey(SessionManager.GM_ID))
+					countryApproval.Remove(SessionManager.GM_ID);
+			}
 		}
 
 		public bool NeedsApproval()

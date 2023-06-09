@@ -96,7 +96,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
+		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, Dictionary<int, List<IApprovalReason>> a_approvalReasons, ref EApprovalType a_requiredApprovalLevel, bool a_reasonOnly)
 		{
 			if (a_requiredApprovalLevel < EApprovalType.AllCountries)
 			{
@@ -106,7 +106,12 @@ namespace MSP2050.Scripts
 				{
 					foreach (KeyValuePair<int, float> fishingValues in fishingFleets.Value)
 					{
-						if (!a_approvalStates.ContainsKey(fishingValues.Key))
+						if (a_approvalReasons.TryGetValue(fishingValues.Key, out var reasons))
+							reasons.Add(new ApprovalReasonFishingPolicy(fishingFleets.Key));
+						else
+							a_approvalReasons.Add(fishingValues.Key, new List<IApprovalReason> { new ApprovalReasonFishingPolicy(fishingFleets.Key) });
+
+						if (!a_reasonOnly && !a_approvalStates.ContainsKey(fishingValues.Key))
 						{
 							a_approvalStates.Add(fishingValues.Key, EPlanApprovalState.Maybe);
 						}

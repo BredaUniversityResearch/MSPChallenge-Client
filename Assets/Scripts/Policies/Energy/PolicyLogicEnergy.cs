@@ -495,7 +495,7 @@ namespace MSP2050.Scripts
 			return duplicate;
 		}
 
-		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
+		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, Dictionary<int, List<IApprovalReason>> a_approvalReasons, ref EApprovalType a_requiredApprovalLevel, bool a_reasonOnly)
 		{
 			if (a_requiredApprovalLevel < EApprovalType.AllCountries)
 			{
@@ -506,13 +506,24 @@ namespace MSP2050.Scripts
 
 				HashSet<int> countriesAffectedByRemovedGrids = new HashSet<int>();
 				foreach (EnergyGrid grid in energyGridsBeforePlan)
+				{
 					if (planData.removedGrids.Contains(grid.m_persistentID))
+					{
 						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.m_energyDistribution.m_distribution)
+						{
+							if (a_approvalReasons.TryGetValue(countryAmount.Key, out var reasons))
+								reasons.Add(new ApprovalReasonEnergyPolicy(grid, true));
+							else
+								a_approvalReasons.Add(countryAmount.Key, new List<IApprovalReason> { new ApprovalReasonEnergyPolicy(grid, true) });
+
 							if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
 								countriesAffectedByRemovedGrids.Add(countryAmount.Key);
+						}
+					}
+				}
 
 				//Removed grids
-				if (countriesAffectedByRemovedGrids != null)
+				if (!a_reasonOnly && countriesAffectedByRemovedGrids != null)
 				{
 					foreach (int i in countriesAffectedByRemovedGrids)
 					{
@@ -530,7 +541,13 @@ namespace MSP2050.Scripts
 					{
 						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.m_energyDistribution.m_distribution)
 						{
-							if (!a_approvalStates.ContainsKey(countryAmount.Key))
+							if (a_approvalReasons.TryGetValue(countryAmount.Key, out var reasons))
+								reasons.Add(new ApprovalReasonEnergyPolicy(grid, false));
+							else
+								a_approvalReasons.Add(countryAmount.Key, new List<IApprovalReason> { new ApprovalReasonEnergyPolicy(grid, false) });
+
+
+							if (!a_reasonOnly && !a_approvalStates.ContainsKey(countryAmount.Key))
 							{
 								a_approvalStates.Add(countryAmount.Key, EPlanApprovalState.Maybe);
 							}
