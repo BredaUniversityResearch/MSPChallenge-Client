@@ -926,7 +926,7 @@ namespace MSP2050.Scripts
 		public void SubmitRequiredApproval(BatchRequest batch)
 		{
 			JObject dataObject = new JObject();
-			if (countryApproval.Count > 0)
+			if (countryApproval != null && countryApproval.Count > 0)
 			{
 				List<int> countries = new List<int>(countryApproval.Count);
 				foreach (KeyValuePair<int, EPlanApprovalState> kvp in countryApproval)

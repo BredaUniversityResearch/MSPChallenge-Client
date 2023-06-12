@@ -77,6 +77,9 @@ namespace MSP2050.Scripts
 			if (m_currentlyEditingLayer != null)
 			{
 				LayerManager.Instance.SetLayerVisibilityLock(m_currentlyEditingLayer.BaseLayer, false);
+				LayerManager.Instance.ClearNonReferenceLayers();
+				LayerManager.Instance.RedrawVisibleLayers(); //This will cause a double redraw if the new AP state is also layer editing
+
 				ConstraintManager.Instance.CheckConstraints(m_plan);
 				IssueManager.Instance.SetIssueInstancesToPlan(m_plan);
 				m_APWindow.RefreshIssueText();
@@ -106,8 +109,6 @@ namespace MSP2050.Scripts
 			LayerManager.Instance.ShowLayer(a_layer.BaseLayer);
 			LayerManager.Instance.SetLayerVisibilityLock(a_layer.BaseLayer, true);
 			LayerManager.Instance.RedrawVisibleLayers();
-
-			//TODO CHECK: assumes the window always closes between layer edits (&OnDisable is called), check this
 
 			//Clear and recreate layer types
 			m_multiType = a_layer.BaseLayer.m_multiTypeSelect;
