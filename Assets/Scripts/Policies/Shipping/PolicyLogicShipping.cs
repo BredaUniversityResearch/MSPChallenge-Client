@@ -33,6 +33,7 @@ namespace MSP2050.Scripts
 		public override void RemoveFromPlan(Plan a_plan)
 		{
 			a_plan.Policies.Remove(PolicyManager.SHIPPING_POLICY_NAME);
+			RestrictionAreaManager.Instance.ClearSettingsForPlan(a_plan);
 		}
 
 		public override void StartEditingPlan(Plan a_plan)
