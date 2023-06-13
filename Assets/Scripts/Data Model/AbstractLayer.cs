@@ -333,7 +333,7 @@ namespace MSP2050.Scripts
 				SubEntityDrawSettings drawSettings = new SubEntityDrawSettings(kvp.Value.displayPolygon, Util.HexToColor(kvp.Value.polygonColor), kvp.Value.polygonPatternName,
 					kvp.Value.innerGlowEnabled, kvp.Value.innerGlowRadius, kvp.Value.innerGlowIterations, kvp.Value.innerGlowMultiplier, kvp.Value.innerGlowPixelSize,
 					kvp.Value.displayLines, Util.HexToColor(kvp.Value.lineColor), kvp.Value.lineWidth, kvp.Value.lineIcon, Color.white, -1, kvp.Value.linePatternType,
-					kvp.Value.displayPoints, Util.HexToColor(kvp.Value.pointColor), kvp.Value.pointSize, pointSprite);
+					kvp.Value.displayPoints, Util.HexToColor(kvp.Value.pointColor), kvp.Value.pointSize*0.5f, pointSprite);
 
 				EntityType entityType = new EntityType(kvp.Value.displayName, kvp.Value.description, kvp.Value.capacity, kvp.Value.investmentCost, kvp.Value.availability, drawSettings, kvp.Value.media, kvp.Value.value, kvp.Value.approval);
 				entityTypes.Add(kvp.Key, entityType);
