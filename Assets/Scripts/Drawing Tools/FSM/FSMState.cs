@@ -20,6 +20,7 @@ namespace MSP2050.Scripts
 		}
 		public virtual void ExitState(Vector3 a_currentMousePosition) { }
 		public virtual EEditingStateType StateType => EEditingStateType.Other;
+		public virtual bool HasGeometrySelected => false;
 
 		//Mouse input
 		public virtual void MouseMoved(Vector3 a_previousPosition, Vector3 a_currentPosition, bool a_cursorIsOverUI) { }
