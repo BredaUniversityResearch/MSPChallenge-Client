@@ -10,11 +10,14 @@ namespace MSP2050.Scripts
 		[SerializeField] ATutorialRequirement[] m_divergingRequirements;
 
 		private int m_actualStep;
+		private bool m_showPrev, m_showNext;
 
-		public override void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep)
+		public override void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep, bool a_showNextChapterButton, bool a_showPrevChapterButton)
 		{
 			m_actualStep = DetermineActualStep();
-			m_divergingSteps[m_actualStep].EnterStep(a_manager, a_firstStep, a_lastStep);
+			m_divergingSteps[m_actualStep].EnterStep(a_manager, a_firstStep, a_lastStep, a_showNextChapterButton, a_showPrevChapterButton);
+			m_showPrev = a_showPrevChapterButton;
+			m_showNext = a_showNextChapterButton;
 		}
 
 		public override void ExitStep(TutorialManager a_manager)
@@ -30,7 +33,7 @@ namespace MSP2050.Scripts
 			{
 				m_divergingSteps[m_actualStep].ExitStep(a_manager);
 				m_actualStep = newStep;
-				m_divergingSteps[m_actualStep].EnterStep(a_manager, false, false);
+				m_divergingSteps[m_actualStep].EnterStep(a_manager, false, false, m_showNext, m_showPrev);
 			}
 			m_divergingSteps[m_actualStep].Update(a_manager);
 		}
