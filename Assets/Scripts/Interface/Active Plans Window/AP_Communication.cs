@@ -84,6 +84,14 @@ namespace MSP2050.Scripts
 		{
 			SetMessageEntry(a_message);
 			m_nextMessageIndex++;
+
+			if(m_messageScrollRect.verticalNormalizedPosition < 0.01f)
+            {
+				Canvas.ForceUpdateCanvases();
+				m_messageScrollRect.verticalNormalizedPosition = 0f;
+				Canvas.ForceUpdateCanvases();
+			}
+
 		}
 
 		void SendMessage()
@@ -94,6 +102,10 @@ namespace MSP2050.Scripts
 				m_chatInputField.text = "";
 				m_chatInputField.ActivateInputField();
 				m_chatInputField.Select();
+
+				Canvas.ForceUpdateCanvases();
+				m_messageScrollRect.verticalNormalizedPosition = 0f;
+				Canvas.ForceUpdateCanvases();
 			}
 		}
 	}

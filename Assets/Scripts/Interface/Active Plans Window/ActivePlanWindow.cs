@@ -368,6 +368,11 @@ namespace MSP2050.Scripts
 			if (!m_initialised)
 				Initialise();
 
+			if (m_currentPlan != null)
+			{
+				m_currentPlan.OnMessageReceivedCallback -= RefreshMessageHeader;
+			}
+
 			if (m_selectedContentToggle != null)
 			{
 				m_selectedContentToggle.ForceClose(false);
@@ -400,6 +405,7 @@ namespace MSP2050.Scripts
 			{
 				m_approvalToggle.IsOn = true;
 			}
+			plan.OnMessageReceivedCallback += RefreshMessageHeader;
 		}
 
 		public void RefreshSectionActivity()
@@ -461,6 +467,11 @@ namespace MSP2050.Scripts
 			{
 				toggle.SetInteractable(Editing);
 			}
+		}
+
+		void RefreshMessageHeader(PlanMessage a_message)
+		{
+			m_communicationToggle.SetContent($"See {m_currentPlan.PlanMessages.Count} messages");
 		}
 
 		void EnterEditMode()
