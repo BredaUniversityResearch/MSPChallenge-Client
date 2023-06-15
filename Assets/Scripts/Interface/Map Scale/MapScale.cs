@@ -30,6 +30,10 @@ namespace MSP2050.Scripts
 		[SerializeField] CustomButton zoomInButton = null;
 		[SerializeField] CustomButton zoomOutButton = null;
 		[SerializeField] CustomButton zoomAllOutButton = null;
+		[SerializeField] CustomButton helpButton = null;
+
+		[Header("Prefab references")]
+		public GameObject helpWindowPrefab;
 
 		//[SerializeField]
 		//private MapScaleToolButton issueVisibilityButton = null;
@@ -37,7 +41,10 @@ namespace MSP2050.Scripts
 		//Size of the currently loaded play area scaled by Main.SCALE.
 		private Vector2 currentScaledWorldAreaSize = Vector2.one;
 
-		public void Awake()
+		public delegate GameObject GetHelpWindowPrefabDelegate();
+		public GetHelpWindowPrefabDelegate getHelpWindowPrefabDelegate;
+
+        public void Awake()
 		{
 			if (Main.Instance.GameLoaded)
 				OnDoneImportingLayers();
@@ -50,10 +57,11 @@ namespace MSP2050.Scripts
             zoomInButton.onClick.AddListener(ZoomIn);
             zoomOutButton.onClick.AddListener(ZoomOut);
             zoomAllOutButton.onClick.AddListener(ZoomAllTheWayOut);
-            //issueVisibilityButton.button.onClick.AddListener(IssueVisibilityClicked);
-            //issueVisibilityButton.SetSelected(IssueManager.Instance.IssueVisibility);
+			helpButton.onClick.AddListener(HelpButtonClicked);
+			//issueVisibilityButton.button.onClick.AddListener(IssueVisibilityClicked);
+			//issueVisibilityButton.SetSelected(IssueManager.Instance.IssueVisibility);
 			gameObject.SetActive(false);
-        }
+		}
 
 		private void Update()
 		{
@@ -158,6 +166,14 @@ namespace MSP2050.Scripts
 				Main.Instance.InterruptFSMState((fsm) => new ZoomToAreaState(fsm, zoomToAreaButton));
 			else
 				Main.Instance.CancelFSMInterruptState();
+		}
+
+		public void HelpButtonClicked()
+		{
+			if (helpWindowPrefab != null)
+			{
+				HelpWindowsManager.Instance.InstantiateHelpWindow(helpWindowPrefab);
+			}
 		}
 
 		public void ZoomAllTheWayOut()
