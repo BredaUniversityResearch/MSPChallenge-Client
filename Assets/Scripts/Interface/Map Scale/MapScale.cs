@@ -41,9 +41,6 @@ namespace MSP2050.Scripts
 		//Size of the currently loaded play area scaled by Main.SCALE.
 		private Vector2 currentScaledWorldAreaSize = Vector2.one;
 
-		public delegate GameObject GetHelpWindowPrefabDelegate();
-		public GetHelpWindowPrefabDelegate getHelpWindowPrefabDelegate;
-
         public void Awake()
 		{
 			if (Main.Instance.GameLoaded)
