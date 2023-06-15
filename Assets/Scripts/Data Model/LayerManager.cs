@@ -676,6 +676,10 @@ namespace MSP2050.Scripts
 
 		public string MakeCategoryDisplayString(string a_subcategory)
 		{
+			if(string.IsNullOrEmpty(a_subcategory))
+			{
+				return "Empty subcategory";
+			}
 			StringBuilder result = new StringBuilder(a_subcategory);
 			result.Replace('_', ' ');
 			result[0] = char.ToUpperInvariant(result[0]);
