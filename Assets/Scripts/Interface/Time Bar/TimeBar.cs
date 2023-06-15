@@ -60,6 +60,11 @@ namespace MSP2050.Scripts
 		[SerializeField] Toggle m_geomViewPlanToggle;
 		[SerializeField] Toggle m_geomViewBaseToggle;
 
+		[Header("Help Window")]
+		[SerializeField] CustomButton helpButton;
+		[SerializeField] GameObject helpWindowDefaultPrefab;
+		[SerializeField] GameObject helpWindowPlanViewPrefab;
+
 		int selectedMonthView, selectedYearView = 0; 
 		int maxSelectableMonth = 0;
 		int maxSelectableYear = 0;
@@ -104,8 +109,25 @@ namespace MSP2050.Scripts
 				if (value)
 					PlanManager.Instance.SetPlanViewState(PlanManager.PlanViewState.Base);
 			});
+
+			if (helpButton != null)
+			{
+				helpButton.onClick.AddListener(HelpButtonClicked);
+			}
 		}
-		
+
+		public void HelpButtonClicked()
+		{
+			if (helpWindowDefaultPrefab != null && !this.isViewingPlan)
+			{
+				HelpWindowsManager.Instance.InstantiateHelpWindow(helpWindowDefaultPrefab);
+			}
+			else if(helpWindowPlanViewPrefab != null && this.isViewingPlan)
+            {
+				HelpWindowsManager.Instance.InstantiateHelpWindow(helpWindowPlanViewPrefab);
+			}
+		}
+
 		private void OnMonthChanged(int oldCurrentMonth, int newCurrentMonth)
 		{
 			if (viewMode != WorldViewMode.Normal)
