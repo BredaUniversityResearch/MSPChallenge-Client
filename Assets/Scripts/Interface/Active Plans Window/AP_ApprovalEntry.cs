@@ -2,6 +2,8 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Text;
+using System.Collections.Generic;
 
 namespace MSP2050.Scripts
 {
@@ -13,6 +15,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_yesButton;
 		[SerializeField] Button m_noButton;
 		[SerializeField] Button m_maybeButton;
+		[SerializeField] Button m_whyButton;
 
 		[SerializeField] Graphic m_yesIcon;
 		[SerializeField] Graphic m_noIcon;
@@ -20,6 +23,7 @@ namespace MSP2050.Scripts
 
 		bool m_playerCanChangeApproval;
 		Team m_currentTeam;
+		Plan m_plan;
 		public ApprovalButtonCallback m_approvalButtonCallback;
 		public delegate void ApprovalButtonCallback(Team a_country, EPlanApprovalState a_newApproval);
 
@@ -28,6 +32,7 @@ namespace MSP2050.Scripts
 			m_yesButton.onClick.AddListener(() => ApprovalButtonPressed(EPlanApprovalState.Approved));
 			m_noButton.onClick.AddListener(() => ApprovalButtonPressed(EPlanApprovalState.Disapproved));
 			m_maybeButton.onClick.AddListener(() => ApprovalButtonPressed(EPlanApprovalState.Maybe));
+			m_whyButton.onClick.AddListener(OnWhyButtonPressed);
 		}
 
 		public void SetCallback(ApprovalButtonCallback a_callback)
@@ -35,21 +40,15 @@ namespace MSP2050.Scripts
 			m_approvalButtonCallback = a_callback;
 		}
 
-		public void SetContent(Team a_country, EPlanApprovalState a_state)
+		public void SetContent(Team a_country, EPlanApprovalState a_state, bool a_inApproval, Plan a_plan)
 		{
+			m_plan = a_plan;
 			m_currentTeam = a_country;
 			m_countryNameText.text = a_country.name;
 			m_yesIcon.color = a_country.color;
 			m_noIcon.color = a_country.color;
 			m_maybeIcon.color = a_country.color;
-			if(SessionManager.Instance.CurrentTeam.ID == a_country.ID)
-			{
-				m_playerCanChangeApproval = true;
-			}
-			else
-			{
-				m_playerCanChangeApproval = SessionManager.Instance.AreWeGameMaster;
-			}
+			m_playerCanChangeApproval = (SessionManager.Instance.CurrentTeam.ID == a_country.ID || SessionManager.Instance.AreWeGameMaster) && a_inApproval;
 			SetApprovalState(a_state);
 		}
 
@@ -66,6 +65,45 @@ namespace MSP2050.Scripts
 		void ApprovalButtonPressed(EPlanApprovalState a_state)
 		{
 			m_approvalButtonCallback.Invoke(m_currentTeam, a_state);
+		}
+
+		void OnWhyButtonPressed()
+		{
+			if (m_plan.countryApprovalReasons != null && m_plan.countryApprovalReasons.TryGetValue(m_currentTeam.ID, out var reasons))
+			{
+				List<List<IApprovalReason>> groupedReasons = new List<List<IApprovalReason>>();
+				foreach (IApprovalReason reason in reasons)
+				{
+					bool found = false;
+					foreach (List<IApprovalReason> group in groupedReasons)
+					{
+						if (group[0].ShouldBeGrouped(reason))
+						{
+							group.Add(reason);
+							found = true;
+							break;
+						}
+					}
+					if(!found)
+					{
+						groupedReasons.Add(new List<IApprovalReason>() { reason });
+					}
+				}
+
+				List<string> explanations = new List<string>(reasons.Count);
+				foreach (List<IApprovalReason> group in groupedReasons)
+				{
+					explanations.Add(group[0].FormatGroupText(group, m_currentTeam.name));
+				}
+
+				DialogBoxManager.instance.NotificationListWindow("Approval requirements",
+					$"This plan requires the {m_currentTeam.name} team's approval for the following reasons:\n\n",
+					explanations, null);
+			}
+			else
+			{
+				DialogBoxManager.instance.NotificationWindow("Approval requirements", "No up to date approval requirements for this team were found, please recalculate required approval.", null);
+			}
 		}
 	}
 }

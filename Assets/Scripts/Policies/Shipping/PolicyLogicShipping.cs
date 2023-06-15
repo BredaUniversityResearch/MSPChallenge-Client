@@ -33,6 +33,7 @@ namespace MSP2050.Scripts
 		public override void RemoveFromPlan(Plan a_plan)
 		{
 			a_plan.Policies.Remove(PolicyManager.SHIPPING_POLICY_NAME);
+			RestrictionAreaManager.Instance.ClearSettingsForPlan(a_plan);
 		}
 
 		public override void StartEditingPlan(Plan a_plan)
@@ -73,7 +74,7 @@ namespace MSP2050.Scripts
 			RestrictionAreaManager.Instance.SubmitSettingsForPlan(a_plan, a_batch);
 		}
 
-		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
+		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, Dictionary<int, List<IApprovalReason>> a_approvalReasons, ref EApprovalType a_requiredApprovalLevel, bool a_reasonOnly)
 		{ 
 			//TODO CHECK: is it possible to change restriction size for other teams, if so: should it require approval?
 		}

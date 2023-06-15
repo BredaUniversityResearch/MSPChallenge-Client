@@ -19,7 +19,7 @@ namespace MSP2050.Scripts
 		private bool m_complete;
 		public bool IsComplete() { return m_complete; }
 
-		public override void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep)
+		public override void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep, bool a_showNextChapterButton, bool a_showPrevChapterButton)
 		{
 			//Initialise requirements
 			if (m_completionRequirements != null && m_completionRequirements.Length > 0)
@@ -57,7 +57,7 @@ namespace MSP2050.Scripts
 			{
 				HighlightManager.instance.SetUIHighlights(m_highlightedObjects, m_highlightBasedOnTags);
 			}
-
+			a_manager.UI.SetChapterButtonActivity(a_showNextChapterButton, a_showPrevChapterButton);
 		}
 
 		public override void ExitStep(TutorialManager a_manager)
