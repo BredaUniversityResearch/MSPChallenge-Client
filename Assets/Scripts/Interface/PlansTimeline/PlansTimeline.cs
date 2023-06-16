@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 		private void OnAddNewPlan(Plan plan)
 		{
 			int trackID = teamTrackID[plan.Country];
-			tracks[trackID].RegisterEvent(plan);
+			tracks[trackID].UpdatetrackEventFor(plan, plan.StartTime);
 		}
 
 		private void OnUpdatePlan(Plan plan, int oldTime)
