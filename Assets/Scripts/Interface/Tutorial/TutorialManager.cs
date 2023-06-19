@@ -73,9 +73,7 @@ namespace MSP2050.Scripts
 			{
 				if(m_data.m_steps[m_currentStep].IsChapterStart())
 				{
-					m_previousChapterStep = m_currentChapterStep;
-					m_currentChapterStep = m_currentStep;
-					m_nextChapterStep = DetermineNextChapterStep(m_currentStep+1);
+					DetermineChapterSteps();
 				}
 				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
 			}
@@ -94,11 +92,9 @@ namespace MSP2050.Scripts
 
 			if (m_currentStep >= 0)
 			{
-				if(m_currentStep < m_nextChapterStep-m_currentChapterStep)
+				if(m_currentStep < m_currentChapterStep)
 				{
-					m_nextChapterStep = DetermineNextChapterStep(m_currentStep+1);
-					m_currentChapterStep = DeterminePreviousChapterStep(m_currentStep);
-					m_previousChapterStep = DeterminePreviousChapterStep(m_currentChapterStep-1);
+					DetermineChapterSteps();
 				}
 
 				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
@@ -115,21 +111,24 @@ namespace MSP2050.Scripts
 			{
 				m_data.m_steps[m_currentStep].ExitStep(this);
 			}
-			m_previousChapterStep = m_currentChapterStep;
 			m_currentStep = m_nextChapterStep;
-			m_currentChapterStep = m_currentStep;
-			m_nextChapterStep = DetermineNextChapterStep(m_currentStep+1);
+			DetermineChapterSteps();
 			m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
 		}
 
 		public void MoveToPreviousChapter()
 		{
 			m_data.m_steps[m_currentStep].ExitStep(this);
-			m_nextChapterStep = m_currentChapterStep;
 			m_currentStep = m_previousChapterStep;
-			m_currentChapterStep = m_currentStep;
-			m_previousChapterStep = DeterminePreviousChapterStep(m_currentStep);
+			DetermineChapterSteps();
 			m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
+		}
+
+		void DetermineChapterSteps()
+		{
+			m_nextChapterStep = DetermineNextChapterStep(m_currentStep + 1);
+			m_currentChapterStep = DeterminePreviousChapterStep(m_currentStep);
+			m_previousChapterStep = DeterminePreviousChapterStep(m_currentChapterStep - 1);
 		}
 
 		int DetermineNextChapterStep(int a_from)
@@ -149,6 +148,15 @@ namespace MSP2050.Scripts
 					return i;
 			}
 			return -1;
+		}
+
+		public void HandleResolutionOrScaleChange()
+		{
+			if(m_UI != null)
+			{
+				m_data.m_steps[m_currentStep].ExitStep(this);
+				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
+			}
 		}
 	}
 }

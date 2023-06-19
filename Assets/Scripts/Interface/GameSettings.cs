@@ -177,6 +177,7 @@ namespace MSP2050.Scripts
 					InterfaceCanvas.Instance.canvas.scaleFactor = (scale + 1f) / 4f;
 					InterfaceCanvas.Instance.objectivesMonitor.thisGenericWindow.HandleResolutionOrScaleChange(oldScale, true);
 					InterfaceCanvas.Instance.impactToolWindow.HandleResolutionOrScaleChange(oldScale, true);
+					TutorialManager.Instance.HandleResolutionOrScaleChange();
 					InterfaceCanvas.Instance.menuBarImpactTool.toggle.isOn = false;
 				}
 				else
