@@ -94,6 +94,11 @@ namespace MSP2050.Scripts
 		public abstract void UpdateGeometry(GeometryObject a_geo);
 		public abstract void SetDataToObject(SubEntityObject a_subEntityObject);
 
+		public void ReAddToEntity()
+		{
+			m_entity.ReAddSubentity(this);
+		}
+
 		protected void calculateOrderBasedOnType()
 		{
 			// Because keys can have gaps in them

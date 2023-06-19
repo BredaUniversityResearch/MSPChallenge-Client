@@ -42,6 +42,18 @@ namespace MSP2050.Scripts
 			m_lineStringSubEntities.Add(a_subEntity);
 		}
 
+		public override void ReAddSubentity(SubEntity subEntity)
+		{
+			if (m_lineStringSubEntities == null)
+			{
+				m_lineStringSubEntities = new List<LineStringSubEntity>() { (LineStringSubEntity)subEntity };
+			}
+			else if (m_lineStringSubEntities.Count == 0)
+			{
+				m_lineStringSubEntities.Add((LineStringSubEntity)subEntity);
+			}
+		}
+
 		public List<LineStringSubEntity> GetSubEntities()
 		{
 			return m_lineStringSubEntities;

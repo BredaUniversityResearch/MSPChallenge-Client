@@ -84,6 +84,11 @@ namespace MSP2050.Scripts
 			throw new NotImplementedException();
 		}
 
+		public override void ReAddSubentity(SubEntity subEntity)
+		{
+			throw new NotImplementedException();
+		}
+
 		//public override float GetInvestmentCost()
 		//{
 		//    throw new NotImplementedException();

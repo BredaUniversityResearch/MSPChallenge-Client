@@ -72,6 +72,18 @@ namespace MSP2050.Scripts
 			pointSubEntities = null;
 		}
 
+		public override void ReAddSubentity(SubEntity subEntity)
+		{
+			if (pointSubEntities == null)
+			{
+				pointSubEntities = new List<PointSubEntity>() { (PointSubEntity)subEntity };
+			}
+			else if (pointSubEntities.Count == 0)
+			{
+				pointSubEntities.Add((PointSubEntity)subEntity);
+			}
+		}
+
 		public override void DrawGameObjects(Transform parent, SubEntityDrawMode drawMode = SubEntityDrawMode.Default)
 		{
 			foreach (PointSubEntity pse in pointSubEntities)

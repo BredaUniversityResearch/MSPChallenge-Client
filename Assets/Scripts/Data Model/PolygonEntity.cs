@@ -42,6 +42,18 @@ namespace MSP2050.Scripts
 			polygonSubEntities.Add(subEntity);
 		}
 
+		public override void ReAddSubentity(SubEntity subEntity)
+		{
+			if (polygonSubEntities == null)
+			{
+				polygonSubEntities = new List<PolygonSubEntity>() { (PolygonSubEntity)subEntity };
+			}
+			else if(polygonSubEntities.Count == 0)
+			{
+				polygonSubEntities.Add((PolygonSubEntity)subEntity);
+			}
+		}
+
 		public List<PolygonSubEntity> GetSubEntities()
 		{
 			return polygonSubEntities;

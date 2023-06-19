@@ -393,7 +393,10 @@ namespace MSP2050.Scripts
 
 		public void ClearNewGeometry()
 		{
-			newGeometry.Clear();
+			if (newGeometry != null)
+				newGeometry.Clear();
+			else
+				newGeometry = new List<Entity>();
 		}
 
 		public void SubmitNewPlanLayer(BatchRequest batch)
