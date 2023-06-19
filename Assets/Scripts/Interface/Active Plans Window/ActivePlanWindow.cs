@@ -455,6 +455,7 @@ namespace MSP2050.Scripts
 			m_communicationToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
 			m_issuesToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.RestoreArchived);
 			m_approvalToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.View && m_currentPlan.State != Plan.PlanState.APPROVED && m_currentPlan.State != Plan.PlanState.IMPLEMENTED);
+			m_approvalToggle.SetInteractable(m_currentPlan.countryApproval != null && m_currentPlan.countryApproval.Count > 0);
 
 			//Content
 			TimeBar.instance.SetGeometryViewModeVisible(!Editing);

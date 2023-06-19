@@ -430,7 +430,7 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
-		public void CalculateRequiredApproval(bool a_reasonOnly = true)
+		public void CalculateRequiredApproval(bool a_reasonOnly = false)
 		{
 			bool requireAMApproval = false;
 			EApprovalType requiredApprovalLevel = EApprovalType.NotDependent;
