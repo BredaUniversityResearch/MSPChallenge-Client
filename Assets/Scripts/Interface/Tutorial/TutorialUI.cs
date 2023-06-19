@@ -66,9 +66,9 @@ namespace MSP2050.Scripts
 		public void SetChapterButtonActivity(bool a_nextChapter, bool a_previousChapter)
 		{
 			foreach (Button b in m_previousChapterButtons)
-				b.interactable = a_previousChapter;
+				b.gameObject.SetActive(a_previousChapter);
 			foreach (Button b in m_nextChapterButtons)
-				b.interactable = a_nextChapter;
+				b.gameObject.SetActive(a_nextChapter);
 		}
 
 		public void SetUIToTitle(string a_header, string a_content, string a_part, bool a_hasPreviousButton = true, bool m_hasNextButton = true)
