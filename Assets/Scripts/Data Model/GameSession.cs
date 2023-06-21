@@ -60,5 +60,6 @@ namespace MSP2050.Scripts
 		public bool success;
 		public string message;
 		public GameSession[] sessionslist;
+		public string server_description;
 	}
 }

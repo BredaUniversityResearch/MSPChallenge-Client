@@ -10,7 +10,14 @@ namespace MSP2050.Scripts
 	{
 		FishingDistributionDelta m_fishingBackup;
 		bool m_wasFishingPlanBeforeEditing;
+		bool m_requireAllApproval = true;
 
+		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
+		{
+			base.Initialise(a_settings, a_definition);
+			PolicySettingsFishing settings = (PolicySettingsFishing)a_settings;
+			m_requireAllApproval = settings.all_country_approval;
+		}
 
 		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage)
 		{
@@ -102,18 +109,40 @@ namespace MSP2050.Scripts
 			{
 				PolicyPlanDataFishing planData = (PolicyPlanDataFishing)a_planData;
 
-				foreach (KeyValuePair<string, Dictionary<int, float>> fishingFleets in planData.fishingDistributionDelta.GetValuesByFleet())
-				{
-					foreach (KeyValuePair<int, float> fishingValues in fishingFleets.Value)
+				if (m_requireAllApproval)
+				{ 
+					if(planData.fishingDistributionDelta.HasDistributionValues())
 					{
-						if (a_approvalReasons.TryGetValue(fishingValues.Key, out var reasons))
-							reasons.Add(new ApprovalReasonFishingPolicy(fishingFleets.Key));
-						else
-							a_approvalReasons.Add(fishingValues.Key, new List<IApprovalReason> { new ApprovalReasonFishingPolicy(fishingFleets.Key) });
-
-						if (!a_reasonOnly && !a_approvalStates.ContainsKey(fishingValues.Key))
+						foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
 						{
-							a_approvalStates.Add(fishingValues.Key, EPlanApprovalState.Maybe);
+							if (!kvp.Value.IsManager && kvp.Value.ID != a_plan.Country && !a_approvalStates.ContainsKey(kvp.Value.ID))
+							{
+								if(!a_reasonOnly)
+									a_approvalStates.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
+
+								if (a_approvalReasons.TryGetValue(kvp.Value.ID, out var reasons))
+									reasons.Add(new ApprovalReasonFishingPolicy(null, true));
+								else
+									a_approvalReasons.Add(kvp.Value.ID, new List<IApprovalReason> { new ApprovalReasonFishingPolicy(null, true) });
+							}
+						}
+					}
+				}
+				else
+				{
+					foreach (KeyValuePair<string, Dictionary<int, float>> fishingFleets in planData.fishingDistributionDelta.GetValuesByFleet())
+					{
+						foreach (KeyValuePair<int, float> fishingValues in fishingFleets.Value)
+						{
+							if (a_approvalReasons.TryGetValue(fishingValues.Key, out var reasons))
+								reasons.Add(new ApprovalReasonFishingPolicy(fishingFleets.Key));
+							else
+								a_approvalReasons.Add(fishingValues.Key, new List<IApprovalReason> { new ApprovalReasonFishingPolicy(fishingFleets.Key) });
+
+							if (!a_reasonOnly && !a_approvalStates.ContainsKey(fishingValues.Key))
+							{
+								a_approvalStates.Add(fishingValues.Key, EPlanApprovalState.Maybe);
+							}
 						}
 					}
 				}
