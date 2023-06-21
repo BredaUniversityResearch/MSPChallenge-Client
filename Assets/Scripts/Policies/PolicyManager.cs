@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 				m_planUpdateType = typeof(PolicyUpdateEnergyPlan),
 				m_updateType = typeof(PolicyUpdateEnergy),
 				m_logicType = typeof(PolicyLogicEnergy),
-				m_settingsType = typeof(APolicyData),
+				m_settingsType = typeof(PolicySettingsEnergy),
 				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyEnergy_PRFB"),
 				m_activePlanIcon = Resources.Load<Sprite>("Icons/energy")
 			});
@@ -76,7 +76,7 @@ namespace MSP2050.Scripts
 				m_displayName = "Fishing Effort",
 				m_planUpdateType = typeof(PolicyUpdateFishingPlan),
 				m_logicType = typeof(PolicyLogicFishing),
-				m_settingsType = typeof(APolicyData),
+				m_settingsType = typeof(PolicySettingsFishing),
 				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyFishing_PRFB"),
 				m_activePlanIcon = Resources.Load<Sprite>("Icons/fishing")
 			});
