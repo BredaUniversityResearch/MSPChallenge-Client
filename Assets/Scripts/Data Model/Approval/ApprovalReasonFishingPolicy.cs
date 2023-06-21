@@ -18,7 +18,7 @@ namespace MSP2050.Scripts
 		public string FormatAsText(string a_teamName)
 		{
 			if (m_requireAll)
-				return $"A team's fishing effort for was altered, requiring approval from all teams.";
+				return $"A team's fishing effort was altered, requiring approval from all teams.";
 			else
 				return $"{a_teamName}'s fishing effort for the {m_fleet} fleet was altered.";
 		}
