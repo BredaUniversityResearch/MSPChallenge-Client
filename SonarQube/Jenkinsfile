@@ -20,16 +20,20 @@ pipeline {
 	stages {
 	
 		stage('SCM') {
-			checkout scm
+			steps {
+				checkout scm
+			}
 		}
   
 		stage('SonarQube Analysis') {
-			def msbuildHome = tool 'Default MSBuild'
-			def scannerHome = tool 'SonarScanner for MSBuild'
-			withSonarQubeEnv() {
-				bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" begin /k:\"MSPChallenge-Client\""
-				bat "\"${msbuildHome}\\MSBuild.exe\" /t:Rebuild"
-				bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" end"
+			steps {
+				def msbuildHome = tool 'Default MSBuild'
+				def scannerHome = tool 'SonarScanner for MSBuild'
+				withSonarQubeEnv() {
+					bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" begin /k:\"MSPChallenge-Client\""
+					bat "\"${msbuildHome}\\MSBuild.exe\" /t:Rebuild"
+					bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" end"
+				}
 			}
 		}
 	}
