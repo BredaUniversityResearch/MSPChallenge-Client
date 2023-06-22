@@ -60,7 +60,8 @@ namespace MSP2050.Scripts
 
 		private void OnDestroy()
 		{
-			PlanManager.Instance.OnViewingPlanChanged -= OnViewedPlanChanged;
+			if(PlanManager.Instance != null)
+				PlanManager.Instance.OnViewingPlanChanged -= OnViewedPlanChanged;
 		}
 
 		public void UpdateInfo()
@@ -163,6 +164,7 @@ namespace MSP2050.Scripts
 			if (m_group != null)
 				m_group.CheckEmpty();
 			m_group = a_group;
+			m_group.CheckEmpty();
 		}
 
 		public void MoveToParent(Transform a_parent)

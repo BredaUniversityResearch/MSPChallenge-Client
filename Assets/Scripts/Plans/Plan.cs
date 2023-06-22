@@ -434,7 +434,7 @@ namespace MSP2050.Scripts
 		{
 			bool requireAMApproval = false;
 			EApprovalType requiredApprovalLevel = EApprovalType.NotDependent;
-			if(!a_reasonOnly)
+			if (!a_reasonOnly)
 				countryApproval = new Dictionary<int, EPlanApprovalState>();
 			countryApprovalReasons = new Dictionary<int, List<IApprovalReason>>();
 
@@ -486,7 +486,7 @@ namespace MSP2050.Scripts
 						{
 							requireAMApproval = true;
 							if (countryApprovalReasons.TryGetValue(SessionManager.AM_ID, out var reasons))
-								reasons.Add(new ApprovalReasonNewGeom(t,false));
+								reasons.Add(new ApprovalReasonNewGeom(t, false));
 							else
 								countryApprovalReasons.Add(SessionManager.AM_ID, new List<IApprovalReason> { new ApprovalReasonNewGeom(t, false) });
 						}
@@ -515,89 +515,84 @@ namespace MSP2050.Scripts
 				countryApproval.Add(SessionManager.AM_ID, EPlanApprovalState.Maybe);
 
 			//Check required approval for policies
-			foreach(var kvp in Policies)
+			foreach (var kvp in Policies)
 			{
 				kvp.Value.logic.GetRequiredApproval(kvp.Value, this, countryApproval, countryApprovalReasons, ref requiredApprovalLevel, a_reasonOnly);
 			}
 
-			if (requiredApprovalLevel >= EApprovalType.AllCountries)
+			if (requiredApprovalLevel >= EApprovalType.AllCountries && !a_reasonOnly)
 			{
-				if (!a_reasonOnly)
+				//All team approval required, there is no chance for AM approval
+				foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
 				{
-					//All team approval required, there is no chance for AM approval
-					foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
+					if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(kvp.Value.ID))
 					{
-						if (!kvp.Value.IsManager && kvp.Value.ID != SessionManager.Instance.CurrentUserTeamID && !countryApproval.ContainsKey(kvp.Value.ID))
+						countryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
+					}
+				}
+			}
+
+			//Actually check the geometry to add required approval based on level
+			if (requiredApprovalLevel > 0 && LayerManager.Instance.m_eezLayer != null)
+			{
+				List<PolygonEntity> EEZs = LayerManager.Instance.m_eezLayer.Entities;
+				int userCountry = SessionManager.Instance.CurrentUserTeamID;
+				for (int i = 0; i < PlanLayers.Count; i++)
+				{
+					//The overlap function depends on the layer type
+					Func<PolygonSubEntity, SubEntity, bool> overlapCheck;
+					if (PlanLayers[i].BaseLayer is PolygonLayer)
+						overlapCheck = (a, b) => Util.PolygonPolygonIntersection(a, b as PolygonSubEntity);
+					else if (PlanLayers[i].BaseLayer is LineStringLayer)
+						overlapCheck = (a, b) => Util.PolygonLineIntersection(a, b as LineStringSubEntity);
+					else
+						overlapCheck = (a, b) => Util.PolygonPointIntersection(a, b as PointSubEntity);
+
+					//Check for new geometry
+					for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
+					{
+						Entity t = PlanLayers[i].GetNewGeometryByIndex(entityIndex);
+						if (t.Country != userCountry)
 						{
-							countryApproval.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
+							if (countryApprovalReasons.TryGetValue(t.Country, out var reasons))
+								reasons.Add(new ApprovalReasonNewGeom(t, false));
+							else
+								countryApprovalReasons.Add(t.Country, new List<IApprovalReason> { new ApprovalReasonNewGeom(t, false) });
+
+							if (!a_reasonOnly && !countryApproval.ContainsKey(t.Country))
+								countryApproval.Add(t.Country, EPlanApprovalState.Maybe);
+						}
+						foreach (PolygonEntity eez in EEZs)
+						{
+							if (eez.Country != userCountry && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
+							{
+								if (countryApprovalReasons.TryGetValue(eez.Country, out var reasons))
+									reasons.Add(new ApprovalReasonNewGeom(t, true));
+								else
+									countryApprovalReasons.Add(eez.Country, new List<IApprovalReason> { new ApprovalReasonNewGeom(t, true) });
+
+								if (!a_reasonOnly && !countryApproval.ContainsKey(eez.Country))
+									countryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
+							}
 						}
 					}
 				}
 			}
-			else
+
+			//Check for removed geometry. Only the country which owns the geometry will need to give their approval.
+			for (int i = 0; i < PlanLayers.Count; i++)
 			{
-				//Actually check the geometry to add required approval based on level
-				if (requiredApprovalLevel > 0 && LayerManager.Instance.m_eezLayer != null)
+				foreach (SubEntity t in removedGeom[i])
 				{
-					List<PolygonEntity> EEZs = LayerManager.Instance.m_eezLayer.Entities;
-					int userCountry = SessionManager.Instance.CurrentUserTeamID;
-					for (int i = 0; i < PlanLayers.Count; i++)
+					if (t.m_entity.Country != Entity.INVALID_COUNTRY_ID && t.m_entity.Country != SessionManager.Instance.CurrentUserTeamID)
 					{
-						//The overlap function depends on the layer type
-						Func<PolygonSubEntity, SubEntity, bool> overlapCheck;
-						if (PlanLayers[i].BaseLayer is PolygonLayer)
-							overlapCheck = (a, b) => Util.PolygonPolygonIntersection(a, b as PolygonSubEntity);
-						else if (PlanLayers[i].BaseLayer is LineStringLayer)
-							overlapCheck = (a, b) => Util.PolygonLineIntersection(a, b as LineStringSubEntity);
+						if (countryApprovalReasons.TryGetValue(t.m_entity.Country, out var reasons))
+							reasons.Add(new ApprovalReasonRemovedGeom(t));
 						else
-							overlapCheck = (a, b) => Util.PolygonPointIntersection(a, b as PointSubEntity);
+							countryApprovalReasons.Add(t.m_entity.Country, new List<IApprovalReason> { new ApprovalReasonRemovedGeom(t) });
 
-						//Check for new geometry
-						for (int entityIndex = 0; entityIndex < PlanLayers[i].GetNewGeometryCount(); ++entityIndex)
-						{
-							Entity t = PlanLayers[i].GetNewGeometryByIndex(entityIndex);
-							if (t.Country != userCountry)
-							{
-								if (countryApprovalReasons.TryGetValue(t.Country, out var reasons))
-									reasons.Add(new ApprovalReasonNewGeom(t, false));
-								else
-									countryApprovalReasons.Add(t.Country, new List<IApprovalReason> { new ApprovalReasonNewGeom(t, false) });
-
-								if (!a_reasonOnly && !countryApproval.ContainsKey(t.Country))
-									countryApproval.Add(t.Country, EPlanApprovalState.Maybe);
-							}
-							foreach (PolygonEntity eez in EEZs)
-							{
-								if (eez.Country != userCountry && overlapCheck(eez.GetPolygonSubEntity(), t.GetSubEntity(0)))
-								{
-									if (countryApprovalReasons.TryGetValue(eez.Country, out var reasons))
-										reasons.Add(new ApprovalReasonNewGeom(t, true));
-									else
-										countryApprovalReasons.Add(eez.Country, new List<IApprovalReason> { new ApprovalReasonNewGeom(t, true) });
-
-									if (!a_reasonOnly && !countryApproval.ContainsKey(eez.Country))
-										countryApproval.Add(eez.Country, EPlanApprovalState.Maybe);
-								}
-							}
-						}
-					}
-				}
-
-				//Check for removed geometry. Only the country which owns the geometry will need to give their approval.
-				for (int i = 0; i < PlanLayers.Count; i++)
-				{
-					foreach (SubEntity t in removedGeom[i])
-					{
-						if (t.m_entity.Country != Entity.INVALID_COUNTRY_ID && t.m_entity.Country != SessionManager.Instance.CurrentUserTeamID)
-						{
-							if (countryApprovalReasons.TryGetValue(t.m_entity.Country, out var reasons))
-								reasons.Add(new ApprovalReasonRemovedGeom(t));
-							else
-								countryApprovalReasons.Add(t.m_entity.Country, new List<IApprovalReason> { new ApprovalReasonRemovedGeom(t) });
-
-							if (!a_reasonOnly && !countryApproval.ContainsKey(t.m_entity.Country))
-								countryApproval.Add(t.m_entity.Country, EPlanApprovalState.Maybe);
-						}
+						if (!a_reasonOnly && !countryApproval.ContainsKey(t.m_entity.Country))
+							countryApproval.Add(t.m_entity.Country, EPlanApprovalState.Maybe);
 					}
 				}
 			}

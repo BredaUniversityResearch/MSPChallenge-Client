@@ -26,7 +26,7 @@ namespace MSP2050.Scripts
 
 		protected void Update()
 		{
-			if (gameObject.activeInHierarchy && Input.GetKeyDown(KeyCode.Return))
+			if (gameObject.activeInHierarchy && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
 			{
 				SendMessage();
 			}

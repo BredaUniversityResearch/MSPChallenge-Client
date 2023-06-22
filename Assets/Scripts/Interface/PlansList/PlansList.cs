@@ -68,13 +68,14 @@ namespace MSP2050.Scripts
 			m_planBarsPerPlan.Add(a_plan, planBar);
 	
 			planBar.Initialise(a_plan, PlanManager.Instance.m_planViewing == a_plan);
-			planBar.MoveToGroup(m_planGroupsPerState[a_plan.State]);
-			planBar.UpdateActionRequired();
-			planBar.Filter(m_searchbar.Text);
 
 			//Hide new plan if it shouldnt be visible
 			if (!a_plan.ShouldBeVisibleInUI)
 				planBar.gameObject.SetActive(false);
+
+			planBar.MoveToGroup(m_planGroupsPerState[a_plan.State]); //Also checks for empty, so plan should be in right activity
+			planBar.UpdateActionRequired();
+			planBar.Filter(m_searchbar.Text);
 
 			RefreshPlanBarInteractablity(a_plan, planBar);
 			SetPlanIssues(a_plan);
