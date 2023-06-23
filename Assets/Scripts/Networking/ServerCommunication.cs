@@ -262,7 +262,7 @@ namespace MSP2050.Scripts
 		{
 			if (!string.IsNullOrEmpty(request.Www.error))
 			{
-				request.failureCallback.Invoke(request, $"Network error in request to url: {request.Www.url}\nError message: {request.Www.error}");
+				request.failureCallback?.Invoke(request, $"Network error in request to url: {request.Www.url}\nError message: {request.Www.error}");
 			}
 			else
 			{
@@ -289,14 +289,14 @@ namespace MSP2050.Scripts
 						});
 						if (!result.success)
 						{
-							request.failureCallback.Invoke(request, result.message);
+							request.failureCallback?.Invoke(request, result.message);
 						}
 						else
 							processPayload = true;
 					}
 					catch (System.Exception e)
 					{
-						request.failureCallback.Invoke(request, $"Error deserializing message from request to url: {request.Www.url}\nError message: {e.Message}");
+						request.failureCallback?.Invoke(request, $"Error deserializing message from request to url: {request.Www.url}\nError message: {e.Message}");
 					}
 					if (processPayload)
 						request.ProcessPayload(result.payload);
@@ -321,7 +321,7 @@ namespace MSP2050.Scripts
 					}
 					catch (System.Exception e)
 					{
-						request.failureCallback.Invoke(request, $"Error deserializing message from request to url: {request.Www.url}\nError message: {e.Message}");
+						request.failureCallback?.Invoke(request, $"Error deserializing message from request to url: {request.Www.url}\nError message: {e.Message}");
 						return;
 					}
 					request.ProcessPayload(result);
