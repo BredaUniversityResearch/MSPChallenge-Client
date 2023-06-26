@@ -7,6 +7,11 @@ def COLOR_MAP = [
 
 pipeline {
 	
+	environment {
+		def msbuildHome = tool 'Default MSBuild'
+		def scannerHome = tool 'SonarScanner for MSBuild'
+	}
+	
 	options {
 		timestamps()
     }
@@ -29,7 +34,7 @@ pipeline {
 			steps {
 				def msbuildHome = tool 'Default MSBuild'
 				def scannerHome = tool 'SonarScanner for MSBuild'
-				withSonarQubeEnv() {
+				withSonarQubeEnv('SonarQube') {
 					bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" begin /k:\"MSPChallenge-Client\""
 					bat "\"${msbuildHome}\\MSBuild.exe\" /t:Rebuild"
 					bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" end"
