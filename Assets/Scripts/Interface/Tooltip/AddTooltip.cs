@@ -32,7 +32,14 @@ namespace MSP2050.Scripts
 				CustomDropdown dropdown = gameObject.GetComponentInChildren<CustomDropdown>();
 				if (dropdown != null)
 				{
-					dropdownTooltip ??= createDropdownTooltip(dropdown);
+					//Removed for compatibility with C# 7.3
+					//dropdownTooltip ??= createDropdownTooltip(dropdown);
+					
+					if(dropdownTooltip == null)
+					{
+						dropdownTooltip = createDropdownTooltip(dropdown);
+					}
+					
 					if (dropdownTooltip != null)
 					{
 						dropdownTooltip.ShowToolTip();
