@@ -169,7 +169,15 @@ namespace MSP2050.Scripts
 			Clamp();
 
 			//VisualizationUtil.Instance.UpdateDisplayScale();
-			m_rescaleCoroutine ??= StartCoroutine(DelayedUpdateScale());
+			
+			//Removed for compatibility with C# 7.3
+			//m_rescaleCoroutine ??= StartCoroutine(DelayedUpdateScale());
+			
+			if(m_rescaleCoroutine == null)
+			{
+				m_rescaleCoroutine = StartCoroutine(DelayedUpdateScale());
+			}
+			
 			UpdateUIScale();
 		}
 
