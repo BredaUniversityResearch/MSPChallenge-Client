@@ -31,7 +31,7 @@ pipeline {
 					def scannerHome = tool 'SonarScanner for MSBuild'
 					withSonarQubeEnv('SonarQube') {
 						bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" begin /k:\"MSPChallenge-Client\""
-						bat "\"${msbuildHome}\\MSBuild.exe\" MSPChallenge-Client-SonarQube.sln\"
+						bat "\"${msbuildHome}\\MSBuild.exe\" MSPChallenge-Client-SonarQube.sln"
 						bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" end"
 					}
 				}
