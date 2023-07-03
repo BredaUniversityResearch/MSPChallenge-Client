@@ -42,10 +42,7 @@ namespace MSP2050.Scripts
 
 		void OnMoreInfoClicked()
 		{
-			if (SessionManager.Instance.MspGlobalData.team_info_base_url[SessionManager.Instance.MspGlobalData.team_info_base_url.Length-1] == '/')
-				Application.OpenURL(SessionManager.Instance.MspGlobalData.team_info_base_url + SessionManager.Instance.CurrentTeam.name);
-			else
-				Application.OpenURL(SessionManager.Instance.MspGlobalData.team_info_base_url + '/' + SessionManager.Instance.CurrentTeam.name);
+			Application.OpenURL(Path.Combine(SessionManager.Instance.MspGlobalData.team_info_base_url, SessionManager.Instance.CurrentTeam.name));
 		}
 
 		void OnUserListReceived(List<UserInfo> a_list)
