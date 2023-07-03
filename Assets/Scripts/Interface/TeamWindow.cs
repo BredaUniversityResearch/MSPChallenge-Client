@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 
 		void OnMoreInfoClicked()
 		{
-			Application.OpenURL(SessionManager.Instance.MspGlobalData.region_base_url + '/' + SessionManager.Instance.CurrentTeam.name);
+			Application.OpenURL(Path.Combine(SessionManager.Instance.MspGlobalData.team_info_base_url, SessionManager.Instance.CurrentTeam.name));
 		}
 
 		void OnUserListReceived(List<UserInfo> a_list)
