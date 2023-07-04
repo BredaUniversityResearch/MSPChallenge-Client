@@ -21,7 +21,8 @@ namespace MSP2050.Scripts
 
 		void Start()
 		{
-			m_readMoreButton.onClick.AddListener(ReadMorePressed);
+			m_readMoreButton.onClick.RemoveAllListeners();
+			m_readMoreButton.onClick.AddListener(()=> Application.OpenURL(m_moreInfoLink));
 		}
 
 		public void SetContent(LoginNewsData a_data)
@@ -34,6 +35,9 @@ namespace MSP2050.Scripts
 			m_readMoreText.margin = new Vector4(m_readMoreText.margin.x, m_readMoreText.margin.y, m_noImageMarginRight, m_readMoreText.margin.w);
 			//if (!string.IsNullOrEmpty(a_data.image_link))
 			//	StartCoroutine(DownloadImage(a_data.image_link));
+
+			m_readMoreButton.onClick.RemoveAllListeners();
+			m_readMoreButton.onClick.AddListener(() => Application.OpenURL(m_moreInfoLink));
 		}
 
 		public void SetImage(Texture2D a_texture)
@@ -63,10 +67,10 @@ namespace MSP2050.Scripts
 		//	}
 		//}
 
-		void ReadMorePressed()
-		{
-			Application.OpenURL(m_moreInfoLink);
-		}
+		//void ReadMorePressed()
+		//{
+		//	Application.OpenURL(m_moreInfoLink);
+		//}
 
 		public void FilterForSearch(string a_search)
 		{
