@@ -2,8 +2,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System;
-using System.IO;
 
 namespace MSP2050.Scripts
 {
