@@ -29,6 +29,7 @@ namespace MSP2050.Scripts
 			m_titleText.text = a_data.date.ToString("dd/MM/yy") + " " + a_data.title;
 			m_contentText.text = a_data.content;
 			m_moreInfoLink = a_data.more_info_link;
+			m_moreInfoLink = m_moreInfoLink.Replace(" ", "_");
 			m_contentImage.gameObject.SetActive(false);
 			m_contentText.margin = new Vector4(m_contentText.margin.x, m_contentText.margin.y, m_noImageMarginRight, m_contentText.margin.w);
 			m_readMoreText.margin = new Vector4(m_readMoreText.margin.x, m_readMoreText.margin.y, m_noImageMarginRight, m_readMoreText.margin.w);
