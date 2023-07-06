@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor.Build.Reporting;
 
+
 class ProjectBuilder
 {
     [MenuItem("MSP 2050/CI/Build Win64")]
@@ -37,13 +38,13 @@ class ProjectBuilder
             throw new Exception("BuildPlayer failure: " + res);
         }
     }
-	
-	private static void WindowsDevBuilder()
-	{
+
+    private static void WindowsDevBuilder()
+    {
         PreBuild();
         string outputDir = GetArg("-customBuildPath");
-		BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, BuildOptions.Development);
-	}
+        BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, outputDir, BuildTarget.StandaloneWindows64, BuildOptions.Development);
+    }
 
     private static void MacOSDevBuilder()
     {
@@ -77,23 +78,23 @@ class ProjectBuilder
             BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, path + "/Windows_Dev/msp_dev.exe", EditorUserBuildSettings.activeBuildTarget, BuildOptions.Development);
         }
     }
-	
-	private static string GetArg(string name)
-	{
-		string[] args = System.Environment.GetCommandLineArgs();
-		for (int i = 0; i < args.Length; i++)
-		{
-			if (args[i] == name && args.Length > i + 1)
-			{
-				return args[i + 1];
+
+    private static string GetArg(string name)
+    {
+        string[] args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == name && args.Length > i + 1)
+            {
+                return args[i + 1];
             }
-		}
-		return null;
-	}
+        }
+        return null;
+    }
 
     private static void PreBuild()
     {
-        UnityManifest manifest = UnityManifest.Load();
-        ApplicationBuildIdentifier.UpdateBuildInformation(manifest);
+        MSP2050.Scripts.UnityManifest manifest = MSP2050.Scripts.UnityManifest.Load();
+        MSP2050.Scripts.ApplicationBuildIdentifier.UpdateBuildInformation(manifest);
     }
 }
