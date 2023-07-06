@@ -2,18 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GenericHelpWindow : MonoBehaviour
+namespace MSP2050.Scripts
 {
-    [SerializeField]
-    CustomButton m_closeButton;
-
-    private void Awake()
+    public class GenericHelpWindow : MonoBehaviour
     {
-        m_closeButton.onClick.AddListener(OnCloseButtonClick);
-    }
+        [SerializeField]
+        CustomButton m_closeButton;
 
-    private void OnCloseButtonClick()
-    {
-        Destroy(gameObject);
+        private void Awake()
+        {
+            m_closeButton.onClick.AddListener(OnCloseButtonClick);
+        }
+
+        private void OnCloseButtonClick()
+        {
+            Destroy(gameObject);
+        }
     }
 }
