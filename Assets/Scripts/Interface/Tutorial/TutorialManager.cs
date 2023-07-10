@@ -13,7 +13,8 @@ namespace MSP2050.Scripts
 		TutorialUI m_UI;
 		TutorialData m_data;
 		int m_currentStep;
-		
+		int m_currentChapterStep = -1, m_nextChapterStep= -1, m_previousChapterStep= -1;
+
 		public TutorialUI UI => m_UI;
 
 		private void Awake()
@@ -42,7 +43,6 @@ namespace MSP2050.Scripts
 				m_UI = Instantiate(m_tutorialUIPrefab, transform).GetComponent<TutorialUI>();
 				m_UI.Initialise(MoveToNextStep, MoveToPreviousStep, CloseTutorial);
 			}
-
 			m_currentStep = -1;
 			MoveToNextStep();
 		}
@@ -66,12 +66,17 @@ namespace MSP2050.Scripts
 				m_data.m_steps[m_currentStep].ExitStep(this);
 			}
 
-
 			m_currentStep++;
-			if(m_currentStep == m_data.m_steps.Length)
+			if (m_currentStep == m_data.m_steps.Length)
 				CloseTutorial();
 			else
-				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length-1);
+			{
+				if(m_data.m_steps[m_currentStep].IsChapterStart())
+				{
+					DetermineChapterSteps();
+				}
+				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
+			}
 		}
 
 		public void MoveToPreviousStep()
@@ -87,11 +92,70 @@ namespace MSP2050.Scripts
 
 			if (m_currentStep >= 0)
 			{
-				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1);
+				if(m_currentStep < m_currentChapterStep)
+				{
+					DetermineChapterSteps();
+				}
+
+				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
 			}
 			else
 			{
 				CloseTutorial();
+			}
+		}
+
+		public void MoveToNextChapter()
+		{
+			if (m_currentStep >= 0)
+			{
+				m_data.m_steps[m_currentStep].ExitStep(this);
+			}
+			m_currentStep = m_nextChapterStep;
+			DetermineChapterSteps();
+			m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
+		}
+
+		public void MoveToPreviousChapter()
+		{
+			m_data.m_steps[m_currentStep].ExitStep(this);
+			m_currentStep = m_previousChapterStep;
+			DetermineChapterSteps();
+			m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
+		}
+
+		void DetermineChapterSteps()
+		{
+			m_nextChapterStep = DetermineNextChapterStep(m_currentStep + 1);
+			m_currentChapterStep = DeterminePreviousChapterStep(m_currentStep);
+			m_previousChapterStep = DeterminePreviousChapterStep(m_currentChapterStep - 1);
+		}
+
+		int DetermineNextChapterStep(int a_from)
+		{
+			for (int i = a_from; i < m_data.m_steps.Length; i++)
+			{
+				if (m_data.m_steps[i].IsChapterStart())
+					return i;
+			}
+			return -1;
+		}
+		int DeterminePreviousChapterStep(int a_from)
+		{
+			for (int i = a_from; i >= 0; i--)
+			{
+				if (m_data.m_steps[i].IsChapterStart())
+					return i;
+			}
+			return -1;
+		}
+
+		public void HandleResolutionOrScaleChange()
+		{
+			if(m_UI != null)
+			{
+				m_data.m_steps[m_currentStep].ExitStep(this);
+				m_data.m_steps[m_currentStep].EnterStep(this, m_currentStep == 0, m_currentStep == m_data.m_steps.Length - 1, m_nextChapterStep >= 0, m_previousChapterStep >= 0);
 			}
 		}
 	}

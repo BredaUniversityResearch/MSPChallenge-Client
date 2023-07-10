@@ -20,7 +20,7 @@ namespace MSP2050.Scripts
 
 		public virtual void Destroy()
 		{ }
-		public abstract void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel);
+		public abstract void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, Dictionary<int, List<IApprovalReason>> a_approvalReasons, ref EApprovalType a_requiredApprovalLevel, bool a_reasonOnly);
 		public virtual bool HasError(APolicyPlanData a_planData) => false;
 		public virtual void GetIssueText(APolicyPlanData a_planData, List<string> a_issueText)
 		{ }

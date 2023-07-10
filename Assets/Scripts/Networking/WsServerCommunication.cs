@@ -28,7 +28,7 @@ namespace MSP2050.Scripts
 	public class WsServerCommunication : IWsServerCommunicationInteractor
 	{
 		private const string API_TOKEN_HEADER = ServerCommunication.ApiTokenHeader;
-		private const string GAME_SESSION_ID_HEADER = "GameSessionId";
+		private const string GAME_SESSION_ID_HEADER = "Game-Session-Id";
 		private bool? m_isConnected = null;
 
 		private readonly int m_teamId;
@@ -79,7 +79,9 @@ namespace MSP2050.Scripts
 					}
 				};
 				client.Options.SetRequestHeader(API_TOKEN_HEADER, ServerCommunication.Instance.GetApiAccessToken());
+				client.Options.SetRequestHeader("MSPAPIToken", ServerCommunication.Instance.GetApiAccessToken()); // backwards compatible
 				client.Options.SetRequestHeader(GAME_SESSION_ID_HEADER, a_gameSessionId.ToString());
+				client.Options.SetRequestHeader("GameSessionId", a_gameSessionId.ToString()); // backwards compatible
 				return client;
 			});
 

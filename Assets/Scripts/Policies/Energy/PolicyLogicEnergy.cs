@@ -495,45 +495,59 @@ namespace MSP2050.Scripts
 			return duplicate;
 		}
 
-		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
+		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, Dictionary<int, List<IApprovalReason>> a_approvalReasons, ref EApprovalType a_requiredApprovalLevel, bool a_reasonOnly)
 		{
-			if (a_requiredApprovalLevel < EApprovalType.AllCountries)
+			PolicyPlanDataEnergy planData = (PolicyPlanDataEnergy)a_planData;
+
+			//Determine countries affected by removed grids
+			List<EnergyGrid> energyGridsBeforePlan = GetEnergyGridsBeforePlan(a_plan, EnergyGrid.GridColor.Either);
+
+			HashSet<int> countriesAffectedByRemovedGrids = new HashSet<int>();
+			foreach (EnergyGrid grid in energyGridsBeforePlan)
 			{
-				PolicyPlanDataEnergy planData = (PolicyPlanDataEnergy)a_planData;
-
-				//Determine countries affected by removed grids
-				List<EnergyGrid> energyGridsBeforePlan = GetEnergyGridsBeforePlan(a_plan, EnergyGrid.GridColor.Either);
-
-				HashSet<int> countriesAffectedByRemovedGrids = new HashSet<int>();
-				foreach (EnergyGrid grid in energyGridsBeforePlan)
-					if (planData.removedGrids.Contains(grid.m_persistentID))
-						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.m_energyDistribution.m_distribution)
-							if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
-								countriesAffectedByRemovedGrids.Add(countryAmount.Key);
-
-				//Removed grids
-				if (countriesAffectedByRemovedGrids != null)
+				if (planData.removedGrids.Contains(grid.m_persistentID))
 				{
-					foreach (int i in countriesAffectedByRemovedGrids)
+					foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.m_energyDistribution.m_distribution)
 					{
-						if (!a_approvalStates.ContainsKey(i))
-						{
-							a_approvalStates.Add(i, EPlanApprovalState.Maybe);
-						}
+						if (a_approvalReasons.TryGetValue(countryAmount.Key, out var reasons))
+							reasons.Add(new ApprovalReasonEnergyPolicy(grid, true));
+						else
+							a_approvalReasons.Add(countryAmount.Key, new List<IApprovalReason> { new ApprovalReasonEnergyPolicy(grid, true) });
+
+						if (!countriesAffectedByRemovedGrids.Contains(countryAmount.Key))
+							countriesAffectedByRemovedGrids.Add(countryAmount.Key);
 					}
 				}
+			}
 
-				//Added grids
-				if (planData.energyGrids != null)
+			//Removed grids
+			if (!a_reasonOnly && countriesAffectedByRemovedGrids != null)
+			{
+				foreach (int i in countriesAffectedByRemovedGrids)
 				{
-					foreach (EnergyGrid grid in planData.energyGrids)
+					if (!a_approvalStates.ContainsKey(i))
 					{
-						foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.m_energyDistribution.m_distribution)
+						a_approvalStates.Add(i, EPlanApprovalState.Maybe);
+					}
+				}
+			}
+
+			//Added grids
+			if (planData.energyGrids != null)
+			{
+				foreach (EnergyGrid grid in planData.energyGrids)
+				{
+					foreach (KeyValuePair<int, CountryEnergyAmount> countryAmount in grid.m_energyDistribution.m_distribution)
+					{
+						if (a_approvalReasons.TryGetValue(countryAmount.Key, out var reasons))
+							reasons.Add(new ApprovalReasonEnergyPolicy(grid, false));
+						else
+							a_approvalReasons.Add(countryAmount.Key, new List<IApprovalReason> { new ApprovalReasonEnergyPolicy(grid, false) });
+
+
+						if (!a_reasonOnly && !a_approvalStates.ContainsKey(countryAmount.Key))
 						{
-							if (!a_approvalStates.ContainsKey(countryAmount.Key))
-							{
-								a_approvalStates.Add(countryAmount.Key, EPlanApprovalState.Maybe);
-							}
+							a_approvalStates.Add(countryAmount.Key, EPlanApprovalState.Maybe);
 						}
 					}
 				}

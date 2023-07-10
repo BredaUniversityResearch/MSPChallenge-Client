@@ -10,7 +10,14 @@ namespace MSP2050.Scripts
 	{
 		FishingDistributionDelta m_fishingBackup;
 		bool m_wasFishingPlanBeforeEditing;
+		bool m_requireAllApproval = true;
 
+		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
+		{
+			base.Initialise(a_settings, a_definition);
+			PolicySettingsFishing settings = (PolicySettingsFishing)a_settings;
+			m_requireAllApproval = settings.all_country_approval;
+		}
 
 		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage)
 		{
@@ -96,17 +103,41 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, ref EApprovalType a_requiredApprovalLevel)
+		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, Dictionary<int, List<IApprovalReason>> a_approvalReasons, ref EApprovalType a_requiredApprovalLevel, bool a_reasonOnly)
 		{
-			if (a_requiredApprovalLevel < EApprovalType.AllCountries)
-			{
-				PolicyPlanDataFishing planData = (PolicyPlanDataFishing)a_planData;
+			PolicyPlanDataFishing planData = (PolicyPlanDataFishing)a_planData;
 
+			if (m_requireAllApproval)
+			{
+				if (planData.fishingDistributionDelta.HasDistributionValues())
+				{
+					foreach (KeyValuePair<int, Team> kvp in SessionManager.Instance.GetTeamsByID())
+					{
+						if (!kvp.Value.IsManager && kvp.Value.ID != a_plan.Country)
+						{
+							if (!a_reasonOnly && !a_approvalStates.ContainsKey(kvp.Value.ID))
+								a_approvalStates.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
+
+							if (a_approvalReasons.TryGetValue(kvp.Value.ID, out var reasons))
+								reasons.Add(new ApprovalReasonFishingPolicy(null, true));
+							else
+								a_approvalReasons.Add(kvp.Value.ID, new List<IApprovalReason> { new ApprovalReasonFishingPolicy(null, true) });
+						}
+					}
+				}
+			}
+			else
+			{
 				foreach (KeyValuePair<string, Dictionary<int, float>> fishingFleets in planData.fishingDistributionDelta.GetValuesByFleet())
 				{
 					foreach (KeyValuePair<int, float> fishingValues in fishingFleets.Value)
 					{
-						if (!a_approvalStates.ContainsKey(fishingValues.Key))
+						if (a_approvalReasons.TryGetValue(fishingValues.Key, out var reasons))
+							reasons.Add(new ApprovalReasonFishingPolicy(fishingFleets.Key));
+						else
+							a_approvalReasons.Add(fishingValues.Key, new List<IApprovalReason> { new ApprovalReasonFishingPolicy(fishingFleets.Key) });
+
+						if (!a_reasonOnly && !a_approvalStates.ContainsKey(fishingValues.Key))
 						{
 							a_approvalStates.Add(fishingValues.Key, EPlanApprovalState.Maybe);
 						}

@@ -21,6 +21,8 @@ namespace MSP2050.Scripts
 
 		protected static HashSet<int> m_firstPoint = new HashSet<int>() { 0 };
 		public override EEditingStateType StateType => EEditingStateType.Edit;
+		public override bool HasGeometrySelected => m_selection != null && m_selection.Count > 0;
+
 
 		public EditPointsState(FSM a_fsm, PlanLayer a_planLayer) : base(a_fsm)
 		{

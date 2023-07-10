@@ -63,6 +63,7 @@ namespace MSP2050.Scripts
 					//This is circumventing the regular way of doing API requests via the ServerCommunication class as this is a more time-critical process.
 					currentTokenRequest = UnityWebRequest.Get(Server.Url + Server.CheckApiAccess());
 					currentTokenRequest.SetRequestHeader(ServerCommunication.ApiTokenHeader, currentAccessToken);
+					currentTokenRequest.SetRequestHeader("MSPAPIToken", currentAccessToken); // backwards compatible
 					currentTokenRequest.SendWebRequest();
 				}
 			}
@@ -113,6 +114,7 @@ namespace MSP2050.Scripts
 			List<IMultipartFormSection> postData = new List<IMultipartFormSection>(1) {new MultipartFormDataSection("expired_token", currentAccessToken)};
 			renewTokenRequest = UnityWebRequest.Post(Server.Url + Server.RenewApiToken(), postData);
 			renewTokenRequest.SetRequestHeader(ServerCommunication.ApiTokenHeader, recoveryToken);
+			renewTokenRequest.SetRequestHeader("MSPAPIToken", recoveryToken); // backwards compatible
 			renewTokenRequest.SendWebRequest();
 		}
 
@@ -120,6 +122,7 @@ namespace MSP2050.Scripts
 		{
 			renewTokenRequest = UnityWebRequest.Get(Server.Url + Server.RenewApiToken());
 			renewTokenRequest.SetRequestHeader(ServerCommunication.ApiTokenHeader, currentAccessToken);
+			renewTokenRequest.SetRequestHeader("MSPAPIToken", currentAccessToken); // backwards compatible
 			renewTokenRequest.SendWebRequest();
 		}
 

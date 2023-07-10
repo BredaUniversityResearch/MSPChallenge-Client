@@ -31,21 +31,24 @@ namespace MSP2050.Scripts
 			int nextIndex = 0;
 
 			//Set entries
-			foreach (var kvp in a_content.countryApproval)
+			if (a_content.countryApproval != null)
 			{
-				if (nextIndex < m_approvalEntries.Count)
+				foreach (var kvp in a_content.countryApproval)
 				{
-					m_approvalEntries[nextIndex].SetContent(SessionManager.Instance.GetTeamByTeamID(kvp.Key), kvp.Value);
-					m_approvalEntries[nextIndex].gameObject.SetActive(true);
+					if (nextIndex < m_approvalEntries.Count)
+					{
+						m_approvalEntries[nextIndex].SetContent(SessionManager.Instance.GetTeamByTeamID(kvp.Key), kvp.Value, a_content.State == Plan.PlanState.APPROVAL, a_content);
+						m_approvalEntries[nextIndex].gameObject.SetActive(true);
+					}
+					else
+					{
+						AP_ApprovalEntry entry = Instantiate(planApprovalEntryPrefab, planApprovalEntryParent).GetComponentInChildren<AP_ApprovalEntry>();
+						entry.SetCallback(ApprovalChangedCountry);
+						m_approvalEntries.Add(entry);
+						entry.SetContent(SessionManager.Instance.GetTeamByTeamID(kvp.Key), kvp.Value, a_content.State == Plan.PlanState.APPROVAL, a_content);
+					}
+					nextIndex++;
 				}
-				else
-				{
-					AP_ApprovalEntry entry = Instantiate(planApprovalEntryPrefab, planApprovalEntryParent).GetComponentInChildren<AP_ApprovalEntry>();
-					entry.SetCallback(ApprovalChangedCountry);
-					m_approvalEntries.Add(entry);
-					entry.SetContent(SessionManager.Instance.GetTeamByTeamID(kvp.Key), kvp.Value);
-				}
-				nextIndex++;
 			}
 
 			//Turn off unused entries

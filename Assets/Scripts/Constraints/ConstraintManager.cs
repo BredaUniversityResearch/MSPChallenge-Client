@@ -209,6 +209,12 @@ namespace MSP2050.Scripts
 
 		public void CheckConstraints(Plan a_plan, out List<string> a_unavailableTypeNames)
 		{
+			CheckConstraints(a_plan);
+			a_unavailableTypeNames = CheckTypeUnavailableConstraints(a_plan, a_plan.StartTime);
+		}
+
+		public void CheckConstraints(Plan a_plan)
+		{
 			RestrictionQueryCache cache = new RestrictionQueryCache();
 
 			foreach (PlanLayer planLayer in a_plan.PlanLayers)
@@ -224,8 +230,6 @@ namespace MSP2050.Scripts
 
 				CheckRestrictionsForLayer(cache, a_plan, planLayer, true);
 			}
-
-			a_unavailableTypeNames = CheckTypeUnavailableConstraints(a_plan, a_plan.StartTime);
 		}
 
 		public void CheckConstraintsForLayer(Plan a_plan, PlanLayer a_planLayer)

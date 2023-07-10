@@ -42,6 +42,10 @@ namespace MSP2050.Scripts
 			m_newsEntries = new List<LoginNewsEntry>();
 			m_searchBar.onValueChanged.AddListener(OnSearchtextChanged);
 			CreateEntries();
+			
+			if (null != CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
+				CommandLineArgumentsManager.CommandLineArgumentName.AutoLogin)) return;			
+			
 			ServerCommunication.Instance.DoExternalAPICall<WikiNewsListResult>(GetNewsListURL, OnNewsListQuerySuccess, OnNewsListQueryFail);
 			m_latestNewsReadMoreButton.onClick.AddListener(OpenNewsTab);
 			m_clearSearchButton.onClick.AddListener(ClearSearch);

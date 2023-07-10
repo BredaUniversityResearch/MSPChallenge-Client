@@ -1,0 +1,47 @@
+#!groovy
+
+def COLOR_MAP = [
+	'SUCCESS': 'good', 
+	'FAILURE': 'danger',
+]
+
+pipeline {
+	options {
+		timestamps()
+    }
+	
+	agent {
+		node {
+			label 'windows'
+		}
+	}
+	
+	stages {
+	
+		stage('SCM') {
+			steps {
+				checkout scm
+			}
+		}
+  
+		stage('SonarQube Analysis') {
+			steps {
+				script {
+					def msbuildHome = tool 'Default MSBuild'
+					def scannerHome = tool 'SonarScanner for MSBuild'
+					withSonarQubeEnv('SonarQube') {
+						bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" begin /k:\"MSPChallenge-Client\""
+						bat "\"${msbuildHome}\\MSBuild.exe\" MSPChallenge-Client-SonarQube.sln"
+						bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" end"
+					}
+				}
+			}
+		}
+	}
+	post {
+		always {			
+			slackSend color: COLOR_MAP[currentBuild.currentResult],
+			message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}"
+		}
+	}
+}

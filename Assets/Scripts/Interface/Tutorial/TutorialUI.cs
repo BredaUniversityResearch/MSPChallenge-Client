@@ -14,6 +14,9 @@ namespace MSP2050.Scripts
 		[SerializeField] CanvasGroup m_fade;
 		[SerializeField] private Button m_nextButton;
 		[SerializeField] private Button m_previousButton;
+		[SerializeField] private Button[] m_previousChapterButtons;
+		[SerializeField] private Button[] m_nextChapterButtons;
+		[SerializeField] private Button m_closeButton;
 		[SerializeField] private float m_fadeTime = 0.5f;
 
 		[Header("Title")]
@@ -48,6 +51,24 @@ namespace MSP2050.Scripts
 			m_previousButton.onClick.AddListener(a_previousButtonCallback);
 			m_titleContinueButton.onClick.AddListener(a_nextButtonCallback);
 			m_titleQuitButton.onClick.AddListener(a_quitButtonCallback);
+			m_closeButton.onClick.AddListener(OnCloseTutorialClicked);
+			foreach(Button b in m_previousChapterButtons)
+				b.onClick.AddListener(TutorialManager.Instance.MoveToPreviousChapter);
+			foreach(Button b in m_nextChapterButtons)
+				b.onClick.AddListener(TutorialManager.Instance.MoveToNextChapter);
+		}
+
+		void OnCloseTutorialClicked()
+		{
+			DialogBoxManager.instance.ConfirmationWindow("Close tutorial?", "Are you sure you want to close the tutorial?", null, TutorialManager.Instance.CloseTutorial);
+		}
+
+		public void SetChapterButtonActivity(bool a_nextChapter, bool a_previousChapter)
+		{
+			foreach (Button b in m_previousChapterButtons)
+				b.gameObject.SetActive(a_previousChapter);
+			foreach (Button b in m_nextChapterButtons)
+				b.gameObject.SetActive(a_nextChapter);
 		}
 
 		public void SetUIToTitle(string a_header, string a_content, string a_part, bool a_hasPreviousButton = true, bool m_hasNextButton = true)

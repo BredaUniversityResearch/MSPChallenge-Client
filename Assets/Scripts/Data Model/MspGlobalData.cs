@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 		public string user_admin_color;
 		[JsonConverter(typeof(JsonConverterBinaryBool))]
 		public bool user_admin_has_password;
-		public string region_base_url;
+		public string team_info_base_url;
 		public string user_region_manager_name;
 		public string user_region_manager_color;
 		[JsonConverter(typeof(JsonConverterBinaryBool))]

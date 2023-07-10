@@ -46,6 +46,7 @@ namespace MSP2050.Scripts
 				form.AddField("session_id", SessionManager.Instance.CurrentSessionID);
 				ServerCommunication.Instance.DoPriorityRequest(Server.CloseSession(), form, null, null);
 				SceneManager.LoadScene(0);
+				UpdateManager.Instance.WsServerCommunicationInteractor?.Stop();
 			});
 		}
 

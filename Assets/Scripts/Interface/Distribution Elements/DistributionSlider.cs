@@ -72,7 +72,7 @@ namespace MSP2050.Scripts
 
 		public bool IsChanged()
 		{
-			return valueSlider.interactable && valueSlider.normalizedValue != oldRemappedNormalizedValue;
+			return /*valueSlider.interactable &&*/ valueSlider.normalizedValue != oldRemappedNormalizedValue;
 		}
 
 		public void SetInteractablity(bool value)

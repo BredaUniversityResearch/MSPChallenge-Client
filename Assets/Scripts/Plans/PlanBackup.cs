@@ -278,17 +278,21 @@ namespace MSP2050.Scripts
 				m_newGeometry[i].DrawGameObject(m_newGeometry[i].m_entity.Layer.LayerGameObject.transform);
 				originalGeometry.Add(m_newGeometry[i].GetDatabaseID());
 			}
-			foreach(Entity entity in m_planLayer.GetNewGeometry())
+			if (m_planLayer.GetNewGeometry() != null)
 			{
-				if(!originalGeometry.Contains(entity.DatabaseID))
+				foreach (Entity entity in m_planLayer.GetNewGeometry())
 				{
-					entity.RemoveGameObjects();
+					if (!originalGeometry.Contains(entity.DatabaseID))
+					{
+						entity.RemoveGameObjects();
+					}
 				}
 			}
 			m_planLayer.ClearNewGeometry();
 			foreach(SubEntity sub in m_newGeometry)
 			{
 				m_planLayer.AddNewGeometry(sub.m_entity);
+				sub.ReAddToEntity();
 			}
 		}
 

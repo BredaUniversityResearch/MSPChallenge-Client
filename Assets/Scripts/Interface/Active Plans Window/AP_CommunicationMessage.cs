@@ -10,24 +10,18 @@ namespace MSP2050.Scripts
 	public class AP_CommunicationMessage : MonoBehaviour
 	{
 		[SerializeField] TextMeshProUGUI m_sender;
-		//[SerializeField] TextMeshProUGUI m_team;
 		[SerializeField] TextMeshProUGUI m_time;
 		[SerializeField] TextMeshProUGUI m_content;
 		[SerializeField] Image m_teamBall;
-		//[SerializeField] CustomImage m_background;
-		//[SerializeField] CustomImage m_lipImage;
 		[SerializeField] RectTransform m_lipTransform;
 
 		public void SetToContent(PlanMessage a_message)
 		{
 			gameObject.SetActive(true);
-			m_sender.color = a_message.team.color;
 			m_teamBall.color = a_message.team.color;
-			m_time.color = a_message.team.color;
 
 			m_sender.text = a_message.user_name;
 			m_time.text = a_message.time;
-			//m_team.text = $"& {a_message.team.name} team";
 			m_content.text = a_message.message;
 
 			AlignLip(a_message.team.ID == SessionManager.Instance.CurrentTeam.ID);

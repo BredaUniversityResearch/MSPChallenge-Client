@@ -390,6 +390,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				m_currentPlan = plan;
+				m_currentPlan.CalculateRequiredApproval(true);
 				m_interactionMode = EInteractionMode.View;
 			}
 			if (m_countryIndicator != null)
@@ -434,26 +435,39 @@ namespace MSP2050.Scripts
 				m_acceptButtonTooltip.SetText("");
 			}
 
-			//Content
+			//Plan info
 			m_planName.interactable = Editing;
 			m_planDescription.interactable = Editing;
 			m_planDescriptionContainer.gameObject.SetActive((!string.IsNullOrEmpty(m_currentPlan.Description) && m_currentPlan.Description != " ") || Editing);
-			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
-			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
-			m_communicationSection.gameObject.SetActive(m_interactionMode != EInteractionMode.SetupNew);
-			m_communicationToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
-			m_issuesToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.RestoreArchived);
-			TimeBar.instance.SetGeometryViewModeVisible(!Editing);
-			m_changeLayersToggleContainer.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
-			m_changePoliciesToggleContainer.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
 			m_planStateToggle.gameObject.SetActive(!Editing);
 			m_planStateToggle.SetInteractable(m_currentPlan.Country == SessionManager.Instance.CurrentUserTeamID || SessionManager.Instance.AreWeManager);
 			m_planDateToggle.SetInteractable(Editing);
+			
+			//Communication
+			m_communicationSection.gameObject.SetActive(m_interactionMode != EInteractionMode.SetupNew);
+			m_communicationToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.EditNew && m_interactionMode != EInteractionMode.SetupNew);
+			m_issuesToggle.gameObject.SetActive(m_interactionMode != EInteractionMode.RestoreArchived);
+			m_approvalToggle.gameObject.SetActive(m_interactionMode == EInteractionMode.View && m_currentPlan.State != Plan.PlanState.APPROVED && m_currentPlan.State != Plan.PlanState.IMPLEMENTED);
+			m_approvalToggle.SetInteractable(m_currentPlan.countryApproval != null && m_currentPlan.countryApproval.Count > 0);
 
-			foreach(var toggle in m_layerToggles)
+			//Content
+			TimeBar.instance.SetGeometryViewModeVisible(!Editing);
+			m_layerSection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
+			m_policySection.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew || m_interactionMode == EInteractionMode.View);
+			m_changeLayersToggleContainer.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+			m_changePoliciesToggleContainer.gameObject.SetActive(m_interactionMode == EInteractionMode.EditExisting || m_interactionMode == EInteractionMode.EditNew);
+
+
+			foreach (var toggle in m_layerToggles)
 			{
 				toggle.SetInteractable(Editing);
 			}
+		}
+
+		public void RefreshMessageHeader()
+		{
+			if(m_currentPlan != null)
+				m_communicationToggle.SetContent($"See {m_currentPlan.PlanMessages.Count} messages");
 		}
 
 		void EnterEditMode()
@@ -545,13 +559,17 @@ namespace MSP2050.Scripts
 			m_communicationToggle.SetContent($"See {m_currentPlan.PlanMessages.Count} messages");
 
 			//Approval
-			if (m_currentPlan.State == Plan.PlanState.APPROVAL)
-            {
-				m_approvalToggle.SetContent($"Approval required from {m_currentPlan.countryApproval.Count} teams");
-            }
-			else
-				m_approvalToggle.gameObject.SetActive(false);
-
+			if (m_currentPlan != null)
+			{
+				if (m_currentPlan.countryApproval == null || m_currentPlan.countryApproval.Count == 0)
+				{
+					m_approvalToggle.SetContent($"No approval required");
+				}
+				else if (m_currentPlan.State == Plan.PlanState.APPROVAL)
+					m_approvalToggle.SetContent($"Approval required from {m_currentPlan.countryApproval.Count} teams");
+				else
+					m_approvalToggle.SetContent($"Approval will be required from {m_currentPlan.countryApproval.Count} teams");
+			}
 
 			//Content
 			RefreshIssueText();

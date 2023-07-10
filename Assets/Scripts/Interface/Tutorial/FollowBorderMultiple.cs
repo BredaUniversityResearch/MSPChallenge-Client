@@ -42,8 +42,11 @@ namespace MSP2050.Scripts
 			if (!active)
 				return;
 
+			float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
 			m_points = new Vector3[4];
 			m_target.GetWorldCorners(m_points);
+			for (int i = 0; i < 4; i++)
+				m_points[i] = m_points[i] / scale;
 			m_width = Mathf.Abs(m_points[0].x - m_points[2].x);
 			m_height = Mathf.Abs(m_points[0].y - m_points[2].y);
 			m_totalDistance = m_width * 2f + m_height * 2f;

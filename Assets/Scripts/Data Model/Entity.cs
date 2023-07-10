@@ -66,6 +66,8 @@ namespace MSP2050.Scripts
 		public abstract int GetSubEntityCount();
 		public abstract float GetRestrictionAreaSurface();
 
+		public abstract void ReAddSubentity(SubEntity subEntity);
+
 		public virtual float GetInvestmentCost()
 		{
 			string cost;

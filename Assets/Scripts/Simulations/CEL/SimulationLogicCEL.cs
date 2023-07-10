@@ -38,7 +38,7 @@ namespace MSP2050.Scripts
 			{
 				layer.m_entityTypes[0].DrawSettings.PointColor = layer.m_greenEnergy ? greenColor : greyColor;
 				layer.m_entityTypes[0].DrawSettings.PointSprite = layer.m_greenEnergy ? greenSprite : greySprite;
-				layer.m_entityTypes[0].DrawSettings.PointSize = layer.m_greenEnergy ? m_settings.green_centerpoint_size : m_settings.grey_centerpoint_size;
+				layer.m_entityTypes[0].DrawSettings.PointSize = (layer.m_greenEnergy ? m_settings.green_centerpoint_size : m_settings.grey_centerpoint_size) * 0.5f;
 			}
 			m_settings = null;
 		}
