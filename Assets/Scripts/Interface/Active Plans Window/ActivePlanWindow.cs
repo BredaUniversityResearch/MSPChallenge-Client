@@ -368,11 +368,6 @@ namespace MSP2050.Scripts
 			if (!m_initialised)
 				Initialise();
 
-			if (m_currentPlan != null && (m_interactionMode != EInteractionMode.SetupNew && m_interactionMode != EInteractionMode.EditNew))
-			{
-				m_currentPlan.OnMessageReceivedCallback -= RefreshMessageHeader;
-			}
-
 			if (m_selectedContentToggle != null)
 			{
 				m_selectedContentToggle.ForceClose(false);
@@ -391,14 +386,12 @@ namespace MSP2050.Scripts
 				m_currentPlan = plan;
 				m_interactionMode = EInteractionMode.RestoreArchived;
 				EnterEditMode();
-				plan.OnMessageReceivedCallback += RefreshMessageHeader;
 			}
 			else
 			{
 				m_currentPlan = plan;
 				m_currentPlan.CalculateRequiredApproval(true);
 				m_interactionMode = EInteractionMode.View;
-				plan.OnMessageReceivedCallback += RefreshMessageHeader;
 			}
 			if (m_countryIndicator != null)
 				m_countryIndicator.color = SessionManager.Instance.FindTeamByID(m_currentPlan.Country).color;
@@ -471,9 +464,10 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		void RefreshMessageHeader(PlanMessage a_message)
+		public void RefreshMessageHeader()
 		{
-			m_communicationToggle.SetContent($"See {m_currentPlan.PlanMessages.Count} messages");
+			if(m_currentPlan != null)
+				m_communicationToggle.SetContent($"See {m_currentPlan.PlanMessages.Count} messages");
 		}
 
 		void EnterEditMode()

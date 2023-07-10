@@ -84,8 +84,9 @@ namespace MSP2050.Scripts
 		{
 			SetMessageEntry(a_message);
 			m_nextMessageIndex++;
+			m_APWindow.RefreshMessageHeader();
 
-			if(m_messageScrollRect.verticalNormalizedPosition < 0.01f)
+			if (m_messageScrollRect.verticalNormalizedPosition < 0.01f)
             {
 				Canvas.ForceUpdateCanvases();
 				m_messageScrollRect.verticalNormalizedPosition = 0f;
