@@ -519,14 +519,9 @@ namespace MSP2050.Scripts
 			return "api/energy/VerifyEnergyGrid";
 		}
 
-		public static string CheckApiAccess()
+		public static string RefreshApiToken()
 		{
-			return "api/security/CheckAccess";
-		}
-
-		public static string RenewApiToken()
-		{
-			return "api/security/RequestToken";
+			return "api/User/RequestToken";
 		}
 
 		public static string ExecuteBatch()

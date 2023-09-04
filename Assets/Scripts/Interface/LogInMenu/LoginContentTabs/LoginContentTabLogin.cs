@@ -178,7 +178,7 @@ namespace MSP2050.Scripts
 
 		void RequestSessionSuccess(ServerCommunication.RequestSessionResponse response, int countryID)
 		{
-			ServerCommunication.Instance.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
+			ServerCommunication.Instance.SetApiAccessToken(response.api_access_token, response.api_refresh_token);
 			SessionManager.Instance.SetSession(countryID, m_passwordContainer.activeInHierarchy ? m_passwordField.text : null, m_usernameField.text, response.session_id);
 			SceneManager.LoadScene("MSP2050");
 		}
