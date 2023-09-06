@@ -64,7 +64,7 @@ namespace MSP2050.Scripts
 		{
 			get
 			{
-				return GameSessionId;
+				return gameSessionId;
 			}
 			set
 			{
