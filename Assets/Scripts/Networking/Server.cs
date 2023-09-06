@@ -64,7 +64,7 @@ namespace MSP2050.Scripts
 		{
 			get
 			{
-				return gameSessionId;
+				return GameSessionId;
 			}
 			set
 			{
@@ -107,307 +107,302 @@ namespace MSP2050.Scripts
 
 		public static string Update()
 		{
-			return "api/game/latest";
+			return "api/Game/Latest";
 		}
 
 		public static string DeleteLayer()
 		{
-			return "api/layer/Delete";
+			return "api/Layer/Delete";
 		}
 
 		public static string MergeLayer()
 		{
-			return "api/geometry/Merge";
+			return "api/Geometry/Merge";
 		}
 
 		public static string NewLayer()
 		{
-			return "api/layer/Post";
+			return "api/Layer/Post";
 		}
 
 		public static string LayerMeta()
 		{
-			return "api/game/meta";
+			return "api/Game/Meta";
 		}
 
 		public static string PolicySimSettings()
 		{
-			return "api/game/PolicySimSettings";
+			return "api/Game/PolicySimSettings";
 		}
 
 		public static string LayerMetaByName()
 		{
-			return "api/layer/MetaByName";
+			return "api/Layer/MetaByName";
 		}
 
 		public static string PostLayerMeta()
 		{
-			return "api/layer/UpdateMeta";
+			return "api/Layer/UpdateMeta";
 		}
 
 		public static string GetLayer()
 		{
-			return "api/layer/get";
+			return "api/Layer/Get";
 		}
 
 		public static string PostGeometry()
 		{
-			return "api/geometry/Post";
+			return "api/Geometry/Post";
 		}
 
 		public static string PostGeometrySub()
 		{
-			return "api/geometry/PostSubtractive";
+			return "api/Geometry/PostSubtractive";
 		}
 
 		public static string UpdateGeometry()
 		{
-			return "api/geometry/Update";
+			return "api/Geometry/Update";
 		}
 
 		public static string DeleteGeometry()
 		{
-			return "api/geometry/Delete";
+			return "api/Geometry/Delete";
 		}
 
 		public static string MarkForDelete()
 		{
-			return "api/geometry/MarkForDelete";
+			return "api/Geometry/MarkForDelete";
 		}
 
 		public static string UnmarkForDelete()
 		{
-			return "api/geometry/UnmarkForDelete";
+			return "api/Geometry/UnmarkForDelete";
 		}
 
 		public static string SendGeometryData()
 		{
-			return "api/geometry/data";
+			return "api/Geometry/Data";
 		}
 
 		public static string SetGameState()
 		{
-			return "api/game/state";
+			return "api/Game/State";
 		}
 
 		public static string SetGamePlanningTime()
 		{
-			return "api/game/planning";
-		}
-
-		public static string SetPlanningTimeRemaining()
-		{
-			return "api/game/timeleft";
+			return "api/Game/Planning";
 		}
 
 		public static string SetRealPlanningTime()
 		{
-			return "api/game/realtime";
+			return "api/Game/Realtime";
 		}
 
 		public static string SetFuturePlanningTime()
 		{
-			return "api/game/FutureRealtime";
+			return "api/Game/FutureRealtime";
 		}
 
 		public static string SetGameSpeed()
 		{
-			return "api/game/speed";
+			return "api/Game/Speed";
 		}
 
 		public static string RequestSession()
 		{
-			return "api/user/RequestSession";
+			return "api/User/RequestSession";
 		}
 
 		public static string CloseSession()
 		{
-			return "api/user/CloseSession";
+			return "api/User/CloseSession";
 		}
 
 		public static string GetUserList()
 		{
-			return "api/user/list";
+			return "api/User/List";
 		}
 
 		public static string IsServerOnline()
 		{
-			return "api/game/isOnline";
+			return "api/Game/IsOnline";
 		}
 
 		public static string PostPlan()
 		{
-			return "api/plan/Post";
+			return "api/Plan/Post";
 		}
 
 		public static string LockPlan()
 		{
-			return "api/plan/Lock";
+			return "api/Plan/Lock";
 		}
 
 		public static string PostPlanFeedback()
 		{
-			return "api/plan/Message";
+			return "api/Plan/Message";
 		}
 
 		public static string UnlockPlan()
 		{
-			return "api/plan/Unlock";
+			return "api/Plan/Unlock";
 		}
 
 		public static string AddPlanLayer()
 		{
-			return "api/plan/Layer";
+			return "api/Plan/Layer";
 		}
 
 		public static string DeletePlanLayer()
 		{
-			return "api/plan/DeleteLayer";
+			return "api/Plan/DeleteLayer";
 		}
 
 		public static string RenamePlan()
 		{
-			return "api/plan/Name";
+			return "api/Plan/Name";
 		}
 
 		public static string ChangePlanDate()
 		{
-			return "api/plan/Date";
+			return "api/Plan/Date";
 		}
 
 		public static string SetPlanState()
 		{
-			return "api/plan/SetState";
+			return "api/Plan/SetState";
 		}
 
 		public static string SetPlanType()
 		{
-			return "api/plan/type";
+			return "api/Plan/Type";
 		}
 
 		public static string SetPlanEnergyDistribution()
 		{
-			return "api/plan/SetEnergyDistribution";
+			return "api/Plan/SetEnergyDistribution";
 		}
 
 		public static string SetPlanRestrictionAreas()
 		{
-			return "api/plan/SetRestrictionAreas";
+			return "api/Plan/SetRestrictionAreas";
 		}
 
 		public static string SetPlanDescription()
 		{
-			return "api/plan/description";
+			return "api/Plan/Description";
 		}
 
 		public static string SendIssues()
 		{
-			return "api/warning/post";
+			return "api/Warning/Post";
 		}
 
 		public static string CreateConnection()
 		{
-			return "api/energy/CreateConnection";
+			return "api/Energy/CreateConnection";
 		}
 
 		public static string UpdateConnection()
 		{
-			return "api/energy/UpdateConnection";
+			return "api/Energy/UpdateConnection";
 		}
 
 		public static string DeleteEnergyConnection()
 		{
-			return "api/energy/DeleteConnection";
+			return "api/Energy/DeleteConnection";
 		}
 
 		public static string GetRestrictions()
 		{
-			return "api/plan/Restrictions";
+			return "api/Plan/Restrictions";
 		}
 
 		public static string SetPlanPolicy()
 		{
-			return "api/plan/SetPolicy";
+			return "api/Plan/SetPolicy";
 		}
 
 		public static string UpdateMaxCapacity()
 		{
-			return "api/energy/UpdateMaxCapacity";
+			return "api/Energy/UpdateMaxCapacity";
 		}
 
 		public static string UpdateGridName()
 		{
-			return "api/energy/UpdateGridName";
+			return "api/Energy/UpdateGridName";
 		}
 
 		public static string UpdateGridEnergy()
 		{
-			return "api/energy/UpdateGridEnergy";
+			return "api/Energy/UpdateGridEnergy";
 		}
 
 		public static string UpdateGridSockets()
 		{
-			return "api/energy/UpdateGridSockets";
+			return "api/Energy/UpdateGridSockets";
 		}
 
 		public static string UpdateGridSources()
 		{
-			return "api/energy/UpdateGridSources";
+			return "api/Energy/UpdateGridSources";
 		}
 
 		public static string SetEnergyOutput()
 		{
-			return "api/energy/SetOutput";
+			return "api/Energy/SetOutput";
 		}
 
 		public static string SetGridNameByGeomID()
 		{
-			return "api/energy/name";
+			return "api/Energy/Name";
 		}
 
 		public static string SetGridActualEnergy()
 		{
-			return "api/energy/GridActual";
+			return "api/Energy/GridActual";
 		}
 
 		public static string GetGeomUsedCapacity()
 		{
-			return "api/energy/GetUsedCapacity";
+			return "api/Energy/GetUsedCapacity";
 		}
 
 		public static string DeleteSocket()
 		{
-			return "api/energy/DeleteSocket";
+			return "api/Energy/DeleteSocket";
 		}
 
 		public static string DeleteEnergyOutput()
 		{
-			return "api/energy/DeleteOutput";
+			return "api/Energy/DeleteOutput";
 		}
 
 		public static string DeleteGridName()
 		{
-			return "api/energy/DeleteName";
+			return "api/Energy/DeleteName";
 		}
 
 		public static string DeleteGrid()
 		{
-			return "api/energy/DeleteGrid";
+			return "api/Energy/DeleteGrid";
 		}
 
 		public static string AddSocket()
 		{
-			return "api/energy/AddSocket";
+			return "api/Energy/AddSocket";
 		}
 
 		public static string AddSource()
 		{
-			return "api/energy/AddSource";
+			return "api/Energy/AddSource";
 		}
 
 		public static string AddEnergyGrid()
 		{
-			return "api/energy/AddGrid";
+			return "api/Energy/AddGrid";
 		}
 
 		//public static string GetCELConfig()
@@ -417,26 +412,26 @@ namespace MSP2050.Scripts
 
 		public static string SendFishingAmount()
 		{
-			return "api/plan/fishing";
+			return "api/Plan/Fishing";
 		}
 
 		public static string DeleteEnergyFromPlan()
 		{
-			return "api/plan/DeleteEnergy";
+			return "api/Plan/DeleteEnergy";
 		}
 
 		public static string DeleteFishingFromPlan()
 		{
-			return "api/plan/DeleteFishing";
+			return "api/Plan/DeleteFishing";
 		}
 
 		public static string SetApproval()
 		{
-			return "api/plan/Vote";
+			return "api/Plan/Vote";
 		}
 		public static string AddApproval()
 		{
-			return "api/plan/AddApproval";
+			return "api/Plan/AddApproval";
 		}
 
 		//public static string GetMELConfig()
@@ -456,52 +451,52 @@ namespace MSP2050.Scripts
 
 		public static string DeleteObjective()
 		{
-			return "api/objective/delete";
+			return "api/objective/Delete";
 		}
 
 		public static string SendObjective()
 		{
-			return "api/objective/post";
+			return "api/objective/Post";
 		}
 
 		public static string SetObjectiveCompleted()
 		{
-			return "api/objective/setCompleted";
+			return "api/objective/SetCompleted";
 		}
 
 		public static string GetGlobalData()
 		{
-			return "api/game/Config";
+			return "api/Game/Config";
 		}
 
 		public static string SetEnergyError()
 		{
-			return "api/plan/SetEnergyError";
+			return "api/Plan/SetEnergyError";
 		}
 
 		public static string GetDependentEnergyPlans()
 		{
-			return "api/energy/GetDependentEnergyPlans";
+			return "api/Energy/GetDependentEnergyPlans";
 		}
 
 		public static string GetOverlappingEnergyPlans()
 		{
-			return "api/energy/GetOverlappingEnergyPlans";
+			return "api/Energy/GetOverlappingEnergyPlans";
 		}
 
 		public static string OverlapsWithPreviousEnergyPlans()
 		{
-			return "api/energy/GetPreviousOverlappingPlans";
+			return "api/Energy/GetPreviousOverlappingPlans";
 		}
 
 		public static string SetPlanRemovedGrids()
 		{
-			return "api/energy/SetDeleted";
+			return "api/Energy/SetDeleted";
 		}
 
 		public static string GetRasterUrl()
 		{
-			return "api/layer/GetRaster";
+			return "api/Layer/GetRaster";
 		}
 
 		public static string SubmitErrorEvent()
@@ -511,12 +506,12 @@ namespace MSP2050.Scripts
 
 		public static string VerifyEnergyCapacity()
 		{
-			return "api/energy/VerifyEnergyCapacity";
+			return "api/Energy/VerifyEnergyCapacity";
 		}
 
 		public static string VerifyEnergyGrid()
 		{
-			return "api/energy/VerifyEnergyGrid";
+			return "api/Energy/VerifyEnergyGrid";
 		}
 
 		public static string RefreshApiToken()
@@ -526,7 +521,7 @@ namespace MSP2050.Scripts
 
 		public static string ExecuteBatch()
 		{
-			return "api/batch/ExecuteBatch";
+			return "api/Batch/ExecuteBatch";
 		}
 	}
 }
