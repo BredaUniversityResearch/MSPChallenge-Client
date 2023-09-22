@@ -106,22 +106,29 @@ namespace MSP2050.Scripts
 				//Create custom sessions
 				if (handler.Success)
 				{
-					if (!handler.SessionList.success)
+					//if (!handler.SessionList.success)
+					//{
+					//	m_sessionErrorObj.gameObject.SetActive(true);
+					//	m_sessionErrorObj.text = handler.SessionList.message;
+					//	m_serverInfoText.gameObject.SetActive(false);
+					//}
+					//else 
+					if(!ApplicationBuildIdentifier.Instance.ServerVersionCompatible(handler.SessionListPayload.server_version))
 					{
 						m_sessionErrorObj.gameObject.SetActive(true);
-						m_sessionErrorObj.text = handler.SessionList.message;
+						m_sessionErrorObj.text = $"The server (version {handler.SessionListPayload.server_version}) is not compatible with the current client (version {ApplicationBuildIdentifier.Instance.GetGitTag()})";
 						m_serverInfoText.gameObject.SetActive(false);
 					}
-					else if (handler.SessionList.sessionslist != null && handler.SessionList.sessionslist.Length > 0)
+					else if (handler.SessionListPayload.sessionslist != null && handler.SessionListPayload.sessionslist.Length > 0)
 					{
 						m_sessionTopLine.SetActive(true);
-						foreach (GameSession session in handler.SessionList.sessionslist)
+						foreach (GameSession session in handler.SessionListPayload.sessionslist)
 							SetSessionEntry(session);
 
-						if (!string.IsNullOrEmpty(handler.SessionList.server_description))
+						if (!string.IsNullOrEmpty(handler.SessionListPayload.server_description))
 						{
 							m_serverInfoText.gameObject.SetActive(true);
-							m_serverInfoText.text = handler.SessionList.server_description;
+							m_serverInfoText.text = handler.SessionListPayload.server_description;
 						}
 						else
 							m_serverInfoText.gameObject.SetActive(false);

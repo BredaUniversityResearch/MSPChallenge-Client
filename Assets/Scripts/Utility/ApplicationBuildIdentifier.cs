@@ -22,6 +22,7 @@ namespace MSP2050.Scripts
 		private string buildTime = "2023-01-01 13:24:12Z";
 		private string gitTag = "";
 		private bool hasInformation = false;
+		private int[] version;
 
 		public static void UpdateBuildInformation(UnityManifest manifest)
 		{
@@ -100,6 +101,21 @@ namespace MSP2050.Scripts
 			gitTag = manifest.buildNumber;
 			buildTime = manifest.buildStartTime;
 			hasInformation = true;
+			string[] versionStrings = gitTag.Split('.');
+			if (versionStrings.Length != 3)
+				UnityEngine.Debug.LogError("Invalid client version string specified: " + gitTag);
+			else
+			{
+				version = new int[3];
+				if (int.TryParse(versionStrings[0], out int value) && int.TryParse(versionStrings[1], out int value1) && int.TryParse(versionStrings[2], out int value2))
+				{
+					version[0] = value;
+					version[1] = value1;
+					version[2] = value2;
+				}
+				else
+					UnityEngine.Debug.LogError("Invalid client version string specified: " + gitTag);
+			}
 		}
 
 		public string GetBuildTime()
@@ -113,6 +129,23 @@ namespace MSP2050.Scripts
 		public bool GetHasInformation()
 		{
 			return hasInformation;
+		}
+
+		public bool ServerVersionCompatible(string a_serverVersion)
+		{
+			if (version == null || a_serverVersion == null)
+				return false;
+
+			string[] versionStrings = a_serverVersion.Split('.');
+			if (versionStrings.Length != 3)
+			{
+				return false;
+			}
+			else
+			{
+				return int.TryParse(versionStrings[0], out int value) && value >= version[0] &&
+					int.TryParse(versionStrings[1], out int value1) && value1 >= version[1];
+			}
 		}
 	}
 }

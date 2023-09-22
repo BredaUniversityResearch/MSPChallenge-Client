@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 			private set;
 		}
 
-		public GameSessionList SessionList
+		public GetSessionListPayload SessionListPayload
 		{
 			get;
 			private set;
@@ -41,13 +41,14 @@ namespace MSP2050.Scripts
 			
 			// This should not go wrong, and if it does we get an UriFormatException
 			UriBuilder baseUrl = new UriBuilder(new Uri(hostnameToUse));
+			Debug.Log("build version: " + ApplicationBuildIdentifier.Instance.GetGitTag());
 
 			var scheme = baseUrl.Scheme;
 			var host = baseUrl.Host;
 			// if a port was specified, use it, otherwise it will be the default
 			var port = baseUrl.Port;
 
-			var address = $"{scheme}://{host}:{port}/ServerManager/api/getsessionslist.php";
+			var address = $"{scheme}://{host}:{port}/manager/gamelist";
 			yield return TryRetrieveSessionList(address);
 
 			// yes, we succeeded
@@ -62,29 +63,54 @@ namespace MSP2050.Scripts
 			// meaning, if we tried the default https port, then we need to switch to port 80 for http,
 			//   also meaning that if a non-default value was given, just try that again, but on a http scheme
 			if (port == 443) port = 80;
-			address = $"{Uri.UriSchemeHttp}://{host}:{port}/ServerManager/api/getsessionslist.php";
+			address = $"{Uri.UriSchemeHttp}://{host}:{port}/manager/gamelist";
 			yield return TryRetrieveSessionList(address);
 		}
 
 		private IEnumerator TryRetrieveSessionList(string fullAddress)
 		{
 			UnityWebRequest www = UnityWebRequest.Post(fullAddress, formData);
+			www.SetRequestHeader("Msp-Client-Version", ApplicationBuildIdentifier.Instance.GetGitTag());
 			www.certificateHandler = new AcceptAllCertificates();
 
 			yield return www.SendWebRequest();
-			if (www.error == null)
+			if (www.error == null && www.responseCode == 200L)
 			{
 				try
 				{
-					SessionList = Util.DeserializeObject<GameSessionList>(www, true);
-					if (SessionList != null)
+					GetSessionListResult result = Util.DeserializeObject<GetSessionListResult>(www, true);
+					SessionListPayload = result!.payload;
+					if (SessionListPayload != null)
 					{
+						Debug.Log("Get session list success: " + www.downloadHandler.text);
 						Success = true;
 					}
 				}
 				catch (Exception e)
 				{
 					Debug.LogError($"Unexpected response from server when fetching session list: {e.Message}. Response: { www.downloadHandler.text}");
+				}
+			}
+			else
+			{
+				if(www.responseCode == 400L)
+				{
+					Debug.LogError($"Unexpected response from server when fetching session list. Response: {www.downloadHandler.text}");
+				}
+				else if (www.responseCode == 403L)
+				{
+					try
+					{
+						GetSessionListResult result = Util.DeserializeObject<GetSessionListResult>(www, true);
+						if (result != null)
+						{
+							DialogBoxManager.instance.NotificationWindow("Incompatible version", $"The client (version {ApplicationBuildIdentifier.Instance.GetGitTag()}) is not compatible with the server (version {result.payload.server_version}).\nVisit {result.payload.clients_url} to download a compatible client version, or connect to a different server.", null);
+						}
+					}
+					catch (Exception e)
+					{
+						Debug.Log($"Unexpected response from server when fetching session list: {e.Message}. Response: {www.downloadHandler.text}");
+					}
 				}
 			}
 		}
