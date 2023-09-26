@@ -43,16 +43,11 @@ namespace MSP2050.Scripts
 
 		public void Update()
 		{
-			if (requestSessionAttempts > 0)
-			{
-				return;
-			}
-
 			if (refreshTokenRequest != null)
 			{
 				HandleRenewTokenRequest();
 			}
-			else if (DateTime.Now - lastTokenReceiveTime > TokenRenewInterval)
+			else if (requestSessionAttempts == 0 && DateTime.Now - lastTokenReceiveTime > TokenRenewInterval)
 			{
 				RefreshToken();
 			}
@@ -85,6 +80,8 @@ namespace MSP2050.Scripts
 					ServerCommunication.RequestSessionResponse result = response.payload.ToObject<ServerCommunication.RequestSessionResponse>();
 					currentAccessToken = result.api_access_token;
 					refreshToken = result.api_refresh_token;
+					lastTokenReceiveTime = DateTime.Now;
+					Debug.Log("API token successfully renewed");
 					requestSessionAttempts = 0;
 				}
 				else
@@ -121,6 +118,7 @@ namespace MSP2050.Scripts
 		{
 			currentAccessToken = responseApiToken;
 			refreshToken = refreshApiToken;
+			lastTokenReceiveTime = DateTime.Now;
 		}
 
 		public string FormatAccessToken()

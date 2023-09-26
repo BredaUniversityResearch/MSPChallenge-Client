@@ -30,6 +30,7 @@ namespace MSP2050.Scripts
 
 		public IEnumerator RetrieveListAsync()
 		{
+			SessionListPayload = null;
 			var hostnameToUse = hostname;
 			// note that Uri() only accepts "hostname" with a scheme, or without the scheme if :port is added,
 			//   but then it messes up parsing, so to prevent errors, always force a scheme https if absent
@@ -41,7 +42,6 @@ namespace MSP2050.Scripts
 			
 			// This should not go wrong, and if it does we get an UriFormatException
 			UriBuilder baseUrl = new UriBuilder(new Uri(hostnameToUse));
-			Debug.Log("build version: " + ApplicationBuildIdentifier.Instance.GetGitTag());
 
 			var scheme = baseUrl.Scheme;
 			var host = baseUrl.Host;
@@ -82,7 +82,6 @@ namespace MSP2050.Scripts
 					SessionListPayload = result!.payload;
 					if (SessionListPayload != null)
 					{
-						Debug.Log("Get session list success: " + www.downloadHandler.text);
 						Success = true;
 					}
 				}
@@ -102,10 +101,7 @@ namespace MSP2050.Scripts
 					try
 					{
 						GetSessionListResult result = Util.DeserializeObject<GetSessionListResult>(www, true);
-						if (result != null)
-						{
-							DialogBoxManager.instance.NotificationWindow("Incompatible version", $"The client (version {ApplicationBuildIdentifier.Instance.GetGitTag()}) is not compatible with the server (version {result.payload.server_version}).\nVisit {result.payload.clients_url} to download a compatible client version, or connect to a different server.", null);
-						}
+						SessionListPayload = result!.payload;
 					}
 					catch (Exception e)
 					{

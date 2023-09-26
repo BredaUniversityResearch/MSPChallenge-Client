@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,6 +25,8 @@ namespace MSP2050.Scripts
 		[SerializeField] private GameObject m_noSessionsObj;
 		[SerializeField] private GameObject m_sessionTopLine;
 		[SerializeField] private TextMeshProUGUI m_sessionErrorObj;
+		[SerializeField] private Button m_sessionErrorButton;
+		[SerializeField] private GameObject m_sessionErrorButtonContainer;
 		[SerializeField] private Transform m_sessionEntryParent;
 		[SerializeField] private GameObject m_sessionEntryPrefab;
 		[SerializeField] private ToggleGroup m_sessionEntryToggleGroup;
@@ -65,7 +68,8 @@ namespace MSP2050.Scripts
 				entry.gameObject.SetActive(false);
 			}
 			m_noSessionsObj.SetActive(false);
-			m_sessionErrorObj.gameObject.SetActive(false); 
+			m_sessionErrorObj.gameObject.SetActive(false);
+			m_sessionErrorButtonContainer.SetActive(false);
 			m_serverInfoText.gameObject.SetActive(false); 
 			m_refreshSessionsButton.interactable = false;
 			m_expectedServerListID++;
@@ -115,9 +119,8 @@ namespace MSP2050.Scripts
 					//else 
 					if(!ApplicationBuildIdentifier.Instance.ServerVersionCompatible(handler.SessionListPayload.server_version))
 					{
-						m_sessionErrorObj.gameObject.SetActive(true);
-						m_sessionErrorObj.text = $"The server (version {handler.SessionListPayload.server_version}) is not compatible with the current client (version {ApplicationBuildIdentifier.Instance.GetGitTag()})";
-						m_serverInfoText.gameObject.SetActive(false);
+						ShowVersionIncompatibilityError(handler.SessionListPayload);
+
 					}
 					else if (handler.SessionListPayload.sessionslist != null && handler.SessionListPayload.sessionslist.Length > 0)
 					{
@@ -139,6 +142,10 @@ namespace MSP2050.Scripts
 						m_noSessionsObj.SetActive(true);
 					}
 				}
+				else if(handler.SessionListPayload != null)
+				{
+					ShowVersionIncompatibilityError(handler.SessionListPayload);
+				}
 				else
 				{
 					m_sessionErrorObj.gameObject.SetActive(true);
@@ -151,6 +158,17 @@ namespace MSP2050.Scripts
 			IEnumerable<LoginSessionEntry> entries = GetSessionEntryByAutoLogin();
 			if (!entries.Any()) yield break;
 			LoginManager.Instance.ConnectPressedForSession(entries.First().GetSession());
+		}
+
+		void ShowVersionIncompatibilityError(GetSessionListPayload a_sessionListPayload)
+		{
+			string url = a_sessionListPayload.clients_url;
+			m_sessionErrorObj.gameObject.SetActive(true);
+			m_sessionErrorObj.text = $"The server (version {a_sessionListPayload.server_version}) is not compatible with the current client (version {ApplicationBuildIdentifier.Instance.GetGitTag()}).\nVisit <u>{url}</u> to download a compatible client version, or connect to a different server.";
+			m_sessionErrorButtonContainer.SetActive(true);
+			m_sessionErrorButton.onClick.RemoveAllListeners();
+			m_sessionErrorButton.onClick.AddListener(() => Application.OpenURL(url));
+			m_serverInfoText.gameObject.SetActive(false);
 		}
 		
 		private IEnumerable<LoginSessionEntry> GetSessionEntryByAutoLogin()
