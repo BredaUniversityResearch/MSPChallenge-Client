@@ -474,15 +474,6 @@ namespace MSP2050.Scripts
 			form.AddField("realtime", times);
 			ServerCommunication.Instance.DoRequest(Server.SetFuturePlanningTime(), form);
 		}
-
-		private void ServerChangeRemainingTime(int newSeconds)
-		{
-			if (newSeconds < 10)
-				newSeconds = 10;
-			NetworkForm form = new NetworkForm();
-			form.AddField("time", newSeconds);
-			ServerCommunication.Instance.DoRequest(Server.SetPlanningTimeRemaining(), form);
-		}
 		#endregion
 	}
 }
