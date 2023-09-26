@@ -99,14 +99,8 @@ namespace MSP2050.Scripts
 					{
 						message += ", Request error: " + refreshTokenRequest.error;
 					}
-					// only log warning, since this is not a fatal error just yet.
+					//Only log warning, since this is not a fatal error just yet.
 					Debug.LogWarning(message);
-
-					// renewal of access token might fail if token is older than 35 min
-					//   (=see Server's Security::TOKEN_DELETE_AFTER_TIME)
-					// This means the token details has been deleted, and the server cannot retrieve them anymore,
-					//   incl. its scope
-					// So in this case, create a completely new one session and token using "RequestSession" call.
 					RefreshToken();
 				}
 
