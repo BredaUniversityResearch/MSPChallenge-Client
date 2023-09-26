@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 	public class ServerCommunication : MonoBehaviour
 	{
 		//consts / enums
-		public const string ApiTokenHeader = "Msp-Api-Token";
+		public const string ApiTokenHeader = "Authorization";
 		public static readonly int[] REQUEST_TIMEOUT = { 1, 10, 30 };
 		public enum EWebRequestFailureResponse { Log, Error, Crash }
 		public const uint DEFAULT_MAX_REQUESTS = 5;
@@ -377,8 +377,7 @@ namespace MSP2050.Scripts
 		private Dictionary<string, string> GetAuthenticationHeaders()
 		{
 			return new Dictionary<string, string> {
-				{ ApiTokenHeader, tokenHandler.GetAccessToken() },
-				{ "MSPAPIToken", tokenHandler.GetAccessToken() } // backwards compatible
+				{ ApiTokenHeader, tokenHandler.FormatAccessToken() }
 			};
 		}
 
@@ -395,14 +394,14 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetApiAccessToken(string responseApiToken, string recoveryApiToken)
+		public void SetApiAccessToken(string responseApiToken, string refreshApiToken)
 		{
-			tokenHandler.SetAccessToken(responseApiToken, recoveryApiToken);
+			tokenHandler.SetAccessToken(responseApiToken, refreshApiToken);
 		}
 
 		public string GetApiAccessToken()
 		{
-			return tokenHandler.GetAccessToken();
+			return tokenHandler.FormatAccessToken();
 		}
 
 		public void RequestSession(
@@ -429,7 +428,7 @@ namespace MSP2050.Scripts
 		{
 			public int session_id = 0;
 			public string api_access_token = "";
-			public string api_access_recovery_token = "";
+			public string api_refresh_token = "";
 		}
 
 		public class WaitForConditionData

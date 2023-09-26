@@ -55,11 +55,21 @@ namespace MSP2050.Scripts
 		}
 	}
 
-	public class GameSessionList
+
+	public class GetSessionListResult
 	{
+		public string header_type;
 		public bool success;
 		public string message;
+		public GetSessionListPayload payload;
+	}
+
+	public class GetSessionListPayload
+	{
 		public GameSession[] sessionslist;
 		public string server_description;
+		public string server_version;
+		public string clients_url;
+		Dictionary<string, string> server_components_versions;
 	}
 }

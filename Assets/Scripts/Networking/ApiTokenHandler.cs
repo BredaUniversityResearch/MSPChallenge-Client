@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
@@ -30,117 +31,41 @@ namespace MSP2050.Scripts
 			public DateTime valid_until = DateTime.MinValue;
 		};
 
-		private static readonly TimeSpan TokenCheckInterval = new TimeSpan(0, 0, 15);
+		private static readonly TimeSpan TokenRenewInterval = new TimeSpan(0, 55, 0);
 
 		private string currentAccessToken = "";
-		private string recoveryToken = "";
-		private DateTime lastTokenCheckTime = DateTime.MinValue;
-		private UnityWebRequest currentTokenRequest = null;
-		private UnityWebRequest renewTokenRequest = null;
+		private string refreshToken = "";
+		private DateTime lastTokenReceiveTime = DateTime.MinValue;
+		private UnityWebRequest refreshTokenRequest = null;
 		private int requestSessionAttempts = 0;
 
 		private const int MAX_REQUEST_SESSION_ATTEMPTS = 10;
 
 		public void Update()
 		{
-			if (requestSessionAttempts > 0)
-			{
-				return;
-			}
-
-			if (renewTokenRequest != null)
+			if (refreshTokenRequest != null)
 			{
 				HandleRenewTokenRequest();
 			}
-			else if (currentTokenRequest != null)
+			else if (requestSessionAttempts == 0 && DateTime.Now - lastTokenReceiveTime > TokenRenewInterval)
 			{
-				HandleCheckAccessResponse();
-			}
-			else
-			{
-				if (DateTime.Now - lastTokenCheckTime > TokenCheckInterval && currentTokenRequest == null)
-				{
-					//This is circumventing the regular way of doing API requests via the ServerCommunication class as this is a more time-critical process.
-					currentTokenRequest = UnityWebRequest.Get(Server.Url + Server.CheckApiAccess());
-					currentTokenRequest.SetRequestHeader(ServerCommunication.ApiTokenHeader, currentAccessToken);
-					currentTokenRequest.SetRequestHeader("MSPAPIToken", currentAccessToken); // backwards compatible
-					currentTokenRequest.SendWebRequest();
-				}
+				RefreshToken();
 			}
 		}
-
-		private void HandleCheckAccessResponse()
-		{
-			if (currentTokenRequest.isDone)
-			{
-				string jsonResponse = currentTokenRequest.downloadHandler.text;
-				RequestResult response = null;
-				try
-				{
-					response = JsonConvert.DeserializeObject<RequestResult>(jsonResponse);	
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Failed to deserialize " + Server.CheckApiAccess() + " request, error: " + e.Message);
-				}
-				if (response != null && response.success == true)
-				{
-					ApiTokenCheckAccessResponse payload = response.payload.ToObject<ApiTokenCheckAccessResponse>();
-					switch (payload.status)
-					{
-					case ApiTokenCheckAccessResponse.EResult.Expired:
-						UnityEngine.Debug.LogWarning("Access token came back as expired... Recovering token...");
-						RecoverToken();
-						break;
-					case ApiTokenCheckAccessResponse.EResult.UpForRenewal:
-						RenewCurrentToken();
-						break;
-					case ApiTokenCheckAccessResponse.EResult.Valid:
-						break;
-					}
-				}
-				else
-				{
-					UnityEngine.Debug.LogWarning("Access token check request failed. Full response: " + jsonResponse + " Request error: " + currentTokenRequest.error);
-				}
-
-				lastTokenCheckTime = DateTime.Now;
-				currentTokenRequest = null;
-			}
-		}
-
-		private void RecoverToken()
-		{
-			List<IMultipartFormSection> postData = new List<IMultipartFormSection>(1) {new MultipartFormDataSection("expired_token", currentAccessToken)};
-			renewTokenRequest = UnityWebRequest.Post(Server.Url + Server.RenewApiToken(), postData);
-			renewTokenRequest.SetRequestHeader(ServerCommunication.ApiTokenHeader, recoveryToken);
-			renewTokenRequest.SetRequestHeader("MSPAPIToken", recoveryToken); // backwards compatible
-			renewTokenRequest.SendWebRequest();
-		}
-
-		private void RenewCurrentToken()
-		{
-			renewTokenRequest = UnityWebRequest.Get(Server.Url + Server.RenewApiToken());
-			renewTokenRequest.SetRequestHeader(ServerCommunication.ApiTokenHeader, currentAccessToken);
-			renewTokenRequest.SetRequestHeader("MSPAPIToken", currentAccessToken); // backwards compatible
-			renewTokenRequest.SendWebRequest();
-		}
-
-		private void RequestSession()
+		private void RefreshToken()
 		{
 			requestSessionAttempts++;
-			int countryIndex = SessionManager.Instance.CurrentUserTeamID;
-			ServerCommunication.Instance.RequestSession(
-				countryIndex, SessionManager.Instance.CurrentUserName, RequestSessionSuccess, RequestSessionFailure,
-				SessionManager.Instance.Password
-			);
+			//This is circumventing the regular way of doing API requests via the ServerCommunication class as this is a more time-critical process.
+			List<IMultipartFormSection> postData = new List<IMultipartFormSection>(1) { new MultipartFormDataSection("api_refresh_token", refreshToken) };
+			refreshTokenRequest = UnityWebRequest.Post(Server.Url + Server.RefreshApiToken(), postData);
+			refreshTokenRequest.SendWebRequest();
 		}
 
 		private void HandleRenewTokenRequest()
 		{
-			if (renewTokenRequest.isDone)
+			if (refreshTokenRequest.isDone)
 			{
-				string responseText = renewTokenRequest.downloadHandler.text;
+				string responseText = refreshTokenRequest.downloadHandler.text;
 				RequestResult response = null;
 				try
 				{
@@ -148,65 +73,51 @@ namespace MSP2050.Scripts
 				}
 				catch (Exception e)
 				{
-					Debug.LogError("Failed to deserialize " + Server.RenewApiToken() + " request, error: " + e.Message);
+					Debug.LogError("Failed to deserialize " + Server.RefreshApiToken() + " request, error: " + e.Message);
 				}
 				if (response != null && response.success)
 				{
-					currentAccessToken = response.payload.ToObject<ApiTokenResponse>().token;
+					ServerCommunication.RequestSessionResponse result = response.payload.ToObject<ServerCommunication.RequestSessionResponse>();
+					currentAccessToken = result.api_access_token;
+					refreshToken = result.api_refresh_token;
+					lastTokenReceiveTime = DateTime.Now;
+					Debug.Log("API token successfully renewed");
+					requestSessionAttempts = 0;
 				}
 				else
 				{
-					string message = "Failed to renew api access token. Message: " + response.message;
-					if (currentTokenRequest != null)
+					if (requestSessionAttempts > MAX_REQUEST_SESSION_ATTEMPTS)
 					{
-						message += ", Request error: " + currentTokenRequest.error;
+						// fatal error, user has to quit the game
+						string msg = "Failed to request new API token, request error: " + response.message;
+						Debug.LogError(msg);
+						throw new Exception(msg);
 					}
-					// only log warning, since this is not a fatal error just yet.
-					UnityEngine.Debug.LogWarning(message);
 
-					// renewal of access token might fail if token is older than 35 min
-					//   (=see Server's Security::TOKEN_DELETE_AFTER_TIME)
-					// This means the token details has been deleted, and the server cannot retrieve them anymore,
-					//   incl. its scope
-					// So in this case, create a completely new one session and token using "RequestSession" call.
-					RequestSession();
+					string message = "Failed to renew api access token. Message: " + response.message;
+					if (refreshTokenRequest != null)
+					{
+						message += ", Request error: " + refreshTokenRequest.error;
+					}
+					//Only log warning, since this is not a fatal error just yet.
+					Debug.LogWarning(message);
+					RefreshToken();
 				}
 
-				renewTokenRequest = null;
+				refreshTokenRequest = null;
 			}
 		}
 
-		public void SetAccessToken(string responseApiToken, string recoveryApiToken)
+		public void SetAccessToken(string responseApiToken, string refreshApiToken)
 		{
 			currentAccessToken = responseApiToken;
-			recoveryToken = recoveryApiToken;
+			refreshToken = refreshApiToken;
+			lastTokenReceiveTime = DateTime.Now;
 		}
 
-		public string GetAccessToken()
+		public string FormatAccessToken()
 		{
-			return currentAccessToken;
-		}
-
-		void RequestSessionSuccess(ServerCommunication.RequestSessionResponse response)
-		{
-			requestSessionAttempts = 0; // yes, user can continue playing
-			ServerCommunication.Instance.SetApiAccessToken(response.api_access_token, response.api_access_recovery_token);
-			SessionManager.Instance.CurrentSessionID = response.session_id;
-		}
-
-		void RequestSessionFailure(ARequest request, string message)
-		{
-			string msg = "Failed to request new session, request error: " + message;
-			if (requestSessionAttempts > MAX_REQUEST_SESSION_ATTEMPTS)
-			{
-				// fatal error, user has to quit the game
-				UnityEngine.Debug.LogError(msg);
-				throw new Exception(msg);
-			}
-
-			// only log warning, since this is not a fatal error just yet.
-			UnityEngine.Debug.LogWarning(msg);
-			RequestSession(); // try again
+			return "Bearer " + currentAccessToken;
 		}
 	}
 }
