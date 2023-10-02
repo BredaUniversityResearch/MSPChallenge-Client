@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 		public Transform m_entryParent;
 
 		private Dictionary<string, KPIGroupBar> m_entries = new Dictionary<string, KPIGroupBar>();
-    
+
 		private void CreateBarForGrid(EnergyGrid a_grid, int a_country)
 		{
 			KPIGroupBar bar = Instantiate(m_entryPrefab, m_entryParent).GetComponent<KPIGroupBar>();
@@ -66,6 +66,11 @@ namespace MSP2050.Scripts
 
 		public void SetBarsToFishing(FishingDistributionSet a_distributionDelta)
 		{
+			if (a_distributionDelta.GetValues() == null)
+			{
+				Debug.LogError("No distribution delta values (FishingDistributionSet) available.");
+				return;
+			}
 			foreach (KeyValuePair<string, Dictionary<int, float>> kvp in a_distributionDelta.GetValues())
 			{
 				UpdateBarForFishing(kvp.Key, kvp.Value);

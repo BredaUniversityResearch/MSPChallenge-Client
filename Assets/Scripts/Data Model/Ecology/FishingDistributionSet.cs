@@ -2,6 +2,7 @@
 //Full set of fishing distributions calculated by accumulating the delta sets of different plans.
 
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace MSP2050.Scripts
 {
@@ -11,6 +12,11 @@ namespace MSP2050.Scripts
 
 		public FishingDistributionSet(FishingDistributionDelta initialValues)
 		{
+			if (initialValues == null)
+			{
+				Debug.LogError("No initial values (FishingDistributionDelta) available. Please setup initial plans with \"fishing\" -> \"initialFishingDistribution\".");
+				return;
+			}
 			fishingValues = new Dictionary<string, Dictionary<int, float>>(initialValues.FleetCount);
 			foreach (KeyValuePair<string, Dictionary<int, float>> fleetValues in initialValues.GetValuesByFleet())
 			{
