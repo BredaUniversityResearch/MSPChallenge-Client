@@ -15,14 +15,10 @@ pipeline {
 
         // Unity Build params & paths
         WINDOWS_BUILD_NAME = "Windows-${currentBuild.number}"
-        WINDOWS_DEV_BUILD_NAME = "Windows-Dev-${currentBuild.number}"
         MACOS_BUILD_NAME = "MacOS-${currentBuild.number}"
-        MACOS_DEV_BUILD_NAME = "MacOS-Dev-${currentBuild.number}"
         WINDOWS_DEV_PR_BUILD_NAME = "Windows-Dev-${BRANCH_NAME}"
         
         String output = "Output"
-        String outputMacDevFolder = "CurrentMacDevBuild"
-        String outputWinDevFolder = "CurrentWinDevBuild"
         String outputMacFolder = "CurrentMacBuild"
         String outputWinFolder = "CurrentWinBuild"
         
@@ -65,38 +61,10 @@ pipeline {
             }
         }
         
-        stage('Build Dev Branch') {
-        
-            when { 
-                expression { BRANCH_NAME ==~ /(dev)/ }
-            }
-            steps {
-                script {
-                    echo "Launching Windows Development Build..."
-                    bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputWinDevFolder%\\MSP-Challenge.exe" -customBuildName "MSP-Challenge" -executeMethod ProjectBuilder.WindowsDevBuilder'''
-                    
-                    echo "Zipping build..."
-                    bat '''7z a -tzip -r "%output%\\%WINDOWS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputWinDevFolder%\\*"'''
-                    
-                    echo "Uploading dev build artifact to Nexus..."
-                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_DEV_BUILD_NAME%.zip"'''
-                        
-                    echo "Launching MacOS Development Build..."
-                    bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacDevFolder%\\MSP-Challenge.app" -customBuildName "MSP-Challenge.app" -executeMethod ProjectBuilder.MacOSDevBuilder'''
-                    
-                    echo "Zipping build..."
-                    bat '''7z a -tzip -r "%output%\\%MACOS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputMacDevFolder%\\*"'''
-                    
-                    echo "Uploading dev build artifact to Nexus..."
-                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MacOS" -F "raw.asset1=@%output%\\%MACOS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_DEV_BUILD_NAME%.zip"'''                    
-                }
-            }
-        }
-        
-        stage('Build Main Branch') {
+        stage('Build REL4_0 Branch') {
         
             when {
-                expression { BRANCH_NAME ==~ /(main)/ }
+                expression { BRANCH_NAME ==~ /(REL4_0)/ }
             }
             steps {
                 script {
@@ -109,7 +77,7 @@ pipeline {
                     
                     
                     echo "Uploading release build artifact to Nexus..."
-                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_BUILD_NAME%.zip"'''
+                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-REL4_0" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_BUILD_NAME%.zip"'''
                         
                     echo "Launching MacOS Release Build..."
                     bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\MSP-Challenge.app" -customBuildName "MSP-Challenge.app" -executeMethod ProjectBuilder.MacOSBuilder'''
@@ -119,7 +87,7 @@ pipeline {
                     
                     
                     echo "Uploading release build artifact to Nexus..."
-                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MacOS" -F "raw.asset1=@%output%\\%MACOS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_BUILD_NAME%.zip"'''
+                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-REL4_0" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MacOS" -F "raw.asset1=@%output%\\%MACOS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_BUILD_NAME%.zip"'''
                 }
             }
         }
