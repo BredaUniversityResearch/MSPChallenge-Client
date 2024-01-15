@@ -29,7 +29,7 @@ namespace MSP2050.Scripts
 		public string game_ws_server_address;
 		public string watchdog_name;
 		public string watchdog_address;
-		public int config_version_version;
+		public int? config_version_version;
 		public string config_version_message;
 		public string config_file_name;
 		public string config_file_description;
