@@ -1,4 +1,8 @@
 #!groovy
+import org.cradle.Discord
+import org.cradle.Signing
+import org.cradle.Nexus
+import org.cradle.Zip
 
 def COLOR_MAP = [
     'SUCCESS': 'good', 
@@ -130,11 +134,14 @@ pipeline {
                 if(fileExists(output)) {
                     echo "Cleaning up workspace..."
                     bat '''RMDIR %output% /S /Q'''
+                }   
+                if (currentBuild.result == 'SUCCESS') {
+                    Discord.SendMessageToMSPChallengeChannel(this, "Daily Build ${currentBuild.number}", "Available on Nexus\n ready for testing:\n [Download from Nexus](https://nexus.cradle.buas.nl/#browse/browse) \n \n Built took: ${currentBuild.durationString}" )
+                }
+                else {
+                    Discord.SendMessageToMSPChallengeChannel(this, "Daily Build ${currentBuild.number}", "Build failed\n Reason: ${currentBuild.description}" )
                 }
             }
-            
-            slackSend color: COLOR_MAP[currentBuild.currentResult],
-            message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}"
         }
     }
 }
