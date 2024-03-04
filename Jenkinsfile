@@ -136,10 +136,10 @@ pipeline {
                     bat '''RMDIR %output% /S /Q'''
                 }   
                 if (currentBuild.result == 'SUCCESS') {
-                    Discord.SendMessageToMSPChallengeChannel(this, "Daily Build ${currentBuild.number}", "Available on Nexus\n ready for testing:\n [Download from Nexus](https://nexus.cradle.buas.nl/#browse/browse) \n \n Built took: ${currentBuild.durationString}" )
+                    Discord.SendMessageToMSPChallengeChannel(this, "MSP-Challenge Build ${currentBuild.number}", "Available on Nexus\n ready for testing:\n [Download from Nexus](https://nexus.cradle.buas.nl/#browse/browse) \n \n Built took: ${currentBuild.durationString}" )
                 }
                 else {
-                    Discord.SendMessageToMSPChallengeChannel(this, "Daily Build ${currentBuild.number}", "Build failed\n Reason: ${currentBuild.description}" )
+                    Discord.SendMessageToMSPChallengeChannel(this, "MSP-Challenge Build ${currentBuild.number}", "Build failed\n Reason: ${currentBuild.description}" )
                 }
             }
         }
