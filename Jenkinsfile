@@ -12,7 +12,7 @@ def COLOR_MAP = [
 pipeline {
     environment {
         // Unity tool installation
-        UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2020.3.31f1\\Editor\\Unity.exe"
+        UNITY_EXECUTABLE = "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.20f1\\Editor\\Unity.exe"
         
         // Latest curl version installation
         CURL_EXECUTABLE = "C:\\Program Files\\Git\\mingw64\\bin\\curl.exe"
