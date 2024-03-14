@@ -62,7 +62,9 @@ namespace MSP2050.Scripts
 			System.Threading.Thread.CurrentThread.CurrentCulture = Localisation.NumberFormatting;
 
 			//Setup projection parameters for later conversion
-			mspCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs");
+			if (string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.projection))
+				SessionManager.Instance.MspGlobalData.projection = "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs";
+			mspCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String(SessionManager.Instance.MspGlobalData.projection);
 			geoJSONCoordinateProjection = DotSpatial.Projections.ProjectionInfo.FromProj4String("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
 
 			GameSettings.Instance.SetAudioMixer(audioMixer);
