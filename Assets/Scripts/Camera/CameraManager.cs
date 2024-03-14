@@ -90,15 +90,20 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			BoxCollider2D collider = layer.LayerGameObject.AddComponent<BoxCollider2D>();
+			Rect zoomRect = layer.GetEntity(layer.GetEntityCount() - 1).GetEntityBounds();
+			BoxCollider2D zoomCollider = layer.LayerGameObject.AddComponent<BoxCollider2D>();
+			zoomCollider.size = zoomRect.size;
+			zoomCollider.offset = zoomRect.center;
 
-			collider.size = layer.GetLayerBounds().size;
-			collider.offset = layer.GetLayerBounds().center;
+			Rect fullRect = layer.GetLayerBounds();
+			BoxCollider2D fullCollider = layer.LayerGameObject.AddComponent<BoxCollider2D>();
+			fullCollider.size = fullRect.size;
+			fullCollider.offset = fullRect.center;
 
-			SetNewArea(collider);
+			SetNewArea(zoomCollider);
 			UpdateBounds();
 
-			WorldSpaceCanvas.ResizeToPlayArea(collider);
+			WorldSpaceCanvas.ResizeToPlayArea(fullCollider);
 		}
 	}
 }
