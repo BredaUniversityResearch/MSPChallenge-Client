@@ -90,15 +90,34 @@ namespace MSP2050.Scripts
 				return;
 			}
 
-			BoxCollider2D collider = layer.LayerGameObject.AddComponent<BoxCollider2D>();
+			//Find the smallest entity and use it for camera bounds
+			int bestIndex = 0;
+			float smallest = float.PositiveInfinity;
+			for(int i = 0; i < layer.GetEntityCount(); i++)
+			{
+				Rect bounds = layer.GetEntity(i).GetEntityBounds();
+				float newSize = bounds.width * bounds.height;
+				if(newSize < smallest)
+				{
+					bestIndex = i;
+					smallest = newSize;
+				}
+			}
+			Rect zoomRect = layer.GetEntity(bestIndex).GetEntityBounds();
+			BoxCollider2D zoomCollider = layer.LayerGameObject.AddComponent<BoxCollider2D>();
+			zoomCollider.size = zoomRect.size;
+			zoomCollider.offset = zoomRect.center;
 
-			collider.size = layer.GetLayerBounds().size;
-			collider.offset = layer.GetLayerBounds().center;
+			//Use the full layer rect to determine the actual play area
+			Rect fullRect = layer.GetLayerBounds();
+			BoxCollider2D fullCollider = layer.LayerGameObject.AddComponent<BoxCollider2D>();
+			fullCollider.size = fullRect.size;
+			fullCollider.offset = fullRect.center;
 
-			SetNewArea(collider);
+			SetNewArea(zoomCollider);
 			UpdateBounds();
 
-			WorldSpaceCanvas.ResizeToPlayArea(collider);
+			WorldSpaceCanvas.ResizeToPlayArea(fullCollider);
 		}
 	}
 }

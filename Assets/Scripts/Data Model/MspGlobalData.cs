@@ -34,6 +34,7 @@ namespace MSP2050.Scripts
 		public ExpertiseDefinition[] expertise_definitions;
 		public string windfarm_data_api_url; // https://test-northsea-dot-hydro-engine.appspot.com/get_windfarm_data
 		public JObject dependencies;
+		public string projection;
 
 		public int session_num_years => Mathf.FloorToInt((float)(era_total_months * num_eras) / 12.0f);
 

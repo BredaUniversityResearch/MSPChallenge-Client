@@ -37,6 +37,9 @@ namespace MSP2050.Scripts
 
 		public void StartTutorial(TutorialData a_tutorialData)
 		{
+			if (m_data == a_tutorialData)
+				return;
+
 			m_data = a_tutorialData;
 			if (m_UI == null)
 			{
