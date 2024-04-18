@@ -149,7 +149,7 @@ namespace MSP2050.Scripts
 			}
 
 			return string.Format(Localisation.NumberFormatting, "{0} ({1})\n{2} ({3})",
-				aSeries.seriesName, Util.MonthToText(month, true), displayUnit.FormatAsString(), changePercentage);
+				aSeries.seriesName, Util.MonthToText(month, true), displayUnit.FormatAsString().Replace("<sup>", "").Replace("</sup>", ""), changePercentage);
 		}
 
 		private void KPIGraphPointAnimator(WMG_Series series, WMG_Node aNode, bool state)
