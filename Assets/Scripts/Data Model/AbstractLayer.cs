@@ -111,7 +111,7 @@ namespace MSP2050.Scripts
 			if(a_layerMeta.layer_text_info != null && a_layerMeta.layer_text_info.property_per_state != null)
 				m_textInfo = new LayerTextInfo(a_layerMeta.layer_text_info);	
 		
-			if (a_layerMeta.layer_states != "")
+			if (a_layerMeta.layer_states != null && a_layerMeta.layer_states != "")
 			{
 				List<LayerStateObject> layerstateObject = new List<LayerStateObject>();
 				try
