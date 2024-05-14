@@ -133,6 +133,7 @@ namespace MSP2050.Scripts
 						string value = propertyMeta != null && !string.IsNullOrEmpty(propertyMeta.Unit) ? entity.GetMetaData(kvp.Key) + " " + propertyMeta.Unit : entity.GetMetaData(kvp.Key);
 						otherInfoParent.CreateEntry(propertyDisplayName, value);
 					}
+					//TODO: draw geometry policy window
 				}
 			}
 			else

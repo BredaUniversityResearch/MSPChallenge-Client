@@ -185,6 +185,7 @@ namespace MSP2050.Scripts
 		public string display_name { get; set; }
 		public string sprite_name { get; set; }
 		public string default_value { get; set; }
+		public string policy_type { get; set; }
 		public bool update_visuals { get; set; }
 		public bool update_text { get; set; }
 		public bool update_calculation { get; set; }

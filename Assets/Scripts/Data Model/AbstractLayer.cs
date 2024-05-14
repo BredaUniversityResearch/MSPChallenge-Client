@@ -382,7 +382,7 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < a_metaInfoList.Length; ++i)
 			{
 				LayerInfoPropertiesObject info = a_metaInfoList[i];
-				EntityPropertyMetaData meta = new EntityPropertyMetaData(info.property_name, info.enabled, info.editable, info.display_name, info.sprite_name, info.default_value, info.update_visuals, info.update_text, info.update_calculation, info.content_type, info.content_validation, info.unit);
+				EntityPropertyMetaData meta = new EntityPropertyMetaData(info.property_name, info.enabled, info.editable, info.display_name, info.policy_type, info.sprite_name, info.default_value, info.update_visuals, info.update_text, info.update_calculation, info.content_type, info.content_validation, info.unit);
 				m_propertyMetaData.Add(meta);
 			}
 		}

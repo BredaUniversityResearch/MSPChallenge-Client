@@ -11,6 +11,8 @@ namespace MSP2050.Scripts
 		public readonly bool Enabled;   //Visible in game for non-dev users
 		private readonly bool Editable;  //Is this property editable for non-dev users? 
 		public readonly string DisplayName;
+		public readonly string PolicyType; //If not null, this data is used for a geometry policy, many other values below are ignored
+
 		public readonly string SpriteName;
 		public readonly string DefaultValue;
 		public readonly bool UpateVisuals; // todo: fix typo's. Will break existing database content
@@ -20,12 +22,13 @@ namespace MSP2050.Scripts
 		public readonly LayerInfoPropertiesObject.ContentValidation ContentValidation;
 		public readonly string Unit;
 
-		public EntityPropertyMetaData(string a_propertyName, bool a_enabled, bool a_editable, string a_displayName, string a_spriteName, string a_defaultValue, bool a_updateVisuals, bool a_updateText, bool a_updateCalculation, TMPro.TMP_InputField.ContentType a_contentType, LayerInfoPropertiesObject.ContentValidation a_contentValidation, string a_unit)
+		public EntityPropertyMetaData(string a_propertyName, bool a_enabled, bool a_editable, string a_displayName, string a_policyType, string a_spriteName, string a_defaultValue, bool a_updateVisuals, bool a_updateText, bool a_updateCalculation, TMPro.TMP_InputField.ContentType a_contentType, LayerInfoPropertiesObject.ContentValidation a_contentValidation, string a_unit)
 		{
 			PropertyName = a_propertyName;
 			Enabled = a_enabled;
 			Editable = a_editable;
 			DisplayName = a_displayName;
+			PolicyType = a_policyType;
 			SpriteName = a_spriteName;
 			DefaultValue = a_defaultValue;
 			UpateVisuals = a_updateVisuals;
