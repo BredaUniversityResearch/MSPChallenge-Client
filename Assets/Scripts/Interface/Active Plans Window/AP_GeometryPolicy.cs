@@ -1,47 +1,52 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace MSP2050.Scripts
 {
-	public class ActivePlanParameter : MonoBehaviour {
-
-		[SerializeField] private Image icon = null;
+	public class AP_GeometryPolicy : MonoBehaviour
+	{
+		[SerializeField] private Button barButton = null;
+		[SerializeField] private Toggle policyToggle = null;
 		[SerializeField] private TextMeshProUGUI nameText = null;
-		[SerializeField] private CustomInputField valueInput = null;
-		[SerializeField] private TextMeshProUGUI unit = null;
 
-		public AP_GeometryTool.ParameterChangeCallback changedCallback;
+		public AP_GeometryTool.GeometryPolicyChangeCallback changedCallback;
+
 		private EntityPropertyMetaData parameter;
-	
-		void Start ()
+
+		void Start()
 		{
-			valueInput.onEndEdit.AddListener(ValueChanged);
+			//TODO: toggle value change
+			//TODO: button open window
 		}
 
-		public void SetValue(string value)
+		public void SetValue(Dictionary<Entity,string> values)
 		{
-			valueInput.text = value;
+			//TODO
 		}
 
 		public void SetInteractable(bool value, bool reset = true)
 		{
-			valueInput.interactable = value;
+			barButton.interactable = value;
+			policyToggle.interactable = value;
 
-			if(reset)
+			if (reset)
 			{
-				valueInput.text = "";
+				policyToggle.isOn = false;
 			}
 		}
 
 		void ValueChanged(string newvalue)
 		{
-			if (changedCallback != null)
-				changedCallback(parameter, newvalue);
+			if (parameterChangedCallback != null)
+				parameterChangedCallback(parameter, newvalue);
 		}
 
-		public void SetToParameter(EntityPropertyMetaData parameter)
+		public void SetToPolicy(EntityPropertyMetaData parameter)
 		{
+			//TODO
+
 			this.parameter = parameter;
 			valueInput.contentType = parameter.ContentType;
 			nameText.text = parameter.DisplayName;

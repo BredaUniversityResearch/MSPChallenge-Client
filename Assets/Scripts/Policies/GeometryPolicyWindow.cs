@@ -13,20 +13,36 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			//TODO: Set button callbacks
+			m_confirmButton.onClick.AddListener(OnConfirm);
+			m_cancelButton.onClick.AddListener(OnCancel);
 		}
 
 		public void OpenToGeometry(List<Entity> a_geometry, RectTransform a_parentWindow)
 		{
 			//TODO: align content
+			if(Main.InEditMode)
+			{ 
+				//Align to geometry tool
+			}
+			else
+			{
+				//Align to properties window
+			}
+			SetContent(a_geometry);
+		}
+
+
+		void OnCancel()
+		{ 
+			
+		}
+
+		void OnConfirm()
+		{
+		
 		}
 
 		protected abstract void SetContent(List<Entity> a_geometry);
-
-		void OnCancel()
-		{ }
-
-		void OnConfirm()
-		{ }
+		protected abstract void ApplyContent(List<Entity> a_geometry);
 	}
 }

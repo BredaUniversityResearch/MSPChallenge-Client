@@ -40,5 +40,6 @@ namespace MSP2050.Scripts
 		}
 
 		public bool ShowInEditMode => Enabled && Editable;
+		public bool IsPolicy => string.IsNullOrEmpty(PolicyType);
 	}
 }

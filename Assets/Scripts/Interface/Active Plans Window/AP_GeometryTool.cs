@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 		public delegate void EntityTypeChangeCallback(List<EntityType> newTypes);
 		public delegate void TeamChangeCallback(int newTeamID);
 		public delegate void ParameterChangeCallback(EntityPropertyMetaData parameter, string value);
+		public delegate void GeometryPolicyChangeCallback(EntityPropertyMetaData parameter, Dictionary<Entity,string> values);
 
 		[Header("Toolbar")]
 		public ToolBar m_toolBar;
@@ -45,9 +46,12 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject[] m_parameterSections;
 		[SerializeField] Transform m_parameterParent;
 		[SerializeField] GameObject m_parameterPrefab;
+		[SerializeField] GameObject m_geometryPolicyPrefab;
 		public ParameterChangeCallback m_parameterChangeCallback;
+		public GeometryPolicyChangeCallback m_geometryPolicyChangeCallback;
 
 		private Dictionary<EntityPropertyMetaData, ActivePlanParameter> m_parameters;
+		private Dictionary<EntityPropertyMetaData, AP_GeometryPolicy> m_geometryPolicies;
 		private Dictionary<EntityPropertyMetaData, string> m_originalParameterValues;
 		private PlanLayer m_currentlyEditingLayer;
 
@@ -177,10 +181,11 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetToSelection(List<List<EntityType>> entityTypes, int team, List<Dictionary<EntityPropertyMetaData, string>> selectedParams)
+		public void SetToSelection(List<List<EntityType>> entityTypes, int team, List<Dictionary<EntityPropertyMetaData, string>> selectedParams,
+			List<Entity> entities)
 		{
 			SetSelectedEntityTypes(entityTypes);
-			SetSelectedParameters(selectedParams);
+			SetSelectedParameters(selectedParams, entities);
 			if (SessionManager.Instance.AreWeGameMaster)
 			{
 				SelectedTeam = team;
@@ -430,13 +435,20 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public void OnGeometryPolicyChanged(EntityPropertyMetaData parameter, Dictionary<Entity,string> values)
+		{
+			//TODO
+		}
+
 		public void SetParameterInteractability(bool value, bool reset = true)
 		{
 			foreach (var kvp in m_parameters)
 				kvp.Value.SetInteractable(value, reset);
+			foreach (var kvp in m_geometryPolicies)
+				kvp.Value.SetInteractable(value, reset);
 		}
 
-		public void SetSelectedParameters(List<Dictionary<EntityPropertyMetaData, string>> selectedParams)
+		public void SetSelectedParameters(List<Dictionary<EntityPropertyMetaData, string>> selectedParams, List<Entity> entities)
 		{
 			if (selectedParams == null || selectedParams.Count == 0)
 			{
@@ -445,37 +457,63 @@ namespace MSP2050.Scripts
 			}
 			else if (selectedParams.Count == 1)
 			{
-				//Show single selected
-				SetParameterValues(selectedParams[0]);
+				//Show single entity selected
+				m_originalParameterValues = selectedParams[0];
+				foreach (var kvp in selectedParams[0])
+				{
+					if (kvp.Key.IsPolicy)
+					{
+						m_geometryPolicies[kvp.Key].SetValue(new Dictionary<Entity, string>() { { entities[0], kvp.Value } });
+					}
+					else
+					{
+						m_parameters[kvp.Key].SetValue(kvp.Value);
+					}
+				}
 				SetParameterInteractability(true, false);
 			}
 			else
 			{
 				Dictionary<EntityPropertyMetaData, bool> identical = new Dictionary<EntityPropertyMetaData, bool>();
+				Dictionary<EntityPropertyMetaData, Dictionary<Entity, string>> policyData = new Dictionary<EntityPropertyMetaData, Dictionary<Entity, string>>();
 				foreach (var kvp in selectedParams[0])
 				{
-					identical[kvp.Key] = true;
+					if(kvp.Key.IsPolicy)
+					{
+						policyData.Add(kvp.Key, new Dictionary<Entity, string>() { { entities[0], kvp.Value } });
+					}
+					else
+					{
+						identical[kvp.Key] = true;
+					}
 				}
 
 				//Check if objects have idental values per param
+				//Add policy values to dict
 				for (int i = 1; i < selectedParams.Count; i++)
 				{
-					bool canCutOff = true;
 					foreach (var kvp in selectedParams[i])
 					{
-						//Already found to not be identical
-						if (!identical[kvp.Key])
-							continue;
+						if (kvp.Key.IsPolicy)
+						{
+							policyData[kvp.Key].Add(entities[i], kvp.Value);
+						}
+						else
+						{
+							//Already found to not be identical
+							if (!identical[kvp.Key])
+								continue;
 
-						//Wasn't already false, so the check is useful
-						canCutOff = false;
-
-						//Check if param idental to the first
-						if (selectedParams[0][kvp.Key] != kvp.Value)
-							identical[kvp.Key] = false;
+							//Check if param idental to the first
+							if (selectedParams[0][kvp.Key] != kvp.Value)
+								identical[kvp.Key] = false;
+						}
 					}
-					if (canCutOff)
-						break;
+				}
+
+				foreach(var kvp in policyData)
+				{
+					m_geometryPolicies[kvp.Key].SetValue(kvp.Value);
 				}
 
 				m_originalParameterValues = new Dictionary<EntityPropertyMetaData, string>();
@@ -488,15 +526,6 @@ namespace MSP2050.Scripts
 					m_originalParameterValues[kvp.Key] = value;
 				}
 				SetParameterInteractability(true, false);
-			}
-		}
-
-		public void SetParameterValues(Dictionary<EntityPropertyMetaData, string> values)
-		{
-			m_originalParameterValues = values;
-			foreach (var kvp in values)
-			{
-				m_parameters[kvp.Key].SetValue(kvp.Value);
 			}
 		}
 		#endregion
@@ -562,16 +591,26 @@ namespace MSP2050.Scripts
 			for (int i = 0; i < m_parameterParent.transform.childCount; i++)
 				Destroy(m_parameterParent.transform.GetChild(i).gameObject);
 			m_parameters = new Dictionary<EntityPropertyMetaData, ActivePlanParameter>();
+			m_geometryPolicies = new Dictionary<EntityPropertyMetaData, AP_GeometryPolicy>();
 			m_originalParameterValues = null;
 		}
 
 		private void CreateParameter(EntityPropertyMetaData parameter)
 		{
-			ActivePlanParameter obj = ((GameObject)GameObject.Instantiate(m_parameterPrefab)).GetComponent<ActivePlanParameter>();
-			obj.transform.SetParent(m_parameterParent, false);
-			obj.SetToParameter(parameter);
-			obj.parameterChangedCallback = OnParameterChanged;
-			m_parameters.Add(parameter, obj);
+			if (string.IsNullOrEmpty(parameter.PolicyType))
+			{
+				ActivePlanParameter obj = Instantiate(m_parameterPrefab, m_parameterParent).GetComponent<ActivePlanParameter>();
+				obj.SetToParameter(parameter);
+				obj.changedCallback = OnParameterChanged;
+				m_parameters.Add(parameter, obj);
+			}
+			else
+			{
+				AP_GeometryPolicy obj = Instantiate(m_geometryPolicyPrefab, m_parameterParent).GetComponent<AP_GeometryPolicy>();
+				obj.SetToPolicy(parameter);
+				obj.changedCallback = OnGeometryPolicyChanged;
+				m_geometryPolicies.Add(parameter, obj);
+			}
 		}
 		#endregion
 	}
