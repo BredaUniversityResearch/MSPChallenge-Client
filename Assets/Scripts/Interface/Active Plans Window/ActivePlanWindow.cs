@@ -136,12 +136,12 @@ namespace MSP2050.Scripts
 			//create policy popouts and toggles
 			foreach (var kvp in PolicyManager.Instance.PolicyLogic)
 			{
-				AP_PopoutWindow popout = Instantiate(kvp.Value.m_definition.m_activePlanPrefab, m_popoutParent).GetComponent<AP_PopoutWindow>();
+				AP_PopoutWindow popout = Instantiate(kvp.Value.m_definition.m_windowPrefab, m_popoutParent).GetComponent<AP_PopoutWindow>();
 				popout.gameObject.SetActive(false);
 
 				AP_ContentToggle toggle = Instantiate(m_policyPrefab, m_policyParent).GetComponent<AP_ContentToggle>();
 				toggle.Initialise(this, popout);
-				toggle.SetContent(kvp.Value.m_definition.m_displayName, kvp.Value.m_definition.m_activePlanIcon);
+				toggle.SetContent(kvp.Value.m_definition.m_displayName, kvp.Value.m_definition.m_policyIcon);
 				m_policyToggles.Add(kvp.Key, toggle);
 			}
 		}

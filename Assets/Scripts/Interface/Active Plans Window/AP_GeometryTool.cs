@@ -47,6 +47,8 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_parameterParent;
 		[SerializeField] GameObject m_parameterPrefab;
 		[SerializeField] GameObject m_geometryPolicyPrefab;
+		[SerializeField] AGeometryPolicyWindowContent m_geometryPolicyWindow;
+
 		public ParameterChangeCallback m_parameterChangeCallback;
 		public GeometryPolicyChangeCallback m_geometryPolicyChangeCallback;
 
@@ -437,7 +439,7 @@ namespace MSP2050.Scripts
 
 		public void OnGeometryPolicyChanged(EntityPropertyMetaData parameter, Dictionary<Entity,string> values)
 		{
-			//TODO
+			m_geometryPolicyChangeCallback(parameter, values);
 		}
 
 		public void SetParameterInteractability(bool value, bool reset = true)
@@ -463,7 +465,7 @@ namespace MSP2050.Scripts
 				{
 					if (kvp.Key.IsPolicy)
 					{
-						m_geometryPolicies[kvp.Key].SetValue(new Dictionary<Entity, string>() { { entities[0], kvp.Value } });
+						m_geometryPolicies[kvp.Key].SetValue(new Dictionary<Entity, string>() { { entities[0], kvp.Value } }, entities, m_geometryPolicyWindow);
 					}
 					else
 					{
@@ -513,7 +515,7 @@ namespace MSP2050.Scripts
 
 				foreach(var kvp in policyData)
 				{
-					m_geometryPolicies[kvp.Key].SetValue(kvp.Value);
+					m_geometryPolicies[kvp.Key].SetValue(kvp.Value, entities, m_geometryPolicyWindow);
 				}
 
 				m_originalParameterValues = new Dictionary<EntityPropertyMetaData, string>();
@@ -608,7 +610,7 @@ namespace MSP2050.Scripts
 			{
 				AP_GeometryPolicy obj = Instantiate(m_geometryPolicyPrefab, m_parameterParent).GetComponent<AP_GeometryPolicy>();
 				obj.SetToPolicy(parameter);
-				obj.changedCallback = OnGeometryPolicyChanged;
+				obj.m_changedCallback = OnGeometryPolicyChanged;
 				m_geometryPolicies.Add(parameter, obj);
 			}
 		}

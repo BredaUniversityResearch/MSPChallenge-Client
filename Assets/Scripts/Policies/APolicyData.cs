@@ -9,5 +9,10 @@ namespace MSP2050.Scripts
 
 		public APolicyData()
 		{ }
+
+		public virtual bool ContentIdentical(APolicyData a_other)
+		{
+			return false;
+		}
 	}
 }

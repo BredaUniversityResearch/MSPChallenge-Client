@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 
             if (PolicyManager.Instance.TryGetDefinition(policyType, out PolicyDefinition definition))
             {
-                target = Activator.CreateInstance(definition.m_updateType);
+                target = Activator.CreateInstance(definition.m_generalUpdateType);
             }
             else
             {
