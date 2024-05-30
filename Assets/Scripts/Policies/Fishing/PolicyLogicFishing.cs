@@ -8,15 +8,47 @@ namespace MSP2050.Scripts
 {
 	public class PolicyLogicFishing : APolicyLogic
 	{
+		static PolicyLogicFishing m_instance;
+		public static PolicyLogicFishing Instance => m_instance;
+
 		FishingDistributionDelta m_fishingBackup;
 		bool m_wasFishingPlanBeforeEditing;
 		bool m_requireAllApproval = true;
+		FleetInfo m_fleetInfo;
 
 		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
 		{
 			base.Initialise(a_settings, a_definition);
 			PolicySettingsFishing settings = (PolicySettingsFishing)a_settings;
 			m_requireAllApproval = settings.all_country_approval;
+			m_fleetInfo = settings.fleet_info;
+			m_instance = this;
+		}
+
+		public override void Destroy()
+		{
+			m_instance = null;
+		}
+
+		public int GetFleetId(int a_countryId, int a_gearId)
+		{
+			for(int i = 0; i < m_fleetInfo.fleets.Length; i++)
+			{
+				if (m_fleetInfo.fleets[i].gear_type == a_gearId && m_fleetInfo.fleets[i].country_id == a_countryId)
+					return i;
+			}
+			Debug.LogError($"No fleet found for country id: {a_countryId}, gear id: {a_gearId}");
+			return -1;
+		}
+
+		public CountryFleetInfo GetFleetInfo(int a_fleetId)
+		{
+			return m_fleetInfo.fleets[a_fleetId];
+		}
+
+		public string[] GetGearTypes()
+		{
+			return m_fleetInfo.gear_types;
 		}
 
 		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage)

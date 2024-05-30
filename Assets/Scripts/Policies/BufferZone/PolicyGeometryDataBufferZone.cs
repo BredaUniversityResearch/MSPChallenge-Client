@@ -3,16 +3,51 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace MSP2050.Scripts
 {
 	public class PolicyGeometryDataBufferZone : APolicyData
 	{
-		public Dictionary<int, Dictionary<int, Months>> fleets; //fleet ids, country ids, months
+		public Dictionary<int, Dictionary<int, Months>> fleets; //gear ids, country ids, months
 		public float radius;
 
 		public PolicyGeometryDataBufferZone()
-		{ }
+		{ 
+		
+		}
+
+		public PolicyGeometryDataBufferZone(string a_jsonData)
+		{
+			//Convert from server format into client format
+			BufferZoneData data = JsonConvert.DeserializeObject<BufferZoneData>(a_jsonData);
+			radius = data.radius;
+			fleets = new Dictionary<int, Dictionary<int, Months>>();
+			foreach(FleetItem item in data.items)
+			{
+				foreach(int fleetId in item.fleets)
+				{
+					CountryFleetInfo countryFleetInfo = PolicyLogicFishing.Instance.GetFleetInfo(fleetId);
+					if (fleets.TryGetValue(countryFleetInfo.gear_type, out var countryMonths))
+					{
+						countryMonths.Add(countryFleetInfo.country_id, item.months);
+					}
+					else
+					{
+						fleets.Add(countryFleetInfo.gear_type, new Dictionary<int, Months>() { { countryFleetInfo.country_id, item.months} });
+					}
+				}
+			}
+		}
+
+		public string GetJson()
+		{
+			//Convert from client format into server format
+			BufferZoneData data = new BufferZoneData();
+			data.radius = this.radius;
+
+			return null;
+		}
 
 		public override bool ContentIdentical(APolicyData a_other)
 		{
@@ -57,6 +92,18 @@ namespace MSP2050.Scripts
 				fleetsCopy.Add(kvp.Key, newValue);
 			}
 			return new PolicyGeometryDataBufferZone() { fleets = fleetsCopy, policy_type = this.policy_type, radius = this.radius };
+		}
+
+		private class BufferZoneData
+		{
+			public float radius;
+			public FleetItem[] items;
+		}
+
+		private class FleetItem
+		{
+			public int[] fleets;
+			public Months months;
 		}
 	}
 }
