@@ -59,12 +59,12 @@ namespace MSP2050.Scripts
 				{
 					if(!newValue.ContentIdentical(kvp.Value))
 					{
-						results.Add(kvp.Key, JsonConvert.SerializeObject(kvp.Value));
+						results.Add(kvp.Key, kvp.Value.GetJson());
 					}
 				}
 				else
 				{
-					results.Add(kvp.Key, JsonConvert.SerializeObject(kvp.Value));
+					results.Add(kvp.Key, kvp.Value.GetJson());
 				}
 			}
 			return results;

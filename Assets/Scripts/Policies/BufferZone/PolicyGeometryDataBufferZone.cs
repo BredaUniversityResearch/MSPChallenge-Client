@@ -44,9 +44,32 @@ namespace MSP2050.Scripts
 		{
 			//Convert from client format into server format
 			BufferZoneData data = new BufferZoneData();
+			data.items = new List<FleetItem>();
 			data.radius = this.radius;
 
-			return null;
+			//Group fleets based on months selected
+			foreach(var kvp in fleets)
+			{
+				foreach(var countryMonth in kvp.Value)
+				{
+					int fleetId = PolicyLogicFishing.Instance.GetFleetId(countryMonth.Key, kvp.Key);
+					bool existing = false;
+					foreach(FleetItem item in data.items)
+					{
+						if(item.months == countryMonth.Value)
+						{
+							item.fleets.Add(fleetId);
+							existing = true;
+							break;
+						}
+					}
+					if(!existing)
+					{
+						data.items.Add(new FleetItem() { fleets = new List<int>() { fleetId }, months = countryMonth.Value });
+					}
+				}
+			}
+			return JsonConvert.SerializeObject(data);
 		}
 
 		public override bool ContentIdentical(APolicyData a_other)
@@ -97,12 +120,12 @@ namespace MSP2050.Scripts
 		private class BufferZoneData
 		{
 			public float radius;
-			public FleetItem[] items;
+			public List<FleetItem> items;
 		}
 
 		private class FleetItem
 		{
-			public int[] fleets;
+			public List<int> fleets;
 			public Months months;
 		}
 	}
