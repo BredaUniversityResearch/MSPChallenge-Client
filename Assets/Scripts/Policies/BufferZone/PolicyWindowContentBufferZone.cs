@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using TMPro;
 using Newtonsoft.Json;
 
 namespace MSP2050.Scripts
@@ -15,10 +14,10 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_fleetGroupParent;
 
 		bool m_initialised;
+		bool m_ignoreCallback;
+		float m_currentRadius;
 		Dictionary<Entity, PolicyGeometryDataBufferZone> m_originalValues;
 		Dictionary<Entity, PolicyGeometryDataBufferZone> m_newValues;
-		List<Entity> m_geometry;
-		bool m_ignoreCallbacks;
 
 		void Initialise()
 		{
@@ -26,29 +25,105 @@ namespace MSP2050.Scripts
 				return;
 
 			//Spawn toggle, set callbacks
-			string[] fleets = new string[5]; //TODO: get the actual value here
-			m_fleetGroups = new List<FleetMixedToggleGroup>(fleets.Length);
-
-			for(int i = 0; i < fleets.Length; i++)
+			m_fleetGroups = new List<FleetMixedToggleGroup>(PolicyLogicFishing.Instance.GetGearTypes().Length);
+			for(int i = 0; i < PolicyLogicFishing.Instance.GetGearTypes().Length; i++)
 			{
 				FleetMixedToggleGroup fleetGroup = Instantiate(m_fleetGroupPrefab, m_fleetGroupParent).GetComponent<FleetMixedToggleGroup>();
-				int fleetId = i;
-				fleetGroup.SetFleet(fleets[i], (b) => OnFleetChanged(fleetId, b));
+				fleetGroup.SetFleet(i, OnFleetChanged, OnCountryChanged, OnMonthChanged);
 				m_fleetGroups.Add(fleetGroup);
-				foreach(Team team in SessionManager.Instance.GetTeams())
+			}
+			m_radiusInput.onEndEdit.AddListener(OnRadiusChanged);
+		}
+
+		void OnFleetChanged(int a_gearId, bool a_value)
+		{
+			if (a_value)
+			{ 
+				foreach(var entityVP in m_newValues)
 				{
-					FleetMixedToggleGroup countryGroup = Instantiate(m_fleetGroupPrefab, fleetGroup.ContentContainer.transform).GetComponent<FleetMixedToggleGroup>();
-					countryGroup.SetFleet(team.name, (b) => OnCountryChanged(fleetId, team.ID, b));
+					Dictionary<int, Months> countryDict = null;
+					if (!entityVP.Value.fleets.TryGetValue(a_gearId, out countryDict))
+					{
+						countryDict = new Dictionary<int, Months>();
+						entityVP.Value.fleets.Add(a_gearId, countryDict);
+					}
+					foreach (Team team in SessionManager.Instance.GetTeams())
+					{
+						if (team.IsManager)
+							continue;
+						countryDict[team.ID] = (Months)int.MaxValue;
+					}
+				}
+			}
+			else
+			{
+				foreach (var entityVP in m_newValues)
+				{
+					entityVP.Value.fleets.Remove(a_gearId);
+				}
+			}
+		}
+		void OnCountryChanged(int a_gearId, int a_countryId, bool a_value)
+		{
+			foreach (var entityVP in m_newValues)
+			{
+				if (entityVP.Value.fleets.TryGetValue(a_gearId, out var countryDict))
+				{
+					if (a_value)
+					{
+						countryDict[a_countryId] = (Months)int.MaxValue;
+					}
+					else
+					{
+						countryDict.Remove(a_countryId);
+					}
+				}
+			}
+		}
+		void OnMonthChanged(int a_gearId, int a_countryId, int a_month, bool a_value)
+		{
+			foreach (var entityVP in m_newValues)
+			{
+				if (entityVP.Value.fleets.TryGetValue(a_gearId, out var countryDict))
+				{
+					if(countryDict.TryGetValue(a_countryId, out Months oldMonths))
+					{ 
+						if(a_value)
+						{
+							countryDict[a_countryId] = (Months)((int)oldMonths | (1 << a_month));//TODO: is Month+1 needed here?
+						}
+						else
+						{
+							countryDict[a_countryId] = (Months)((int)oldMonths & ~(1 << a_month));//TODO: is Month+1 needed here?
+						}
+					}
+					else if(a_value)
+					{
+						countryDict[a_countryId] = (Months)(1 << a_month);//TODO: is Month+1 needed here?
+					}
 				}
 			}
 		}
 
-		void OnFleetChanged(int a_fleetId, bool a_value)
-		{ }
-		void OnCountryChanged(int a_fleetId, int a_countryId, bool a_value)
-		{ }
-		void OnMonthChanged(int a_fleetId, int a_countryId, int a_month, bool a_value)
-		{ }
+		void OnRadiusChanged(string a_newValue)
+		{
+			if (m_ignoreCallback)
+				return;
+
+			float result = float.NegativeInfinity;
+			if(float.TryParse(a_newValue, out result))
+			{
+				if (result >= 0)
+				{
+					m_currentRadius = result;
+					foreach (var entityVP in m_newValues)
+					{
+						entityVP.Value.radius = m_currentRadius;
+					}
+				}
+			}
+			SetRadiusText();
+		}
 
 		public override Dictionary<Entity, string> GetChanges()
 		{
@@ -73,17 +148,52 @@ namespace MSP2050.Scripts
 		public override void SetContent(Dictionary<Entity, string> a_values, List<Entity> a_geometry)
 		{
 			Initialise();
-			m_geometry = a_geometry;
 			m_originalValues = new Dictionary<Entity, PolicyGeometryDataBufferZone>();
 			m_newValues = new Dictionary<Entity, PolicyGeometryDataBufferZone>();
+			m_currentRadius = 0f;
+			bool first = true;
 			foreach(var kvp in a_values)
 			{
-				PolicyGeometryDataBufferZone data = JsonConvert.DeserializeObject<PolicyGeometryDataBufferZone>(kvp.Value);
+				PolicyGeometryDataBufferZone data = new PolicyGeometryDataBufferZone(kvp.Value);
 				m_originalValues.Add(kvp.Key, data);
 				m_newValues.Add(kvp.Key, data.GetValueCopy());
-
+				if(first)
+				{
+					m_currentRadius = data.radius;
+					first = false;
+				}
+				else if(m_currentRadius >= 0 && Mathf.Abs(data.radius - m_currentRadius) > 0.01f)
+				{
+					m_currentRadius = Mathf.NegativeInfinity;
+				}
 			}
-			//TODO: set toggles to values
+			foreach(Entity e in a_geometry)
+			{
+				if (!a_values.ContainsKey(e))
+				{
+					//Create empty entries for geometry that doesnt have a value yet
+					m_newValues.Add(e, new PolicyGeometryDataBufferZone());
+				}
+			}
+			foreach(FleetMixedToggleGroup fleetGroup in m_fleetGroups)
+			{
+				fleetGroup.SetValues(m_newValues);
+			}
+			SetRadiusText();
+		}
+
+		void SetRadiusText()
+		{
+			m_ignoreCallback = true;
+			if (m_currentRadius >= 0)
+			{
+				m_radiusInput.text = m_currentRadius.ToString("N2");
+			}
+			else
+			{
+				m_radiusInput.text = "~";
+			}
+			m_ignoreCallback = false;
 		}
 	}
 }

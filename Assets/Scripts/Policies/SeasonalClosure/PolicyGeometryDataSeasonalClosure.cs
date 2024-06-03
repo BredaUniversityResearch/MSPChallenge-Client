@@ -24,6 +24,14 @@ namespace MSP2050.Scripts
 		December = 2048,
 	}
 
+	static class MonthsMethods
+	{
+		public static bool MonthSet(this Months a_months, int a_check)
+		{
+			return ((int)a_months & (1 << a_check)) != 0;
+		}
+	}
+
 	public class PolicyGeometryDataSeasonalClosure : APolicyData
 	{
 		public List<string> fleets;

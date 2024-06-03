@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections.Generic;
 
 namespace MSP2050.Scripts
 {
@@ -15,8 +16,11 @@ namespace MSP2050.Scripts
 		bool m_ignoreCallback;
 		Action<int, int, bool> m_countryCallback;
 		Action<int, int, int, bool> m_monthCallback;
+		Action<bool?> m_toggleChangedCallback;
 		int m_countryId;
 		int m_gearId;
+
+		public bool? Value => m_valueToggle.Value;
 
 		private void Start()
 		{
@@ -29,7 +33,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetCountry(int a_gearId, Team a_country, Months a_months, 
+		public void SetCountry(int a_gearId, Team a_country, 
 			Action<int, int, bool> a_countryCallback,
 			Action<int, int, int, bool> a_monthCallback)
 		{
@@ -42,19 +46,42 @@ namespace MSP2050.Scripts
 			m_contentContainer.SetActive(false);
 		}
 
-		public void SetValue(Months a_months)
+		public bool? SetValue(List<Months> a_months)
 		{
-			m_ignoreCallback = true;
-			//TODO: set month toggles
-			DetermineCountryToggle();
-			m_ignoreCallback = false;
+			if (a_months.Count == 0)
+			{
+				SetValue(false);
+			}
+			else
+			{
+				m_ignoreCallback = true;
+				for (int i = 0; i < m_monthToggles.Length; i++)
+				{
+					bool? monthValue = a_months[0].MonthSet(i);//TODO: is Month+1 needed here?
+					for (int j = 1; j < a_months.Count; j++)
+					{
+						if (a_months[j].MonthSet(i) != monthValue.Value)//TODO: is Month+1 needed here?
+						{
+							monthValue = null;
+							break;
+						}
+					}
+					m_monthToggles[i].Value = monthValue;
+				}
+				DetermineCountryToggle();
+				m_ignoreCallback = false;
+			}
+			return m_valueToggle.Value;
 		}
 
 		public void SetValue(bool a_value)
 		{
 			m_ignoreCallback = true;
 			m_valueToggle.Value = a_value;
-			//TODO: set month toggles
+			for (int i = 0; i < m_monthToggles.Length; i++)
+			{
+				m_monthToggles[i].Value = a_value;
+			}
 			m_ignoreCallback = false;
 		}
 

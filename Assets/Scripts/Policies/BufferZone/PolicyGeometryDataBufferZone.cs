@@ -13,8 +13,17 @@ namespace MSP2050.Scripts
 		public float radius;
 
 		public PolicyGeometryDataBufferZone()
-		{ 
-		
+		{
+			policy_type = PolicyManager.BUFFER_ZONE_POLICY_NAME;
+			fleets = new Dictionary<int, Dictionary<int, Months>>();
+			radius = 0f;
+		}
+
+		public PolicyGeometryDataBufferZone(Dictionary<int, Dictionary<int, Months>> a_fleets, float a_radius)
+		{
+			policy_type = PolicyManager.BUFFER_ZONE_POLICY_NAME;
+			fleets = a_fleets;
+			radius = a_radius;
 		}
 
 		public PolicyGeometryDataBufferZone(string a_jsonData)
@@ -114,7 +123,7 @@ namespace MSP2050.Scripts
 				}
 				fleetsCopy.Add(kvp.Key, newValue);
 			}
-			return new PolicyGeometryDataBufferZone() { fleets = fleetsCopy, policy_type = this.policy_type, radius = this.radius };
+			return new PolicyGeometryDataBufferZone(fleetsCopy, radius);
 		}
 
 		private class BufferZoneData
