@@ -9,13 +9,13 @@ namespace MSP2050.Scripts
 	public class PolicyWindowContentBufferZone : AGeometryPolicyWindowContent
 	{
 		[SerializeField] CustomInputField m_radiusInput;
-		[SerializeField] List<FleetMixedToggleGroup> m_fleetGroups;
 		[SerializeField] GameObject m_fleetGroupPrefab;
 		[SerializeField] Transform m_fleetGroupParent;
 
 		bool m_initialised;
 		bool m_ignoreCallback;
 		float m_currentRadius;
+		List<FleetMixedToggleGroup> m_fleetGroups;
 		Dictionary<Entity, PolicyGeometryDataBufferZone> m_originalValues;
 		Dictionary<Entity, PolicyGeometryDataBufferZone> m_newValues;
 

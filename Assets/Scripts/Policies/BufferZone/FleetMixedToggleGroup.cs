@@ -78,6 +78,34 @@ namespace MSP2050.Scripts
 			DetermineFleetToggle();
 		}
 
+		public void SetValues(Dictionary<Entity, PolicyGeometryDataSeasonalClosure> a_values)
+		{
+			m_ignoreCallback = true;
+			int i = 0; //Not all countries appear in list, so keep seperate
+			foreach (Team team in SessionManager.Instance.GetTeams())
+			{
+				if (team.IsManager)
+					continue;
+
+				//Collect all values for country
+				List<Months> countryValuesResult = new List<Months>();
+				foreach (var entityVP in a_values)
+				{
+					if (entityVP.Value.fleets.TryGetValue(m_gearId, out Dictionary<int, Months> fleetCountry))
+					{
+						if (fleetCountry.TryGetValue(team.ID, out Months countryMonths))
+						{
+							countryValuesResult.Add(countryMonths);
+						}
+					}
+				}
+				m_countryToggles[i].SetValue(countryValuesResult);
+				i++;
+			}
+			m_ignoreCallback = false;
+			DetermineFleetToggle();
+		}
+
 		void OnExpandToggled(bool a_newValue)
 		{
 			m_contentContainer.SetActive(a_newValue);

@@ -502,6 +502,7 @@ namespace MSP2050.Scripts
 			List<List<EntityType>> selectedEntityTypes = new List<List<EntityType>>();
 			int? selectedTeam = null;
 			List<Dictionary<EntityPropertyMetaData, string>> selectedParams = new List<Dictionary<EntityPropertyMetaData, string>>();
+			List<Entity> entities = new List<Entity>(m_selection.Count);
 
 			foreach (PointSubEntity pse in m_selection)
 			{
@@ -517,12 +518,13 @@ namespace MSP2050.Scripts
 						parameters.Add(p, pse.m_entity.GetPropertyMetaData(p));
 				}
 				selectedParams.Add(parameters);
-
+				entities.Add(pse.m_entity);
 			}
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
-				selectedParams);
+				selectedParams,
+				entities);
 		}
 	}
 }

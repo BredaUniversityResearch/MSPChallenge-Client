@@ -47,7 +47,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_parameterParent;
 		[SerializeField] GameObject m_parameterPrefab;
 		[SerializeField] GameObject m_geometryPolicyPrefab;
-		[SerializeField] AGeometryPolicyWindowContent m_geometryPolicyWindow;
+		[SerializeField] AGeometryPolicyWindow m_geometryPolicyWindow;
 
 		public ParameterChangeCallback m_parameterChangeCallback;
 		public GeometryPolicyChangeCallback m_geometryPolicyChangeCallback;

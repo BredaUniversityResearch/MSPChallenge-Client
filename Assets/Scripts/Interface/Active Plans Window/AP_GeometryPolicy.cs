@@ -18,7 +18,7 @@ namespace MSP2050.Scripts
 		public AP_GeometryTool.GeometryPolicyChangeCallback m_changedCallback;
 
 		private EntityPropertyMetaData m_parameter;
-		private AGeometryPolicyWindowContent m_geometryPolicyWindow;
+		private AGeometryPolicyWindow m_geometryPolicyWindow;
 		private PolicyDefinition m_policyDefinition;
 		private Dictionary<Entity, string> m_policyData;
 		private List<Entity> m_geometry;
@@ -69,7 +69,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetValue(Dictionary<Entity,string> a_values, List<Entity> a_geometry, AGeometryPolicyWindowContent a_geometryPolicyWindow)
+		public void SetValue(Dictionary<Entity,string> a_values, List<Entity> a_geometry, AGeometryPolicyWindow a_geometryPolicyWindow)
 		{
 			m_geometryPolicyWindow = a_geometryPolicyWindow;
 			m_policyData = a_values;

@@ -32,7 +32,7 @@ namespace MSP2050.Scripts
 			BufferZoneData data = JsonConvert.DeserializeObject<BufferZoneData>(a_jsonData);
 			radius = data.radius;
 			fleets = new Dictionary<int, Dictionary<int, Months>>();
-			foreach(FleetItem item in data.items)
+			foreach(FleetClosureData item in data.items)
 			{
 				foreach(int fleetId in item.fleets)
 				{
@@ -53,7 +53,7 @@ namespace MSP2050.Scripts
 		{
 			//Convert from client format into server format
 			BufferZoneData data = new BufferZoneData();
-			data.items = new List<FleetItem>();
+			data.items = new List<FleetClosureData>();
 			data.radius = this.radius;
 
 			//Group fleets based on months selected
@@ -63,7 +63,7 @@ namespace MSP2050.Scripts
 				{
 					int fleetId = PolicyLogicFishing.Instance.GetFleetId(countryMonth.Key, kvp.Key);
 					bool existing = false;
-					foreach(FleetItem item in data.items)
+					foreach(FleetClosureData item in data.items)
 					{
 						if(item.months == countryMonth.Value)
 						{
@@ -74,7 +74,7 @@ namespace MSP2050.Scripts
 					}
 					if(!existing)
 					{
-						data.items.Add(new FleetItem() { fleets = new List<int>() { fleetId }, months = countryMonth.Value });
+						data.items.Add(new FleetClosureData() { fleets = new List<int>() { fleetId }, months = countryMonth.Value });
 					}
 				}
 			}
@@ -129,13 +129,13 @@ namespace MSP2050.Scripts
 		private class BufferZoneData
 		{
 			public float radius;
-			public List<FleetItem> items;
+			public List<FleetClosureData> items;
 		}
+	}
 
-		private class FleetItem
-		{
-			public List<int> fleets;
-			public Months months;
-		}
+	public class FleetClosureData
+	{
+		public List<int> fleets;
+		public Months months;
 	}
 }
