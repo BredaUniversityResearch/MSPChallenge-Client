@@ -969,6 +969,20 @@ namespace MSP2050.Scripts
 			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
+		public override void HandleGeometryPolicyChange(EntityPropertyMetaData a_policy, Dictionary<Entity, string> a_newValues)
+		{
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			foreach (LineStringSubEntity subEntity in m_selectedSubEntities)
+			{
+				if (a_newValues.TryGetValue(subEntity.m_entity, out string value))
+				{
+					LineStringSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
+					subEntityToModify.m_entity.SetPropertyMetaData(a_policy, value);
+				}
+			}
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+		}
+
 		public override void ExitState(Vector3 a_currentMousePosition)
 		{
 			foreach (LineStringSubEntity lsse in m_selectedSubEntities)

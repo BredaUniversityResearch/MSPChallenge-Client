@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
-	public abstract class AGeometryPolicyWindow : MonoBehaviour
+	public class AGeometryPolicyWindow : MonoBehaviour
 	{
 		[SerializeField] GameObject m_buttonContainer;
 		[SerializeField] Button m_closeButton;
