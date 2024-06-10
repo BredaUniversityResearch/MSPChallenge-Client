@@ -11,12 +11,11 @@ namespace MSP2050.Scripts
 		[SerializeField] Toggle m_barToggle;
 		[SerializeField] GameObject m_contentContainer;
 		[SerializeField] TMPro.TextMeshProUGUI m_nameText;
-		[SerializeField] ToggleMixedValue[] m_monthToggles;
+		[SerializeField] MonthsMixedToggleGroup m_monthToggles;
 
 		bool m_ignoreCallback;
-		Action<int, int, bool> m_countryCallback;
-		Action<int, int, int, bool> m_monthCallback;
-		Action<bool?> m_toggleChangedCallback;
+		Action<int, bool> m_countryCallback;
+		Action<int, int, bool> m_monthCallback;
 		int m_countryId;
 		int m_gearId;
 
@@ -26,18 +25,13 @@ namespace MSP2050.Scripts
 		{
 			m_valueToggle.m_onValueChangeCallback = OnValueToggleChanged;
 			m_barToggle.onValueChanged.AddListener(OnExpandToggled);
-			for(int i = 0; i < m_monthToggles.Length; i++)
-			{
-				int month = i;
-				m_monthToggles[i].m_onValueChangeCallback = (b) => OnMonthToggleChanged(b, month);
-			}
+			m_monthToggles.m_monthChangedCallback = OnMonthToggleChanged;
 		}
 
-		public void SetCountry(int a_gearId, Team a_country, 
-			Action<int, int, bool> a_countryCallback,
-			Action<int, int, int, bool> a_monthCallback)
+		public void SetCountry(Team a_country, 
+			Action<int, bool> a_countryCallback,
+			Action<int, int, bool> a_monthCallback)
 		{
-			m_gearId = a_gearId;
 			m_countryCallback = a_countryCallback;
 			m_monthCallback = a_monthCallback;
 			m_nameText.text = a_country.name;
@@ -48,29 +42,9 @@ namespace MSP2050.Scripts
 
 		public bool? SetValue(List<Months> a_months)
 		{
-			if (a_months.Count == 0)
-			{
-				SetValue(false);
-			}
-			else
-			{
-				m_ignoreCallback = true;
-				for (int i = 0; i < m_monthToggles.Length; i++)
-				{
-					bool? monthValue = a_months[0].MonthSet(i);//TODO: is Month+1 needed here?
-					for (int j = 1; j < a_months.Count; j++)
-					{
-						if (a_months[j].MonthSet(i) != monthValue.Value)//TODO: is Month+1 needed here?
-						{
-							monthValue = null;
-							break;
-						}
-					}
-					m_monthToggles[i].Value = monthValue;
-				}
-				DetermineCountryToggle();
-				m_ignoreCallback = false;
-			}
+			m_ignoreCallback = true;
+			m_valueToggle.Value = m_monthToggles.SetValue(a_months);
+			m_ignoreCallback = false;
 			return m_valueToggle.Value;
 		}
 
@@ -78,10 +52,7 @@ namespace MSP2050.Scripts
 		{
 			m_ignoreCallback = true;
 			m_valueToggle.Value = a_value;
-			for (int i = 0; i < m_monthToggles.Length; i++)
-			{
-				m_monthToggles[i].Value = a_value;
-			}
+			m_monthToggles.CombinedValue = a_value;
 			m_ignoreCallback = false;
 		}
 
@@ -96,13 +67,10 @@ namespace MSP2050.Scripts
 				return;
 
 			m_ignoreCallback = true;
-			foreach(ToggleMixedValue t in m_monthToggles)
-			{
-				t.Value = a_newValue;
-			}
+			m_monthToggles.CombinedValue = a_newValue;
 			m_ignoreCallback = false;
 
-			m_countryCallback.Invoke(m_gearId, m_countryId, a_newValue);
+			m_countryCallback.Invoke(m_countryId, a_newValue);
 		}
 
 		void OnMonthToggleChanged(bool a_newValue, int a_month)
@@ -110,32 +78,10 @@ namespace MSP2050.Scripts
 			if (m_ignoreCallback)
 				return;
 
-			DetermineCountryToggle();
-			m_monthCallback.Invoke(m_gearId, m_countryId, a_month, a_newValue);
-		}
-
-		void DetermineCountryToggle()
-		{
 			m_ignoreCallback = true;
-			if (!m_monthToggles[0].Value.HasValue)
-			{
-				m_valueToggle.Value = null;
-				m_ignoreCallback = false;
-				return;
-			}
-
-			bool reference = m_monthToggles[0].Value.Value;
-			for (int i = 1; i < m_monthToggles.Length; i++)
-			{
-				if (!m_monthToggles[i].Value.HasValue || m_monthToggles[i].Value.Value != reference)
-				{
-					m_valueToggle.Value = null;
-					m_ignoreCallback = false;
-					return;
-				}
-			}
-			m_valueToggle.Value = reference;
+			m_valueToggle.Value = m_monthToggles.CombinedValue;
 			m_ignoreCallback = false;
+			m_monthCallback.Invoke(m_countryId, a_month, a_newValue);
 		}
 	}
 }

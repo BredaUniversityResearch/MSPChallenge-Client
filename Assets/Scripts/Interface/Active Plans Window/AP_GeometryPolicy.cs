@@ -10,10 +10,9 @@ namespace MSP2050.Scripts
 	public class AP_GeometryPolicy : MonoBehaviour
 	{
 		[SerializeField] private Button m_barButton = null;
-		[SerializeField] private Toggle m_policyToggle = null;
-		[SerializeField] private GameObject m_policyToggleMixed = null;
+		[SerializeField] private ToggleMixedValue m_policyToggle = null;
 		[SerializeField] private TextMeshProUGUI m_nameText = null;
-		[SerializeField] private Image m_icon = null;
+		//[SerializeField] private Image m_icon = null;
 
 		public AP_GeometryTool.GeometryPolicyChangeCallback m_changedCallback;
 
@@ -27,7 +26,7 @@ namespace MSP2050.Scripts
 		void Start()
 		{
 			m_barButton.onClick.AddListener(OnBarButtonClick);
-			m_policyToggle.onValueChanged.AddListener(OnToggleChange);
+			m_policyToggle.m_onValueChangeCallback = OnToggleChange;
 		}
 
 		void OnBarButtonClick()
@@ -41,22 +40,13 @@ namespace MSP2050.Scripts
 		{
 			if (m_ignoreCallbacks)
 				return;
-			if(m_policyToggleMixed.activeSelf)
-			{
-				string emptyPolicy = JsonConvert.SerializeObject(Activator.CreateInstance(m_policyDefinition.m_generalUpdateType));
-				foreach(Entity e in m_geometry)
-				{
-					if(!m_policyData.TryGetValue(e, out string value) || value == null)
-						m_policyData[e] = emptyPolicy;
-				}
-				m_policyToggleMixed.SetActive(false);
-			}
-			else if(a_newValue)
+			if(a_newValue)
 			{
 				string emptyPolicy = JsonConvert.SerializeObject(Activator.CreateInstance(m_policyDefinition.m_generalUpdateType));
 				foreach (Entity e in m_geometry)
 				{
-					m_policyData[e] = emptyPolicy;
+					if (!m_policyData.TryGetValue(e, out string value) || value == null)
+						m_policyData[e] = emptyPolicy;
 				}
 			}
 			else
@@ -94,27 +84,24 @@ namespace MSP2050.Scripts
 			m_ignoreCallbacks = true;
 			if (m_policyData.Count == 0)
 			{
-				m_policyToggle.isOn = false;
-				m_policyToggleMixed.SetActive(false);
+				m_policyToggle.Value = false;
 			}
 			else if (m_policyData.Count != m_geometry.Count)
 			{
-				m_policyToggle.isOn = false;
-				m_policyToggleMixed.SetActive(true);
+				m_policyToggle.Value = null;
 			}
 			else
 			{
-				m_policyToggle.isOn = true;
-				m_policyToggleMixed.SetActive(false);
+				bool mixed = false;
 				foreach(var kvp in m_policyData)
 				{
-					if (kvp.Value == null) //Check if any policy data is set to null
+					if (string.IsNullOrEmpty(kvp.Value)) //Check if any policy data is set to null
 					{
-						m_policyToggle.isOn = false;
-						m_policyToggleMixed.SetActive(true);
+						mixed = true;
 						break;
 					}
 				}
+				m_policyToggle.Value = mixed ? null : true;
 			}
 			m_ignoreCallbacks = false;
 		}
@@ -122,12 +109,12 @@ namespace MSP2050.Scripts
 		public void SetInteractable(bool value, bool reset = true)
 		{
 			m_barButton.interactable = value;
-			m_policyToggle.interactable = value;
+			m_policyToggle.Interactable = value;
 
 			if (reset)
 			{
 				m_ignoreCallbacks = true;
-				m_policyToggle.isOn = false;
+				m_policyToggle.Value = false;
 				m_ignoreCallbacks = false;
 			}
 		}
@@ -140,10 +127,10 @@ namespace MSP2050.Scripts
 
 			m_nameText.text = a_parameter.DisplayName;
 			SetInteractable(false);
-			if (!string.IsNullOrEmpty(a_parameter.SpriteName))
-				m_icon.sprite = Resources.Load<Sprite>(a_parameter.SpriteName);
-			else
-				m_icon.gameObject.SetActive(false);
+			//if (!string.IsNullOrEmpty(a_parameter.SpriteName))
+			//	m_icon.sprite = Resources.Load<Sprite>(a_parameter.SpriteName);
+			//else
+			//	m_icon.gameObject.SetActive(false);
 		}
 	}
 }

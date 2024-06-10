@@ -32,6 +32,15 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public bool Interactable
+		{
+			get => m_toggle.interactable;
+			set 
+			{
+				m_toggle.interactable = value;
+			}
+		}
+
 		private void Start()
 		{
 			m_toggle.onValueChanged.AddListener(OnToggleClicked);
