@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		public const string SHIPPING_POLICY_NAME = "shipping";
 		public const string SEASONAL_CLOSURE_POLICY_NAME = "seasonal_closure";
 		public const string BUFFER_ZONE_POLICY_NAME = "buffer_zone";
+		public const string ECO_GEAR_POLICY_NAME = "eco_gear";
 
 		private static PolicyManager singleton;
 		public static PolicyManager Instance
@@ -92,23 +93,31 @@ namespace MSP2050.Scripts
 				m_windowPrefab = Resources.Load<GameObject>("AP_PolicyShipping_PRFB"),
 				m_policyIcon = Resources.Load<Sprite>("Icons/shipping")
 			});
+			m_policyDefinitions.Add(ECO_GEAR_POLICY_NAME, new PolicyDefinition
+			{
+				m_name = ECO_GEAR_POLICY_NAME,
+				m_displayName = "Ecological Fishing Gear",
+				m_planUpdateType = typeof(PolicyUpdateEcoGearPlan),
+				m_logicType = typeof(PolicyLogicEcoGear),
+				m_settingsType = typeof(APolicyData),
+				m_windowPrefab = Resources.Load<GameObject>("AP_PolicyEcoGear_PRFB"),
+				m_policyIcon = Resources.Load<Sprite>("Icons/shipping")
+			});
 			m_policyDefinitions.Add(SEASONAL_CLOSURE_POLICY_NAME, new PolicyDefinition
 			{
 				m_name = SEASONAL_CLOSURE_POLICY_NAME,
-				m_displayName = "Seasonal closure",
+				m_displayName = "Fleet Bans",
 				m_geometryPolicy = true,
 				m_planUpdateType = typeof(PolicyGeometryDataSeasonalClosure),
-				m_windowPrefab = Resources.Load<GameObject>("PolicyWindowSeasonalClosure"),
-				m_policyIcon = Resources.Load<Sprite>("Icons/seasonal_closure")
+				m_windowPrefab = Resources.Load<GameObject>("GeometryPolicyContentSeasonalClosure_PRFB")
 			});
 			m_policyDefinitions.Add(BUFFER_ZONE_POLICY_NAME, new PolicyDefinition
 			{
 				m_name = BUFFER_ZONE_POLICY_NAME,
-				m_displayName = "Buffer zone",
+				m_displayName = "Buffer Zone",
 				m_geometryPolicy = true,
 				m_planUpdateType = typeof(PolicyGeometryDataBufferZone),
-				m_windowPrefab = Resources.Load<GameObject>("PolicyWindowBufferZone"),
-				m_policyIcon = Resources.Load<Sprite>("Icons/buffer_zone")
+				m_windowPrefab = Resources.Load<GameObject>("GeometryPolicyContentBufferZone_PRFB")
 			});
 		}
 

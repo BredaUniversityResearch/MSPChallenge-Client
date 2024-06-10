@@ -41,6 +41,17 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
+		public List<CountryFleetInfo> GetFleetsForCountry(int a_countryId)
+		{
+			List<CountryFleetInfo> result = new List<CountryFleetInfo>();
+			for (int i = 0; i < m_fleetInfo.fleets.Length; i++)
+			{
+				if (m_fleetInfo.fleets[i].country_id == a_countryId)
+					result.Add(m_fleetInfo.fleets[i]);
+			}
+			return result;
+		}
+
 		public int GetFleetId(int a_countryId, int a_gearId)
 		{
 			for(int i = 0; i < m_fleetInfo.fleets.Length; i++)
