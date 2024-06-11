@@ -465,6 +465,9 @@ namespace MSP2050.Scripts
 				{
 					if (kvp.Key.IsPolicy)
 					{
+						//Dictionary<Entity, string> data = new Dictionary<Entity, string>() { { entities[0], kvp.Value } };
+						//if (!string.IsNullOrEmpty(kvp.Value))
+						//	data.Add(entities[0], kvp.Value);
 						m_geometryPolicies[kvp.Key].SetValue(new Dictionary<Entity, string>() { { entities[0], kvp.Value } }, entities, m_geometryPolicyWindow);
 					}
 					else

@@ -13,6 +13,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_confirmButton;
 		[SerializeField] Button m_cancelButton;
 		[SerializeField] Transform m_contentParent;
+		[SerializeField] TextMeshProUGUI m_windowTitle;
 
 		AGeometryPolicyWindowContent m_content;
 		Action<Dictionary<Entity, string>> m_changedCallback;
@@ -27,6 +28,8 @@ namespace MSP2050.Scripts
 		public void OpenToGeometry(PolicyDefinition a_policyDefinition, Dictionary<Entity, string> a_values, List<Entity> a_geometry, Action<Dictionary<Entity, string>> a_changedCallback)
 		{
 			m_changedCallback = a_changedCallback;
+			m_windowTitle.text = a_policyDefinition.m_displayName;
+			Destroy(m_content.gameObject);
 			m_content = Instantiate(a_policyDefinition.m_windowPrefab, m_contentParent).GetComponent<AGeometryPolicyWindowContent>();
 			if (Main.InEditMode)
 			{
@@ -39,6 +42,7 @@ namespace MSP2050.Scripts
 				m_closeButton.gameObject.SetActive(true);
 			}
 			m_content.SetContent(a_values, a_geometry);
+			gameObject.SetActive(true);
 		}
 
 		void OnConfirm()

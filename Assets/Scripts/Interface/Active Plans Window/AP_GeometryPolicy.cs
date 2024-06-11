@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 				return;
 			if(a_newValue)
 			{
-				string emptyPolicy = JsonConvert.SerializeObject(Activator.CreateInstance(m_policyDefinition.m_generalUpdateType));
+				string emptyPolicy = JsonConvert.SerializeObject(Activator.CreateInstance(m_policyDefinition.m_planUpdateType));
 				foreach (Entity e in m_geometry)
 				{
 					if (!m_policyData.TryGetValue(e, out string value) || value == null)
@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 				{
 					if (string.IsNullOrEmpty(kvp.Value)) //Check if any policy data is set to null
 					{
-						mixed = true;
+						mixed = true; //TODO: check if all null/empty or with value
 						break;
 					}
 				}

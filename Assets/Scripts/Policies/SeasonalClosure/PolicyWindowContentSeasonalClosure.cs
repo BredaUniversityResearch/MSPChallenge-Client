@@ -128,16 +128,21 @@ namespace MSP2050.Scripts
 			m_newValues = new Dictionary<Entity, PolicyGeometryDataSeasonalClosure>();
 			foreach (var kvp in a_values)
 			{
-				PolicyGeometryDataSeasonalClosure data = new PolicyGeometryDataSeasonalClosure(kvp.Value);
+				PolicyGeometryDataSeasonalClosure data = null;
+				if(!string.IsNullOrEmpty(kvp.Value))
+				{
+					data = new PolicyGeometryDataSeasonalClosure(kvp.Value);
+				}
 				m_originalValues.Add(kvp.Key, data);
-				m_newValues.Add(kvp.Key, data.GetValueCopy());
+				m_newValues.Add(kvp.Key, data?.GetValueCopy());
 			}
 			foreach (Entity e in a_geometry)
 			{
 				if (!a_values.ContainsKey(e))
 				{
 					//Create empty entries for geometry that doesnt have a value yet
-					m_newValues.Add(e, new PolicyGeometryDataSeasonalClosure());
+					//m_newValues.Add(e, new PolicyGeometryDataSeasonalClosure());
+					m_newValues.Add(e, null);
 				}
 			}
 			foreach (FleetMixedToggleGroup fleetGroup in m_fleetGroups)

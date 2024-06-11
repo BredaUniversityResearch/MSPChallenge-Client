@@ -154,25 +154,30 @@ namespace MSP2050.Scripts
 			bool first = true;
 			foreach(var kvp in a_values)
 			{
-				PolicyGeometryDataBufferZone data = new PolicyGeometryDataBufferZone(kvp.Value);
+				PolicyGeometryDataBufferZone data = null;
+				if (!string.IsNullOrEmpty(kvp.Value))
+				{
+					data = new PolicyGeometryDataBufferZone(kvp.Value);
+					if(first)
+					{
+						m_currentRadius = data.radius;
+						first = false;
+					}
+					else if(m_currentRadius >= 0 && Mathf.Abs(data.radius - m_currentRadius) > 0.01f)
+					{
+						m_currentRadius = Mathf.NegativeInfinity;
+					}
+				}
 				m_originalValues.Add(kvp.Key, data);
-				m_newValues.Add(kvp.Key, data.GetValueCopy());
-				if(first)
-				{
-					m_currentRadius = data.radius;
-					first = false;
-				}
-				else if(m_currentRadius >= 0 && Mathf.Abs(data.radius - m_currentRadius) > 0.01f)
-				{
-					m_currentRadius = Mathf.NegativeInfinity;
-				}
+				m_newValues.Add(kvp.Key, data?.GetValueCopy());
 			}
 			foreach(Entity e in a_geometry)
 			{
 				if (!a_values.ContainsKey(e))
 				{
 					//Create empty entries for geometry that doesnt have a value yet
-					m_newValues.Add(e, new PolicyGeometryDataBufferZone());
+					//m_newValues.Add(e, new PolicyGeometryDataBufferZone());
+					m_newValues.Add(e, null);
 				}
 			}
 			foreach(FleetMixedToggleGroup fleetGroup in m_fleetGroups)

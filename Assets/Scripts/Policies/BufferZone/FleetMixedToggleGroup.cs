@@ -79,7 +79,7 @@ namespace MSP2050.Scripts
 				List<Months> countryValuesResult = new List<Months>();
 				foreach(var entityVP in a_values)
 				{
-					if(entityVP.Value.fleets.TryGetValue(m_gearId, out Dictionary<int, Months> fleetCountry))
+					if(entityVP.Value != null && entityVP.Value.fleets.TryGetValue(m_gearId, out Dictionary<int, Months> fleetCountry))
 					{
 						if (fleetCountry.TryGetValue(m_countryFleetInfo[i].country_id, out Months countryMonths))
 						{
@@ -112,7 +112,7 @@ namespace MSP2050.Scripts
 				List<Months> countryValuesResult = new List<Months>();
 				foreach (var entityVP in a_values)
 				{
-					if (entityVP.Value.fleets.TryGetValue(m_gearId, out Dictionary<int, Months> fleetCountry))
+					if (entityVP.Value != null && entityVP.Value.fleets.TryGetValue(m_gearId, out Dictionary<int, Months> fleetCountry))
 					{
 						if (fleetCountry.TryGetValue(m_countryFleetInfo[i].country_id, out Months countryMonths))
 						{
