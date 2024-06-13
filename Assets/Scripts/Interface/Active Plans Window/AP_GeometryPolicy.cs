@@ -92,16 +92,22 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				bool mixed = false;
+				bool? result = null;
+				bool first = true;
 				foreach(var kvp in m_policyData)
 				{
-					if (string.IsNullOrEmpty(kvp.Value)) //Check if any policy data is set to null
+					if(first)
 					{
-						mixed = true; //TODO: check if all null/empty or with value
+						result = !string.IsNullOrEmpty(kvp.Value);
+						first = false;
+					}
+					else if (string.IsNullOrEmpty(kvp.Value) == result.Value) //Check if any policy data is set to null
+					{
+						result = null;
 						break;
 					}
 				}
-				m_policyToggle.Value = mixed ? null : true;
+				m_policyToggle.Value = result;
 			}
 			m_ignoreCallbacks = false;
 		}

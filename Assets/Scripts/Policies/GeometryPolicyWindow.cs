@@ -29,7 +29,8 @@ namespace MSP2050.Scripts
 		{
 			m_changedCallback = a_changedCallback;
 			m_windowTitle.text = a_policyDefinition.m_displayName;
-			Destroy(m_content.gameObject);
+			if(m_content != null)
+				Destroy(m_content.gameObject);
 			m_content = Instantiate(a_policyDefinition.m_windowPrefab, m_contentParent).GetComponent<AGeometryPolicyWindowContent>();
 			if (Main.InEditMode)
 			{

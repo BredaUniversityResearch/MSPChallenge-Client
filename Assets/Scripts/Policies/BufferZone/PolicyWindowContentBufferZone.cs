@@ -130,9 +130,9 @@ namespace MSP2050.Scripts
 			Dictionary<Entity, string> results = new Dictionary<Entity, string>();
 			foreach (var kvp in m_newValues)
 			{
-				if(m_originalValues.TryGetValue(kvp.Key, out var newValue))
+				if(m_originalValues.TryGetValue(kvp.Key, out var oldValue))
 				{
-					if(!newValue.ContentIdentical(kvp.Value))
+					if(!oldValue.ContentIdentical(kvp.Value))
 					{
 						results.Add(kvp.Key, kvp.Value.GetJson());
 					}
@@ -154,10 +154,10 @@ namespace MSP2050.Scripts
 			bool first = true;
 			foreach(var kvp in a_values)
 			{
-				PolicyGeometryDataBufferZone data = null;
-				if (!string.IsNullOrEmpty(kvp.Value))
-				{
-					data = new PolicyGeometryDataBufferZone(kvp.Value);
+				PolicyGeometryDataBufferZone data = new PolicyGeometryDataBufferZone(kvp.Value);
+				//if (!string.IsNullOrEmpty(kvp.Value))
+				//{
+				//	data = new PolicyGeometryDataBufferZone(kvp.Value);
 					if(first)
 					{
 						m_currentRadius = data.radius;
@@ -167,7 +167,7 @@ namespace MSP2050.Scripts
 					{
 						m_currentRadius = Mathf.NegativeInfinity;
 					}
-				}
+				//}
 				m_originalValues.Add(kvp.Key, data);
 				m_newValues.Add(kvp.Key, data?.GetValueCopy());
 			}
@@ -176,8 +176,8 @@ namespace MSP2050.Scripts
 				if (!a_values.ContainsKey(e))
 				{
 					//Create empty entries for geometry that doesnt have a value yet
-					//m_newValues.Add(e, new PolicyGeometryDataBufferZone());
-					m_newValues.Add(e, null);
+					m_newValues.Add(e, new PolicyGeometryDataBufferZone());
+					//m_newValues.Add(e, null);
 				}
 			}
 			foreach(FleetMixedToggleGroup fleetGroup in m_fleetGroups)

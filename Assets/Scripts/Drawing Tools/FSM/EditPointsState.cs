@@ -482,14 +482,21 @@ namespace MSP2050.Scripts
 
 		public override void HandleGeometryPolicyChange(EntityPropertyMetaData a_policy, Dictionary<Entity, string> a_newValues)
 		{
-			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			List<PointSubEntity> subEntitiesWithDifferentParams = new List<PointSubEntity>();
+
 			foreach (PointSubEntity subEntity in m_selection)
 			{
 				if (a_newValues.TryGetValue(subEntity.m_entity, out string value))
 				{
-					PointSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
-					subEntityToModify.m_entity.SetPropertyMetaData(a_policy, value);
+					subEntitiesWithDifferentParams.Add(subEntity);
 				}
+			}
+
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			foreach (PointSubEntity subEntity in subEntitiesWithDifferentParams)
+			{
+				PointSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
+				subEntityToModify.m_entity.SetPropertyMetaData(a_policy, a_newValues[subEntity.m_entity]);
 			}
 			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}

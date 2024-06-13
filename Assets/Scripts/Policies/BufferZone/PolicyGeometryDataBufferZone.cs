@@ -28,6 +28,14 @@ namespace MSP2050.Scripts
 
 		public PolicyGeometryDataBufferZone(string a_jsonData)
 		{
+			if(string.IsNullOrEmpty(a_jsonData))
+			{
+				policy_type = PolicyManager.BUFFER_ZONE_POLICY_NAME;
+				fleets = new Dictionary<int, Dictionary<int, Months>>();
+				radius = 0f;
+				return;
+			}
+
 			//Convert from server format into client format
 			BufferZoneData data = JsonConvert.DeserializeObject<BufferZoneData>(a_jsonData);
 			radius = data.radius;

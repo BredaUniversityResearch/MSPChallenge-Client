@@ -51,6 +51,13 @@ namespace MSP2050.Scripts
 
 		public PolicyGeometryDataSeasonalClosure(string a_jsonData)
 		{
+			if(string.IsNullOrEmpty(a_jsonData))
+			{
+				policy_type = PolicyManager.SEASONAL_CLOSURE_POLICY_NAME;
+				fleets = new Dictionary<int, Dictionary<int, Months>>();
+				return;
+			}
+
 			//Convert from server format into client format
 			SeasonalClosureData data = JsonConvert.DeserializeObject<SeasonalClosureData>(a_jsonData);
 			fleets = new Dictionary<int, Dictionary<int, Months>>();
@@ -104,7 +111,7 @@ namespace MSP2050.Scripts
 
 		public override bool ContentIdentical(APolicyData a_other)
 		{
-			PolicyGeometryDataBufferZone other = (PolicyGeometryDataBufferZone)a_other;
+			PolicyGeometryDataSeasonalClosure other = (PolicyGeometryDataSeasonalClosure)a_other;
 			if (other == null || fleets.Count != other.fleets.Count)
 				return false;
 			foreach (var kvp in fleets)
