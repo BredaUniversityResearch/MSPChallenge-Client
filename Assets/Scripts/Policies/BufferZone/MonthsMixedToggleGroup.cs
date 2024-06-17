@@ -83,7 +83,7 @@ namespace MSP2050.Scripts
 					m_monthToggles[i].Value = monthValue;
 					if (i == 0)
 						totalValue = monthValue;
-					else if (!totalValue.HasValue || monthValue.HasValue || totalValue.Value != monthValue.Value)
+					else if (!totalValue.HasValue || !monthValue.HasValue || totalValue.Value != monthValue.Value)
 						totalValue = null;
 				}
 				m_ignoreCallback = false;

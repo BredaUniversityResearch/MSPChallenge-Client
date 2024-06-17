@@ -43,11 +43,9 @@ namespace MSP2050.Scripts
 						countryDict = new Dictionary<int, Months>();
 						entityVP.Value.fleets.Add(a_gearId, countryDict);
 					}
-					foreach (Team team in SessionManager.Instance.GetTeams())
+					foreach (var countryFleet in PolicyLogicFishing.Instance.GetFleetsForGear(a_gearId))
 					{
-						if (team.IsManager)
-							continue;
-						countryDict[team.ID] = (Months)int.MaxValue;
+						countryDict[countryFleet.country_id] = (Months)int.MaxValue;
 					}
 				}
 			}
@@ -97,6 +95,10 @@ namespace MSP2050.Scripts
 					{
 						countryDict[a_countryId] = (Months)(1 << a_month);//TODO: is Month+1 needed here?
 					}
+				}
+				else if (a_value)
+				{
+					entityVP.Value.fleets.Add(a_gearId, new Dictionary<int, Months> { { a_countryId, (Months)(1 << a_month) } });
 				}
 			}
 		}
