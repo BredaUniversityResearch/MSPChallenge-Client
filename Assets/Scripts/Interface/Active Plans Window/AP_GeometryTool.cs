@@ -452,6 +452,9 @@ namespace MSP2050.Scripts
 
 		public void SetSelectedParameters(List<Dictionary<EntityPropertyMetaData, string>> selectedParams, List<Entity> entities)
 		{
+			//TODO: month values not correctly mixed (~) when geom without policy selected
+			//TODO: remove confimation in geom policy window
+			m_geometryPolicyWindow.CloseWindow();
 			if (selectedParams == null || selectedParams.Count == 0)
 			{
 				//Deselect

@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 {
 	public class AP_GeometryPolicy : MonoBehaviour
 	{
-		[SerializeField] private Button m_barButton = null;
+		[SerializeField] private Toggle m_barToggle = null;
 		[SerializeField] private ToggleMixedValue m_policyToggle = null;
 		[SerializeField] private TextMeshProUGUI m_nameText = null;
 		//[SerializeField] private Image m_icon = null;
@@ -25,38 +25,54 @@ namespace MSP2050.Scripts
 
 		void Start()
 		{
-			m_barButton.onClick.AddListener(OnBarButtonClick);
+			m_barToggle.onValueChanged.AddListener(OnBarToggleChange);
 			m_policyToggle.m_onValueChangeCallback = OnToggleChange;
 		}
 
-		void OnBarButtonClick()
+		void OnBarToggleChange(bool a_value)
 		{
 			if (m_ignoreCallbacks)
 				return;
-			m_geometryPolicyWindow.OpenToGeometry(m_policyDefinition, m_policyData, m_geometry, OnPolicyValuesChanged);
+			if (a_value)
+			{
+				m_geometryPolicyWindow.OpenToGeometry(m_policyDefinition, m_policyData, m_geometry, OnPolicyValuesChanged);
+			}
+			else
+			{
+				m_geometryPolicyWindow.CloseWindow();
+			}
 		}
 
 		void OnToggleChange(bool a_newValue)
 		{
 			if (m_ignoreCallbacks)
 				return;
-			if(a_newValue)
+			Dictionary<Entity, string> changes = new Dictionary<Entity, string>();
+			if (a_newValue)
 			{
-				string emptyPolicy = JsonConvert.SerializeObject(Activator.CreateInstance(m_policyDefinition.m_planUpdateType));
+				string emptyPolicy = ((APolicyData)Activator.CreateInstance(m_policyDefinition.m_planUpdateType)).GetJson();
 				foreach (Entity e in m_geometry)
 				{
 					if (!m_policyData.TryGetValue(e, out string value) || value == null)
+					{
 						m_policyData[e] = emptyPolicy;
+						changes.Add(e, emptyPolicy);
+					}
 				}
 			}
 			else
 			{
 				foreach (Entity e in m_geometry)
 				{
-					if(m_policyData.ContainsKey(e))
+					if (m_policyData.ContainsKey(e))
+					{
 						m_policyData[e] = null;
+						changes.Add(e, null);
+					}
 				}
 			}
+			if(changes.Count > 0)
+				m_changedCallback.Invoke(m_parameter, changes);
 		}
 
 		public void SetValue(Dictionary<Entity,string> a_values, List<Entity> a_geometry, AGeometryPolicyWindow a_geometryPolicyWindow)
@@ -64,7 +80,9 @@ namespace MSP2050.Scripts
 			m_geometryPolicyWindow = a_geometryPolicyWindow;
 			m_policyData = a_values;
 			m_geometry = a_geometry;
-
+			m_ignoreCallbacks = true;
+			m_barToggle.isOn = false;
+			m_ignoreCallbacks = false;
 			UpdateToggleState();
 		}
 
@@ -114,13 +132,16 @@ namespace MSP2050.Scripts
 
 		public void SetInteractable(bool value, bool reset = true)
 		{
-			m_barButton.interactable = value;
+			m_barToggle.interactable = value;
 			m_policyToggle.Interactable = value;
 
 			if (reset)
 			{
 				m_ignoreCallbacks = true;
 				m_policyToggle.Value = false;
+				m_barToggle.isOn = false;
+				if (m_geometryPolicyWindow != null)
+					m_geometryPolicyWindow.CloseWindow();
 				m_ignoreCallbacks = false;
 			}
 		}

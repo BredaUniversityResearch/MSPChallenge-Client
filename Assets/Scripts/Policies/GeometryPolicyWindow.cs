@@ -52,9 +52,10 @@ namespace MSP2050.Scripts
 			CloseWindow();
 		}
 
-		void CloseWindow()
+		public void CloseWindow()
 		{
-			Destroy(m_content.gameObject);
+			if(m_content != null)
+				Destroy(m_content.gameObject);
 			m_content = null;
 			gameObject.SetActive(false);
 		}

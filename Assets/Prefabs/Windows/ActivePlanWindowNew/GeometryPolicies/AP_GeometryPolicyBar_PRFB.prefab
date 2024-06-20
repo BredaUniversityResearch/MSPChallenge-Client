@@ -14,9 +14,9 @@ GameObject:
   - component: {fileID: 5164538564984663770}
   - component: {fileID: 3367910669411299880}
   - component: {fileID: 3397485099911881159}
-  - component: {fileID: 567488431083568910}
-  - component: {fileID: 6942684418147827576}
-  - component: {fileID: 714005069505597678}
+  - component: {fileID: 3772474389147758852}
+  - component: {fileID: 7839320779072710886}
+  - component: {fileID: 4481054136989809549}
   m_Layer: 5
   m_Name: AP_GeometryPolicyBar_PRFB
   m_TagString: Untagged
@@ -142,10 +142,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdead6c76140d7f489c1a66f694f245b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_barButton: {fileID: 567488431083568910}
+  m_barToggle: {fileID: 3772474389147758852}
   m_policyToggle: {fileID: 4078739514395169488}
   m_nameText: {fileID: 3585815435830463469}
---- !u!114 &567488431083568910
+--- !u!114 &3772474389147758852
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -154,7 +154,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 317556378764674290}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ca76be1e29062546bf98f89550ce635, type: 3}
+  m_Script: {fileID: 11500000, guid: eeaa0bb0be42908448050e0e12b1e3be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -186,13 +186,17 @@ MonoBehaviour:
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 5164538564984663770}
-  m_OnClick:
+  toggleTransition: 1
+  graphic: {fileID: 0}
+  m_Group: {fileID: 0}
+  onValueChanged:
     m_PersistentCalls:
       m_Calls: []
+  m_IsOn: 0
   m_onRightClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &6942684418147827576
+--- !u!114 &7839320779072710886
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -201,7 +205,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 317556378764674290}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e05f750d797a9294f8ef07fd42a83ad6, type: 3}
+  m_Script: {fileID: 11500000, guid: b0b013a8cfba12845bf7b18016e82e0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
@@ -222,13 +226,37 @@ MonoBehaviour:
       Data: UnityEngine.Color, UnityEngine.CoreModule
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
     - Name: 
       Entry: 4
-      Data: 1
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: colorSelected
+      Entry: 7
+      Data: 1|ColourPalette.ConstColour, MSP2050Plugins
+    - Name: m_colour
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
     - Name: 
       Entry: 4
       Data: 0
@@ -241,14 +269,19 @@ MonoBehaviour:
     - Name: colorHighlight
       Entry: 10
       Data: 0
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
     - Name: colorDisabled
       Entry: 6
       Data: 
   targetGraphics:
   - {fileID: 5164538564984663770}
+  highlightIfOn: 1
   useHighlightColor: 1
+  separateSelectedHighlight: 0
   useDisabledColor: 0
---- !u!114 &714005069505597678
+--- !u!114 &4481054136989809549
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -257,7 +290,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 317556378764674290}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e05f750d797a9294f8ef07fd42a83ad6, type: 3}
+  m_Script: {fileID: 11500000, guid: b0b013a8cfba12845bf7b18016e82e0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
@@ -265,7 +298,8 @@ MonoBehaviour:
     SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
-    - {fileID: 11400000, guid: 0a7ffe14bb8c0574a922aa33cdfbb7e8, type: 2}
+    - {fileID: 11400000, guid: dbe24502a18c5e546a327941d209c921, type: 2}
+    - {fileID: 11400000, guid: e059de7d05d519647b5f945149105ad6, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -274,16 +308,25 @@ MonoBehaviour:
     - Name: colorNormal
       Entry: 10
       Data: 0
-    - Name: colorHighlight
+    - Name: colorSelected
       Entry: 10
       Data: 1
-    - Name: colorDisabled
+    - Name: colorHighlight
       Entry: 6
       Data: 
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
+    - Name: colorDisabled
+      Entry: 10
+      Data: 2
   targetGraphics:
   - {fileID: 3585815435830463469}
-  useHighlightColor: 1
-  useDisabledColor: 0
+  - {fileID: 8609916316617907901}
+  highlightIfOn: 0
+  useHighlightColor: 0
+  separateSelectedHighlight: 0
+  useDisabledColor: 1
 --- !u!1 &1531938022654458636
 GameObject:
   m_ObjectHideFlags: 0
@@ -869,3 +912,15 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &8609916316617907901 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8205070288196611790, guid: 8d5717f7f784c9741b199d121c1b7aa1,
+    type: 3}
+  m_PrefabInstance: {fileID: 478176170803441779}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b742792d5f8b2e64e9ce90c5610628fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

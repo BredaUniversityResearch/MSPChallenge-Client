@@ -57,7 +57,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public string GetJson()
+		public override string GetJson()
 		{
 			//Convert from client format into server format
 			BufferZoneData data = new BufferZoneData();
