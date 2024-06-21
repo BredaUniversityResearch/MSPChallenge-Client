@@ -8,10 +8,7 @@ namespace MSP2050.Scripts
 {
 	public class AGeometryPolicyWindow : MonoBehaviour
 	{
-		[SerializeField] GameObject m_buttonContainer;
 		[SerializeField] Button m_closeButton;
-		[SerializeField] Button m_confirmButton;
-		[SerializeField] Button m_cancelButton;
 		[SerializeField] Transform m_contentParent;
 		[SerializeField] TextMeshProUGUI m_windowTitle;
 
@@ -20,8 +17,6 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			m_confirmButton.onClick.AddListener(OnConfirm);
-			m_cancelButton.onClick.AddListener(CloseWindow);
 			m_closeButton.onClick.AddListener(CloseWindow);
 		}
 
@@ -34,12 +29,10 @@ namespace MSP2050.Scripts
 			m_content = Instantiate(a_policyDefinition.m_windowPrefab, m_contentParent).GetComponent<AGeometryPolicyWindowContent>();
 			if (Main.InEditMode)
 			{
-				m_buttonContainer.SetActive(true);
 				m_closeButton.gameObject.SetActive(false);
 			}
 			else
 			{
-				m_buttonContainer.SetActive(false);
 				m_closeButton.gameObject.SetActive(true);
 			}
 			m_content.SetContent(a_values, a_geometry);

@@ -88,16 +88,16 @@ namespace MSP2050.Scripts
 					{ 
 						if(a_value)
 						{
-							countryDict[a_countryId] = (Months)((int)oldMonths | (1 << a_month));//TODO: is Month+1 needed here?
+							countryDict[a_countryId] = (Months)((int)oldMonths | (1 << a_month));
 						}
 						else
 						{
-							countryDict[a_countryId] = (Months)((int)oldMonths & ~(1 << a_month));//TODO: is Month+1 needed here?
+							countryDict[a_countryId] = (Months)((int)oldMonths & ~(1 << a_month));
 						}
 					}
 					else if(a_value)
 					{
-						countryDict[a_countryId] = (Months)(1 << a_month);//TODO: is Month+1 needed here?
+						countryDict[a_countryId] = (Months)(1 << a_month);
 					}
 				}
 				else if(a_value)
@@ -157,19 +157,15 @@ namespace MSP2050.Scripts
 			foreach(var kvp in a_values)
 			{
 				PolicyGeometryDataBufferZone data = new PolicyGeometryDataBufferZone(kvp.Value);
-				//if (!string.IsNullOrEmpty(kvp.Value))
-				//{
-				//	data = new PolicyGeometryDataBufferZone(kvp.Value);
-					if(first)
-					{
-						m_currentRadius = data.radius;
-						first = false;
-					}
-					else if(m_currentRadius >= 0 && Mathf.Abs(data.radius - m_currentRadius) > 0.01f)
-					{
-						m_currentRadius = Mathf.NegativeInfinity;
-					}
-				//}
+				if(first)
+				{
+					m_currentRadius = data.radius;
+					first = false;
+				}
+				else if(m_currentRadius >= 0 && Mathf.Abs(data.radius - m_currentRadius) > 0.01f)
+				{
+					m_currentRadius = Mathf.NegativeInfinity;
+				}
 				m_originalValues.Add(kvp.Key, data);
 				m_newValues.Add(kvp.Key, data?.GetValueCopy());
 			}
@@ -179,7 +175,6 @@ namespace MSP2050.Scripts
 				{
 					//Create empty entries for geometry that doesnt have a value yet
 					m_newValues.Add(e, new PolicyGeometryDataBufferZone());
-					//m_newValues.Add(e, null);
 					if (m_currentRadius > 0.01f)
 					{
 						m_currentRadius = Mathf.NegativeInfinity;
