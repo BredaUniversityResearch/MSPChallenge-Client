@@ -85,6 +85,14 @@ namespace MSP2050.Scripts
 						{
 							countryValuesResult.Add(countryMonths);
 						}
+						else
+						{
+							countryValuesResult.Add(Months.None);
+						}
+					}
+					else
+					{
+						countryValuesResult.Add(Months.None);
 					}
 				}
 				if (m_usingCountries)
@@ -118,6 +126,14 @@ namespace MSP2050.Scripts
 						{
 							countryValuesResult.Add(countryMonths);
 						}
+						else
+						{
+							countryValuesResult.Add(Months.None);
+						}
+					}
+					else
+					{
+						countryValuesResult.Add(Months.None);
 					}
 				}
 				if (m_usingCountries)

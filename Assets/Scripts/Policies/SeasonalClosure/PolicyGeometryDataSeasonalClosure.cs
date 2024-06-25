@@ -27,9 +27,14 @@ namespace MSP2050.Scripts
 
 	static class MonthsMethods
 	{
+		public const int AllMonthsValue = 4095;
 		public static bool MonthSet(this Months a_months, int a_check)
 		{
 			return ((int)a_months & (1 << a_check)) != 0;
+		}
+		public static bool AllMonths(this Months a_months)
+		{
+			return (int)a_months >= AllMonthsValue;
 		}
 	}
 

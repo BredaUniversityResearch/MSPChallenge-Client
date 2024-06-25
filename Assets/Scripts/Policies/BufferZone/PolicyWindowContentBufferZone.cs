@@ -1,4 +1,5 @@
 ﻿using TMPro;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
@@ -16,8 +17,8 @@ namespace MSP2050.Scripts
 		bool m_ignoreCallback;
 		float m_currentRadius;
 		List<FleetMixedToggleGroup> m_fleetGroups;
-		Dictionary<Entity, PolicyGeometryDataBufferZone> m_originalValues;
-		Dictionary<Entity, PolicyGeometryDataBufferZone> m_newValues;
+		Dictionary<Entity, PolicyGeometryDataBufferZone> m_policyValues;
+		Action<Dictionary<Entity, string>> m_changedCallback;
 
 		void Initialise()
 		{
@@ -37,50 +38,76 @@ namespace MSP2050.Scripts
 
 		void OnFleetChanged(int a_gearId, bool a_value)
 		{
+			Dictionary<Entity, string> changes = new Dictionary<Entity, string>();
 			if (a_value)
 			{ 
-				foreach(var entityVP in m_newValues)
+				foreach(var entityVP in m_policyValues)
 				{
+					bool changed = false;
 					Dictionary<int, Months> countryDict = null;
 					if (!entityVP.Value.fleets.TryGetValue(a_gearId, out countryDict))
 					{
 						countryDict = new Dictionary<int, Months>();
 						entityVP.Value.fleets.Add(a_gearId, countryDict);
+						changed = true;
 					}
 					foreach(var countryFleet in PolicyLogicFishing.Instance.GetFleetsForGear(a_gearId))
 					{
+						if(!changed && (!countryDict.TryGetValue(countryFleet.country_id, out Months result) || !result.AllMonths()))
+							changed = true;
+						
 						countryDict[countryFleet.country_id] = (Months)int.MaxValue;
 					}
+					if(changed)
+						changes.Add(entityVP.Key, entityVP.Value.GetJson());
 				}
 			}
 			else
 			{
-				foreach (var entityVP in m_newValues)
+				foreach (var entityVP in m_policyValues)
 				{
-					entityVP.Value.fleets.Remove(a_gearId);
+					if(entityVP.Value.fleets.Remove(a_gearId))
+					{
+						changes.Add(entityVP.Key, entityVP.Value.GetJson());
+					}
 				}
 			}
+			if (changes.Count > 0)
+				m_changedCallback.Invoke(changes);
 		}
 		void OnCountryChanged(int a_gearId, int a_countryId, bool a_value)
 		{
-			foreach (var entityVP in m_newValues)
+			Dictionary<Entity, string> changes = new Dictionary<Entity, string>();
+			foreach (var entityVP in m_policyValues)
 			{
 				if (entityVP.Value.fleets.TryGetValue(a_gearId, out var countryDict))
 				{
 					if (a_value)
 					{
+						bool changed = !countryDict.TryGetValue(a_countryId, out Months result) || !result.AllMonths();
 						countryDict[a_countryId] = (Months)int.MaxValue;
+						if(changed)
+							changes.Add(entityVP.Key, entityVP.Value.GetJson());
 					}
 					else
 					{
-						countryDict.Remove(a_countryId);
+						if(countryDict.Remove(a_countryId))
+							changes.Add(entityVP.Key, entityVP.Value.GetJson());
 					}
 				}
+				else if(a_value)
+				{
+					entityVP.Value.fleets.Add(a_gearId, new Dictionary<int, Months> { { a_countryId, (Months)int.MaxValue } });
+					changes.Add(entityVP.Key, entityVP.Value.GetJson());
+				}
 			}
+			if (changes.Count > 0)
+				m_changedCallback.Invoke(changes);
 		}
 		void OnMonthChanged(int a_gearId, int a_countryId, int a_month, bool a_value)
 		{
-			foreach (var entityVP in m_newValues)
+			Dictionary<Entity, string> changes = new Dictionary<Entity, string>();
+			foreach (var entityVP in m_policyValues)
 			{
 				if (entityVP.Value.fleets.TryGetValue(a_gearId, out var countryDict))
 				{
@@ -88,23 +115,33 @@ namespace MSP2050.Scripts
 					{ 
 						if(a_value)
 						{
-							countryDict[a_countryId] = (Months)((int)oldMonths | (1 << a_month));
+							Months newMonths = (Months)((int)oldMonths | (1 << a_month));
+							countryDict[a_countryId] = newMonths;
+							if(oldMonths != newMonths)
+								changes.Add(entityVP.Key, entityVP.Value.GetJson());
 						}
 						else
 						{
-							countryDict[a_countryId] = (Months)((int)oldMonths & ~(1 << a_month));
+							Months newMonths = (Months)((int)oldMonths & ~(1 << a_month));
+							countryDict[a_countryId] = newMonths;
+							if (oldMonths != newMonths)
+								changes.Add(entityVP.Key, entityVP.Value.GetJson());
 						}
 					}
 					else if(a_value)
 					{
 						countryDict[a_countryId] = (Months)(1 << a_month);
+						changes.Add(entityVP.Key, entityVP.Value.GetJson());
 					}
 				}
 				else if(a_value)
 				{
 					entityVP.Value.fleets.Add(a_gearId, new Dictionary<int, Months> { { a_countryId, (Months)(1 << a_month) } });
+					changes.Add(entityVP.Key, entityVP.Value.GetJson());
 				}
 			}
+			if (changes.Count > 0)
+				m_changedCallback.Invoke(changes);
 		}
 
 		void OnRadiusChanged(string a_newValue)
@@ -112,46 +149,32 @@ namespace MSP2050.Scripts
 			if (m_ignoreCallback)
 				return;
 
+			Dictionary<Entity, string> changes = new Dictionary<Entity, string>();
 			float result = float.NegativeInfinity;
 			if(float.TryParse(a_newValue, out result))
 			{
 				if (result >= 0)
 				{
 					m_currentRadius = result;
-					foreach (var entityVP in m_newValues)
+					foreach (var entityVP in m_policyValues)
 					{
+						bool changed = Mathf.Abs(entityVP.Value.radius - result) > 0.01f;
 						entityVP.Value.radius = m_currentRadius;
+						if(changed)
+							changes.Add(entityVP.Key, entityVP.Value.GetJson());
 					}
 				}
 			}
 			SetRadiusText();
+			if (changes.Count > 0)
+				m_changedCallback.Invoke(changes);
 		}
 
-		public override Dictionary<Entity, string> GetChanges()
-		{
-			Dictionary<Entity, string> results = new Dictionary<Entity, string>();
-			foreach (var kvp in m_newValues)
-			{
-				if(m_originalValues.TryGetValue(kvp.Key, out var oldValue))
-				{
-					if(!oldValue.ContentIdentical(kvp.Value))
-					{
-						results.Add(kvp.Key, kvp.Value.GetJson());
-					}
-				}
-				else
-				{
-					results.Add(kvp.Key, kvp.Value.GetJson());
-				}
-			}
-			return results;
-		}
-
-		public override void SetContent(Dictionary<Entity, string> a_values, List<Entity> a_geometry)
+		public override void SetContent(Dictionary<Entity, string> a_values, List<Entity> a_geometry, Action<Dictionary<Entity, string>> a_changedCallback)
 		{
 			Initialise();
-			m_originalValues = new Dictionary<Entity, PolicyGeometryDataBufferZone>();
-			m_newValues = new Dictionary<Entity, PolicyGeometryDataBufferZone>();
+			m_changedCallback = a_changedCallback;
+			m_policyValues = new Dictionary<Entity, PolicyGeometryDataBufferZone>();
 			m_currentRadius = 0f;
 			bool first = true;
 			foreach(var kvp in a_values)
@@ -166,15 +189,14 @@ namespace MSP2050.Scripts
 				{
 					m_currentRadius = Mathf.NegativeInfinity;
 				}
-				m_originalValues.Add(kvp.Key, data);
-				m_newValues.Add(kvp.Key, data?.GetValueCopy());
+				m_policyValues.Add(kvp.Key, data);
 			}
 			foreach(Entity e in a_geometry)
 			{
 				if (!a_values.ContainsKey(e))
 				{
 					//Create empty entries for geometry that doesnt have a value yet
-					m_newValues.Add(e, new PolicyGeometryDataBufferZone());
+					m_policyValues.Add(e, new PolicyGeometryDataBufferZone());
 					if (m_currentRadius > 0.01f)
 					{
 						m_currentRadius = Mathf.NegativeInfinity;
@@ -183,7 +205,7 @@ namespace MSP2050.Scripts
 			}
 			foreach(FleetMixedToggleGroup fleetGroup in m_fleetGroups)
 			{
-				fleetGroup.SetValues(m_newValues);
+				fleetGroup.SetValues(m_policyValues);
 			}
 			SetRadiusText();
 		}
