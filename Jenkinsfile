@@ -64,7 +64,7 @@ pipeline {
                     bat '''7z a -tzip -r "%output%\\%WINDOWS_DEV_PR_BUILD_NAME%" "%CD%\\%output%\\%outputWinDevFolder%\\*"'''
                     
                     echo "Uploading dev build artifact to Nexus..."
-                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-PR" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_DEV_PR_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_DEV_PR_BUILD_NAME%.zip"'''
+                    bat '''"%CURL_EXECUTABLE%" -X POST "https://nexus.cradle.buas.nl/service/rest/v1/components?repository=MSPChallenge-Client-PR" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_DEV_PR_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_DEV_PR_BUILD_NAME%.zip"'''
                 }
             }
         }
@@ -83,7 +83,7 @@ pipeline {
                     bat '''7z a -tzip -r "%output%\\%WINDOWS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputWinDevFolder%\\*"'''
                     
                     echo "Uploading dev build artifact to Nexus..."
-                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_DEV_BUILD_NAME%.zip"'''
+                    bat '''"%CURL_EXECUTABLE%" -X POST "https://nexus.cradle.buas.nl/service/rest/v1/components?repository=MSPChallenge-Client-Dev" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_DEV_BUILD_NAME%.zip"'''
                         
                     echo "Launching MacOS Development Build..."
                     bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacDevFolder%\\MSP-Challenge.app" -customBuildName "MSP-Challenge.app" -executeMethod ProjectBuilder.MacOSDevBuilder'''
@@ -92,7 +92,7 @@ pipeline {
                     bat '''7z a -tzip -r "%output%\\%MACOS_DEV_BUILD_NAME%" "%CD%\\%output%\\%outputMacDevFolder%\\*"'''
                     
                     echo "Uploading dev build artifact to Nexus..."
-                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Dev" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MacOS" -F "raw.asset1=@%output%\\%MACOS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_DEV_BUILD_NAME%.zip"'''                    
+                    bat '''"%CURL_EXECUTABLE%" -X POST "https://nexus.cradle.buas.nl/service/rest/v1/components?repository=MSPChallenge-Client-Dev" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MacOS" -F "raw.asset1=@%output%\\%MACOS_DEV_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_DEV_BUILD_NAME%.zip"'''                    
                 }
             }
         }
@@ -113,7 +113,7 @@ pipeline {
                     
                     
                     echo "Uploading release build artifact to Nexus..."
-                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_BUILD_NAME%.zip"'''
+                    bat '''"%CURL_EXECUTABLE%" -X POST "https://nexus.cradle.buas.nl/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=Windows" -F "raw.asset1=@%output%\\%WINDOWS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%WINDOWS_BUILD_NAME%.zip"'''
                         
                     echo "Launching MacOS Release Build..."
                     bat '''"%UNITY_EXECUTABLE%" -projectPath "%CD%" -quit -batchmode -nographics -customBuildPath "%CD%\\%output%\\%outputMacFolder%\\MSP-Challenge.app" -customBuildName "MSP-Challenge.app" -executeMethod ProjectBuilder.MacOSBuilder'''
@@ -123,7 +123,7 @@ pipeline {
                     
                     
                     echo "Uploading release build artifact to Nexus..."
-                    bat '''"%CURL_EXECUTABLE%" -X POST "http://localhost:8081/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MacOS" -F "raw.asset1=@%output%\\%MACOS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_BUILD_NAME%.zip"'''
+                    bat '''"%CURL_EXECUTABLE%" -X POST "https://nexus.cradle.buas.nl/service/rest/v1/components?repository=MSPChallenge-Client-Main" -H "accept: application/json" -H "Authorization: Basic %NEXUS_CREDENTIALS%" -F "raw.directory=MacOS" -F "raw.asset1=@%output%\\%MACOS_BUILD_NAME%.zip;type=application/x-zip-compressed" -F "raw.asset1.filename=%MACOS_BUILD_NAME%.zip"'''
                 }
             }
         }
