@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 		public const string ENERGY_POLICY_NAME = "energy";
 		public const string FISHING_POLICY_NAME = "fishing";
 		public const string SHIPPING_POLICY_NAME = "shipping";
+		public const string SANDEXTRACTION_POLICY_NAME = "sand extraction";
 
 		private static PolicyManager singleton;
 		public static PolicyManager Instance
@@ -90,7 +91,17 @@ namespace MSP2050.Scripts
 				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyShipping_PRFB"),
 				m_activePlanIcon = Resources.Load<Sprite>("Icons/shipping")
 			});
-		}
+            m_policyDefinitions.Add(SANDEXTRACTION_POLICY_NAME, new PolicyDefinition
+            {
+                m_name = SANDEXTRACTION_POLICY_NAME,
+                m_displayName = "Sand Extraction Reservation Area",
+                m_planUpdateType = typeof(PolicyUpdateSandExtractionPlan),
+                m_logicType = typeof(PolicyLogicSandExtraction),
+                m_settingsType = typeof(APolicyData),
+                m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicySandExtraction_PRFB"),
+                m_activePlanIcon = Resources.Load<Sprite>("Icons/sandextraction")
+            });
+        }
 
 		public void InitialisePolicies(List<APolicyData> a_policySettings)
 		{
