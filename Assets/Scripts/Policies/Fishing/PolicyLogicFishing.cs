@@ -144,13 +144,12 @@ namespace MSP2050.Scripts
 		{
 			if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var data))
 			{
-				if (!m_wasFishingPlanBeforeEditing)
-					SubmitPolicyActivity(a_plan, PolicyManager.FISHING_POLICY_NAME, true, a_batch);
+				SetGeneralPolicyData(a_plan, new EmptyPolicyPlanData(PolicyManager.FISHING_POLICY_NAME), a_batch);
 				data.fishingDistributionDelta.SubmitToServer(a_plan.GetDataBaseOrBatchIDReference(), a_batch);
 			}
 			else if(m_wasFishingPlanBeforeEditing)
 			{
-				SubmitPolicyActivity(a_plan, PolicyManager.FISHING_POLICY_NAME, false, a_batch);
+				DeleteGeneralPolicyData(a_plan, PolicyManager.FISHING_POLICY_NAME, a_batch);
 				JObject dataObject = new JObject();
 				dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
 				a_batch.AddRequest(Server.DeleteFishingFromPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);

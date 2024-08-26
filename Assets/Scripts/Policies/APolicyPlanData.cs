@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-	public abstract class APolicyPlanData
+	public abstract class APolicyPlanData : APolicyData
 	{
 		public APolicyLogic logic;
 

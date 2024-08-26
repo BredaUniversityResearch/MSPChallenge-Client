@@ -320,9 +320,14 @@ namespace MSP2050.Scripts
 			return "api/Plan/Restrictions";
 		}
 
-		public static string SetPlanPolicy()
+		public static string SetGeneralPolicyData()
 		{
-			return "api/Plan/SetPolicy";
+			return "api/Plan/SetGeneralPolicyData";
+		}
+
+		public static string DeleteGeneralPolicy()
+		{
+			return "api/Plan/DeleteGeneralPolicy";
 		}
 
 		public static string UpdateMaxCapacity()

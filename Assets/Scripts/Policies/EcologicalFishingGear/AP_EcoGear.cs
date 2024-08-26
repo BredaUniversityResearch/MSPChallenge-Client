@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 	{
 		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
 		{
+			base.OpenToContent(a_content, a_toggle, a_APWindow);
 			//If plan has policy data: display data
 
 			//Otherwise: get previous data for country, display that
