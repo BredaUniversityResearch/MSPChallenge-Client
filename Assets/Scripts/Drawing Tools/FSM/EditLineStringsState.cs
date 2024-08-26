@@ -971,21 +971,25 @@ namespace MSP2050.Scripts
 
 		public override void HandleGeometryPolicyChange(EntityPropertyMetaData a_policy, Dictionary<Entity, string> a_newValues)
 		{
-			List<LineStringSubEntity> subEntitiesWithDifferentParams = new List<LineStringSubEntity>();
+			List<(string p, LineStringSubEntity lse)> changes = new List<(string, LineStringSubEntity)>(a_newValues.Count);
 
+			//Note: cannot match entity in a_newvalues directly because the instance might have changed with previous modification
 			foreach (LineStringSubEntity subEntity in m_selectedSubEntities)
 			{
-				if (a_newValues.TryGetValue(subEntity.m_entity, out string value))
+				foreach(var kvp in a_newValues)
 				{
-					subEntitiesWithDifferentParams.Add(subEntity);
+					if(subEntity.GetPersistentID() == kvp.Key.PersistentID)
+					{
+						changes.Add((kvp.Value, subEntity));
+					}
 				}
 			}
 
 			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
-			foreach (LineStringSubEntity subEntity in subEntitiesWithDifferentParams)
+			foreach (var change in changes)
 			{
-				LineStringSubEntity subEntityToModify = StartModifyingSubEntity(subEntity, true);
-				subEntityToModify.m_entity.SetPropertyMetaData(a_policy, a_newValues[subEntity.m_entity]);
+				LineStringSubEntity subEntityToModify = StartModifyingSubEntity(change.lse, true);
+				subEntityToModify.m_entity.SetPropertyMetaData(a_policy, change.p);
 			}
 			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
