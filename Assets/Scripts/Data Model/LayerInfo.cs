@@ -177,7 +177,7 @@ namespace MSP2050.Scripts
 	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match json
 	public class LayerInfoPropertiesObject
 	{
-		public enum ContentValidation { None, ShippingWidth, NumberCables }
+		public enum ContentValidation { None, ShippingWidth, NumberCables, PitExtractionDepth }
 
 		public string property_name { get; set; }
 		public bool enabled { get; set; }
