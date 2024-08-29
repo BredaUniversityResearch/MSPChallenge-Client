@@ -17,6 +17,16 @@ namespace MSP2050.Scripts
 
 			//TODO: Get state for country at plan time
 			//TODO: get overrides of current plan
+			RefreshContent(a_content);
+		}
+
+		public void RefreshContent(Plan a_content)
+		{
+			if (m_APWindow.Editing)
+			{
+				//TODO
+			}
+			//TODO
 		}
 
 		public override void ApplyContent()

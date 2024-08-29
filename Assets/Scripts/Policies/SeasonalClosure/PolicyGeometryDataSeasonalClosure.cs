@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 		December = 2048,
 	}
 
-	static class MonthsMethods
+	public static class MonthsMethods
 	{
 		public const int AllMonthsValue = 4095;
 		public static bool MonthSet(this Months a_months, int a_check)

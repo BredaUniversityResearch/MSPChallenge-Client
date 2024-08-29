@@ -53,7 +53,7 @@ namespace MSP2050.Scripts
 						if (!changed && (!countryDict.TryGetValue(countryFleet.country_id, out Months result) || !result.AllMonths()))
 							changed = true;
 
-						countryDict[countryFleet.country_id] = (Months)int.MaxValue;
+						countryDict[countryFleet.country_id] = (Months)MonthsMethods.AllMonthsValue;
 					}
 					if (changed)
 						changes.Add(entityVP.Key, entityVP.Value.GetJson());
@@ -82,7 +82,7 @@ namespace MSP2050.Scripts
 					if (a_value)
 					{
 						bool changed = !countryDict.TryGetValue(a_countryId, out Months result) || !result.AllMonths();
-						countryDict[a_countryId] = (Months)int.MaxValue;
+						countryDict[a_countryId] = (Months)MonthsMethods.AllMonthsValue;
 						if (changed)
 							changes.Add(entityVP.Key, entityVP.Value.GetJson());
 					}
@@ -94,7 +94,7 @@ namespace MSP2050.Scripts
 				}
 				else if (a_value)
 				{
-					entityVP.Value.fleets.Add(a_gearId, new Dictionary<int, Months> { { a_countryId, (Months)int.MaxValue } });
+					entityVP.Value.fleets.Add(a_gearId, new Dictionary<int, Months> { { a_countryId, (Months)MonthsMethods.AllMonthsValue } });
 					changes.Add(entityVP.Key, entityVP.Value.GetJson());
 				}
 			}
