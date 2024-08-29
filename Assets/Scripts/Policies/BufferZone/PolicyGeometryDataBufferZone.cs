@@ -114,7 +114,7 @@ namespace MSP2050.Scripts
 				}
 				else if(kvp.Value.Count > 0)
 					return false;
-			}		
+			}
 			return true;
 		}
 
@@ -134,8 +134,12 @@ namespace MSP2050.Scripts
 			return new PolicyGeometryDataBufferZone(fleetsCopy, radius);
 		}
 
-		private class BufferZoneData
+		private class BufferZoneData: APolicyData
 		{
+			public BufferZoneData()
+			{
+				policy_type = PolicyManager.BUFFER_ZONE_POLICY_NAME;
+			}
 			public float radius;
 			public List<FleetClosureData> items;
 		}
