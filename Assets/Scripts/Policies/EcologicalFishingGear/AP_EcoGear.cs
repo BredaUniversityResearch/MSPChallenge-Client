@@ -8,6 +8,12 @@ namespace MSP2050.Scripts
 {
 	public class AP_EcoGear : AP_PopoutWindow
 	{
+		[SerializeField] GameObject m_fleetEntryPrefab;
+		[SerializeField] Transform m_fleetEntryParent;
+
+		List<FleetEcoGearToggle> m_fleetGearToggles;
+
+
 		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
 		{
 			base.OpenToContent(a_content, a_toggle, a_APWindow);

@@ -6,29 +6,22 @@ namespace MSP2050.Scripts
 {
 	public class PolicyPlanDataEcoGear : APolicyPlanData
 	{
-		public Dictionary<int, Dictionary<int, bool>> m_values; //country, gear_type, eco_gear
+		public Dictionary<int, bool> m_values; //fleet_id, eco_gear
 
 		public PolicyPlanDataEcoGear(APolicyLogic a_logic) : base(a_logic)
 		{
+			m_values = new Dictionary<int, bool>();
 		}
 
-		public void AddUnchangedValues(Dictionary<int, Dictionary<int, bool>> a_result)
+		public void AddUnchangedValues(Dictionary<int, bool> a_result)
 		{
 			if (m_values == null)
 				return;
-			foreach(var countryVal in m_values)
+			foreach(var fleetVal in m_values)
 			{
-				Dictionary<int, bool> resultFleetVal;
-				if (!a_result.TryGetValue(countryVal.Key, out resultFleetVal))
+				if (!a_result.ContainsKey(fleetVal.Key))
 				{
-					resultFleetVal = new Dictionary<int, bool>();
-					a_result.Add(countryVal.Key, resultFleetVal);
-				}
-
-				foreach(var fleetVal in countryVal.Value)
-				{
-					if(!resultFleetVal.ContainsKey(fleetVal.Key))
-						resultFleetVal[fleetVal.Key] = fleetVal.Value;
+					a_result[fleetVal.Key] = fleetVal.Value;
 				}
 			}
 		}
