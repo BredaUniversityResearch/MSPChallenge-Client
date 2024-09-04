@@ -8,9 +8,18 @@ namespace MSP2050.Scripts
 {
 	public class PolicyLogicEcoGear : APolicyLogic
 	{
+		static PolicyLogicEcoGear m_instance;
+		public static PolicyLogicEcoGear Instance => m_instance;
+
 		//Editing backups
 		bool m_wasEcoGearPlanBeforeEditing;
 		PolicyPlanDataEcoGear m_backup;
+
+		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
+		{
+			base.Initialise(a_settings, a_definition);
+			m_instance = this;
+		}
 
 		public override void AddToPlan(Plan a_plan)
 		{

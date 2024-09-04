@@ -13,6 +13,7 @@ namespace MSP2050.Scripts
 
 		List<FleetEcoGearToggle> m_fleetGearToggles;
 
+		Dictionary<int, bool> m_settingsBeforePlan;
 
 		public override void OpenToContent(Plan a_content, AP_ContentToggle a_toggle, ActivePlanWindow a_APWindow)
 		{
