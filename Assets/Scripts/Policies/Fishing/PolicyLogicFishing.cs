@@ -68,6 +68,11 @@ namespace MSP2050.Scripts
 			return m_fleetInfo.fleets[a_fleetId];
 		}
 
+		public CountryFleetInfo[] GetAllFleetInfo()
+		{
+			return m_fleetInfo.fleets;
+		}
+
 		public string[] GetGearTypes()
 		{
 			return m_fleetInfo.gear_types;
