@@ -58,12 +58,12 @@ namespace MSP2050.Scripts
 				m_settingsBeforePlan.TryGetValue(i, out oldValue);
 				if (planData.m_values.TryGetValue(i, out bool value))
 				{
-					m_fleetGearToggles[i].SetContent(gearTypes[fleets[i].gear_type], value, oldValue,
+					m_fleetGearToggles[i].SetContent(gearTypes[fleets[i].gear_type], fleets[i].country_id, value, oldValue,
 						m_APWindow.Editing && (SessionManager.Instance.IsManager(a_content.Country) || fleets[i].country_id == a_content.Country));
 				}
 				else
 				{
-					m_fleetGearToggles[i].SetContent(gearTypes[fleets[i].gear_type], oldValue, oldValue,
+					m_fleetGearToggles[i].SetContent(gearTypes[fleets[i].gear_type], fleets[i].country_id, oldValue, oldValue,
 						m_APWindow.Editing && (SessionManager.Instance.IsManager(a_content.Country) || fleets[i].country_id == a_content.Country));
 				}
 			}
