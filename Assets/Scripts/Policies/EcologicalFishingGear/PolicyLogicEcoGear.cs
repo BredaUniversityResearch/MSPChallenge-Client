@@ -14,6 +14,7 @@ namespace MSP2050.Scripts
 		//Editing backups
 		bool m_wasEcoGearPlanBeforeEditing;
 		PolicyPlanDataEcoGear m_backup;
+		AP_EcoGear m_apEcoGear;
 
 		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
 		{
@@ -23,7 +24,7 @@ namespace MSP2050.Scripts
 
 		public override void AddToPlan(Plan a_plan)
 		{
-			a_plan.AddPolicyData(new PolicyPlanDataEcoGear(this);
+			a_plan.AddPolicyData(new PolicyPlanDataEcoGear(this));
 		}
 
 		public override void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, Dictionary<int, List<IApprovalReason>> a_approvalReasons, ref EApprovalType a_requiredApprovalLevel, bool a_reasonOnly)
@@ -108,6 +109,27 @@ namespace MSP2050.Scripts
 		public override void StopEditingPlan(Plan a_plan)
 		{
 			m_backup = null;
+		}
+
+		public override void EditedPlanTimeChanged(Plan a_plan)
+		{
+			if (m_apEcoGear != null && m_apEcoGear.IsOpen)
+			{
+				m_apEcoGear.RefreshContent(a_plan);
+			}
+		}
+
+		public override void PreviousPlanChangedInfluence(Plan a_plan)
+		{
+			if (m_apEcoGear != null && m_apEcoGear.IsOpen)
+			{
+				m_apEcoGear.RefreshContent(a_plan);
+			}
+		}
+
+		public void RegisterAPEcoGear(AP_EcoGear a_apEcoGear)
+		{
+			m_apEcoGear = a_apEcoGear;
 		}
 
 		public Dictionary<int, bool> GetEcoGearSettingBeforePlan(Plan a_plan)
