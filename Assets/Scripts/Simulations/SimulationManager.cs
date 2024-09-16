@@ -33,6 +33,7 @@ namespace MSP2050.Scripts
 
 		private bool m_initialised;
 		public bool Initialised => m_initialised;
+		public Dictionary<string, ASimulationData> Settings => m_simulationSettings;
 
 		void Start()
 		{
@@ -56,8 +57,8 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		//All possible policies should be registered before policies are initilised
-		public void RegisterPolicy(SimulationDefinition a_simulation)
+		//All possible simulations should be registered before policies are initialised
+		public void RegisterSimulation(SimulationDefinition a_simulation)
 		{
 			m_simulationDefinitions.Add(a_simulation.m_name, a_simulation);
 		}
