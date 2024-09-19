@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 				PolicyLogicEcoGear.Instance.RegisterAPEcoGear(this);
 			}
 
-			RefreshContent(a_content);
+			RefreshContent(a_content, false);
 		}
 
 		public void RefreshContent(Plan a_content, bool a_applyCurrent = true)
@@ -59,12 +59,12 @@ namespace MSP2050.Scripts
 				if (planData.m_values.TryGetValue(i, out bool value))
 				{
 					m_fleetGearToggles[i].SetContent(gearTypes[fleets[i].gear_type], fleets[i].country_id, value, oldValue,
-						m_APWindow.Editing && (SessionManager.Instance.IsManager(a_content.Country) || fleets[i].country_id == a_content.Country));
+						m_APWindow.Editing && (fleets[i].country_id < 0 || (SessionManager.Instance.IsManager(a_content.Country) || fleets[i].country_id == a_content.Country)));
 				}
 				else
 				{
 					m_fleetGearToggles[i].SetContent(gearTypes[fleets[i].gear_type], fleets[i].country_id, oldValue, oldValue,
-						m_APWindow.Editing && (SessionManager.Instance.IsManager(a_content.Country) || fleets[i].country_id == a_content.Country));
+						m_APWindow.Editing && (fleets[i].country_id < 0 || (SessionManager.Instance.IsManager(a_content.Country) || fleets[i].country_id == a_content.Country)));
 				}
 			}
 		}

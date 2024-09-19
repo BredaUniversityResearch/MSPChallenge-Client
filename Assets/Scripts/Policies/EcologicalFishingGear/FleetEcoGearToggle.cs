@@ -30,7 +30,8 @@ namespace MSP2050.Scripts
 			m_previousValue = a_previousValue;
 			m_toggle.isOn = a_currentValue;
 			m_toggle.interactable = a_interactable;
-			m_countryBall.color = SessionManager.Instance.GetTeamByTeamID(a_countryId).color;
+			if(a_countryId > 0)
+				m_countryBall.color = SessionManager.Instance.GetTeamByTeamID(a_countryId).color;
 			CheckChanged();
 		}
 
