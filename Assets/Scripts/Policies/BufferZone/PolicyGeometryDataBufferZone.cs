@@ -142,6 +142,7 @@ namespace MSP2050.Scripts
 			}
 			public float radius;
 			public List<FleetClosureData> items;
+			public float pressure = 0f;
 		}
 	}
 
