@@ -11,6 +11,8 @@ namespace MSP2050.Scripts
 	public class DashboardCategory : SerializedScriptableObject
 	{
 		public string m_name;
+		public string m_displayName;
 		public Sprite m_icon;
+		public bool m_favorite;
 	}
 }

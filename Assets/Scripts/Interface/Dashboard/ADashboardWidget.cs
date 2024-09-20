@@ -10,5 +10,15 @@ namespace MSP2050.Scripts
 	{
 		public DashboardCategory m_category;
 		public bool m_startingWidget;
+
+		public virtual void Hide()
+		{
+			gameObject.SetActive(false);
+		}
+
+		public virtual void Show(bool a_favoriteLayout = false)
+		{
+			gameObject.SetActive(true);
+		}
 	}
 }
