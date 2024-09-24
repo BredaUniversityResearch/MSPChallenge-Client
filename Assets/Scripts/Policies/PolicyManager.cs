@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 		public const string SEASONAL_CLOSURE_POLICY_NAME = "seasonal_closure";
 		public const string BUFFER_ZONE_POLICY_NAME = "buffer_zone";
 		public const string ECO_GEAR_POLICY_NAME = "eco_gear";
-		public const string SANDEXTRACTION_POLICY_NAME = "sand extraction";
+		public const string SANDEXTRACTION_POLICY_NAME = "sand_extraction";
 
 		private static PolicyManager singleton;
 		public static PolicyManager Instance
@@ -127,8 +127,8 @@ namespace MSP2050.Scripts
                 m_planUpdateType = typeof(PolicyUpdateSandExtractionPlan),
                 m_logicType = typeof(PolicyLogicSandExtraction),
                 m_settingsType = typeof(APolicyData),
-                m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicySandExtraction_PRFB"),
-                m_activePlanIcon = Resources.Load<Sprite>("Icons/sandextraction")
+                m_windowPrefab = Resources.Load<GameObject>("AP_PolicySandExtraction_PRFB"),
+                m_policyIcon = Resources.Load<Sprite>("Icons/sandextraction")
             });
         }
 

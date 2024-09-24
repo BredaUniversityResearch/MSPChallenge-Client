@@ -13,7 +13,6 @@ namespace MSP2050.Scripts
         //Editing backups
         bool m_wasSandExtractionPlanBeforeEditing;
         PolicyPlanDataSandExtraction m_backup;
-        AP_SandExtraction m_apSandExtraction;
 
         public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
         {
@@ -75,19 +74,6 @@ namespace MSP2050.Scripts
             m_backup = null;
         }
 
-        public override void EditedPlanTimeChanged(Plan a_plan)
-        {
-            if (m_apSandExtraction != null && m_apSandExtraction.IsOpen)
-            {
-                m_apSandExtraction.RefreshContent(a_plan);
-            }
-        }
-
-        public void RegisterAPSandExtraxction(AP_SandExtraction a_apSandExtraction)
-        {
-            m_apSandExtraction = a_apSandExtraction;
-        }
-
         public override void RestoreBackupForPlan(Plan a_plan)
         {
             if (m_wasSandExtractionPlanBeforeEditing)
@@ -104,13 +90,12 @@ namespace MSP2050.Scripts
         {
             if (a_plan.TryGetPolicyData<PolicyPlanDataSandExtraction>(PolicyManager.SANDEXTRACTION_POLICY_NAME, out var data))
             {
-                //if (!m_wasSandExtractionPlanBeforeEditing)
-                //    SubmitPolicyActivity(a_plan, PolicyManager.SANDEXTRACTION_POLICY_NAME, true, a_batch);
+                if (!m_wasSandExtractionPlanBeforeEditing)
+                    SetGeneralPolicyData(a_plan, new PolicyUpdateSandExtractionPlan() { m_distanceValue = data.m_value, policy_type = PolicyManager.SANDEXTRACTION_POLICY_NAME }, a_batch);
                 
             }
             else if (m_wasSandExtractionPlanBeforeEditing)
             {
-                //SubmitPolicyActivity(a_plan, PolicyManager.SANDEXTRACTION_POLICY_NAME, false, a_batch);
                 DeleteGeneralPolicyData(a_plan, PolicyManager.SANDEXTRACTION_POLICY_NAME, a_batch);
             }
         }
@@ -139,7 +124,7 @@ namespace MSP2050.Scripts
             {
                 if (plans[i].InInfluencingState && plans[i].TryGetPolicyData<PolicyPlanDataSandExtraction>(PolicyManager.SANDEXTRACTION_POLICY_NAME, out var planData))
                 {
-                    planData.AddUnchangedValues(result);
+                    return planData.m_value;
                 }
             }
             return result;
