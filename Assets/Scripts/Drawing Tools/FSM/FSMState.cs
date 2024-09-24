@@ -40,6 +40,7 @@ namespace MSP2050.Scripts
 		public virtual void HandleEntityTypeChange(List<EntityType> a_newTypes) { }
 		public virtual void HandleTeamChange(int a_newteam) { }
 		public virtual void HandleParameterChange(EntityPropertyMetaData a_parameter, string a_newValue) { }
+		public virtual void HandleGeometryPolicyChange(EntityPropertyMetaData a_policy, Dictionary<Entity,string> a_newValues) { }
 		public virtual void Abort() { }
 		public virtual void HandleCameraZoomChanged() { }
 

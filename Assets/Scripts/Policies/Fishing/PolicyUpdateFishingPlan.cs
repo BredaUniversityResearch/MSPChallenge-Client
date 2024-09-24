@@ -6,6 +6,7 @@ namespace MSP2050.Scripts
 	public class PolicyUpdateFishingPlan : APolicyData
 	{
 		public List<FishingObject> fishing;
+		public float pressure = 0f;
 	}
 
 	public class FishingObject

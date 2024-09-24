@@ -480,6 +480,31 @@ namespace MSP2050.Scripts
 			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 		}
 
+		public override void HandleGeometryPolicyChange(EntityPropertyMetaData a_policy, Dictionary<Entity, string> a_newValues)
+		{
+			List<(string p, PointSubEntity pse)> changes = new List<(string, PointSubEntity)>(a_newValues.Count);
+
+			//Note: cannot match entity in a_newvalues directly because the instance might have changed with previous modification
+			foreach (PointSubEntity subEntity in m_selection)
+			{
+				foreach (var kvp in a_newValues)
+				{
+					if (subEntity.GetPersistentID() == kvp.Key.PersistentID)
+					{
+						changes.Add((kvp.Value, subEntity));
+					}
+				}
+			}
+
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+			foreach (var change in changes)
+			{
+				PointSubEntity subEntityToModify = StartModifyingSubEntity(change.pse, true);
+				subEntityToModify.m_entity.SetPropertyMetaData(a_policy, change.p);
+			}
+			m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
+		}
+
 		public override void ExitState(Vector3 a_currentMousePosition)
 		{
 			if (m_previousHover != null)
@@ -502,6 +527,7 @@ namespace MSP2050.Scripts
 			List<List<EntityType>> selectedEntityTypes = new List<List<EntityType>>();
 			int? selectedTeam = null;
 			List<Dictionary<EntityPropertyMetaData, string>> selectedParams = new List<Dictionary<EntityPropertyMetaData, string>>();
+			List<Entity> entities = new List<Entity>(m_selection.Count);
 
 			foreach (PointSubEntity pse in m_selection)
 			{
@@ -517,12 +543,13 @@ namespace MSP2050.Scripts
 						parameters.Add(p, pse.m_entity.GetPropertyMetaData(p));
 				}
 				selectedParams.Add(parameters);
-
+				entities.Add(pse.m_entity);
 			}
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.SetToSelection(
 				selectedEntityTypes.Count > 0 ? selectedEntityTypes : null,
 				selectedTeam ?? -2,
-				selectedParams);
+				selectedParams,
+				entities);
 		}
 	}
 }
