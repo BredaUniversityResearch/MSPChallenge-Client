@@ -127,8 +127,8 @@ namespace MSP2050.Scripts
                 m_planUpdateType = typeof(PolicyUpdateSandExtractionPlan),
                 m_logicType = typeof(PolicyLogicSandExtraction),
                 m_settingsType = typeof(APolicyData),
-                m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicySandExtraction_PRFB"),
-                m_activePlanIcon = Resources.Load<Sprite>("Icons/sandextraction")
+                m_windowPrefab = Resources.Load<GameObject>("AP_PolicySandExtraction_PRFB"),
+                m_policyIcon = Resources.Load<Sprite>("Icons/sandextraction")
             });
         }
 
