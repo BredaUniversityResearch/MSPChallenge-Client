@@ -41,6 +41,7 @@ namespace MSP2050.Scripts
 	public class PolicyGeometryDataSeasonalClosure : APolicyData
 	{
 		public Dictionary<int, Dictionary<int, Months>> fleets; //gear ids, country ids, months
+		public float pressure = 0f;
 
 		public PolicyGeometryDataSeasonalClosure()
 		{
