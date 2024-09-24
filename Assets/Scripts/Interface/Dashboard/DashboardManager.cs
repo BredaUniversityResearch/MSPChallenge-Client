@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 
 namespace MSP2050.Scripts
 {
@@ -180,6 +181,16 @@ namespace MSP2050.Scripts
 				m_catSelectedWidgets[m_favoriteCategory].Add(a_widget);
 			else
 				m_catSelectedWidgets[m_favoriteCategory].Remove(a_widget);
+		}
+
+		public void ShowWidgetMovePreview(ADashboardWidget a_widget, PointerEventData a_data)
+		{
+
+		}
+
+		public void OnWidgetMoveRelease(ADashboardWidget a_widget, PointerEventData a_data)
+		{
+
 		}
 	}
 }
