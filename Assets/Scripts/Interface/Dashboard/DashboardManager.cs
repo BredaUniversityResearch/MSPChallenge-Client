@@ -9,6 +9,8 @@ namespace MSP2050.Scripts
 {
 	public class DashboardManager : MonoBehaviour
 	{
+		
+
 		static DashboardManager m_instance;
 		public static DashboardManager Instance => m_instance;
 

@@ -9,34 +9,28 @@ namespace MSP2050.Scripts
 {
 	public class DashboardWidgetHeader : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 	{
-		public delegate void DragEvent(PointerEventData a_pointer, RectTransform a_rect);
+		public delegate void DragEvent(PointerEventData a_pointer);
 		public DragEvent m_onDrag;
 		public DragEvent m_onDragStart;
 		public DragEvent m_onDragEnd;
 
-		RectTransform rect;
-
-		private void Start()
-		{
-			rect = GetComponent<RectTransform>();
-		}
 
 		public void OnDrag(PointerEventData data)
 		{
 			if (m_onDrag != null)
-				m_onDrag(data, rect);
+				m_onDrag(data);
 		}
 
 		public void OnBeginDrag(PointerEventData data)
 		{
 			if (m_onDragStart != null)
-				m_onDragStart(data, rect);
+				m_onDragStart(data);
 		}
 
 		public void OnEndDrag(PointerEventData data)
 		{
 			if (m_onDragEnd != null)
-				m_onDragEnd(data, rect);
+				m_onDragEnd(data);
 		}
 	}
 }

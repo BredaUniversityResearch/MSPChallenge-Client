@@ -36,14 +36,14 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(true);
 		}
 
-		public void OnDragStart(PointerEventData a_data, RectTransform a_headerRect)
+		public void OnDragStart(PointerEventData a_data)
 		{
 			m_contentContainer.SetActive(false);
 			//TODO: set preview outline true, or leave content active?
 			//TODO: Remove widget from core structure, collapse if possible
 		}
 
-		public void OnDrag(PointerEventData a_data, RectTransform a_headerRect)
+		public void OnDrag(PointerEventData a_data)
 		{
 			//Detect new location, show preview?
 			//When over / overlapping, add insertion preview above row
@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 			DashboardManager.Instance.ShowWidgetMovePreview(this, a_data);
 		}
 
-		public void OnDragEnd(PointerEventData a_data, RectTransform a_headerRect)
+		public void OnDragEnd(PointerEventData a_data)
 		{
 			m_contentContainer.SetActive(true);
 			//TODO: set preview outline false, or leave content active?
