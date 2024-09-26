@@ -18,8 +18,8 @@ namespace MSP2050.Scripts
 		public DashboardCategory m_category;
 		public bool m_startingWidget;
 
-		protected DashboardWidgetPosition m_position;
-		protected DashboardWidgetPosition m_favPosition;
+		public DashboardWidgetPosition m_position;
+		public DashboardWidgetPosition m_favPosition;
 
 		public int DefaultW => m_defaultW;
 		public int DefaultH => m_defaultH;

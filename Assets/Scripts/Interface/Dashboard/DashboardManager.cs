@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
 
 		//Widgets
 		List<ADashboardWidget> m_loadedWidgets;
-		Dictionary<DashboardCategory, List<ADashboardWidget>> m_catSelectedWidgets;
+		Dictionary<DashboardCategory, DashboardWidgetLayout> m_catSelectedWidgets;
 		List<ADashboardWidget> m_visibleWidgets = new List<ADashboardWidget>();
 
 		private void Awake()
@@ -64,7 +64,7 @@ namespace MSP2050.Scripts
 			DashboardCategory[] categories = Resources.LoadAll<DashboardCategory>(m_categoriesAssetPath);
 
 			m_categoryToggles = new List<DashboardCategoryToggle>();
-			m_catSelectedWidgets = new Dictionary<DashboardCategory, List<ADashboardWidget>> ();
+			m_catSelectedWidgets = new Dictionary<DashboardCategory, DashboardWidgetLayout>();
 			m_loadedWidgets = new List<ADashboardWidget>();
 
 			foreach (var cat in categories)
@@ -73,6 +73,7 @@ namespace MSP2050.Scripts
 				{
 					m_favoriteCategory = cat;
 					AddCategoryToggle(cat);
+					m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(true));
 				}
 				else
 				{
@@ -81,6 +82,7 @@ namespace MSP2050.Scripts
 						if (kvp.Key.Equals(cat.name))
 						{
 							AddCategoryToggle(cat);
+							m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(false));
 							break;
 						}
 					}
@@ -104,7 +106,6 @@ namespace MSP2050.Scripts
 
 		void AddCategoryToggle(DashboardCategory a_category)
 		{
-			m_catSelectedWidgets.Add(a_category, new List<ADashboardWidget>());
 			DashboardCategoryToggle toggle = Instantiate(m_categoryTogglePrefab, m_categoryToggleParent).GetComponent<DashboardCategoryToggle>();
 			toggle.Initialise(a_category, m_categoryToggleGroup, OnCategorySelected);
 			m_categoryToggles.Add(toggle);
@@ -116,7 +117,7 @@ namespace MSP2050.Scripts
 		{
 			ADashboardWidget instance = Instantiate(a_widget, m_widgetParent).GetComponent<ADashboardWidget>();
 			instance.gameObject.SetActive(false);
-			m_catSelectedWidgets[a_widget.m_category].Add(instance);
+			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);
 		}
 
 		void OnCategorySelected(DashboardCategory a_category)
@@ -150,7 +151,7 @@ namespace MSP2050.Scripts
 		{
 			m_currentCategory = a_category;
 			m_categoryNameText.text = a_category.m_displayName;
-			foreach(ADashboardWidget widget in m_catSelectedWidgets[a_category])
+			foreach(ADashboardWidget widget in m_catSelectedWidgets[a_category].Widgets)
 			{
 				widget.Show();
 			}
@@ -180,7 +181,7 @@ namespace MSP2050.Scripts
 		public void SetWidgetAsFavorite(ADashboardWidget a_widget, bool a_favorite)
 		{
 			if(a_favorite)
-				m_catSelectedWidgets[m_favoriteCategory].Add(a_widget);
+				m_catSelectedWidgets[m_favoriteCategory].AddWidget(a_widget);
 			else
 				m_catSelectedWidgets[m_favoriteCategory].Remove(a_widget);
 		}
