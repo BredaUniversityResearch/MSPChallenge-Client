@@ -11,6 +11,8 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] DashboardWidgetHeader m_header;
 		[SerializeField] GameObject m_contentContainer;
+		[SerializeField] int m_defaultW;
+		[SerializeField] int m_defaultH;
 
 		//Set in individual prefabs
 		public DashboardCategory m_category;
@@ -18,6 +20,9 @@ namespace MSP2050.Scripts
 
 		protected DashboardWidgetPosition m_position;
 		protected DashboardWidgetPosition m_favPosition;
+
+		public int DefaultW => m_defaultW;
+		public int DefaultH => m_defaultH;
 
 		private void Awake()
 		{
