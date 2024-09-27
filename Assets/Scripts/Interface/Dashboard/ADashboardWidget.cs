@@ -62,5 +62,10 @@ namespace MSP2050.Scripts
 			//TODO: set preview outline false, or leave content active?
 			DashboardManager.Instance.OnWidgetMoveRelease(this, a_data);
 		}
+
+		public void Reposition(bool a_favoriteLayout = false)
+		{
+
+		}
 	}
 }
