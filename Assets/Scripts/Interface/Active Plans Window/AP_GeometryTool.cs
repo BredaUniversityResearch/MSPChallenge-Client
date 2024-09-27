@@ -38,7 +38,6 @@ namespace MSP2050.Scripts
 
 		private Dictionary<int, Toggle> m_countryToggles;
 		private Toggle m_gmCountryToggle, m_multiCountryToggle;
-		//private int m_selectedCountry;
 		private bool m_gmSelectable = true;
 		private bool m_ignoreCountryToggleCallback;
 
@@ -452,8 +451,6 @@ namespace MSP2050.Scripts
 
 		public void SetSelectedParameters(List<Dictionary<EntityPropertyMetaData, string>> selectedParams, List<Entity> entities)
 		{
-			//TODO: month values not correctly mixed (~) when geom without policy selected
-			//TODO: remove confimation in geom policy window
 			m_geometryPolicyWindow.CloseWindow();
 			if (selectedParams == null || selectedParams.Count == 0)
 			{
@@ -468,9 +465,6 @@ namespace MSP2050.Scripts
 				{
 					if (kvp.Key.IsPolicy)
 					{
-						//Dictionary<Entity, string> data = new Dictionary<Entity, string>() { { entities[0], kvp.Value } };
-						//if (!string.IsNullOrEmpty(kvp.Value))
-						//	data.Add(entities[0], kvp.Value);
 						m_geometryPolicies[kvp.Key].SetValue(new Dictionary<Entity, string>() { { entities[0], kvp.Value } }, entities, m_geometryPolicyWindow);
 					}
 					else

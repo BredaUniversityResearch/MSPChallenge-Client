@@ -71,10 +71,10 @@ namespace MSP2050.Scripts
 				bool? totalValue = null;
 				for (int i = 0; i < m_monthToggles.Length; i++)
 				{
-					bool? monthValue = a_months[0].MonthSet(i);//TODO: is Month+1 needed here?
+					bool? monthValue = a_months[0].MonthSet(i);
 					for (int j = 1; j < a_months.Count; j++)
 					{
-						if (a_months[j].MonthSet(i) != monthValue.Value)//TODO: is Month+1 needed here?
+						if (a_months[j].MonthSet(i) != monthValue.Value)
 						{
 							monthValue = null;
 							break;
