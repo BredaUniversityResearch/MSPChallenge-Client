@@ -192,7 +192,11 @@ namespace MSP2050.Scripts
 			serializer.Converters.Add(new JsonConverterBinaryBool());
 			BatchRequestResultHeaderData headerData =
 				a_result.header_data.ToObject<BatchRequestResultHeaderData>(serializer);
-			if (!a_result.success)
+			if (!a_result.success && 
+			    // If a batch is created server side, for this client, but not by the client itself,
+			    //   the client will not have registered the batch call back, so check if it is there
+			    // E.g. when a programmer injects some batches to test with for websocket server testing
+			    m_batchRequestFailureCallbacks.ContainsKey(headerData.batch_guid))
 			{
 				BatchRequestResultAndFailureCallback pair =
 					new BatchRequestResultAndFailureCallback(a_result.message,
@@ -202,6 +206,7 @@ namespace MSP2050.Scripts
 			}
 
 			// new scope
+			if (m_batchRequestSuccessCallbacks.ContainsKey(headerData.batch_guid))
 			{
 				BatchExecutionResult batchExecutionResult = a_result.payload.ToObject<BatchExecutionResult>(serializer);
 				BatchRequestResultAndSuccessCallback pair =

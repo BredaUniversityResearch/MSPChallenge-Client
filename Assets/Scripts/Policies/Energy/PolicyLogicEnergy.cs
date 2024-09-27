@@ -255,8 +255,7 @@ namespace MSP2050.Scripts
 		{
 			if (a_plan.TryGetPolicyData<PolicyPlanDataEnergy>(PolicyManager.ENERGY_POLICY_NAME, out var data))
 			{
-				if (!m_wasEnergyPlanBeforeEditing)
-					SubmitPolicyActivity(a_plan, PolicyManager.ENERGY_POLICY_NAME, true, a_batch);
+				SetGeneralPolicyData(a_plan, new EmptyPolicyPlanData(PolicyManager.ENERGY_POLICY_NAME), a_batch);
 
 				// Add new grids (not distributions/sockets/sources yet)
 				foreach (EnergyGrid grid in data.energyGrids)
@@ -282,7 +281,7 @@ namespace MSP2050.Scripts
 			}
 			else if(m_wasEnergyPlanBeforeEditing)
 			{
-				SubmitPolicyActivity(a_plan, PolicyManager.ENERGY_POLICY_NAME, false, a_batch);
+				DeleteGeneralPolicyData(a_plan, PolicyManager.ENERGY_POLICY_NAME, a_batch);
 				JObject dataObject = new JObject();
 				dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
 				a_batch.AddRequest(Server.DeleteEnergyFromPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);

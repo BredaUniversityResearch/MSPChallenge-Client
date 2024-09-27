@@ -8,15 +8,74 @@ namespace MSP2050.Scripts
 {
 	public class PolicyLogicFishing : APolicyLogic
 	{
+		static PolicyLogicFishing m_instance;
+		public static PolicyLogicFishing Instance => m_instance;
+
 		FishingDistributionDelta m_fishingBackup;
 		bool m_wasFishingPlanBeforeEditing;
 		bool m_requireAllApproval = true;
+		FleetInfo m_fleetInfo;
 
 		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
 		{
 			base.Initialise(a_settings, a_definition);
 			PolicySettingsFishing settings = (PolicySettingsFishing)a_settings;
 			m_requireAllApproval = settings.all_country_approval;
+			m_fleetInfo = settings.fleet_info;
+			m_instance = this;
+		}
+
+		public override void Destroy()
+		{
+			m_instance = null;
+		}
+
+		public List<CountryFleetInfo> GetFleetsForGear(int a_gearId)
+		{
+			List<CountryFleetInfo> result = new List<CountryFleetInfo>();
+			for (int i = 0; i < m_fleetInfo.fleets.Length; i++)
+			{
+				if (m_fleetInfo.fleets[i].gear_type == a_gearId)
+					result.Add(m_fleetInfo.fleets[i]);
+			}
+			return result;
+		}
+
+		public List<CountryFleetInfo> GetFleetsForCountry(int a_countryId)
+		{
+			List<CountryFleetInfo> result = new List<CountryFleetInfo>();
+			for (int i = 0; i < m_fleetInfo.fleets.Length; i++)
+			{
+				if (m_fleetInfo.fleets[i].country_id == a_countryId)
+					result.Add(m_fleetInfo.fleets[i]);
+			}
+			return result;
+		}
+
+		public int GetFleetId(int a_countryId, int a_gearId)
+		{
+			for(int i = 0; i < m_fleetInfo.fleets.Length; i++)
+			{
+				if (m_fleetInfo.fleets[i].gear_type == a_gearId && m_fleetInfo.fleets[i].country_id == a_countryId)
+					return i;
+			}
+			Debug.LogError($"No fleet found for country id: {a_countryId}, gear id: {a_gearId}");
+			return -1;
+		}
+
+		public CountryFleetInfo GetFleetInfo(int a_fleetId)
+		{
+			return m_fleetInfo.fleets[a_fleetId];
+		}
+
+		public CountryFleetInfo[] GetAllFleetInfo()
+		{
+			return m_fleetInfo.fleets;
+		}
+
+		public string[] GetGearTypes()
+		{
+			return m_fleetInfo.gear_types;
 		}
 
 		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage)
@@ -90,13 +149,12 @@ namespace MSP2050.Scripts
 		{
 			if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var data))
 			{
-				if (!m_wasFishingPlanBeforeEditing)
-					SubmitPolicyActivity(a_plan, PolicyManager.FISHING_POLICY_NAME, true, a_batch);
+				SetGeneralPolicyData(a_plan, new EmptyPolicyPlanData(PolicyManager.FISHING_POLICY_NAME), a_batch);
 				data.fishingDistributionDelta.SubmitToServer(a_plan.GetDataBaseOrBatchIDReference(), a_batch);
 			}
 			else if(m_wasFishingPlanBeforeEditing)
 			{
-				SubmitPolicyActivity(a_plan, PolicyManager.FISHING_POLICY_NAME, false, a_batch);
+				DeleteGeneralPolicyData(a_plan, PolicyManager.FISHING_POLICY_NAME, a_batch);
 				JObject dataObject = new JObject();
 				dataObject.Add("plan", a_plan.GetDataBaseOrBatchIDReference());
 				a_batch.AddRequest(Server.DeleteFishingFromPlan(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);

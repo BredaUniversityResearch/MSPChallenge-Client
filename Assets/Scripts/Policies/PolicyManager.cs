@@ -10,6 +10,9 @@ namespace MSP2050.Scripts
 		public const string ENERGY_POLICY_NAME = "energy";
 		public const string FISHING_POLICY_NAME = "fishing";
 		public const string SHIPPING_POLICY_NAME = "shipping";
+		public const string SEASONAL_CLOSURE_POLICY_NAME = "seasonal_closure";
+		public const string BUFFER_ZONE_POLICY_NAME = "buffer_zone";
+		public const string ECO_GEAR_POLICY_NAME = "eco_gear";
 
 		private static PolicyManager singleton;
 		public static PolicyManager Instance
@@ -64,11 +67,11 @@ namespace MSP2050.Scripts
 				m_name = ENERGY_POLICY_NAME,
 				m_displayName = "Energy Distribution",
 				m_planUpdateType = typeof(PolicyUpdateEnergyPlan),
-				m_updateType = typeof(PolicyUpdateEnergy),
+				m_generalUpdateType = typeof(PolicyUpdateEnergy),
 				m_logicType = typeof(PolicyLogicEnergy),
 				m_settingsType = typeof(PolicySettingsEnergy),
-				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyEnergy_PRFB"),
-				m_activePlanIcon = Resources.Load<Sprite>("Icons/energy")
+				m_windowPrefab = Resources.Load<GameObject>("AP_PolicyEnergy_PRFB"),
+				m_policyIcon = Resources.Load<Sprite>("Icons/energy")
 			});
 			m_policyDefinitions.Add(FISHING_POLICY_NAME, new PolicyDefinition
 			{
@@ -77,8 +80,8 @@ namespace MSP2050.Scripts
 				m_planUpdateType = typeof(PolicyUpdateFishingPlan),
 				m_logicType = typeof(PolicyLogicFishing),
 				m_settingsType = typeof(PolicySettingsFishing),
-				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyFishing_PRFB"),
-				m_activePlanIcon = Resources.Load<Sprite>("Icons/fishing")
+				m_windowPrefab = Resources.Load<GameObject>("AP_PolicyFishing_PRFB"),
+				m_policyIcon = Resources.Load<Sprite>("Icons/fishing")
 			});
 			m_policyDefinitions.Add(SHIPPING_POLICY_NAME, new PolicyDefinition
 			{
@@ -87,8 +90,34 @@ namespace MSP2050.Scripts
 				m_planUpdateType = typeof(PolicyUpdateShippingPlan),
 				m_logicType = typeof(PolicyLogicShipping),
 				m_settingsType = typeof(APolicyData),
-				m_activePlanPrefab = Resources.Load<GameObject>("AP_PolicyShipping_PRFB"),
-				m_activePlanIcon = Resources.Load<Sprite>("Icons/shipping")
+				m_windowPrefab = Resources.Load<GameObject>("AP_PolicyShipping_PRFB"),
+				m_policyIcon = Resources.Load<Sprite>("Icons/shipping")
+			});
+			m_policyDefinitions.Add(ECO_GEAR_POLICY_NAME, new PolicyDefinition
+			{
+				m_name = ECO_GEAR_POLICY_NAME,
+				m_displayName = "Ecological Fishing Gear",
+				m_planUpdateType = typeof(PolicyUpdateEcoGearPlan),
+				m_logicType = typeof(PolicyLogicEcoGear),
+				m_settingsType = typeof(APolicyData),
+				m_windowPrefab = Resources.Load<GameObject>("AP_PolicyEcoGear_PRFB"),
+				m_policyIcon = Resources.Load<Sprite>("Icons/shipping")
+			});
+			m_policyDefinitions.Add(SEASONAL_CLOSURE_POLICY_NAME, new PolicyDefinition
+			{
+				m_name = SEASONAL_CLOSURE_POLICY_NAME,
+				m_displayName = "Fleet Bans",
+				m_geometryPolicy = true,
+				m_planUpdateType = typeof(PolicyGeometryDataSeasonalClosure),
+				m_windowPrefab = Resources.Load<GameObject>("GeometryPolicyContentSeasonalClosure_PRFB")
+			});
+			m_policyDefinitions.Add(BUFFER_ZONE_POLICY_NAME, new PolicyDefinition
+			{
+				m_name = BUFFER_ZONE_POLICY_NAME,
+				m_displayName = "Buffer Zone",
+				m_geometryPolicy = true,
+				m_planUpdateType = typeof(PolicyGeometryDataBufferZone),
+				m_windowPrefab = Resources.Load<GameObject>("GeometryPolicyContentBufferZone_PRFB")
 			});
 		}
 

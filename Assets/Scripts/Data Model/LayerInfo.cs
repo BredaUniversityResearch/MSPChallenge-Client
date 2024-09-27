@@ -136,6 +136,7 @@ namespace MSP2050.Scripts
 		public int layer_id { get; set; }
 		public string layer_original_id { get; set; }
 		public string layer_depth { get; set; }
+		public string[] layer_tags { get; set; }
 		public string layer_name { get; set; }
 		public string layer_geotype { get; set; }
 		public string layer_short { get; set; }
@@ -185,6 +186,7 @@ namespace MSP2050.Scripts
 		public string display_name { get; set; }
 		public string sprite_name { get; set; }
 		public string default_value { get; set; }
+		public string policy_type { get; set; }
 		public bool update_visuals { get; set; }
 		public bool update_text { get; set; }
 		public bool update_calculation { get; set; }
