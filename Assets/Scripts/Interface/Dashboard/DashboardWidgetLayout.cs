@@ -6,15 +6,16 @@ namespace MSP2050.Scripts
 {
 	public class DashboardWidgetLayout
 	{
-		const int columns = 5;
 		List<ADashboardWidget> m_widgets;
 		List<ADashboardWidget[]> m_widgetLayout;
 		bool m_favorites;
+		int m_columns = 5;
 
 		public List<ADashboardWidget> Widgets => m_widgets;
 
-		public DashboardWidgetLayout(bool a_favorites)
+		public DashboardWidgetLayout(bool a_favorites, int a_columns)
 		{
+			m_columns = a_columns;
 			m_favorites = a_favorites;
 			m_widgets = new List<ADashboardWidget>();
 			m_widgetLayout = new List<ADashboardWidget[]>() { new ADashboardWidget[5] };
@@ -27,6 +28,7 @@ namespace MSP2050.Scripts
 			var position = FindFittingPosition(a_widget.DefaultW, a_widget.DefaultH);
 			(m_favorites ? a_widget.m_favPosition : a_widget.m_position).SetPosition(position.x, position.y);
 			InsertWidget(a_widget);
+			a_widget.Reposition();
 		}
 
 		public (int y, int x) FindFittingPosition(int a_w, int a_h)
@@ -39,12 +41,12 @@ namespace MSP2050.Scripts
 				//Discard rows now beyond scope
 				if (validIndices.Count == a_h)
 					validIndices.RemoveAt(0);
-				validIndices.Add(new List<int>(columns));
+				validIndices.Add(new List<int>(m_columns));
 
 				//Find available indices in current row
 				int x = 0;
 				int lastEmptyindex = -1;
-				while (x <= columns - a_w)
+				while (x <= m_columns - a_w)
 				{
 					if (m_widgetLayout[y][x] != null)
 					{
@@ -124,6 +126,12 @@ namespace MSP2050.Scripts
 					m_widgetLayout[y][x] = a_widget;
 				}
 			}
+		}
+
+		public void ChangeNumberColumns(int a_columns)
+		{
+			m_columns = a_columns; 
+			//TODO: restructure content
 		}
 
 		public void DuplicateWidget(ADashboardWidget a_widget)

@@ -9,6 +9,8 @@ namespace MSP2050.Scripts
 {
 	public abstract class ADashboardWidget : MonoBehaviour
 	{
+		
+
 		[SerializeField] DashboardWidgetHeader m_header;
 		[SerializeField] GameObject m_contentContainer;
 		[SerializeField] int m_defaultW;
@@ -65,7 +67,10 @@ namespace MSP2050.Scripts
 
 		public void Reposition(bool a_favoriteLayout = false)
 		{
-
+			RectTransform rect = GetComponent<RectTransform>();
+			DashboardWidgetPosition pos = a_favoriteLayout ? m_favPosition : m_position;
+			rect.sizeDelta = new Vector2(pos.W * DashboardManager.cellsize, pos.H * DashboardManager.cellsize);
+			rect.localPosition = new Vector3(pos.X * DashboardManager.cellsize, -pos.Y * DashboardManager.cellsize);
 		}
 	}
 }

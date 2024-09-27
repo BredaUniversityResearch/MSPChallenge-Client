@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 {
 	public class DashboardManager : MonoBehaviour
 	{
-		
+		public const float cellsize = 300f;
 
 		static DashboardManager m_instance;
 		public static DashboardManager Instance => m_instance;
@@ -21,7 +21,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_catalogueButton;
 		[SerializeField] Button m_sortButton;
 
-		[SerializeField] Transform m_widgetParent;
+		[SerializeField] RectTransform m_widgetParent;
 		[SerializeField] GameObject m_categoryTogglePrefab;
 		[SerializeField] Transform m_categoryToggleParent;
 		[SerializeField] ToggleGroup m_categoryToggleGroup;
@@ -67,13 +67,15 @@ namespace MSP2050.Scripts
 			m_catSelectedWidgets = new Dictionary<DashboardCategory, DashboardWidgetLayout>();
 			m_loadedWidgets = new List<ADashboardWidget>();
 
+			int numberColumns = 5; // TODO: determine this based on screen size
+
 			foreach (var cat in categories)
 			{
 				if (cat.m_favorite)
 				{
 					m_favoriteCategory = cat;
 					AddCategoryToggle(cat);
-					m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(true));
+					m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(true, numberColumns));
 				}
 				else
 				{
@@ -82,7 +84,7 @@ namespace MSP2050.Scripts
 						if (kvp.Key.Equals(cat.name))
 						{
 							AddCategoryToggle(cat);
-							m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(false));
+							m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(false, numberColumns));
 							break;
 						}
 					}
@@ -188,12 +190,27 @@ namespace MSP2050.Scripts
 
 		public void ShowWidgetMovePreview(ADashboardWidget a_widget, PointerEventData a_data)
 		{
-
+			//If over current widget: do nothing
+			//If over empty spot: check if fit
+			//If no fit, place preview above current spot
 		}
 
 		public void OnWidgetMoveRelease(ADashboardWidget a_widget, PointerEventData a_data)
 		{
+			//If over current widget: do nothing
+			//If over empty spot: check if fit
+			//If no fit, create rows above position to fit
+		}
 
+		(int x, int y) GetPointerPosition(PointerEventData a_data)
+		{
+			int x = 0, y = 0;
+			if(RectTransformUtility.ScreenPointToLocalPointInRectangle(m_widgetParent, a_data.position, a_data.enterEventCamera, out Vector2 localPos))
+			{
+				x = (int)(localPos.x / cellsize);
+				y = (int)(-localPos.y / cellsize);
+			}
+			return (x, y);
 		}
 	}
 }
