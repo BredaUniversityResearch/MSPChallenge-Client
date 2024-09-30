@@ -136,6 +136,7 @@ namespace MSP2050.Scripts
 		public int layer_id { get; set; }
 		public string layer_original_id { get; set; }
 		public string layer_depth { get; set; }
+		public string[] layer_tags { get; set; }
 		public string layer_name { get; set; }
 		public string layer_geotype { get; set; }
 		public string layer_short { get; set; }
@@ -177,7 +178,7 @@ namespace MSP2050.Scripts
 	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match json
 	public class LayerInfoPropertiesObject
 	{
-		public enum ContentValidation { None, ShippingWidth, NumberCables }
+		public enum ContentValidation { None, ShippingWidth, NumberCables, PitExtractionDepth }
 
 		public string property_name { get; set; }
 		public bool enabled { get; set; }

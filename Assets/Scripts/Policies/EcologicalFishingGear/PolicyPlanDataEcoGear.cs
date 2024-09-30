@@ -7,6 +7,7 @@ namespace MSP2050.Scripts
 	public class PolicyPlanDataEcoGear : APolicyPlanData
 	{
 		public Dictionary<int, bool> m_values; //fleet_id, eco_gear
+		public float pressure = 0f;
 
 		public PolicyPlanDataEcoGear(APolicyLogic a_logic) : base(a_logic)
 		{

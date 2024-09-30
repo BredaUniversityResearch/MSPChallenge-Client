@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 	{
 		public Dictionary<int, Dictionary<int, Months>> fleets; //gear ids, country ids, months
 		public float radius;
+		public float pressure = 0f;
 
 		public PolicyGeometryDataBufferZone()
 		{
@@ -142,6 +143,7 @@ namespace MSP2050.Scripts
 			}
 			public float radius;
 			public List<FleetClosureData> items;
+			public float pressure = 0f;
 		}
 	}
 

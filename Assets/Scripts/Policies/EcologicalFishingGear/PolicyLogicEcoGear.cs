@@ -97,7 +97,22 @@ namespace MSP2050.Scripts
 		{
 			if (a_plan.TryGetPolicyData<PolicyPlanDataEcoGear>(PolicyManager.ECO_GEAR_POLICY_NAME, out var data))
 			{
-				SetGeneralPolicyData(a_plan, new EmptyPolicyPlanData(PolicyManager.ENERGY_POLICY_NAME), a_batch);
+				List<int> enabledFleets = new List<int>();
+				List<int> disabledFleets = new List<int>();
+				foreach(var kvp in data.m_values)
+				{
+					if(kvp.Value)
+						enabledFleets.Add(kvp.Key);
+					else
+						disabledFleets.Add(kvp.Key);
+				}
+				List<EcoGearSetting> items = new List<EcoGearSetting>();
+				if (enabledFleets.Count > 0)
+					items.Add(new EcoGearSetting() { enabled = true, fleets = enabledFleets.ToArray() });
+				if (disabledFleets.Count > 0)
+					items.Add(new EcoGearSetting() { enabled = false, fleets = disabledFleets.ToArray() });
+
+				SetGeneralPolicyData(a_plan, new PolicyUpdateEcoGearPlan() { items = items, policy_type = PolicyManager.ECO_GEAR_POLICY_NAME }, a_batch);
 
 			}
 			else if (m_wasEcoGearPlanBeforeEditing)

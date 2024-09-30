@@ -41,6 +41,7 @@ namespace MSP2050.Scripts
 	public class PolicyGeometryDataSeasonalClosure : APolicyData
 	{
 		public Dictionary<int, Dictionary<int, Months>> fleets; //gear ids, country ids, months
+		public float pressure = 0f;
 
 		public PolicyGeometryDataSeasonalClosure()
 		{
@@ -159,9 +160,14 @@ namespace MSP2050.Scripts
 			return new PolicyGeometryDataSeasonalClosure(fleetsCopy);
 		}
 
-		private class SeasonalClosureData
+		private class SeasonalClosureData: APolicyData
 		{
+			public SeasonalClosureData()
+			{
+				policy_type = PolicyManager.SEASONAL_CLOSURE_POLICY_NAME;
+			}			
 			public List<FleetClosureData> items;
+			public float pressure = 0f;
 		}
 	}
 }
