@@ -33,5 +33,9 @@ namespace MSP2050.Scripts
 				m_onSelect.Invoke(m_category);
 		}
 
+		public void ForceActive()
+		{
+			m_toggle.isOn = true;
+		}
 	}
 }

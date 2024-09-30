@@ -81,7 +81,7 @@ namespace MSP2050.Scripts
 				{
 					foreach (var kvp in SimulationManager.Instance.Settings)
 					{
-						if (kvp.Key.Equals(cat.name))
+						if (kvp.Key.Equals(cat.m_name, StringComparison.InvariantCultureIgnoreCase))
 						{
 							AddCategoryToggle(cat);
 							m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(false, m_numberColumns));
@@ -104,7 +104,8 @@ namespace MSP2050.Scripts
 					}
 				}
             }
-        }
+			m_categoryToggles[0].ForceActive();
+		}
 
 		void AddCategoryToggle(DashboardCategory a_category)
 		{
@@ -118,6 +119,7 @@ namespace MSP2050.Scripts
 		void AddFromCatalogue(ADashboardWidget a_widget)
 		{
 			ADashboardWidget instance = Instantiate(a_widget, m_widgetParent).GetComponent<ADashboardWidget>();
+			instance.Initialise(a_widget);
 			instance.gameObject.SetActive(false);
 			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);
 		}
@@ -156,6 +158,7 @@ namespace MSP2050.Scripts
 			foreach(ADashboardWidget widget in m_catSelectedWidgets[a_category].Widgets)
 			{
 				widget.Show();
+				m_visibleWidgets.Add(widget);
 			}
 		}
 

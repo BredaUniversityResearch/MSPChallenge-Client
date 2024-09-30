@@ -15,6 +15,9 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_contentContainer;
 		[SerializeField] int m_defaultW;
 		[SerializeField] int m_defaultH;
+		[SerializeField] Button m_addButton;
+		[SerializeField] Toggle m_favouriteToggle;
+		[SerializeField] Button m_optionsButton;
 
 		//Set in individual prefabs
 		public DashboardCategory m_category;
@@ -31,6 +34,20 @@ namespace MSP2050.Scripts
 			m_header.m_onDragStart = OnDragStart;
 			m_header.m_onDrag = OnDrag;
 			m_header.m_onDragEnd = OnDragEnd;
+		}
+
+		public void Initialise(bool a_catalogueWidget)
+		{
+			m_position = new DashboardWidgetPosition();
+			m_position.SetSize(m_defaultW, m_defaultH);
+			//TODO: show right buttons
+			//TODO: link up buttons
+		}
+
+		public void Initialise(ADashboardWidget a_original)
+		{
+			m_position = new DashboardWidgetPosition();
+			m_position.SetSize(a_original.m_position.W, a_original.m_position.H);
 		}
 
 		public virtual void Hide()
