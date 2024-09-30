@@ -26,6 +26,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_categoryToggleParent;
 		[SerializeField] ToggleGroup m_categoryToggleGroup;
 		[SerializeField] TextMeshProUGUI m_categoryNameText;
+		[SerializeField] RectTransform m_rowInsertPreview;
 
 		//Categories
 		List<DashboardCategoryToggle> m_categoryToggles;
@@ -37,6 +38,7 @@ namespace MSP2050.Scripts
 		List<ADashboardWidget> m_loadedWidgets;
 		Dictionary<DashboardCategory, DashboardWidgetLayout> m_catSelectedWidgets;
 		List<ADashboardWidget> m_visibleWidgets = new List<ADashboardWidget>();
+		int m_numberColumns = 5; // TODO: determine this based on screen size
 
 		private void Awake()
 		{
@@ -49,7 +51,7 @@ namespace MSP2050.Scripts
 				SimulationManager.Instance.m_onSimulationsInitialised += InitialiseDashboard;
 			m_closeButton.onClick.AddListener(CloseDashboard);
 			m_catalogueButton.onClick.AddListener(OpenCatalogue);
-			m_sortButton.onClick.AddListener(Sort);
+			//m_sortButton.onClick.AddListener(Sort);
 		}
 
 		void CloseDashboard()
@@ -67,15 +69,13 @@ namespace MSP2050.Scripts
 			m_catSelectedWidgets = new Dictionary<DashboardCategory, DashboardWidgetLayout>();
 			m_loadedWidgets = new List<ADashboardWidget>();
 
-			int numberColumns = 5; // TODO: determine this based on screen size
-
 			foreach (var cat in categories)
 			{
 				if (cat.m_favorite)
 				{
 					m_favoriteCategory = cat;
 					AddCategoryToggle(cat);
-					m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(true, numberColumns));
+					m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(true, m_numberColumns));
 				}
 				else
 				{
@@ -84,7 +84,7 @@ namespace MSP2050.Scripts
 						if (kvp.Key.Equals(cat.name))
 						{
 							AddCategoryToggle(cat);
-							m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(false, numberColumns));
+							m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(false, m_numberColumns));
 							break;
 						}
 					}
@@ -188,18 +188,60 @@ namespace MSP2050.Scripts
 				m_catSelectedWidgets[m_favoriteCategory].Remove(a_widget);
 		}
 
+		public void OnWidgetMoveStart(ADashboardWidget a_widget)
+		{
+			m_catSelectedWidgets[m_currentCategory].Remove(a_widget, true);
+
+		}
+
 		public void ShowWidgetMovePreview(ADashboardWidget a_widget, PointerEventData a_data)
 		{
-			//If over current widget: do nothing
-			//If over empty spot: check if fit
-			//If no fit, place preview above current spot
+			var pos = GetPointerPosition(a_data);
+			DashboardWidgetPosition layout = m_currentCategory.m_favorite ? a_widget.m_favPosition : a_widget.m_position;
+			if (m_catSelectedWidgets[m_currentCategory].WidgetFitsAt(a_widget, pos.x, pos.y, layout.W, layout.H))
+			{
+				//Show placed preview
+				a_widget.RepositionToPreview(pos.x, pos.y, layout.W, layout.H);
+				a_widget.SetContentActive(true);
+				m_rowInsertPreview.gameObject.SetActive(false);
+			}
+			else if(m_numberColumns >= pos.x + layout.W)
+			{
+				//Show above preview
+				a_widget.SetContentActive(false);
+				m_rowInsertPreview.gameObject.SetActive(true);
+				m_rowInsertPreview.sizeDelta = new Vector2(layout.W * DashboardManager.cellsize, 0f);
+				m_rowInsertPreview.localPosition = new Vector3(pos.x * DashboardManager.cellsize, -pos.y * DashboardManager.cellsize);
+			}
+			else
+			{
+				//Widget can't fit here even with inserted rows
+				a_widget.SetContentActive(false);
+				m_rowInsertPreview.gameObject.SetActive(false);
+				//TODO: cross on preview?
+			}
 		}
 
 		public void OnWidgetMoveRelease(ADashboardWidget a_widget, PointerEventData a_data)
 		{
-			//If over current widget: do nothing
-			//If over empty spot: check if fit
-			//If no fit, create rows above position to fit
+			m_rowInsertPreview.gameObject.SetActive(false);
+			var pos = GetPointerPosition(a_data);
+			DashboardWidgetPosition layout = m_currentCategory.m_favorite ? a_widget.m_favPosition : a_widget.m_position;
+			if (m_catSelectedWidgets[m_currentCategory].WidgetFitsAt(a_widget, pos.x, pos.y, layout.W, layout.H))
+			{
+				//Move to available position
+				m_catSelectedWidgets[m_currentCategory].MoveWidget(a_widget, pos.x, pos.y);
+			}
+			else if (m_numberColumns >= pos.x + layout.W)
+			{
+				//Create new rows to fit
+				m_catSelectedWidgets[m_currentCategory].MoveWidgetAboveRow(a_widget, pos.x, pos.y);
+			}
+			else
+			{
+				//Widget can't fit here even with inserted rows; insert into old position
+				m_catSelectedWidgets[m_currentCategory].InsertWidget(a_widget);
+			}
 		}
 
 		(int x, int y) GetPointerPosition(PointerEventData a_data)
@@ -210,6 +252,12 @@ namespace MSP2050.Scripts
 				x = (int)(localPos.x / cellsize);
 				y = (int)(-localPos.y / cellsize);
 			}
+			if (y < 0) 
+				y = 0;
+			if(x < 0) 
+				x = 0;
+			if (x >= m_numberColumns)
+				x = m_numberColumns - 1;
 			return (x, y);
 		}
 	}

@@ -28,7 +28,6 @@ namespace MSP2050.Scripts
 			var position = FindFittingPosition(a_widget.DefaultW, a_widget.DefaultH);
 			(m_favorites ? a_widget.m_favPosition : a_widget.m_position).SetPosition(position.x, position.y);
 			InsertWidget(a_widget);
-			a_widget.Reposition();
 		}
 
 		public (int y, int x) FindFittingPosition(int a_w, int a_h)
@@ -108,24 +107,22 @@ namespace MSP2050.Scripts
 			return (m_widgetLayout.Count, 0);
 		}
 
-		void InsertWidget(ADashboardWidget a_widget)
+		public void InsertWidget(ADashboardWidget a_widget)
 		{
-			int posX = m_favorites ? a_widget.m_favPosition.X : a_widget.m_position.X;
-			int posY = m_favorites ? a_widget.m_favPosition.Y : a_widget.m_position.Y;
-			int w = m_favorites ? a_widget.m_favPosition.W : a_widget.m_position.W;
-			int h = m_favorites ? a_widget.m_favPosition.H : a_widget.m_position.H;
-
-			for (int i = m_widgetLayout.Count; i < posY + a_widget.DefaultH; i++)
+			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
+			for (int i = m_widgetLayout.Count; i < layout.Y + layout.H; i++)
 			{
 				m_widgetLayout.Add(new ADashboardWidget[5]);
 			}
-			for(int y = posY; y < posY + h; y++)
+
+			for (int y = layout.Y; y < layout.Y + layout.H; y++)
 			{
-				for (int x = posX; x < posX + w; x++)
+				for (int x = layout.X; x < layout.X + layout.W; x++)
 				{
 					m_widgetLayout[y][x] = a_widget;
 				}
 			}
+			a_widget.Reposition();
 		}
 
 		public void ChangeNumberColumns(int a_columns)
@@ -134,28 +131,71 @@ namespace MSP2050.Scripts
 			//TODO: restructure content
 		}
 
-		public void DuplicateWidget(ADashboardWidget a_widget)
-		{ }
-
 		public void ChangeWidgetSize(ADashboardWidget a_widget, int a_newW, int a_newH)
-		{ }
-
-		public void Remove(ADashboardWidget a_widget)
 		{
-			m_widgets.Remove(a_widget);
+			//TODO
+		}
 
-			int posX = m_favorites ? a_widget.m_favPosition.X : a_widget.m_position.X;
-			int posY = m_favorites ? a_widget.m_favPosition.Y : a_widget.m_position.Y;
-			int w = m_favorites ? a_widget.m_favPosition.W : a_widget.m_position.W;
-			int h = m_favorites ? a_widget.m_favPosition.H : a_widget.m_position.H;
+		public void Remove(ADashboardWidget a_widget, bool a_layoutOnly = false)
+		{
+			if(!a_layoutOnly)
+				m_widgets.Remove(a_widget);
+			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
 
-			for (int y = posY; y < posY + h; y++)
+			for (int y = layout.Y; y < layout.Y + layout.H; y++)
 			{
-				for (int x = posX; x < posX + w; x++)
+				for (int x = layout.X; x < layout.X + layout.W; x++)
 				{
 					m_widgetLayout[y][x] = null;
 				}
 			}
+		}
+
+		public void MoveWidget(ADashboardWidget a_widget, int a_newX, int a_newY)
+		{
+			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
+			Remove(a_widget, true);
+			layout.SetPosition(a_newX, a_newY);
+			InsertWidget(a_widget);
+		}
+
+		public void MoveWidgetAboveRow(ADashboardWidget a_widget, int a_newX, int a_newY)
+		{
+			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
+			Remove(a_widget, true);
+			layout.SetPosition(a_newX, a_newY);
+			for(int i = 0; i < layout.H; i++)
+			{
+				m_widgetLayout.Insert(a_newY, new ADashboardWidget[5]);
+			}
+			InsertWidget(a_widget);
+		}
+
+		public bool WidgetFitsAt(ADashboardWidget a_widget, (int x, int y) a_newPos)
+		{
+			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
+			return WidgetFitsAt(a_widget, a_newPos.x, a_newPos.y, layout.W, layout.H);
+		}
+
+		public bool WidgetFitsAt(ADashboardWidget a_widget, int a_w, int a_h)
+		{
+			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
+			return WidgetFitsAt(a_widget, layout.X, layout.Y, a_w, a_h);
+		}
+
+		public bool WidgetFitsAt(ADashboardWidget a_widget, int a_x, int a_y, int a_w, int a_h)
+		{
+			if (m_columns < a_x + a_w)
+				return false;
+			for (int y = a_y; y < a_y + a_h && y < m_widgetLayout.Count; y++)
+			{
+				for (int x = a_x; x < a_x + a_w; x++)
+				{
+					if (m_widgetLayout[y][x] != null && m_widgetLayout[y][x] != a_widget)
+						return false;
+				}
+			}
+			return true;
 		}
 	}
 }

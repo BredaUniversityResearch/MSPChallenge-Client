@@ -45,24 +45,21 @@ namespace MSP2050.Scripts
 
 		public void OnDragStart(PointerEventData a_data)
 		{
-			m_contentContainer.SetActive(false);
-			//TODO: set preview outline true, or leave content active?
-			//TODO: Remove widget from core structure, collapse if possible
 		}
 
 		public void OnDrag(PointerEventData a_data)
 		{
-			//Detect new location, show preview?
-			//When over / overlapping, add insertion preview above row
-			//When over available space, add preview for full widget
 			DashboardManager.Instance.ShowWidgetMovePreview(this, a_data);
 		}
 
 		public void OnDragEnd(PointerEventData a_data)
 		{
-			m_contentContainer.SetActive(true);
-			//TODO: set preview outline false, or leave content active?
 			DashboardManager.Instance.OnWidgetMoveRelease(this, a_data);
+		}
+
+		public void SetContentActive(bool a_active)
+		{
+			m_contentContainer.SetActive(a_active);
 		}
 
 		public void Reposition(bool a_favoriteLayout = false)
@@ -71,6 +68,13 @@ namespace MSP2050.Scripts
 			DashboardWidgetPosition pos = a_favoriteLayout ? m_favPosition : m_position;
 			rect.sizeDelta = new Vector2(pos.W * DashboardManager.cellsize, pos.H * DashboardManager.cellsize);
 			rect.localPosition = new Vector3(pos.X * DashboardManager.cellsize, -pos.Y * DashboardManager.cellsize);
+		}
+
+		public void RepositionToPreview(int a_x, int a_y, int a_w, int a_h)
+		{
+			RectTransform rect = GetComponent<RectTransform>();
+			rect.sizeDelta = new Vector2(a_w * DashboardManager.cellsize, a_h * DashboardManager.cellsize);
+			rect.localPosition = new Vector3(a_x * DashboardManager.cellsize, -a_y * DashboardManager.cellsize);
 		}
 	}
 }
