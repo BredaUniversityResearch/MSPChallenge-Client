@@ -100,7 +100,7 @@ namespace MSP2050.Scripts
 					m_loadedWidgets.Add(widget);
 					if (widget.m_startingWidget && m_catSelectedWidgets.ContainsKey(widget.m_category))
 					{
-						AddFromCatalogue(widget);
+						AddFromCatalogue(widget, false);
 					}
 				}
             }
@@ -116,10 +116,10 @@ namespace MSP2050.Scripts
 				toggle.transform.SetAsFirstSibling();
 		}
 
-		void AddFromCatalogue(ADashboardWidget a_widget)
+		public void AddFromCatalogue(ADashboardWidget a_widget, bool a_copyPosition = true)
 		{
 			ADashboardWidget instance = Instantiate(a_widget, m_widgetParent).GetComponent<ADashboardWidget>();
-			instance.Initialise(a_widget);
+			instance.Initialise(a_copyPosition ? a_widget : null);
 			instance.gameObject.SetActive(false);
 			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);
 		}
@@ -172,6 +172,7 @@ namespace MSP2050.Scripts
 				if(widget.m_category == m_currentCategory)
 				{
 					ADashboardWidget instance = Instantiate(widget.gameObject, m_widgetParent).GetComponent<ADashboardWidget>();
+					instance.Initialise();
 					m_visibleWidgets.Add(instance);
 				}
 			}
@@ -185,10 +186,13 @@ namespace MSP2050.Scripts
 
 		public void SetWidgetAsFavorite(ADashboardWidget a_widget, bool a_favorite)
 		{
-			if(a_favorite)
+			if (a_favorite)
 				m_catSelectedWidgets[m_favoriteCategory].AddWidget(a_widget);
 			else
+			{
 				m_catSelectedWidgets[m_favoriteCategory].Remove(a_widget);
+				a_widget.Hide();
+			}
 		}
 
 		public void OnWidgetMoveStart(ADashboardWidget a_widget)

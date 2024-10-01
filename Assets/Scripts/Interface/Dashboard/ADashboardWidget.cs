@@ -36,18 +36,31 @@ namespace MSP2050.Scripts
 			m_header.m_onDragEnd = OnDragEnd;
 		}
 
-		public void Initialise(bool a_catalogueWidget)
+		public void Initialise()
 		{
+			//Catalogue widget
 			m_position = new DashboardWidgetPosition();
 			m_position.SetSize(m_defaultW, m_defaultH);
-			//TODO: show right buttons
-			//TODO: link up buttons
+
+			//Show right buttons
+			m_addButton.gameObject.SetActive(true);
+			m_addButton.onClick.AddListener(AddFromCatalogue);
+			m_favouriteToggle.gameObject.SetActive(false);
 		}
 
 		public void Initialise(ADashboardWidget a_original)
 		{
+			//Regular widget
 			m_position = new DashboardWidgetPosition();
-			m_position.SetSize(a_original.m_position.W, a_original.m_position.H);
+			if(a_original != null)
+				m_position.SetSize(a_original.m_position.W, a_original.m_position.H);
+			else
+				m_position.SetSize(m_defaultW, m_defaultH);
+
+			//Show right buttons
+			m_addButton.gameObject.SetActive(false);
+			m_favouriteToggle.gameObject.SetActive(true);
+			m_favouriteToggle.onValueChanged.AddListener(OnFavouriteToggled);
 		}
 
 		public virtual void Hide()
@@ -92,6 +105,16 @@ namespace MSP2050.Scripts
 			RectTransform rect = GetComponent<RectTransform>();
 			rect.sizeDelta = new Vector2(a_w * DashboardManager.cellsize, a_h * DashboardManager.cellsize);
 			rect.localPosition = new Vector3(a_x * DashboardManager.cellsize, -a_y * DashboardManager.cellsize);
+		}
+
+		void AddFromCatalogue()
+		{
+			DashboardManager.Instance.AddFromCatalogue(this);
+		}
+
+		void OnFavouriteToggled(bool a_value)
+		{
+			DashboardManager.Instance.SetWidgetAsFavorite(this, a_value);
 		}
 	}
 }

@@ -23,12 +23,21 @@ namespace MSP2050.Scripts
 
 		public void AddWidget(ADashboardWidget a_widget)
 		{
+			if(m_favorites)
+			{ 
+				a_widget.m_position = new DashboardWidgetPosition();
+				a_widget.m_position.SetSize(a_widget.DefaultW, a_widget.DefaultH);
+				var position = FindFittingPosition(a_widget.DefaultW, a_widget.DefaultH);
+				a_widget.m_position.SetPosition(position.x, position.y);			
+			}
+			else
+			{
+				a_widget.m_favPosition = new DashboardWidgetPosition();
+				a_widget.m_favPosition.SetSize(a_widget.m_position.W, a_widget.m_position.H);
+				var position = FindFittingPosition(a_widget.m_favPosition.W, a_widget.m_favPosition.H);
+				a_widget.m_favPosition.SetPosition(position.x, position.y);
+			}
 			m_widgets.Add(a_widget);
-			a_widget.m_position = new DashboardWidgetPosition();
-			a_widget.m_favPosition = new DashboardWidgetPosition();
-			(m_favorites ? a_widget.m_favPosition : a_widget.m_position).SetSize(a_widget.DefaultW, a_widget.DefaultH);
-			var position = FindFittingPosition(a_widget.DefaultW, a_widget.DefaultH);
-			(m_favorites ? a_widget.m_favPosition : a_widget.m_position).SetPosition(position.x, position.y);
 			InsertWidget(a_widget);
 		}
 
@@ -57,8 +66,8 @@ namespace MSP2050.Scripts
 					}
 					if (lastEmptyindex < 0)
 						lastEmptyindex = x;
-					if (lastEmptyindex >= 0 && x - lastEmptyindex >= a_w)
-						validIndices[validIndices.Count-1].Add(x - a_w);
+					if (x - lastEmptyindex + 1 >= a_w)
+						validIndices[validIndices.Count-1].Add(x - a_w + 1);
 					x++;
 				}
 
@@ -171,6 +180,10 @@ namespace MSP2050.Scripts
 				m_widgetLayout.Insert(a_newY, new ADashboardWidget[5]);
 			}
 			InsertWidget(a_widget);
+			foreach(ADashboardWidget widget in m_widgets)
+			{
+				widget.Reposition();
+			}
 		}
 
 		public bool WidgetFitsAt(ADashboardWidget a_widget, (int x, int y) a_newPos)
