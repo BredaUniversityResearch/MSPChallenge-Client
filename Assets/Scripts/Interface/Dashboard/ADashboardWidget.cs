@@ -13,8 +13,10 @@ namespace MSP2050.Scripts
 
 		[SerializeField] DashboardWidgetHeader m_header;
 		[SerializeField] GameObject m_contentContainer;
-		[SerializeField] int m_defaultW;
-		[SerializeField] int m_defaultH;
+		[SerializeField] int m_defaultW = 1;
+		[SerializeField] int m_defaultH = 1;
+		[SerializeField] int m_minW = 1;
+		[SerializeField] int m_minH = 1;
 		[SerializeField] Button m_addButton;
 		[SerializeField] Toggle m_favouriteToggle;
 		[SerializeField] Button m_optionsButton;
@@ -28,6 +30,8 @@ namespace MSP2050.Scripts
 
 		public int DefaultW => m_defaultW;
 		public int DefaultH => m_defaultH;
+		public int MinW => m_minW;
+		public int MinH => m_minH;
 
 		private void Awake()
 		{

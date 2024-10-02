@@ -205,24 +205,24 @@ namespace MSP2050.Scripts
 		{
 			var pos = GetPointerPosition(a_data);
 			DashboardWidgetPosition layout = m_currentCategory.m_favorite ? a_widget.m_favPosition : a_widget.m_position;
-			if (m_catSelectedWidgets[m_currentCategory].WidgetFitsAt(a_widget, pos.x, pos.y, layout.W, layout.H))
+			if (m_catSelectedWidgets[m_currentCategory].WidgetFitsAt(a_widget, pos.x, pos.y, layout.W, layout.H, out int maxW, out int maxH))
 			{
 				//Show placed preview
-				a_widget.RepositionToPreview(pos.x, pos.y, layout.W, layout.H);
+				a_widget.RepositionToPreview(pos.x, pos.y, maxW, maxH);
 				a_widget.SetContentActive(true);
 				m_rowInsertPreview.gameObject.SetActive(false);
 			}
-			else if(m_numberColumns >= pos.x + layout.W)
+			else if(m_catSelectedWidgets[m_currentCategory].WidgetInsertRowPossible(a_widget, pos.y, pos.x, layout.W, out int maxRowW))
 			{
 				//Show above preview
 				a_widget.SetContentActive(false);
 				m_rowInsertPreview.gameObject.SetActive(true);
-				m_rowInsertPreview.sizeDelta = new Vector2(layout.W * DashboardManager.cellsize, 0f);
+				m_rowInsertPreview.sizeDelta = new Vector2(maxRowW * DashboardManager.cellsize, 0f);
 				m_rowInsertPreview.localPosition = new Vector3(pos.x * DashboardManager.cellsize, -pos.y * DashboardManager.cellsize);
 			}
 			else
 			{
-				//Widget can't fit here even with inserted rows
+				//Widget can't fit
 				a_widget.SetContentActive(false);
 				m_rowInsertPreview.gameObject.SetActive(false);
 				//TODO: cross on preview?
@@ -234,19 +234,19 @@ namespace MSP2050.Scripts
 			m_rowInsertPreview.gameObject.SetActive(false);
 			var pos = GetPointerPosition(a_data);
 			DashboardWidgetPosition layout = m_currentCategory.m_favorite ? a_widget.m_favPosition : a_widget.m_position;
-			if (m_catSelectedWidgets[m_currentCategory].WidgetFitsAt(a_widget, pos.x, pos.y, layout.W, layout.H))
+			if (m_catSelectedWidgets[m_currentCategory].WidgetFitsAt(a_widget, pos.x, pos.y, layout.W, layout.H, out int maxW, out int maxH))
 			{
 				//Move to available position
-				m_catSelectedWidgets[m_currentCategory].MoveWidget(a_widget, pos.x, pos.y);
+				m_catSelectedWidgets[m_currentCategory].MoveWidget(a_widget, pos.x, pos.y, maxW, maxH);
 			}
-			else if (m_numberColumns >= pos.x + layout.W)
+			else if (m_catSelectedWidgets[m_currentCategory].WidgetInsertRowPossible(a_widget, pos.y, pos.x, layout.W, out int maxRowW))
 			{
 				//Create new rows to fit
-				m_catSelectedWidgets[m_currentCategory].MoveWidgetAboveRow(a_widget, pos.x, pos.y);
+				m_catSelectedWidgets[m_currentCategory].MoveWidgetAboveRow(a_widget, pos.x, pos.y, maxRowW);
 			}
 			else
 			{
-				//Widget can't fit here even with inserted rows; insert into old position
+				//Widget can't fit; insert into old position
 				m_catSelectedWidgets[m_currentCategory].InsertWidget(a_widget);
 			}
 		}

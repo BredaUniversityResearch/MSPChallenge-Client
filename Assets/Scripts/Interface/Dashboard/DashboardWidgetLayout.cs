@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -18,7 +19,7 @@ namespace MSP2050.Scripts
 			m_columns = a_columns;
 			m_favorites = a_favorites;
 			m_widgets = new List<ADashboardWidget>();
-			m_widgetLayout = new List<ADashboardWidget[]>() { new ADashboardWidget[5] };
+			m_widgetLayout = new List<ADashboardWidget[]>() { new ADashboardWidget[m_columns] };
 		}
 
 		public void AddWidget(ADashboardWidget a_widget)
@@ -170,15 +171,22 @@ namespace MSP2050.Scripts
 			InsertWidget(a_widget);
 		}
 
-		public void MoveWidgetAboveRow(ADashboardWidget a_widget, int a_newX, int a_newY)
+		public void MoveWidget(ADashboardWidget a_widget, int a_newX, int a_newY, int a_newW, int a_newH)
 		{
 			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
 			Remove(a_widget, true);
 			layout.SetPosition(a_newX, a_newY);
-			for(int i = 0; i < layout.H; i++)
-			{
-				m_widgetLayout.Insert(a_newY, new ADashboardWidget[5]);
-			}
+			layout.SetSize(a_newW, a_newH);
+			InsertWidget(a_widget);
+		}
+
+		public void MoveWidgetAboveRow(ADashboardWidget a_widget, int a_newX, int a_newY, int a_newW)
+		{
+			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
+			Remove(a_widget, true);
+			layout.SetPosition(a_newX, a_newY);
+			layout.SetSize(a_newW, layout.H);
+			InsertRows(a_newY, layout.H);	
 			InsertWidget(a_widget);
 			foreach(ADashboardWidget widget in m_widgets)
 			{
@@ -211,6 +219,137 @@ namespace MSP2050.Scripts
 				}
 			}
 			return true;
+		}
+
+		public bool WidgetFitsAt(ADashboardWidget a_widget, int a_x, int a_y, int a_currentW, int a_currentH, out int a_outW, out int a_outH)
+		{
+			a_outW = a_widget.MinW;
+			a_outH = a_widget.MinH;
+			for (int y = a_y; y < a_y + a_outH && y < m_widgetLayout.Count; y++)
+			{
+				for (int x = a_x; x < a_x + a_outW && x < m_columns; x++)
+				{
+					if (m_widgetLayout[y][x] != null && m_widgetLayout[y][x] != a_widget)
+						return false;
+				}
+			}
+			//Min size possible, expand from there
+			bool xDone = false;
+			bool yDone = false;
+			while(!xDone || !yDone)
+			{
+				if(!xDone)
+				{
+					if (a_outW == a_currentW || a_outW + a_x + 1 == m_columns)
+					{ 
+						xDone = true;
+					}
+					else
+					{
+						int newX = a_x + a_outW + 1;
+						for (int y = a_y; y < a_y + a_outH && y < m_widgetLayout.Count; y++)
+						{
+							if (m_widgetLayout[y][newX] != null && m_widgetLayout[y][newX] != a_widget)
+							{
+								xDone = true;
+								break;
+							}
+						}
+						if (!xDone)
+							a_outW++;
+					}
+					
+				}
+				if (!yDone)
+				{
+					if (a_outH == a_currentH)
+					{
+						yDone = true;
+					}
+					else if (a_y + a_outH >= m_widgetLayout.Count)
+					{
+						a_outH = a_currentH;
+						yDone = true;
+					}
+					else
+					{
+						int newY = a_y + a_outH + 1;
+						for (int x = a_x; x < a_x + a_outW; x++)
+						{
+							if (m_widgetLayout[newY][x] != null && m_widgetLayout[newY][x] != a_widget)
+							{
+								yDone = true;
+								break;
+							}
+						}
+						if (!yDone)
+							a_outH++;
+					}
+				}
+			}
+			return true;
+		}
+
+		public bool WidgetInsertRowPossible(ADashboardWidget a_widget, int a_row, int a_x, int a_currentW, out int a_maxW)
+		{
+            if (m_columns - a_x < a_widget.MinW)
+            {
+				a_maxW = 0;
+				return false;
+
+			}
+            if (a_row == 0)
+			{
+				a_maxW = Mathf.Min(a_currentW, m_columns - a_x);
+				return true;
+			}
+			for (int x = a_x; x < a_x + a_currentW && x < m_columns; x++)
+			{
+				ADashboardWidget newWidget = m_widgetLayout[a_row][x];
+				if (newWidget != null && newWidget != a_widget)
+				{
+					if((m_favorites ? newWidget.m_favPosition : newWidget.m_position).Y < a_row)
+					{
+						a_maxW = x - a_x;
+						return a_maxW >= a_widget.MinW;
+					}
+				}
+			}
+			a_maxW = a_currentW;
+			return true;
+		}
+
+		void InsertRows(int a_row, int a_amount)
+		{
+			if (a_row > 0)
+			{
+				List<ADashboardWidget[]> newRows = new List<ADashboardWidget[]>(a_amount);
+				for (int i = 0; i < a_amount; i++)
+					newRows.Add(new ADashboardWidget[m_columns]);
+
+				//Check if this would intersect widgets
+				for (int x = 0; x < m_columns; x++)
+				{
+					ADashboardWidget widget = m_widgetLayout[a_row][x];
+					if (widget != null)
+					{
+						DashboardWidgetPosition layout = m_favorites ? widget.m_favPosition : widget.m_position;
+						if (layout.Y < a_row)
+						{
+							//Splits widget, remove from old rows and add to new
+							int rowsBelow = layout.Y + layout.H - a_row;
+							for (int y = 0; y <= rowsBelow; y++)
+							{
+								m_widgetLayout[layout.Y + layout.H - 1 - y] = null;
+								if(y < a_amount)
+									newRows[y][x] = widget;
+							}
+						}
+					}
+				}
+
+				m_widgetLayout.InsertRange(a_row, newRows);
+			}
 		}
 	}
 }
