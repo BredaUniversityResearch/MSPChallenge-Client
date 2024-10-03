@@ -1,47 +1,45 @@
-#!groovy
+//@Library('CradleSharedLibrary') _ // Loaded implicitly
 
-def COLOR_MAP = [
-	'SUCCESS': 'good', 
-	'FAILURE': 'danger',
-]
+String Node = ''
+String WorkingDir = ''
+//Assign a node to run the pipeline
+node('WindowsNode') {
+    echo "Running on ${env.NODE_NAME} in ${env.WORKSPACE}"
+    Node = env.NODE_NAME
+    WorkingDir = env.WORKSPACE
+}
 
-pipeline {
-	options {
-		timestamps()
+String commit = ""
+
+stage('Clone') {
+    node(Node) {
+        git.checkout("https://github.com/BredaUniversityResearch/MSPChallenge-Client", "main", 'CRADLE_WEBMASTER_CREDENTIALS')
+        commit = git.fetchCommitHash()
     }
-	
-	agent {
-		node {
-			label 'windows'
-		}
-	}
-	
-	stages {
-	
-		stage('SCM') {
-			steps {
-				checkout scm
-			}
-		}
-  
-		stage('SonarQube Analysis') {
-			steps {
-				script {
-					def msbuildHome = tool 'Default MSBuild'
-					def scannerHome = tool 'SonarScanner for MSBuild'
-					withSonarQubeEnv('SonarQube') {
-						bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" begin /k:\"MSPChallenge-Client\""
-						bat "\"${msbuildHome}\\MSBuild.exe\" MSPChallenge-Client-SonarQube.sln"
-						bat "\"${scannerHome}\\SonarScanner.MSBuild.exe\" end"
-					}
-				}
-			}
-		}
-	}
-	post {
-		always {			
-			slackSend color: COLOR_MAP[currentBuild.currentResult],
-			message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}"
-		}
-	}
+}
+
+stage('Analysis') {
+    node(Node) {
+        script {
+            def msBuild = tool 'Default MSBuild'
+            def scanner = tool 'SonarScanner for MSBuild'
+            withSonarQubeEnv('SonarQube') {
+                bat "\"${scanner}\\SonarScanner.MSBuild.exe\" begin /k:\"MSPChallenge-Client\""
+                bat "\"${msBuild}\\MSBuild.exe\" MSPChallenge-Client-SonarQube.sln"
+                bat "\"${scanner}\\SonarScanner.MSBuild.exe\" end"
+            }
+        }
+    }
+}
+
+
+stage('Cleanup') {
+    node(Node) {
+        dir(WorkingDir) {
+            script {
+                deleteDir()
+            }
+        }
+        cleanWs()
+    }
 }
