@@ -253,19 +253,21 @@ def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, w
         stage('UploadWindowsBuild') {
             nexus.upload("MSPChallenge-Client-Dev", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
         }
-        stage('MacOSUnityBuild') {
-            build job: 'Library/WindowsUnityBuild',
-            parameters: [
-                string(name: 'NODE', value: Node),
-                string(name: 'WORKING_DIR', value: WorkingDir),
-                string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
-                string(name: 'PROJECTPATH', value: "%CD%"),
-                string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacDevFolder}\\MSP-Challenge.app"),
-                string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
-                string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSDevBuilder'),
-                string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
-            ]
-        }
+    }
+    stage('MacOSUnityBuild') {
+        build job: 'Library/WindowsUnityBuild',
+        parameters: [
+            string(name: 'NODE', value: Node),
+            string(name: 'WORKING_DIR', value: WorkingDir),
+            string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
+            string(name: 'PROJECTPATH', value: "%CD%"),
+            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacDevFolder}\\MSP-Challenge.app"),
+            string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
+            string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSDevBuilder'),
+            string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
+        ]
+    }
+    node(Node) {
         String macZipName = sanitizeinput.buildName(macOSDevBuildName, "${currentBuild.number}", commit, "zip")
         stage('ZipMacOSBuild') {
             zip.pack(".\\${output}\\${outputMacDevFolder}", macZipName)
@@ -299,19 +301,21 @@ def buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, window
         stage('UploadWindowsBuild') {
         nexus.upload("MSPChallenge-Client-Main", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
         }
-        stage('MacOSUnityBuild') {
-            build job: 'Library/WindowsUnityBuild',
-            parameters: [
-                string(name: 'NODE', value: Node),
-                string(name: 'WORKING_DIR', value: WorkingDir),
-                string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
-                string(name: 'PROJECTPATH', value: "%CD%"),
-                string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacFolder}\\MSP-Challenge.app"),
-                string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
-                string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSBuilder'),
-                string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
-            ]
-        }
+    }
+    stage('MacOSUnityBuild') {
+        build job: 'Library/WindowsUnityBuild',
+        parameters: [
+            string(name: 'NODE', value: Node),
+            string(name: 'WORKING_DIR', value: WorkingDir),
+            string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
+            string(name: 'PROJECTPATH', value: "%CD%"),
+            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacFolder}\\MSP-Challenge.app"),
+            string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
+            string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSBuilder'),
+            string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
+        ]
+    }
+    node(Node) {
         String macZipName = sanitizeinput.buildName(macOSBuildName, "${currentBuild.number}", commit, "zip")
         stage('ZipMacOSBuild') {
             zip.pack(".\\${output}\\${outputMacFolder}", macZipName)
