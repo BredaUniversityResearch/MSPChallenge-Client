@@ -48,7 +48,7 @@ try {
     }
 
     stage('Build') {
-        node(Node) {
+        //node(Node) {
             script {
                 switch (env.BRANCH_NAME) {
                     case ~/(bugfix.*|hotfix.*|MSP.*|PR.*)/:
@@ -75,7 +75,7 @@ try {
                         break
                 }
             }
-        }
+        //}
     }
 } catch (InterruptedException e) {
     catchError(buildResult: 'ABORTED', stageResult: 'ABORTED') {
@@ -204,26 +204,28 @@ def buildPR(Node, WorkingDir, output, outputWinDevFolder, buildName, commit, dis
             string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
         ]
     }
-    String zipName = sanitizeinput.buildName(buildName, "${currentBuild.number}", commit, "zip")
-    stage('ZipWindowsBuild') {
-        zip.pack(".\\${output}\\${outputWinDevFolder}", zipName)
-    }
-    stage('UploadWindowsBuild') {
-        nexus.upload("MSPChallenge-Client-PR", zipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
-    }
-    stage('MacOSUnityBuild') {
-        catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
-            error("Mac Build was skipped")
+    node(Node) {
+        String zipName = sanitizeinput.buildName(buildName, "${currentBuild.number}", commit, "zip")
+        stage('ZipWindowsBuild') {
+            zip.pack(".\\${output}\\${outputWinDevFolder}", zipName)
         }
-    }
-    stage('ZipMacOSBuild') {
-        catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
-            error("Mac Zip was skipped")
+        stage('UploadWindowsBuild') {
+            nexus.upload("MSPChallenge-Client-PR", zipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
         }
-    }
-    stage('UploadMacOSBuild') {
-        catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
-            error("Mac Upload was skipped")
+        stage('MacOSUnityBuild') {
+            catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
+                error("Mac Build was skipped")
+            }
+        }
+        stage('ZipMacOSBuild') {
+            catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
+                error("Mac Zip was skipped")
+            }
+        }
+        stage('UploadMacOSBuild') {
+            catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
+                error("Mac Upload was skipped")
+            }
         }
     }
 }
@@ -243,32 +245,34 @@ def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, w
             string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
         ]
     }
-    String winZipName = sanitizeinput.buildName(windowsDevBuildName, "${currentBuild.number}", commit, "zip")
-    stage('ZipWindowsBuild') {
-        zip.pack(".\\${output}\\${outputWinDevFolder}", winZipName)
-    }
-    stage('UploadWindowsBuild') {
-        nexus.upload("MSPChallenge-Client-Dev", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
-    }
-    stage('MacOSUnityBuild') {
-        build job: 'Library/WindowsUnityBuild',
-        parameters: [
-            string(name: 'NODE', value: Node),
-            string(name: 'WORKING_DIR', value: WorkingDir),
-            string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
-            string(name: 'PROJECTPATH', value: "%CD%"),
-            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacDevFolder}\\MSP-Challenge.app"),
-            string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
-            string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSDevBuilder'),
-            string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
-        ]
-    }
-    String macZipName = sanitizeinput.buildName(macOSDevBuildName, "${currentBuild.number}", commit, "zip")
-    stage('ZipMacOSBuild') {
-        zip.pack(".\\${output}\\${outputMacDevFolder}", macZipName)
-    }
-    stage('UploadMacOSBuild') {
-        nexus.upload("MSPChallenge-Client-Dev", macZipName, "application/x-zip-compressed", "MacOS", 'NEXUS_CREDENTIALS')
+    node(Node) {
+        String winZipName = sanitizeinput.buildName(windowsDevBuildName, "${currentBuild.number}", commit, "zip")
+        stage('ZipWindowsBuild') {
+            zip.pack(".\\${output}\\${outputWinDevFolder}", winZipName)
+        }
+        stage('UploadWindowsBuild') {
+            nexus.upload("MSPChallenge-Client-Dev", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
+        }
+        stage('MacOSUnityBuild') {
+            build job: 'Library/WindowsUnityBuild',
+            parameters: [
+                string(name: 'NODE', value: Node),
+                string(name: 'WORKING_DIR', value: WorkingDir),
+                string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
+                string(name: 'PROJECTPATH', value: "%CD%"),
+                string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacDevFolder}\\MSP-Challenge.app"),
+                string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
+                string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSDevBuilder'),
+                string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
+            ]
+        }
+        String macZipName = sanitizeinput.buildName(macOSDevBuildName, "${currentBuild.number}", commit, "zip")
+        stage('ZipMacOSBuild') {
+            zip.pack(".\\${output}\\${outputMacDevFolder}", macZipName)
+        }
+        stage('UploadMacOSBuild') {
+            nexus.upload("MSPChallenge-Client-Dev", macZipName, "application/x-zip-compressed", "MacOS", 'NEXUS_CREDENTIALS')
+        }
     }
 }
 
@@ -287,31 +291,33 @@ def buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, window
             string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
         ]
     }
-    String winZipName = sanitizeinput.buildName(windowsBuildName, "${currentBuild.number}", commit, "zip")
-    stage('ZipWindowsBuild') {
-        zip.pack(".\\${output}\\${outputWinFolder}", winZipName)
-    }
-    stage('UploadWindowsBuild') {
-    nexus.upload("MSPChallenge-Client-Main", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
-    }
-    stage('MacOSUnityBuild') {
-        build job: 'Library/WindowsUnityBuild',
-        parameters: [
-            string(name: 'NODE', value: Node),
-            string(name: 'WORKING_DIR', value: WorkingDir),
-            string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
-            string(name: 'PROJECTPATH', value: "%CD%"),
-            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacFolder}\\MSP-Challenge.app"),
-            string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
-            string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSBuilder'),
-            string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
-        ]
-    }
-    String macZipName = sanitizeinput.buildName(macOSBuildName, "${currentBuild.number}", commit, "zip")
-    stage('ZipMacOSBuild') {
-        zip.pack(".\\${output}\\${outputMacFolder}", macZipName)
-    }
-    stage('UploadMacOSBuild') {
-        nexus.upload("MSPChallenge-Client-Main", macZipName, "application/x-zip-compressed", "MacOS", 'NEXUS_CREDENTIALS')
+    node(Node) {
+        String winZipName = sanitizeinput.buildName(windowsBuildName, "${currentBuild.number}", commit, "zip")
+        stage('ZipWindowsBuild') {
+            zip.pack(".\\${output}\\${outputWinFolder}", winZipName)
+        }
+        stage('UploadWindowsBuild') {
+        nexus.upload("MSPChallenge-Client-Main", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
+        }
+        stage('MacOSUnityBuild') {
+            build job: 'Library/WindowsUnityBuild',
+            parameters: [
+                string(name: 'NODE', value: Node),
+                string(name: 'WORKING_DIR', value: WorkingDir),
+                string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
+                string(name: 'PROJECTPATH', value: "%CD%"),
+                string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacFolder}\\MSP-Challenge.app"),
+                string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
+                string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSBuilder'),
+                string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
+            ]
+        }
+        String macZipName = sanitizeinput.buildName(macOSBuildName, "${currentBuild.number}", commit, "zip")
+        stage('ZipMacOSBuild') {
+            zip.pack(".\\${output}\\${outputMacFolder}", macZipName)
+        }
+        stage('UploadMacOSBuild') {
+            nexus.upload("MSPChallenge-Client-Main", macZipName, "application/x-zip-compressed", "MacOS", 'NEXUS_CREDENTIALS')
+        }
     }
 }
