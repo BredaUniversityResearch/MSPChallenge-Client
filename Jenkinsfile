@@ -42,6 +42,7 @@ try {
             }
         }
         node(Node) {
+            echo "Checking out branch: ${BRANCH_NAME} from GitHub"
             git.checkoutWithSubModules("https://github.com/BredaUniversityResearch/MSPChallenge-Client", "${BRANCH_NAME}", 'CRADLE_WEBMASTER_CREDENTIALS')
             commit = git.fetchCommitHash('CRADLE_WEBMASTER_CREDENTIALS')
         }
