@@ -42,7 +42,8 @@ try {
             }
         }
         node(Node) {
-            git.checkoutWithSubModules("https://github.com/BredaUniversityResearch/MSPChallenge-Client", "main", 'CRADLE_WEBMASTER_CREDENTIALS')
+            echo "Checking out branch: ${CHANGE_BRANCH} from GitHub"
+            git.checkoutWithSubModules("https://github.com/BredaUniversityResearch/MSPChallenge-Client", "${CHANGE_BRANCH}", 'CRADLE_WEBMASTER_CREDENTIALS')
             commit = git.fetchCommitHash('CRADLE_WEBMASTER_CREDENTIALS')
         }
     }
