@@ -1,14 +1,15 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 
 namespace MSP2050.Scripts
 {
 	public class EntityInfoText
 	{
-		private readonly EntityInfoTextConfig config;
 		private readonly GameObject rootTextObject;
-		private readonly TextMesh textMesh;
+		private readonly TextMeshPro textMesh;
 		private readonly Renderer textRenderer;
 		private readonly SubEntity ownerSubEntity;
+		private readonly EntityInfoTextInstance instance;
 
 		private readonly GameObject highlightBackground;
 		private readonly SpriteRenderer highlightBackgroundRenderer;
@@ -18,39 +19,33 @@ namespace MSP2050.Scripts
 
 		public EntityInfoText(SubEntity ownerSubEntity, LayerTextInfo textInfo, Transform parentTransform)
 		{
-			config = Resources.Load<EntityInfoTextConfig>("EntityInfoTextConfig");
-			if (config == null)
-			{
-				Debug.LogError("Could not find Config for EntityInfoText at \"EntityInfoTextConfig\". Please verify that this asset exists in a resources folder");
-			}
-
 			this.ownerSubEntity = ownerSubEntity;
 			LayerTextInfo info = textInfo;
 
-			rootTextObject = new GameObject("TextObject");
-			rootTextObject.transform.SetParent(parentTransform, false);
+			GameObject textPrefab = Resources.Load<GameObject>("EntityTextInstance/EntityInfoTextInstance");
+
+			rootTextObject = GameObject.Instantiate(textPrefab, parentTransform);
+
+			instance = rootTextObject.GetComponent<EntityInfoTextInstance>();
 
 			SetPosition(rootTextObject.transform.position, true);
 
-			textMesh = rootTextObject.AddComponent<TextMesh>();
-			textMesh.anchor = TextAnchor.MiddleCenter;
-			textMesh.alignment = TextAlignment.Center;
+			textMesh = instance.m_text;
+			textMesh.alignment = TextAlignmentOptions.Center;
 			textMesh.text = GetTextTypeText();
-			textMesh.font = config.TextFont;
 			textMesh.fontSize = info.GetTextSize();
 			textMesh.color = info.textColor;
 			textRenderer = rootTextObject.GetComponent<Renderer>();
 			textRenderer.sortingOrder = 11;
-			textRenderer.sharedMaterial = config.TextFont.material;
 
 			highlightBackground = new GameObject("HighlightBackground");
 			highlightBackground.transform.SetParent(rootTextObject.transform, false);
 			highlightBackground.transform.localPosition = Vector3.zero; // Needs -7 to avoid being behind cables
-			highlightBackground.transform.localScale = new Vector3(config.BackgroundScale, config.BackgroundScale, 1.0f); //Scale it a bit up so it looks neater.
+			highlightBackground.transform.localScale = new Vector3(instance.m_backgroundScale, instance.m_backgroundScale, 1.0f); // Scale it a bit up so it looks neater.
 
 			highlightBackgroundRenderer = highlightBackground.AddComponent<SpriteRenderer>();
 			highlightBackgroundRenderer.drawMode = SpriteDrawMode.Sliced;
-			highlightBackgroundRenderer.sprite = config.BackgroundSprite;
+			highlightBackgroundRenderer.sprite = instance.m_background.sprite;
 			highlightBackgroundRenderer.sortingOrder = 10;
 		}
 
@@ -117,8 +112,8 @@ namespace MSP2050.Scripts
 
 		private void UpdateBackgroundSize(float textScale)
 		{
-			Vector3 unscaledExtents = (textRenderer.bounds.extents / textScale) / (config.BackgroundScale / 2.0f);
-			highlightBackgroundRenderer.size = new Vector2(unscaledExtents.x, unscaledExtents.y) + config.BackgroundExtrude;
+			Vector3 unscaledExtents = (textRenderer.bounds.extents / textScale) / (instance.m_backgroundScale / 2.0f);
+			highlightBackgroundRenderer.size = new Vector2(unscaledExtents.x, unscaledExtents.y) + new Vector2(instance.m_backgroundExtrude, instance.m_backgroundExtrude);
 		}
 
 		public void SetZOffset(float newZOffset)
