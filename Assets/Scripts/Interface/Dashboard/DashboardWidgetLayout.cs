@@ -29,14 +29,14 @@ namespace MSP2050.Scripts
 				a_widget.m_position = new DashboardWidgetPosition();
 				a_widget.m_position.SetSize(a_widget.DefaultW, a_widget.DefaultH);
 				var position = FindFittingPosition(a_widget.DefaultW, a_widget.DefaultH);
-				a_widget.m_position.SetPosition(position.x, position.y);			
+				a_widget.m_favPosition.SetPosition(position.x, position.y);
 			}
 			else
 			{
 				a_widget.m_favPosition = new DashboardWidgetPosition();
 				a_widget.m_favPosition.SetSize(a_widget.m_position.W, a_widget.m_position.H);
 				var position = FindFittingPosition(a_widget.m_favPosition.W, a_widget.m_favPosition.H);
-				a_widget.m_favPosition.SetPosition(position.x, position.y);
+				a_widget.m_position.SetPosition(position.x, position.y);			
 			}
 			m_widgets.Add(a_widget);
 			InsertWidget(a_widget);
@@ -188,9 +188,20 @@ namespace MSP2050.Scripts
 			layout.SetSize(a_newW, layout.H);
 			InsertRows(a_newY, layout.H);	
 			InsertWidget(a_widget);
-			foreach(ADashboardWidget widget in m_widgets)
+
+			for(int y = a_newY + 1; y < m_widgetLayout.Count; y++)
 			{
-				widget.Reposition();
+				for(int x = 0; x < m_columns; x++)
+				{
+					if (m_widgetLayout[y][x] == null)
+						continue;
+					DashboardWidgetPosition newLayout = m_favorites ? m_widgetLayout[y][x].m_favPosition : m_widgetLayout[y][x].m_position;
+					if (newLayout.Y < y)
+					{
+						newLayout.SetPosition(newLayout.X, newLayout.Y + layout.H);
+						m_widgetLayout[y][x].Reposition();
+					}
+				}
 			}
 		}
 
@@ -246,7 +257,7 @@ namespace MSP2050.Scripts
 					}
 					else
 					{
-						int newX = a_x + a_outW + 1;
+						int newX = a_x + a_outW - 1;
 						for (int y = a_y; y < a_y + a_outH && y < m_widgetLayout.Count; y++)
 						{
 							if (m_widgetLayout[y][newX] != null && m_widgetLayout[y][newX] != a_widget)
@@ -273,7 +284,7 @@ namespace MSP2050.Scripts
 					}
 					else
 					{
-						int newY = a_y + a_outH + 1;
+						int newY = a_y + a_outH - 1;
 						for (int x = a_x; x < a_x + a_outW; x++)
 						{
 							if (m_widgetLayout[newY][x] != null && m_widgetLayout[newY][x] != a_widget)
@@ -349,6 +360,11 @@ namespace MSP2050.Scripts
 				}
 
 				m_widgetLayout.InsertRange(a_row, newRows);
+			}
+			else
+			{
+				for (int i = 0; i < a_amount; i++)
+					m_widgetLayout.Insert(0,new ADashboardWidget[m_columns]);
 			}
 		}
 	}

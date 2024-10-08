@@ -105,6 +105,7 @@ namespace MSP2050.Scripts
 				}
             }
 			m_categoryToggles[0].ForceActive();
+			SetWidgetsToCategory(categories[0]);
 		}
 
 		void AddCategoryToggle(DashboardCategory a_category)
