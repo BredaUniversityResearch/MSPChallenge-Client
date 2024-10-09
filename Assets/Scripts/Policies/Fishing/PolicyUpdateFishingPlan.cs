@@ -5,14 +5,14 @@ namespace MSP2050.Scripts
 {
 	public class PolicyUpdateFishingPlan : APolicyData
 	{
-		public List<FishingObject> fishing;
+		public List<FleetFishingEffort> fishing;
 		public float pressure = 0f;
 	}
 
-	public class FishingObject
+	public class FleetFishingEffort
 	{
 		public int country_id;
-		public string type;
-		public float amount;
+		public int gear_type;
+		public float effort;
 	}
 }

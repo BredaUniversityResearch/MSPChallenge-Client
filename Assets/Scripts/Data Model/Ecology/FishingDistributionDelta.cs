@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 	{
 		public const float MaxSummedFishingValue = 1.0f;
 
-		private Dictionary<string, Dictionary<int, float>> m_values = new Dictionary<string, Dictionary<int, float>>(); //per fishing type, a dictionary of countries and their expected values
+		private Dictionary<int, Dictionary<int, float>> m_values = new Dictionary<int, Dictionary<int, float>>(); //gear_type, country_id, effort
 
 		public int FleetCount => m_values.Count;
 
@@ -18,19 +18,19 @@ namespace MSP2050.Scripts
 		/// <summary>
 		/// Returns a fishing distribution set to the given objects. If an empty list is given, it creates a basic distribution.
 		/// </summary>
-		public FishingDistributionDelta(List<FishingObject> a_objects)
+		public FishingDistributionDelta(List<FleetFishingEffort> a_objects)
 		{
 			LoadDistribution(a_objects);
 		}
 
-		public Dictionary<int, float> FindValuesForFleet(string a_fleetName)
+		public Dictionary<int, float> FindValuesForGear(int a_gear_type)
 		{
 			Dictionary<int, float> result;
-			m_values.TryGetValue(a_fleetName, out result);
+			m_values.TryGetValue(a_gear_type, out result);
 			return result;
 		}
 
-		public IEnumerable<KeyValuePair<string, Dictionary<int, float>>> GetValuesByFleet()
+		public IEnumerable<KeyValuePair<int, Dictionary<int, float>>> GetValuesByGear()
 		{
 			return m_values;
 		}
@@ -45,47 +45,57 @@ namespace MSP2050.Scripts
 			m_values.Clear();
 		}
 
-		public bool HasFinishingValue(string a_fleetName)
+		public bool HasFishingValue(int a_gearType)
 		{
-			return m_values.ContainsKey(a_fleetName);
+			return m_values.ContainsKey(a_gearType);
 		}
 
-		public void SetFishingValue(string a_fleetName, int a_country, float a_fishingValue)
+		public bool HasCountryGearValue(int a_gearType, int a_countryId)
 		{
-			Dictionary<int, float> fleetValues;
-			if (!m_values.TryGetValue(a_fleetName, out fleetValues))
+			if(m_values.TryGetValue(a_gearType, out var gearValues))
 			{
-				fleetValues = new Dictionary<int, float>(SessionManager.Instance.TeamCount);
-				m_values.Add(a_fleetName, fleetValues);
+				return gearValues.ContainsKey(a_countryId);
+			}
+			return false;
+		}
+
+		public void SetFishingEffort(int a_gearType, int a_country, float a_fishingEffort)
+		{
+			Dictionary<int, float> countryValues;
+			if (!m_values.TryGetValue(a_gearType, out countryValues))
+			{
+				countryValues = new Dictionary<int, float>(SessionManager.Instance.TeamCount);
+				m_values.Add(a_gearType, countryValues);
 			}
 
-			fleetValues[a_country] = a_fishingValue;
+			countryValues[a_country] = a_fishingEffort;
 		}
 
-		private void LoadDistribution(List<FishingObject> a_deltaValues)
+		private void LoadDistribution(List<FleetFishingEffort> a_deltaValues)
 		{
 			m_values.Clear();
 			if (a_deltaValues != null)
 			{
-				foreach (FishingObject obj in a_deltaValues)
+				foreach (FleetFishingEffort obj in a_deltaValues)
 				{
-					SetFishingValue(obj.type, obj.country_id, obj.amount);
+					SetFishingEffort(obj.gear_type, obj.country_id, obj.effort);
 				}
 			}
 		}
 
 		public void SubmitToServer(string a_planId, BatchRequest a_batch)
 		{
-			List<FishingObject> valuesToSubmit = new List<FishingObject>(32);
+			List<FleetFishingEffort> valuesToSubmit = new List<FleetFishingEffort>(32);
 
-			foreach (KeyValuePair<string, Dictionary<int, float>> fishingType in m_values)
+			foreach (KeyValuePair<int, Dictionary<int, float>> fishingType in m_values)
 			{
 				foreach (KeyValuePair<int, float> kvp in fishingType.Value)
 				{
-					valuesToSubmit.Add(new FishingObject {
+					valuesToSubmit.Add(new FleetFishingEffort
+					{
 						country_id = kvp.Key,
-						type = fishingType.Key,
-						amount = kvp.Value
+						gear_type = fishingType.Key,
+						effort = kvp.Value
 					});
 				}
 			}
