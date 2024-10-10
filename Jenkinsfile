@@ -72,22 +72,22 @@ try {
                 switch (env.BRANCH_NAME) {
                     case ~/(bugfix.*|hotfix.*|MSP.*|PR.*)/:
                         echo "Pull Request Build"
-                        buildPR(Node, WorkingDir, output, outputWinDevFolder, windowsDevPRBuildName, unityVersion, commit, discordWebhook)
+                        buildPR(Node, WorkingDir, output, outputWinDevFolder, unityBuildName, windowsDevPRBuildName, unityVersion, commit, discordWebhook)
                         buildType = "PR"
                         break
                     case ~/(dev)/:
                         echo "Dev Build"
-                        buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, windowsDevBuildName, macosDevBuildName, unityVersion, commit, discordWebhook)
+                        buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, unityBuildName, windowsDevBuildName, macosDevBuildName, unityVersion, commit, discordWebhook)
                         buildType = "Dev"
                         break
                     case ~/(main)/:
                         echo "Main Build"
-                        buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, windowsBuildName, macosBuildName, unityVersion, commit, discordWebhook)
+                        buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, unityBuildName, windowsBuildName, macosBuildName, unityVersion, commit, discordWebhook)
                         buildType = "Main"
                         break
                     default:
                         echo "Regex match failed, building as if Pull Request"
-                        buildPR(Node, WorkingDir, output, outputWinDevFolder, windowsDevPRBuildName, unityVersion, commit, discordWebhook)
+                        buildPR(Node, WorkingDir, output, outputWinDevFolder, unityBuildName, windowsDevPRBuildName, unityVersion, commit, discordWebhook)
                         buildType = "PR"
                         //buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, windowsDevBuildName, macosDevBuildName, commit)
                         //buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, windowsBuildName, macosBuildName, commit)
@@ -208,7 +208,7 @@ try {
     }
 }
 
-def buildPR(Node, WorkingDir, output, outputWinDevFolder, buildName, unityVersion, commit, discordWebhook)
+def buildPR(Node, WorkingDir, output, outputWinDevFolder, unityBuildName, buildName, unityVersion, commit, discordWebhook)
 {
     stage('WindowsUnityBuild') {
         build job: 'Library/WindowsUnityBuild',
@@ -249,7 +249,7 @@ def buildPR(Node, WorkingDir, output, outputWinDevFolder, buildName, unityVersio
     }
 }
 
-def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, windowsDevBuildName, macOSDevBuildName, unityVersion, commit, discordWebhook)
+def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, unityBuildName, windowsDevBuildName, macOSDevBuildName, unityVersion, commit, discordWebhook)
 {
     stage('WindowsUnityBuild') {
         build job: 'Library/WindowsUnityBuild',
@@ -297,7 +297,7 @@ def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, w
     }
 }
 
-def buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, windowsBuildName, macOSBuildName, unityVersion, commit, discordWebhook)
+def buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, unityBuildName, windowsBuildName, macOSBuildName, unityVersion, commit, discordWebhook)
 {
     stage('WindowsUnityBuild') {
         build job: 'Library/WindowsUnityBuild',
