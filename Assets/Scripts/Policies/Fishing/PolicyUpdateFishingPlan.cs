@@ -13,6 +13,6 @@ namespace MSP2050.Scripts
 	{
 		public int country_id;
 		public int gear_type;
-		public float effort;
+		public float effort_weight;
 	}
 }
