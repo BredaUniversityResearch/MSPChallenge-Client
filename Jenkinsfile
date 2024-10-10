@@ -9,6 +9,18 @@ node('WindowsNode') {
     WorkingDir = env.WORKSPACE
 }
 
+// Config section
+
+String gitHubRepo = "BredaUniversityResearch/MSPChallenge-Client"
+String discordFriendlyName = "MSPChallenge-MultiBranch"
+
+String nexusPRRepo = "MSPChallenge-Client-PR"
+String nexusDevRepo = "MSPChallenge-Client-Dev"
+String nexusMainRepo = "MSPChallenge-Client-Main"
+
+String unityBuildName = "MSP-Challenge"
+String unityVersion = "2022.3.20f1"
+
 String windowsBuildName = "Windows"
 String windowsDevBuildName = "Windows-Dev"
 String macosBuildName = "MacOS"
@@ -21,9 +33,11 @@ String outputWinDevFolder = "CurrentWinDevBuild"
 String outputMacFolder = "CurrentMacBuild"
 String outputWinFolder = "CurrentWinBuild"
 
-String buildType = ""
-
 String discordWebhook = 'MSP_DISCORD_WEBHOOK'
+
+// End of Config section
+
+String buildType = ""
 
 Boolean cleanupBefore = false
 Boolean cleanupAfter = true
@@ -42,8 +56,12 @@ try {
             }
         }
         node(Node) {
-            echo "Checking out branch: ${CHANGE_BRANCH} from GitHub"
-            git.checkoutWithSubModules("https://github.com/BredaUniversityResearch/MSPChallenge-Client", "${CHANGE_BRANCH}", 'CRADLE_WEBMASTER_CREDENTIALS')
+            String branch = "${env.CHANGE_BRANCH}"
+            if (branch == null || branch == "" || branch == "null") {
+                branch = "${env.BRANCH_NAME}"
+            }
+            echo "Branch: ${branch}"
+            git.checkoutWithSubModules("https://github.com/${gitHubRepo}", "${branch}", 'CRADLE_WEBMASTER_CREDENTIALS')
             commit = git.fetchCommitHash('CRADLE_WEBMASTER_CREDENTIALS')
         }
     }
@@ -54,22 +72,22 @@ try {
                 switch (env.BRANCH_NAME) {
                     case ~/(bugfix.*|hotfix.*|MSP.*|PR.*)/:
                         echo "Pull Request Build"
-                        buildPR(Node, WorkingDir, output, outputWinDevFolder, windowsDevPRBuildName, commit, discordWebhook)
+                        buildPR(Node, WorkingDir, output, outputWinDevFolder, unityBuildName, windowsDevPRBuildName, unityVersion, commit, nexusPRRepo, discordWebhook)
                         buildType = "PR"
                         break
                     case ~/(dev)/:
                         echo "Dev Build"
-                        buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, windowsDevBuildName, macosDevBuildName, commit, discordWebhook)
+                        buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, unityBuildName, windowsDevBuildName, macosDevBuildName, unityVersion, commit, nexusDevRepo, discordWebhook)
                         buildType = "Dev"
                         break
                     case ~/(main)/:
                         echo "Main Build"
-                        buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, windowsBuildName, macosBuildName, commit, discordWebhook)
+                        buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, unityBuildName, windowsBuildName, macosBuildName, unityVersion, commit, nexusMainRepo, discordWebhook)
                         buildType = "Main"
                         break
                     default:
                         echo "Regex match failed, building as if Pull Request"
-                        buildPR(Node, WorkingDir, output, outputWinDevFolder, windowsDevPRBuildName, commit, discordWebhook)
+                        buildPR(Node, WorkingDir, output, outputWinDevFolder, unityBuildName, windowsDevPRBuildName, unityVersion, commit, nexusPRRepo, discordWebhook)
                         buildType = "PR"
                         //buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, windowsDevBuildName, macosDevBuildName, commit)
                         //buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, windowsBuildName, macosBuildName, commit)
@@ -89,7 +107,7 @@ try {
     }
     node(Node) {
         script {
-            discord.failed(discordWebhook, "MSPChallenge-MultiBranch", "${e}")
+            discord.failed(discordWebhook, "${discordFriendlyName}", "${e}")
         }
     }
     throw (e)
@@ -102,20 +120,20 @@ try {
                         case "SUCCESS":
                             if (buildType == "PR") {
                                 String winZipName = sanitizeinput.buildName(windowsDevPRBuildName, "${currentBuild.number}", commit, "zip")
-                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-PR:Windows%%2F${winZipName}"
-                                discord.succeeded(discordWebhook, "MSPChallenge-MultiBranch-PR", "[Download Windows Build from Nexus](${windowsLink})")
+                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusPRRepo}:Windows%%2F${winZipName}"
+                                discord.succeeded(discordWebhook, "${discordFriendlyName}-PR", "[Download Windows Build from Nexus](${windowsLink})")
                             } else if (buildType == "Dev") {
                                 String winZipName = sanitizeinput.buildName(windowsDevBuildName, "${currentBuild.number}", commit, "zip")
                                 String macZipName = sanitizeinput.buildName(macosDevBuildName, "${currentBuild.number}", commit, "zip")
-                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-Dev:Windows%%2F${winZipName}"
-                                String macLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-Dev:MacOS%%2F${macZipName}"
-                                discord.succeeded(discordWebhook, "MSPChallenge-MultiBranch-Dev", "[Download Windows Build from Nexus](${windowsLink});[Download MacOS Build from Nexus](${macLink})")
+                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusDevRepo}:Windows%%2F${winZipName}"
+                                String macLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusDevRepo}:MacOS%%2F${macZipName}"
+                                discord.succeeded(discordWebhook, "${discordFriendlyName}-Dev", "[Download Windows Build from Nexus](${windowsLink});[Download MacOS Build from Nexus](${macLink})")
                             } else {
                                 String winZipName = sanitizeinput.buildName(windowsBuildName, "${currentBuild.number}", commit, "zip")
                                 String macZipName = sanitizeinput.buildName(macosBuildName, "${currentBuild.number}", commit, "zip")
-                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-Main:Windows%%2F${winZipName}"
-                                String macLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-Main:MacOS%%2F${macZipName}"
-                                discord.succeeded(discordWebhook, "MSPChallenge-MultiBranch-Main", "[Download Windows Build from Nexus](${windowsLink});[Download MacOS Build from Nexus](${macLink})")
+                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusMainRepo}:Windows%%2F${winZipName}"
+                                String macLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusMainRepo}:MacOS%%2F${macZipName}"
+                                discord.succeeded(discordWebhook, "${discordFriendlyName}-Main", "[Download Windows Build from Nexus](${windowsLink});[Download MacOS Build from Nexus](${macLink})")
                             }
                             break
                         case "UNSTABLE":
@@ -131,20 +149,20 @@ try {
                             echo "Unknown result, assuming build was successful"
                             if (buildType == "PR") {
                                 String winZipName = sanitizeinput.buildName(windowsDevPRBuildName, "${currentBuild.number}", commit, "zip")
-                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-PR:Windows%%2F${winZipName}"
-                                discord.succeeded(discordWebhook, "MSPChallenge-MultiBranch-PR", "[Download Windows Build from Nexus](${windowsLink})")
+                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusPRRepo}:Windows%%2F${winZipName}"
+                                discord.succeeded(discordWebhook, "${discordFriendlyName}-PR", "[Download Windows Build from Nexus](${windowsLink})")
                             } else if (buildType == "Dev") {
                                 String winZipName = sanitizeinput.buildName(windowsDevBuildName, "${currentBuild.number}", commit, "zip")
                                 String macZipName = sanitizeinput.buildName(macosDevBuildName, "${currentBuild.number}", commit, "zip")
-                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-Dev:Windows%%2F${winZipName}"
-                                String macLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-Dev:MacOS%%2F${macZipName}"
-                                discord.succeeded(discordWebhook, "MSPChallenge-MultiBranch-Dev", "[Download Windows Build from Nexus](${windowsLink});[Download MacOS Build from Nexus](${macLink})")
+                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusDevRepo}:Windows%%2F${winZipName}"
+                                String macLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusDevRepo}:MacOS%%2F${macZipName}"
+                                discord.succeeded(discordWebhook, "${discordFriendlyName}-Dev", "[Download Windows Build from Nexus](${windowsLink});[Download MacOS Build from Nexus](${macLink})")
                             } else {
                                 String winZipName = sanitizeinput.buildName(windowsBuildName, "${currentBuild.number}", commit, "zip")
                                 String macZipName = sanitizeinput.buildName(macosBuildName, "${currentBuild.number}", commit, "zip")
-                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-Main:Windows%%2F${winZipName}"
-                                String macLink = "https://nexus.cradle.buas.nl/#browse/browse:MSPChallenge-Client-Main:MacOS%%2F${macZipName}"
-                                discord.succeeded(discordWebhook, "MSPChallenge-MultiBranch-Main", "[Download Windows Build from Nexus](${windowsLink});[Download MacOS Build from Nexus](${macLink})")
+                                String windowsLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusMainRepo}:Windows%%2F${winZipName}"
+                                String macLink = "https://nexus.cradle.buas.nl/#browse/browse:${nexusPRRepo}:MacOS%%2F${macZipName}"
+                                discord.succeeded(discordWebhook, "${discordFriendlyName}-Main", "[Download Windows Build from Nexus](${windowsLink});[Download MacOS Build from Nexus](${macLink})")
                             }
                             break
                     }
@@ -190,17 +208,17 @@ try {
     }
 }
 
-def buildPR(Node, WorkingDir, output, outputWinDevFolder, buildName, commit, discordWebhook)
+def buildPR(Node, WorkingDir, output, outputWinDevFolder, unityBuildName, buildName, unityVersion, commit, nexusPRRepo, discordWebhook)
 {
     stage('WindowsUnityBuild') {
         build job: 'Library/WindowsUnityBuild',
         parameters: [
             string(name: 'NODE', value: Node),
             string(name: 'WORKING_DIR', value: WorkingDir),
-            string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
+            string(name: 'UNITY_VERSION', value: "${unityVersion}"),
             string(name: 'PROJECTPATH', value: "%CD%"),
-            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputWinDevFolder}\\MSP-Challenge.exe"),
-            string(name: 'BUILD_NAME', value: 'MSP-Challenge'),
+            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputWinDevFolder}\\${unityBuildName}.exe"),
+            string(name: 'BUILD_NAME', value: "${unityBuildName}"),
             string(name: 'BUILD_METHOD', value: 'ProjectBuilder.WindowsDevBuilder'),
             string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
         ]
@@ -211,7 +229,7 @@ def buildPR(Node, WorkingDir, output, outputWinDevFolder, buildName, commit, dis
             zip.pack(".\\${output}\\${outputWinDevFolder}", zipName)
         }
         stage('UploadWindowsBuild') {
-            nexus.upload("MSPChallenge-Client-PR", zipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
+            nexus.upload("${nexusPRRepo}", zipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
         }
         stage('MacOSUnityBuild') {
             catchError(buildResult: 'SUCCESS', stageResult: 'ABORTED') {
@@ -231,17 +249,17 @@ def buildPR(Node, WorkingDir, output, outputWinDevFolder, buildName, commit, dis
     }
 }
 
-def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, windowsDevBuildName, macOSDevBuildName, commit, discordWebhook)
+def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, unityBuildName, windowsDevBuildName, macOSDevBuildName, unityVersion, commit, nexusDevRepo, discordWebhook)
 {
     stage('WindowsUnityBuild') {
         build job: 'Library/WindowsUnityBuild',
         parameters: [
             string(name: 'NODE', value: Node),
             string(name: 'WORKING_DIR', value: WorkingDir),
-            string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
+            string(name: 'UNITY_VERSION', value: "${unityVersion}"),
             string(name: 'PROJECTPATH', value: "%CD%"),
-            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputWinDevFolder}\\MSP-Challenge.exe"),
-            string(name: 'BUILD_NAME', value: 'MSP-Challenge'),
+            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputWinDevFolder}\\${unityBuildName}.exe"),
+            string(name: 'BUILD_NAME', value: "${unityBuildName}"),
             string(name: 'BUILD_METHOD', value: 'ProjectBuilder.WindowsDevBuilder'),
             string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
         ]
@@ -252,7 +270,7 @@ def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, w
             zip.pack(".\\${output}\\${outputWinDevFolder}", winZipName)
         }
         stage('UploadWindowsBuild') {
-            nexus.upload("MSPChallenge-Client-Dev", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
+            nexus.upload("${nexusDevRepo}", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
         }
     }
     stage('MacOSUnityBuild') {
@@ -260,10 +278,10 @@ def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, w
         parameters: [
             string(name: 'NODE', value: Node),
             string(name: 'WORKING_DIR', value: WorkingDir),
-            string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
+            string(name: 'UNITY_VERSION', value: "${unityVersion}"),
             string(name: 'PROJECTPATH', value: "%CD%"),
-            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacDevFolder}\\MSP-Challenge.app"),
-            string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
+            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacDevFolder}\\${unityBuildName}.app"),
+            string(name: 'BUILD_NAME', value: "${unityBuildName}.app"),
             string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSDevBuilder'),
             string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
         ]
@@ -274,22 +292,22 @@ def buildDev(Node, WorkingDir, output, outputWinDevFolder, outputMacDevFolder, w
             zip.pack(".\\${output}\\${outputMacDevFolder}", macZipName)
         }
         stage('UploadMacOSBuild') {
-            nexus.upload("MSPChallenge-Client-Dev", macZipName, "application/x-zip-compressed", "MacOS", 'NEXUS_CREDENTIALS')
+            nexus.upload("${nexusDevRepo}", macZipName, "application/x-zip-compressed", "MacOS", 'NEXUS_CREDENTIALS')
         }
     }
 }
 
-def buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, windowsBuildName, macOSBuildName, commit, discordWebhook)
+def buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, unityBuildName, windowsBuildName, macOSBuildName, unityVersion, commit, nexusMainRepo, discordWebhook)
 {
     stage('WindowsUnityBuild') {
         build job: 'Library/WindowsUnityBuild',
         parameters: [
             string(name: 'NODE', value: Node),
             string(name: 'WORKING_DIR', value: WorkingDir),
-            string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
+            string(name: 'UNITY_VERSION', value: "${unityVersion}"),
             string(name: 'PROJECTPATH', value: "%CD%"),
-            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputWinFolder}\\MSP-Challenge.exe"),
-            string(name: 'BUILD_NAME', value: 'MSP-Challenge'),
+            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputWinFolder}\\${unityBuildName}.exe"),
+            string(name: 'BUILD_NAME', value: "${unityBuildName}"),
             string(name: 'BUILD_METHOD', value: 'ProjectBuilder.WindowsBuilder'),
             string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
         ]
@@ -300,7 +318,7 @@ def buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, window
             zip.pack(".\\${output}\\${outputWinFolder}", winZipName)
         }
         stage('UploadWindowsBuild') {
-        nexus.upload("MSPChallenge-Client-Main", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
+        nexus.upload("${nexusMainRepo}", winZipName, "application/x-zip-compressed", "Windows", 'NEXUS_CREDENTIALS')
         }
     }
     stage('MacOSUnityBuild') {
@@ -308,10 +326,10 @@ def buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, window
         parameters: [
             string(name: 'NODE', value: Node),
             string(name: 'WORKING_DIR', value: WorkingDir),
-            string(name: 'UNITY_VERSION', value: '2022.3.20f1'),
+            string(name: 'UNITY_VERSION', value: "${unityVersion}"),
             string(name: 'PROJECTPATH', value: "%CD%"),
-            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacFolder}\\MSP-Challenge.app"),
-            string(name: 'BUILD_NAME', value: 'MSP-Challenge.app'),
+            string(name: 'EXPORTPATH', value: "%CD%\\${output}\\${outputMacFolder}\\${unityBuildName}.app"),
+            string(name: 'BUILD_NAME', value: "${unityBuildName}.app"),
             string(name: 'BUILD_METHOD', value: 'ProjectBuilder.MacOSBuilder'),
             string(name: 'DISCORD_WEBHOOK', value: discordWebhook)
         ]
@@ -322,7 +340,7 @@ def buildMain(Node, WorkingDir, output, outputWinFolder, outputMacFolder, window
             zip.pack(".\\${output}\\${outputMacFolder}", macZipName)
         }
         stage('UploadMacOSBuild') {
-            nexus.upload("MSPChallenge-Client-Main", macZipName, "application/x-zip-compressed", "MacOS", 'NEXUS_CREDENTIALS')
+            nexus.upload("${nexusMainRepo}", macZipName, "application/x-zip-compressed", "MacOS", 'NEXUS_CREDENTIALS')
         }
     }
 }
