@@ -78,7 +78,7 @@ namespace MSP2050.Scripts
 			{
 				foreach (FleetFishingEffort obj in a_deltaValues)
 				{
-					SetFishingEffort(obj.gear_type, obj.country_id, obj.effort);
+					SetFishingEffort(obj.gear_type, obj.country_id, obj.effort_weight);
 				}
 			}
 		}
@@ -95,7 +95,7 @@ namespace MSP2050.Scripts
 					{
 						country_id = kvp.Key,
 						gear_type = fishingType.Key,
-						effort = kvp.Value
+						effort_weight = kvp.Value
 					});
 				}
 			}

@@ -41,7 +41,7 @@ namespace MSP2050.Scripts
 				if(m_nationalFleets)
 				{
 					if(countryFleet.initial_fishing_distribution != null) 
-						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, countryFleet.country_id, countryFleet.initial_fishing_distribution[0].effort);
+						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, countryFleet.country_id, countryFleet.initial_fishing_distribution[0].effort_weight);
 					else
 						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, countryFleet.country_id, m_defaultFishingEffort);
 				}
@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 					{
 						foreach(InitialFishingDistribution initial in countryFleet.initial_fishing_distribution)
 						{
-							m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, initial.country_id, initial.effort);
+							m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, initial.country_id, initial.effort_weight);
 						}
 						foreach (Team team in SessionManager.Instance.GetTeams())
 						{
