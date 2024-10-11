@@ -35,38 +35,41 @@ namespace MSP2050.Scripts
 			m_instance = this;
 
 			//Set initial fishing values, using default value if undefined
+			//Note: initial fishing values are normally not used if there is a starting fishing plan
 			m_initialFishingDistribution = new FishingDistributionDelta();
 			foreach (CountryFleetInfo countryFleet in m_fleetInfo.fleets)
 			{ 
 				if(m_nationalFleets)
 				{
-					if(countryFleet.initial_fishing_distribution != null) 
-						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, countryFleet.country_id, countryFleet.initial_fishing_distribution[0].effort_weight);
+					if (countryFleet.initial_fishing_distribution != null)
+						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, countryFleet.country_id, Mathf.Min(1f, countryFleet.initial_fishing_distribution[0].effort_weight));
 					else
-						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, countryFleet.country_id, m_defaultFishingEffort);
+						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, countryFleet.country_id, Mathf.Min(1f, m_defaultFishingEffort));
 				}
 				else
 				{
+					//Determine effort per country, then add normalized values to initial fishing
+					Dictionary<int, float> countryEffort = new Dictionary<int, float>();
+					float totalEffort = 0f;
+
 					if (countryFleet.initial_fishing_distribution != null)
 					{
 						foreach(InitialFishingDistribution initial in countryFleet.initial_fishing_distribution)
 						{
-							m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, initial.country_id, initial.effort_weight);
-						}
-						foreach (Team team in SessionManager.Instance.GetTeams())
-						{
-							if (!team.IsManager && !m_initialFishingDistribution.HasCountryGearValue(countryFleet.gear_type, team.ID))
-								m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, team.ID, m_defaultFishingEffort);
+							countryEffort.Add(initial.country_id, initial.effort_weight);
+							totalEffort += initial.effort_weight;
 						}
 					}
-					else
-					{	
-						foreach (Team team in SessionManager.Instance.GetTeams())
+					foreach (Team team in SessionManager.Instance.GetTeams())
+					{
+						if (!team.IsManager && !countryEffort.ContainsKey(team.ID))
 						{
-							if(!team.IsManager)
-								m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, team.ID, m_defaultFishingEffort);
+							countryEffort.Add(team.ID, m_defaultFishingEffort);
+							totalEffort += m_defaultFishingEffort;
 						}
 					}
+					foreach(var kvp in countryEffort)
+						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, kvp.Key, kvp.Value / totalEffort);
 				}
 			}
 		}
