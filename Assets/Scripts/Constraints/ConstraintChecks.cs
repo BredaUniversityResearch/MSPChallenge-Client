@@ -38,10 +38,25 @@ namespace MSP2050.Scripts
 			PolygonSubEntity poly = (PolygonSubEntity)a_subEntityA;
 			RasterLayer rasterLayer = (RasterLayer)a_subEntityB.m_entity.Layer;
 
-			Vector3 polyCentre = a_subEntityA.m_boundingBox.center;
-
+			PolygonRasterizer.Raster rasterizedPolygon;
 			Rect rasterBounds = new Rect(rasterLayer.RasterBounds.position, rasterLayer.RasterBounds.size);
-			PolygonRasterizer.Raster rasterizedPolygon = Rasterizer.CreateScanlinesForPolygon(rasterLayer.GetRasterImageWidth(), rasterLayer.GetRasterImageHeight(), poly.GetPoints(), rasterBounds);
+			try
+			{
+				// Scale the point coordinate values to prevent float precision issues
+				const float pointScale = 100000.0f;
+				var points = poly.GetPoints();
+				foreach (var p in points)
+				{
+					p.Set(p.x * pointScale, p.y * pointScale, p.z);
+				}
+				rasterizedPolygon = Rasterizer.CreateScanlinesForPolygon(rasterLayer.GetRasterImageWidth(),
+					rasterLayer.GetRasterImageHeight(), poly.GetPoints(), rasterBounds);	
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogError(e.Message);
+				return false;
+			}
 
 			for (int y = rasterizedPolygon.m_scanlineMin; y < rasterizedPolygon.m_scanlineMax; ++y)
 			{
