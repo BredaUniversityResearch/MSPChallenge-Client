@@ -51,9 +51,10 @@ namespace MSP2050.Scripts
 
 		public void SetSliderValuesToFishingDistribution(FishingDistributionSet fishingDistributionBeforePlan, FishingDistributionDelta planDeltaSet)
 		{
+			string[] gear = PolicyLogicFishing.Instance.GetGearTypes();
 			if (groups == null || groups.Count == 0)
 			{
-				foreach (string fishingFleet in SimulationLogicMEL.Instance.fishingFleets)
+				foreach (string fishingFleet in gear)
 				{
 					CreateGroup(fishingFleet);
 				}
@@ -61,18 +62,17 @@ namespace MSP2050.Scripts
 
 			if (fishingDistributionBeforePlan != null && planDeltaSet != null)
 			{
-				for (int i = 0; i < SimulationLogicMEL.Instance.fishingFleets.Count; i++)
+				for (int i = 0; i < gear.Length; i++)
 				{
-					string fleetName = SimulationLogicMEL.Instance.fishingFleets[i];
-					Dictionary<int, float> deltaValues = planDeltaSet.FindValuesForFleet(fleetName);
-					Dictionary<int, float> unchangedValues = fishingDistributionBeforePlan.FindValuesForFleet(fleetName);
+					Dictionary<int, float> deltaValues = planDeltaSet.FindValuesForGear(i);
+					Dictionary<int, float> unchangedValues = fishingDistributionBeforePlan.FindValuesForGear(i);
 					if (unchangedValues != null)
 					{
 						groups[i].SetSliderValues(deltaValues, unchangedValues);
 					}
 					else
 					{
-						Debug.LogError("Could not find fishing fleet values for fleet " + fleetName + ". Have the initial fishing values been setup correctly and loaded?");
+						Debug.LogError("Could not find fishing fleet values for gear " + gear[i] + ". Have the initial fishing values been setup correctly and loaded?");
 					}
 				}
 			}
@@ -138,7 +138,7 @@ namespace MSP2050.Scripts
 				Debug.LogError("Cannot apply slider values to plan without fishing policy");
 			}
 
-			for (int i = 0; i < SimulationLogicMEL.Instance.fishingFleets.Count; i++)
+			for (int i = 0; i < groups.Count; i++)
 			{			
 				groups[i].ApplySliderValues(plan, i);
 			}

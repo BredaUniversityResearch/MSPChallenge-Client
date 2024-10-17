@@ -8,7 +8,7 @@ namespace MSP2050.Scripts
 {
 	public class FishingDistributionSet
 	{
-		private Dictionary<string, Dictionary<int, float>> fishingValues;
+		private Dictionary<int, Dictionary<int, float>> fishingValues; //gear_type, country_id, effort
 
 		public FishingDistributionSet(FishingDistributionDelta initialValues)
 		{
@@ -17,8 +17,8 @@ namespace MSP2050.Scripts
 				Debug.LogError("No initial values (FishingDistributionDelta) available. Please setup initial plans with \"fishing\" -> \"initialFishingDistribution\".");
 				return;
 			}
-			fishingValues = new Dictionary<string, Dictionary<int, float>>(initialValues.FleetCount);
-			foreach (KeyValuePair<string, Dictionary<int, float>> fleetValues in initialValues.GetValuesByFleet())
+			fishingValues = new Dictionary<int, Dictionary<int, float>>(initialValues.FleetCount);
+			foreach (KeyValuePair<int, Dictionary<int, float>> fleetValues in initialValues.GetValuesByGear())
 			{
 				Dictionary<int, float> distributionValues = new Dictionary<int, float>(fleetValues.Value);
 				fishingValues.Add(fleetValues.Key, distributionValues);
@@ -27,7 +27,7 @@ namespace MSP2050.Scripts
 
 		public void ApplyValues(FishingDistributionDelta deltaSet)
 		{
-			foreach (KeyValuePair<string, Dictionary<int, float>> values in deltaSet.GetValuesByFleet())
+			foreach (KeyValuePair<int, Dictionary<int, float>> values in deltaSet.GetValuesByGear())
 			{
 				Dictionary<int, float> target = fishingValues[values.Key];
 				foreach (KeyValuePair<int, float> value in values.Value)
@@ -37,42 +37,16 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public IEnumerable<KeyValuePair<string, Dictionary<int, float>>> GetValues()
+		public IEnumerable<KeyValuePair<int, Dictionary<int, float>>> GetValues()
 		{
 			return fishingValues;
 		}
 
-		public Dictionary<int, float> FindValuesForFleet(string fleetName)
+		public Dictionary<int, float> FindValuesForGear(int a_gearType)
 		{
 			Dictionary<int, float> result;
-			fishingValues.TryGetValue(fleetName, out result);
+			fishingValues.TryGetValue(a_gearType, out result);
 			return result;
 		}
-
-		/*public void NormalizeValues()
-	{
-		foreach (KeyValuePair<string, Dictionary<int, float>> valuesByFleet in fishingValues)
-		{
-			float sum = 0.0f;
-			foreach (KeyValuePair<int, float> valuesByTeam in valuesByFleet.Value)
-			{
-				sum += valuesByTeam.Value;
-			}
-
-			if (sum > 1.0f)
-			{
-				//Normalize categories to a 1.0 range.
-				float reciprocal = 1.0f / sum;
-				foreach (Team team in TeamManager.GetTeams())
-				{
-					float oldValue;
-					if (valuesByFleet.Value.TryGetValue(team.ID, out oldValue))
-					{
-						valuesByFleet.Value[team.ID] = oldValue * reciprocal;
-					}
-				}
-			}
-		}
-	}*/
 	}
 }

@@ -44,7 +44,7 @@ namespace MSP2050.Scripts
 			m_fleetCallback = a_fleetCallback;
 			m_countryCallback = a_countryCallback;
 			m_monthCallback = a_monthCallback;
-			m_nameText.text = PolicyLogicFishing.Instance.GetGearTypes()[a_gearId];
+			m_nameText.text = PolicyLogicFishing.Instance.GetGearName(a_gearId);
 			m_countryFleetInfo = PolicyLogicFishing.Instance.GetFleetsForGear(a_gearId);
 
 			if(m_countryFleetInfo.Count == 0)

@@ -14,16 +14,14 @@ namespace MSP2050.Scripts
 
 		private void Start()
 		{
-			//outlineCol = distributionFillBar.outline.color;
 			Initialise();
 		}
 
-		public override void ApplySliderValues(Plan plan, int index)
+		public override void ApplySliderValues(Plan a_plan, int a_gearType)
 		{
-			string fleetName = SimulationLogicMEL.Instance.fishingFleets[index];
-			if (plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData))
+			if (a_plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData))
 			{
-				SetFishingToSliderValues(fishingData.fishingDistributionDelta, fleetName);
+				SetFishingToSliderValues(fishingData.fishingDistributionDelta, a_gearType);
 			}
 			else
 			{
@@ -33,7 +31,7 @@ namespace MSP2050.Scripts
 
 		public override void UpdateDistributionItem(DistributionItem updatedItem, float currentValue)
 		{
-			UpdateDistributionItem(updatedItem, currentValue, true);
+			UpdateDistributionItem(updatedItem, currentValue, !PolicyLogicFishing.Instance.NationalFleets);
 		}
 
 		private void UpdateDistributionItem(DistributionItem updatedItem, float currentValue, bool normalizeValues)
@@ -86,16 +84,19 @@ namespace MSP2050.Scripts
 				totalSum += memberItemValue;
 			}
 
-			effortText.text = string.Format(TITLE_FORMAT, Mathf.Clamp01(totalSum) * 100.0f);
+			if (!PolicyLogicFishing.Instance.NationalFleets)
+				effortText.text = string.Format(TITLE_FORMAT, Mathf.Clamp01(totalSum) * 100.0f);
+			else
+				effortText.text = "";
 		}
 
-		private void SetFishingToSliderValues(FishingDistributionDelta distribution, string fleetName)
+		private void SetFishingToSliderValues(FishingDistributionDelta distribution, int a_gearType)
 		{
 			foreach (DistributionItem item in items)
 			{
 				if (item.changed)
 				{
-					distribution.SetFishingValue(fleetName, item.Country, item.GetDistributionValue());
+					distribution.SetFishingEffort(a_gearType, item.Country, item.GetDistributionValue());
 				}
 			}
 		}
@@ -138,7 +139,8 @@ namespace MSP2050.Scripts
 				distributionFillBar.CreateEmptyFill(FishingDistributionDelta.MaxSummedFishingValue, true);
 			}
 
-			NormalizeValues();
+			if(!PolicyLogicFishing.Instance.NationalFleets)
+				NormalizeValues();
 			SortItems();
 			distributionFillBar.SortFills();
 			UpdateDistributionTitle();
