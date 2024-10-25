@@ -26,20 +26,20 @@ namespace MSP2050.Scripts
 		{
 			if(m_favorites)
 			{ 
-				a_widget.m_position = new DashboardWidgetPosition();
-				a_widget.m_position.SetSize(a_widget.DefaultW, a_widget.DefaultH);
-				var position = FindFittingPosition(a_widget.DefaultW, a_widget.DefaultH);
+				a_widget.m_favPosition = new DashboardWidgetPosition();
+				a_widget.m_favPosition.SetSize(a_widget.m_position.W, a_widget.m_position.H);
+				var position = FindFittingPosition(a_widget.m_favPosition.W, a_widget.m_favPosition.H);
 				a_widget.m_favPosition.SetPosition(position.x, position.y);
 			}
 			else
 			{
-				a_widget.m_favPosition = new DashboardWidgetPosition();
-				a_widget.m_favPosition.SetSize(a_widget.m_position.W, a_widget.m_position.H);
-				var position = FindFittingPosition(a_widget.m_favPosition.W, a_widget.m_favPosition.H);
+				a_widget.m_position = new DashboardWidgetPosition();
+				a_widget.m_position.SetSize(a_widget.DefaultW, a_widget.DefaultH);
+				var position = FindFittingPosition(a_widget.DefaultW, a_widget.DefaultH);
 				a_widget.m_position.SetPosition(position.x, position.y);			
 			}
 			m_widgets.Add(a_widget);
-			InsertWidget(a_widget);
+			InsertWidget(a_widget, !m_favorites);
 		}
 
 		public (int y, int x) FindFittingPosition(int a_w, int a_h)
@@ -119,7 +119,7 @@ namespace MSP2050.Scripts
 			return (m_widgetLayout.Count, 0);
 		}
 
-		public void InsertWidget(ADashboardWidget a_widget)
+		public void InsertWidget(ADashboardWidget a_widget, bool a_reposition = true)
 		{
 			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
 			for (int i = m_widgetLayout.Count; i < layout.Y + layout.H; i++)
@@ -134,7 +134,8 @@ namespace MSP2050.Scripts
 					m_widgetLayout[y][x] = a_widget;
 				}
 			}
-			a_widget.Reposition();
+			if(a_reposition)
+				a_widget.Reposition(m_favorites);
 		}
 
 		public void ChangeNumberColumns(int a_columns)
@@ -199,7 +200,7 @@ namespace MSP2050.Scripts
 					if (newLayout.Y < y)
 					{
 						newLayout.SetPosition(newLayout.X, newLayout.Y + layout.H);
-						m_widgetLayout[y][x].Reposition();
+						m_widgetLayout[y][x].Reposition(m_favorites);
 					}
 				}
 			}
@@ -251,13 +252,13 @@ namespace MSP2050.Scripts
 			{
 				if(!xDone)
 				{
-					if (a_outW == a_currentW || a_outW + a_x + 1 == m_columns)
+					if (a_outW == a_currentW || a_outW + a_x >= m_columns)
 					{ 
 						xDone = true;
 					}
 					else
 					{
-						int newX = a_x + a_outW - 1;
+						int newX = a_x + a_outW;
 						for (int y = a_y; y < a_y + a_outH && y < m_widgetLayout.Count; y++)
 						{
 							if (m_widgetLayout[y][newX] != null && m_widgetLayout[y][newX] != a_widget)
@@ -284,7 +285,7 @@ namespace MSP2050.Scripts
 					}
 					else
 					{
-						int newY = a_y + a_outH - 1;
+						int newY = a_y + a_outH;
 						for (int x = a_x; x < a_x + a_outW; x++)
 						{
 							if (m_widgetLayout[newY][x] != null && m_widgetLayout[newY][x] != a_widget)

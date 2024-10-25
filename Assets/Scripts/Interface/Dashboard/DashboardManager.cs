@@ -27,6 +27,7 @@ namespace MSP2050.Scripts
 		[SerializeField] ToggleGroup m_categoryToggleGroup;
 		[SerializeField] TextMeshProUGUI m_categoryNameText;
 		[SerializeField] RectTransform m_rowInsertPreview;
+		[SerializeField] RectTransform m_movePreview;
 
 		//Categories
 		List<DashboardCategoryToggle> m_categoryToggles;
@@ -159,6 +160,7 @@ namespace MSP2050.Scripts
 			foreach(ADashboardWidget widget in m_catSelectedWidgets[a_category].Widgets)
 			{
 				widget.Show();
+				widget.Reposition(a_category.m_favorite);
 				m_visibleWidgets.Add(widget);
 			}
 		}
@@ -192,14 +194,15 @@ namespace MSP2050.Scripts
 			else
 			{
 				m_catSelectedWidgets[m_favoriteCategory].Remove(a_widget);
-				a_widget.Hide();
+				if(m_currentCategory.m_favorite)
+					a_widget.Hide();
 			}
 		}
 
-		public void OnWidgetMoveStart(ADashboardWidget a_widget)
+		public void OnWidgetMoveStart(ADashboardWidget a_widget, PointerEventData a_data)
 		{
-			m_catSelectedWidgets[m_currentCategory].Remove(a_widget, true);
-
+			//m_catSelectedWidgets[m_currentCategory].Remove(a_widget, true);
+			//a_widget.Hide();
 		}
 
 		public void ShowWidgetMovePreview(ADashboardWidget a_widget, PointerEventData a_data)
@@ -209,22 +212,23 @@ namespace MSP2050.Scripts
 			if (m_catSelectedWidgets[m_currentCategory].WidgetFitsAt(a_widget, pos.x, pos.y, layout.W, layout.H, out int maxW, out int maxH))
 			{
 				//Show placed preview
-				a_widget.RepositionToPreview(pos.x, pos.y, maxW, maxH);
-				a_widget.SetContentActive(true);
+				m_movePreview.gameObject.SetActive(true);
 				m_rowInsertPreview.gameObject.SetActive(false);
+				m_movePreview.sizeDelta = new Vector2(maxW * DashboardManager.cellsize, maxH * DashboardManager.cellsize);
+				m_movePreview.localPosition = new Vector3(pos.x * DashboardManager.cellsize, -pos.y * DashboardManager.cellsize);
 			}
 			else if(m_catSelectedWidgets[m_currentCategory].WidgetInsertRowPossible(a_widget, pos.y, pos.x, layout.W, out int maxRowW))
 			{
 				//Show above preview
-				a_widget.SetContentActive(false);
+				m_movePreview.gameObject.SetActive(false);
 				m_rowInsertPreview.gameObject.SetActive(true);
-				m_rowInsertPreview.sizeDelta = new Vector2(maxRowW * DashboardManager.cellsize, 0f);
+				m_rowInsertPreview.sizeDelta = new Vector2(maxRowW * DashboardManager.cellsize, 8f);
 				m_rowInsertPreview.localPosition = new Vector3(pos.x * DashboardManager.cellsize, -pos.y * DashboardManager.cellsize);
 			}
 			else
 			{
 				//Widget can't fit
-				a_widget.SetContentActive(false);
+				m_movePreview.gameObject.SetActive(false);
 				m_rowInsertPreview.gameObject.SetActive(false);
 				//TODO: cross on preview?
 			}
@@ -233,6 +237,7 @@ namespace MSP2050.Scripts
 		public void OnWidgetMoveRelease(ADashboardWidget a_widget, PointerEventData a_data)
 		{
 			m_rowInsertPreview.gameObject.SetActive(false);
+			m_movePreview.gameObject.SetActive(false);
 			var pos = GetPointerPosition(a_data);
 			DashboardWidgetPosition layout = m_currentCategory.m_favorite ? a_widget.m_favPosition : a_widget.m_position;
 			if (m_catSelectedWidgets[m_currentCategory].WidgetFitsAt(a_widget, pos.x, pos.y, layout.W, layout.H, out int maxW, out int maxH))
@@ -249,6 +254,20 @@ namespace MSP2050.Scripts
 			{
 				//Widget can't fit; insert into old position
 				m_catSelectedWidgets[m_currentCategory].InsertWidget(a_widget);
+			}
+			//a_widget.Show();
+		}
+
+		public void OnWidgetResize(ADashboardWidget a_widget, PointerEventData a_data)
+		{
+			var pos = GetPointerPosition(a_data);
+			DashboardWidgetPosition layout = m_currentCategory.m_favorite ? a_widget.m_favPosition : a_widget.m_position;
+			int targetW = Math.Max(a_widget.MinW, pos.x - layout.X + 1);
+			int targetH = Math.Max(a_widget.MinH, pos.y - layout.Y + 1);
+			if (m_catSelectedWidgets[m_currentCategory].WidgetFitsAt(a_widget, layout.X, layout.Y, targetW, targetH, out int maxW, out int maxH))
+			{
+				//Move to available position
+				m_catSelectedWidgets[m_currentCategory].MoveWidget(a_widget, layout.X, layout.Y, maxW, maxH);
 			}
 		}
 

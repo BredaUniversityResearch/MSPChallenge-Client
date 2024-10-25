@@ -20,6 +20,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_addButton;
 		[SerializeField] Toggle m_favouriteToggle;
 		[SerializeField] Button m_optionsButton;
+		[SerializeField] ResizeHandle m_resizeHandle;
 
 		//Set in individual prefabs
 		public DashboardCategory m_category;
@@ -38,6 +39,7 @@ namespace MSP2050.Scripts
 			m_header.m_onDragStart = OnDragStart;
 			m_header.m_onDrag = OnDrag;
 			m_header.m_onDragEnd = OnDragEnd;
+			m_resizeHandle.onHandleDragged = HandleResize;
 		}
 
 		public void Initialise()
@@ -72,28 +74,27 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(false);
 		}
 
-		public virtual void Show(bool a_favoriteLayout = false)
+		public virtual void Show()
 		{
 			gameObject.SetActive(true);
 		}
 
 		public void OnDragStart(PointerEventData a_data)
 		{
+			DashboardManager.Instance.OnWidgetMoveStart(this, a_data);
+			m_contentContainer.SetActive(false);
 		}
 
 		public void OnDrag(PointerEventData a_data)
 		{
 			DashboardManager.Instance.ShowWidgetMovePreview(this, a_data);
+			transform.position = a_data.position;
 		}
 
 		public void OnDragEnd(PointerEventData a_data)
 		{
 			DashboardManager.Instance.OnWidgetMoveRelease(this, a_data);
-		}
-
-		public void SetContentActive(bool a_active)
-		{
-			m_contentContainer.SetActive(a_active);
+			m_contentContainer.SetActive(true);
 		}
 
 		public void Reposition(bool a_favoriteLayout = false)
@@ -119,6 +120,11 @@ namespace MSP2050.Scripts
 		void OnFavouriteToggled(bool a_value)
 		{
 			DashboardManager.Instance.SetWidgetAsFavorite(this, a_value);
+		}
+
+		void HandleResize(PointerEventData data, RectTransform handleRect, ResizeHandle.RescaleDirectionHor hor, ResizeHandle.RescaleDirectionVer ver)
+		{
+			DashboardManager.Instance.OnWidgetResize(this, data);
 		}
 	}
 }
