@@ -112,6 +112,7 @@
     <Compile Include="Assets\Scripts\Interface\UIGradient.cs" />
     <Compile Include="Assets\Scripts\Interface\Tutorial\TutorialData.cs" />
     <Compile Include="Assets\Scripts\Policies\SeasonalClosure\PolicyWindowContentSeasonalClosure.cs" />
+    <Compile Include="Assets\Scripts\Policies\BufferZone\MonthsMixedToggleGroup.cs" />
     <Compile Include="Assets\Scripts\Interface\Active Plans Window\AP_ApprovalEntry.cs" />
     <Compile Include="Assets\Scripts\Interface\ValueConversion\ConvertedUnitFloat.cs" />
     <Compile Include="Assets\Scripts\Interface\Options\Options.cs" />
@@ -123,6 +124,7 @@
     <Compile Include="Assets\Scripts\Data Model\Approval\ApprovalReasonRemovedGeom.cs" />
     <Compile Include="Assets\Scripts\Interface\Objectives\New Objective Window\Components\EraDropdown.cs" />
     <Compile Include="Assets\Scripts\Interface\Generics\OrderWindowOnClick.cs" />
+    <Compile Include="Assets\Scripts\Policies\EmptyPolicyPlanData.cs" />
     <Compile Include="Assets\Scripts\Interface\Generics\OnPointerExitClose.cs" />
     <Compile Include="Assets\Scripts\Networking\AbstractOperation.cs" />
     <Compile Include="Assets\Scripts\Interface\Active Plans Window\AP_GeometryPolicy.cs" />
@@ -321,6 +323,7 @@
     <Compile Include="Assets\Scripts\Interface\Active Plans Window\ActivePlanWindow.cs" />
     <Compile Include="Assets\Scripts\Interface\WarningLabel\WarningLabel.cs" />
     <Compile Include="Assets\Scripts\Interface\Objectives\Monitor\ObjectivesMonitor.cs" />
+    <Compile Include="Assets\Scripts\Interface\PropertiesWindow\PropertiesWindow.cs" />
     <Compile Include="Assets\Scripts\KPI\KPIValueCollectionShipping.cs" />
     <Compile Include="Assets\Scripts\Policies\Shipping\PolicyPlanDataShipping.cs" />
     <Compile Include="Assets\Scripts\Interface\KPI\Graph\KPIGraphDateMarker.cs" />
@@ -377,6 +380,7 @@
     <Compile Include="Assets\Scripts\Drawing Tools\FSM\Energy\StartCreatingEnergyLineStringState.cs" />
     <Compile Include="Assets\Scripts\Utility\Util.cs" />
     <Compile Include="Assets\Scripts\Data Model\Energy\EnergyPolygonLayer.cs" />
+    <Compile Include="Assets\Scripts\Interface\PropertiesWindow\PropertiesWindowGeometryPolicyBar.cs" />
     <Compile Include="Assets\Scripts\Interface\Active Plans Window\AP_LayerSelectCategory.cs" />
     <Compile Include="Assets\Scripts\Policies\Energy\PolicyPlanDataEnergy.cs" />
     <Compile Include="Assets\Scripts\Data Model\RestrictionArea.cs" />
@@ -386,10 +390,12 @@
     <Compile Include="Assets\Scripts\Interface\Distribution Elements\DistributionGroupEcology.cs" />
     <Compile Include="Assets\Scripts\Networking\SingleOperation.cs" />
     <Compile Include="Assets\Scripts\Simulations\MEL\SimulationSettingsMEL.cs" />
+    <Compile Include="Assets\Scripts\Policies\EcologicalFishingGear\PolicyUpdateEcoGearPlan.cs" />
     <Compile Include="Assets\Scripts\Interface\Tutorial\TutorialRequirements\TutorialRequirementMapPan.cs" />
     <Compile Include="Assets\Scripts\ImpactTool\HEBGraphLinkHandler.cs" />
     <Compile Include="Assets\Scripts\Interface\Active Plans Window\AP_ContentToggle.cs" />
     <Compile Include="Assets\Scripts\Policies\Shipping\PolicyLogicShipping.cs" />
+    <Compile Include="Assets\Scripts\Policies\EcologicalFishingGear\PolicyLogicEcoGear.cs" />
     <Compile Include="Assets\Scripts\Interface\Generics\ResizeHandle.cs" />
     <Compile Include="Assets\Scripts\Data Model\RestrictionAreaSetting.cs" />
     <Compile Include="Assets\Scripts\Interface\LogInMenu\LoginManager.cs" />
@@ -402,6 +408,7 @@
     <Compile Include="Assets\Scripts\Data Model\ELayerKPICategory.cs" />
     <Compile Include="Assets\Scripts\Interface\LayerProbeWindow\LayerProbeWindow.cs" />
     <Compile Include="Assets\HelpWindowsManager.cs" />
+    <Compile Include="Assets\Scripts\Policies\EcologicalFishingGear\PolicyPlanDataEcoGear.cs" />
     <Compile Include="Assets\Scripts\Interface\Time Manager\TimeManagerWindow.cs" />
     <Compile Include="Assets\Scripts\Utility\WorldSpaceCanvas.cs" />
     <Compile Include="Assets\Scripts\Interface\LayerProbeWindow\LayerProbeEntry.cs" />
@@ -479,6 +486,7 @@
     <Compile Include="Assets\Scripts\KPI\KPIValueProceduralColorScheme.cs" />
     <Compile Include="Assets\Scripts\Simulations\SimulationSettingsJsonConverter.cs" />
     <Compile Include="Assets\Scripts\Interface\KPI\KPIDateSelector.cs" />
+    <Compile Include="Assets\Scripts\Policies\EcologicalFishingGear\AP_EcoGear.cs" />
     <Compile Include="Assets\Scripts\Policies\Energy\AP_Energy.cs" />
     <Compile Include="Assets\Scripts\Interface\Active Plans Window\ActivePlanParameter.cs" />
     <Compile Include="Assets\Scripts\Interface\Generics\OpenTextURL.cs" />
@@ -491,7 +499,6 @@
     <Compile Include="Assets\Scripts\Policies\APolicyData.cs" />
     <Compile Include="Assets\Scripts\HelpWindows\ObjectiveMonitorHelpWindowManager.cs" />
     <Compile Include="Assets\Scripts\Data Model\ELayerSpecialEntityType.cs" />
-    <Compile Include="Assets\Scripts\Interface\PropertiesWindow.cs" />
     <Compile Include="Assets\Scripts\Networking\WsServerCommunication.cs" />
     <Compile Include="Assets\Scripts\Simulations\SEL\SimulationSettingsSEL.cs" />
     <Compile Include="Assets\Scripts\Data Model\LineStringSubEntity.cs" />
@@ -509,6 +516,7 @@
     <Compile Include="Assets\Scripts\Policies\APolicyPlanData.cs" />
     <Compile Include="Assets\Scripts\KPI\KPIValueCollectionGeometry.cs" />
     <Compile Include="Assets\Scripts\Drawing Tools\FSM\Energy\CreateEnergyPointState.cs" />
+    <Compile Include="Assets\Scripts\Policies\EcologicalFishingGear\FleetEcoGearToggle.cs" />
     <Compile Include="Assets\Scripts\Interface\Distribution Elements\InterpolatedValueMapping.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -127,11 +127,11 @@ namespace MSP2050.Scripts
 				Destroy(child.gameObject);
 			}
 			geometryPolicySection.SetActive(false);
+			otherInfoParent.gameObject.SetActive(false);
 			geometryPolicyWindow.CloseWindow();
 
 			if (entity.metaData.Count > 0)
 			{
-				otherInfoParent.gameObject.SetActive(true);
 
 				foreach (var kvp in entity.metaData)
 				{
@@ -144,14 +144,13 @@ namespace MSP2050.Scripts
 					}
 					else if (propertyMeta == null || propertyMeta.Enabled || Main.IsDeveloper)
 					{
+						otherInfoParent.gameObject.SetActive(true);
 						string propertyDisplayName = (propertyMeta != null && !string.IsNullOrEmpty(propertyMeta.DisplayName)) ? propertyMeta.DisplayName : kvp.Key;
 						string value = propertyMeta != null && !string.IsNullOrEmpty(propertyMeta.Unit) ? entity.GetMetaData(kvp.Key) + " " + propertyMeta.Unit : entity.GetMetaData(kvp.Key);
 						otherInfoParent.CreateEntry(propertyDisplayName, value);
 					}
 				}
 			}
-			else
-				otherInfoParent.gameObject.SetActive(false);
 
 			//Debug information
 			if (Main.IsDeveloper)
