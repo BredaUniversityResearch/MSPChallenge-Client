@@ -23,8 +23,10 @@ namespace MSP2050.Scripts
 		[Header("Content locations")]
 		public GenericContent baseDataParent;
 		public GenericContent entityTypeParent, otherInfoParent, debugInfoParent;
-
-		private List<GenericEntry> genericEntries;
+		public GameObject geometryPolicySection;
+		public Transform geometryPolicyContent;
+		public GameObject geometryPolicyBarPrefab;
+		public AGeometryPolicyWindow geometryPolicyWindow;
 
 		[SerializeField]
 		private ValueConversionCollection valueConversionCollection = null;
@@ -120,6 +122,13 @@ namespace MSP2050.Scripts
 			//Other information
 			otherInfoParent.DestroyAllContent();
 			otherInfoParent.Initialise();
+			foreach (Transform child in geometryPolicyContent.transform)
+			{
+				Destroy(child.gameObject);
+			}
+			geometryPolicySection.SetActive(false);
+			geometryPolicyWindow.CloseWindow();
+
 			if (entity.metaData.Count > 0)
 			{
 				otherInfoParent.gameObject.SetActive(true);
@@ -127,13 +136,18 @@ namespace MSP2050.Scripts
 				foreach (var kvp in entity.metaData)
 				{
 					EntityPropertyMetaData propertyMeta = entity.Layer.FindPropertyMetaDataByName(kvp.Key);
-					if ((propertyMeta == null || propertyMeta.Enabled) || Main.IsDeveloper)
+					if(propertyMeta != null && !string.IsNullOrEmpty(propertyMeta.PolicyType))
+					{
+						geometryPolicySection.SetActive(true);
+						PropertiesWindowGeometryPolicyBar bar = Instantiate(geometryPolicyBarPrefab, geometryPolicyContent).GetComponent<PropertiesWindowGeometryPolicyBar>();
+						bar.SetValue(propertyMeta, kvp.Value, entity, geometryPolicyWindow);
+					}
+					else if (propertyMeta == null || propertyMeta.Enabled || Main.IsDeveloper)
 					{
 						string propertyDisplayName = (propertyMeta != null && !string.IsNullOrEmpty(propertyMeta.DisplayName)) ? propertyMeta.DisplayName : kvp.Key;
 						string value = propertyMeta != null && !string.IsNullOrEmpty(propertyMeta.Unit) ? entity.GetMetaData(kvp.Key) + " " + propertyMeta.Unit : entity.GetMetaData(kvp.Key);
 						otherInfoParent.CreateEntry(propertyDisplayName, value);
 					}
-					//TODO: draw geometry policy window
 				}
 			}
 			else

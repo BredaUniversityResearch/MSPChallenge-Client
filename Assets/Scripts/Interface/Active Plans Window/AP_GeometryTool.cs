@@ -126,6 +126,7 @@ namespace MSP2050.Scripts
 
 			//Clear and recreate parameters
 			ClearParameters();
+			m_geometryPolicyWindow.CloseWindow();
 			if (a_layer.BaseLayer.m_propertyMetaData == null || a_layer.BaseLayer.m_propertyMetaData.Count == 0)
 				SetParameterSectionActive(false);
 			else

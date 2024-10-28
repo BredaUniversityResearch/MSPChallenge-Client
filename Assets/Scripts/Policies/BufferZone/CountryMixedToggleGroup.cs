@@ -40,6 +40,12 @@ namespace MSP2050.Scripts
 			m_contentContainer.SetActive(false);
 		}
 
+		public void SetInteractable(bool a_interactable)
+		{
+			m_valueToggle.Interactable = a_interactable;
+			m_monthToggles.SetInteractable(a_interactable);
+		}
+
 		public bool? SetValue(List<Months> a_months)
 		{
 			m_ignoreCallback = true;

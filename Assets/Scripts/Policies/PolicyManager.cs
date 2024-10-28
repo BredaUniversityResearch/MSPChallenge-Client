@@ -106,7 +106,7 @@ namespace MSP2050.Scripts
 			m_policyDefinitions.Add(SEASONAL_CLOSURE_POLICY_NAME, new PolicyDefinition
 			{
 				m_name = SEASONAL_CLOSURE_POLICY_NAME,
-				m_displayName = "Fleet Bans",
+				m_displayName = "Fleet Bans Policy",
 				m_geometryPolicy = true,
 				m_planUpdateType = typeof(PolicyGeometryDataSeasonalClosure),
 				m_windowPrefab = Resources.Load<GameObject>("GeometryPolicyContentSeasonalClosure_PRFB")
@@ -114,7 +114,7 @@ namespace MSP2050.Scripts
 			m_policyDefinitions.Add(BUFFER_ZONE_POLICY_NAME, new PolicyDefinition
 			{
 				m_name = BUFFER_ZONE_POLICY_NAME,
-				m_displayName = "Buffer Zone",
+				m_displayName = "Buffer Zone Policy",
 				m_geometryPolicy = true,
 				m_planUpdateType = typeof(PolicyGeometryDataBufferZone),
 				m_windowPrefab = Resources.Load<GameObject>("GeometryPolicyContentBufferZone_PRFB")

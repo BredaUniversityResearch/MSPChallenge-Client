@@ -232,5 +232,21 @@ namespace MSP2050.Scripts
 			}
 			m_ignoreCallback = false;
 		}
+
+		public void SetIntactable(bool a_interactable)
+		{
+			m_valueToggle.Interactable = a_interactable;
+			if(m_monthToggles != null)
+			{
+				m_monthToggles.SetInteractable(a_interactable);
+			}
+			if(m_countryToggles != null)
+			{
+				foreach(var toggle in m_countryToggles)
+				{
+					toggle.SetInteractable(a_interactable);
+				}
+			}
+		}
 	}
 }

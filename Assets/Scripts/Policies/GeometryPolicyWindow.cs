@@ -29,6 +29,17 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(true);
 		}
 
+		public void OpenToGeometry(PolicyDefinition a_policyDefinition, string a_value, Entity a_geometry)
+		{
+			m_windowTitle.text = a_policyDefinition.m_displayName;
+			if (m_content != null)
+				Destroy(m_content.gameObject);
+			m_content = Instantiate(a_policyDefinition.m_windowPrefab, m_contentParent).GetComponent<AGeometryPolicyWindowContent>();
+			m_content.SetContent(a_value, a_geometry);
+			m_content.SetInteractable(false);
+			gameObject.SetActive(true);
+		}
+
 		public void CloseWindow()
 		{
 			if(m_content != null)

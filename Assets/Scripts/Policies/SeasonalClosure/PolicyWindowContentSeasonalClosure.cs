@@ -12,7 +12,6 @@ namespace MSP2050.Scripts
 		[SerializeField] Transform m_fleetGroupParent;
 
 		bool m_initialised;
-		float m_currentRadius;
 		List<FleetMixedToggleGroup> m_fleetGroups;
 		Dictionary<Entity, PolicyGeometryDataSeasonalClosure> m_policyValues;
 		Action<Dictionary<Entity, string>> m_changedCallback;
@@ -70,7 +69,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			if (changes.Count > 0)
-				m_changedCallback.Invoke(changes);
+				m_changedCallback?.Invoke(changes);
 		}
 		void OnCountryChanged(int a_gearId, int a_countryId, bool a_value)
 		{
@@ -99,7 +98,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			if (changes.Count > 0)
-				m_changedCallback.Invoke(changes);
+				m_changedCallback?.Invoke(changes);
 		}
 		void OnMonthChanged(int a_gearId, int a_countryId, int a_month, bool a_value)
 		{
@@ -138,7 +137,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			if (changes.Count > 0)
-				m_changedCallback.Invoke(changes);
+				m_changedCallback?.Invoke(changes);
 		}
 
 		public override void SetContent(Dictionary<Entity, string> a_values, List<Entity> a_geometry, Action<Dictionary<Entity, string>> a_changedCallback)
@@ -162,6 +161,26 @@ namespace MSP2050.Scripts
 			foreach (FleetMixedToggleGroup fleetGroup in m_fleetGroups)
 			{
 				fleetGroup.SetValues(m_policyValues);
+			}
+		}
+
+		public override void SetContent(string a_value, Entity a_geometry)
+		{
+			Initialise();
+			m_changedCallback = null;
+			m_policyValues = new Dictionary<Entity, PolicyGeometryDataSeasonalClosure>() { { a_geometry, new PolicyGeometryDataSeasonalClosure(a_value) } };
+			
+			foreach (FleetMixedToggleGroup fleetGroup in m_fleetGroups)
+			{
+				fleetGroup.SetValues(m_policyValues);
+			}
+		}
+
+		public override void SetInteractable(bool a_interactable)
+		{
+			foreach (FleetMixedToggleGroup fleetGroup in m_fleetGroups)
+			{
+				fleetGroup.SetIntactable(a_interactable);
 			}
 		}
 	}

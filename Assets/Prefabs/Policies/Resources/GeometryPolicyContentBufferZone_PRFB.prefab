@@ -406,7 +406,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 176, y: 0}
+  m_AnchoredPosition: {x: 240, y: 0}
   m_SizeDelta: {x: 12, y: 0}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &3741383146255189366
@@ -664,7 +664,7 @@ PrefabInstance:
     - target: {fileID: 2355066688373951130, guid: 11825fa05d36be6489aba2ee7a27497f,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 64
+      value: 128
       objectReference: {fileID: 0}
     - target: {fileID: 2355066688373951130, guid: 11825fa05d36be6489aba2ee7a27497f,
         type: 3}
@@ -743,14 +743,46 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
         type: 3}
+      propertyPath: useDisabledColor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
+        type: 3}
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
         type: 3}
-    m_RemovedComponents: []
+    - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
+        type: 3}
+      propertyPath: serializationData.PrefabModifications.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
+        type: 3}
+      propertyPath: serializationData.PrefabModifications.Array.data[0]
+      value: '"path":"colorDisabled","value":{"$id":0,"$type":"ColourPalette.ConstColour,
+        MSP2050Plugins","m_colour":{"$type":"UnityEngine.Color, UnityEngine.CoreModule",0,0,0,0}}'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
+        type: 3}
+      propertyPath: serializationData.PrefabModifications.Array.data[1]
+      value: '"path":"colorDisabled.m_colour","value":{"$id":0,"$type":"UnityEngine.Color,
+        UnityEngine.CoreModule",0,0,0,0}'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7791332031944812890, guid: 11825fa05d36be6489aba2ee7a27497f,
+        type: 3}
+      propertyPath: serializationData.PrefabModificationsReferencedUnityObjects.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 9060718707749636025, guid: 11825fa05d36be6489aba2ee7a27497f, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3828439231952930672, guid: 11825fa05d36be6489aba2ee7a27497f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 683802211885171696}
   m_SourcePrefab: {fileID: 100100000, guid: 11825fa05d36be6489aba2ee7a27497f, type: 3}
 --- !u!224 &998798657131484877 stripped
 RectTransform:
@@ -758,13 +790,67 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 3274841210347789399}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1392221576875156218 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4476781022726340269, guid: 11825fa05d36be6489aba2ee7a27497f,
+    type: 3}
+  m_PrefabInstance: {fileID: 3274841210347789399}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &1752968466264906535 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3828439231952930672, guid: 11825fa05d36be6489aba2ee7a27497f,
+    type: 3}
+  m_PrefabInstance: {fileID: 3274841210347789399}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &683802211885171696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1752968466264906535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc054043880e7a5448a97ebba9ce43a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+    - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 10
+      Data: 0
+    - Name: colorHighlight
+      Entry: 6
+      Data: 
+    - Name: colorDisabled
+      Entry: 10
+      Data: 1
+  targetGraphics:
+  - {fileID: 1392221576875156218}
+  useHighlightColor: 0
+  useDisabledColor: 1
 --- !u!114 &7148530769734540313 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5640261994619404366, guid: 11825fa05d36be6489aba2ee7a27497f,
     type: 3}
   m_PrefabInstance: {fileID: 3274841210347789399}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1752968466264906535}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 30a9fec5836a98a4abddbd8282ec3f2b, type: 3}

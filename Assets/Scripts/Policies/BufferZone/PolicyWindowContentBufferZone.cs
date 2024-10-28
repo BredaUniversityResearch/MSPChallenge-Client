@@ -73,7 +73,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			if (changes.Count > 0)
-				m_changedCallback.Invoke(changes);
+				m_changedCallback?.Invoke(changes);
 		}
 		void OnCountryChanged(int a_gearId, int a_countryId, bool a_value)
 		{
@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			if (changes.Count > 0)
-				m_changedCallback.Invoke(changes);
+				m_changedCallback?.Invoke(changes);
 		}
 		void OnMonthChanged(int a_gearId, int a_countryId, int a_month, bool a_value)
 		{
@@ -141,7 +141,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			if (changes.Count > 0)
-				m_changedCallback.Invoke(changes);
+				m_changedCallback?.Invoke(changes);
 		}
 
 		void OnRadiusChanged(string a_newValue)
@@ -167,7 +167,7 @@ namespace MSP2050.Scripts
 			}
 			SetRadiusText();
 			if (changes.Count > 0)
-				m_changedCallback.Invoke(changes);
+				m_changedCallback?.Invoke(changes);
 		}
 
 		public override void SetContent(Dictionary<Entity, string> a_values, List<Entity> a_geometry, Action<Dictionary<Entity, string>> a_changedCallback)
@@ -210,6 +210,21 @@ namespace MSP2050.Scripts
 			SetRadiusText();
 		}
 
+		public override void SetContent(string a_value, Entity a_geometry)
+		{
+			Initialise();
+			m_changedCallback = null;
+			PolicyGeometryDataBufferZone data = new PolicyGeometryDataBufferZone(a_value);
+			m_policyValues = new Dictionary<Entity, PolicyGeometryDataBufferZone>() { { a_geometry, data } };
+			m_currentRadius = data.radius;
+
+			foreach (FleetMixedToggleGroup fleetGroup in m_fleetGroups)
+			{
+				fleetGroup.SetValues(m_policyValues);
+			}
+			SetRadiusText();
+		}
+
 		void SetRadiusText()
 		{
 			m_ignoreCallback = true;
@@ -222,6 +237,15 @@ namespace MSP2050.Scripts
 				m_radiusInput.text = "~";
 			}
 			m_ignoreCallback = false;
+		}
+
+		public override void SetInteractable(bool a_interactable)
+		{
+			foreach (FleetMixedToggleGroup fleetGroup in m_fleetGroups)
+			{
+				fleetGroup.SetIntactable(a_interactable);
+			}
+			m_radiusInput.interactable = a_interactable;
 		}
 	}
 }
