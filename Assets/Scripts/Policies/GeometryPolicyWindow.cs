@@ -13,14 +13,19 @@ namespace MSP2050.Scripts
 		[SerializeField] TextMeshProUGUI m_windowTitle;
 
 		AGeometryPolicyWindowContent m_content;
+		public Action m_onCloseOrChange;
 
 		private void Start()
 		{
 			m_closeButton.onClick.AddListener(CloseWindow);
 		}
 
-		public void OpenToGeometry(PolicyDefinition a_policyDefinition, Dictionary<Entity, string> a_values, List<Entity> a_geometry, Action<Dictionary<Entity, string>> a_changedCallback)
+		public void OpenToGeometry(PolicyDefinition a_policyDefinition, Dictionary<Entity, string> a_values, List<Entity> a_geometry, Action<Dictionary<Entity, string>> a_changedCallback, Action a_onCloseOrChange)
 		{
+			if (m_onCloseOrChange != null)
+				m_onCloseOrChange.Invoke();
+
+			m_onCloseOrChange = a_onCloseOrChange;
 			m_windowTitle.text = a_policyDefinition.m_displayName;
 			if(m_content != null)
 				Destroy(m_content.gameObject);
@@ -29,8 +34,12 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(true);
 		}
 
-		public void OpenToGeometry(PolicyDefinition a_policyDefinition, string a_value, Entity a_geometry)
+		public void OpenToGeometry(PolicyDefinition a_policyDefinition, string a_value, Entity a_geometry, Action a_onCloseOrChange)
 		{
+			if (m_onCloseOrChange != null)
+				m_onCloseOrChange.Invoke();
+
+			m_onCloseOrChange = a_onCloseOrChange;
 			m_windowTitle.text = a_policyDefinition.m_displayName;
 			if (m_content != null)
 				Destroy(m_content.gameObject);
@@ -42,7 +51,10 @@ namespace MSP2050.Scripts
 
 		public void CloseWindow()
 		{
-			if(m_content != null)
+			if (m_onCloseOrChange != null)
+				m_onCloseOrChange.Invoke();
+			m_onCloseOrChange = null;
+			if (m_content != null)
 				Destroy(m_content.gameObject);
 			m_content = null;
 			gameObject.SetActive(false);

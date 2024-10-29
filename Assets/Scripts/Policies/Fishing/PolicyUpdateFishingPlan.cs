@@ -12,7 +12,7 @@ namespace MSP2050.Scripts
 	public class FleetFishingEffort
 	{
 		public int country_id;
-		public int gear_type;
+		public int gear_type; // Was: gear_type
 		public float effort_weight;
 	}
 }

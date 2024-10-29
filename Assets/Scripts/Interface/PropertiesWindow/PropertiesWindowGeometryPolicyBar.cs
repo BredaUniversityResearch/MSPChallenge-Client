@@ -8,7 +8,7 @@ namespace MSP2050.Scripts
 {
 	public class PropertiesWindowGeometryPolicyBar : MonoBehaviour
 	{
-		[SerializeField] private Button m_barButton = null;
+		[SerializeField] private Toggle m_barToggle = null;
 		[SerializeField] private Image m_policyToggleImage = null;
 		[SerializeField] private TextMeshProUGUI m_nameText = null;
 		[SerializeField] private Sprite m_activeSprite = null;
@@ -18,15 +18,32 @@ namespace MSP2050.Scripts
 		private PolicyDefinition m_policyDefinition;
 		private string m_policyData;
 		private Entity m_geometry;
+		bool m_ignoreCallbacks;
 
 		void Start()
 		{
-			m_barButton.onClick.AddListener(OnBarClicked);
+			m_barToggle.onValueChanged.AddListener(OnBarToggleChange);
 		}
 
-		void OnBarClicked()
+		void OnBarToggleChange(bool a_value)
 		{
-			m_geometryPolicyWindow.OpenToGeometry(m_policyDefinition, m_policyData, m_geometry);
+			if (m_ignoreCallbacks)
+				return;
+			if (a_value)
+			{
+				m_geometryPolicyWindow.OpenToGeometry(m_policyDefinition, m_policyData, m_geometry, OnGeometryPolicyWindowCloseOrChange);
+			}
+			else
+			{
+				m_geometryPolicyWindow.CloseWindow();
+			}
+		}
+
+		void OnGeometryPolicyWindowCloseOrChange()
+		{
+			m_ignoreCallbacks = true;
+			m_barToggle.isOn = false;
+			m_ignoreCallbacks = false;
 		}
 
 		public void SetValue(EntityPropertyMetaData a_parameter, string a_value, Entity a_geometry, AGeometryPolicyWindow a_geometryPolicyWindow)
