@@ -28,6 +28,12 @@ namespace MSP2050.Scripts
 			y = a_y; 
 		}
 
+		public void SetPosition((int y, int x) a_pos)
+		{
+			x = a_pos.x;
+			y = a_pos.y;
+		}
+
 		public void SetSize(int a_w, int a_h)
 		{
 			w = a_w;

@@ -19,7 +19,6 @@ namespace MSP2050.Scripts
 
 		[SerializeField] Button m_closeButton;
 		[SerializeField] Button m_catalogueButton;
-		[SerializeField] Button m_sortButton;
 
 		[SerializeField] RectTransform m_widgetParent;
 		[SerializeField] GameObject m_categoryTogglePrefab;
@@ -33,12 +32,13 @@ namespace MSP2050.Scripts
 		List<DashboardCategoryToggle> m_categoryToggles;
 		DashboardCategory m_favoriteCategory;
 		DashboardCategory m_currentCategory;
-		bool m_catalogueOpen;
+
+		//Catalogue
+		DashboardWidgetLayout m_catalogueLayout;
 
 		//Widgets
 		List<ADashboardWidget> m_loadedWidgets;
 		Dictionary<DashboardCategory, DashboardWidgetLayout> m_catSelectedWidgets;
-		List<ADashboardWidget> m_visibleWidgets = new List<ADashboardWidget>();
 		int m_numberColumns = 5; // TODO: determine this based on screen size
 
 		private void Awake()
@@ -52,7 +52,6 @@ namespace MSP2050.Scripts
 				SimulationManager.Instance.m_onSimulationsInitialised += InitialiseDashboard;
 			m_closeButton.onClick.AddListener(CloseDashboard);
 			m_catalogueButton.onClick.AddListener(OpenCatalogue);
-			//m_sortButton.onClick.AddListener(Sort);
 		}
 
 		void CloseDashboard()
@@ -69,6 +68,7 @@ namespace MSP2050.Scripts
 			m_categoryToggles = new List<DashboardCategoryToggle>();
 			m_catSelectedWidgets = new Dictionary<DashboardCategory, DashboardWidgetLayout>();
 			m_loadedWidgets = new List<ADashboardWidget>();
+			m_catalogueLayout = new DashboardWidgetLayout(false, m_numberColumns);
 
 			foreach (var cat in categories)
 			{
@@ -106,7 +106,9 @@ namespace MSP2050.Scripts
 				}
             }
 			m_categoryToggles[0].ForceActive();
-			SetWidgetsToCategory(categories[0]);
+			//SetWidgetsToCategory(categories[0]);
+			OnCategorySelected(categories[0]);
+
 		}
 
 		void AddCategoryToggle(DashboardCategory a_category)
@@ -118,73 +120,58 @@ namespace MSP2050.Scripts
 				toggle.transform.SetAsFirstSibling();
 		}
 
-		public void AddFromCatalogue(ADashboardWidget a_widget, bool a_copyPosition = true)
+		public void AddFromCatalogue(ADashboardWidget a_widget, bool a_copySize = true)
 		{
 			ADashboardWidget instance = Instantiate(a_widget, m_widgetParent).GetComponent<ADashboardWidget>();
-			instance.Initialise(a_copyPosition ? a_widget : null);
+			instance.Initialise(a_copySize ? a_widget : null);
 			instance.gameObject.SetActive(false);
 			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);
 		}
 
 		void OnCategorySelected(DashboardCategory a_category)
 		{
-			ClearVisibleWidgets();
+			if (m_catalogueLayout.Visible)
+			{
+				m_catalogueLayout.DeleteAndClear();
+				m_catalogueLayout.Visible = false;
+			}
+			else if(m_currentCategory != null)
+				m_catSelectedWidgets[m_currentCategory].Visible = false;
+
 			SetWidgetsToCategory(a_category);
 			m_catalogueButton.interactable = !a_category.m_favorite;
-		}
-
-		void ClearVisibleWidgets()
-		{
-			if (m_catalogueOpen)
-			{
-				foreach (ADashboardWidget widget in m_visibleWidgets)
-				{
-					Destroy(widget.gameObject);
-				}
-			}
-			else
-			{
-				foreach (ADashboardWidget widget in m_visibleWidgets)
-				{
-					widget.Hide();
-				}
-			}
-			m_visibleWidgets = new List<ADashboardWidget>();
-			m_catalogueOpen = false;
 		}
 
 		void SetWidgetsToCategory(DashboardCategory a_category)
 		{
 			m_currentCategory = a_category;
 			m_categoryNameText.text = a_category.m_displayName;
-			foreach(ADashboardWidget widget in m_catSelectedWidgets[a_category].Widgets)
-			{
-				widget.Show();
-				widget.Reposition(a_category.m_favorite);
-				m_visibleWidgets.Add(widget);
-			}
+			m_catSelectedWidgets[a_category].Visible = true;
+			OnNumberRowsChanged(m_catSelectedWidgets[a_category].Rows);
+		}
+
+		public void OnNumberRowsChanged(int a_numberRows)
+		{
+			m_widgetParent.sizeDelta = new Vector2(0f, cellsize * a_numberRows);
 		}
 
 		void OpenCatalogue()
 		{
-			ClearVisibleWidgets();
-			m_catalogueOpen = true;
+			if (m_currentCategory != null)
+				m_catSelectedWidgets[m_currentCategory].Visible = false;
+
+			m_catalogueLayout.Visible = true;
+			m_catalogueButton.interactable = false;
 			m_categoryNameText.text = $"{m_currentCategory.m_displayName} widget catalogue";
 			foreach (ADashboardWidget widget in m_loadedWidgets)
 			{
 				if(widget.m_category == m_currentCategory)
 				{
 					ADashboardWidget instance = Instantiate(widget.gameObject, m_widgetParent).GetComponent<ADashboardWidget>();
-					instance.Initialise();
-					m_visibleWidgets.Add(instance);
+					instance.InitialiseCatalogue();
+					m_catalogueLayout.AddWidget(instance);
 				}
 			}
-			Sort();
-		}
-
-		void Sort()
-		{
-			//TODO
 		}
 
 		public void SetWidgetAsFavorite(ADashboardWidget a_widget, bool a_favorite)
@@ -200,10 +187,7 @@ namespace MSP2050.Scripts
 		}
 
 		public void OnWidgetMoveStart(ADashboardWidget a_widget, PointerEventData a_data)
-		{
-			//m_catSelectedWidgets[m_currentCategory].Remove(a_widget, true);
-			//a_widget.Hide();
-		}
+		{ }
 
 		public void ShowWidgetMovePreview(ADashboardWidget a_widget, PointerEventData a_data)
 		{
@@ -255,7 +239,6 @@ namespace MSP2050.Scripts
 				//Widget can't fit; insert into old position
 				m_catSelectedWidgets[m_currentCategory].InsertWidget(a_widget);
 			}
-			//a_widget.Show();
 		}
 
 		public void OnWidgetResize(ADashboardWidget a_widget, PointerEventData a_data)

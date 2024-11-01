@@ -10,9 +10,36 @@ namespace MSP2050.Scripts
 		List<ADashboardWidget> m_widgets;
 		List<ADashboardWidget[]> m_widgetLayout;
 		bool m_favorites;
+		bool m_visible;
 		int m_columns = 5;
 
 		public List<ADashboardWidget> Widgets => m_widgets;
+
+		public int Rows => m_widgetLayout.Count;
+		public bool Visible
+		{
+			get { return m_visible; }
+			set 
+			{ 
+				m_visible = value;
+				if(m_visible)
+				{
+					foreach (ADashboardWidget widget in m_widgets)
+					{
+						widget.Show();
+						widget.Reposition(m_favorites);
+					}
+				}
+				else
+				{
+					foreach (ADashboardWidget widget in m_widgets)
+					{
+						widget.Hide();
+					}
+				}
+			}
+		}
+
 
 		public DashboardWidgetLayout(bool a_favorites, int a_columns)
 		{
@@ -28,18 +55,14 @@ namespace MSP2050.Scripts
 			{ 
 				a_widget.m_favPosition = new DashboardWidgetPosition();
 				a_widget.m_favPosition.SetSize(a_widget.m_position.W, a_widget.m_position.H);
-				var position = FindFittingPosition(a_widget.m_favPosition.W, a_widget.m_favPosition.H);
-				a_widget.m_favPosition.SetPosition(position.x, position.y);
+				a_widget.m_favPosition.SetPosition(FindFittingPosition(a_widget.m_favPosition.W, a_widget.m_favPosition.H));
 			}
 			else
 			{
-				a_widget.m_position = new DashboardWidgetPosition();
-				a_widget.m_position.SetSize(a_widget.DefaultW, a_widget.DefaultH);
-				var position = FindFittingPosition(a_widget.DefaultW, a_widget.DefaultH);
-				a_widget.m_position.SetPosition(position.x, position.y);			
+				a_widget.m_position.SetPosition(FindFittingPosition(a_widget.m_position.W, a_widget.m_position.H));			
 			}
 			m_widgets.Add(a_widget);
-			InsertWidget(a_widget, !m_favorites);
+			InsertWidget(a_widget);
 		}
 
 		public (int y, int x) FindFittingPosition(int a_w, int a_h)
@@ -119,13 +142,17 @@ namespace MSP2050.Scripts
 			return (m_widgetLayout.Count, 0);
 		}
 
-		public void InsertWidget(ADashboardWidget a_widget, bool a_reposition = true)
+		public void InsertWidget(ADashboardWidget a_widget)
 		{
 			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
+			bool rowsInserted = false;
 			for (int i = m_widgetLayout.Count; i < layout.Y + layout.H; i++)
 			{
-				m_widgetLayout.Add(new ADashboardWidget[5]);
+				m_widgetLayout.Add(new ADashboardWidget[m_columns]);
+				rowsInserted = true;
 			}
+			if(rowsInserted)
+				DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
 
 			for (int y = layout.Y; y < layout.Y + layout.H; y++)
 			{
@@ -134,8 +161,9 @@ namespace MSP2050.Scripts
 					m_widgetLayout[y][x] = a_widget;
 				}
 			}
-			if(a_reposition)
+			if(m_visible)
 				a_widget.Reposition(m_favorites);
+
 		}
 
 		public void ChangeNumberColumns(int a_columns)
@@ -144,9 +172,14 @@ namespace MSP2050.Scripts
 			//TODO: restructure content
 		}
 
-		public void ChangeWidgetSize(ADashboardWidget a_widget, int a_newW, int a_newH)
+		public void DeleteAndClear()
 		{
-			//TODO
+			foreach (ADashboardWidget widget in m_widgets)
+			{
+				GameObject.Destroy(widget.gameObject);
+			}
+			m_widgets = new List<ADashboardWidget>();
+			m_widgetLayout = new List<ADashboardWidget[]>() { new ADashboardWidget[m_columns] };
 		}
 
 		public void Remove(ADashboardWidget a_widget, bool a_layoutOnly = false)
@@ -204,6 +237,7 @@ namespace MSP2050.Scripts
 					}
 				}
 			}
+			DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
 		}
 
 		public bool WidgetFitsAt(ADashboardWidget a_widget, (int x, int y) a_newPos)
