@@ -16,7 +16,7 @@ namespace MSP2050.Scripts
 		bool m_requireAllApproval = true;
 		bool m_nationalFleets;
 		FleetInfo m_fleetInfo;
-		float m_defaultFishingEffort = 0f;
+		float m_defaultFishingEffort = 1f;
 		float m_fishingDisplayScale = 100f;
 		FishingDistributionDelta m_initialFishingDistribution;
 
