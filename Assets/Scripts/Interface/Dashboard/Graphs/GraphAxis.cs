@@ -7,5 +7,9 @@ namespace MSP2050.Scripts
 {
 	public class GraphAxis : MonoBehaviour
 	{
+		public void SetData(GraphDataStepped a_data)
+		{
+			//TODO
+		}
 	}
 }

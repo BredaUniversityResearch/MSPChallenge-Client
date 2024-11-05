@@ -7,5 +7,10 @@ namespace MSP2050.Scripts
 {
 	public class GraphLegend : MonoBehaviour
 	{
+		public void SetData(GraphDataStepped a_data)
+		{
+			//TODO
+		}
+
 	}
 }
