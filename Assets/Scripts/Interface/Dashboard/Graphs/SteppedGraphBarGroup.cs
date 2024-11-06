@@ -13,11 +13,6 @@ namespace MSP2050.Scripts
 		List<SteppedGraphBarSingle> m_bars = new List<SteppedGraphBarSingle>();
 		bool m_stacked;
 
-		//public void Initialise(bool a_stacked)
-		//{
-		//	m_stacked = a_stacked;
-		//}
-
 		public void SetStacked(bool a_stacked)
 		{
 			m_stacked = a_stacked;
@@ -34,8 +29,7 @@ namespace MSP2050.Scripts
 				{
 					if(i < m_bars.Count)
 						m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
-					float value = a_data.m_steps[a_step][i];
-					float ymax = ymin + value / a_data.m_scale;
+					float ymax = ymin + a_data.m_steps[a_step][i] / a_data.m_scale;
 					m_bars[i].SetData(a_data, a_step, i, 0f, 1f, ymin, ymax);
 					ymin = ymax;
 				}
@@ -46,16 +40,13 @@ namespace MSP2050.Scripts
 				{
 					if (i < m_bars.Count)
 						m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
-					float value = a_data.m_steps[a_step][i];
-					float ymax = ymin + value / a_data.m_scale;
 					m_bars[i].SetData(a_data, a_step, i, 
 						i / a_data.m_categoryNames.Length, 
 						(i+1) / a_data.m_categoryNames.Length, 
-						0f, ymin, ymax);
-					ymin = ymax;
+						0f,
+						a_data.m_steps[a_step][i] / a_data.m_scale);
 				}
 			}
-			//TODO: set actual data
 		}
 	}
 }

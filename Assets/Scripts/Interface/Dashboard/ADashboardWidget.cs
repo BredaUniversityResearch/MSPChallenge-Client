@@ -105,13 +105,6 @@ namespace MSP2050.Scripts
 			rect.localPosition = new Vector3(pos.X * DashboardManager.cellsize, -pos.Y * DashboardManager.cellsize);
 		}
 
-		public void RepositionToPreview(int a_x, int a_y, int a_w, int a_h)
-		{
-			RectTransform rect = GetComponent<RectTransform>();
-			rect.sizeDelta = new Vector2(a_w * DashboardManager.cellsize, a_h * DashboardManager.cellsize);
-			rect.localPosition = new Vector3(a_x * DashboardManager.cellsize, -a_y * DashboardManager.cellsize);
-		}
-
 		void AddFromCatalogue()
 		{
 			DashboardManager.Instance.AddFromCatalogue(this);
