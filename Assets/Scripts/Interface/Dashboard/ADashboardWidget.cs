@@ -103,6 +103,7 @@ namespace MSP2050.Scripts
 			DashboardWidgetPosition pos = a_favoriteLayout ? m_favPosition : m_position;
 			rect.sizeDelta = new Vector2(pos.W * DashboardManager.cellsize, pos.H * DashboardManager.cellsize);
 			rect.localPosition = new Vector3(pos.X * DashboardManager.cellsize, -pos.Y * DashboardManager.cellsize);
+			OnSizeChanged(pos.W, pos.H);
 		}
 
 		void AddFromCatalogue()
@@ -119,5 +120,7 @@ namespace MSP2050.Scripts
 		{
 			DashboardManager.Instance.OnWidgetResize(this, data);
 		}
+
+		protected virtual void OnSizeChanged(int a_w, int a_h) { }
 	}
 }

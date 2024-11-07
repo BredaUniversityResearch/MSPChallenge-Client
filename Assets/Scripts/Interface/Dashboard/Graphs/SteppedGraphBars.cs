@@ -40,9 +40,9 @@ namespace MSP2050.Scripts
 				m_entries = new List<SteppedGraphBarGroup>();
 
 			m_data = a_data;
-			m_legend.SetData(a_data);
-			m_valueAxis.SetData(a_data);
-			m_stepAxis.SetData(a_data);
+			//m_legend.SetData(a_data);
+			//m_valueAxis.SetData(a_data);
+			//m_stepAxis.SetData(a_data);
 
 			for(int i = 0; i < a_data.m_steps.Count; i++)
 			{

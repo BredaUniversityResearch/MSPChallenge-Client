@@ -17,7 +17,7 @@ namespace MSP2050.Scripts
 			RectTransform rect = GetComponent<RectTransform>();
 			rect.anchorMin = new Vector2(a_xMin, a_yMin);
 			rect.anchorMax = new Vector2(a_xMax, a_yMax);
-			m_tooltip.text = $"{a_data.m_categoryNames}: {a_data.m_unit.ConvertUnit(a_data.m_steps[a_step][a_cat])}";
+			m_tooltip.text = $"{a_data.m_categoryNames}: {a_data.m_unit.ConvertUnit(a_data.m_steps[a_step][a_cat]).FormatAsString()}";
 		}
 	}
 }
