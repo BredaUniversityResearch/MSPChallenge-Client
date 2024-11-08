@@ -52,6 +52,7 @@ namespace MSP2050.Scripts
 			m_addButton.gameObject.SetActive(true);
 			m_addButton.onClick.AddListener(AddFromCatalogue);
 			m_favouriteToggle.gameObject.SetActive(false);
+			UpdateData();
 		}
 
 		public void Initialise(ADashboardWidget a_original)
@@ -67,6 +68,7 @@ namespace MSP2050.Scripts
 			m_addButton.gameObject.SetActive(false);
 			m_favouriteToggle.gameObject.SetActive(true);
 			m_favouriteToggle.onValueChanged.AddListener(OnFavouriteToggled);
+			UpdateData();
 		}
 
 		public virtual void Hide()
@@ -122,5 +124,6 @@ namespace MSP2050.Scripts
 		}
 
 		protected virtual void OnSizeChanged(int a_w, int a_h) { }
+		public abstract void UpdateData();
 	}
 }

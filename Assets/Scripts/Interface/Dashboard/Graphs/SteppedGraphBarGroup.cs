@@ -22,29 +22,36 @@ namespace MSP2050.Scripts
 		{
 			gameObject.SetActive(true);
 			
+			int nextEntryIndex = 0;
 			if(m_stacked)
 			{
 				float ymin = 0f;
 				for(int i = 0; i < a_data.m_categoryNames.Length; i++)
 				{
-					if(i < m_bars.Count)
+					if (!a_data.m_steps[a_step][i].HasValue)
+						continue;
+					if(nextEntryIndex <= m_bars.Count)
 						m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
-					float ymax = ymin + a_data.m_steps[a_step][i] / a_data.m_scale;
-					m_bars[i].SetData(a_data, a_step, i, 0f, 1f, ymin, ymax);
+					float ymax = ymin + a_data.m_steps[a_step][i].Value / a_data.m_scale;
+					m_bars[nextEntryIndex].SetData(a_data, a_step, i, 0f, 1f, ymin, ymax);
 					ymin = ymax;
+					nextEntryIndex++;
 				}
 			}
 			else
 			{
 				for (int i = 0; i < a_data.m_categoryNames.Length; i++)
 				{
-					if (i < m_bars.Count)
+					if (!a_data.m_steps[a_step][i].HasValue)
+						continue;
+					if (nextEntryIndex <= m_bars.Count)
 						m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
-					m_bars[i].SetData(a_data, a_step, i, 
-						i / a_data.m_categoryNames.Length, 
-						(i+1) / a_data.m_categoryNames.Length, 
+					m_bars[nextEntryIndex].SetData(a_data, a_step, i, 
+						i / (float)a_data.m_categoryNames.Length, 
+						(i+1) / (float)a_data.m_categoryNames.Length, 
 						0f,
-						a_data.m_steps[a_step][i] / a_data.m_scale);
+						a_data.m_steps[a_step][i].Value / a_data.m_scale);
+					nextEntryIndex++;
 				}
 			}
 		}

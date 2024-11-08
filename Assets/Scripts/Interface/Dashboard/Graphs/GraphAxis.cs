@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 	public class GraphAxis : MonoBehaviour
 	{
 		[SerializeField] bool m_horizontal = true;
-		[SerializeField] GraphAxis m_entryPrefab;
+		[SerializeField] GameObject m_entryPrefab;
 
 		List<GraphAxisEntry> m_entries = new List<GraphAxisEntry>();
 
@@ -27,8 +27,8 @@ namespace MSP2050.Scripts
 					m_entries.Add(Instantiate(m_entryPrefab, transform).GetComponent<GraphAxisEntry>());
 
 				m_entries[i].SetValue(a_data.m_stepNames[i],
-					i / a_data.m_stepNames.Length,
-					(i + 1) / a_data.m_stepNames.Length);
+					i / (float)a_data.m_stepNames.Length,
+					(i + 1) / (float)a_data.m_stepNames.Length);
 			}
 
 			//Disable unused

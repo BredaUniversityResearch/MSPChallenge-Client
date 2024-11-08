@@ -6,7 +6,7 @@ namespace MSP2050.Scripts
 {
 	public class GraphDataStepped
 	{
-		public List<float[]> m_steps; //Step (time step or distribution), value per category
+		public List<float?[]> m_steps; //Step (time step or distribution), value per category
 
 		public ValueConversionUnit m_unit;
 		public float m_scale;
