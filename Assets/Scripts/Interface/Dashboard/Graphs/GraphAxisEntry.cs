@@ -27,6 +27,7 @@ namespace MSP2050.Scripts
 				rect.anchorMin = new Vector2(1f, a_anchorMin);
 				rect.anchorMax = new Vector2(1f, a_anchorMax);
 			}
+			rect.sizeDelta = Vector2.zero;
 		}
 
 		public void SetValue(string a_name, float a_anchorPosition)
@@ -45,6 +46,7 @@ namespace MSP2050.Scripts
 				rect.anchorMin = new Vector2(1f, a_anchorPosition);
 				rect.anchorMax = new Vector2(1f, a_anchorPosition);
 			}
+			rect.sizeDelta = Vector2.zero;
 		}
 	}
 }

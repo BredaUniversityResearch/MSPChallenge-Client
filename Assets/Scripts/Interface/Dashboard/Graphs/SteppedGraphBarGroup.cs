@@ -18,10 +18,16 @@ namespace MSP2050.Scripts
 			m_stacked = a_stacked;
 		}
 
-		public void SetData(GraphDataStepped a_data, int a_step)
+		public void SetData(GraphDataStepped a_data, int a_step, float a_min, float a_max, float a_offsetL, float a_offsetR)
 		{
 			gameObject.SetActive(true);
 			
+			RectTransform rect = GetComponent<RectTransform>();
+			rect.anchorMin = new Vector2(a_min, 0f);
+			rect.anchorMax = new Vector2(a_max, 1f);	
+			rect.offsetMin= new Vector2(a_offsetL, 0f);
+			rect.offsetMax = new Vector2(-a_offsetR, 0f);
+
 			int nextEntryIndex = 0;
 			if(m_stacked)
 			{
@@ -30,9 +36,9 @@ namespace MSP2050.Scripts
 				{
 					if (!a_data.m_steps[a_step][i].HasValue)
 						continue;
-					if(nextEntryIndex <= m_bars.Count)
+					if(nextEntryIndex == m_bars.Count)
 						m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
-					float ymax = ymin + a_data.m_steps[a_step][i].Value / a_data.m_scale;
+					float ymax = ymin + (a_data.m_steps[a_step][i].Value - a_data.m_graphMin) / a_data.m_graphRange;
 					m_bars[nextEntryIndex].SetData(a_data, a_step, i, 0f, 1f, ymin, ymax);
 					ymin = ymax;
 					nextEntryIndex++;
@@ -44,13 +50,13 @@ namespace MSP2050.Scripts
 				{
 					if (!a_data.m_steps[a_step][i].HasValue)
 						continue;
-					if (nextEntryIndex <= m_bars.Count)
+					if (nextEntryIndex == m_bars.Count)
 						m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
 					m_bars[nextEntryIndex].SetData(a_data, a_step, i, 
 						i / (float)a_data.m_categoryNames.Length, 
 						(i+1) / (float)a_data.m_categoryNames.Length, 
 						0f,
-						a_data.m_steps[a_step][i].Value / a_data.m_scale);
+						(a_data.m_steps[a_step][i].Value - a_data.m_graphMin) / a_data.m_graphRange);
 					nextEntryIndex++;
 				}
 			}

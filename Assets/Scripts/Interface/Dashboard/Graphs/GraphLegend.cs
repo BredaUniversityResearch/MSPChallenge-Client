@@ -7,29 +7,30 @@ namespace MSP2050.Scripts
 {
 	public class GraphLegend : MonoBehaviour
 	{
-		[SerializeField] float m_spacing;
-		//[SerializeField] bool m_horizontalEdge = true;
 		[SerializeField] GraphLegendEntry m_entryPrefab;
 
 		GraphDataStepped m_data;
 		int m_columns = 1;
 		List<GraphLegendEntry> m_entries = new List<GraphLegendEntry>();
+		bool m_horizontal = true;
 
-		public void SetSize(int a_w, int a_h)
+		public float SetSize(int a_w, int a_h, bool a_horizontal, float a_sideSpacing, float a_spacing)
 		{
 			//Currently assumes it fills a full horizontal edge
 			//TODO: set horizontal or vertical alignment
 			//TODO: return expected size
-			m_columns = System.Math.Max(1, a_w / 2);
+			m_horizontal = a_horizontal;
+			m_columns = m_horizontal ? a_w : System.Math.Max(1, a_w / 4);
 			if (m_data != null)
-				SetData(m_data);
+				return SetData(m_data, a_sideSpacing, a_spacing);
+			return 0f;
 		}
 
-		public void SetData(GraphDataStepped a_data)
+		public float SetData(GraphDataStepped a_data, float a_sideSpacing, float a_spacing)
 		{
 			m_data = a_data;
 			//Determine max number of rows
-			int rows = Mathf.CeilToInt(a_data.m_categoryNames.Length / m_columns);
+			int rows = Mathf.CeilToInt(a_data.m_categoryNames.Length / (float)m_columns);
 			//Start positioning from top row
 			int i = 0;
 			for(int y = 0; y < rows && i < a_data.m_categoryColours.Length; y++)
@@ -41,15 +42,36 @@ namespace MSP2050.Scripts
 						m_entries.Add(Instantiate(m_entryPrefab, transform).GetComponent<GraphLegendEntry>());
 					}
 					m_entries[i].SetData(a_data.m_categoryNames[i], a_data.m_categoryColours[i],
-						x / m_columns,
-						(x + 1) / m_columns,
-						m_spacing / 2f,
-						y * (m_entryPrefab.m_height + m_spacing));
+						x / (float)m_columns,
+						(x + 1) / (float)m_columns,
+						a_spacing / 2f,
+						y * (m_entryPrefab.m_height + a_spacing));
+					i++;
 				}
 			}
 			for(; i < m_entries.Count; i++)
 			{
 				m_entries[i].gameObject.SetActive(false);
+			}
+
+			RectTransform rect = GetComponent<RectTransform>();
+			if(m_horizontal)
+			{
+				float size = rows * m_entryPrefab.m_height + (rows - 1) * a_spacing + a_sideSpacing;
+				rect.anchorMin = new Vector2(0f, 0f);
+				rect.anchorMax = new Vector2(1f, 0f);
+				rect.offsetMin = new Vector2(a_sideSpacing, a_sideSpacing);
+				rect.offsetMax = new Vector2(-a_sideSpacing, size);
+				return size;
+			}
+			else
+			{
+				float size = m_columns * m_entryPrefab.m_preferredWidth + (m_columns - 1) * a_spacing + a_sideSpacing;
+				rect.anchorMin = new Vector2(0f, 0f);
+				rect.anchorMax = new Vector2(0f, 1f);
+				rect.offsetMin = new Vector2(a_sideSpacing, a_sideSpacing);
+				rect.offsetMax = new Vector2(size, -a_sideSpacing);
+				return size;
 			}
 		}
 

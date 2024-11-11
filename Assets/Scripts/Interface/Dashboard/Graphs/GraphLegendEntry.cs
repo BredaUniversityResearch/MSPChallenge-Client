@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		[SerializeField] TextMeshProUGUI m_nameText;
 
 		public int m_height;
+		public int m_preferredWidth;
 
 		public void SetData(string a_name, Color a_colour, float a_xMin, float a_xMax, float a_xOffset, float a_yOffset)
 		{
@@ -25,8 +26,8 @@ namespace MSP2050.Scripts
 			RectTransform rect = GetComponent<RectTransform>();
 			rect.anchorMin = new Vector2(a_xMin, 1f);
 			rect.anchorMax = new Vector2(a_xMax, 1f);
-			rect.offsetMin = new Vector2(a_xOffset, a_yOffset + m_height);
-			rect.offsetMax = new Vector2(a_xOffset, a_yOffset);
+			rect.offsetMin = new Vector2(a_xOffset, -(a_yOffset + m_height));
+			rect.offsetMax = new Vector2(-a_xOffset, -a_yOffset);
 		}
 	}
 }

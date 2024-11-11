@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 {
 	public class DashboardManager : MonoBehaviour
 	{
-		public const float cellsize = 300f;
+		public const float cellsize = 150f;
 
 		static DashboardManager m_instance;
 		public static DashboardManager Instance => m_instance;
@@ -39,7 +39,7 @@ namespace MSP2050.Scripts
 		//Widgets
 		List<ADashboardWidget> m_loadedWidgets;
 		Dictionary<DashboardCategory, DashboardWidgetLayout> m_catSelectedWidgets;
-		int m_numberColumns = 5; // TODO: determine this based on screen size
+		int m_numberColumns = 10; // TODO: determine this based on screen size
 
 		private void Awake()
 		{

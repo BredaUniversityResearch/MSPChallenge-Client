@@ -1719,5 +1719,41 @@ namespace MSP2050.Scripts
 					return "Implemented";
 			}
 		}
+
+		public static double TruncateToSignificantDigits(this double a_value, int a_digits)
+		{
+			if (a_value == 0d)
+				return 0d;
+
+			double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(a_value))) + 1 - a_digits);
+			return scale * Math.Truncate(a_value / scale);
+		}
+
+		public static double RoundToSignificantDigits(this double a_value, int a_digits)
+		{
+			if (a_value == 0d)
+				return 0d;
+
+			double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(a_value))) + 1);
+			return scale * Math.Round(a_value / scale, a_digits);
+		}
+
+		public static double FloorToSignificantDigits(this double a_value, int a_digits)
+		{
+			if (a_value == 0d)
+				return 0d;
+
+			double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(a_value))) + 1 - a_digits);
+			return scale * Math.Floor(a_value / scale);
+		}
+
+		public static double CeilToSignificantDigits(this double a_value, int a_digits)
+		{
+			if (a_value == 0d)
+				return 0d;
+
+			double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(a_value))) + 1 - a_digits);
+			return scale * Math.Ceiling(a_value / scale);
+		}
 	}
 }

@@ -9,6 +9,7 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] RectTransform m_barParent;
 		[SerializeField] GameObject m_barPrefab;
+		[SerializeField] float m_halfHSpacing;
 
 		GraphDataStepped m_data;
 		List<SteppedGraphBarGroup> m_entries;
@@ -34,6 +35,15 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public void SetRectOffset(Vector2 a_offsetMin, Vector2 a_offsetMax)
+		{
+			RectTransform rect = GetComponent<RectTransform>();
+			rect.anchorMin = Vector2.zero;
+			rect.anchorMax = Vector2.one;
+			rect.offsetMin = a_offsetMin;
+			rect.offsetMax = a_offsetMax;
+		}
+
 		public override void SetData(GraphDataStepped a_data)
 		{
 			if (m_entries == null)
@@ -46,17 +56,17 @@ namespace MSP2050.Scripts
 
 			for(int i = 0; i < a_data.m_steps.Count; i++)
 			{
-				if(i < m_entries.Count)
-				{
-					m_entries[i].SetData(a_data, i);
-				}
-				else
+				if (i >= m_entries.Count)
 				{
 					SteppedGraphBarGroup newEntry = Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarGroup>();
 					newEntry.SetStacked(m_stacked);
-					newEntry.SetData(a_data, i);
 					m_entries.Add(newEntry);
 				}
+				m_entries[i].SetData(a_data, i,
+					i / (float)a_data.m_steps.Count,
+					(i + 1) / (float)a_data.m_steps.Count,
+					m_halfHSpacing,
+					m_halfHSpacing);			
 			}
 		}
 	}

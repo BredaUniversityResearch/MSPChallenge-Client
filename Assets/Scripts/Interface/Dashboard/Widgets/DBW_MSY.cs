@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using static UnityEditor.PlayerSettings;
 
 namespace MSP2050.Scripts
 {
@@ -27,10 +28,12 @@ namespace MSP2050.Scripts
         [SerializeField] protected GraphAxis m_stepAxis;
         [SerializeField] protected GraphLegend m_legend;
         [SerializeField] protected SteppedGraphBars m_graph;
+		[SerializeField] float m_sideSpacing = 16f;
+		[SerializeField] float m_spacing = 12f;
 
+        bool m_legendBottom = true;
 
-
-        public override void UpdateData()
+		public override void UpdateData()
 		{
             KPIValueCollection kvc = SimulationLogicMEL.Instance.GetKPIValuesForCountry();
             List<KPIValue> kpiValues = GetKPIValuesByName(kvc, new string[]{ 
@@ -73,20 +76,50 @@ namespace MSP2050.Scripts
                 }
 			}
 
+            if(maxValue < 1f)
+                maxValue = 1f;
 
-			m_legend.SetData(data);
-            m_valueAxis.SetDataRange(data, 0, maxValue);
+			float legendSize = m_legend.SetData(data, m_sideSpacing, m_spacing);
+            m_valueAxis.SetDataRange(data, 0, maxValue); //Also sets scale
             m_stepAxis.SetDataStepped(data);
             m_graph.SetData(data);
-        }
+            SetRectPositions(legendSize);           
+		}
 
         protected override void OnSizeChanged(int a_w, int a_h) 
         {
-            m_legend.SetSize(a_w, a_h);
+            m_legendBottom = a_w / a_h < 4;
+			float legendSize = m_legend.SetSize(a_w, a_h, m_legendBottom, m_sideSpacing, m_spacing);
             m_valueAxis.SetSize(a_w, a_h);
             m_stepAxis.SetSize(a_w, a_h);
-           //TODO: gather/set offsets and set graph region
-        }
+			SetRectPositions(legendSize);
+		}
+
+        void SetRectPositions(float a_legendSize)
+        {
+			Vector2 graphCorner, axisCorner;
+			if (m_legendBottom)
+			{
+				graphCorner = new Vector2(m_sideSpacing + m_valueAxis.m_size, a_legendSize + m_spacing + m_stepAxis.m_size);
+				axisCorner = new Vector2(m_sideSpacing, a_legendSize + m_spacing);
+			}
+			else
+			{
+				graphCorner = new Vector2(a_legendSize + m_spacing + m_valueAxis.m_size, m_sideSpacing + m_stepAxis.m_size);
+				axisCorner = new Vector2(a_legendSize + m_spacing, m_sideSpacing);
+			}
+			m_valueAxis.SetRectOffset(
+				new Vector2(0f, 1f),
+				new Vector2(axisCorner.x, graphCorner.y),
+				new Vector2(graphCorner.x, -m_sideSpacing));
+			m_stepAxis.SetRectOffset(
+				new Vector2(1f, 0f),
+				new Vector2(graphCorner.x, axisCorner.y),
+				new Vector2(-m_sideSpacing, graphCorner.y));
+			m_graph.SetRectOffset(
+				new Vector2(graphCorner.x, graphCorner.y),
+				new Vector2(-m_sideSpacing, -m_sideSpacing));
+		}
 
 		List<KPIValue> GetKPIValuesByName(KPIValueCollection a_kvc, string[] a_names)
         {
