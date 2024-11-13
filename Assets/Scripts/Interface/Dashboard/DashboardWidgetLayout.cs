@@ -270,9 +270,11 @@ namespace MSP2050.Scripts
 		{
 			a_outW = a_widget.MinW;
 			a_outH = a_widget.MinH;
+			if (a_x + a_outW >= m_columns)
+				return false;
 			for (int y = a_y; y < a_y + a_outH && y < m_widgetLayout.Count; y++)
 			{
-				for (int x = a_x; x < a_x + a_outW && x < m_columns; x++)
+				for (int x = a_x; x < a_x + a_outW; x++)
 				{
 					if (m_widgetLayout[y][x] != null && m_widgetLayout[y][x] != a_widget)
 						return false;
@@ -337,7 +339,7 @@ namespace MSP2050.Scripts
 
 		public bool WidgetInsertRowPossible(ADashboardWidget a_widget, int a_row, int a_x, int a_currentW, out int a_maxW)
 		{
-            if (m_columns - a_x < a_widget.MinW)
+            if (m_columns <= a_widget.MinW + a_x)
             {
 				a_maxW = 0;
 				return false;
@@ -345,7 +347,7 @@ namespace MSP2050.Scripts
 			}
             if (a_row == 0)
 			{
-				a_maxW = Mathf.Min(a_currentW, m_columns - a_x);
+				a_maxW = System.Math.Min(a_currentW, m_columns - a_x);
 				return true;
 			}
 			for (int x = a_x; x < a_x + a_currentW && x < m_columns; x++)
