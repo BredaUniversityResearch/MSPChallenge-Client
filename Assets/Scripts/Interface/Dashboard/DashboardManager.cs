@@ -162,7 +162,7 @@ namespace MSP2050.Scripts
 
 			m_catalogueLayout.Visible = true;
 			m_catalogueButton.interactable = false;
-			m_categoryNameText.text = $"{m_currentCategory.m_displayName} widget catalogue";
+			m_categoryNameText.text = $"{m_currentCategory.m_displayName} Widget Catalogue";
 			foreach (ADashboardWidget widget in m_loadedWidgets)
 			{
 				if(widget.m_category == m_currentCategory)
