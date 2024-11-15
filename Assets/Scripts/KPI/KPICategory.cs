@@ -21,7 +21,7 @@ namespace MSP2050.Scripts
 			childValues.Add(child);
 		}
 
-		public IEnumerable<KPIValue> GetChildValues()
+		public List<KPIValue> GetChildValues()
 		{
 			return childValues;
 		}

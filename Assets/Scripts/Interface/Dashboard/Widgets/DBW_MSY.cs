@@ -9,25 +9,12 @@ namespace MSP2050.Scripts
 {
     public class DBW_MSY : ADashboardWidget
     {
-        readonly string[] MONTH_STEP_NAMES = {
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sept",
-            "Oct",
-            "Nov",
-            "Dec"
-        };
-
         [SerializeField] protected GraphAxis m_valueAxis;
         [SerializeField] protected GraphAxis m_stepAxis;
         [SerializeField] protected GraphLegend m_legend;
         [SerializeField] protected SteppedGraphBars m_graph;
+        [SerializeField] protected GraphTimeSelect m_timeSelect;
+        [SerializeField] protected AGraphContentSelect m_contentSelect;
 		[SerializeField] float m_sideSpacing = 16f;
 		[SerializeField] float m_spacing = 12f;
 
