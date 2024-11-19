@@ -8,7 +8,6 @@ namespace MSP2050.Scripts
 {
 	public class GraphTimeSelectWindow : MonoBehaviour
 	{
-
 		public Toggle m_yearToggle; //per month / per year
 		public CustomDropdown m_aggregationDropdown;
 
@@ -18,6 +17,7 @@ namespace MSP2050.Scripts
 		public GameObject m_rangeSection;
 		public Slider m_rangeMinSlider;
 		public Slider m_rangeMaxSlider;
+		public RectTransform m_rangeSliderFill;
 		public TextMeshProUGUI m_rangeMinText;
 		public TextMeshProUGUI m_rangeMaxText;
 	}

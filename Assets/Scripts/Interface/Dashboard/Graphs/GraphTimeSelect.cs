@@ -29,13 +29,10 @@ namespace MSP2050.Scripts
 		public void Initialise(Action a_onSettingsChanged)
 		{
 			//Called by widget
-			m_onSettingsChanged = a_onSettingsChanged;
 			TimeManager.Instance.OnCurrentMonthChanged += OnMonthChanged;
 			m_detailsToggle.onValueChanged.AddListener(ToggleDetails);
-
-
-			UpdateSliderRanges();
 			SetSettingsToDisplay();
+			m_onSettingsChanged = a_onSettingsChanged;
 		}
 
 		void ToggleDetails(bool a_value)
@@ -56,9 +53,9 @@ namespace MSP2050.Scripts
 			//Set current values
 			m_windowInstance.m_aggregationDropdown.ClearOptions();
 			m_windowInstance.m_aggregationDropdown.options = new List<TMP_Dropdown.OptionData>() {
-				new TMP_Dropdown.OptionData("Average"),
-				new TMP_Dropdown.OptionData("Minimum"),
-				new TMP_Dropdown.OptionData("Maximum")};
+				new TMP_Dropdown.OptionData("Yearly average"),
+				new TMP_Dropdown.OptionData("Yearly minimum"),
+				new TMP_Dropdown.OptionData("Yearly maximum")};
 			m_windowInstance.m_aggregationDropdown.value = m_aggregationOption;
 			m_windowInstance.m_yearToggle.isOn = m_yearToggleValue;
 			m_windowInstance.m_aggregationDropdown.gameObject.SetActive(m_yearToggleValue);
@@ -69,8 +66,7 @@ namespace MSP2050.Scripts
 			UpdateSliderRanges();
 			m_windowInstance.m_rangeMinSlider.value = m_rangeMin;
 			m_windowInstance.m_rangeMaxSlider.value = m_rangeMax;
-			m_windowInstance.m_rangeMinText.text = m_rangeMin.ToString();
-			m_windowInstance.m_rangeMaxText.text = m_rangeMax.ToString();
+			UpdateSliderContext();
 
 			//Set callbacks
 			m_windowInstance.m_aggregationDropdown.onValueChanged.AddListener(OnAggregationOptionChanged);
@@ -79,7 +75,6 @@ namespace MSP2050.Scripts
 			m_windowInstance.m_rangeMaxSlider.onValueChanged.AddListener(OnSliderMaxChanged);
 			m_windowInstance.m_rangeToggle.onValueChanged.AddListener(OnRangeToggleChanged);
 			m_windowInstance.m_yearToggle.onValueChanged.AddListener(OnYearToggleChanged);
-
 		}
 
 		private void OnDestroy()
@@ -117,9 +112,7 @@ namespace MSP2050.Scripts
 				m_windowInstance.m_rangeMaxSlider.value = m_rangeMax;
 				m_ignoreCallback = false;
 			}
-
-			m_windowInstance.m_rangeMinText.text = m_rangeMin.ToString();
-			m_windowInstance.m_rangeMaxText.text = m_rangeMax.ToString();
+			UpdateSliderContext();
 			SetSettingsToDisplay();
 		}
 
@@ -136,10 +129,28 @@ namespace MSP2050.Scripts
 				m_windowInstance.m_rangeMinSlider.value = m_rangeMin;
 				m_ignoreCallback = false;
 			}
+			UpdateSliderContext();
+			SetSettingsToDisplay();
+		}
 
+		void UpdateSliderContext()
+		{
+			m_windowInstance.m_rangeSliderFill.anchorMin = new Vector2(m_rangeMin / m_windowInstance.m_rangeMaxSlider.maxValue, 0f);
+			m_windowInstance.m_rangeSliderFill.anchorMax = new Vector2(m_rangeMax / m_windowInstance.m_rangeMaxSlider.maxValue, 1f);
+			m_windowInstance.m_rangeSliderFill.offsetMin = Vector2.zero;
+			m_windowInstance.m_rangeSliderFill.offsetMax = Vector2.zero;
 			m_windowInstance.m_rangeMinText.text = m_rangeMin.ToString();
 			m_windowInstance.m_rangeMaxText.text = m_rangeMax.ToString();
-			SetSettingsToDisplay();
+			if (m_yearToggleValue)
+			{
+				m_windowInstance.m_rangeMinText.text = Util.MonthToYearText(m_rangeMin * 12);
+				m_windowInstance.m_rangeMaxText.text = Util.MonthToYearText(m_rangeMax * 12);
+			}
+			else
+			{
+				m_windowInstance.m_rangeMinText.text = Util.MonthToText(m_rangeMin, true);
+				m_windowInstance.m_rangeMaxText.text = Util.MonthToText(m_rangeMax, true);
+			}
 		}
 
 		void OnMonthChanged(int a_oldCurrentMonth, int a_newCurrentMonth)
@@ -178,10 +189,10 @@ namespace MSP2050.Scripts
 			int currentTime = TimeManager.Instance.GetCurrentMonth();
 			if (a_newValue)
 			{
-				m_windowInstance.m_rangeMinSlider.maxValue = TimeManager.Instance.GetCurrentMonth() % 12;
+				m_windowInstance.m_rangeMinSlider.maxValue = TimeManager.Instance.GetCurrentMonth() / 12;
 				m_windowInstance.m_rangeMaxSlider.maxValue = m_windowInstance.m_rangeMinSlider.maxValue;
-				m_rangeMin = m_rangeMin % 12;
-				m_rangeMax = m_rangeMax % 12;
+				m_rangeMin = m_rangeMin / 12;
+				m_rangeMax = m_rangeMax / 12;
 				m_windowInstance.m_rangeMinSlider.value = m_rangeMin;
 				m_windowInstance.m_rangeMaxSlider.value = m_rangeMax;
 			}
@@ -189,7 +200,7 @@ namespace MSP2050.Scripts
 			{
 				m_windowInstance.m_rangeMinSlider.maxValue = TimeManager.Instance.GetCurrentMonth();
 				m_windowInstance.m_rangeMaxSlider.maxValue = m_windowInstance.m_rangeMinSlider.maxValue;
-				if (m_rangeMax == TimeManager.Instance.GetCurrentMonth() % 12)
+				if (m_rangeMax == TimeManager.Instance.GetCurrentMonth() / 12)
 					m_rangeMax = TimeManager.Instance.GetCurrentMonth();
 				else 
 					m_rangeMax = m_rangeMax * 12;
@@ -199,6 +210,7 @@ namespace MSP2050.Scripts
 			}
 			m_ignoreCallback = false;
 
+			UpdateSliderContext();
 			SetSettingsToDisplay();
 		}
 
@@ -250,6 +262,7 @@ namespace MSP2050.Scripts
 		{
 			m_currentSettings = new GraphTimeSettings();
 			m_currentSettings.m_months = new List<List<int>>();
+			m_currentSettings.m_stepNames = new List<string>();
 			if (m_yearToggleValue)
 			{
 				switch(m_aggregationOption)
@@ -279,6 +292,7 @@ namespace MSP2050.Scripts
 							newSet.Add(j + i);
 						}
 						m_currentSettings.m_months.Add(newSet);
+						m_currentSettings.m_stepNames.Add(Util.MonthToYearText(i));
 					}
 				}
 				else
@@ -286,6 +300,10 @@ namespace MSP2050.Scripts
 					for (int i = m_rangeMin; i <= m_rangeMax; i++)
 					{
 						m_currentSettings.m_months.Add(new List<int>() { i });
+						if(i == m_rangeMin || i%12 == 0)
+							m_currentSettings.m_stepNames.Add(Util.MonthToText(i, true));
+						else
+							m_currentSettings.m_stepNames.Add(Util.MonthToMonthText(i, true));
 					}
 				}
 			}
@@ -302,6 +320,7 @@ namespace MSP2050.Scripts
 							newSet.Add(j + i);
 						}
 						m_currentSettings.m_months.Add(newSet);
+						m_currentSettings.m_stepNames.Add(Util.MonthToYearText(i));
 					}
 				}
 				else
@@ -310,6 +329,10 @@ namespace MSP2050.Scripts
 					for (int i = first; i <= currentMonth; i++)
 					{
 						m_currentSettings.m_months.Add(new List<int>() { i });
+						if (i == m_rangeMin || i % 12 == 0)
+							m_currentSettings.m_stepNames.Add(Util.MonthToText(i, true));
+						else
+							m_currentSettings.m_stepNames.Add(Util.MonthToMonthText(i, true));
 					}
 				}
 			}
@@ -318,47 +341,63 @@ namespace MSP2050.Scripts
 			m_onSettingsChanged?.Invoke();
 		}
 
-		float AggregateYearsMin(List<float> a_monthData)
+		float? AggregateYearsMin(List<float?> a_monthData)
 		{
 			if(a_monthData.Count == 0)
-				return 0f;
+				return null;
 
 			float result = Mathf.Infinity;
-			foreach(float data in a_monthData)
-				if(data < result)
-					result = data;
-			return result;
+			foreach(float? data in a_monthData)
+			{
+				if (!data.HasValue)
+					continue;
+				if(data.Value < result)
+					result = data.Value;
+			}
+			return result == Mathf.Infinity ? null : result;
 		}
 
-		float AggregateYearsMax(List<float> a_monthData)
+		float? AggregateYearsMax(List<float?> a_monthData)
 		{
 			if (a_monthData.Count == 0)
-				return 0f;
+				return null;
 
 			float result = Mathf.NegativeInfinity;
-			foreach (float data in a_monthData)
-				if (data > result)
-					result = data;
-			return result;
+			foreach (float? data in a_monthData)
+			{
+				if (!data.HasValue)
+					continue;
+				if (data.Value > result)
+					result = data.Value;
+			}
+			return result == Mathf.NegativeInfinity ? null : result;
 		}
 
-		float AggregateYearsAvg(List<float> a_monthData)
+		float? AggregateYearsAvg(List<float?> a_monthData)
 		{
 			if (a_monthData.Count == 0)
-				return 0f;
+				return null;
 
 			float result = 0f;
-			foreach (float data in a_monthData)
-				result += data;
-			return result / a_monthData.Count;
+			int count = 0;
+			foreach (float? data in a_monthData)
+			{
+				if (!data.HasValue)
+					continue;
+				result += data.Value;
+				count++;
+			}
+			if (count == 0)
+				return null;
+			return result / count;
 		}
 	}
 
 	public class GraphTimeSettings
 	{
 		public List<List<int>> m_months;
-		public delegate float AggregationFunction(List<float> a_monthData);
+		public delegate float? AggregationFunction(List<float?> a_monthData);
 		public AggregationFunction m_aggregationFunction;
-		public string[] m_stepNames; //TODO: set this
+		public List<string> m_stepNames; 
 	}
 }

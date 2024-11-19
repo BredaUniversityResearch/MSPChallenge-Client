@@ -32,14 +32,14 @@ namespace MSP2050.Scripts
 		public void SetDataStepped(GraphDataStepped a_data)
 		{
 			int i = 0;
-			for (; i < a_data.m_stepNames.Length; i++)
+			for (; i < a_data.m_stepNames.Count; i++)
 			{
 				if (i == m_entries.Count)
 					m_entries.Add(Instantiate(m_entryPrefab, transform).GetComponent<GraphAxisEntry>());
 
 				m_entries[i].SetValue(a_data.m_stepNames[i],
-					i / (float)a_data.m_stepNames.Length,
-					(i + 1) / (float)a_data.m_stepNames.Length);
+					i / (float)a_data.m_stepNames.Count,
+					(i + 1) / (float)a_data.m_stepNames.Count);
 			}
 
 			//Disable unused

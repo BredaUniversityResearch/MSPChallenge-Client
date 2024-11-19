@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 		public ValueConversionUnit m_unit;
 		public float m_graphMin; //Set by value axis
 		public float m_graphRange;
-		public string[] m_stepNames;
+		public List<string> m_stepNames;
 		public string[] m_categoryNames;
 		public Color[] m_categoryColours;
 	}

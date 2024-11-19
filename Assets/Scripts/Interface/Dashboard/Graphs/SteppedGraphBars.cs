@@ -50,11 +50,9 @@ namespace MSP2050.Scripts
 				m_entries = new List<SteppedGraphBarGroup>();
 
 			m_data = a_data;
-			//m_legend.SetData(a_data);
-			//m_valueAxis.SetData(a_data);
-			//m_stepAxis.SetData(a_data);
 
-			for(int i = 0; i < a_data.m_steps.Count; i++)
+			int i = 0;
+			for(; i < a_data.m_steps.Count; i++)
 			{
 				if (i >= m_entries.Count)
 				{
@@ -68,6 +66,8 @@ namespace MSP2050.Scripts
 					m_halfHSpacing,
 					m_halfHSpacing);			
 			}
+			for(; i < m_entries.Count; i++)
+				m_entries[i].gameObject.SetActive(false);
 		}
 	}
 }

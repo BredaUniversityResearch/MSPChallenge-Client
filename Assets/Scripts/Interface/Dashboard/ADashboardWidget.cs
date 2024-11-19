@@ -55,7 +55,7 @@ namespace MSP2050.Scripts
 			UpdateData();
 		}
 
-		public void Initialise(ADashboardWidget a_original)
+		public virtual void Initialise(ADashboardWidget a_original)
 		{
 			//Regular widget
 			m_position = new DashboardWidgetPosition();

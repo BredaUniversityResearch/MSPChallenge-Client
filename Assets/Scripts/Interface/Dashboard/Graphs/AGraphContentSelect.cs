@@ -9,21 +9,6 @@ namespace MSP2050.Scripts
 {
 	public abstract class AGraphContentSelect : MonoBehaviour
 	{
-		protected readonly string[] MONTH_STEP_NAMES = {
-			"Jan",
-			"Feb",
-			"Mar",
-			"Apr",
-			"May",
-			"Jun",
-			"Jul",
-			"Aug",
-			"Sep",
-			"Oct",
-			"Nov",
-			"Dec"
-		};
-
 		[SerializeField] protected TextMeshProUGUI m_summaryText;
 		[SerializeField] protected Toggle m_detailsToggle;
 		[SerializeField] protected GameObject m_detailsWindowPrefab;
@@ -51,6 +36,6 @@ namespace MSP2050.Scripts
 
 		protected abstract void CreateDetailsWindow();
 		protected abstract void DestroyDetailsWindow();
-		public abstract GraphDataStepped FetchData(GraphTimeSettings a_timeSettings);
+		public abstract GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, out float a_maxValue, out float a_minValue);
 	}
 }
