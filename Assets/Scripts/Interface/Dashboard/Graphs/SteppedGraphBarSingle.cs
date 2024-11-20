@@ -18,7 +18,8 @@ namespace MSP2050.Scripts
 			m_image.color = a_data.m_categoryColours[a_cat];
 			rect.anchorMin = new Vector2(a_xMin, a_yMin);
 			rect.anchorMax = new Vector2(a_xMax, a_yMax);
-			m_tooltip.text = $"{a_data.m_categoryNames}: {a_data.m_unit.ConvertUnit(a_data.m_steps[a_step][a_cat].Value).FormatAsString()}";
+			m_tooltip.text = $"{a_data.m_categoryNames[a_cat]}: {a_data.m_unit.FormatValueWithUnitIndex(a_data.m_steps[a_step][a_cat].Value, a_data.m_unitIndex)}";
+			
 		}
 	}
 }

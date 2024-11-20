@@ -9,6 +9,7 @@ namespace MSP2050.Scripts
 		public List<float?[]> m_steps; //Step (time step or distribution), value per category
 
 		public ValueConversionUnit m_unit;
+		public int m_unitIndex;
 		public float m_graphMin; //Set by value axis
 		public float m_graphRange;
 		public List<string> m_stepNames;

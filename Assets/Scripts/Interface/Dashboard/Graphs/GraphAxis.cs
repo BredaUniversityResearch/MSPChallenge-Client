@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 	public class GraphAxis : MonoBehaviour
 	{
 		[SerializeField] GameObject m_entryPrefab;
+		[SerializeField] TextMeshProUGUI m_unitText;
 
 		public float m_size;
 
@@ -56,14 +57,18 @@ namespace MSP2050.Scripts
 			float maxScaled = (float)(maxT - minT).CeilToSignificantDigits(1);
 			float step = maxScaled / 5f;
 
-			int nextEntryIndex = 0;
+			a_data.m_graphMin = minT;
+			a_data.m_graphRange = maxScaled;
+			a_data.m_unitIndex = a_data.m_unit.GetConversionUnitIndexForSize(maxScaled);
+			m_unitText.text = a_data.m_unit.GetUnitStringForUnitIndex(a_data.m_unitIndex);
 
+			int nextEntryIndex = 0;
 			//Set all inbetween points
 			int i = 0; 
 			while(true)
 			{
 				float v = minT + i * step;
-				SetEntry(a_data.m_unit.ConvertUnit(v).FormatAsString(), (v - minT) / maxScaled, nextEntryIndex++);
+				SetEntry(a_data.m_unit.FormatValueWithUnitIndex(v, a_data.m_unitIndex), (v - minT) / maxScaled, nextEntryIndex++);
 				if (v >= a_max - 0.001f)
 					break;
 				i++;
@@ -75,8 +80,6 @@ namespace MSP2050.Scripts
 				m_entries[nextEntryIndex].gameObject.SetActive(false);
 			}
 
-			a_data.m_graphMin = minT;
-			a_data.m_graphRange = maxScaled;
 		}
 
 		void SetEntry(string a_value, float a_relativePos, int a_entryIndex)
