@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] GameObject m_entryPrefab;
 		[SerializeField] TextMeshProUGUI m_unitText;
+		[SerializeField] float m_firstAndLastOffset = 4f;
 
 		public float m_size;
 
@@ -38,7 +39,7 @@ namespace MSP2050.Scripts
 				if (i == m_entries.Count)
 					m_entries.Add(Instantiate(m_entryPrefab, transform).GetComponent<GraphAxisEntry>());
 
-				m_entries[i].SetValue(a_data.m_stepNames[i],
+				m_entries[i].SetValueStretch(a_data.m_stepNames[i],
 					i / (float)a_data.m_stepNames.Count,
 					(i + 1) / (float)a_data.m_stepNames.Count);
 			}
@@ -62,31 +63,41 @@ namespace MSP2050.Scripts
 			a_data.m_unitIndex = a_data.m_unit.GetConversionUnitIndexForSize(maxScaled);
 			m_unitText.text = a_data.m_unit.GetUnitStringForUnitIndex(a_data.m_unitIndex);
 
-			int nextEntryIndex = 0;
 			//Set all inbetween points
-			int i = 0; 
-			while(true)
+			//int i = 0; 
+			//while(true)
+			//{
+			//	float v = minT + i * step;
+			//	SetEntry(a_data.m_unit.FormatValueWithUnitIndex(v, a_data.m_unitIndex), (v - minT) / maxScaled, i++);
+			//	if (v >= a_max)
+			//	{
+			//		m_entries[i-1].SetVOffset(-m_firstAndLastOffset);
+			//		break;
+			//	}
+			//}
+
+			int i = 0;
+			for(; i < 6; i++)
 			{
 				float v = minT + i * step;
-				SetEntry(a_data.m_unit.FormatValueWithUnitIndex(v, a_data.m_unitIndex), (v - minT) / maxScaled, nextEntryIndex++);
-				if (v >= a_max - 0.001f)
-					break;
-				i++;
+				SetEntry(a_data.m_unit.FormatValueWithUnitIndex(v, a_data.m_unitIndex),
+					(v - minT) / maxScaled,
+					i,
+					i == 0 ? m_firstAndLastOffset : i == 5 ? -m_firstAndLastOffset : 0f);
 			}
 
 			//Disable unused
-			for (; nextEntryIndex < m_entries.Count; nextEntryIndex++)
+			for (; i < m_entries.Count; i++)
 			{
-				m_entries[nextEntryIndex].gameObject.SetActive(false);
+				m_entries[i].gameObject.SetActive(false);
 			}
-
 		}
 
-		void SetEntry(string a_value, float a_relativePos, int a_entryIndex)
+		void SetEntry(string a_value, float a_relativePos, int a_entryIndex, float a_vOffset)
 		{
 			if (a_entryIndex >= m_entries.Count)
 				m_entries.Add(Instantiate(m_entryPrefab, transform).GetComponent<GraphAxisEntry>());
-			m_entries[a_entryIndex].SetValue(a_value, a_relativePos);
+			m_entries[a_entryIndex].SetValuePoint(a_value, a_relativePos, a_vOffset);
 		}
 	}
 }

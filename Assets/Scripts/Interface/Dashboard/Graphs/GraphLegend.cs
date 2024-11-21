@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 		List<GraphLegendEntry> m_entries = new List<GraphLegendEntry>();
 		bool m_horizontal = true;
 
-		public float SetSize(int a_w, int a_h, bool a_horizontal, float a_sideSpacing, float a_spacing)
+		public float SetSize(int a_w, int a_h, bool a_horizontal, float a_sideSpacing, float a_spacing, float a_topSpacing)
 		{
 			//Currently assumes it fills a full horizontal edge
 			//TODO: set horizontal or vertical alignment
@@ -22,11 +22,11 @@ namespace MSP2050.Scripts
 			m_horizontal = a_horizontal;
 			m_columns = m_horizontal ? a_w : System.Math.Max(1, a_w / 4);
 			if (m_data != null)
-				return SetData(m_data, a_sideSpacing, a_spacing);
+				return SetData(m_data, a_sideSpacing, a_spacing, a_topSpacing);
 			return 0f;
 		}
 
-		public float SetData(GraphDataStepped a_data, float a_sideSpacing, float a_spacing)
+		public float SetData(GraphDataStepped a_data, float a_sideSpacing, float a_spacing, float a_topSpacing)
 		{
 			m_data = a_data;
 			//Determine max number of rows
@@ -70,7 +70,7 @@ namespace MSP2050.Scripts
 				rect.anchorMin = new Vector2(0f, 0f);
 				rect.anchorMax = new Vector2(0f, 1f);
 				rect.offsetMin = new Vector2(a_sideSpacing, a_sideSpacing);
-				rect.offsetMax = new Vector2(size, -a_sideSpacing);
+				rect.offsetMax = new Vector2(size, -a_topSpacing);
 				return size;
 			}
 		}

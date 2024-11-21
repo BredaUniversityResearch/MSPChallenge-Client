@@ -178,7 +178,7 @@ MonoBehaviour:
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: 4
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -186,7 +186,7 @@ MonoBehaviour:
   m_charWidthMaxAdj: 0
   m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
+  m_overflowMode: 1
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
@@ -220,6 +220,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5423240945377520330}
   - component: {fileID: 779112713152024931}
+  - component: {fileID: 1589812580910970418}
   m_Layer: 5
   m_Name: GraphLegendEntry_PRFB
   m_TagString: Untagged
@@ -263,8 +264,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_colourImage: {fileID: 401607269348145820}
   m_nameText: {fileID: 1154278429948454351}
+  m_tooltip: {fileID: 1589812580910970418}
   m_height: 16
   m_preferredWidth: 128
+--- !u!114 &1589812580910970418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7745124523506250426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004fe4f2157b1b445a667b7877f010f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: 
+  timeBeforeShowing: 0.5
+  passClickToParent: 1
 --- !u!1 &9005195322295612826
 GameObject:
   m_ObjectHideFlags: 0

@@ -300,15 +300,45 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
-    SerializedBytes: 01010b00000063006f006c006f0072004e006f0072006d0061006c002f00000000012900000043006f006c006f0075007200500061006c0065007400740065002e0043006f006e007300740043006f006c006f00750072002c0020004d0053005000320030003500300050006c007500670069006e007300000000000301080000006d005f0063006f006c006f00750072002f01000000012900000055006e0069007400790045006e00670069006e0065002e0043006f006c006f0072002c00200055006e0069007400790045006e00670069006e0065002e0043006f00720065004d006f00640075006c006500200000803f200000803f200000803f200000000005050b010e00000063006f006c006f00720048006900670068006c006900670068007400000000002d010d00000063006f006c006f007200440069007300610062006c0065006400
+    SerializedFormat: 2
+    SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: e059de7d05d519647b5f945149105ad6, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 7
+      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
+    - Name: m_colour
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 1
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: colorHighlight
+      Entry: 10
+      Data: 0
+    - Name: colorDisabled
+      Entry: 6
+      Data: 
   targetGraphics:
   - {fileID: 5044135933874409576}
   useHighlightColor: 1
@@ -613,15 +643,72 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
-    SerializedBytes: 01010b00000063006f006c006f0072004e006f0072006d0061006c002f00000000012900000043006f006c006f0075007200500061006c0065007400740065002e0043006f006e007300740043006f006c006f00750072002c0020004d0053005000320030003500300050006c007500670069006e007300000000000301080000006d005f0063006f006c006f00750072002f01000000012900000055006e0069007400790045006e00670069006e0065002e0043006f006c006f0072002c00200055006e0069007400790045006e00670069006e0065002e0043006f00720065004d006f00640075006c0065002000000000200000000020000000002000000000050501010d00000063006f006c006f007200530065006c00650063007400650064003000000000010000000301080000006d005f0063006f006c006f00750072003001000000200000000020000000002000000000200000000005050b010e00000063006f006c006f00720048006900670068006c006900670068007400000000002d011600000063006f006c006f007200530065006c006500630074006500640048006900670068006c0069006700680074002d010d00000063006f006c006f007200440069007300610062006c0065006400
+    SerializedFormat: 2
+    SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: e059de7d05d519647b5f945149105ad6, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 7
+      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
+    - Name: m_colour
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: colorSelected
+      Entry: 7
+      Data: 1|ColourPalette.ConstColour, MSP2050Plugins
+    - Name: m_colour
+      Entry: 7
+      Data: UnityEngine.Color, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: colorHighlight
+      Entry: 10
+      Data: 0
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
+    - Name: colorDisabled
+      Entry: 6
+      Data: 
   targetGraphics:
   - {fileID: 5128848778711471338}
   highlightIfOn: 1
@@ -641,8 +728,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
-    SerializedBytes: 0b010b00000063006f006c006f0072004e006f0072006d0061006c00000000000b010d00000063006f006c006f007200530065006c0065006300740065006400010000002d010e00000063006f006c006f00720048006900670068006c0069006700680074002d011600000063006f006c006f007200530065006c006500630074006500640048006900670068006c0069006700680074002d010d00000063006f006c006f007200440069007300610062006c0065006400
+    SerializedFormat: 2
+    SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
     - {fileID: 11400000, guid: dbe24502a18c5e546a327941d209c921, type: 2}
@@ -650,7 +737,22 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 10
+      Data: 0
+    - Name: colorSelected
+      Entry: 10
+      Data: 1
+    - Name: colorHighlight
+      Entry: 6
+      Data: 
+    - Name: colorSelectedHighlight
+      Entry: 6
+      Data: 
+    - Name: colorDisabled
+      Entry: 6
+      Data: 
   targetGraphics:
   - {fileID: 1436470769847646395}
   highlightIfOn: 0
@@ -797,12 +899,13 @@ MonoBehaviour:
   m_startingWidget: 1
   m_valueAxis: {fileID: 3570428555805728836}
   m_stepAxis: {fileID: 9093296015309662484}
+  m_stepGrouper: {fileID: 8106480321537245210}
   m_legend: {fileID: 5644574513115450481}
   m_graph: {fileID: 1732735506758529994}
   m_timeSelect: {fileID: 5626420663799924783}
   m_contentSelect: {fileID: 3630648080084196978}
   m_sideSpacing: 16
-  m_topSpacing: 44
+  m_topSpacing: 48
   m_spacing: 12
 --- !u!1 &4671403960083137515
 GameObject:
@@ -975,6 +1078,7 @@ RectTransform:
   m_Children:
   - {fileID: 8075328950193876718}
   - {fileID: 7917283600127744042}
+  - {fileID: 7228309096413768451}
   - {fileID: 6706055338758063506}
   - {fileID: 8573010675056315075}
   - {fileID: 5691859033983829006}
@@ -1349,6 +1453,142 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 3771360036731267224}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &4569119789236985901
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4817418993549915672}
+    m_Modifications:
+    - target: {fileID: 1433185582021535903, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_Name
+      value: GraphStepGrouper_PRFB
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 4eece65e3ff780c479c31fae27132bdd, type: 3}
+--- !u!224 &7228309096413768451 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 6573244372016040750, guid: 4eece65e3ff780c479c31fae27132bdd,
+    type: 3}
+  m_PrefabInstance: {fileID: 4569119789236985901}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8106480321537245210 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5758070765115252791, guid: 4eece65e3ff780c479c31fae27132bdd,
+    type: 3}
+  m_PrefabInstance: {fileID: 4569119789236985901}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13d3907920403dd4d8f57f8665e676c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &4773108577328504897
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1471,6 +1711,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GraphAxisV_PRFB
+      objectReference: {fileID: 0}
+    - target: {fileID: 8336665578450124805, guid: 2531ad4046a07634d9357387f064de06,
+        type: 3}
+      propertyPath: m_firstAndLastOffset
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1754,21 +1999,22 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5209642262658536472, guid: 045b926a766b03e4880adab6784e3f59,
+        type: 3}
     - target: {fileID: 5209642262658536472, guid: 045b926a766b03e4880adab6784e3f59,
         type: 3}
       propertyPath: serializationData.SerializedFormat
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5209642262658536472, guid: 045b926a766b03e4880adab6784e3f59,
         type: 3}
       propertyPath: serializationData.SerializedBytes.Array.size
-      value: 192
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5209642262658536472, guid: 045b926a766b03e4880adab6784e3f59,
         type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 0
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5209642262658536472, guid: 045b926a766b03e4880adab6784e3f59,
         type: 3}
@@ -2361,6 +2607,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3974949415593306887, guid: 94616b06630ed67489a8ac2a8271dcd7,
+        type: 3}
+      propertyPath: m_size
+      value: 40
+      objectReference: {fileID: 0}
     - target: {fileID: 7989287999301855565, guid: 94616b06630ed67489a8ac2a8271dcd7,
         type: 3}
       propertyPath: m_Name
@@ -2406,21 +2657,22 @@ PrefabInstance:
         type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 5381908880225255757, guid: db7804fed8d769a4aadaf9c04e182ac2,
+        type: 3}
     - target: {fileID: 5381908880225255757, guid: db7804fed8d769a4aadaf9c04e182ac2,
         type: 3}
       propertyPath: serializationData.SerializedFormat
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5381908880225255757, guid: db7804fed8d769a4aadaf9c04e182ac2,
         type: 3}
       propertyPath: serializationData.SerializedBytes.Array.size
-      value: 192
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5381908880225255757, guid: db7804fed8d769a4aadaf9c04e182ac2,
         type: 3}
       propertyPath: serializationData.SerializationNodes.Array.size
-      value: 0
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5381908880225255757, guid: db7804fed8d769a4aadaf9c04e182ac2,
         type: 3}

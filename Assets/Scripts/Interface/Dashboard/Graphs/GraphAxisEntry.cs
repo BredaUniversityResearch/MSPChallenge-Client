@@ -10,8 +10,9 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] TextMeshProUGUI m_text;
 		[SerializeField] bool m_horizontal;
+		[SerializeField] float m_baseTextOffset = -12f;
 
-		public void SetValue(string a_name, float a_anchorMin, float a_anchorMax)
+		public void SetValueStretch(string a_name, float a_anchorMin, float a_anchorMax)
 		{
 			gameObject.SetActive(true);
 			m_text.text = a_name;
@@ -30,7 +31,7 @@ namespace MSP2050.Scripts
 			rect.sizeDelta = Vector2.zero;
 		}
 
-		public void SetValue(string a_name, float a_anchorPosition)
+		public void SetValuePoint(string a_name, float a_anchorPosition, float a_vOffset)
 		{
 			m_text.text = a_name; 
 			gameObject.SetActive(true);
@@ -47,6 +48,7 @@ namespace MSP2050.Scripts
 				rect.anchorMax = new Vector2(1f, a_anchorPosition);
 			}
 			rect.sizeDelta = Vector2.zero;
+			m_text.GetComponent<RectTransform>().anchoredPosition = new Vector2(m_baseTextOffset, a_vOffset);
 		}
 	}
 }

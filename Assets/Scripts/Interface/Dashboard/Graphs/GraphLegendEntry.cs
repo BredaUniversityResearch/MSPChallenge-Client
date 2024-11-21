@@ -10,6 +10,8 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] Image m_colourImage;
 		[SerializeField] TextMeshProUGUI m_nameText;
+		[SerializeField] AddTooltip m_tooltip;
+		
 
 		public int m_height;
 		public int m_preferredWidth;
@@ -22,6 +24,7 @@ namespace MSP2050.Scripts
 			gameObject.SetActive(true);
 			m_nameText.text = a_name; 
 			m_colourImage.color = a_colour;
+			m_tooltip.text = a_name;
 
 			RectTransform rect = GetComponent<RectTransform>();
 			rect.anchorMin = new Vector2(a_xMin, 1f);

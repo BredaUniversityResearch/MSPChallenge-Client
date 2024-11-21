@@ -66,8 +66,13 @@ namespace MSP2050.Scripts
 					m_halfHSpacing,
 					m_halfHSpacing);			
 			}
+
+			//Clear unused entries
+			int clearFrom = i;
 			for(; i < m_entries.Count; i++)
-				m_entries[i].gameObject.SetActive(false);
+				Destroy(m_entries[i].gameObject);
+			if(clearFrom != m_entries.Count)
+				m_entries.RemoveRange(clearFrom, m_entries.Count - clearFrom);
 		}
 	}
 }

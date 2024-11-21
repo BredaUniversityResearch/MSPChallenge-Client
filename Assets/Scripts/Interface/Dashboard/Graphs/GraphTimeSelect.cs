@@ -300,9 +300,9 @@ namespace MSP2050.Scripts
 					for (int i = m_rangeMin; i <= m_rangeMax; i++)
 					{
 						m_currentSettings.m_months.Add(new List<int>() { i });
-						if(i == m_rangeMin || i%12 == 0)
-							m_currentSettings.m_stepNames.Add(Util.MonthToText(i, true));
-						else
+						//if(i == m_rangeMin || i%12 == 0)
+						//	m_currentSettings.m_stepNames.Add(Util.MonthToText(i, true));
+						//else
 							m_currentSettings.m_stepNames.Add(Util.MonthToMonthText(i, true));
 					}
 				}
@@ -329,9 +329,9 @@ namespace MSP2050.Scripts
 					for (int i = first; i <= currentMonth; i++)
 					{
 						m_currentSettings.m_months.Add(new List<int>() { i });
-						if (i == m_rangeMin || i % 12 == 0)
-							m_currentSettings.m_stepNames.Add(Util.MonthToText(i, true));
-						else
+						//if (i == m_rangeMin || i % 12 == 0)
+						//	m_currentSettings.m_stepNames.Add(Util.MonthToText(i, true));
+						//else
 							m_currentSettings.m_stepNames.Add(Util.MonthToMonthText(i, true));
 					}
 				}
