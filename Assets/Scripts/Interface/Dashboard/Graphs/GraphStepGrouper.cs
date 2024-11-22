@@ -48,11 +48,11 @@ namespace MSP2050.Scripts
 					int groupStartIndex = 0;
 					for (int i = 1; i < a_timeSettings.m_months.Count; i++)
 					{
-						if(i % 12 == 0)
+						if(a_timeSettings.m_months[i][0] % 12 == 0)
 						{
 							SetGroup(nextGroupIndex, Util.MonthToYearText(a_timeSettings.m_months[groupStartIndex][0]),
 								groupStartIndex / (float)a_timeSettings.m_months.Count,
-								(i-1) / (float)a_timeSettings.m_months.Count);
+								i / (float)a_timeSettings.m_months.Count);
 							nextGroupIndex++;
 							groupStartIndex = i;
 						}

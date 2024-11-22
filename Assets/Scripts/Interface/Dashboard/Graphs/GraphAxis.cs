@@ -64,18 +64,6 @@ namespace MSP2050.Scripts
 			m_unitText.text = a_data.m_unit.GetUnitStringForUnitIndex(a_data.m_unitIndex);
 
 			//Set all inbetween points
-			//int i = 0; 
-			//while(true)
-			//{
-			//	float v = minT + i * step;
-			//	SetEntry(a_data.m_unit.FormatValueWithUnitIndex(v, a_data.m_unitIndex), (v - minT) / maxScaled, i++);
-			//	if (v >= a_max)
-			//	{
-			//		m_entries[i-1].SetVOffset(-m_firstAndLastOffset);
-			//		break;
-			//	}
-			//}
-
 			int i = 0;
 			for(; i < 6; i++)
 			{
@@ -93,11 +81,11 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		void SetEntry(string a_value, float a_relativePos, int a_entryIndex, float a_vOffset)
+		void SetEntry(string a_value, float a_relativePos, int a_entryIndex, float a_textOffset)
 		{
 			if (a_entryIndex >= m_entries.Count)
 				m_entries.Add(Instantiate(m_entryPrefab, transform).GetComponent<GraphAxisEntry>());
-			m_entries[a_entryIndex].SetValuePoint(a_value, a_relativePos, a_vOffset);
+			m_entries[a_entryIndex].SetValuePoint(a_value, a_relativePos, m_size, a_textOffset);
 		}
 	}
 }

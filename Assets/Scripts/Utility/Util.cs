@@ -191,7 +191,7 @@ namespace MSP2050.Scripts
 				return Localisation.DateFormatting.GetMonthName(month) + " " + year.ToString();
 		}
 
-		public static string MonthToYearText(int months)
+		public static string MonthToYearText(int months, bool shortened = false)
 		{
 			if (SessionManager.Instance.MspGlobalData == null)
 				return "";
@@ -202,7 +202,10 @@ namespace MSP2050.Scripts
 				--baseYear;
 			}
 			int year = months / 12 + baseYear;
-			return year.ToString();
+			if(shortened)
+				return year.ToString().Substring(2,2);
+			else
+				return year.ToString();
 		}
 
 		public static string MonthToMonthText(int months, bool shortened = false)
@@ -217,6 +220,16 @@ namespace MSP2050.Scripts
 				return Localisation.DateFormatting.GetMonthName(month).Substring(0, 3);
 			else
 				return Localisation.DateFormatting.GetMonthName(month);
+
+		}
+
+		public static string MonthToMonthLetter(int months)
+		{
+			while (months < 0)
+			{
+				months += 12;
+			}
+			return Localisation.DateFormatting.GetMonthName(months % 12 + 1).Substring(0, 1);
 
 		}
 

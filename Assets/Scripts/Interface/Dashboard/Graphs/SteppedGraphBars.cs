@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] RectTransform m_barParent;
 		[SerializeField] GameObject m_barPrefab;
-		[SerializeField] float m_halfHSpacing;
+		[SerializeField] int m_totalSpacing = 128;
 
 		GraphDataStepped m_data;
 		List<SteppedGraphBarGroup> m_entries;
@@ -50,6 +50,7 @@ namespace MSP2050.Scripts
 				m_entries = new List<SteppedGraphBarGroup>();
 
 			m_data = a_data;
+			float halfSpacing = m_totalSpacing / m_data.m_steps.Count / 2;
 
 			int i = 0;
 			for(; i < a_data.m_steps.Count; i++)
@@ -63,8 +64,8 @@ namespace MSP2050.Scripts
 				m_entries[i].SetData(a_data, i,
 					i / (float)a_data.m_steps.Count,
 					(i + 1) / (float)a_data.m_steps.Count,
-					m_halfHSpacing,
-					m_halfHSpacing);			
+					halfSpacing,
+					halfSpacing);			
 			}
 
 			//Clear unused entries

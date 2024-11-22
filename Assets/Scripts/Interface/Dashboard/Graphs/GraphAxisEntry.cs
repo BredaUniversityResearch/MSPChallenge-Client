@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 			rect.sizeDelta = Vector2.zero;
 		}
 
-		public void SetValuePoint(string a_name, float a_anchorPosition, float a_vOffset)
+		public void SetValuePoint(string a_name, float a_anchorPosition, float a_leftOffset, float a_textOffset)
 		{
 			m_text.text = a_name; 
 			gameObject.SetActive(true);
@@ -44,11 +44,14 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				rect.anchorMin = new Vector2(1f, a_anchorPosition);
+				rect.anchorMin = new Vector2(0f, a_anchorPosition);
 				rect.anchorMax = new Vector2(1f, a_anchorPosition);
 			}
 			rect.sizeDelta = Vector2.zero;
-			m_text.GetComponent<RectTransform>().anchoredPosition = new Vector2(m_baseTextOffset, a_vOffset);
+			rect.offsetMin = new Vector2(a_leftOffset, 0f);
+			rect.offsetMax = Vector2.zero;
+
+			m_text.GetComponent<RectTransform>().anchoredPosition = new Vector2(m_baseTextOffset, a_textOffset);
 		}
 	}
 }

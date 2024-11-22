@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using static UnityEngine.ParticleSystem;
 
 namespace MSP2050.Scripts
 {
@@ -135,8 +136,16 @@ namespace MSP2050.Scripts
 
 		void UpdateSliderContext()
 		{
-			m_windowInstance.m_rangeSliderFill.anchorMin = new Vector2(m_rangeMin / m_windowInstance.m_rangeMaxSlider.maxValue, 0f);
-			m_windowInstance.m_rangeSliderFill.anchorMax = new Vector2(m_rangeMax / m_windowInstance.m_rangeMaxSlider.maxValue, 1f);
+			if(m_windowInstance.m_rangeMaxSlider.maxValue < 0.01f)
+			{
+				m_windowInstance.m_rangeSliderFill.anchorMin = new Vector2(0f, 0f);
+				m_windowInstance.m_rangeSliderFill.anchorMax = new Vector2(0f, 1f);
+			}
+			else
+			{
+				m_windowInstance.m_rangeSliderFill.anchorMin = new Vector2(m_rangeMin / m_windowInstance.m_rangeMaxSlider.maxValue, 0f);
+				m_windowInstance.m_rangeSliderFill.anchorMax = new Vector2(m_rangeMax / m_windowInstance.m_rangeMaxSlider.maxValue, 1f);
+			}
 			m_windowInstance.m_rangeSliderFill.offsetMin = Vector2.zero;
 			m_windowInstance.m_rangeSliderFill.offsetMax = Vector2.zero;
 			m_windowInstance.m_rangeMinText.text = m_rangeMin.ToString();
@@ -282,17 +291,18 @@ namespace MSP2050.Scripts
 			int currentMonth = TimeManager.Instance.GetCurrentMonth();
 			if(m_rangeToggleValue)
 			{
+				bool shorten = m_rangeMax - m_rangeMin >= 20;
 				if (m_yearToggleValue)
 				{
-					for (int i = m_rangeMin; i <= m_rangeMax && i <= currentMonth; i+=12)
+					for (int i = m_rangeMin; i <= m_rangeMax; i++)
 					{
 						List<int> newSet = new List<int>(12);
-						for (int j = 0; j < 12 && j + i <= currentMonth && j + i <= m_rangeMax; j++)
+						for (int j = 0; j < 12 && j + i*12 <= currentMonth; j++)
 						{
-							newSet.Add(j + i);
+							newSet.Add(j + i*12);
 						}
 						m_currentSettings.m_months.Add(newSet);
-						m_currentSettings.m_stepNames.Add(Util.MonthToYearText(i));
+						m_currentSettings.m_stepNames.Add(Util.MonthToYearText(i*12, shorten));
 					}
 				}
 				else
@@ -300,9 +310,10 @@ namespace MSP2050.Scripts
 					for (int i = m_rangeMin; i <= m_rangeMax; i++)
 					{
 						m_currentSettings.m_months.Add(new List<int>() { i });
-						//if(i == m_rangeMin || i%12 == 0)
-						//	m_currentSettings.m_stepNames.Add(Util.MonthToText(i, true));
-						//else
+
+						if (shorten)
+							m_currentSettings.m_stepNames.Add(Util.MonthToMonthLetter(i));
+						else
 							m_currentSettings.m_stepNames.Add(Util.MonthToMonthText(i, true));
 					}
 				}
@@ -312,7 +323,8 @@ namespace MSP2050.Scripts
 				if(m_yearToggleValue)
 				{
 					int first = Math.Max(0, currentMonth % 12 - 12 * (m_latestAmount - 1));
-					for(int i = first; i <= currentMonth; i+= 12)
+					bool shorten = (currentMonth - first) / 12 >= 20;
+					for (int i = first; i <= currentMonth; i+= 12)
 					{
 						List<int> newSet = new List<int>(12);
 						for(int j = 0; j < 12 && j+i <= currentMonth; j++)
@@ -320,18 +332,20 @@ namespace MSP2050.Scripts
 							newSet.Add(j + i);
 						}
 						m_currentSettings.m_months.Add(newSet);
-						m_currentSettings.m_stepNames.Add(Util.MonthToYearText(i));
+						m_currentSettings.m_stepNames.Add(Util.MonthToYearText(i, shorten));
 					}
 				}
 				else
 				{
-					int first = Math.Max(0, currentMonth - m_latestAmount - 1);
+					int first = Math.Max(0, currentMonth - m_latestAmount + 1);
+					bool shorten = currentMonth - first >= 20;
 					for (int i = first; i <= currentMonth; i++)
 					{
 						m_currentSettings.m_months.Add(new List<int>() { i });
-						//if (i == m_rangeMin || i % 12 == 0)
-						//	m_currentSettings.m_stepNames.Add(Util.MonthToText(i, true));
-						//else
+					
+						if(shorten)
+							m_currentSettings.m_stepNames.Add(Util.MonthToMonthLetter(i));
+						else
 							m_currentSettings.m_stepNames.Add(Util.MonthToMonthText(i, true));
 					}
 				}

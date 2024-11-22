@@ -55,18 +55,22 @@ namespace MSP2050.Scripts
 			Vector2 graphCorner, axisCorner;
 			if (m_legendBottom)
 			{
-				graphCorner = new Vector2(m_sideSpacing + m_valueAxis.m_size, a_legendSize + m_spacing + m_stepAxis.m_size);
-				axisCorner = new Vector2(m_sideSpacing, a_legendSize + m_spacing);
+				graphCorner = new Vector2(m_sideSpacing + m_valueAxis.m_size, a_legendSize + m_spacing + m_spacing + m_stepAxis.m_size);
+				axisCorner = new Vector2(m_sideSpacing, a_legendSize + m_spacing + m_spacing);
 			}
 			else
 			{
 				graphCorner = new Vector2(a_legendSize + m_spacing + m_valueAxis.m_size, m_sideSpacing + m_stepAxis.m_size);
 				axisCorner = new Vector2(a_legendSize + m_spacing, m_sideSpacing);
 			}
+			//m_valueAxis.SetRectOffset(
+			//	new Vector2(0f, 1f),
+			//	new Vector2(axisCorner.x, graphCorner.y),
+			//	new Vector2(graphCorner.x, -m_topSpacing));
 			m_valueAxis.SetRectOffset(
-				new Vector2(0f, 1f),
+				new Vector2(1f, 1f),
 				new Vector2(axisCorner.x, graphCorner.y),
-				new Vector2(graphCorner.x, -m_topSpacing));
+				new Vector2(-m_sideSpacing, -m_topSpacing));
 			m_stepAxis.SetRectOffset(
 				new Vector2(1f, 0f),
 				new Vector2(graphCorner.x, axisCorner.y),
