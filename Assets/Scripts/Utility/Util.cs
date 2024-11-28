@@ -191,7 +191,7 @@ namespace MSP2050.Scripts
 				return Localisation.DateFormatting.GetMonthName(month) + " " + year.ToString();
 		}
 
-		public static string MonthToYearText(int months)
+		public static string MonthToYearText(int months, bool shortened = false)
 		{
 			if (SessionManager.Instance.MspGlobalData == null)
 				return "";
@@ -202,7 +202,10 @@ namespace MSP2050.Scripts
 				--baseYear;
 			}
 			int year = months / 12 + baseYear;
-			return year.ToString();
+			if(shortened)
+				return year.ToString().Substring(2,2);
+			else
+				return year.ToString();
 		}
 
 		public static string MonthToMonthText(int months, bool shortened = false)
@@ -217,6 +220,16 @@ namespace MSP2050.Scripts
 				return Localisation.DateFormatting.GetMonthName(month).Substring(0, 3);
 			else
 				return Localisation.DateFormatting.GetMonthName(month);
+
+		}
+
+		public static string MonthToMonthLetter(int months)
+		{
+			while (months < 0)
+			{
+				months += 12;
+			}
+			return Localisation.DateFormatting.GetMonthName(months % 12 + 1).Substring(0, 1);
 
 		}
 
@@ -1718,6 +1731,42 @@ namespace MSP2050.Scripts
 				default:
 					return "Implemented";
 			}
+		}
+
+		public static double TruncateToSignificantDigits(this double a_value, int a_digits)
+		{
+			if (a_value == 0d)
+				return 0d;
+
+			double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(a_value))) + 1 - a_digits);
+			return scale * Math.Truncate(a_value / scale);
+		}
+
+		public static double RoundToSignificantDigits(this double a_value, int a_digits)
+		{
+			if (a_value == 0d)
+				return 0d;
+
+			double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(a_value))) + 1);
+			return scale * Math.Round(a_value / scale, a_digits);
+		}
+
+		public static double FloorToSignificantDigits(this double a_value, int a_digits)
+		{
+			if (a_value == 0d)
+				return 0d;
+
+			double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(a_value))) + 1 - a_digits);
+			return scale * Math.Floor(a_value / scale);
+		}
+
+		public static double CeilToSignificantDigits(this double a_value, int a_digits)
+		{
+			if (a_value == 0d)
+				return 0d;
+
+			double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(a_value))) + 1 - a_digits);
+			return scale * Math.Ceiling(a_value / scale);
 		}
 	}
 }
