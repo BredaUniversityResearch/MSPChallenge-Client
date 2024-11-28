@@ -114,9 +114,17 @@ namespace MSP2050.Scripts
 			return InterfaceCanvas.Instance.mapScale.GetRealWorldPolygonAreaInSquareKm(polygonSubEntities[0].GetPoints());
 		}
 
-		//public override float GetInvestmentCost()
-		//{
-		//	return Util.GetPolygonArea(polygonSubEntities[0].GetPoints()) * EntityTypes[0].investmentCost;
-		//}
+		public float GetOffsetArea(float a_offset)
+		{
+			//Calculate offset
+			ClipperLib.ClipperOffset co = new ClipperLib.ClipperOffset();
+			co.AddPath(GeometryOperations.VectorToIntPoint(polygonSubEntities[0].GetPoints()), ClipperLib.JoinType.jtSquare, ClipperLib.EndType.etClosedPolygon);
+
+			List<List<ClipperLib.IntPoint>> csolution = new List<List<ClipperLib.IntPoint>>();
+			co.Execute(ref csolution, (double)a_offset * GeometryOperations.intConverstion * 10d); //TODO: why is the 10d here?
+			if (csolution.Count == 0)
+				return 0f;
+			return InterfaceCanvas.Instance.mapScale.GetRealWorldPolygonAreaInSquareKm(GeometryOperations.IntPointToVector(csolution[0]));
+		}
 	}
 }

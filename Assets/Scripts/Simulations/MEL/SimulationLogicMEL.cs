@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MSP2050.Scripts
 {
@@ -164,31 +165,70 @@ namespace MSP2050.Scripts
 		private void UpdateProtectionKPIForPolicyLayer(AbstractLayer a_layer, KPIValueCollection a_valueCollection, int a_previousMostRecentMonth, int a_mostRecentMonth)
 		{
 			LayerState state = a_layer.GetLayerStateAtTime(a_previousMostRecentMonth);
-			for (int i = a_previousMostRecentMonth + 1; i <= a_mostRecentMonth; ++i)
+			for (int month = a_previousMostRecentMonth + 1; month <= a_mostRecentMonth; ++month)
 			{
-				state.AdvanceStateToMonth(i);
+				int currentMonthNorm = month % 12;
+				state.AdvanceStateToMonth(month);
 
-				Dictionary<string, float> sizeByGear = new Dictionary<string, float>(PolicyLogicFishing.Instance.GetGearTypes().Length);
-				foreach (string gear in PolicyLogicFishing.Instance.GetGearTypes())
-				{
-					//Make sure we initialize all the types otherwise the KPIs wont add values in for these new months.
-					sizeByGear.Add(gear, 0.0f);
-				}
-
+				float[] sizeByGear = new float[PolicyLogicFishing.Instance.GetGearTypes().Length];
 				foreach (Entity t in state.baseGeometry)
 				{
-					foreach (EntityType entityType in t.EntityTypes)
+					float baseArea = t.GetRestrictionAreaSurface();
+
+					//Check seasonal closure policy, add area if relevant
+					if(t.TryGetMetaData(PolicyManager.SEASONAL_CLOSURE_POLICY_NAME, out string seasonalClosureString))
 					{
-						float restrictionSize;
-						sizeByEntityType.TryGetValue(entityType, out restrictionSize);
-						restrictionSize += t.GetRestrictionAreaSurface();
-						sizeByEntityType[entityType] = restrictionSize;
+						PolicyGeometryDataSeasonalClosure policyData = JsonConvert.DeserializeObject<PolicyGeometryDataSeasonalClosure>(seasonalClosureString);
+						foreach(var bansByGear in policyData.fleets)
+						{
+							//Check if geometry policy contains any bans for gear for the current month
+							bool banned = false;
+							foreach(var bansByCountry in bansByGear.Value)
+							{
+								if(bansByCountry.Value.MonthSet(currentMonthNorm))
+								{
+									banned = true;
+									break;
+								}
+							}
+							if(banned)
+							{
+								sizeByGear[bansByGear.Key] += baseArea;
+							}
+						}
+					}
+
+					//Check buffer zone policy, add area if relevgant
+					if (t.TryGetMetaData(PolicyManager.BUFFER_ZONE_POLICY_NAME, out string bufferZoneString))
+					{
+						PolicyGeometryDataBufferZone policyData = JsonConvert.DeserializeObject<PolicyGeometryDataBufferZone>(bufferZoneString);
+						if (policyData.radius >= 0.001f)
+						{
+							float bufferArea = ((PolygonEntity)t).GetOffsetArea(policyData.radius) - baseArea;
+							foreach (var bansByGear in policyData.fleets)
+							{
+								//Check if geometry policy contains any bans for gear for the current month
+								bool banned = false;
+								foreach (var bansByCountry in bansByGear.Value)
+								{
+									if (bansByCountry.Value.MonthSet(currentMonthNorm))
+									{
+										banned = true;
+										break;
+									}
+								}
+								if (banned)
+								{
+									sizeByGear[bansByGear.Key] += bufferArea;
+								}
+							}
+						}
 					}
 				}
 
-				foreach (KeyValuePair<EntityType, float> sizeForEntityType in sizeByEntityType)
+				for(int j = 0; j < sizeByGear.Length; j++)
 				{
-					a_valueCollection.TryUpdateKPIValue($"{a_layer.FileName}_{sizeForEntityType.Key.Name}", i, sizeForEntityType.Value);
+					a_valueCollection.TryUpdateKPIValue($"{a_layer.FileName}_{PolicyLogicFishing.Instance.GetGearName(j)}", j, sizeByGear[j]);
 				}
 			}
 		}
