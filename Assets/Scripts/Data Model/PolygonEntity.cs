@@ -121,7 +121,7 @@ namespace MSP2050.Scripts
 			co.AddPath(GeometryOperations.VectorToIntPoint(polygonSubEntities[0].GetPoints()), ClipperLib.JoinType.jtSquare, ClipperLib.EndType.etClosedPolygon);
 
 			List<List<ClipperLib.IntPoint>> csolution = new List<List<ClipperLib.IntPoint>>();
-			co.Execute(ref csolution, (double)a_offset * GeometryOperations.intConverstion * 10d); //TODO: why is the 10d here?
+			co.Execute(ref csolution, (double)a_offset / 1000d * GeometryOperations.intConversion); //m to km
 			if (csolution.Count == 0)
 				return 0f;
 			return InterfaceCanvas.Instance.mapScale.GetRealWorldPolygonAreaInSquareKm(GeometryOperations.IntPointToVector(csolution[0]));

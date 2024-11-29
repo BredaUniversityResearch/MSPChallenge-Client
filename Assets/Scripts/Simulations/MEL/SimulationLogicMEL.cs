@@ -13,6 +13,11 @@ namespace MSP2050.Scripts
 		public static SimulationLogicMEL Instance => m_instance;
 
 		private KPIValueCollection m_ecologyKPI;
+		private SimulationSettingsMEL m_config;
+
+		//Has to be stored separately because PropertyMetaData PolicyType differs from PropertyName...
+		private string m_seasonalClosureGMPName;
+		private string m_BufferZoneGMPName;
 
 		public override void HandleGeneralUpdate(ASimulationData a_data)
 		{
@@ -23,11 +28,10 @@ namespace MSP2050.Scripts
 		public override void Initialise(ASimulationData a_settings)
 		{
 			m_instance = this;
-			//Currently in Server.GetMELConfig()
 
-			SimulationSettingsMEL config = (SimulationSettingsMEL)a_settings;
+			m_config = (SimulationSettingsMEL)a_settings;
 
-			CreateEcologyKPIs(config.content);
+			Main.Instance.OnFinishedLoadingLayers += CreateEcologyKPIs; //Requires layers to be imported first
 		}
 		public override void Destroy()
 		{
@@ -39,9 +43,9 @@ namespace MSP2050.Scripts
 			return m_ecologyKPI;
 		}
 
-		public void CreateEcologyKPIs(JObject a_melConfig)
+		public void CreateEcologyKPIs()
 		{
-			List<KPICategoryDefinition> categoryDefinitions = a_melConfig["ecologyCategories"].ToObject<List<KPICategoryDefinition>>();
+			List<KPICategoryDefinition> categoryDefinitions = m_config.content["ecologyCategories"].ToObject<List<KPICategoryDefinition>>();
 			
 			//Add categories & values for protected area layers
 			foreach (AbstractLayer layer in LayerManager.Instance.m_protectedAreaLayers)
@@ -60,11 +64,15 @@ namespace MSP2050.Scripts
 				bool hasGeomPolicy = false;
 				foreach(var property in layer.m_propertyMetaData)
 				{
-					if (property.PolicyType == PolicyManager.SEASONAL_CLOSURE_POLICY_NAME ||
-						property.PolicyType == PolicyManager.BUFFER_ZONE_POLICY_NAME)
+					if (property.PolicyType == PolicyManager.SEASONAL_CLOSURE_POLICY_NAME) 
 					{
 						hasGeomPolicy = true;
-						break;
+						m_seasonalClosureGMPName = property.PropertyName;
+					}
+					else if(property.PolicyType == PolicyManager.BUFFER_ZONE_POLICY_NAME)
+					{
+						hasGeomPolicy = true;
+						m_BufferZoneGMPName = property.PropertyName;
 					}
 				}
 
@@ -87,7 +95,7 @@ namespace MSP2050.Scripts
 						values.Add(new KPIValueDefinition()
 						{
 							valueName = $"{layer.FileName}_{layerType.Name}",
-							valueDisplayName = "Protection against " + layerType.Name,
+							valueDisplayName = layerType.Name,
 							unit = "km2",
 							valueDependentCountry = KPIValue.CountrySpecific
 						});
@@ -100,6 +108,7 @@ namespace MSP2050.Scripts
 			m_ecologyKPI = new KPIValueCollection();
 			m_ecologyKPI.SetupKPIValues(categoryDefinitions.ToArray(), SessionManager.Instance.MspGlobalData.session_end_month);
 			m_ecologyKPI.OnKPIValuesReceivedAndProcessed += OnEcologyKPIReceivedNewMonth;
+			m_config = null;
 		}
 
 		public void ReceiveEcologyKPIUpdate(KPIObject[] a_objects)
@@ -176,9 +185,9 @@ namespace MSP2050.Scripts
 					float baseArea = t.GetRestrictionAreaSurface();
 
 					//Check seasonal closure policy, add area if relevant
-					if(t.TryGetMetaData(PolicyManager.SEASONAL_CLOSURE_POLICY_NAME, out string seasonalClosureString))
+					if(t.TryGetMetaData(m_seasonalClosureGMPName, out string seasonalClosureString))
 					{
-						PolicyGeometryDataSeasonalClosure policyData = JsonConvert.DeserializeObject<PolicyGeometryDataSeasonalClosure>(seasonalClosureString);
+						PolicyGeometryDataSeasonalClosure policyData = new PolicyGeometryDataSeasonalClosure(seasonalClosureString);
 						foreach(var bansByGear in policyData.fleets)
 						{
 							//Check if geometry policy contains any bans for gear for the current month
@@ -199,9 +208,9 @@ namespace MSP2050.Scripts
 					}
 
 					//Check buffer zone policy, add area if relevgant
-					if (t.TryGetMetaData(PolicyManager.BUFFER_ZONE_POLICY_NAME, out string bufferZoneString))
+					if (t.TryGetMetaData(m_BufferZoneGMPName, out string bufferZoneString))
 					{
-						PolicyGeometryDataBufferZone policyData = JsonConvert.DeserializeObject<PolicyGeometryDataBufferZone>(bufferZoneString);
+						PolicyGeometryDataBufferZone policyData = new PolicyGeometryDataBufferZone(bufferZoneString);
 						if (policyData.radius >= 0.001f)
 						{
 							float bufferArea = ((PolygonEntity)t).GetOffsetArea(policyData.radius) - baseArea;
@@ -228,7 +237,7 @@ namespace MSP2050.Scripts
 
 				for(int j = 0; j < sizeByGear.Length; j++)
 				{
-					a_valueCollection.TryUpdateKPIValue($"{a_layer.FileName}_{PolicyLogicFishing.Instance.GetGearName(j)}", j, sizeByGear[j]);
+					a_valueCollection.TryUpdateKPIValue($"{a_layer.FileName}_{PolicyLogicFishing.Instance.GetGearName(j)}", month, sizeByGear[j]);
 				}
 			}
 		}

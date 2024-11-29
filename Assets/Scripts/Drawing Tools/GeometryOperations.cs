@@ -5,7 +5,7 @@ namespace MSP2050.Scripts
 {
 	public static class GeometryOperations
 	{
-		public static float intConverstion = 100000000000000.0f;
+		public static float intConversion = 100000000000000.0f;
 
 		public static bool LineIntersection(List<Vector3> source, List<Vector3> target, out List<Vector3> intersectionPoints)
 		{
@@ -143,7 +143,7 @@ namespace MSP2050.Scripts
 
 			for (int i = 0; i < points.Count; i++)
 			{
-				verts.Add(new Vector3(points[i].X / intConverstion, points[i].Y / intConverstion));
+				verts.Add(new Vector3(points[i].X / intConversion, points[i].Y / intConversion));
 			}
 
 			return verts;
@@ -155,7 +155,7 @@ namespace MSP2050.Scripts
 
 			for (int i = 0; i < points.Count; i++)
 			{
-				verts.Add(new ClipperLib.IntPoint(points[i].x * intConverstion, points[i].y * intConverstion));
+				verts.Add(new ClipperLib.IntPoint(points[i].x * intConversion, points[i].y * intConversion));
 			}
 
 			return verts;
