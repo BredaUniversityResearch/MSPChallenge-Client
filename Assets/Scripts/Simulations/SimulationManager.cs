@@ -121,11 +121,11 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public KPIValueCollection GetKPIValuesForSimulation(string a_targetSimulation, int a_countryId = -1)
+		public List<KPIValueCollection> GetKPIValuesForSimulation(string a_targetSimulation, int a_countryId = -1)
 		{
 			if(string.IsNullOrEmpty(a_targetSimulation))
 			{
-				return geometryKPIs.GetKPIForCountry(a_countryId);
+				return new List<KPIValueCollection> { geometryKPIs.GetKPIForCountry(a_countryId) };
 			}
 			if (m_simulationLogic.TryGetValue(a_targetSimulation, out var logic))
 			{

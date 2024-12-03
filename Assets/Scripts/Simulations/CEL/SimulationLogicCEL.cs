@@ -134,9 +134,9 @@ namespace MSP2050.Scripts
 
 		}
 
-		public override KPIValueCollection GetKPIValuesForCountry(int a_countryId = -1)
+		public override List<KPIValueCollection> GetKPIValuesForCountry(int a_countryId = -1)
 		{
-			return m_energyKPIs.GetKPIForCountry(a_countryId);
+			return new List<KPIValueCollection> { m_energyKPIs.GetKPIForCountry(a_countryId) };
 		}
 	}
 }

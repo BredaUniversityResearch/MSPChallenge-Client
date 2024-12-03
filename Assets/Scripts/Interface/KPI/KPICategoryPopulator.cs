@@ -27,7 +27,7 @@ namespace MSP2050.Scripts
 
 		private Dictionary<string, KPIBar> kpiBarsByValueName = new Dictionary<string, KPIBar>(16); //Also includes the categories
 		private Dictionary<string, KPIGroupDisplay> kpiCategoriesByCategoryName = new Dictionary<string, KPIGroupDisplay>(8);
-		private KPIValueCollection targetCollection = null;
+		private List<KPIValueCollection> targetCollections = null;
 		private int targetTeamId = -1;
 
 		private int displayMonth = -1;
@@ -64,14 +64,14 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			KPIValueCollection collection = SimulationManager.Instance.GetKPIValuesForSimulation(m_targetSimulation, targetTeamId);
+			List<KPIValueCollection> collections = SimulationManager.Instance.GetKPIValuesForSimulation(m_targetSimulation, targetTeamId);
 			TimeManager.Instance.OnCurrentMonthChanged += OnCurrentMonthChanged;
 			displayMonth = TimeManager.Instance.GetCurrentMonth();
 
-			if (collection != null)
+			if (collections != null)
 			{
-				CreateValuesForCollection(collection);
-				SetTargetCollection(collection);
+				CreateValuesForCollection(collections);
+				SetTargetCollection(collections);
 			}
 		}
 
@@ -95,9 +95,9 @@ namespace MSP2050.Scripts
 		{
 			displayMonth = month;
 			automaticallyFollowLatestMonth = false;
-			if (targetCollection != null)
+			if (targetCollections != null)
 			{
-				UpdateDisplayValues(targetCollection, displayMonth);
+				UpdateDisplayValues(targetCollections, displayMonth);
 			}
 		}
 
@@ -107,7 +107,7 @@ namespace MSP2050.Scripts
 			if (targetTeamId != teamId)
 			{
 				List<string> toggledValueNames = null;
-				if (targetCollection != null)
+				if (targetCollections != null)
 				{
 					toggledValueNames = ClearActiveToggledValues();
 				}
@@ -115,7 +115,7 @@ namespace MSP2050.Scripts
 				targetTeamId = teamId;
 				SetTargetCollection(SimulationManager.Instance.GetKPIValuesForSimulation(m_targetSimulation, targetTeamId));
 
-				if (targetCollection != null)
+				if (targetCollections != null)
 				{
 					if (toggledValueNames != null)
 					{
@@ -125,22 +125,28 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void SetTargetCollection(KPIValueCollection newTarget)
+		private void SetTargetCollection(List<KPIValueCollection> newTargets)
 		{
-			if (targetCollection != null)
+			if (targetCollections != null)
 			{
-				targetCollection.OnKPIValuesUpdated -= OnKPIValuesUpdated;
-				targetCollection.OnKPIValueDefinitionsChanged -= OnKPIValueDefinitionsChanged;
+				foreach (KPIValueCollection targetCollection in targetCollections)
+				{
+					targetCollection.OnKPIValuesUpdated -= OnKPIValuesUpdated;
+					targetCollection.OnKPIValueDefinitionsChanged -= OnKPIValueDefinitionsChanged;
+				}
 			}
 
-			targetCollection = newTarget;
+			targetCollections = newTargets;
 
-			if (targetCollection != null)
+			if (targetCollections != null)
 			{
-				UpdateDisplayValues(targetCollection, automaticallyFollowLatestMonth ? TimeManager.Instance.GetCurrentMonth() : displayMonth);
-				//UpdateDisplayValues(targetCollection, automaticallyFollowLatestMonth ? targetCollection.MostRecentMonthReceived : displayMonth);
-				targetCollection.OnKPIValuesUpdated += OnKPIValuesUpdated;
-				targetCollection.OnKPIValueDefinitionsChanged += OnKPIValueDefinitionsChanged;
+				foreach (KPIValueCollection targetCollection in targetCollections)
+				{
+					UpdateDisplayValues(targetCollections, automaticallyFollowLatestMonth ? TimeManager.Instance.GetCurrentMonth() : displayMonth);
+					//UpdateDisplayValues(targetCollection, automaticallyFollowLatestMonth ? targetCollection.MostRecentMonthReceived : displayMonth);
+					targetCollection.OnKPIValuesUpdated += OnKPIValuesUpdated;
+					targetCollection.OnKPIValueDefinitionsChanged += OnKPIValueDefinitionsChanged;
+				}
 			}
 		}
 
@@ -149,14 +155,14 @@ namespace MSP2050.Scripts
 			if (automaticallyFollowLatestMonth)
 			{
 				displayMonth = newCurrentMonth;
-				UpdateDisplayValues(targetCollection, newCurrentMonth);
+				UpdateDisplayValues(targetCollections, newCurrentMonth);
 			}
 		}
 
 		private void OnKPIValueDefinitionsChanged(KPIValueCollection sourceCollection)
 		{
 			DestroyAllValueBars();
-			CreateValuesForCollection(sourceCollection);
+			CreateValuesForCollection(targetCollections);
 		}
 
 		private void OnKPIValuesUpdated(KPIValueCollection sourceCollection, int previousMostRecentMonthReceived, int mostRecentMonthReceived)
@@ -168,11 +174,11 @@ namespace MSP2050.Scripts
 
 			if (displayMonth == mostRecentMonthReceived)
 			{
-				UpdateDisplayValues(sourceCollection, mostRecentMonthReceived);
+				UpdateDisplayValues(targetCollections, mostRecentMonthReceived);
 			}
 		}
 
-		private void UpdateDisplayValues(KPIValueCollection valueCollection, int month)
+		private void UpdateDisplayValues(List<KPIValueCollection> valueCollections, int month)
 		{
 			if (kpiBarsByValueName.Count == 0)
 			{
@@ -180,41 +186,45 @@ namespace MSP2050.Scripts
 			}
 
 			HashSet<string> valuesToRemove = new HashSet<string>(kpiBarsByValueName.Keys);
-			foreach (KPIValue value in valueCollection.GetValues())
-			{
-				valuesToRemove.Remove(value.name);
 
-				KPIBar bar;
-				if (!kpiBarsByValueName.TryGetValue(value.name, out bar))
+			foreach (KPIValueCollection valueCollection in valueCollections)
+			{
+				foreach (KPIValue value in valueCollection.GetValues())
 				{
-					if (kpiCategoriesByCategoryName.TryGetValue(value.owningCategoryName, out KPIGroupDisplay group))
+					valuesToRemove.Remove(value.name);
+
+					KPIBar bar;
+					if (!kpiBarsByValueName.TryGetValue(value.name, out bar))
 					{
-						bar = CreateKPIBar(m_entryPrefab, group.EntryParent, value);
+						if (kpiCategoriesByCategoryName.TryGetValue(value.owningCategoryName, out KPIGroupDisplay group))
+						{
+							bar = CreateKPIBar(m_entryPrefab, group.EntryParent, value);
+						}
+						else
+						{
+							Debug.LogWarning("Tried updating KPI Value " + value.name + " but a KPI bar could not be found for the value and the category has no group entry");
+						}
 					}
-					else
-					{
-						Debug.LogWarning("Tried updating KPI Value " + value.name + " but a KPI bar could not be found for the value and the category has no group entry");
-					}
+
+					bar.SetStartValue((float)(value.GetKpiValueForMonth(0) ?? value.GetKpiValueForMonth(-1) ?? 0f));
+					bar.SetActual(value.GetKpiValueForMonth(month)/*, value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId*/);
 				}
 
-				bar.SetStartValue((float)(value.GetKpiValueForMonth(0) ?? value.GetKpiValueForMonth(-1) ?? 0f));
-				bar.SetActual(value.GetKpiValueForMonth(month)/*, value.targetCountryId == KPIValue.CountryGlobal? 0 : value.targetCountryId*/);
-			}
-
-			foreach (KPICategory category in valueCollection.GetCategories()) //Categories also have entries
-			{
-				valuesToRemove.Remove(category.name);
-
-				KPIBar bar;
-				KPIGroupDisplay group = kpiCategoriesByCategoryName[category.name];
-				if (!kpiBarsByValueName.TryGetValue(category.name, out bar))
+				foreach (KPICategory category in valueCollection.GetCategories()) //Categories also have entries
 				{
-					bar = CreateKPIBar(m_entryPrefab, group.EntryParent, category);
+					valuesToRemove.Remove(category.name);
+
+					KPIBar bar;
+					KPIGroupDisplay group = kpiCategoriesByCategoryName[category.name];
+					if (!kpiBarsByValueName.TryGetValue(category.name, out bar))
+					{
+						bar = CreateKPIBar(m_entryPrefab, group.EntryParent, category);
+					}
+					bar.SetStartValue((float)(category.GetKpiValueForMonth(0) ?? category.GetKpiValueForMonth(-1) ?? 0f));
+					bar.SetActual(category.GetKpiValueForMonth(month)/*, category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId*/);
+					bar.transform.SetAsLastSibling();
+					group.PositionSeparator();
 				}
-				bar.SetStartValue((float)(category.GetKpiValueForMonth(0) ?? category.GetKpiValueForMonth(-1) ?? 0f));
-				bar.SetActual(category.GetKpiValueForMonth(month)/*, category.targetCountryId == KPIValue.CountryGlobal ? 0 : category.targetCountryId*/);
-				bar.transform.SetAsLastSibling();
-				group.PositionSeparator();
 			}
 
 			foreach (string valueToRemove in valuesToRemove)
@@ -231,9 +241,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		private void CreateValuesForCollection(KPIValueCollection collection)
+		private void CreateValuesForCollection(List<KPIValueCollection> collections)
 		{
-			if (collection != null)
+			foreach(KPIValueCollection collection in collections)
 			{
 				foreach (KPICategory category in collection.GetCategories())
 				{
@@ -267,26 +277,35 @@ namespace MSP2050.Scripts
 
 		private void ToggleGraph(bool isOnState, KPIBar targetBar)
 		{
-			KPIValue targetValue = targetCollection.FindValueByName(targetBar.ValueName);
-
-			if (!isOnState)
+			foreach (KPIValueCollection targetCollection in targetCollections)
 			{
-				Color graphColor = Color.white;
-				targetBar.SetDisplayedGraphColor(graphColor);
-			}
+				KPIValue targetValue = targetCollection.FindValueByName(targetBar.ValueName);
 
-			if(m_graphDisplay != null)
-			{
-				if(!m_graphDisplay.ToggleGraph(targetValue, isOnState))
+				if (!isOnState)
 				{
-					targetBar.SetGraphToggled(false);
+					Color graphColor = Color.white;
+					targetBar.SetDisplayedGraphColor(graphColor);
+				}
+
+				if (m_graphDisplay != null)
+				{
+					if (!m_graphDisplay.ToggleGraph(targetValue, isOnState))
+					{
+						targetBar.SetGraphToggled(false);
+					}
 				}
 			}
 
 			KPIValueProceduralColorScheme.Context context = new KPIValueProceduralColorScheme.Context();
 			foreach (string toggledKPIValue in GetActiveToggledValues())
 			{
-				KPIValue value = targetCollection.FindValueByName(toggledKPIValue);
+				KPIValue value = null;
+				foreach (KPIValueCollection targetCollection in targetCollections)
+				{
+					value = targetCollection.FindValueByName(toggledKPIValue);
+					if (value != null)
+						break;
+				}
 				Color newColor = GetCurrentKPIColor(value, context);
 				if (kpiBarsByValueName.TryGetValue(value.name, out KPIBar kpiBar))
 				{
@@ -307,7 +326,13 @@ namespace MSP2050.Scripts
 		private Color GetCurrentKPIColor(KPIValue targetValue, KPIValueProceduralColorScheme.Context context)
 		{
 			Color graphColor;
-			KPICategory category = targetCollection.FindCategoryByName(targetValue.owningCategoryName);
+			KPICategory category = null;
+			foreach (KPIValueCollection targetCollection in targetCollections)
+			{
+				category = targetCollection.FindCategoryByName(targetValue.owningCategoryName);
+				if (category != null)
+					break;
+			}
 			if (category != null && category.kpiValueColorScheme == EKPIValueColorScheme.ProceduralColor)
 			{
 				graphColor = m_colorScheme.GetColor(context);

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System;
 using UnityEngine;
 
@@ -29,9 +30,9 @@ namespace MSP2050.Scripts
 		public override void Destroy()
 		{ }
 
-		public override KPIValueCollection GetKPIValuesForCountry(int a_countryId = -1)
+		public override List<KPIValueCollection> GetKPIValuesForCountry(int a_countryId = -1)
 		{
-			return shippingKPI.GetKPIForCountry(a_countryId);
+			return new List<KPIValueCollection> { shippingKPI.GetKPIForCountry(a_countryId) };
 		}
 	}
 }
