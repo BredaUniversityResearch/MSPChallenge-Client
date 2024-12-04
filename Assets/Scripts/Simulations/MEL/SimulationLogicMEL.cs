@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace MSP2050.Scripts
 {
@@ -13,7 +14,7 @@ namespace MSP2050.Scripts
 		public static SimulationLogicMEL Instance => m_instance;
 
 		private KPIValueCollection m_sharedEcologyKPI;
-		private Dictionary<int, KPIValueCollection> m_ecologyKPIs;
+		private Dictionary<int, KPIValueCollection> m_countryEcologyKPIs;
 		private SimulationSettingsMEL m_config;
 
 		//Has to be stored separately because PropertyMetaData PolicyType differs from PropertyName...
@@ -41,15 +42,73 @@ namespace MSP2050.Scripts
 
 		public override List<KPIValueCollection> GetKPIValuesForCountry(int a_countryId = -1)
 		{
-			if(a_countryId >= 0)
-				return new List<KPIValueCollection> { m_sharedEcologyKPI, m_ecologyKPIs[a_countryId] };
+			if(a_countryId >= 0 && m_countryEcologyKPIs != null)
+				return new List<KPIValueCollection> { m_sharedEcologyKPI, m_countryEcologyKPIs[a_countryId] };
 			return new List<KPIValueCollection> { m_sharedEcologyKPI };
 		}
 
 		public void CreateEcologyKPIs()
 		{
-			List<KPICategoryDefinition> categoryDefinitions = m_config.content["ecologyCategories"].ToObject<List<KPICategoryDefinition>>();
-			
+			List<EcologyKPICategoryDefinition> receivedCategories = m_config.content["ecologyCategories"].ToObject<List<EcologyKPICategoryDefinition>>();
+			List<KPICategoryDefinition> sharedCategories = new List<KPICategoryDefinition>();
+			Dictionary<int, List<KPICategoryDefinition>> countryCategories = new Dictionary<int, List<KPICategoryDefinition>>();
+
+			//Generate fleet specific KPIs
+			foreach (EcologyKPICategoryDefinition receivedCat in receivedCategories)
+			{
+				if(receivedCat.fleetSpecific)
+				{
+					int fleetId = 0;
+					foreach(CountryFleetInfo fleet in PolicyLogicFishing.Instance.GetAllFleetInfo())
+					{
+						KPICategoryDefinition newCat = new KPICategoryDefinition()
+						{
+							categoryName = receivedCat.categoryName,
+							categoryDisplayName = receivedCat.categoryDisplayName,
+							categoryValueType = receivedCat.categoryValueType,
+							categoryColor = receivedCat.categoryColor,
+							unit = receivedCat.unit,
+							valueColorScheme = EKPIValueColorScheme.ProceduralColor
+						};
+
+						//Duplicate value definition but with altered names
+						newCat.valueDefinitions = new KPIValueDefinition[receivedCat.valueDefinitions.Length];
+						for(int i = 0; i < newCat.valueDefinitions.Length; i++)
+						{
+							newCat.valueDefinitions[i] = new KPIValueDefinition()
+							{
+								valueName = receivedCat.valueDefinitions[i].valueName + fleetId.ToString(),
+								valueDisplayName = $"{receivedCat.valueDefinitions[i].valueName} {PolicyLogicFishing.Instance.GetGearName(fleet.gear_type)}",
+								valueColor = receivedCat.valueDefinitions[i].valueColor,
+								unit = receivedCat.valueDefinitions[i].unit,
+								valueDependentCountry = KPIValue.CountrySpecific
+							};
+						}
+
+						if (PolicyLogicFishing.Instance.NationalFleets)
+						{
+							if (countryCategories.TryGetValue(fleet.country_id, out var countryCats))
+							{
+								countryCats.Add(newCat);
+							}
+							else
+							{
+								countryCategories.Add(fleet.country_id, new List<KPICategoryDefinition> { newCat });
+							}
+						}
+						else
+						{
+							sharedCategories.Add(newCat);
+						}
+						fleetId++;
+					}
+				}
+				else
+				{
+					sharedCategories.Add(receivedCat);
+				}
+			}
+
 			//Add categories & values for protected area layers
 			foreach (AbstractLayer layer in LayerManager.Instance.m_protectedAreaLayers)
 			{
@@ -105,18 +164,58 @@ namespace MSP2050.Scripts
 					}
 				}
 				newCat.valueDefinitions = values.ToArray();
-				categoryDefinitions.Add(newCat);
+				sharedCategories.Add(newCat);
 			}
 
 			m_sharedEcologyKPI = new KPIValueCollection();
-			m_sharedEcologyKPI.SetupKPIValues(categoryDefinitions.ToArray(), SessionManager.Instance.MspGlobalData.session_end_month);
+			m_sharedEcologyKPI.SetupKPIValues(sharedCategories.ToArray(), SessionManager.Instance.MspGlobalData.session_end_month);
 			m_sharedEcologyKPI.OnKPIValuesReceivedAndProcessed += OnEcologyKPIReceivedNewMonth;
+
+			if (countryCategories.Count > 0)
+			{
+				m_countryEcologyKPIs = new Dictionary<int, KPIValueCollection>();
+				foreach (var kvp in countryCategories)
+				{
+					KPIValueCollection collection = new KPIValueCollection();
+					collection.SetupKPIValues(kvp.Value.ToArray(), SessionManager.Instance.MspGlobalData.session_end_month);
+					m_countryEcologyKPIs.Add(kvp.Key, collection);
+				}
+			}
 			m_config = null;
 		}
 
 		public void ReceiveEcologyKPIUpdate(KPIObject[] a_objects)
 		{
-			m_sharedEcologyKPI.ProcessReceivedKPIData(a_objects);
+			List<KPIObject> sharedUpdated = new List<KPIObject>();
+			Dictionary<int, List<KPIObject>> countryUpdates = new Dictionary<int, List<KPIObject>>();
+
+			foreach(KPIObject update in a_objects)
+			{
+				if(update.tags != null)
+				{
+					int fleetId = int.Parse(update.tags["fleet"]);
+					int country = PolicyLogicFishing.Instance.GetFleetInfo(fleetId).country_id;
+					update.name = update.tags["valueName"] + fleetId.ToString();
+					if(countryUpdates.TryGetValue(country, out var list))
+						list.Add(update);
+					else
+						countryUpdates.Add(country, new List<KPIObject>() { update });
+				}
+				else
+				{
+					sharedUpdated.Add(update);
+				}
+			}
+
+			if (countryUpdates.Count > 0)
+			{
+				foreach(var kvp in countryUpdates)
+				{
+					m_countryEcologyKPIs[kvp.Key].ProcessReceivedKPIData(kvp.Value);
+				}
+			}
+			if(sharedUpdated.Count > 0) 
+				m_sharedEcologyKPI.ProcessReceivedKPIData(a_objects);
 		}
 
 		private void OnEcologyKPIReceivedNewMonth(KPIValueCollection a_valueCollection, int a_previousMostRecentMonth, int a_mostRecentMonth)
@@ -250,5 +349,10 @@ namespace MSP2050.Scripts
 	{
 		public string name;
 		public float scalar;
+	}
+
+	public class EcologyKPICategoryDefinition : KPICategoryDefinition
+	{
+		public bool fleetSpecific;
 	}
 }
