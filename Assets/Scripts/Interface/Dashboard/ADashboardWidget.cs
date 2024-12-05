@@ -103,8 +103,8 @@ namespace MSP2050.Scripts
 		{
 			RectTransform rect = GetComponent<RectTransform>();
 			DashboardWidgetPosition pos = a_favoriteLayout ? m_favPosition : m_position;
-			rect.sizeDelta = new Vector2(pos.W * DashboardManager.m_cellsize, pos.H * DashboardManager.m_cellsize);
-			rect.localPosition = new Vector3(pos.X * DashboardManager.m_cellsize, -pos.Y * DashboardManager.m_cellsize);
+			rect.sizeDelta = new Vector2(pos.W * DashboardManager.Instance.m_cellsize, pos.H * DashboardManager.Instance.m_cellsize);
+			rect.localPosition = new Vector3(pos.X * DashboardManager.Instance.m_cellsize, -pos.Y * DashboardManager.Instance.m_cellsize);
 			OnSizeChanged(pos.W, pos.H);
 		}
 

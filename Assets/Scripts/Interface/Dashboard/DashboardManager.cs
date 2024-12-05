@@ -209,16 +209,16 @@ namespace MSP2050.Scripts
 				//Show placed preview
 				m_movePreview.gameObject.SetActive(true);
 				m_rowInsertPreview.gameObject.SetActive(false);
-				m_movePreview.sizeDelta = new Vector2(maxW * DashboardManager.m_cellsize, maxH * DashboardManager.m_cellsize);
-				m_movePreview.localPosition = new Vector3(pos.x * DashboardManager.m_cellsize, -pos.y * DashboardManager.m_cellsize);
+				m_movePreview.sizeDelta = new Vector2(maxW * DashboardManager.Instance.m_cellsize, maxH * DashboardManager.Instance.m_cellsize);
+				m_movePreview.localPosition = new Vector3(pos.x * DashboardManager.Instance.m_cellsize, -pos.y * DashboardManager.Instance.m_cellsize);
 			}
 			else if(m_catSelectedWidgets[m_currentCategory].WidgetInsertRowPossible(a_widget, pos.y, pos.x, layout.W, out int maxRowW))
 			{
 				//Show above preview
 				m_movePreview.gameObject.SetActive(false);
 				m_rowInsertPreview.gameObject.SetActive(true);
-				m_rowInsertPreview.sizeDelta = new Vector2(maxRowW * DashboardManager.m_cellsize, 8f);
-				m_rowInsertPreview.localPosition = new Vector3(pos.x * DashboardManager.m_cellsize, -pos.y * DashboardManager.m_cellsize);
+				m_rowInsertPreview.sizeDelta = new Vector2(maxRowW * DashboardManager.Instance.m_cellsize, 8f);
+				m_rowInsertPreview.localPosition = new Vector3(pos.x * DashboardManager.Instance.m_cellsize, -pos.y * DashboardManager.Instance.m_cellsize);
 			}
 			else
 			{
