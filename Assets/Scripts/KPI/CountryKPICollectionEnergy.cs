@@ -114,8 +114,8 @@ namespace MSP2050.Scripts
 
         public KPIValueCollectionEnergy GetKPIForCountry(int country)
         {
-            if(energyKPIs.TryGetValue(country, out var result))
-                return result;
+            if(energyKPIs.ContainsKey(country))
+                return energyKPIs[country];
             return null;
         }
     }
