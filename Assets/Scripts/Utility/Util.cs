@@ -1603,6 +1603,39 @@ namespace MSP2050.Scripts
 				return null;
 			}
 		}
+
+		public static List<List<Vector3>> GetPolygonOverlap(List<Vector3> a_polygon1, List<Vector3> a_polygon2)
+		{
+			ClipperLib.Clipper co = new ClipperLib.Clipper();
+			co.AddPath(GeometryOperations.VectorToIntPoint(a_polygon1), ClipperLib.PolyType.ptClip, true);
+			co.AddPath(GeometryOperations.VectorToIntPoint(a_polygon2), ClipperLib.PolyType.ptSubject, true);
+
+			List<List<ClipperLib.IntPoint>> csolution = new List<List<ClipperLib.IntPoint>>();
+			co.Execute(ClipperLib.ClipType.ctIntersection, csolution);
+			List<List<Vector3>> result = new List<List<Vector3>>();
+			if (csolution.Count > 0)
+			{ 
+				for(int i = 0; i < csolution.Count; i++)
+				{
+					result.Add(GeometryOperations.IntPointToVector(csolution[i]));
+				}
+			}
+			return result;
+		}
+
+		public static float GetPolygonOverlapArea(List<Vector3> a_polygon1, List<Vector3> a_polygon2)
+		{
+			List<List<Vector3>> overlap = GetPolygonOverlap(a_polygon1, a_polygon2);
+			float result = 0f;
+			if(overlap.Count > 0)
+			{
+				for (int i = 0; i < overlap.Count; i++)
+				{
+					result += InterfaceCanvas.Instance.mapScale.GetRealWorldPolygonAreaInSquareKm(overlap[i]);
+				}
+			}
+			return result;
+		}
 	}
 
 

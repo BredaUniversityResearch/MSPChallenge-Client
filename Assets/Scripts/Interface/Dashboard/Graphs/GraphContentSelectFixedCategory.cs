@@ -47,11 +47,28 @@ namespace MSP2050.Scripts
 				index++;
 			}
 
-			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
-			vcc.TryGetConverter(chosenKPIs[0].unit, out data.m_unit);
-
 			a_minValue = 0f;
 			a_maxValue = float.NegativeInfinity;
+
+			//if(chosenKPIs.Count == 0)
+			//{
+			//	data.m_stepNames = a_timeSettings.m_stepNames;
+			//	data.m_categoryNames = new string[0];
+			//	data.m_categoryColours = new Color[0];
+			//	data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);
+			//	a_maxValue = 1f;
+			//}
+
+			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
+			if (chosenKPIs.Count > 0)
+			{
+				vcc.TryGetConverter(chosenKPIs[0].unit, out data.m_unit);
+			}
+			else
+			{
+				vcc.TryGetConverter("", out data.m_unit);
+			}
+
 			data.m_stepNames = a_timeSettings.m_stepNames;
 			data.m_categoryNames = new string[chosenKPIs.Count];
 			data.m_categoryColours = new Color[chosenKPIs.Count];

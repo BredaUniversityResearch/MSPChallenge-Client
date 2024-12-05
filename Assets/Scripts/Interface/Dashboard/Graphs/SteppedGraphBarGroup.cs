@@ -60,6 +60,12 @@ namespace MSP2050.Scripts
 					nextEntryIndex++;
 				}
 			}
+
+			//remove unused
+			for (int i = nextEntryIndex; i < m_bars.Count; i++)
+				Destroy(m_bars[i].gameObject);
+			if (nextEntryIndex != m_bars.Count)
+				m_bars.RemoveRange(nextEntryIndex, m_bars.Count - nextEntryIndex);
 		}
 	}
 }

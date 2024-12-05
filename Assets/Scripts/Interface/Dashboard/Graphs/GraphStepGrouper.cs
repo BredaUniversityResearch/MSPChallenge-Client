@@ -39,9 +39,12 @@ namespace MSP2050.Scripts
 			else
 			{
 				//Group by years
-				if(a_timeSettings.m_months.Count == 1)
+				if (a_timeSettings.m_months.Count == 0)
+				{ }
+				else if (a_timeSettings.m_months.Count == 1)
 				{
 					SetGroup(nextGroupIndex, Util.MonthToYearText(a_timeSettings.m_months[0][0]), 0f, 1f);
+					nextGroupIndex++;
 				}
 				else
 				{

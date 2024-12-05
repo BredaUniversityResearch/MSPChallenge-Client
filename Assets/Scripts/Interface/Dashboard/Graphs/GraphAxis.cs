@@ -60,15 +60,21 @@ namespace MSP2050.Scripts
 
 			a_data.m_graphMin = minT;
 			a_data.m_graphRange = maxScaled;
-			a_data.m_unitIndex = a_data.m_unit.GetConversionUnitIndexForSize(maxScaled);
-			m_unitText.text = a_data.m_unit.GetUnitStringForUnitIndex(a_data.m_unitIndex);
+			if (a_data.m_unit != null)
+			{
+				a_data.m_unitIndex = a_data.m_unit.GetConversionUnitIndexForSize(maxScaled);
+				m_unitText.text = a_data.m_unit.GetUnitStringForUnitIndex(a_data.m_unitIndex);
+			}
+			else
+				m_unitText.text = "?";
 
-			//Set all inbetween points
-			int i = 0;
+
+				//Set all inbetween points
+				int i = 0;
 			for(; i < 6; i++)
 			{
 				float v = minT + i * step;
-				SetEntry(a_data.m_unit.FormatValueWithUnitIndex(v, a_data.m_unitIndex),
+				SetEntry(a_data.m_unit != null ? a_data.m_unit.FormatValueWithUnitIndex(v, a_data.m_unitIndex) : v.ToString(),
 					(v - minT) / maxScaled,
 					i,
 					i == 0 ? m_firstAndLastOffset : i == 5 ? -m_firstAndLastOffset : 0f);

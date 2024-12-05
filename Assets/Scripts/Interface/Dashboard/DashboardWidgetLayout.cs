@@ -48,6 +48,14 @@ namespace MSP2050.Scripts
 			m_widgetLayout = new List<ADashboardWidget[]>() { new ADashboardWidget[m_columns] };
 		}
 
+		public void RepositionAllWidgets()
+		{
+			foreach (ADashboardWidget widget in m_widgets)
+			{
+				widget.Reposition(m_favorites);
+			}
+		}
+
 		public void AddWidget(ADashboardWidget a_widget)
 		{
 			if(m_favorites)

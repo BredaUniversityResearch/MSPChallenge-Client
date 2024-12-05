@@ -9,13 +9,13 @@ namespace MSP2050.Scripts
 {
 	public class DashboardManager : MonoBehaviour
 	{
-		public const float cellsize = 150f;
 
 		static DashboardManager m_instance;
 		public static DashboardManager Instance => m_instance;
 
 		[SerializeField] string m_widgetAssetPath;
 		[SerializeField] string m_categoriesAssetPath;
+		[SerializeField] int m_numberColumns = 10; 
 
 		[SerializeField] Button m_closeButton;
 		[SerializeField] Button m_catalogueButton;
@@ -37,9 +37,9 @@ namespace MSP2050.Scripts
 		DashboardWidgetLayout m_catalogueLayout;
 
 		//Widgets
+		public float m_cellsize = 150f;
 		List<ADashboardWidget> m_loadedWidgets;
 		Dictionary<DashboardCategory, DashboardWidgetLayout> m_catSelectedWidgets;
-		int m_numberColumns = 10; // TODO: determine this based on screen size
 
 		private void Awake()
 		{
@@ -52,6 +52,17 @@ namespace MSP2050.Scripts
 				SimulationManager.Instance.m_onSimulationsInitialised += InitialiseDashboard;
 			m_closeButton.onClick.AddListener(CloseDashboard);
 			m_catalogueButton.onClick.AddListener(OpenCatalogue);
+		}
+
+		public void HandleResolutionOrScaleChange()
+		{
+			m_cellsize = Mathf.Round(Screen.width * InterfaceCanvas.Instance.canvas.scaleFactor / m_numberColumns);
+			if (m_catalogueLayout != null && m_catalogueLayout.Visible)
+			{
+				m_catalogueLayout.RepositionAllWidgets();
+			}
+			else if (m_currentCategory != null)
+				m_catSelectedWidgets[m_currentCategory].RepositionAllWidgets();
 		}
 
 		void CloseDashboard()
@@ -152,7 +163,7 @@ namespace MSP2050.Scripts
 
 		public void OnNumberRowsChanged(int a_numberRows)
 		{
-			m_widgetParent.sizeDelta = new Vector2(0f, cellsize * a_numberRows);
+			m_widgetParent.sizeDelta = new Vector2(0f, m_cellsize * a_numberRows);
 		}
 
 		void OpenCatalogue()
@@ -198,16 +209,16 @@ namespace MSP2050.Scripts
 				//Show placed preview
 				m_movePreview.gameObject.SetActive(true);
 				m_rowInsertPreview.gameObject.SetActive(false);
-				m_movePreview.sizeDelta = new Vector2(maxW * DashboardManager.cellsize, maxH * DashboardManager.cellsize);
-				m_movePreview.localPosition = new Vector3(pos.x * DashboardManager.cellsize, -pos.y * DashboardManager.cellsize);
+				m_movePreview.sizeDelta = new Vector2(maxW * DashboardManager.m_cellsize, maxH * DashboardManager.m_cellsize);
+				m_movePreview.localPosition = new Vector3(pos.x * DashboardManager.m_cellsize, -pos.y * DashboardManager.m_cellsize);
 			}
 			else if(m_catSelectedWidgets[m_currentCategory].WidgetInsertRowPossible(a_widget, pos.y, pos.x, layout.W, out int maxRowW))
 			{
 				//Show above preview
 				m_movePreview.gameObject.SetActive(false);
 				m_rowInsertPreview.gameObject.SetActive(true);
-				m_rowInsertPreview.sizeDelta = new Vector2(maxRowW * DashboardManager.cellsize, 8f);
-				m_rowInsertPreview.localPosition = new Vector3(pos.x * DashboardManager.cellsize, -pos.y * DashboardManager.cellsize);
+				m_rowInsertPreview.sizeDelta = new Vector2(maxRowW * DashboardManager.m_cellsize, 8f);
+				m_rowInsertPreview.localPosition = new Vector3(pos.x * DashboardManager.m_cellsize, -pos.y * DashboardManager.m_cellsize);
 			}
 			else
 			{
@@ -259,8 +270,8 @@ namespace MSP2050.Scripts
 			int x = 0, y = 0;
 			if(RectTransformUtility.ScreenPointToLocalPointInRectangle(m_widgetParent, a_data.position, a_data.enterEventCamera, out Vector2 localPos))
 			{
-				x = (int)(localPos.x / cellsize);
-				y = (int)(-localPos.y / cellsize);
+				x = (int)(localPos.x / m_cellsize);
+				y = (int)(-localPos.y / m_cellsize);
 			}
 			if (y < 0) 
 				y = 0;

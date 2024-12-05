@@ -50,7 +50,7 @@ namespace MSP2050.Scripts
 				m_entries = new List<SteppedGraphBarGroup>();
 
 			m_data = a_data;
-			float halfSpacing = m_totalSpacing / m_data.m_steps.Count / 2;
+			float halfSpacing = m_data.m_steps.Count == 0 ? 0f : m_totalSpacing / m_data.m_steps.Count / 2;
 
 			int i = 0;
 			for(; i < a_data.m_steps.Count; i++)
