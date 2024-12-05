@@ -12,8 +12,7 @@ namespace MSP2050.Scripts
 		static SimulationLogicMEL m_instance;
 		public static SimulationLogicMEL Instance => m_instance;
 
-		private KPIValueCollection m_sharedEcologyKPI;
-		private Dictionary<int, KPIValueCollection> m_ecologyKPIs;
+		private KPIValueCollection m_ecologyKPI;
 		private SimulationSettingsMEL m_config;
 
 		//Has to be stored separately because PropertyMetaData PolicyType differs from PropertyName...
@@ -39,11 +38,9 @@ namespace MSP2050.Scripts
 			m_instance = null;
 		}
 
-		public override List<KPIValueCollection> GetKPIValuesForCountry(int a_countryId = -1)
+		public override KPIValueCollection GetKPIValuesForCountry(int a_countryId = -1)
 		{
-			if(a_countryId >= 0)
-				return new List<KPIValueCollection> { m_sharedEcologyKPI, m_ecologyKPIs[a_countryId] };
-			return new List<KPIValueCollection> { m_sharedEcologyKPI };
+			return m_ecologyKPI;
 		}
 
 		public void CreateEcologyKPIs()
@@ -108,15 +105,15 @@ namespace MSP2050.Scripts
 				categoryDefinitions.Add(newCat);
 			}
 
-			m_sharedEcologyKPI = new KPIValueCollection();
-			m_sharedEcologyKPI.SetupKPIValues(categoryDefinitions.ToArray(), SessionManager.Instance.MspGlobalData.session_end_month);
-			m_sharedEcologyKPI.OnKPIValuesReceivedAndProcessed += OnEcologyKPIReceivedNewMonth;
+			m_ecologyKPI = new KPIValueCollection();
+			m_ecologyKPI.SetupKPIValues(categoryDefinitions.ToArray(), SessionManager.Instance.MspGlobalData.session_end_month);
+			m_ecologyKPI.OnKPIValuesReceivedAndProcessed += OnEcologyKPIReceivedNewMonth;
 			m_config = null;
 		}
 
 		public void ReceiveEcologyKPIUpdate(KPIObject[] a_objects)
 		{
-			m_sharedEcologyKPI.ProcessReceivedKPIData(a_objects);
+			m_ecologyKPI.ProcessReceivedKPIData(a_objects);
 		}
 
 		private void OnEcologyKPIReceivedNewMonth(KPIValueCollection a_valueCollection, int a_previousMostRecentMonth, int a_mostRecentMonth)

@@ -39,7 +39,7 @@ namespace MSP2050.Scripts
 				targetKPICollection.OnKPIValuesUpdated -= OnTargetCollectionValuesUpdated;
 			}
 
-			targetKPICollection = SimulationManager.Instance.GetKPIValuesForSimulation(SimulationManager.CEL_SIM_NAME, targetTeamId)[0];
+			targetKPICollection = SimulationManager.Instance.GetKPIValuesForSimulation(SimulationManager.CEL_SIM_NAME, targetTeamId);
 
 			if (targetKPICollection != null)
 			{

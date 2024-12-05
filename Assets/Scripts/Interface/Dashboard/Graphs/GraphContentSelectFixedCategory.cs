@@ -20,13 +20,8 @@ namespace MSP2050.Scripts
 		{
 			base.Initialise(a_onSettingsChanged);
 
-			List<KPIValueCollection> kvcs = SimulationLogicMEL.Instance.GetKPIValuesForCountry();
-			foreach(var kvc in kvcs)
-			{
-				m_category = kvc.FindCategoryByName(m_categoryName);
-				if (m_category != null)
-					break;
-			}
+			KPIValueCollection kvc = SimulationLogicMEL.Instance.GetKPIValuesForCountry();
+			m_category = kvc.FindCategoryByName(m_categoryName);
 			m_valueToggles = new bool[m_category.GetChildValueCount()];
 			for (int i = 0; i < m_valueToggles.Length; i++)
 				m_valueToggles[i] = true;
