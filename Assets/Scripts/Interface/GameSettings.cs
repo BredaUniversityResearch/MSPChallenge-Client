@@ -178,7 +178,8 @@ namespace MSP2050.Scripts
 					InterfaceCanvas.Instance.objectivesMonitor.thisGenericWindow.HandleResolutionOrScaleChange(oldScale, true);
 					InterfaceCanvas.Instance.impactToolWindow.HandleResolutionOrScaleChange(oldScale, true);
 					TutorialManager.Instance.HandleResolutionOrScaleChange();
-					DashboardManager.Instance.HandleResolutionOrScaleChange();
+					if(DashboardManager.Instance != null)
+						DashboardManager.Instance.HandleResolutionOrScaleChange();
 					InterfaceCanvas.Instance.menuBarImpactTool.toggle.isOn = false;
 				}
 				else

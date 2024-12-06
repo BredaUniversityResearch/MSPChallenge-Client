@@ -52,11 +52,12 @@ namespace MSP2050.Scripts
 				SimulationManager.Instance.m_onSimulationsInitialised += InitialiseDashboard;
 			m_closeButton.onClick.AddListener(CloseDashboard);
 			m_catalogueButton.onClick.AddListener(OpenCatalogue);
+			HandleResolutionOrScaleChange();
 		}
 
 		public void HandleResolutionOrScaleChange()
 		{
-			m_cellsize = Mathf.Round(Screen.width * InterfaceCanvas.Instance.canvas.scaleFactor / m_numberColumns);
+			m_cellsize = Mathf.Round((Screen.width -36f) * InterfaceCanvas.Instance.canvas.scaleFactor / m_numberColumns);
 			if (m_catalogueLayout != null && m_catalogueLayout.Visible)
 			{
 				m_catalogueLayout.RepositionAllWidgets();
