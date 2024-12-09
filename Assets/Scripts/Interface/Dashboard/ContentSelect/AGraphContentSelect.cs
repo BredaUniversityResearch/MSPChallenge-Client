@@ -13,14 +13,15 @@ namespace MSP2050.Scripts
 		[SerializeField] protected Toggle m_detailsToggle;
 		[SerializeField] protected GameObject m_detailsWindowPrefab;
 		[SerializeField] protected Transform m_detailsWindowParent;
+		[SerializeField] protected TextMeshProUGUI m_noDataEntry;
 
-
+		protected ADashboardWidget m_widget;
 		protected Action m_onSettingsChanged;
 		//Fixed category, toggles for content
 		//Fixed category, selectable country (or: all)
 		//2 fixed categories, grouped by content (different name)
 
-		public virtual void Initialise(Action a_onSettingsChanged)
+		public virtual void Initialise(Action a_onSettingsChanged, ADashboardWidget a_widget)
 		{
 			m_onSettingsChanged = a_onSettingsChanged;
 			m_detailsToggle.onValueChanged.AddListener(ToggleDetails);

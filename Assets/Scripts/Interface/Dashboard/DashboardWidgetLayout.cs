@@ -87,7 +87,7 @@ namespace MSP2050.Scripts
 				//Find available indices in current row
 				int x = 0;
 				int lastEmptyindex = -1;
-				while (x <= m_columns - a_w)
+				while (x <= m_columns - a_w + 1)
 				{
 					if (m_widgetLayout[y][x] != null)
 					{

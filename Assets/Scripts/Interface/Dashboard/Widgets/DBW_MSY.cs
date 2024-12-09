@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 		public override void Initialise(ADashboardWidget a_original)
 		{
 			m_timeSelect.Initialise(UpdateData);
-			m_contentSelect.Initialise(UpdateData);
+			m_contentSelect.Initialise(UpdateData, this);
 			base.Initialise(a_original);
 		}
 

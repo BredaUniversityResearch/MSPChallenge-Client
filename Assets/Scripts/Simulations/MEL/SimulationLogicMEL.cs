@@ -18,6 +18,9 @@ namespace MSP2050.Scripts
 		//Has to be stored separately because PropertyMetaData PolicyType differs from PropertyName...
 		private string m_seasonalClosureGMPName;
 		private string m_BufferZoneGMPName;
+		private List<string> m_protectionKPICategories;
+
+		public List<string> ProtectionKPICategories => m_protectionKPICategories;
 
 		public override void HandleGeneralUpdate(ASimulationData a_data)
 		{
@@ -46,10 +49,12 @@ namespace MSP2050.Scripts
 		public void CreateEcologyKPIs()
 		{
 			List<KPICategoryDefinition> categoryDefinitions = m_config.content["ecologyCategories"].ToObject<List<KPICategoryDefinition>>();
-			
+			m_protectionKPICategories = new List<string>();
+
 			//Add categories & values for protected area layers
 			foreach (AbstractLayer layer in LayerManager.Instance.m_protectedAreaLayers)
 			{
+				m_protectionKPICategories.Add(layer.FileName);
 				KPICategoryDefinition newCat = new KPICategoryDefinition()
 				{
 					categoryName = layer.FileName,

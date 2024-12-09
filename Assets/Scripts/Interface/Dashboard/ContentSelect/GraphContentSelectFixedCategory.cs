@@ -10,23 +10,50 @@ namespace MSP2050.Scripts
 {
 	public class GraphContentSelectFixedCategory : AGraphContentSelect
 	{
-		[SerializeField] string m_categoryName;
+		[SerializeField] protected string[] m_categoryNames;
 
 		bool[] m_valueToggles;
-		KPICategory m_category;
+		List<KPICategory> m_categories;
+		List<KPIValue> m_values;
 		GraphContentSelectFixedCategoryWindow m_detailsWindow;
 
-		public override void Initialise(Action a_onSettingsChanged)
+		public override void Initialise(Action a_onSettingsChanged, ADashboardWidget a_widget)
 		{
-			base.Initialise(a_onSettingsChanged);
+			base.Initialise(a_onSettingsChanged, a_widget);
 
 			KPIValueCollection kvc = SimulationLogicMEL.Instance.GetKPIValuesForCountry();
-			m_category = kvc.FindCategoryByName(m_categoryName);
-			m_valueToggles = new bool[m_category.GetChildValueCount()];
+			m_categories = new List<KPICategory>();
+			m_values = new List<KPIValue>();
+			foreach(string s in m_categoryNames)
+			{
+				KPICategory cat = kvc.FindCategoryByName(s);
+				if (cat == null)
+					continue;
+				m_categories.Add(cat);
+				cat.OnValueUpdated += OnKPIChanged;
+				m_values.AddRange(cat.GetChildValues());
+			}
+			m_valueToggles = new bool[m_values.Count];
 			for (int i = 0; i < m_valueToggles.Length; i++)
 				m_valueToggles[i] = true;
+			if (m_categories.Count == 0)
+			{
+				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
+				m_noDataEntry.text = "NO DATA AVAILABLE";
+			}
+		}
 
-			//TODO: subscribe to KPI change
+		private void OnDestroy()
+		{
+			foreach(KPICategory cat in m_categories)
+			{
+				cat.OnValueUpdated -= OnKPIChanged;
+			}
+		}
+
+		void OnKPIChanged(KPIValue a_newValue)
+		{
+			m_widget.UpdateData();
 		}
 
 		void OnToggleValueChanged(int a_index, bool a_value)
@@ -40,33 +67,31 @@ namespace MSP2050.Scripts
 			GraphDataStepped data = new GraphDataStepped();
 			List<KPIValue> chosenKPIs = new List<KPIValue>();
 			int index = 0;
-			foreach(KPIValue v in m_category.GetChildValues())
+			foreach (KPIValue v in m_values)
 			{
 				if (m_valueToggles[index])
 					chosenKPIs.Add(v);
 				index++;
 			}
+			
 
 			a_minValue = 0f;
 			a_maxValue = float.NegativeInfinity;
-
-			//if(chosenKPIs.Count == 0)
-			//{
-			//	data.m_stepNames = a_timeSettings.m_stepNames;
-			//	data.m_categoryNames = new string[0];
-			//	data.m_categoryColours = new Color[0];
-			//	data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);
-			//	a_maxValue = 1f;
-			//}
 
 			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 			if (chosenKPIs.Count > 0)
 			{
 				vcc.TryGetConverter(chosenKPIs[0].unit, out data.m_unit);
+				m_noDataEntry.gameObject.SetActive(false);
 			}
 			else
 			{
 				vcc.TryGetConverter("", out data.m_unit);
+				if(m_values.Count > 0)
+				{
+					m_noDataEntry.gameObject.SetActive(true);
+					m_noDataEntry.text = "NO CONTENT SELECTED";
+				}
 			}
 
 			data.m_stepNames = a_timeSettings.m_stepNames;
@@ -128,13 +153,15 @@ namespace MSP2050.Scripts
 
 			if (a_maxValue == Mathf.NegativeInfinity)
 				a_maxValue = 1f;
+			if (Mathf.Abs(a_maxValue - a_minValue) < 0.001f)
+				a_maxValue = a_minValue + 0.001f;
 			return data;
 		}
 
 		protected override void CreateDetailsWindow()
 		{
 			m_detailsWindow = Instantiate(m_detailsWindowPrefab, m_detailsWindowParent).GetComponent<GraphContentSelectFixedCategoryWindow>();
-			m_detailsWindow.Initialise(m_valueToggles, m_category.GetChildValues(), OnToggleValueChanged);
+			m_detailsWindow.Initialise(m_valueToggles, m_values, OnToggleValueChanged);
 		}
 
 		protected override void DestroyDetailsWindow()
