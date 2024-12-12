@@ -33,15 +33,15 @@ namespace MSP2050.Scripts
 			int rows = Mathf.CeilToInt(a_data.m_categoryNames.Length / (float)m_columns);
 			//Start positioning from top row
 			int i = 0;
-			for(int y = 0; y < rows && i < a_data.m_categoryColours.Length; y++)
+			for(int y = 0; y < rows && i < a_data.m_categoryNames.Length; y++)
 			{
-				for (int x = 0; x < m_columns && i < a_data.m_categoryColours.Length; x++)
+				for (int x = 0; x < m_columns && i < a_data.m_categoryNames.Length; x++)
 				{
 					if (i >= m_entries.Count)
 					{
 						m_entries.Add(Instantiate(m_entryPrefab, transform).GetComponent<GraphLegendEntry>());
 					}
-					m_entries[i].SetData(a_data.m_categoryNames[i], a_data.m_categoryColours[i],
+					m_entries[i].SetData(a_data.m_categoryNames[i], DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[i]),
 						x / (float)m_columns,
 						(x + 1) / (float)m_columns,
 						a_spacing / 2f,

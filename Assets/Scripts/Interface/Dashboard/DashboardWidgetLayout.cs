@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -56,6 +57,13 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		void SortAndSetHierarchy()
+		{
+			m_widgets.Sort((a, b) => a.CompareTo(b, m_favorites));
+			for (int i = 0; i < m_widgets.Count; i++)
+				m_widgets[m_widgets.Count - 1 - i].transform.SetSiblingIndex(i);
+		}
+
 		public void AddWidget(ADashboardWidget a_widget)
 		{
 			if(m_favorites)
@@ -70,6 +78,7 @@ namespace MSP2050.Scripts
 			}
 			m_widgets.Add(a_widget);
 			InsertWidget(a_widget);
+			SortAndSetHierarchy();
 		}
 
 		public (int y, int x) FindFittingPosition(int a_w, int a_h)
@@ -170,13 +179,6 @@ namespace MSP2050.Scripts
 			}
 			if(m_visible)
 				a_widget.Reposition(m_favorites);
-
-		}
-
-		public void ChangeNumberColumns(int a_columns)
-		{
-			m_columns = a_columns; 
-			//TODO: restructure content
 		}
 
 		public void DeleteAndClear()
@@ -210,6 +212,7 @@ namespace MSP2050.Scripts
 			Remove(a_widget, true);
 			layout.SetPosition(a_newX, a_newY);
 			InsertWidget(a_widget);
+			SortAndSetHierarchy();
 		}
 
 		public void MoveWidget(ADashboardWidget a_widget, int a_newX, int a_newY, int a_newW, int a_newH)
@@ -219,6 +222,7 @@ namespace MSP2050.Scripts
 			layout.SetPosition(a_newX, a_newY);
 			layout.SetSize(a_newW, a_newH);
 			InsertWidget(a_widget);
+			SortAndSetHierarchy();
 		}
 
 		public void MoveWidgetAboveRow(ADashboardWidget a_widget, int a_newX, int a_newY, int a_newW)
@@ -245,6 +249,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
+			SortAndSetHierarchy();
 		}
 
 		public bool WidgetFitsAt(ADashboardWidget a_widget, (int x, int y) a_newPos)

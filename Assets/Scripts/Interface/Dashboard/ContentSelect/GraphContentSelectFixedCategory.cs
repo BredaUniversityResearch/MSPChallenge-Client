@@ -65,12 +65,16 @@ namespace MSP2050.Scripts
 		public override GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, out float a_maxValue, out float a_minValue)
 		{
 			GraphDataStepped data = new GraphDataStepped();
+			data.m_absoluteCategoryIndices = new List<int>();
 			List<KPIValue> chosenKPIs = new List<KPIValue>();
 			int index = 0;
 			foreach (KPIValue v in m_values)
 			{
 				if (m_valueToggles[index])
+				{
 					chosenKPIs.Add(v);
+					data.m_absoluteCategoryIndices.Add(index);
+				}
 				index++;
 			}
 			
@@ -96,13 +100,11 @@ namespace MSP2050.Scripts
 
 			data.m_stepNames = a_timeSettings.m_stepNames;
 			data.m_categoryNames = new string[chosenKPIs.Count];
-			data.m_categoryColours = new Color[chosenKPIs.Count];
 			data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);
 
 			for (int i = 0; i < chosenKPIs.Count; i++)
 			{
 				data.m_categoryNames[i] = chosenKPIs[i].displayName;
-				data.m_categoryColours[i] = chosenKPIs[i].graphColor;
 			}
 
 			if(a_timeSettings.m_aggregationFunction != null)

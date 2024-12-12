@@ -125,5 +125,18 @@ namespace MSP2050.Scripts
 
 		protected virtual void OnSizeChanged(int a_w, int a_h) { }
 		public abstract void UpdateData();
+
+		public int CompareTo(ADashboardWidget a_other, bool a_fav)
+		{
+			if(a_fav)
+			{
+				if(m_favPosition.Y == a_other.m_favPosition.Y)
+					return m_favPosition.X.CompareTo(a_other.m_favPosition.X);
+				return m_favPosition.Y.CompareTo(a_other.m_favPosition.Y);
+			}
+			if (m_position.Y == a_other.m_position.Y)
+				return m_position.X.CompareTo(a_other.m_position.X);
+			return m_position.X.CompareTo(a_other.m_position.X);
+		}
 	}
 }

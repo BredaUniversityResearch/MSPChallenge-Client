@@ -16,6 +16,7 @@ namespace MSP2050.Scripts
 		[SerializeField] string m_widgetAssetPath;
 		[SerializeField] string m_categoriesAssetPath;
 		[SerializeField] int m_numberColumns = 10; 
+		[SerializeField] DashboardColourList m_colourList;
 
 		[SerializeField] Button m_closeButton;
 		[SerializeField] Button m_catalogueButton;
@@ -40,6 +41,8 @@ namespace MSP2050.Scripts
 		public float m_cellsize = 150f;
 		List<ADashboardWidget> m_loadedWidgets;
 		Dictionary<DashboardCategory, DashboardWidgetLayout> m_catSelectedWidgets;
+
+		public DashboardColourList ColourList => m_colourList;
 
 		private void Awake()
 		{
@@ -151,7 +154,7 @@ namespace MSP2050.Scripts
 				m_catSelectedWidgets[m_currentCategory].Visible = false;
 
 			SetWidgetsToCategory(a_category);
-			m_catalogueButton.interactable = !a_category.m_favorite;
+			m_catalogueButton.gameObject.SetActive(!a_category.m_favorite);
 		}
 
 		void SetWidgetsToCategory(DashboardCategory a_category)
@@ -173,7 +176,7 @@ namespace MSP2050.Scripts
 				m_catSelectedWidgets[m_currentCategory].Visible = false;
 
 			m_catalogueLayout.Visible = true;
-			m_catalogueButton.interactable = false;
+			m_catalogueButton.gameObject.SetActive(false);
 			m_categoryNameText.text = $"{m_currentCategory.m_displayName} Widget Catalogue";
 			foreach (ADashboardWidget widget in m_loadedWidgets)
 			{
@@ -226,7 +229,6 @@ namespace MSP2050.Scripts
 				//Widget can't fit
 				m_movePreview.gameObject.SetActive(false);
 				m_rowInsertPreview.gameObject.SetActive(false);
-				//TODO: cross on preview?
 			}
 		}
 

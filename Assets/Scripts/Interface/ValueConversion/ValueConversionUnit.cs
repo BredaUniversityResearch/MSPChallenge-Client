@@ -114,6 +114,11 @@ namespace MSP2050.Scripts
 			return ConvertedUnitFloat.FormatValue(a_value / conversionUnits[a_index].unitSize, decimalPlaces);
 		}
 
+		public float GetUnitEntrySize(int a_index)
+		{
+			return conversionUnits[a_index].unitSize;
+		}
+
 		public void ParseUnit(string input, out float amount)
 		{
 			int separatorIndex = input.LastIndexOfAny("0123456789".ToCharArray());
