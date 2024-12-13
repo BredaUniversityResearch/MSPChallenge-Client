@@ -29,8 +29,10 @@ Boolean cleanupBefore = false
 Boolean cleanupAfter = true
 
 String commit = ""
+String messageIfStageFailure = ""
 try {
     stage('Clone') {
+        messageIfStageFailure = "Failed to clean workspace"
         if (cleanupBefore) {
             node(Node) {
                 dir(WorkingDir) {
@@ -41,6 +43,7 @@ try {
                 cleanWs()
             }
         }
+        messageIfStageFailure = "Failed to clone repositories"
         node(Node) {
             String branch = "${env.CHANGE_BRANCH}"
             if (branch == null || branch == "" || branch == "null") {
@@ -53,6 +56,7 @@ try {
     }
 
     stage('Build') {
+        messageIfStageFailure = "Failed to build"
         //node(Node) {
             script {
                 switch (env.BRANCH_NAME) {
@@ -93,7 +97,7 @@ try {
     }
     node(Node) {
         script {
-            discord.failed(discordWebhook, "MSPChallenge-MultiBranch", "${e}")
+            discord.failed(discordWebhook, "MSPChallenge-MultiBranch", "${messageIfStageFailure}\n\n${e}")
         }
     }
     throw (e)
