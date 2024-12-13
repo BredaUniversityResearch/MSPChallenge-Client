@@ -136,6 +136,9 @@ namespace MSP2050.Scripts
 
 		void UpdateSliderContext()
 		{
+			if (m_windowInstance == null)
+				return;
+
 			if(m_windowInstance.m_rangeMaxSlider.maxValue < 0.01f)
 			{
 				m_windowInstance.m_rangeSliderFill.anchorMin = new Vector2(0f, 0f);
@@ -165,6 +168,7 @@ namespace MSP2050.Scripts
 		void OnMonthChanged(int a_oldCurrentMonth, int a_newCurrentMonth)
 		{
 			UpdateSliderRanges();
+			UpdateSliderContext();
 			SetSettingsToDisplay();
 		}
 
@@ -229,7 +233,7 @@ namespace MSP2050.Scripts
 			int max = TimeManager.Instance.GetCurrentMonth();
 			if (m_yearToggleValue)
 			{
-				max %= 12;
+				max /= 12;
 			}
 			if (m_windowInstance != null)
 			{

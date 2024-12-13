@@ -35,6 +35,17 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public override void Initialise()
+		{
+			if (m_barParent.childCount > 1)
+			{
+				for(int i = 1; i < m_barParent.childCount; i++)
+				{
+					Destroy(transform.GetChild(i).gameObject);
+				}
+			}
+		}
+
 		public void SetRectOffset(Vector2 a_offsetMin, Vector2 a_offsetMax)
 		{
 			RectTransform rect = GetComponent<RectTransform>();

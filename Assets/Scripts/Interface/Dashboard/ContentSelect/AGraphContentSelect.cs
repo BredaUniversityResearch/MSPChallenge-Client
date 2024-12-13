@@ -23,6 +23,7 @@ namespace MSP2050.Scripts
 
 		public virtual void Initialise(Action a_onSettingsChanged, ADashboardWidget a_widget)
 		{
+			m_widget = a_widget;
 			m_onSettingsChanged = a_onSettingsChanged;
 			m_detailsToggle.onValueChanged.AddListener(ToggleDetails);
 		}

@@ -12,10 +12,22 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_entryPrefab;
 		[SerializeField] TextMeshProUGUI m_unitText;
 		[SerializeField] float m_firstAndLastOffset = 4f;
+		[SerializeField] int m_expectedEmptyChildren = 0;
 
 		public float m_size;
 
 		List<GraphAxisEntry> m_entries = new List<GraphAxisEntry>();
+
+		public void Initialise()
+		{
+			if (transform.childCount > 1)
+			{
+				for (int i = m_expectedEmptyChildren; i < transform.childCount; i++)
+				{
+					Destroy(transform.GetChild(i).gameObject);
+				}
+			}
+		}
 
 		public void SetSize(int a_w, int a_h)
 		{ }

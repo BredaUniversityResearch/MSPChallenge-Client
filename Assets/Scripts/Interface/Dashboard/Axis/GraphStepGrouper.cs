@@ -14,6 +14,17 @@ namespace MSP2050.Scripts
 
 		List<GraphStepGroup> m_groups = new List<GraphStepGroup>();
 
+		public void Initialise()
+		{ 
+			if(m_groupParent.childCount > 0)
+			{
+				foreach(Transform child in m_groupParent)
+				{
+					Destroy(child.gameObject);
+				}
+			}
+		}
+
 		public void SetRectOffset(Vector2 a_offsetMin, Vector2 a_offsetMax)
 		{
 			RectTransform rect = GetComponent<RectTransform>();

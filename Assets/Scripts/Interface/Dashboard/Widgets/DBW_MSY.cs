@@ -21,11 +21,27 @@ namespace MSP2050.Scripts
 
         bool m_legendBottom = true;
 
+		public override void InitialiseCatalogue()
+		{
+			InitialiseContent();
+			base.InitialiseCatalogue();
+		}
+
 		public override void Initialise(ADashboardWidget a_original)
+		{
+			InitialiseContent();
+			base.Initialise(a_original);
+		}
+
+		void InitialiseContent()
 		{
 			m_timeSelect.Initialise(UpdateData);
 			m_contentSelect.Initialise(UpdateData, this);
-			base.Initialise(a_original);
+			m_stepGrouper.Initialise();
+			m_valueAxis.Initialise();
+			m_stepAxis.Initialise();
+			m_graph.Initialise();
+			m_legend.Initialise();
 		}
 
 		public override void UpdateData()

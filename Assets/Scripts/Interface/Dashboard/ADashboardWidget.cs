@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 			m_resizeHandle.onHandleDragged = HandleResize;
 		}
 
-		public void InitialiseCatalogue()
+		public virtual void InitialiseCatalogue()
 		{
 			//Catalogue widget
 			m_position = new DashboardWidgetPosition();

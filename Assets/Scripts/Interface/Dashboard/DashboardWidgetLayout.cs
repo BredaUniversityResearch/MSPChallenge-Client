@@ -229,26 +229,10 @@ namespace MSP2050.Scripts
 		{
 			DashboardWidgetPosition layout = m_favorites ? a_widget.m_favPosition : a_widget.m_position;
 			Remove(a_widget, true);
+			InsertRows(a_newY, layout.H);	
 			layout.SetPosition(a_newX, a_newY);
 			layout.SetSize(a_newW, layout.H);
-			InsertRows(a_newY, layout.H);	
-			InsertWidget(a_widget);
-
-			for(int y = a_newY + 1; y < m_widgetLayout.Count; y++)
-			{
-				for(int x = 0; x < m_columns; x++)
-				{
-					if (m_widgetLayout[y][x] == null)
-						continue;
-					DashboardWidgetPosition newLayout = m_favorites ? m_widgetLayout[y][x].m_favPosition : m_widgetLayout[y][x].m_position;
-					if (newLayout.Y < y)
-					{
-						newLayout.SetPosition(newLayout.X, newLayout.Y + layout.H);
-						m_widgetLayout[y][x].Reposition(m_favorites);
-					}
-				}
-			}
-			DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
+			InsertWidget(a_widget);			
 			SortAndSetHierarchy();
 		}
 
@@ -400,7 +384,7 @@ namespace MSP2050.Scripts
 							int rowsBelow = layout.Y + layout.H - a_row;
 							for (int y = 0; y <= rowsBelow; y++)
 							{
-								m_widgetLayout[layout.Y + layout.H - 1 - y] = null;
+								m_widgetLayout[layout.Y + layout.H - 1 - y][x] = null;
 								if(y < a_amount)
 									newRows[y][x] = widget;
 							}
@@ -415,6 +399,33 @@ namespace MSP2050.Scripts
 				for (int i = 0; i < a_amount; i++)
 					m_widgetLayout.Insert(0,new ADashboardWidget[m_columns]);
 			}
+
+			//Move all widgets down to new rows
+			foreach(ADashboardWidget widget in m_widgets)
+			{
+				DashboardWidgetPosition layout = m_favorites ? widget.m_favPosition : widget.m_position;
+				if(layout.Y >= a_row)
+				{
+					layout.SetPosition(layout.X, layout.Y + a_amount);
+					widget.Reposition(m_favorites);
+				}	
+			}
+
+			//for (int y = a_newY + 1; y < m_widgetLayout.Count; y++)
+			//{
+			//	for (int x = 0; x < m_columns; x++)
+			//	{
+			//		if (m_widgetLayout[y][x] == null)
+			//			continue;
+			//		DashboardWidgetPosition newLayout = m_favorites ? m_widgetLayout[y][x].m_favPosition : m_widgetLayout[y][x].m_position;
+			//		if (newLayout.Y < y)
+			//		{
+			//			newLayout.SetPosition(newLayout.X, newLayout.Y + layout.H);
+			//			m_widgetLayout[y][x].Reposition(m_favorites);
+			//		}
+			//	}
+			//}
+			DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
 		}
 	}
 }

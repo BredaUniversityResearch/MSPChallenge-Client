@@ -14,11 +14,22 @@ namespace MSP2050.Scripts
 		List<GraphLegendEntry> m_entries = new List<GraphLegendEntry>();
 		bool m_horizontal = true;
 
+		public void Initialise()
+		{
+			if (transform.childCount > 0)
+			{
+				foreach (Transform child in transform)
+				{
+					Destroy(child.gameObject);
+				}
+			}
+		}
+
 		public float SetSize(int a_w, int a_h, bool a_horizontal, float a_sideSpacing, float a_spacing, float a_topSpacing)
 		{
 			//Currently assumes it fills a full horizontal edge
-			//TODO: set horizontal or vertical alignment
-			//TODO: return expected size
+			//set horizontal or vertical alignment
+			//return expected size
 			m_horizontal = a_horizontal;
 			m_columns = m_horizontal ? a_w : System.Math.Max(1, a_w / 4);
 			if (m_data != null)
