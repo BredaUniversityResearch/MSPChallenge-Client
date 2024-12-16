@@ -153,17 +153,18 @@ namespace MSP2050.Scripts
 			float result = float.NegativeInfinity;
 			if(float.TryParse(a_newValue, out result))
 			{
-				if (result >= 0)
+				if (result < 20000f)
 				{
-					m_currentRadius = result;
-					foreach (var entityVP in m_policyValues)
-					{
-						bool changed = Mathf.Abs(entityVP.Value.radius - result) > 0.01f;
-						entityVP.Value.radius = m_currentRadius;
-						if(changed)
-							changes.Add(entityVP.Key, entityVP.Value.GetJson());
-					}
+					result = 20000f;
 				}
+				m_currentRadius = result;
+				foreach (var entityVP in m_policyValues)
+				{
+					bool changed = Mathf.Abs(entityVP.Value.radius - result) > 0.01f;
+					entityVP.Value.radius = m_currentRadius;
+					if(changed)
+						changes.Add(entityVP.Key, entityVP.Value.GetJson());
+				}	
 			}
 			SetRadiusText();
 			if (changes.Count > 0)

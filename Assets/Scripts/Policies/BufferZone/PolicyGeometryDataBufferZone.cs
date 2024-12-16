@@ -17,7 +17,7 @@ namespace MSP2050.Scripts
 		{
 			policy_type = PolicyManager.BUFFER_ZONE_POLICY_NAME;
 			fleets = new Dictionary<int, Dictionary<int, Months>>();
-			radius = 0f;
+			radius = 20000f;
 		}
 
 		public PolicyGeometryDataBufferZone(Dictionary<int, Dictionary<int, Months>> a_fleets, float a_radius)
@@ -33,7 +33,7 @@ namespace MSP2050.Scripts
 			{
 				policy_type = PolicyManager.BUFFER_ZONE_POLICY_NAME;
 				fleets = new Dictionary<int, Dictionary<int, Months>>();
-				radius = 0f;
+				radius = 20000f;
 				return;
 			}
 
