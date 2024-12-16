@@ -267,7 +267,7 @@ namespace MSP2050.Scripts
 		{
 			a_outW = a_widget.MinW;
 			a_outH = a_widget.MinH;
-			if (a_x + a_outW >= m_columns)
+			if (a_x + a_outW > m_columns)
 				return false;
 			for (int y = a_y; y < a_y + a_outH && y < m_widgetLayout.Count; y++)
 			{
@@ -336,7 +336,7 @@ namespace MSP2050.Scripts
 
 		public bool WidgetInsertRowPossible(ADashboardWidget a_widget, int a_row, int a_x, int a_currentW, out int a_maxW)
 		{
-            if (m_columns <= a_widget.MinW + a_x)
+            if (m_columns < a_widget.MinW + a_x)
             {
 				a_maxW = 0;
 				return false;
@@ -382,7 +382,7 @@ namespace MSP2050.Scripts
 						{
 							//Splits widget, remove from old rows and add to new
 							int rowsBelow = layout.Y + layout.H - a_row;
-							for (int y = 0; y <= rowsBelow; y++)
+							for (int y = 0; y < rowsBelow; y++)
 							{
 								m_widgetLayout[layout.Y + layout.H - 1 - y][x] = null;
 								if(y < a_amount)

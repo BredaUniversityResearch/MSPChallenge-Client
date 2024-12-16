@@ -29,8 +29,8 @@ namespace MSP2050.Scripts
 			if (m_unit == null)
 			{
 				if (m_unitPower != 0)
-					return $"e{m_unitPower} ?";
-				return "?";
+					return $"e{m_unitPower} N/A";
+				return "N/A";
 			}
 			if (m_unitPower != 0)
 				return $"e{m_unitPower} {m_unit.GetUnitStringForUnitIndex(m_unitIndex)}";
