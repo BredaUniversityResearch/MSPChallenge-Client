@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 			m_presetProperties.Add("Area", (a_subent) =>
 			{
 				PolygonSubEntity polygonEntity = (PolygonSubEntity)a_subent;
-				return polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km2";
+				return polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>";
 			});
 		}
 

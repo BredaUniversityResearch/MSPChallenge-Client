@@ -14,7 +14,7 @@ String commit = ""
 stage('Clone') {
     node(Node) {
         git.checkout("https://github.com/BredaUniversityResearch/MSPChallenge-Client", "main", 'CRADLE_WEBMASTER_CREDENTIALS')
-        commit = git.fetchCommitHash()
+        //commit = git.fetchCommitHash()
     }
 }
 
