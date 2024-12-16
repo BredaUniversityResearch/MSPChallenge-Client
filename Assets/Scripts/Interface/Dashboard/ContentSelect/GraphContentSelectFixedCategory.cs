@@ -62,7 +62,7 @@ namespace MSP2050.Scripts
 			m_onSettingsChanged.Invoke();
 		}
 
-		public override GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, out float a_maxValue, out float a_minValue)
+		public override GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, bool a_stacked, out float a_maxValue, out float a_minValue)
 		{
 			GraphDataStepped data = new GraphDataStepped();
 			data.m_absoluteCategoryIndices = new List<int>();
@@ -81,6 +81,8 @@ namespace MSP2050.Scripts
 
 			a_minValue = 0f;
 			a_maxValue = float.NegativeInfinity;
+			if (a_stacked)
+				a_maxValue = 0f;
 
 			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 			if (chosenKPIs.Count > 0)
@@ -124,10 +126,15 @@ namespace MSP2050.Scripts
 						data.m_steps[i][j] = aggregatedV;
 						if (aggregatedV.HasValue)
 						{
-							if(aggregatedV.Value > a_maxValue)
-								a_maxValue = aggregatedV.Value;
-							if (aggregatedV.Value < a_minValue)
-								a_minValue = aggregatedV.Value;
+							if (a_stacked)
+								a_maxValue += aggregatedV.Value;
+							else
+							{
+								if (aggregatedV.Value > a_maxValue)
+									a_maxValue = aggregatedV.Value;
+								if (aggregatedV.Value < a_minValue)
+									a_minValue = aggregatedV.Value;
+							}
 						}
 					}
 				}
@@ -144,10 +151,15 @@ namespace MSP2050.Scripts
 						data.m_steps[i][j] = v;
 						if (v.HasValue)
 						{
-							if (v.Value > a_maxValue)
-								a_maxValue = v.Value;
-							if (v.Value < a_minValue)
-								a_minValue = v.Value;
+							if (a_stacked)
+								a_maxValue += v.Value;
+							else
+							{
+								if (v.Value > a_maxValue)
+									a_maxValue = v.Value;
+								if (v.Value < a_minValue)
+									a_minValue = v.Value;
+							}
 						}
 					}
 				}

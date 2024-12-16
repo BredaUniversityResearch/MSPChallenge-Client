@@ -38,6 +38,6 @@ namespace MSP2050.Scripts
 
 		protected abstract void CreateDetailsWindow();
 		protected abstract void DestroyDetailsWindow();
-		public abstract GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, out float a_maxValue, out float a_minValue);
+		public abstract GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, bool a_stacked, out float a_maxValue, out float a_minValue);
 	}
 }

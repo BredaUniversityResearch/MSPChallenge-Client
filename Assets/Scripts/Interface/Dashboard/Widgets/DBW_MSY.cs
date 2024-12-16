@@ -20,6 +20,7 @@ namespace MSP2050.Scripts
 		[SerializeField] float m_spacing = 12f;
 
         bool m_legendBottom = true;
+		bool m_stacked = false;
 
 		public override void InitialiseCatalogue()
 		{
@@ -41,13 +42,14 @@ namespace MSP2050.Scripts
 			m_valueAxis.Initialise();
 			m_stepAxis.Initialise();
 			m_graph.Initialise();
+			m_graph.Stacked = m_stacked;
 			m_legend.Initialise();
 		}
 
 		public override void UpdateData()
 		{
 			float maxValue, minValue;
-			GraphDataStepped data = m_contentSelect.FetchData(m_timeSelect.CurrentSettings, out maxValue, out minValue);
+			GraphDataStepped data = m_contentSelect.FetchData(m_timeSelect.CurrentSettings, m_stacked, out maxValue, out minValue);
 			float legendSize = m_legend.SetData(data, m_sideSpacing, m_spacing, m_topSpacing);
 			m_stepGrouper.CreateGroups(m_timeSelect.CurrentSettings);
 			m_valueAxis.SetDataRange(data, minValue, maxValue); //Also sets scale
