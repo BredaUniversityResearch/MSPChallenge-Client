@@ -35,7 +35,7 @@ namespace MSP2050.Scripts
 				return;
 			if (a_value)
 			{
-				m_geometryPolicyWindow.OpenToGeometry(m_policyDefinition, m_policyData, m_geometry, OnPolicyValuesChanged);
+				m_geometryPolicyWindow.OpenToGeometry(m_policyDefinition, m_policyData, m_geometry, OnPolicyValuesChanged, OnGeometryPolicyWindowCloseOrChange);
 			}
 			else
 			{
@@ -73,6 +73,13 @@ namespace MSP2050.Scripts
 			}
 			if(changes.Count > 0)
 				m_changedCallback.Invoke(m_parameter, changes);
+		}
+
+		void OnGeometryPolicyWindowCloseOrChange()
+		{
+			m_ignoreCallbacks = true;
+			m_barToggle.isOn = false;
+			m_ignoreCallbacks = false;
 		}
 
 		public void SetValue(Dictionary<Entity,string> a_values, List<Entity> a_geometry, AGeometryPolicyWindow a_geometryPolicyWindow)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -74,6 +75,11 @@ namespace MSP2050.Scripts
 			{
 				converter.ParseUnit(input, out amount);
 			}
+		}
+
+		public bool TryGetConverter(string unit, out ValueConversionUnit result)
+		{
+			return conversionUnits.TryGetValue(unit, out result);
 		}
 	}
 }

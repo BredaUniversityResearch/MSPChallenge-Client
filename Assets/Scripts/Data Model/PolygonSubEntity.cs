@@ -1146,6 +1146,9 @@ namespace MSP2050.Scripts
 					line.loop = drawSettings.DrawLineFromEndToStart;
 					outline.SetActive(true);
 					UpdatePolygonOutlineScale(drawSettings);
+					line.material = InterfaceCanvas.Instance.lineMaterials[(int)drawSettings.LinePatternType];
+					if (drawSettings.LinePatternType != ELinePatternType.Solid)
+						line.textureMode = LineTextureMode.Tile;
 				}
 			}
 			else

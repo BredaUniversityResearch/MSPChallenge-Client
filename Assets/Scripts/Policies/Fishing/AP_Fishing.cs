@@ -16,7 +16,7 @@ namespace MSP2050.Scripts
 			base.OpenToContent(a_content, a_toggle, a_APWindow);
 			if (a_content.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData))
 			{
-				ecologyDistribution.SetSliderValuesToFishingDistribution(SimulationLogicMEL.Instance.GetFishingDistributionForPreviousPlan(a_content), fishingData.fishingDistributionDelta);
+				ecologyDistribution.SetSliderValuesToFishingDistribution(PolicyLogicFishing.Instance.GetFishingDistributionForPreviousPlan(a_content), fishingData.fishingDistributionDelta);
 				emptyContentOverlay.SetActive(ecologyDistribution.NumberGroups == 0);
 			}
 			else

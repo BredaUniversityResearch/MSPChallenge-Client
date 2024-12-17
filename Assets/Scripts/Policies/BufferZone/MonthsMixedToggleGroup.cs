@@ -90,5 +90,11 @@ namespace MSP2050.Scripts
 				return totalValue;
 			}
 		}
+
+		public void SetInteractable(bool a_interactable)
+		{
+			foreach (ToggleMixedValue toggle in m_monthToggles)
+				toggle.Interactable = a_interactable;
+		}
 	}
 }

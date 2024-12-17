@@ -44,7 +44,7 @@ namespace MSP2050.Scripts
 			m_fleetCallback = a_fleetCallback;
 			m_countryCallback = a_countryCallback;
 			m_monthCallback = a_monthCallback;
-			m_nameText.text = PolicyLogicFishing.Instance.GetGearTypes()[a_gearId];
+			m_nameText.text = PolicyLogicFishing.Instance.GetGearName(a_gearId);
 			m_countryFleetInfo = PolicyLogicFishing.Instance.GetFleetsForGear(a_gearId);
 
 			if(m_countryFleetInfo.Count == 0)
@@ -231,6 +231,22 @@ namespace MSP2050.Scripts
 				m_valueToggle.Value = m_monthToggles.CombinedValue;
 			}
 			m_ignoreCallback = false;
+		}
+
+		public void SetIntactable(bool a_interactable)
+		{
+			m_valueToggle.Interactable = a_interactable;
+			if(m_monthToggles != null)
+			{
+				m_monthToggles.SetInteractable(a_interactable);
+			}
+			if(m_countryToggles != null)
+			{
+				foreach(var toggle in m_countryToggles)
+				{
+					toggle.SetInteractable(a_interactable);
+				}
+			}
 		}
 	}
 }

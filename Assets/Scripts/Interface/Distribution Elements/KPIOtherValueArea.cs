@@ -19,15 +19,16 @@ namespace MSP2050.Scripts
 			bar.SetToEnergyValues(a_grid, a_country, a_grid.m_name);
 		}
 
-		private void UpdateBarForFishing(string a_name, Dictionary<int, float> a_values)
+		private void UpdateBarForFishing(int a_gearType, Dictionary<int, float> a_values)
 		{
-			if (m_entries.TryGetValue(a_name, out var bar))
+			string name = PolicyLogicFishing.Instance.GetGearName(a_gearType);
+			if (m_entries.TryGetValue(name, out var bar))
 			{
-				bar.UpdateFishingValues(a_values, a_name);
+				bar.UpdateFishingValues(a_values, name);
 			}
 			else
 			{
-				CreateBarForFishing(a_name, a_values);
+				CreateBarForFishing(name, a_values);
 			}
 		}
 
@@ -71,7 +72,7 @@ namespace MSP2050.Scripts
 				Debug.LogError("No distribution delta values (FishingDistributionSet) available.");
 				return;
 			}
-			foreach (KeyValuePair<string, Dictionary<int, float>> kvp in a_distributionDelta.GetValues())
+			foreach (KeyValuePair<int, Dictionary<int, float>> kvp in a_distributionDelta.GetValues())
 			{
 				UpdateBarForFishing(kvp.Key, kvp.Value);
 			}

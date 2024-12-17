@@ -14,7 +14,14 @@ namespace MSP2050.Scripts
 		FishingDistributionDelta m_fishingBackup;
 		bool m_wasFishingPlanBeforeEditing;
 		bool m_requireAllApproval = true;
+		bool m_nationalFleets;
 		FleetInfo m_fleetInfo;
+		float m_defaultFishingEffort = 1f;
+		float m_fishingDisplayScale = 100f;
+		FishingDistributionDelta m_initialFishingDistribution;
+
+		public bool NationalFleets => m_nationalFleets;
+		public float FishingDisplayScale => m_fishingDisplayScale;
 
 		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
 		{
@@ -22,7 +29,49 @@ namespace MSP2050.Scripts
 			PolicySettingsFishing settings = (PolicySettingsFishing)a_settings;
 			m_requireAllApproval = settings.all_country_approval;
 			m_fleetInfo = settings.fleet_info;
+			m_defaultFishingEffort = settings.default_fishing_effort;
+			m_fishingDisplayScale = settings.fishing_display_scale;
+			m_nationalFleets = m_fleetInfo.fleets[0].country_id >= 0;
 			m_instance = this;
+
+			//Set initial fishing values, using default value if undefined
+			//Note: initial fishing values are normally not used if there is a starting fishing plan
+			m_initialFishingDistribution = new FishingDistributionDelta();
+			foreach (CountryFleetInfo countryFleet in m_fleetInfo.fleets)
+			{ 
+				if(m_nationalFleets)
+				{
+					if (countryFleet.initial_fishing_distribution != null)
+						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, countryFleet.country_id, Mathf.Min(1f, countryFleet.initial_fishing_distribution[0].effort_weight));
+					else
+						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, countryFleet.country_id, Mathf.Min(1f, m_defaultFishingEffort));
+				}
+				else
+				{
+					//Determine effort per country, then add normalized values to initial fishing
+					Dictionary<int, float> countryEffort = new Dictionary<int, float>();
+					float totalEffort = 0f;
+
+					if (countryFleet.initial_fishing_distribution != null)
+					{
+						foreach(InitialFishingDistribution initial in countryFleet.initial_fishing_distribution)
+						{
+							countryEffort.Add(initial.country_id, initial.effort_weight);
+							totalEffort += initial.effort_weight;
+						}
+					}
+					foreach (Team team in SessionManager.Instance.GetTeams())
+					{
+						if (!team.IsManager && !countryEffort.ContainsKey(team.ID))
+						{
+							countryEffort.Add(team.ID, m_defaultFishingEffort);
+							totalEffort += m_defaultFishingEffort;
+						}
+					}
+					foreach(var kvp in countryEffort)
+						m_initialFishingDistribution.SetFishingEffort(countryFleet.gear_type, kvp.Key, kvp.Value / totalEffort);
+				}
+			}
 		}
 
 		public override void Destroy()
@@ -76,6 +125,13 @@ namespace MSP2050.Scripts
 		public string[] GetGearTypes()
 		{
 			return m_fleetInfo.gear_types;
+		}
+
+		public string GetGearName(int a_gearType)
+		{
+			if (a_gearType < 0)
+				return "Unknown gear";
+			return m_fleetInfo.gear_types[a_gearType];
 		}
 
 		public override void HandlePlanUpdate(APolicyData a_data, Plan a_plan, EPolicyUpdateStage a_stage)
@@ -177,16 +233,16 @@ namespace MSP2050.Scripts
 								a_approvalStates.Add(kvp.Value.ID, EPlanApprovalState.Maybe);
 
 							if (a_approvalReasons.TryGetValue(kvp.Value.ID, out var reasons))
-								reasons.Add(new ApprovalReasonFishingPolicy(null, true));
+								reasons.Add(new ApprovalReasonFishingPolicy(-1, true));
 							else
-								a_approvalReasons.Add(kvp.Value.ID, new List<IApprovalReason> { new ApprovalReasonFishingPolicy(null, true) });
+								a_approvalReasons.Add(kvp.Value.ID, new List<IApprovalReason> { new ApprovalReasonFishingPolicy(-1, true) });
 						}
 					}
 				}
 			}
 			else
 			{
-				foreach (KeyValuePair<string, Dictionary<int, float>> fishingFleets in planData.fishingDistributionDelta.GetValuesByFleet())
+				foreach (KeyValuePair<int, Dictionary<int, float>> fishingFleets in planData.fishingDistributionDelta.GetValuesByGear())
 				{
 					foreach (KeyValuePair<int, float> fishingValues in fishingFleets.Value)
 					{
@@ -207,6 +263,46 @@ namespace MSP2050.Scripts
 		public override void AddToPlan(Plan a_plan)
 		{
 			a_plan.AddPolicyData(new PolicyPlanDataFishing(this) { fishingDistributionDelta = new FishingDistributionDelta() });
+		}
+
+		public FishingDistributionSet GetFishingDistributionForPreviousPlan(Plan referencePlan)
+		{
+			FishingDistributionSet result = new FishingDistributionSet(m_initialFishingDistribution);
+			foreach (Plan plan in PlanManager.Instance.Plans)
+			{
+				if (plan.ID == referencePlan.ID)
+				{
+					break;
+				}
+				else
+				{
+					if (plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData) && fishingData.fishingDistributionDelta != null)
+					{
+						result.ApplyValues(fishingData.fishingDistributionDelta);
+					}
+				}
+			}
+
+			return result;
+		}
+
+		public FishingDistributionSet GetFishingDistributionAtTime(int timeMonth)
+		{
+			FishingDistributionSet result = new FishingDistributionSet(m_initialFishingDistribution);
+			foreach (Plan plan in PlanManager.Instance.Plans)
+			{
+				if (plan.StartTime > timeMonth)
+				{
+					break;
+				}
+
+				if (plan.State == Plan.PlanState.IMPLEMENTED && plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData) && fishingData.fishingDistributionDelta != null)
+				{
+					result.ApplyValues(fishingData.fishingDistributionDelta);
+				}
+			}
+
+			return result;
 		}
 	}
 }
