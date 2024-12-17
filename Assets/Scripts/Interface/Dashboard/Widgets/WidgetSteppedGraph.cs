@@ -6,7 +6,7 @@ using TMPro;
 
 namespace MSP2050.Scripts
 {
-    public class DBW_MSY : ADashboardWidget
+    public class WidgetSteppedGraph : ADashboardWidget
     {
         [SerializeField] protected GraphAxis m_valueAxis;
         [SerializeField] protected GraphAxis m_stepAxis;
