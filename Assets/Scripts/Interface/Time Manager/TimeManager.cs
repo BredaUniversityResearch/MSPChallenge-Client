@@ -18,6 +18,9 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		[SerializeField] GameObject m_screenborderGradient;
+		[SerializeField] GameObject m_scrollingTextBand;
+
 		//Time
 		private int month = -1;
 		private int era = 0;
@@ -396,8 +399,8 @@ namespace MSP2050.Scripts
 
 		private void OnSimulationPhaseStarted()
 		{
-			ScreenBorderGradient.instance.SetEnabled(true);
-			ScrollingTextBand.instance.SetEnabled(true);
+			m_screenborderGradient.SetActive(true);
+			m_scrollingTextBand.SetActive(true);
 			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = false;
 			SimulationStateEntered();
 			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();
@@ -405,8 +408,8 @@ namespace MSP2050.Scripts
 
 		private void OnSimulationPhaseEnded()
 		{
-			ScreenBorderGradient.instance.SetEnabled(false);
-			ScrollingTextBand.instance.SetEnabled(false);
+			m_screenborderGradient.SetActive(false);
+			m_scrollingTextBand.SetActive(false);
 			InterfaceCanvas.Instance.menuBarCreatePlan.toggle.interactable = true;
 			SimulationStateExited();
 			InterfaceCanvas.Instance.plansList.RefreshPlanBarInteractablityForAllPlans();

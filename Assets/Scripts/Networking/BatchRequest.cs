@@ -101,15 +101,17 @@ namespace MSP2050.Scripts
 		private Action<string> CreateHandleBatchFailureAction(ARequest a_request)
 		{
 			return delegate(string a_message) {
+				Debug.LogError($"Batch with ID {m_batchGuid} reported error message: {a_message}");
 				if (a_request.retriesRemaining > 0)
 				{
-					m_status = EBatchStatus.AwaitingResults;				
+					m_status = EBatchStatus.AwaitingResults;
+					Debug.LogError($"Retrying: Batch with ID {m_batchGuid}...");
 					ServerCommunication.Instance.RetryRequest(a_request);
 				}
 				else
 				{
 					UpdateManager.Instance.WsServerCommunicationInteractor?.UnregisterBatchRequestCallbacks(m_batchGuid);
-					Debug.LogError($"Batch with ID {m_batchGuid} failed. Error message: {a_message}");
+					Debug.LogError($"Batch with ID {m_batchGuid} failed after {a_request.retriesRemaining} retries.");
 					m_status = EBatchStatus.Failed;
 					if (m_failureCallback != null)
 					{

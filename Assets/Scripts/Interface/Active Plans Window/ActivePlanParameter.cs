@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 		[SerializeField] private CustomInputField valueInput = null;
 		[SerializeField] private TextMeshProUGUI unit = null;
 
-		public AP_GeometryTool.ParameterChangeCallback parameterChangedCallback;
+		public AP_GeometryTool.ParameterChangeCallback changedCallback;
 		private EntityPropertyMetaData parameter;
 	
 		void Start ()
@@ -36,8 +36,8 @@ namespace MSP2050.Scripts
 
 		void ValueChanged(string newvalue)
 		{
-			if (parameterChangedCallback != null)
-				parameterChangedCallback(parameter, newvalue);
+			if (changedCallback != null)
+				changedCallback(parameter, newvalue);
 		}
 
 		public void SetToParameter(EntityPropertyMetaData parameter)

@@ -8,7 +8,6 @@ namespace MSP2050.Scripts
 		public enum TimeControlButton { None, Play, Pause, Forward }
 		TimeControlButton glowing = TimeControlButton.None;
 
-		private bool interactable = true;
 		public Button play, pause, forward, finishSetup;
 		public GameObject buttonBlocker;
 
@@ -23,13 +22,9 @@ namespace MSP2050.Scripts
 
 		public bool Interactable
 		{
-			get
-			{
-				return interactable;
-			}
 			set
 			{
-				buttonBlocker.SetActive(!interactable);
+				buttonBlocker.SetActive(!value);
 			}
 		}
 

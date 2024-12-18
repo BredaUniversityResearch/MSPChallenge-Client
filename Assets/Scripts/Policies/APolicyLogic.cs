@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace MSP2050.Scripts
@@ -59,13 +60,20 @@ namespace MSP2050.Scripts
 		//Update order: 1
 		public abstract void HandlePlanUpdate(APolicyData a_updateData, Plan a_plan, EPolicyUpdateStage a_stage);
 
-		protected void SubmitPolicyActivity(Plan a_plan, string a_policy, bool a_active, BatchRequest a_batch)
+		protected void SetGeneralPolicyData(Plan a_plan, APolicyData a_data, BatchRequest a_batch)
 		{
 			JObject dataObject = new JObject();
 			dataObject.Add("plan_id", a_plan.GetDataBaseOrBatchIDReference());
-			dataObject.Add("policy_type", a_policy);
-			dataObject.Add("active", a_active ? 1 : 0);
-			a_batch.AddRequest(Server.SetPlanPolicy(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+			dataObject.Add("policy_data", JsonConvert.SerializeObject(a_data));
+			a_batch.AddRequest(Server.SetGeneralPolicyData(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
+		}
+
+		protected void DeleteGeneralPolicyData(Plan a_plan, string a_policyType, BatchRequest a_batch)
+		{
+			JObject dataObject = new JObject();
+			dataObject.Add("plan_id", a_plan.GetDataBaseOrBatchIDReference());
+			dataObject.Add("policy_type", a_policyType);
+			a_batch.AddRequest(Server.DeleteGeneralPolicy(), dataObject, BatchRequest.BATCH_GROUP_PLAN_CHANGE);
 		}
 	}
 }

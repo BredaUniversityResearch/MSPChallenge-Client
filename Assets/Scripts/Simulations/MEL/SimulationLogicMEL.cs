@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MSP2050.Scripts
 {
@@ -12,10 +13,14 @@ namespace MSP2050.Scripts
 		public static SimulationLogicMEL Instance => m_instance;
 
 		private KPIValueCollection m_ecologyKPI;
-		public List<string> fishingFleets;
-		public float initialFishingMapping;
-		public float fishingDisplayScale;
-		public FishingDistributionDelta initialFishingValues;
+		private SimulationSettingsMEL m_config;
+
+		//Has to be stored separately because PropertyMetaData PolicyType differs from PropertyName...
+		private string m_seasonalClosureGMPName;
+		private string m_BufferZoneGMPName;
+		private List<string> m_protectionKPICategories;
+
+		public List<string> ProtectionKPICategories => m_protectionKPICategories;
 
 		public override void HandleGeneralUpdate(ASimulationData a_data)
 		{
@@ -26,12 +31,10 @@ namespace MSP2050.Scripts
 		public override void Initialise(ASimulationData a_settings)
 		{
 			m_instance = this;
-			//Currently in Server.GetMELConfig()
 
-			SimulationSettingsMEL config = (SimulationSettingsMEL)a_settings;
+			m_config = (SimulationSettingsMEL)a_settings;
 
-			CreateEcologyKPIs(config.content);
-			LoadFishingFleets(config.content);
+			Main.Instance.OnFinishedLoadingLayers += CreateEcologyKPIs; //Requires layers to be imported first
 		}
 		public override void Destroy()
 		{
@@ -43,12 +46,74 @@ namespace MSP2050.Scripts
 			return m_ecologyKPI;
 		}
 
-		public void CreateEcologyKPIs(JObject a_melConfig)
+		public void CreateEcologyKPIs()
 		{
-			KPICategoryDefinition[] categoryDefinitions = a_melConfig["ecologyCategories"].ToObject<KPICategoryDefinition[]>();
+			List<KPICategoryDefinition> categoryDefinitions = m_config.content["ecologyCategories"].ToObject<List<KPICategoryDefinition>>();
+			m_protectionKPICategories = new List<string>();
+
+			//Add categories & values for protected area layers
+			foreach (AbstractLayer layer in LayerManager.Instance.m_protectedAreaLayers)
+			{
+				m_protectionKPICategories.Add(layer.FileName);
+				KPICategoryDefinition newCat = new KPICategoryDefinition()
+				{
+					categoryName = layer.FileName,
+					categoryDisplayName = layer.ShortName,
+					categoryValueType = EKPICategoryValueType.Sum,
+					unit = "km2",
+					valueColorScheme = EKPIValueColorScheme.ProceduralColor
+				};
+				List<KPIValueDefinition> values = new List<KPIValueDefinition>();
+
+				//Does the layer have seasonal closure or buffer zones? Then use those.
+				bool hasGeomPolicy = false;
+				foreach(var property in layer.m_propertyMetaData)
+				{
+					if (property.PolicyType == PolicyManager.SEASONAL_CLOSURE_POLICY_NAME) 
+					{
+						hasGeomPolicy = true;
+						m_seasonalClosureGMPName = property.PropertyName;
+					}
+					else if(property.PolicyType == PolicyManager.BUFFER_ZONE_POLICY_NAME)
+					{
+						hasGeomPolicy = true;
+						m_BufferZoneGMPName = property.PropertyName;
+					}
+				}
+
+				if (hasGeomPolicy)
+				{
+					foreach(string gear in PolicyLogicFishing.Instance.GetGearTypes())
+					{
+						values.Add(new KPIValueDefinition() { 
+							valueName = $"{layer.FileName}_{gear}",
+							valueDisplayName = "Protection against " + gear,
+							unit = "km2",
+							valueDependentCountry = KPIValue.CountrySpecific
+						});
+					}
+				}
+				else
+				{
+					foreach (EntityType layerType in layer.m_entityTypes.Values)
+					{
+						values.Add(new KPIValueDefinition()
+						{
+							valueName = $"{layer.FileName}_{layerType.Name}",
+							valueDisplayName = layerType.Name,
+							unit = "km2",
+							valueDependentCountry = KPIValue.CountrySpecific
+						});
+					}
+				}
+				newCat.valueDefinitions = values.ToArray();
+				categoryDefinitions.Add(newCat);
+			}
+
 			m_ecologyKPI = new KPIValueCollection();
-			m_ecologyKPI.SetupKPIValues(categoryDefinitions, SessionManager.Instance.MspGlobalData.session_end_month);
+			m_ecologyKPI.SetupKPIValues(categoryDefinitions.ToArray(), SessionManager.Instance.MspGlobalData.session_end_month);
 			m_ecologyKPI.OnKPIValuesReceivedAndProcessed += OnEcologyKPIReceivedNewMonth;
+			m_config = null;
 		}
 
 		public void ReceiveEcologyKPIUpdate(KPIObject[] a_objects)
@@ -60,130 +125,126 @@ namespace MSP2050.Scripts
 		{
 			foreach (AbstractLayer layer in LayerManager.Instance.m_protectedAreaLayers)
 			{
-				LayerState state = layer.GetLayerStateAtTime(a_previousMostRecentMonth);
-				for (int i = a_previousMostRecentMonth + 1; i <= a_mostRecentMonth; ++i)
+				bool hasGeomPolicy = false;
+				foreach (var property in layer.m_propertyMetaData)
 				{
-					state.AdvanceStateToMonth(i);
-
-					Dictionary<EntityType, float> sizeByEntityType = new Dictionary<EntityType, float>(layer.m_entityTypes.Count);
-					foreach (EntityType layerType in layer.m_entityTypes.Values)
+					if (property.PolicyType == PolicyManager.SEASONAL_CLOSURE_POLICY_NAME ||
+						property.PolicyType == PolicyManager.BUFFER_ZONE_POLICY_NAME)
 					{
-						//Make sure we initialize all the types otherwise the KPIs wont add values in for these new months.
-						sizeByEntityType.Add(layerType, 0.0f);
-					}
-
-					foreach (Entity t in state.baseGeometry)
-					{
-						foreach (EntityType entityType in t.EntityTypes)
-						{
-							float restrictionSize;
-							sizeByEntityType.TryGetValue(entityType, out restrictionSize);
-							restrictionSize += t.GetRestrictionAreaSurface();
-							sizeByEntityType[entityType] = restrictionSize;
-						}
-					}
-
-					foreach (KeyValuePair<EntityType, float> sizeForEntityType in sizeByEntityType)
-					{
-						a_valueCollection.TryUpdateKPIValue(sizeForEntityType.Key.Name, i, sizeForEntityType.Value);
+						hasGeomPolicy = true;
+						break;
 					}
 				}
-			}
-
-			//TODO move this to it's own MonoBehaviour and trigger this OnMonthAdvanced?
-			InterfaceCanvas.Instance.KPIEcologyGroups.SetBarsToFishing(GetFishingDistributionAtTime(a_mostRecentMonth));
-		}
-
-		public void LoadFishingFleets(JObject melConfig)
-		{
-			fishingFleets = new List<string>();
-			try
-			{
-				JEnumerable<JToken> results = melConfig["fishing"].Children();
-				foreach (JToken token in results)
-					fishingFleets.Add(token.ToObject<FishingFleet>().name);
-				initialFishingMapping = melConfig["initialFishingMapping"].ToObject<float>();
-				fishingDisplayScale = melConfig["fishingDisplayScale"].ToObject<float>();
-			}
-			catch
-			{
-				Debug.Log("Fishing fleets json does not match expected format.");
-			}
-
-			initialFishingValues = null;
-		}
-
-		private void SetInitialFishingValuesFromPlans()
-		{
-			if (initialFishingValues != null)
-			{
-				return; // already set.
-			}
-			foreach (Plan plan in PlanManager.Instance.Plans)
-			{
-				if (plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData) && fishingData.fishingDistributionDelta != null)
-				{
-					foreach (KeyValuePair<string, Dictionary<int, float>> values in fishingData.fishingDistributionDelta.GetValuesByFleet())
-					{
-						var fleetName = values.Key;
-						if (initialFishingValues != null && initialFishingValues.HasFinishingValue(fleetName))
-						{
-							continue; // already there, skip it
-						}
-						// gonna set fishing values, make sure initialFishingValues is initialised. Assuming a fleet always has values
-						if (initialFishingValues == null)
-						{
-							initialFishingValues = new FishingDistributionDelta();
-						}
-						foreach (var item in values.Value)
-						{
-							initialFishingValues.SetFishingValue(fleetName, item.Key, item.Value); // add it the initial value
-						}
-					}
-				}
-			}
-		}
-
-		public FishingDistributionSet GetFishingDistributionForPreviousPlan(Plan referencePlan)
-		{
-			SetInitialFishingValuesFromPlans();
-			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
-			foreach (Plan plan in PlanManager.Instance.Plans)
-			{
-				if (plan.ID == referencePlan.ID)
-				{
-					break;
-				}
+				if (hasGeomPolicy)
+					UpdateProtectionKPIForPolicyLayer(layer, a_valueCollection, a_previousMostRecentMonth, a_mostRecentMonth);
 				else
-				{
-					if (plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData) && fishingData.fishingDistributionDelta != null)
-					{
-						result.ApplyValues(fishingData.fishingDistributionDelta);
-					}
-				}
+					UpdateProtectionKPIForTypedLayer(layer, a_valueCollection, a_previousMostRecentMonth, a_mostRecentMonth);
 			}
 
-			return result;
+			InterfaceCanvas.Instance.KPIEcologyGroups.SetBarsToFishing(PolicyLogicFishing.Instance.GetFishingDistributionAtTime(a_mostRecentMonth));
 		}
 
-		public FishingDistributionSet GetFishingDistributionAtTime(int timeMonth)
+		private void UpdateProtectionKPIForTypedLayer(AbstractLayer a_layer, KPIValueCollection a_valueCollection, int a_previousMostRecentMonth, int a_mostRecentMonth)
 		{
-			SetInitialFishingValuesFromPlans();
-			FishingDistributionSet result = new FishingDistributionSet(initialFishingValues);
-			foreach (Plan plan in PlanManager.Instance.Plans)
+			LayerState state = a_layer.GetLayerStateAtTime(a_previousMostRecentMonth);
+			for (int i = a_previousMostRecentMonth + 1; i <= a_mostRecentMonth; ++i)
 			{
-				if (plan.StartTime > timeMonth)
+				state.AdvanceStateToMonth(i);
+
+				Dictionary<EntityType, float> sizeByEntityType = new Dictionary<EntityType, float>(a_layer.m_entityTypes.Count);
+				foreach (EntityType layerType in a_layer.m_entityTypes.Values)
 				{
-					break;
+					//Make sure we initialize all the types otherwise the KPIs wont add values in for these new months.
+					sizeByEntityType.Add(layerType, 0.0f);
 				}
 
-				if (plan.State == Plan.PlanState.IMPLEMENTED && plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData) && fishingData.fishingDistributionDelta != null)
+				foreach (Entity t in state.baseGeometry)
 				{
-					result.ApplyValues(fishingData.fishingDistributionDelta);
+					foreach (EntityType entityType in t.EntityTypes)
+					{
+						float restrictionSize;
+						sizeByEntityType.TryGetValue(entityType, out restrictionSize);
+						restrictionSize += t.GetRestrictionAreaSurface();
+						sizeByEntityType[entityType] = restrictionSize;
+					}
+				}
+
+				foreach (KeyValuePair<EntityType, float> sizeForEntityType in sizeByEntityType)
+				{
+					a_valueCollection.TryUpdateKPIValue($"{a_layer.FileName}_{sizeForEntityType.Key.Name}", i, sizeForEntityType.Value);
 				}
 			}
+		}
 
-			return result;
+		private void UpdateProtectionKPIForPolicyLayer(AbstractLayer a_layer, KPIValueCollection a_valueCollection, int a_previousMostRecentMonth, int a_mostRecentMonth)
+		{
+			LayerState state = a_layer.GetLayerStateAtTime(a_previousMostRecentMonth);
+			for (int month = a_previousMostRecentMonth + 1; month <= a_mostRecentMonth; ++month)
+			{
+				int currentMonthNorm = month % 12;
+				state.AdvanceStateToMonth(month);
+
+				float[] sizeByGear = new float[PolicyLogicFishing.Instance.GetGearTypes().Length];
+				foreach (Entity t in state.baseGeometry)
+				{
+					float baseArea = t.GetRestrictionAreaSurface();
+
+					//Check seasonal closure policy, add area if relevant
+					if(t.TryGetMetaData(m_seasonalClosureGMPName, out string seasonalClosureString))
+					{
+						PolicyGeometryDataSeasonalClosure policyData = new PolicyGeometryDataSeasonalClosure(seasonalClosureString);
+						foreach(var bansByGear in policyData.fleets)
+						{
+							//Check if geometry policy contains any bans for gear for the current month
+							bool banned = false;
+							foreach(var bansByCountry in bansByGear.Value)
+							{
+								if(bansByCountry.Value.MonthSet(currentMonthNorm))
+								{
+									banned = true;
+									break;
+								}
+							}
+							if(banned)
+							{
+								sizeByGear[bansByGear.Key] += baseArea;
+							}
+						}
+					}
+
+					//Check buffer zone policy, add area if relevgant
+					if (t.TryGetMetaData(m_BufferZoneGMPName, out string bufferZoneString))
+					{
+						PolicyGeometryDataBufferZone policyData = new PolicyGeometryDataBufferZone(bufferZoneString);
+						if (policyData.radius >= 0.001f)
+						{
+							float bufferArea = ((PolygonEntity)t).GetOffsetArea(policyData.radius) - baseArea;
+							foreach (var bansByGear in policyData.fleets)
+							{
+								//Check if geometry policy contains any bans for gear for the current month
+								bool banned = false;
+								foreach (var bansByCountry in bansByGear.Value)
+								{
+									if (bansByCountry.Value.MonthSet(currentMonthNorm))
+									{
+										banned = true;
+										break;
+									}
+								}
+								if (banned)
+								{
+									sizeByGear[bansByGear.Key] += bufferArea;
+								}
+							}
+						}
+					}
+				}
+
+				for(int j = 0; j < sizeByGear.Length; j++)
+				{
+					a_valueCollection.TryUpdateKPIValue($"{a_layer.FileName}_{PolicyLogicFishing.Instance.GetGearName(j)}", month, sizeByGear[j]);
+				}
+			}
 		}
 	}
 

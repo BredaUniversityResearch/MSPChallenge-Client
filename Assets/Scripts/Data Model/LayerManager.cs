@@ -22,6 +22,7 @@ namespace MSP2050.Scripts
 
 		[SerializeField] private List<Sprite> m_subcategoryIcons = null;
 		private Dictionary<string, Sprite> m_subcategoryIconDict;
+		[SerializeField] private Sprite m_defaultSubcategoryIcon;
 
 		private List<AbstractLayer> m_layers = new List<AbstractLayer>();
 		private HashSet<AbstractLayer> m_loadedLayers = new HashSet<AbstractLayer>();
@@ -116,7 +117,7 @@ namespace MSP2050.Scripts
 			{
 				return result;
 			}
-			return null;
+			return m_defaultSubcategoryIcon;
 		}
 
 

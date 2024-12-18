@@ -251,18 +251,8 @@ namespace MSP2050.Scripts
 		public List<PlanLayerObject> layers;
 		public List<ApprovalObject> votes;
 
-		//Added
 		[JsonProperty(ItemConverterType = typeof(PolicyPlanUpdateJsonConverter))]
 		public List<APolicyData> policies;
-
-		//Removed
-		//public string type; // energy,fishing,shipping : ex 1,0,1
-		//public bool alters_energy_distribution;
-		//public List<GridObject> grids;
-		//public List<FishingObject> fishing;
-		//public HashSet<int> deleted_grids;
-		//public string energy_error;
-		//public RestrictionAreaObject[] restriction_settings;
 
 		public int CompareTo(PlanObject other)
 		{

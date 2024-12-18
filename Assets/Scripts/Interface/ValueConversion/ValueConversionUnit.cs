@@ -91,6 +91,34 @@ namespace MSP2050.Scripts
 			return new ConvertedUnitLong((double)value / (double)unitConversion.unitSize, unitConversion.unitPostfix, decimalPlaces);
 		}
 
+		public int GetConversionUnitIndexForSize(float a_value)
+		{
+			float absValue = Mathf.Abs(a_value);
+			for (int i = conversionUnits.Length - 1; i >= 0; --i)
+			{
+				if (absValue >= conversionUnits[i].unitSize)
+				{
+					return i;
+				}
+			}
+			return 0;
+		}
+
+		public string GetUnitStringForUnitIndex(int a_index)
+		{
+			return conversionUnits[a_index].unitPostfix;
+		}
+
+		public string FormatValueWithUnitIndex(float a_value, int a_index)
+		{
+			return ConvertedUnitFloat.FormatValue(a_value / conversionUnits[a_index].unitSize, decimalPlaces);
+		}
+
+		public float GetUnitEntrySize(int a_index)
+		{
+			return conversionUnits[a_index].unitSize;
+		}
+
 		public void ParseUnit(string input, out float amount)
 		{
 			int separatorIndex = input.LastIndexOfAny("0123456789".ToCharArray());

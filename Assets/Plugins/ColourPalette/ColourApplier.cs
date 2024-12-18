@@ -31,6 +31,13 @@ namespace ColourPalette
 
         void Start()
         {
+            if(graphics == null || graphics.Count == 0)
+            {
+                graphics = new List<Graphic>();
+                Graphic current = GetComponent<Graphic>();
+                if(current != null)
+				    graphics.Add(current);
+            }
             SubscribeToAssetChange();
         }
 

@@ -77,6 +77,7 @@ namespace MSP2050.Scripts
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_typeChangeCallback = EntityTypeChanged;
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_countryChangeCallback = TeamChanged;
 			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_parameterChangeCallback = ParameterChanged;
+			InterfaceCanvas.Instance.activePlanWindow.m_geometryTool.m_geometryPolicyChangeCallback = GeometryPolicyChanged;
 		}
 
 		public void SetCursor(CursorType a_cursorType, bool a_forceRedraw = false)
@@ -212,6 +213,12 @@ namespace MSP2050.Scripts
 		{
 			Instance.SetInterruptState(null);
 			Instance.m_currentState.HandleParameterChange(a_parameter, a_newValue);
+		}
+
+		private static void GeometryPolicyChanged(EntityPropertyMetaData a_parameter, Dictionary<Entity, string> a_newValues)
+		{
+			Instance.SetInterruptState(null);
+			Instance.m_currentState.HandleGeometryPolicyChange(a_parameter, a_newValues);
 		}
 
 		public void SetSnappingEnabled(bool a_value)

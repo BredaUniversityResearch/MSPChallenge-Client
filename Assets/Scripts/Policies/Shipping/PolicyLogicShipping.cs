@@ -64,12 +64,11 @@ namespace MSP2050.Scripts
 		{
 			if (a_plan.TryGetPolicyData<PolicyPlanDataShipping>(PolicyManager.SHIPPING_POLICY_NAME, out var data))
 			{
-				if(!m_wasShippingPlanBeforeEditing)
-					SubmitPolicyActivity(a_plan, PolicyManager.SHIPPING_POLICY_NAME, true, a_batch);
+				SetGeneralPolicyData(a_plan, new EmptyPolicyPlanData(PolicyManager.SHIPPING_POLICY_NAME), a_batch);
 			}
 			else if(m_wasShippingPlanBeforeEditing)
 			{
-				SubmitPolicyActivity(a_plan, PolicyManager.SHIPPING_POLICY_NAME, false, a_batch);
+				DeleteGeneralPolicyData(a_plan, PolicyManager.SHIPPING_POLICY_NAME, a_batch);
 			}
 			RestrictionAreaManager.Instance.SubmitSettingsForPlan(a_plan, a_batch);
 		}
