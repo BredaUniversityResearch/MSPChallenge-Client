@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311926, g: 0.38073996, b: 0.35872698, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -12054,7 +12054,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1428924123}
-  - component: {fileID: 1428924124}
   - component: {fileID: 1428924127}
   - component: {fileID: 1428924126}
   m_Layer: 5
@@ -12083,19 +12082,6 @@ RectTransform:
   m_AnchoredPosition: {x: 24, y: -12}
   m_SizeDelta: {x: -48, y: -24}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1428924124
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1428924122}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cca4458a3e70cb646a615b64894b22d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gradientImage: {fileID: 1428924126}
 --- !u!114 &1428924126
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13902,6 +13888,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bd88751324dee544851502a2689bdee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_screenborderGradient: {fileID: 1428924122}
+  m_scrollingTextBand: {fileID: 1351963451}
 --- !u!114 &1589480018
 MonoBehaviour:
   m_ObjectHideFlags: 0
