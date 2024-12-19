@@ -16,8 +16,8 @@ namespace MSP2050.Scripts
 			play.onClick.AddListener(TimeManager.Instance.Play);
 			pause.onClick.AddListener(TimeManager.Instance.Pause);
 			forward.onClick.AddListener(TimeManager.Instance.Forward);  
-			finishSetup.onClick.AddListener(TimeManager.Instance.FinishSetup);  
-		      
+			finishSetup.onClick.AddListener(TimeManager.Instance.FinishSetup);
+			Interactable = TimeManager.Instance.CurrentState != TimeManager.PlanningState.Simulation;
 		}
 
 		public bool Interactable
