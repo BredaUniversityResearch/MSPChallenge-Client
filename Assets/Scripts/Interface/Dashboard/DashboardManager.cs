@@ -121,8 +121,7 @@ namespace MSP2050.Scripts
 				}
             }
 			m_categoryToggles[0].ForceActive();
-			//SetWidgetsToCategory(categories[0]);
-			OnCategorySelected(categories[0]);
+			OnCategorySelected(m_catSelectedWidgets.GetFirstKey<DashboardCategory, DashboardWidgetLayout>());
 
 		}
 
