@@ -12,7 +12,8 @@ namespace MSP2050.Scripts
 		public enum EditingType { Normal, Cable, Transformer, Socket, SourcePoint, SourcePolygon, SourcePolygonPoint };
 
 		public int m_id;
-		public string FileName { get; set; }
+        public string[] m_tags;
+        public string FileName { get; set; }
 		public string ShortName { get; set; }
 		public string Media { get; private set; }
 		public string Group { get; set; }
@@ -75,7 +76,8 @@ namespace MSP2050.Scripts
 			m_presetProperties = new Dictionary<string, PresetPropertyDelegate>();
 
 			m_id = a_layerMeta.layer_id;
-			FileName = a_layerMeta.layer_name;
+            m_tags = a_layerMeta.layer_tags;
+            FileName = a_layerMeta.layer_name;
 			ShortName = a_layerMeta.layer_short;
 			Media = a_layerMeta.layer_media;
 			Group = a_layerMeta.layer_group;
