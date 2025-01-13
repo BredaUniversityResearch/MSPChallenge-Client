@@ -12,6 +12,7 @@ namespace MSP2050.Scripts
 		public enum EditingType { Normal, Cable, Transformer, Socket, SourcePoint, SourcePolygon, SourcePolygonPoint };
 
 		public int m_id;
+		public string[] m_tags;
 		public string FileName { get; set; }
 		public string ShortName { get; set; }
 		public string Media { get; private set; }
@@ -75,6 +76,7 @@ namespace MSP2050.Scripts
 			m_presetProperties = new Dictionary<string, PresetPropertyDelegate>();
 
 			m_id = a_layerMeta.layer_id;
+			m_tags = a_layerMeta.layer_tags;
 			FileName = a_layerMeta.layer_name;
 			ShortName = a_layerMeta.layer_short;
 			Media = a_layerMeta.layer_media;
@@ -246,7 +248,7 @@ namespace MSP2050.Scripts
 		public abstract void SetEntitiesActiveUpTo(int a_index, bool a_showRemovedInLatestPlan = true, bool a_showCurrentIfNotInfluencing = true);
 		public abstract void SetEntitiesActiveUpTo(Plan a_plan);
 		public abstract void SetEntitiesActiveUpToCurrentTime();
-    
+	
 		public abstract bool IsIDInActiveGeometry(int a_id);
 		public abstract bool IsPersisIDCurrentlyNew(int a_persisID);
 		public abstract bool IsDatabaseIDPreModified(int a_dataBaseID);
