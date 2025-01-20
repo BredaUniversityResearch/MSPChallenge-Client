@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
 
 			if (Main.InEditMode)
 			{
-				DialogBoxManager.instance.ConfirmationWindow("Stop editing", "Starting the tutorial will leave edit mode. All changes made to the plan will be lost. Are you sure you want to cancel?", null, () => StartTutorialConfirmed());
+				DialogBoxManager.instance.ConfirmationWindow("Stop editing", "Starting the tutorial will leave edit mode. All changes made to the plan will be lost. Are you sure you want to open the tutorial?", null, () => StartTutorialConfirmed());
 			}
 			else
 				StartTutorialConfirmed();
