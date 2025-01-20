@@ -10,13 +10,14 @@ namespace MSP2050.Scripts
 	{
 		const string LAYER_TAG = "SandDepth";
 		const int MAX_DEPTH = 12;
-
+    
 		static PolicyLogicSandExtraction m_instance;
 		public static PolicyLogicSandExtraction Instance => m_instance;
 
 		//Editing backups
 		bool m_wasSandExtractionPlanBeforeEditing;
 		PolicyPlanDataSandExtraction m_backup;
+
 
 		RasterLayer m_maxDepthRasterLayer;
 
