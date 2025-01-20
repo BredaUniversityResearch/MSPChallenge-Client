@@ -136,7 +136,7 @@ namespace MSP2050.Scripts
 		public int layer_id { get; set; }
 		public string layer_original_id { get; set; }
 		public string layer_depth { get; set; }
-		public string[] layer_tags { get; set; }
+		public string layer_tags { get; set; }
 		public string layer_name { get; set; }
 		public string layer_geotype { get; set; }
 		public string layer_short { get; set; }

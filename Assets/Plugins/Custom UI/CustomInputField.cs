@@ -25,4 +25,9 @@ public class CustomInputField : TMP_InputField, IPointerClickHandler
             m_onRightClick?.Invoke();
         }
     }
+
+    public void SetValueWithoutNotify(string value)
+    {
+        SetTextWithoutNotify(value);
+    }
 }
