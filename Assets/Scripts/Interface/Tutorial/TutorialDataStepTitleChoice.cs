@@ -12,6 +12,11 @@ namespace MSP2050.Scripts
 		{
 			a_manager.UI.SetUIToTitle(m_headerText, m_contentText, m_partText, m_continueButtonText, m_quitButtonText, !a_firstStep);
 			a_manager.UI.SetChapterButtonActivity(a_showNextChapterButton, a_showPrevChapterButton);
+			if (m_enterStepActions != null)
+			{
+				foreach (ATutorialAction action in m_enterStepActions)
+					action.Invoke();
+			}
 		}
 	}
 }
