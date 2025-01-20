@@ -17,6 +17,7 @@ namespace MSP2050.Scripts
 
 		[Header("Buttons")]
 		[SerializeField] GameObject m_buttonContainer;
+		[SerializeField] GameObject m_tutorialButtonCover;
 		[SerializeField] Button m_startEditingButton;
 		[SerializeField] Button m_acceptEditButton;
 		[SerializeField] Button m_cancelEditButton;
@@ -706,6 +707,11 @@ namespace MSP2050.Scripts
 					return null;
 				return m_geometryTool.CurrentlyEditingLayer.BaseLayer;
 			}
+		}
+
+		public void SetTutorialButtonCoverActive(bool a_active)
+		{
+			m_tutorialButtonCover.SetActive(a_active);
 		}
 	}
 }

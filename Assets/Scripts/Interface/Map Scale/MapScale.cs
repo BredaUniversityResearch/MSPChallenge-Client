@@ -66,7 +66,12 @@ namespace MSP2050.Scripts
 			xCoordinateText.text = ((float)x).FormatAsCoordinateText();
 			yCoordinateText.text = ((float)y).FormatAsCoordinateText();
 		}
-		
+
+		private void OnDisable()
+		{
+			InterfaceCanvas.Instance.menuBarMapTools.toggle.isOn = false;
+		}
+
 		public void OnDoneImportingLayers()
 		{
 			AbstractLayer layer = LayerManager.Instance.FindFirstLayerContainingName("_PLAYAREA");
