@@ -2,11 +2,15 @@ using System.Collections;
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace MSP2050.Scripts
 {
 	public class PolicyLogicSandExtraction : APolicyLogic
 	{
+		const string LAYER_TAG = "SandDepth";
+		const int MAX_DEPTH = 12;
+    
 		static PolicyLogicSandExtraction m_instance;
 		public static PolicyLogicSandExtraction Instance => m_instance;
 
@@ -14,10 +18,15 @@ namespace MSP2050.Scripts
 		bool m_wasSandExtractionPlanBeforeEditing;
 		PolicyPlanDataSandExtraction m_backup;
 
+
+		RasterLayer m_maxDepthRasterLayer;
+
 		public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
 		{
 			base.Initialise(a_settings, a_definition);
 			m_instance = this;
+
+			m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTag(LAYER_TAG);
 		}
 
 		public override void AddToPlan(Plan a_plan)
@@ -128,6 +137,57 @@ namespace MSP2050.Scripts
 				}
 			}
 			return result;
+		}
+
+		public float CalculatePitVolume(PolygonSubEntity a_subEntity)
+		{
+			float volume = 0;
+
+			Rect surfaceBoundingBox = a_subEntity.m_boundingBox;
+			Rect rasterSurfaceBoundingBox = m_maxDepthRasterLayer.RasterBounds;
+
+			// Relative normalized position of the bounding box of the SubEntity within the Raster bounding box.
+			float relativeXNormalized = (surfaceBoundingBox.x - rasterSurfaceBoundingBox.x) / rasterSurfaceBoundingBox.width;
+			float relativeYNormalized = (surfaceBoundingBox.y - rasterSurfaceBoundingBox.y) / rasterSurfaceBoundingBox.height;
+
+			// Height and Width of the texture of the Raster Layer
+			int rasterHeight = m_maxDepthRasterLayer.GetRasterImageHeight();
+			int rasterWidth = m_maxDepthRasterLayer.GetRasterImageWidth();
+
+			// Calculate the pixel range in the raster that corresponds to the bounding box of the PolygonSubEntity
+			int startX = Mathf.FloorToInt(relativeXNormalized * rasterWidth);
+			int startY = Mathf.FloorToInt(relativeYNormalized * rasterHeight);
+			int endX = Mathf.CeilToInt((relativeXNormalized + surfaceBoundingBox.width / rasterSurfaceBoundingBox.width) * rasterWidth + 1);
+			int endY = Mathf.CeilToInt((relativeYNormalized + surfaceBoundingBox.height / rasterSurfaceBoundingBox.height) * rasterHeight + 1);
+
+			// Convert PolygonSubEntity to a list of Vector3 points
+			List<UnityEngine.Vector3> polygonPoints = a_subEntity.GetPoints();
+
+			// Iterate over the pixels in the calculated range
+			for (int x = startX; x < endX; x++)
+			{
+				for (int y = startY; y < endY; y++)
+				{
+					// Convert pixel coordinates to world coordinates
+					UnityEngine.Vector2 worldPos = m_maxDepthRasterLayer.GetWorldPositionForTextureLocation(x, y);
+
+					// Check if the world position is inside the PolygonSubEntity
+					List<UnityEngine.Vector3> worldPosList = new List<UnityEngine.Vector3> { new UnityEngine.Vector3(worldPos.x, worldPos.y, 0) };
+					if (Util.GetPolygonOverlap(polygonPoints, worldPosList).Count > 0)
+					{
+						// Retrieve the value of the raster at this pixel
+						float? rasterValue = m_maxDepthRasterLayer.GetRasterValueAt(worldPos);
+
+						// If the raster value is valid, add it to the volume
+						if (rasterValue.HasValue)
+						{
+							volume += rasterValue.Value * MAX_DEPTH;
+						}
+					}
+				}
+			}
+
+			return volume;
 		}
 	}
 }
