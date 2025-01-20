@@ -66,7 +66,7 @@ namespace MSP2050.Scripts
 		public void CloseAllWindows()
 		{
 			//Close open dialog windows first
-			DialogBoxManager.instance.CancelTopDialog();
+			while(DialogBoxManager.instance.CancelTopDialog());
 
 			//High priority
 			if (fixedPriorityWindowsHigh != null)

@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 		[SerializeField, TextArea] protected string m_contentText;
 		[SerializeField] protected bool m_chapterStart;
 		[SerializeField] protected string m_partText;
-		[SerializeField] ATutorialAction[] m_enterStepActions;
+		[SerializeField] protected ATutorialAction[] m_enterStepActions;
 
 		public override void EnterStep(TutorialManager a_manager, bool a_firstStep, bool a_lastStep, bool a_showNextChapterButton, bool a_showPrevChapterButton)
 		{

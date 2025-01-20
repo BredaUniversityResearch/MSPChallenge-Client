@@ -54,6 +54,7 @@ namespace MSP2050.Scripts
 		public MenuBarToggle menuBarPlansList;
 		public MenuBarToggle menuBarCreatePlan;
 		public MenuBarToggle menuBarNotifications;
+		public MenuBarToggle menuBarMapTools;
 
 		[Header("KPI")]
 		public  KPIOtherValueArea KPIEcologyGroups;
