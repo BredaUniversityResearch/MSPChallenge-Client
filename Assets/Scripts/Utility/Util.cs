@@ -1636,6 +1636,36 @@ namespace MSP2050.Scripts
 			}
 			return result;
 		}
+
+		public static List<List<Vector3>> GetLineInsidePolygon(List<Vector3> a_polygon, List<Vector3> a_line)
+		{
+			ClipperLib.Clipper co = new ClipperLib.Clipper();
+			co.AddPath(GeometryOperations.VectorToIntPoint(a_polygon), ClipperLib.PolyType.ptClip, true);
+			co.AddPath(GeometryOperations.VectorToIntPoint(a_line), ClipperLib.PolyType.ptSubject, false);
+
+			ClipperLib.PolyTree csolution = new ClipperLib.PolyTree();
+			co.Execute(ClipperLib.ClipType.ctIntersection, csolution);
+			List<List<Vector3>> result = new List<List<Vector3>>();		
+			foreach(var v in ClipperLib.Clipper.OpenPathsFromPolyTree(csolution))
+			{
+				result.Add(GeometryOperations.IntPointToVector(v));		
+			}
+			return result;
+		}
+
+		public static float GetPolygonLineOverlapLength(List<Vector3> a_polygon, List<Vector3> a_line)
+		{
+			List<List<Vector3>> overlap = GetLineInsidePolygon(a_polygon, a_line);
+			float result = 0f;
+			if (overlap.Count > 0)
+			{
+				for (int i = 0; i < overlap.Count; i++)
+				{
+					result += GetLineStringLength(overlap[i]);
+				}
+			}
+			return result;
+		}
 	}
 
 
