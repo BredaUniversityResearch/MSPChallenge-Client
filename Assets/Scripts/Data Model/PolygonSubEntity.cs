@@ -723,28 +723,25 @@ namespace MSP2050.Scripts
 			}
 			m_drawSettings = m_entity.EntityTypes[0].DrawSettings;
 
-			if (!m_entity.Layer.Optimized)
+			m_gameObject = new GameObject(m_databaseID != -1 ? "" + m_databaseID : "<undefined database ID>");
+			m_gameObject.transform.SetParent(parent);
+
+			PolygonLayer layer = (PolygonLayer)m_entity.Layer;
+			if (m_drawSettings.InnerGlowEnabled)
 			{
-				m_gameObject = new GameObject(m_databaseID != -1 ? "" + m_databaseID : "<undefined database ID>");
-				m_gameObject.transform.SetParent(parent);
-
-				PolygonLayer layer = (PolygonLayer)m_entity.Layer;
-				if (m_drawSettings.InnerGlowEnabled)
-				{
-					layer.UpdateInnerGlow(m_drawSettings.InnerGlowRadius, m_drawSettings.InnerGlowIterations, m_drawSettings.InnerGlowMultiplier, m_drawSettings.InnerGlowPixelSize);
-				}
-
-				if (m_entity.Layer.m_textInfo != null)
-				{
-					CreateTextMesh(m_gameObject.transform, Vector3.zero);
-				}
-
-				RebuildLods();
-
-				RedrawGameObject(drawMode, selectedPoints, hoverPoints);
-
-				SetOrderBasedOnType();
+				layer.UpdateInnerGlow(m_drawSettings.InnerGlowRadius, m_drawSettings.InnerGlowIterations, m_drawSettings.InnerGlowMultiplier, m_drawSettings.InnerGlowPixelSize);
 			}
+
+			if (m_entity.Layer.m_textInfo != null)
+			{
+				CreateTextMesh(m_gameObject.transform, Vector3.zero);
+			}
+
+			RebuildLods();
+
+			RedrawGameObject(drawMode, selectedPoints, hoverPoints);
+
+			SetOrderBasedOnType();
 		}
 
 		public override void RedrawGameObject(SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null, bool updatePlanState = true)
@@ -1216,6 +1213,11 @@ namespace MSP2050.Scripts
 		{
 			this.polygon = points;
 			UpdateBoundingBox();
+		}
+
+		protected override void SetHoles(List<List<Vector3>> a_holes)
+		{ 
+			this.holes = a_holes;
 		}
 
 		public override List<List<Vector3>> GetHoles(bool copy = false)
