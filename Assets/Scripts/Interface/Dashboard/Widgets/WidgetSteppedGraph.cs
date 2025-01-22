@@ -18,9 +18,9 @@ namespace MSP2050.Scripts
 		[SerializeField] float m_sideSpacing = 16f;
 		[SerializeField] float m_topSpacing = 44f;
 		[SerializeField] float m_spacing = 12f;
+		[SerializeField] bool m_stacked = false;
 
         bool m_legendBottom = true;
-		bool m_stacked = false;
 
 		public override void InitialiseCatalogue()
 		{
@@ -112,5 +112,16 @@ namespace MSP2050.Scripts
             return result;
 		}
 
+		protected override void PopulateOptions()
+		{
+			m_optionsWindow.AddToggle("Stacked", m_stacked, SetStacked);
+		}
+
+		void SetStacked(bool a_stacked)
+		{
+			m_stacked = a_stacked;
+			m_graph.Stacked = a_stacked;
+			UpdateData();
+		}
 	}
 }
