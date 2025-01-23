@@ -19,19 +19,13 @@ namespace MSP2050.Scripts
 		{
 			get { return m_stacked; }
 			set 
-			{ 
-				if(m_stacked != value && m_data != null)
+			{
+				if (m_stacked != value && m_entries != null)
 				{
-					m_stacked = value; 
-					if(m_entries != null)
-					{
-						foreach (var entry in m_entries)
-							entry.SetStacked(m_stacked);
-					}
-					SetData(m_data);
+					foreach (var entry in m_entries)
+						entry.SetStacked(value);
 				}
-				else
-					m_stacked = value; 
+				m_stacked = value; 
 			}
 		}
 
