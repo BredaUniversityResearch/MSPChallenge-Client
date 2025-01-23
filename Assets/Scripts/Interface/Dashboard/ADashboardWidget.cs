@@ -9,8 +9,6 @@ namespace MSP2050.Scripts
 {
 	public abstract class ADashboardWidget : MonoBehaviour
 	{
-		
-
 		[SerializeField] DashboardWidgetHeader m_header;
 		[SerializeField] GameObject m_contentContainer;
 		[SerializeField] int m_defaultW = 1;
@@ -19,8 +17,10 @@ namespace MSP2050.Scripts
 		[SerializeField] int m_minH = 1;
 		[SerializeField] Button m_addButton;
 		[SerializeField] Toggle m_favouriteToggle;
-		[SerializeField] Button m_optionsButton;
+		[SerializeField] Toggle m_optionsToggle;
 		[SerializeField] ResizeHandle m_resizeHandle;
+		[SerializeField] GameObject m_optionsWindowPrefab;
+		[SerializeField] Transform m_optionsWindowParent;
 
 		//Set in individual prefabs
 		public DashboardCategory m_category;
@@ -28,6 +28,8 @@ namespace MSP2050.Scripts
 
 		public DashboardWidgetPosition m_position;
 		public DashboardWidgetPosition m_favPosition;
+
+		protected WidgetOptionsWindow m_optionsWindow;
 
 		public int DefaultW => m_defaultW;
 		public int DefaultH => m_defaultH;
@@ -40,6 +42,7 @@ namespace MSP2050.Scripts
 			m_header.m_onDrag = OnDrag;
 			m_header.m_onDragEnd = OnDragEnd;
 			m_resizeHandle.onHandleDragged = HandleResize;
+			m_optionsToggle.onValueChanged.AddListener(ToggleOptionsWindow);
 		}
 
 		public virtual void InitialiseCatalogue()
@@ -138,5 +141,21 @@ namespace MSP2050.Scripts
 				return m_position.X.CompareTo(a_other.m_position.X);
 			return m_position.X.CompareTo(a_other.m_position.X);
 		}
+
+		void ToggleOptionsWindow(bool a_value)
+		{
+			if (a_value)
+			{
+				m_optionsWindow = Instantiate(m_optionsWindowPrefab, m_optionsWindowParent).GetComponent<WidgetOptionsWindow>();
+				PopulateOptions();
+			}
+			else
+			{
+				Destroy(m_optionsWindow.gameObject);
+				m_optionsWindow = null;
+			}
+		}
+
+		protected abstract void PopulateOptions();
 	}
 }

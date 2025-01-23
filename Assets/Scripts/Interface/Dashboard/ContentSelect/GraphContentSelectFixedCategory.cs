@@ -81,8 +81,6 @@ namespace MSP2050.Scripts
 
 			a_minValue = 0f;
 			a_maxValue = float.NegativeInfinity;
-			if (a_stacked)
-				a_maxValue = 0f;
 
 			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 			if (chosenKPIs.Count > 0)
@@ -115,6 +113,7 @@ namespace MSP2050.Scripts
 				for(int i = 0; i < a_timeSettings.m_months.Count; i++)
 				{
 					data.m_steps.Add(new float?[chosenKPIs.Count]);
+					float stackedV = 0f;
 					for (int j = 0; j < chosenKPIs.Count; j++)
 					{
 						List<float?> values = new List<float?>(a_timeSettings.m_months[i].Count);
@@ -126,16 +125,22 @@ namespace MSP2050.Scripts
 						data.m_steps[i][j] = aggregatedV;
 						if (aggregatedV.HasValue)
 						{
-							if (a_stacked)
-								a_maxValue += aggregatedV.Value;
-							else
+							if (!a_stacked)
 							{
 								if (aggregatedV.Value > a_maxValue)
 									a_maxValue = aggregatedV.Value;
 								if (aggregatedV.Value < a_minValue)
 									a_minValue = aggregatedV.Value;
 							}
+							stackedV += aggregatedV.Value;
 						}
+					}
+					if(a_stacked)
+					{
+						if (stackedV > a_maxValue)
+							a_maxValue = stackedV;
+						if (stackedV < a_minValue)
+							a_minValue = stackedV;
 					}
 				}
 			}
@@ -145,22 +150,29 @@ namespace MSP2050.Scripts
 				for (int i = 0; i < a_timeSettings.m_months.Count; i++)
 				{
 					data.m_steps.Add(new float?[chosenKPIs.Count]);
+					float stackedV = 0f;
 					for (int j = 0; j < chosenKPIs.Count; j++)
 					{
 						float? v = chosenKPIs[j].GetKpiValueForMonth(a_timeSettings.m_months[i][0]);
 						data.m_steps[i][j] = v;
 						if (v.HasValue)
 						{
-							if (a_stacked)
-								a_maxValue += v.Value;
-							else
+							if (!a_stacked)
 							{
 								if (v.Value > a_maxValue)
 									a_maxValue = v.Value;
 								if (v.Value < a_minValue)
 									a_minValue = v.Value;
 							}
+							stackedV += v.Value;
 						}
+					}
+					if (a_stacked)
+					{
+						if (stackedV > a_maxValue)
+							a_maxValue = stackedV;
+						if (stackedV < a_minValue)
+							a_minValue = stackedV;
 					}
 				}
 			}
