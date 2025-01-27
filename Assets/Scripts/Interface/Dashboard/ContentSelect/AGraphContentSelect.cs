@@ -9,10 +9,8 @@ namespace MSP2050.Scripts
 {
 	public abstract class AGraphContentSelect : MonoBehaviour
 	{
-		[SerializeField] protected TextMeshProUGUI m_summaryText;
-		[SerializeField] protected Toggle m_detailsToggle;
+		[SerializeField] protected GraphContentSelectToggle[] m_contentToggles;
 		[SerializeField] protected GameObject m_detailsWindowPrefab;
-		[SerializeField] protected Transform m_detailsWindowParent;
 		[SerializeField] protected TextMeshProUGUI m_noDataEntry;
 
 		protected ADashboardWidget m_widget;
@@ -25,19 +23,24 @@ namespace MSP2050.Scripts
 		{
 			m_widget = a_widget;
 			m_onSettingsChanged = a_onSettingsChanged;
-			m_detailsToggle.onValueChanged.AddListener(ToggleDetails);
+			for(int i = 0; i < m_contentToggles.Length; i++ )
+			{
+				int index = i;
+				m_contentToggles[i].m_detailsToggle.onValueChanged.AddListener((b) => ToggleDetails(b, index));
+
+			}
 		}
 
-		void ToggleDetails(bool a_value)
+		void ToggleDetails(bool a_value, int a_index)
 		{
 			if (a_value)
-				CreateDetailsWindow();
+				CreateDetailsWindow(a_index);
 			else
-				DestroyDetailsWindow();		
+				DestroyDetailsWindow(a_index);		
 		}
 
-		protected abstract void CreateDetailsWindow();
-		protected abstract void DestroyDetailsWindow();
+		protected abstract void CreateDetailsWindow(int a_index);
+		protected abstract void DestroyDetailsWindow(int a_index);
 		public abstract GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, bool a_stacked, out float a_maxValue, out float a_minValue);
 	}
 }

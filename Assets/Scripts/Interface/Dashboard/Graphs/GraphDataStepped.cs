@@ -14,8 +14,10 @@ namespace MSP2050.Scripts
 		public float m_graphMin; //Set by value axis
 		public float m_graphRange;
 		public List<string> m_stepNames;
-		public string[] m_categoryNames;
+		//public string[] m_categoryNames;
 		public List<int> m_absoluteCategoryIndices;
+		public List<int> m_selectedCountries;
+		public List<string> m_selectedDisplayIDs;
 
 		public string FormatValue(float a_value)
 		{

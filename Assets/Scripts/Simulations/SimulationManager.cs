@@ -134,6 +134,19 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
+		public List<KPIValueCollection> GetKPIValuesForAllCountriesSimulation(string a_targetSimulation)
+		{
+			if (string.IsNullOrEmpty(a_targetSimulation))
+			{
+				return geometryKPIs.GetKPIForAllCountries();
+			}
+			if (m_simulationLogic.TryGetValue(a_targetSimulation, out var logic))
+			{
+				return logic.GetKPIValuesForAllCountries();
+			}
+			return null;
+		}
+
 		private void CreateGeometryKPI()
 		{
 			foreach (Team team in SessionManager.Instance.GetTeams())

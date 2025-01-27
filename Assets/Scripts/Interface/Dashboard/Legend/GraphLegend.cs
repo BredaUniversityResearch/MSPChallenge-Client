@@ -41,22 +41,34 @@ namespace MSP2050.Scripts
 		{
 			m_data = a_data;
 			//Determine max number of rows
-			int rows = Mathf.CeilToInt(a_data.m_categoryNames.Length / (float)m_columns);
+			int rows = Mathf.CeilToInt(a_data.m_selectedDisplayIDs.Count / (float)m_columns);
 			//Start positioning from top row
 			int i = 0;
-			for(int y = 0; y < rows && i < a_data.m_categoryNames.Length; y++)
+			for(int y = 0; y < rows && i < a_data.m_selectedDisplayIDs.Count; y++)
 			{
-				for (int x = 0; x < m_columns && i < a_data.m_categoryNames.Length; x++)
+				for (int x = 0; x < m_columns && i < a_data.m_selectedDisplayIDs.Count; x++)
 				{
 					if (i >= m_entries.Count)
 					{
 						m_entries.Add(Instantiate(m_entryPrefab, transform).GetComponent<GraphLegendEntry>());
 					}
-					m_entries[i].SetData(a_data.m_categoryNames[i], DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[i]),
-						x / (float)m_columns,
-						(x + 1) / (float)m_columns,
-						a_spacing / 2f,
-						y * (m_entryPrefab.m_height + a_spacing));
+					if(a_data.m_selectedCountries == null)
+					{
+						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i], DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[i]),
+							x / (float)m_columns,
+							(x + 1) / (float)m_columns,
+							a_spacing / 2f,
+							y * (m_entryPrefab.m_height + a_spacing));
+					}
+					else
+					{
+						float t = (float)(i + 1) / (a_data.m_selectedDisplayIDs.Count + 1);
+						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i], new Color(t, t, t, 1f),
+													x / (float)m_columns,
+													(x + 1) / (float)m_columns,
+													a_spacing / 2f,
+													y * (m_entryPrefab.m_height + a_spacing));
+					}
 					i++;
 				}
 			}

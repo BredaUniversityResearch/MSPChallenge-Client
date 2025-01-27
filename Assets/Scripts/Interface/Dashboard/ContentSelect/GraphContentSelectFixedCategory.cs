@@ -10,36 +10,107 @@ namespace MSP2050.Scripts
 {
 	public class GraphContentSelectFixedCategory : AGraphContentSelect
 	{
+		public enum KPISource { Ecology, Energy, Shipping, Geometry }
 		[SerializeField] protected string[] m_categoryNames;
+		[SerializeField] protected KPISource m_kpiSource;
 
-		bool[] m_valueToggles;
+		HashSet<int> m_selectedCountries;
+		HashSet<string> m_selectedIDs;
+
+		List<int> m_AllCountries;
+		List<string> m_allIDs;
+		List<string> m_displayIDs;
 		List<KPICategory> m_categories;
 		List<KPIValue> m_values;
-		GraphContentSelectFixedCategoryWindow m_detailsWindow;
+		GraphContentSelectFixedCategoryWindow[] m_detailsWindows;
 
 		public override void Initialise(Action a_onSettingsChanged, ADashboardWidget a_widget)
 		{
 			base.Initialise(a_onSettingsChanged, a_widget);
+			m_detailsWindows = new GraphContentSelectFixedCategoryWindow[m_contentToggles.Length];
 
-			KPIValueCollection kvc = SimulationLogicMEL.Instance.GetKPIValuesForCountry();
+			List<KPIValueCollection> kvcs = null;
+			switch(m_kpiSource)
+			{
+				case KPISource.Ecology:
+					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.MEL_SIM_NAME); 
+					break;
+				case KPISource.Energy:
+					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.CEL_SIM_NAME);
+					break;
+				case KPISource.Shipping:
+					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SEL_SIM_NAME);
+					break;
+				case KPISource.Geometry:
+					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(null);
+					break;
+			}
+			
+			if(kvcs == null || kvcs.Count == 0)
+			{
+				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
+				m_noDataEntry.text = "NO DATA AVAILABLE";
+				for(int i = 0; i < m_contentToggles.Length; i++)
+				{
+					m_contentToggles[i].gameObject.SetActive(false);
+				}
+				return;
+			}
+			else if (kvcs.Count == 1)
+			{
+				m_contentToggles[1].gameObject.SetActive(false);
+			}
+
+			//Fetch values and their names
 			m_categories = new List<KPICategory>();
 			m_values = new List<KPIValue>();
-			foreach(string s in m_categoryNames)
+			m_displayIDs = new List<string>();
+			m_allIDs = new List<string>();
+			m_selectedIDs = new HashSet<string>();
+			int valueIndex = 0;
+			foreach (KPIValueCollection valueColl in kvcs)
 			{
-				KPICategory cat = kvc.FindCategoryByName(s);
-				if (cat == null)
-					continue;
-				m_categories.Add(cat);
-				cat.OnValueUpdated += OnKPIChanged;
-				m_values.AddRange(cat.GetChildValues());
+				foreach (string s in m_categoryNames)
+				{
+					KPICategory cat = valueColl.FindCategoryByName(s);
+					if (cat == null)
+						continue;
+					m_categories.Add(cat);
+					cat.OnValueUpdated += OnKPIChanged;
+					m_values.AddRange(cat.GetChildValues());
+					if(valueIndex == 0)
+					{ 
+						foreach(var value in cat.GetChildValues())
+						{
+							m_displayIDs.Add(value.displayName);
+							m_allIDs.Add(value.name);
+							m_selectedIDs.Add(value.name);
+						}
+					}
+				}
+				valueIndex++;
 			}
-			m_valueToggles = new bool[m_values.Count];
-			for (int i = 0; i < m_valueToggles.Length; i++)
-				m_valueToggles[i] = true;
 			if (m_categories.Count == 0)
 			{
 				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
 				m_noDataEntry.text = "NO DATA AVAILABLE";
+			}
+
+			//Setup toggle values
+			if(kvcs.Count > 1)
+			{
+				m_AllCountries = new List<int>();
+				foreach(Team team in SessionManager.Instance.GetTeams())
+				{
+					if (!team.IsManager)
+						m_AllCountries.Add(team.ID);
+				}
+				m_selectedCountries = new HashSet<int>();
+				foreach(int country in m_AllCountries)
+				{
+					m_selectedCountries.Add(country);
+				}
+				//TODO: add all country option if relevant?
 			}
 		}
 
@@ -56,9 +127,21 @@ namespace MSP2050.Scripts
 			m_widget.UpdateData();
 		}
 
-		void OnToggleValueChanged(int a_index, bool a_value)
+		void OnIDToggleChanged(int a_index, bool a_value)
 		{
-			m_valueToggles[a_index] = a_value;
+			if (a_value)
+				m_selectedIDs.Add(m_allIDs[a_index]);
+			else
+				m_selectedIDs.Remove(m_allIDs[a_index]);
+			m_onSettingsChanged.Invoke();
+		}
+
+		void OnCountryToggleChanged(int a_index, bool a_value)
+		{
+			if (a_value)
+				m_selectedCountries.Add(m_AllCountries[a_index]);
+			else
+				m_selectedCountries.Remove(m_AllCountries[a_index]);
 			m_onSettingsChanged.Invoke();
 		}
 
@@ -70,7 +153,7 @@ namespace MSP2050.Scripts
 			int index = 0;
 			foreach (KPIValue v in m_values)
 			{
-				if (m_valueToggles[index])
+				if (m_selectedIDs.Contains(v.name) && (m_selectedCountries == null || m_selectedCountries.Contains(v.targetCountryId)))
 				{
 					chosenKPIs.Add(v);
 					data.m_absoluteCategoryIndices.Add(index);
@@ -99,12 +182,21 @@ namespace MSP2050.Scripts
 			}
 
 			data.m_stepNames = a_timeSettings.m_stepNames;
-			data.m_categoryNames = new string[chosenKPIs.Count];
 			data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);
-
-			for (int i = 0; i < chosenKPIs.Count; i++)
+			if(m_selectedCountries != null)
 			{
-				data.m_categoryNames[i] = chosenKPIs[i].displayName;
+				data.m_selectedCountries = new List<int>(m_selectedCountries.Count);
+				foreach(int country in m_AllCountries)
+				{
+					if (m_selectedCountries.Contains(country))
+						data.m_selectedCountries.Add(country);
+				}
+			}
+			data.m_selectedDisplayIDs = new List<string>(m_selectedIDs.Count);
+			for(int i = 0; i < m_allIDs.Count; i++)
+			{
+				if (m_selectedIDs.Contains(m_allIDs[i]))
+					data.m_selectedDisplayIDs.Add(m_displayIDs[i]);
 			}
 
 			if(a_timeSettings.m_aggregationFunction != null)
@@ -184,16 +276,23 @@ namespace MSP2050.Scripts
 			return data;
 		}
 
-		protected override void CreateDetailsWindow()
+		protected override void CreateDetailsWindow(int a_index)
 		{
-			m_detailsWindow = Instantiate(m_detailsWindowPrefab, m_detailsWindowParent).GetComponent<GraphContentSelectFixedCategoryWindow>();
-			m_detailsWindow.Initialise(m_valueToggles, m_values, OnToggleValueChanged);
+			m_detailsWindows[a_index] = Instantiate(m_detailsWindowPrefab, m_contentToggles[a_index].m_detailsWindowParent).GetComponent<GraphContentSelectFixedCategoryWindow>();
+			if(a_index == 0)
+			{
+				m_detailsWindows[0].Initialise(m_selectedIDs, m_allIDs, m_displayIDs, OnIDToggleChanged);
+			}
+			else
+			{
+				m_detailsWindows[1].Initialise(m_selectedCountries, m_AllCountries, OnCountryToggleChanged);
+			}
 		}
 
-		protected override void DestroyDetailsWindow()
+		protected override void DestroyDetailsWindow(int a_index)
 		{
-			Destroy(m_detailsWindow.gameObject);
-			m_detailsWindow = null;
+			Destroy(m_detailsWindows[a_index].gameObject);
+			m_detailsWindows[a_index] = null;
 		}
 	}
 }
