@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 			{
 				int iDIndex = a_cat % a_data.m_selectedDisplayIDs.Count;
 				int country = a_data.m_selectedCountries[a_cat / a_data.m_selectedDisplayIDs.Count];
-				float t = (float)(a_cat + 1) / (a_data.m_selectedDisplayIDs.Count + 1);
+				float t = (float)(iDIndex + 1) / (a_data.m_selectedDisplayIDs.Count + 1);
 
 				Team team = SessionManager.Instance.GetTeamByTeamID(country);
 				m_image.color = team.color;

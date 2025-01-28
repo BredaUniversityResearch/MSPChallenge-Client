@@ -136,12 +136,42 @@ namespace MSP2050.Scripts
 			m_onSettingsChanged.Invoke();
 		}
 
+		void OnAllIDTogglesChanged(bool a_value)
+		{
+			if (a_value)
+			{
+				m_selectedIDs = new HashSet<string>();
+				for (int i = 0; i < m_allIDs.Count; i++)
+				{
+					m_selectedIDs.Add(m_allIDs[i]);
+				}
+			}
+			else
+				m_selectedIDs = new HashSet<string>();
+			m_onSettingsChanged.Invoke();
+		}
+
 		void OnCountryToggleChanged(int a_index, bool a_value)
 		{
 			if (a_value)
 				m_selectedCountries.Add(m_AllCountries[a_index]);
 			else
 				m_selectedCountries.Remove(m_AllCountries[a_index]);
+			m_onSettingsChanged.Invoke();
+		}
+
+		void OnAllCountriesToggleChanged(bool a_value)
+		{
+			if (a_value)
+			{
+				m_selectedCountries = new HashSet<int>();
+				for (int i = 0; i < m_AllCountries.Count; i++)
+				{
+					m_selectedCountries.Add(m_AllCountries[i]);
+				}
+			}
+			else
+				m_selectedCountries = new HashSet<int>();
 			m_onSettingsChanged.Invoke();
 		}
 
@@ -169,6 +199,8 @@ namespace MSP2050.Scripts
 			if (chosenKPIs.Count > 0)
 			{
 				vcc.TryGetConverter(chosenKPIs[0].unit, out data.m_unit);
+				if (data.m_unit == null)
+					data.m_undefinedUnit = string.IsNullOrEmpty(chosenKPIs[0].unit) ? "N/A" : chosenKPIs[0].unit;
 				m_noDataEntry.gameObject.SetActive(false);
 			}
 			else
@@ -281,11 +313,11 @@ namespace MSP2050.Scripts
 			m_detailsWindows[a_index] = Instantiate(m_detailsWindowPrefab, m_contentToggles[a_index].m_detailsWindowParent).GetComponent<GraphContentSelectFixedCategoryWindow>();
 			if(a_index == 0)
 			{
-				m_detailsWindows[0].Initialise(m_selectedIDs, m_allIDs, m_displayIDs, OnIDToggleChanged);
+				m_detailsWindows[0].Initialise(m_selectedIDs, m_allIDs, m_displayIDs, OnIDToggleChanged, OnAllIDTogglesChanged);
 			}
 			else
 			{
-				m_detailsWindows[1].Initialise(m_selectedCountries, m_AllCountries, OnCountryToggleChanged);
+				m_detailsWindows[1].Initialise(m_selectedCountries, m_AllCountries, OnCountryToggleChanged, OnAllCountriesToggleChanged);
 			}
 		}
 
