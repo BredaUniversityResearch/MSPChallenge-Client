@@ -26,10 +26,18 @@ namespace MSP2050.Scripts
 				int country = a_data.m_selectedCountries[a_cat / a_data.m_selectedDisplayIDs.Count];
 				float t = (float)(iDIndex + 1) / (a_data.m_selectedDisplayIDs.Count + 1);
 
-				Team team = SessionManager.Instance.GetTeamByTeamID(country);
-				m_image.color = team.color;
-				m_image.color = new Color((m_image.color.r + t) / 2f, (m_image.color.g + t) / 2f, (m_image.color.b + t) / 2f, 1f);
-				m_tooltip.text = $"{team.name} team's {a_data.m_selectedDisplayIDs[iDIndex]}: {a_data.FormatValue(a_data.m_steps[a_step][a_cat].Value)} {a_data.GetUnitString()}";
+				Team team = SessionManager.Instance.FindTeamByID(country);
+				if (team == null)
+				{
+					m_image.color = new Color(t, t, t, 1f);
+					m_tooltip.text = $"All team's {a_data.m_selectedDisplayIDs[iDIndex]}: {a_data.FormatValue(a_data.m_steps[a_step][a_cat].Value)} {a_data.GetUnitString()}";
+				}
+				else
+				{
+					m_image.color = team.color;
+					m_image.color = new Color((m_image.color.r + t) / 2f, (m_image.color.g + t) / 2f, (m_image.color.b + t) / 2f, 1f);
+					m_tooltip.text = $"{team.name} team's {a_data.m_selectedDisplayIDs[iDIndex]}: {a_data.FormatValue(a_data.m_steps[a_step][a_cat].Value)} {a_data.GetUnitString()}";
+				}
 			}
 			rect.anchorMin = new Vector2(a_xMin, a_yMin);
 			rect.anchorMax = new Vector2(a_xMax, a_yMax);

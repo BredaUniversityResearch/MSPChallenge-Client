@@ -20,13 +20,12 @@ namespace MSP2050.Scripts
 		bool m_ignoreCallbacks;
 		List<GenericTextToggle> m_entries;
 
-		public void Initialise(HashSet<string> a_selectedIDs, List<string> a_allIDs, List<string> a_displayIDs, Action<int, bool> a_callback, Action<bool> a_allChangeCallback)
+		public void SetContent(HashSet<string> a_selectedIDs, List<string> a_allIDs, List<string> a_displayIDs, Action<int, bool> a_callback, Action<bool> a_allChangeCallback)
 		{
 			m_callback = a_callback;
 			m_allChangeCallback = a_allChangeCallback;
-			m_entries = new List<GenericTextToggle>();
-			m_allButton.onClick.AddListener(ToggleAll);
-			m_noneButton.onClick.AddListener(ToggleNone);
+			ClearEntries();
+			InitialiseButtons();
 
 			for (int i = 0; i < a_allIDs.Count; i++)
 			{
@@ -39,13 +38,30 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void Initialise(HashSet<int> a_selectedCountries, List<int> a_allCountries, Action<int, bool> a_callback, Action<bool> a_allChangeCallback)
+		public void SetContent(HashSet<KPIValue> a_selectedValues, List<KPIValue> a_allValues,  Action<int, bool> a_callback, Action<bool> a_allChangeCallback)
 		{
 			m_callback = a_callback;
 			m_allChangeCallback = a_allChangeCallback;
-			m_entries = new List<GenericTextToggle>();
-			m_allButton.onClick.AddListener(ToggleAll);
-			m_noneButton.onClick.AddListener(ToggleNone);
+			ClearEntries();
+			InitialiseButtons();
+
+			for (int i = 0; i < a_allValues.Count; i++)
+			{
+				int index = i;
+				GenericTextToggle entry = Instantiate(m_entryPrefab, m_entryParent).GetComponent<GenericTextToggle>();
+				entry.m_toggle.isOn = a_selectedValues.Contains(a_allValues[i]);
+				entry.m_toggle.onValueChanged.AddListener((b) => { ToggleChangedCallback(index, b); });
+				entry.m_text.text = a_allValues[i].displayName;
+				m_entries.Add(entry);
+			}
+		}
+
+		public void SetContent(HashSet<int> a_selectedCountries, List<int> a_allCountries, Action<int, bool> a_callback, Action<bool> a_allChangeCallback)
+		{
+			m_callback = a_callback;
+			m_allChangeCallback = a_allChangeCallback;
+			ClearEntries();
+			InitialiseButtons();
 
 			for (int i = 0; i < a_allCountries.Count; i++)
 			{
@@ -53,9 +69,34 @@ namespace MSP2050.Scripts
 				GenericTextToggle entry = Instantiate(m_entryPrefab, m_entryParent).GetComponent<GenericTextToggle>();
 				entry.m_toggle.isOn = a_selectedCountries.Contains(a_allCountries[i]);
 				entry.m_toggle.onValueChanged.AddListener((b) => { ToggleChangedCallback(index, b); });
-				entry.m_text.text = SessionManager.Instance.GetTeamByTeamID(a_allCountries[i]).name;
+				if(a_allCountries[i] <= 0)
+				{
+					entry.m_text.text = "All";
+				}
+				else
+					entry.m_text.text = SessionManager.Instance.GetTeamByTeamID(a_allCountries[i]).name;
 				m_entries.Add(entry);
 			}
+		}
+
+		void InitialiseButtons()
+		{
+			m_allButton.onClick.RemoveAllListeners();
+			m_noneButton.onClick.RemoveAllListeners();
+			m_allButton.onClick.AddListener(ToggleAll);
+			m_noneButton.onClick.AddListener(ToggleNone);
+		}
+
+		void ClearEntries()
+		{
+			if (m_entries != null)
+			{
+				foreach (GenericTextToggle entry in m_entries)
+				{
+					Destroy(entry.gameObject);
+				}
+			}
+			m_entries = new List<GenericTextToggle>();
 		}
 
 		void ToggleAll()
