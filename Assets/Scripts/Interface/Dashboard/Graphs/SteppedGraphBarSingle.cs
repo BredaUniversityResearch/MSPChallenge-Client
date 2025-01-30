@@ -15,7 +15,7 @@ namespace MSP2050.Scripts
 		public void SetData(GraphDataStepped a_data, int a_step, int a_cat, float a_xMin, float a_xMax, float a_yMin, float a_yMax)
 		{
 			RectTransform rect = GetComponent<RectTransform>();
-			if (a_data.m_selectedCountries == null)
+			if (a_data.m_valueCountries == null)
 			{
 				m_image.color = DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[a_cat]);
 				m_tooltip.text = $"{a_data.m_selectedDisplayIDs[a_cat]}: {a_data.FormatValue(a_data.m_steps[a_step][a_cat].Value)} {a_data.GetUnitString()}";
@@ -23,10 +23,9 @@ namespace MSP2050.Scripts
 			else
 			{
 				int iDIndex = a_cat % a_data.m_selectedDisplayIDs.Count;
-				int country = a_data.m_selectedCountries[a_cat / a_data.m_selectedDisplayIDs.Count];
 				float t = (float)(iDIndex + 1) / (a_data.m_selectedDisplayIDs.Count + 1);
 
-				Team team = SessionManager.Instance.FindTeamByID(country);
+				Team team = SessionManager.Instance.FindTeamByID(a_data.m_valueCountries[a_cat]);
 				if (team == null)
 				{
 					m_image.color = new Color(t, t, t, 1f);

@@ -8,6 +8,8 @@ namespace MSP2050.Scripts
 	public class GraphLegend : MonoBehaviour
 	{
 		[SerializeField] GraphLegendEntry m_entryPrefab;
+		[SerializeField] RectTransform m_entryParent;
+		[SerializeField] float m_maxOuterSize;
 
 		GraphDataStepped m_data;
 		int m_columns = 1;
@@ -16,7 +18,7 @@ namespace MSP2050.Scripts
 
 		public void Initialise()
 		{
-			if (transform.childCount > 0)
+			if (m_entryParent.childCount > 0)
 			{
 				foreach (Transform child in transform)
 				{
@@ -50,9 +52,9 @@ namespace MSP2050.Scripts
 				{
 					if (i >= m_entries.Count)
 					{
-						m_entries.Add(Instantiate(m_entryPrefab, transform).GetComponent<GraphLegendEntry>());
+						m_entries.Add(Instantiate(m_entryPrefab, m_entryParent).GetComponent<GraphLegendEntry>());
 					}
-					if(a_data.m_selectedCountries == null)
+					if(a_data.m_valueCountries == null)
 					{
 						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i], DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[i]),
 							x / (float)m_columns,
@@ -78,25 +80,25 @@ namespace MSP2050.Scripts
 			}
 
 			RectTransform rect = GetComponent<RectTransform>();
+			float size = 0f;
+			m_entryParent.sizeDelta = new Vector2(0f, rows * m_entryPrefab.m_height + (rows - 1) * a_spacing);
 			if(m_horizontal)
 			{
-				float size = rows * m_entryPrefab.m_height + (rows - 1) * a_spacing + a_sideSpacing;
+				size = Mathf.Min(rows * m_entryPrefab.m_height + (rows - 1) * a_spacing + a_sideSpacing, m_maxOuterSize);
 				rect.anchorMin = new Vector2(0f, 0f);
 				rect.anchorMax = new Vector2(1f, 0f);
 				rect.offsetMin = new Vector2(a_sideSpacing, a_sideSpacing);
 				rect.offsetMax = new Vector2(-a_sideSpacing, size);
-				return size;
 			}
 			else
 			{
-				float size = m_columns * m_entryPrefab.m_preferredWidth + (m_columns - 1) * a_spacing + a_sideSpacing;
+				size = Mathf.Min(m_entryPrefab.m_preferredWidth + (m_columns - 1) * a_spacing + a_sideSpacing, m_maxOuterSize);
 				rect.anchorMin = new Vector2(0f, 0f);
 				rect.anchorMax = new Vector2(0f, 1f);
 				rect.offsetMin = new Vector2(a_sideSpacing, a_sideSpacing);
 				rect.offsetMax = new Vector2(size, -a_topSpacing);
-				return size;
 			}
+			return size;
 		}
-
 	}
 }

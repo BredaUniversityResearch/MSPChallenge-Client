@@ -6,19 +6,23 @@ namespace MSP2050.Scripts
 {
 	public class GraphDataStepped
 	{
-		public List<float?[]> m_steps; //Step (time step or distribution), value per category
+		//Actual data: Step (time step or distribution), value per category
+		public List<float?[]> m_steps; 
 
+		//Unit information
 		public ValueConversionUnit m_unit;
 		public string m_undefinedUnit;
 		public int m_unitIndex;
 		public int m_unitPower;
 		public int m_unitEOffset;
+
+		//Data display range
 		public float m_graphMin; //Set by value axis
 		public float m_graphRange;
 
 		public List<string> m_stepNames;
-		public List<int> m_absoluteCategoryIndices;
-		public List<int> m_selectedCountries;
+		public List<int> m_absoluteCategoryIndices; //Used to keep colours consistent when values are hidden
+		public List<int> m_valueCountries; //Country of all the selected values
 		public List<string> m_selectedDisplayIDs;
 
 		public string FormatValue(float a_value)

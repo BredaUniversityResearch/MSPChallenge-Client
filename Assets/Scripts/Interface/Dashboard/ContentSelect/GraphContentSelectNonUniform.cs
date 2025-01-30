@@ -233,17 +233,16 @@ namespace MSP2050.Scripts
 
 			data.m_stepNames = a_timeSettings.m_stepNames;
 			data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);
-			if(m_selectedCountries != null)
+			if (m_selectedCountries != null)
 			{
-				data.m_selectedCountries = new List<int>(m_selectedCountries.Count);
-				foreach(int country in m_allCountries)
+				data.m_valueCountries = new List<int>(chosenKPIs.Count);
+				foreach (KPIValue kpi in chosenKPIs)
 				{
-					if (m_selectedCountries.Contains(country))
-						data.m_selectedCountries.Add(country);
+					data.m_valueCountries.Add(kpi.targetCountryId);
 				}
 			}
 
-			if(a_timeSettings.m_aggregationFunction != null)
+			if (a_timeSettings.m_aggregationFunction != null)
 			{
 				//get sets, then aggregate
 				for(int i = 0; i < a_timeSettings.m_months.Count; i++)
