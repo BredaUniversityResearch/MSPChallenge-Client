@@ -43,7 +43,8 @@ namespace MSP2050.Scripts
 		{
 			m_data = a_data;
 			//Determine max number of rows
-			int rows = Mathf.CeilToInt(a_data.m_selectedDisplayIDs.Count / (float)m_columns);
+			int rows = Mathf.CeilToInt((a_data.m_selectedDisplayIDs.Count + (a_data.m_patternNames == null ? 0 : a_data.m_patternNames.Count-1)) / (float)m_columns);
+			string postFix = a_data.m_patternNames == null ? " " : " " + a_data.m_patternNames[0];
 			//Start positioning from top row
 			int i = 0;
 			for(int y = 0; y < rows && i < a_data.m_selectedDisplayIDs.Count; y++)
@@ -56,7 +57,7 @@ namespace MSP2050.Scripts
 					}
 					if(a_data.m_valueCountries == null)
 					{
-						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i], DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[i]),
+						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i] + postFix, DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[i]),
 							x / (float)m_columns,
 							(x + 1) / (float)m_columns,
 							a_spacing / 2f,
@@ -65,12 +66,29 @@ namespace MSP2050.Scripts
 					else
 					{
 						float t = (float)(i + 1) / (a_data.m_selectedDisplayIDs.Count + 1);
-						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i], new Color(t, t, t, 1f),
+						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i] + postFix, new Color(t, t, t, 1f),
 													x / (float)m_columns,
 													(x + 1) / (float)m_columns,
 													a_spacing / 2f,
 													y * (m_entryPrefab.m_height + a_spacing));
 					}
+					i++;
+				}
+			}
+			if(a_data.m_patternNames != null && a_data.m_patternNames.Count > 1)
+			{
+				for(int p = 1; p < a_data.m_patternNames.Count; p++)
+				{
+					if (i >= m_entries.Count)
+					{
+						m_entries.Add(Instantiate(m_entryPrefab, m_entryParent).GetComponent<GraphLegendEntry>());
+					}
+					int x = i % m_columns;
+					m_entries[i].SetData(a_data.m_patternNames[p], Color.black,
+							x / (float)m_columns,
+							(x + 1) / (float)m_columns,
+							a_spacing / 2f,
+							i/m_columns * (m_entryPrefab.m_height + a_spacing),p);
 					i++;
 				}
 			}

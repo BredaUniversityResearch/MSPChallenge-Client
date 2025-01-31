@@ -9,10 +9,16 @@ namespace MSP2050.Scripts
 	public class DashboardColourList : ScriptableObject
 	{
 		public List<Color> m_colours;
+		public List<Sprite> m_patterns;
 
 		public Color GetColour(int a_index)
 		{
 			return m_colours[a_index % m_colours.Count];
+		}
+
+		public Sprite GetPattern(int a_index)
+		{
+			return m_patterns[a_index % m_patterns.Count];
 		}
 	}
 }

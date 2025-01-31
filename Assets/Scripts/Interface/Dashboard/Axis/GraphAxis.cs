@@ -73,11 +73,11 @@ namespace MSP2050.Scripts
 			if (a_data.m_unit != null)
 			{
 				a_data.m_unitIndex = a_data.m_unit.GetConversionUnitIndexForSize(maxScaled);
-				a_data.m_unitPower = FindPower(maxScaled);// * a_data.m_unit.GetUnitEntrySize(a_data.m_unitIndex));
+				a_data.m_scalePower = FindPower(maxScaled);// * a_data.m_unit.GetUnitEntrySize(a_data.m_unitIndex));
 				a_data.m_unitEOffset = a_data.m_unit.GetUnitEntryEOffset(a_data.m_unitIndex);
 			}
 			else
-				a_data.m_unitPower = FindPower(maxScaled);
+				a_data.m_scalePower = FindPower(maxScaled);
 
 			m_unitText.text = a_data.GetUnitString();
 

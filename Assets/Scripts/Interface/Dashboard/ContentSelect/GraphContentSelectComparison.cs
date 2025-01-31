@@ -8,18 +8,23 @@ using System.Linq;
 
 namespace MSP2050.Scripts
 {
-	public class GraphContentSelectNonUniform : AGraphContentSelect
+	public class GraphContentSelectComparison : AGraphContentSelect
 	{
+		public enum KPISource { Ecology, Energy, Shipping, Geometry, Other }
 		[SerializeField] protected string[] m_categoryNames;
-		[SerializeField] protected GraphContentSelectFixedCategory.KPISource m_kpiSource;
+		[SerializeField] protected string[] m_categoryDisplayNames;
+		[SerializeField] protected KPISource m_kpiSource;
+		[SerializeField] bool m_overLapPatternSet;
 
 		HashSet<int> m_selectedCountries;
-		HashSet<KPIValue> m_selectedValues;
+		HashSet<string> m_selectedIDs;
 
-		Dictionary<int, List<KPIValue>> m_valuesPerCountry;
 		List<int> m_allCountries;
-		List<KPIValue> m_currentValueOptions;
+		List<string> m_allIDs;
+		List<string> m_displayIDs;
 		List<KPICategory> m_categories;
+		Dictionary<string, List<KPIValue>> m_valuesPerId;
+
 		GraphContentSelectFixedCategoryWindow[] m_detailsWindows;
 
 		public override void Initialise(Action a_onSettingsChanged, ADashboardWidget a_widget)
@@ -30,17 +35,20 @@ namespace MSP2050.Scripts
 			List<KPIValueCollection> kvcs = null;
 			switch(m_kpiSource)
 			{
-				case GraphContentSelectFixedCategory.KPISource.Ecology:
+				case KPISource.Ecology:
 					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.MEL_SIM_NAME); 
 					break;
-				case GraphContentSelectFixedCategory.KPISource.Energy:
+				case KPISource.Energy:
 					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.CEL_SIM_NAME);
 					break;
-				case GraphContentSelectFixedCategory.KPISource.Shipping:
+				case KPISource.Shipping:
 					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SEL_SIM_NAME);
 					break;
-				case GraphContentSelectFixedCategory.KPISource.Geometry:
+				case KPISource.Geometry:
 					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(null);
+					break;
+				default:
+					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.OTHER_SIM_NAME);
 					break;
 			}
 			
@@ -54,14 +62,17 @@ namespace MSP2050.Scripts
 				}
 				return;
 			}
+			else if (kvcs.Count == 1)
+			{
+				m_contentToggles[1].gameObject.SetActive(false);
+			}
 
 			//Fetch values and their names
 			m_categories = new List<KPICategory>();
-			m_currentValueOptions = new List<KPIValue>();
-			m_allCountries = new List<int>();
-			m_selectedValues = new HashSet<KPIValue>();
-			m_valuesPerCountry = new Dictionary<int, List<KPIValue>>();
-
+			m_valuesPerId = new Dictionary<string, List<KPIValue>>();
+			m_displayIDs = new List<string>();
+			m_allIDs = new List<string>();
+			m_selectedIDs = new HashSet<string>();
 			foreach (KPIValueCollection valueColl in kvcs)
 			{
 				foreach (string s in m_categoryNames)
@@ -73,17 +84,18 @@ namespace MSP2050.Scripts
 					cat.OnValueUpdated += OnKPIChanged;
 					foreach (var value in cat.GetChildValues())
 					{
-						m_currentValueOptions.Add(value);
-						m_selectedValues.Add(value);
-						if (m_valuesPerCountry.TryGetValue(cat.targetCountryId, out var list))
-						{
+						if (m_valuesPerId.TryGetValue(value.name, out var list))
+						{ 
 							list.Add(value);
 						}
 						else
-						{ 
-							m_valuesPerCountry.Add(cat.targetCountryId, new List<KPIValue>() { value });
+						{
+							m_valuesPerId.Add(value.name, new List<KPIValue>() { value });
+							m_selectedIDs.Add(value.name);
+							m_allIDs.Add(value.name);
+							m_displayIDs.Add(value.displayName);
 						}
-					}			
+					}
 				}
 			}
 			if (m_categories.Count == 0)
@@ -95,11 +107,16 @@ namespace MSP2050.Scripts
 			//Setup toggle values
 			if(kvcs.Count > 1)
 			{
+				m_allCountries = new List<int>();
+				foreach(Team team in SessionManager.Instance.GetTeams())
+				{
+					if (!team.IsManager)
+						m_allCountries.Add(team.ID);
+				}
 				m_selectedCountries = new HashSet<int>();
-				foreach(int country in m_valuesPerCountry.Keys)
+				foreach(int country in m_allCountries)
 				{
 					m_selectedCountries.Add(country);
-					m_allCountries.Add(country);
 				}
 			}
 		}
@@ -120,9 +137,9 @@ namespace MSP2050.Scripts
 		void OnIDToggleChanged(int a_index, bool a_value)
 		{
 			if (a_value)
-				m_selectedValues.Add(m_currentValueOptions[a_index]);
+				m_selectedIDs.Add(m_allIDs[a_index]);
 			else
-				m_selectedValues.Remove(m_currentValueOptions[a_index]);
+				m_selectedIDs.Remove(m_allIDs[a_index]);
 			m_onSettingsChanged.Invoke();
 		}
 
@@ -130,38 +147,23 @@ namespace MSP2050.Scripts
 		{
 			if (a_value)
 			{
-				m_selectedValues = new HashSet<KPIValue>();
-				for (int i = 0; i < m_currentValueOptions.Count; i++)
+				m_selectedIDs = new HashSet<string>();
+				for (int i = 0; i < m_allIDs.Count; i++)
 				{
-					m_selectedValues.Add(m_currentValueOptions[i]);
+					m_selectedIDs.Add(m_allIDs[i]);
 				}
 			}
 			else
-				m_selectedValues = new HashSet<KPIValue>();
+				m_selectedIDs = new HashSet<string>();
 			m_onSettingsChanged.Invoke();
 		}
 
 		void OnCountryToggleChanged(int a_index, bool a_value)
 		{
 			if (a_value)
-			{
 				m_selectedCountries.Add(m_allCountries[a_index]);
-				foreach(KPIValue kpi in m_valuesPerCountry[m_allCountries[a_index]])
-				{
-					m_selectedValues.Add(kpi);
-					m_currentValueOptions.Add(kpi);
-				}
-			}
 			else
-			{
 				m_selectedCountries.Remove(m_allCountries[a_index]);
-				foreach (KPIValue kpi in m_valuesPerCountry[m_allCountries[a_index]])
-				{
-					m_selectedValues.Remove(kpi);
-					m_currentValueOptions.Remove(kpi);
-				}
-			}
-			RefreshValueSelectIfOpen();
 			m_onSettingsChanged.Invoke();
 		}
 
@@ -172,25 +174,11 @@ namespace MSP2050.Scripts
 				m_selectedCountries = new HashSet<int>();
 				for (int i = 0; i < m_allCountries.Count; i++)
 				{
-					if(!m_selectedCountries.Contains(m_allCountries[i]))
-					{
-						foreach (KPIValue kpi in m_valuesPerCountry[m_allCountries[i]])
-						{
-							m_selectedValues.Add(kpi);
-							m_currentValueOptions.Add(kpi);
-						}
-					}
 					m_selectedCountries.Add(m_allCountries[i]);
 				}
-
 			}
 			else
-			{
 				m_selectedCountries = new HashSet<int>();
-				m_selectedValues = new HashSet<KPIValue>();
-				m_currentValueOptions = new List<KPIValue>();
-			}
-			RefreshValueSelectIfOpen();
 			m_onSettingsChanged.Invoke();
 		}
 
@@ -198,16 +186,30 @@ namespace MSP2050.Scripts
 		{
 			GraphDataStepped data = new GraphDataStepped();
 			data.m_absoluteCategoryIndices = new List<int>();
+			data.m_overLapPatternSet = m_overLapPatternSet;
 			List<KPIValue> chosenKPIs = new List<KPIValue>();
 			int index = 0;
-			data.m_selectedDisplayIDs = new List<string>(m_selectedValues.Count);
-			foreach (KPIValue v in m_selectedValues)
+			foreach (var kvp in m_valuesPerId)
 			{
-				chosenKPIs.Add(v);
-				data.m_absoluteCategoryIndices.Add(index);
-				data.m_selectedDisplayIDs.Add(v.displayName);
-				index++;
+				if (m_selectedIDs.Contains(kvp.Key))
+				{
+					foreach (KPIValue v in kvp.Value)
+					{
+						if (m_selectedCountries == null || m_selectedCountries.Contains(v.targetCountryId))
+						{
+							chosenKPIs.Add(v);
+							data.m_absoluteCategoryIndices.Add(index);
+						}
+						index++;
+					}
+				}
+				else
+					index += kvp.Value.Count;
 			}
+
+			data.m_patternNames = new List<string>();
+			foreach(string s in m_categoryDisplayNames)
+				data.m_patternNames.Add(s);
 
 			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 			if (chosenKPIs.Count > 0)
@@ -220,7 +222,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				vcc.TryGetConverter("", out data.m_unit);
-				if(m_allCountries.Count > 0)
+				if(m_valuesPerId.Count > 0)
 				{
 					m_noDataEntry.gameObject.SetActive(true);
 					m_noDataEntry.text = "NO CONTENT SELECTED";
@@ -229,13 +231,19 @@ namespace MSP2050.Scripts
 
 			data.m_stepNames = a_timeSettings.m_stepNames;
 			data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);
-			if (m_selectedCountries != null)
+			if(m_selectedCountries != null)
 			{
 				data.m_valueCountries = new List<int>(chosenKPIs.Count);
-				foreach (KPIValue kpi in chosenKPIs)
+				foreach(KPIValue kpi in chosenKPIs)
 				{
 					data.m_valueCountries.Add(kpi.targetCountryId);
 				}
+			}
+			data.m_selectedDisplayIDs = new List<string>(m_selectedIDs.Count);
+			for(int i = 0; i < m_allIDs.Count; i++)
+			{
+				if (m_selectedIDs.Contains(m_allIDs[i]))
+					data.m_selectedDisplayIDs.Add(m_displayIDs[i]);
 			}
 
 			FetchDataInternal(chosenKPIs, data, a_timeSettings, a_stacked, out a_maxValue, out a_minValue);
@@ -247,7 +255,7 @@ namespace MSP2050.Scripts
 			m_detailsWindows[a_index] = Instantiate(m_detailsWindowPrefab, m_contentToggles[a_index].m_detailsWindowParent).GetComponent<GraphContentSelectFixedCategoryWindow>();
 			if(a_index == 0)
 			{
-				m_detailsWindows[0].SetContent(m_selectedValues, m_currentValueOptions, OnIDToggleChanged, OnAllIDTogglesChanged);
+				m_detailsWindows[0].SetContent(m_selectedIDs, m_allIDs, m_displayIDs, OnIDToggleChanged, OnAllIDTogglesChanged);
 			}
 			else
 			{
@@ -259,14 +267,6 @@ namespace MSP2050.Scripts
 		{
 			Destroy(m_detailsWindows[a_index].gameObject);
 			m_detailsWindows[a_index] = null;
-		}
-
-		void RefreshValueSelectIfOpen()
-		{
-			if(m_detailsWindows[0] != null)
-			{
-				m_detailsWindows[0].SetContent(m_selectedValues, m_currentValueOptions, OnIDToggleChanged, OnAllIDTogglesChanged);
-			}
 		}
 	}
 }

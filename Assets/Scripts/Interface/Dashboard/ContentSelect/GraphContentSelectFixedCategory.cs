@@ -193,10 +193,6 @@ namespace MSP2050.Scripts
 				}
 				index++;
 			}
-			
-
-			a_minValue = 0f;
-			a_maxValue = float.NegativeInfinity;
 
 			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 			if (chosenKPIs.Count > 0)
@@ -233,80 +229,7 @@ namespace MSP2050.Scripts
 					data.m_selectedDisplayIDs.Add(m_displayIDs[i]);
 			}
 
-			if(a_timeSettings.m_aggregationFunction != null)
-			{
-				//get sets, then aggregate
-				for(int i = 0; i < a_timeSettings.m_months.Count; i++)
-				{
-					data.m_steps.Add(new float?[chosenKPIs.Count]);
-					float stackedV = 0f;
-					for (int j = 0; j < chosenKPIs.Count; j++)
-					{
-						List<float?> values = new List<float?>(a_timeSettings.m_months[i].Count);
-						foreach (int month in a_timeSettings.m_months[i])
-						{
-							values.Add(chosenKPIs[j].GetKpiValueForMonth(month));
-						}
-						float? aggregatedV = a_timeSettings.m_aggregationFunction(values);
-						data.m_steps[i][j] = aggregatedV;
-						if (aggregatedV.HasValue)
-						{
-							if (!a_stacked)
-							{
-								if (aggregatedV.Value > a_maxValue)
-									a_maxValue = aggregatedV.Value;
-								if (aggregatedV.Value < a_minValue)
-									a_minValue = aggregatedV.Value;
-							}
-							stackedV += aggregatedV.Value;
-						}
-					}
-					if(a_stacked)
-					{
-						if (stackedV > a_maxValue)
-							a_maxValue = stackedV;
-						if (stackedV < a_minValue)
-							a_minValue = stackedV;
-					}
-				}
-			}
-			else
-			{
-				//get data directly
-				for (int i = 0; i < a_timeSettings.m_months.Count; i++)
-				{
-					data.m_steps.Add(new float?[chosenKPIs.Count]);
-					float stackedV = 0f;
-					for (int j = 0; j < chosenKPIs.Count; j++)
-					{
-						float? v = chosenKPIs[j].GetKpiValueForMonth(a_timeSettings.m_months[i][0]);
-						data.m_steps[i][j] = v;
-						if (v.HasValue)
-						{
-							if (!a_stacked)
-							{
-								if (v.Value > a_maxValue)
-									a_maxValue = v.Value;
-								if (v.Value < a_minValue)
-									a_minValue = v.Value;
-							}
-							stackedV += v.Value;
-						}
-					}
-					if (a_stacked)
-					{
-						if (stackedV > a_maxValue)
-							a_maxValue = stackedV;
-						if (stackedV < a_minValue)
-							a_minValue = stackedV;
-					}
-				}
-			}
-
-			if (a_maxValue == Mathf.NegativeInfinity)
-				a_maxValue = 1f;
-			if (Mathf.Abs(a_maxValue - a_minValue) < 0.001f)
-				a_maxValue = a_minValue + 0.001f;
+			FetchDataInternal(chosenKPIs, data, a_timeSettings, a_stacked, out a_maxValue, out a_minValue);
 			return data;
 		}
 
