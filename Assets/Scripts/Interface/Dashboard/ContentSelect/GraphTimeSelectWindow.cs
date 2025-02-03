@@ -11,6 +11,7 @@ namespace MSP2050.Scripts
 		public Toggle m_yearToggle; //per month / per year
 		public CustomDropdown m_aggregationDropdown;
 
+		public GameObject m_sectionSeparator;
 		public Toggle m_rangeToggle; // Latest X / range
 		public GameObject m_latestAmountSection;
 		public CustomInputField m_latestAmountInput;
