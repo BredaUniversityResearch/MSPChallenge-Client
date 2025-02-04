@@ -15,6 +15,7 @@ namespace MSP2050.Scripts
 		int m_columns = 1;
 		List<GraphLegendEntry> m_entries = new List<GraphLegendEntry>();
 		bool m_horizontal = true;
+		int m_w, m_h;
 
 		public void Initialise()
 		{
@@ -33,6 +34,8 @@ namespace MSP2050.Scripts
 			//set horizontal or vertical alignment
 			//return expected size
 			m_horizontal = a_horizontal;
+			m_w = a_w;
+			m_h = a_h;
 			m_columns = m_horizontal ? a_w : System.Math.Max(1, a_w / 4);
 			if (m_data != null)
 				return SetData(m_data, a_sideSpacing, a_spacing, a_topSpacing);
@@ -100,9 +103,10 @@ namespace MSP2050.Scripts
 			RectTransform rect = GetComponent<RectTransform>();
 			float size = 0f;
 			m_entryParent.sizeDelta = new Vector2(0f, rows * m_entryPrefab.m_height + (rows - 1) * a_spacing);
-			if(m_horizontal)
+			int minSizeEntries = m_horizontal ? m_h * 2 : m_w * 2;
+			if (m_horizontal)
 			{
-				size = Mathf.Min(rows * m_entryPrefab.m_height + (rows - 1) * a_spacing + a_sideSpacing, m_maxOuterSize);
+				size = Mathf.Min(rows * m_entryPrefab.m_height + (rows - 1) * a_spacing + a_sideSpacing, m_maxOuterSize, minSizeEntries * m_entryPrefab.m_height + (minSizeEntries - 1) * a_spacing);
 				rect.anchorMin = new Vector2(0f, 0f);
 				rect.anchorMax = new Vector2(1f, 0f);
 				rect.offsetMin = new Vector2(a_sideSpacing, a_sideSpacing);
@@ -110,7 +114,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				size = Mathf.Min(m_entryPrefab.m_preferredWidth + (m_columns - 1) * a_spacing + a_sideSpacing, m_maxOuterSize);
+				size = Mathf.Min(m_columns * m_entryPrefab.m_preferredWidth + (m_columns - 1) * a_spacing + a_sideSpacing, m_maxOuterSize, minSizeEntries * m_entryPrefab.m_preferredWidth + (minSizeEntries - 1) * a_spacing + a_sideSpacing);
 				rect.anchorMin = new Vector2(0f, 0f);
 				rect.anchorMax = new Vector2(0f, 1f);
 				rect.offsetMin = new Vector2(a_sideSpacing, a_sideSpacing);
