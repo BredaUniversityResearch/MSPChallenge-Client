@@ -1,10 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using UnityEngine.EventSystems;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MSP2050.Scripts
 {
@@ -13,6 +10,8 @@ namespace MSP2050.Scripts
 		public enum KPISource { Ecology, Energy, Shipping, Geometry, Other }
 		[SerializeField] protected string[] m_categoryNames;
 		[SerializeField] protected KPISource m_kpiSource;
+		[SerializeField] protected ContentSelectFocusSelection m_focusSelection;
+		[SerializeField] protected GameObject m_singleSelectWindowPrefab;
 
 		HashSet<int> m_selectedCountries;
 		HashSet<string> m_selectedIDs;
@@ -22,12 +21,12 @@ namespace MSP2050.Scripts
 		List<string> m_displayIDs;
 		List<KPICategory> m_categories;
 		List<KPIValue> m_values;
-		GraphContentSelectFixedCategoryWindow[] m_detailsWindows;
+		GraphContentSelectWindow[] m_detailsWindows;
 
 		public override void Initialise(Action a_onSettingsChanged, ADashboardWidget a_widget)
 		{
 			base.Initialise(a_onSettingsChanged, a_widget);
-			m_detailsWindows = new GraphContentSelectFixedCategoryWindow[m_contentToggles.Length];
+			m_detailsWindows = new GraphContentSelectWindow[m_contentToggles.Length];
 
 			List<KPIValueCollection> kvcs = null;
 			switch(m_kpiSource)
@@ -62,6 +61,16 @@ namespace MSP2050.Scripts
 			else if (kvcs.Count == 1)
 			{
 				m_contentToggles[1].gameObject.SetActive(false);
+			}
+
+			if(m_focusSelection != null)
+			{
+				string[] focusNames = new string[m_contentToggles.Length];
+				for (int i = 0; i < m_contentToggleNames.Length; i++) 
+				{
+					focusNames[i] = "per " + m_contentToggleNames[i];
+				}
+				m_focusSelection.Initialise(focusNames, OnSelectedFocusChanged);
 			}
 
 			//Fetch values and their names
@@ -125,9 +134,31 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		void OnSelectedFocusChanged(int a_index)
+		{ 
+			foreach(var toggle in m_contentToggles)
+			{
+				toggle.m_detailsToggle.isOn = false;
+			}
+			if(a_index == 0)
+			{
+				if(m_selectedIDs.Count > 1)
+				{
+					m_selectedIDs.Clear();
+					m_selectedIDs.Add(m_allIDs[0]);
+				}
+			}
+			else if (m_selectedCountries.Count > 1)
+			{
+				m_selectedCountries.Clear();
+				m_selectedCountries.Add(m_AllCountries[0]);
+			}
+			m_onSettingsChanged.Invoke();
+		}
+
 		void OnKPIChanged(KPIValue a_newValue)
 		{
-			m_widget.UpdateData();
+			m_onSettingsChanged.Invoke();
 		}
 
 		void OnIDToggleChanged(int a_index, bool a_value)
@@ -235,7 +266,10 @@ namespace MSP2050.Scripts
 
 		protected override void CreateDetailsWindow(int a_index)
 		{
-			m_detailsWindows[a_index] = Instantiate(m_detailsWindowPrefab, m_contentToggles[a_index].m_detailsWindowParent).GetComponent<GraphContentSelectFixedCategoryWindow>();
+			if(m_focusSelection != null && a_index == m_focusSelection.CurrentIndex)
+				m_detailsWindows[a_index] = Instantiate(m_singleSelectWindowPrefab, m_contentToggles[a_index].m_detailsWindowParent).GetComponent<GraphContentSelectSingleSelectWindow>();
+			else
+				m_detailsWindows[a_index] = Instantiate(m_detailsWindowPrefab, m_contentToggles[a_index].m_detailsWindowParent).GetComponent<GraphContentSelectMultiSelectWindow>();
 			if(a_index == 0)
 			{
 				m_detailsWindows[0].SetContent(m_selectedIDs, m_allIDs, m_displayIDs, OnIDToggleChanged, OnAllIDTogglesChanged);

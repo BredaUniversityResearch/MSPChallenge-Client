@@ -94,7 +94,7 @@ namespace MSP2050.Scripts
 
 		void OnKPIChanged(KPIValue a_newValue)
 		{
-			m_widget.UpdateData();
+			m_onSettingsChanged.Invoke();
 		}
 
 		public override GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, bool a_stacked, out float a_maxValue, out float a_minValue)

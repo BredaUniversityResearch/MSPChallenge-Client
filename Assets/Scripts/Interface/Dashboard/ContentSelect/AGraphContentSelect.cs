@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 	public abstract class AGraphContentSelect : MonoBehaviour
 	{
 		[SerializeField] protected GraphContentSelectToggle[] m_contentToggles;
+		[SerializeField] protected string[] m_contentToggleNames = new string[2] { "Type", "Country" };
 		[SerializeField] protected GameObject m_detailsWindowPrefab;
 		[SerializeField] protected TextMeshProUGUI m_noDataEntry;
 
@@ -27,7 +28,7 @@ namespace MSP2050.Scripts
 			{
 				int index = i;
 				m_contentToggles[i].m_detailsToggle.onValueChanged.AddListener((b) => ToggleDetails(b, index));
-
+				m_contentToggles[i].m_summaryText.text = m_contentToggleNames[i];
 			}
 		}
 

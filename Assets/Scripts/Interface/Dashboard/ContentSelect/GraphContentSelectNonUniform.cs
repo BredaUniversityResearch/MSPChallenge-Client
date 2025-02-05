@@ -20,12 +20,12 @@ namespace MSP2050.Scripts
 		List<int> m_allCountries;
 		List<KPIValue> m_currentValueOptions;
 		List<KPICategory> m_categories;
-		GraphContentSelectFixedCategoryWindow[] m_detailsWindows;
+		GraphContentSelectMultiSelectWindow[] m_detailsWindows;
 
 		public override void Initialise(Action a_onSettingsChanged, ADashboardWidget a_widget)
 		{
 			base.Initialise(a_onSettingsChanged, a_widget);
-			m_detailsWindows = new GraphContentSelectFixedCategoryWindow[m_contentToggles.Length];
+			m_detailsWindows = new GraphContentSelectMultiSelectWindow[m_contentToggles.Length];
 
 			List<KPIValueCollection> kvcs = null;
 			switch(m_kpiSource)
@@ -114,7 +114,7 @@ namespace MSP2050.Scripts
 
 		void OnKPIChanged(KPIValue a_newValue)
 		{
-			m_widget.UpdateData();
+			m_onSettingsChanged.Invoke();
 		}
 
 		void OnIDToggleChanged(int a_index, bool a_value)
@@ -244,7 +244,7 @@ namespace MSP2050.Scripts
 
 		protected override void CreateDetailsWindow(int a_index)
 		{
-			m_detailsWindows[a_index] = Instantiate(m_detailsWindowPrefab, m_contentToggles[a_index].m_detailsWindowParent).GetComponent<GraphContentSelectFixedCategoryWindow>();
+			m_detailsWindows[a_index] = Instantiate(m_detailsWindowPrefab, m_contentToggles[a_index].m_detailsWindowParent).GetComponent<GraphContentSelectMultiSelectWindow>();
 			if(a_index == 0)
 			{
 				m_detailsWindows[0].SetContent(m_selectedValues, m_currentValueOptions, OnIDToggleChanged, OnAllIDTogglesChanged);
