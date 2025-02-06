@@ -55,11 +55,11 @@ namespace MSP2050.Scripts
 			//Set current values
 			m_windowInstance.m_aggregationDropdown.ClearOptions();
 			m_windowInstance.m_aggregationDropdown.options = new List<TMP_Dropdown.OptionData>() {
-				new TMP_Dropdown.OptionData("Yearly average"),
-				new TMP_Dropdown.OptionData("Yearly minimum"),
-				new TMP_Dropdown.OptionData("Yearly maximum"),
-				new TMP_Dropdown.OptionData("Yearly sum"),
-				new TMP_Dropdown.OptionData("Full year sum")
+				new TMP_Dropdown.OptionData("Yearly Average"),
+				new TMP_Dropdown.OptionData("Yearly Minimum"),
+				new TMP_Dropdown.OptionData("Yearly Maximum"),
+				new TMP_Dropdown.OptionData("Yearly Sum"),
+				new TMP_Dropdown.OptionData("Full Tear Sum")
 			};
 			m_windowInstance.m_aggregationDropdown.value = m_aggregationOption;
 			m_windowInstance.m_yearToggle.isOn = m_yearToggleValue;
@@ -264,9 +264,9 @@ namespace MSP2050.Scripts
 					m_summaryText.text = $"{Util.MonthToText(m_rangeMin, true)} - {Util.MonthToText(m_rangeMax, true)}";
 			}
 			else if (m_yearToggleValue)
-				m_summaryText.text = $"Last {m_latestAmount} years ({GetAggregationText()})";
+				m_summaryText.text = $"Last {m_latestAmount} Years ({GetAggregationText()})";
 			else
-				m_summaryText.text = $"Last {m_latestAmount} months";
+				m_summaryText.text = $"Last {m_latestAmount} Months";
 		}
 
 		string GetAggregationText()

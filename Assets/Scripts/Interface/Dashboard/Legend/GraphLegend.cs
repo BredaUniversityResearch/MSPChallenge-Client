@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System;
 
 namespace MSP2050.Scripts
 {
@@ -46,41 +47,15 @@ namespace MSP2050.Scripts
 		{
 			m_data = a_data;
 			//Determine max number of rows
-			int rows = Mathf.CeilToInt((a_data.m_selectedDisplayIDs.Count + (a_data.m_patternNames == null ? 0 : a_data.m_patternNames.Count-1)) / (float)m_columns);
+			int rows;
 			string postFix = a_data.m_patternNames == null ? " " : " " + a_data.m_patternNames[0];
 			//Start positioning from top row
 			int i = 0;
-			for(int y = 0; y < rows && i < a_data.m_selectedDisplayIDs.Count; y++)
+
+			//Pattern entries
+			if (a_data.m_patternNames != null && a_data.m_patternNames.Count > 1)
 			{
-				for (int x = 0; x < m_columns && i < a_data.m_selectedDisplayIDs.Count; x++)
-				{
-					if (i >= m_entries.Count)
-					{
-						m_entries.Add(Instantiate(m_entryPrefab, m_entryParent).GetComponent<GraphLegendEntry>());
-					}
-					if(a_data.m_valueCountries == null)
-					{
-						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i] + postFix, DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[i]),
-							x / (float)m_columns,
-							(x + 1) / (float)m_columns,
-							a_spacing / 2f,
-							y * (m_entryPrefab.m_height + a_spacing));
-					}
-					else
-					{
-						float t = (float)(i + 1) / (a_data.m_selectedDisplayIDs.Count + 1);
-						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i] + postFix, new Color(t, t, t, 1f),
-													x / (float)m_columns,
-													(x + 1) / (float)m_columns,
-													a_spacing / 2f,
-													y * (m_entryPrefab.m_height + a_spacing));
-					}
-					i++;
-				}
-			}
-			if(a_data.m_patternNames != null && a_data.m_patternNames.Count > 1)
-			{
-				for(int p = 1; p < a_data.m_patternNames.Count; p++)
+				for (int p = 0; p < a_data.m_patternNames.Count; p++)
 				{
 					if (i >= m_entries.Count)
 					{
@@ -91,10 +66,79 @@ namespace MSP2050.Scripts
 							x / (float)m_columns,
 							(x + 1) / (float)m_columns,
 							a_spacing / 2f,
-							i/m_columns * (m_entryPrefab.m_height + a_spacing),p);
+							i / m_columns * (m_entryPrefab.m_height + a_spacing), p);
 					i++;
 				}
 			}
+
+			//Value entries
+			if (a_data.m_valueCountries == null)
+			{
+				rows = Mathf.CeilToInt((a_data.m_selectedDisplayIDs.Count + (a_data.m_patternNames == null ? 0 : a_data.m_patternNames.Count-1)) / (float)m_columns);
+				for (int y = 0; y < rows && i < a_data.m_selectedDisplayIDs.Count; y++)
+				{
+					for (int x = 0; x < m_columns && i < a_data.m_selectedDisplayIDs.Count; x++)
+					{
+						if (i >= m_entries.Count)
+						{
+							m_entries.Add(Instantiate(m_entryPrefab, m_entryParent).GetComponent<GraphLegendEntry>());
+						}
+							m_entries[i].SetData(a_data.m_selectedDisplayIDs[i] + postFix, DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[i]),
+								x / (float)m_columns,
+								(x + 1) / (float)m_columns,
+								a_spacing / 2f,
+								y * (m_entryPrefab.m_height + a_spacing));
+						
+						i++;
+					}
+				}
+			}
+			else
+			{
+				rows = Mathf.CeilToInt((a_data.m_valueCountries.Count + (a_data.m_patternNames == null ? 0 : a_data.m_patternNames.Count-1)) / (float)m_columns);
+				for (int y = 0; y < rows && i < a_data.m_valueCountries.Count; y++)
+				{
+					for (int x = 0; x < m_columns && i < a_data.m_valueCountries.Count; x++)
+					{
+						if (i >= m_entries.Count)
+						{
+							m_entries.Add(Instantiate(m_entryPrefab, m_entryParent).GetComponent<GraphLegendEntry>());
+						}
+						//Set entries to country colours
+						Color color;
+						if (a_data.m_selectedDisplayIDs.Count > 1)
+						{
+							//Focused per country, offset colour darkness
+							float t = (float)(i + 1) / (a_data.m_selectedDisplayIDs.Count + 1);
+							Team team = SessionManager.Instance.FindTeamByID(a_data.m_valueCountries[i]);
+							if (team == null)
+								color = new Color(t, t, t, 1f);
+							else
+							{
+								color = DashboardManager.GetLerpedCountryColour(team.color, t);
+							}
+						}
+						else
+						{
+							//Focused per type, show pure country colours
+							Team team = SessionManager.Instance.FindTeamByID(a_data.m_valueCountries[i]);
+							if (team == null)
+								color = new Color(0.5f, 0.5f, 0.5f, 1f);
+							else
+								color = team.color;
+						}
+						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i % a_data.m_selectedDisplayIDs.Count] + postFix, color,
+													x / (float)m_columns,
+													(x + 1) / (float)m_columns,
+													a_spacing / 2f,
+													y * (m_entryPrefab.m_height + a_spacing));
+
+						i++;
+					}
+				}
+			}
+
+			//Disable unused
 			for(; i < m_entries.Count; i++)
 			{
 				m_entries[i].gameObject.SetActive(false);

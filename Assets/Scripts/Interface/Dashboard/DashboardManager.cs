@@ -282,5 +282,18 @@ namespace MSP2050.Scripts
 				x = m_numberColumns - 1;
 			return (x, y);
 		}
+
+		public static Color GetLerpedCountryColour(Color a_teamColour, float a_t)
+		{
+			if (a_t > 0.5f)
+			{
+				float t = (a_t - 0.5f) * 2f;
+				return new Color(Mathf.Lerp(a_teamColour.r, 1f, t), Mathf.Lerp(a_teamColour.g, 1f, t), Mathf.Lerp(a_teamColour.b, 1f, t));
+			}
+			else
+			{
+				return a_teamColour * (a_t * 2f);
+			}
+		}
 	}
 }

@@ -60,7 +60,7 @@ namespace MSP2050.Scripts
 			else
 			{
 				m_image.color = team.color;
-				m_image.color = new Color((m_image.color.r + t) / 2f, (m_image.color.g + t) / 2f, (m_image.color.b + t) / 2f, 1f);
+				m_image.color = DashboardManager.GetLerpedCountryColour(team.color, t);
 				m_tooltip.text = $"{team.name} team's {a_data.m_selectedDisplayIDs[iDIndex]}: {a_data.FormatValue(a_data.m_steps[a_step][a_cat].Value)} {a_data.GetUnitString()}";
 			}
 		}

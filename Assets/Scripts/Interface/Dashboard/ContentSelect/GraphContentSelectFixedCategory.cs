@@ -68,7 +68,7 @@ namespace MSP2050.Scripts
 				string[] focusNames = new string[m_contentToggles.Length];
 				for (int i = 0; i < m_contentToggleNames.Length; i++) 
 				{
-					focusNames[i] = "per " + m_contentToggleNames[i];
+					focusNames[i] = "Per " + m_contentToggleNames[i];
 				}
 				m_focusSelection.Initialise(focusNames, OnSelectedFocusChanged);
 			}
@@ -96,7 +96,8 @@ namespace MSP2050.Scripts
 						{
 							m_displayIDs.Add(value.displayName);
 							m_allIDs.Add(value.name);
-							m_selectedIDs.Add(value.name);
+							if(m_focusSelection == null)
+								m_selectedIDs.Add(value.name);
 						}
 					}
 				}
@@ -107,9 +108,13 @@ namespace MSP2050.Scripts
 				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
 				m_noDataEntry.text = "NO DATA AVAILABLE";
 			}
+			if(m_focusSelection != null && m_allIDs.Count > 0)
+			{
+				m_selectedIDs.Add(m_allIDs[0]);
+			}
 
 			//Setup toggle values
-			if(kvcs.Count > 1)
+			if (kvcs.Count > 1)
 			{
 				m_AllCountries = new List<int>();
 				foreach(Team team in SessionManager.Instance.GetTeams())
