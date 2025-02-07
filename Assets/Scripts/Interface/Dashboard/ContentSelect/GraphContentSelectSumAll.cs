@@ -105,7 +105,6 @@ namespace MSP2050.Scripts
 			for(int i = 0; i < m_values.Count; i++ )
 			{
 				data.m_absoluteCategoryIndices.Add(i);
-
 			}
 
 			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
@@ -128,7 +127,10 @@ namespace MSP2050.Scripts
 
 			data.m_stepNames = a_timeSettings.m_stepNames;
 			data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);
-			data.m_selectedDisplayIDs = new List<string>(1) { m_entryName };
+			if(m_values.Count > 0)
+				data.m_selectedDisplayIDs = new List<string>(1) { m_entryName };
+			else
+				data.m_selectedDisplayIDs = new List<string>();
 
 			a_minValue = 0f;
 			a_maxValue = float.NegativeInfinity;
@@ -139,6 +141,8 @@ namespace MSP2050.Scripts
 				for (int i = 0; i < a_timeSettings.m_months.Count; i++)
 				{
 					float? sum = 0f;
+					if (m_values.Count == 0 && m_onlyCompleteSets)
+						sum = null;
 					for (int j = 0; j < m_values.Count; j++)
 					{
 						List<float?> values = new List<float?>(a_timeSettings.m_months[i].Count);
@@ -172,6 +176,8 @@ namespace MSP2050.Scripts
 				for (int i = 0; i < a_timeSettings.m_months.Count; i++)
 				{
 					float? sum = 0f;
+					if (m_values.Count == 0 && m_onlyCompleteSets)
+						sum = null;
 					for (int j = 0; j < m_values.Count; j++)
 					{
 						float? v = m_values[j].GetKpiValueForMonth(a_timeSettings.m_months[i][0]);

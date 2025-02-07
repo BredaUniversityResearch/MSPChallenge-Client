@@ -33,48 +33,51 @@ namespace MSP2050.Scripts
 			//if (a_data.m_selectedCountries != null)
 			//	entriesPerStep *= a_data.m_selectedCountries.Count;
 			int nextEntryIndex = 0;
-			if(a_data.m_overLapPatternSet && a_data.m_patternNames != null && a_data.m_patternNames.Count > 0)
+			if(a_data.m_overLapPatternSet)
 			{
 				if(m_stacked) //Stacked and overlapping sets
 				{
+					int setIndex = -1;
 					float ymin = 0f;
-					int setsPerGroup = entriesPerStep / a_data.m_patternNames.Count;
-					for (int set = 0; set < setsPerGroup; set++)
+					for (int i = 0; i < entriesPerStep; i++)
 					{
-						float nextMax = Mathf.NegativeInfinity;
-						for (int i = 0; i < a_data.m_patternNames.Count; i++)
+						float nextMin = 0f;
+						if (a_data.m_patternIndices[i] == 0)
 						{
-							int actualIndex = set * a_data.m_patternNames.Count + i;
-							if (!a_data.m_steps[a_step][actualIndex].HasValue)
-								continue;
-							float ymax = ymin + (a_data.m_steps[a_step][actualIndex].Value - a_data.m_graphMin) / a_data.m_graphRange;
-							if(ymax> nextMax)
-								nextMax = ymax;
-							m_bars[nextEntryIndex].SetData(a_data, a_step, actualIndex, 0f, 1f, ymin, ymax);
-							nextEntryIndex++;
+							setIndex++;
+							ymin = nextMin;
 						}
-						ymin = nextMax;
+						if (!a_data.m_steps[a_step][i].HasValue)
+							continue;
+						if (nextEntryIndex == m_bars.Count)
+							m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
+						
+						float ymax = ymin + (a_data.m_steps[a_step][i].Value - a_data.m_graphMin) / a_data.m_graphRange;
+						if (ymax > nextMin)
+							nextMin = ymax;
+						m_bars[nextEntryIndex].SetData(a_data, a_step, i, 0f, 1f, ymin, ymax);
+						ymin = ymax;
+						nextEntryIndex++;
 					}
 				}
 				else //Only overlapping sets
 				{
-					int setsPerGroup = entriesPerStep / a_data.m_patternNames.Count;
-					for (int set = 0; set < setsPerGroup; set++)
+					int setIndex = -1;
+					for (int i = 0; i < entriesPerStep; i++)
 					{
-						for (int i = 0; i < a_data.m_patternNames.Count; i++)
-						{
-							int actualIndex = set * a_data.m_patternNames.Count + i;
-							if (!a_data.m_steps[a_step][actualIndex].HasValue)
-								continue;
-							if (nextEntryIndex == m_bars.Count)
-								m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
-							m_bars[nextEntryIndex].SetData(a_data, a_step, actualIndex,
-								set / (float)setsPerGroup,
-								(set + 1) / (float)setsPerGroup,
-								0f,
-								(a_data.m_steps[a_step][actualIndex].Value - a_data.m_graphMin) / a_data.m_graphRange);
-							nextEntryIndex++;
-						}
+						if (a_data.m_patternIndices[i] == 0)
+							setIndex++;
+						if (!a_data.m_steps[a_step][i].HasValue)
+							continue;
+						if (nextEntryIndex == m_bars.Count)
+							m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
+
+						m_bars[nextEntryIndex].SetData(a_data, a_step, i,
+							setIndex / (float)a_data.m_patternSetsPerStep,
+							(setIndex + 1) / (float)a_data.m_patternSetsPerStep,
+							0f,
+							(a_data.m_steps[a_step][i].Value - a_data.m_graphMin) / a_data.m_graphRange);
+						nextEntryIndex++;
 					}
 				}
 			}

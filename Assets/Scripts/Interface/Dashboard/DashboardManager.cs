@@ -288,11 +288,12 @@ namespace MSP2050.Scripts
 			if (a_t > 0.5f)
 			{
 				float t = (a_t - 0.5f) * 2f;
-				return new Color(Mathf.Lerp(a_teamColour.r, 1f, t), Mathf.Lerp(a_teamColour.g, 1f, t), Mathf.Lerp(a_teamColour.b, 1f, t));
+				return new Color(Mathf.Lerp(a_teamColour.r, 1f, t), Mathf.Lerp(a_teamColour.g, 1f, t), Mathf.Lerp(a_teamColour.b, 1f, t), 1f);
 			}
 			else
 			{
-				return a_teamColour * (a_t * 2f);
+				float t = a_t * 2f;
+				return new Color(a_teamColour.r *t, a_teamColour.g * t, a_teamColour.b * t, 1f);
 			}
 		}
 	}

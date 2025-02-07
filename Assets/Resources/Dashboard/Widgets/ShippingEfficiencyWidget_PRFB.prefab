@@ -998,7 +998,7 @@ PrefabInstance:
     - target: {fileID: 6965936257756674246, guid: 4d933073a0940184e904c7c0055e1e88,
         type: 3}
       propertyPath: m_text
-      value: Route Efficiency
+      value: Route Efficiency Per Team
       objectReference: {fileID: 0}
     - target: {fileID: 7690416954969916493, guid: 4d933073a0940184e904c7c0055e1e88,
         type: 3}
@@ -1020,7 +1020,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_contentSelect
       value: 
-      objectReference: {fileID: 3733315926000152026}
+      objectReference: {fileID: 2006514883308528217}
     - target: {fileID: 7765459918354236647, guid: 4d933073a0940184e904c7c0055e1e88,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -2016,13 +2016,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 5506317919119656259, guid: 4d933073a0940184e904c7c0055e1e88, type: 3}
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 2515904152597735582, guid: 4d933073a0940184e904c7c0055e1e88, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4762612501511773980, guid: 4d933073a0940184e904c7c0055e1e88,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3733315926000152026}
+      addedObject: {fileID: 2006514883308528217}
   m_SourcePrefab: {fileID: 100100000, guid: 4d933073a0940184e904c7c0055e1e88, type: 3}
 --- !u!114 &2169277592242294414 stripped
 MonoBehaviour:
@@ -2054,7 +2055,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 7990997878016217203}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3733315926000152026
+--- !u!114 &2006514883308528217
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2063,7 +2064,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3241897859666087791}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 739615f3f36c28349988c5853cc9321f, type: 3}
+  m_Script: {fileID: 11500000, guid: 29bdc6aeee7cc9946af656e1f262a145, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_contentToggles:
@@ -2078,6 +2079,8 @@ MonoBehaviour:
   m_categoryNames:
   - Route Efficiency
   m_kpiSource: 2
+  m_singleSelectWindowPrefab: {fileID: 5113700886073145813, guid: 8bc59d7bf29b7974f85fec8bbac4f1b2,
+    type: 3}
 --- !u!114 &4372661393929983651 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5929950319412528848, guid: 4d933073a0940184e904c7c0055e1e88,

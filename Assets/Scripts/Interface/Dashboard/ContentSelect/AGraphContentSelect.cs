@@ -51,14 +51,13 @@ namespace MSP2050.Scripts
 
 			if (a_timeSettings.m_aggregationFunction != null)
 			{
-				if (a_data.m_overLapPatternSet && a_data.m_patternNames != null && a_data.m_patternNames.Count > 0 && a_stacked)
+				if (a_data.m_overLapPatternSet && a_stacked)
 				{
 					//Aggregated with max per set
 					for (int i = 0; i < a_timeSettings.m_months.Count; i++)
 					{
 						a_data.m_steps.Add(new float?[a_chosenKPIs.Count]);
 						float stackedV = 0f;
-						int indexInSet = 0;
 						float maxInSet = 0f;
 						for (int j = 0; j < a_chosenKPIs.Count; j++)
 						{
@@ -73,10 +72,8 @@ namespace MSP2050.Scripts
 							{
 								maxInSet = Mathf.Max(maxInSet, aggregatedV.Value);
 							}
-							indexInSet++;
-							if (indexInSet == a_data.m_patternNames.Count)
+							if (j == a_chosenKPIs.Count - 1 || a_data.m_patternIndices[j + 1] == 0)
 							{
-								indexInSet = 0;
 								stackedV += aggregatedV.Value;
 								maxInSet = 0f;
 							}
@@ -120,14 +117,13 @@ namespace MSP2050.Scripts
 					}
 				}
 			}
-			else if(a_data.m_overLapPatternSet && a_data.m_patternNames != null && a_data.m_patternNames.Count > 0 && a_stacked)
+			else if(a_data.m_overLapPatternSet && a_stacked)
 			{
 				//Non-aggregated, but using max per set
 				for (int i = 0; i < a_timeSettings.m_months.Count; i++)
 				{
 					a_data.m_steps.Add(new float?[a_chosenKPIs.Count]);
 					float stackedV = 0f;
-					int indexInSet = 0;
 					float maxInSet = 0f;
 					for (int j = 0; j < a_chosenKPIs.Count; j++)
 					{
@@ -137,10 +133,8 @@ namespace MSP2050.Scripts
 						{
 							maxInSet = Mathf.Max(maxInSet, v.Value);
 						}
-						indexInSet++;
-						if(indexInSet == a_data.m_patternNames.Count)
+						if(j == a_chosenKPIs.Count-1 || a_data.m_patternIndices[j+1] == 0)
 						{
-							indexInSet = 0;
 							stackedV += v.Value;
 							maxInSet = 0f;
 						}

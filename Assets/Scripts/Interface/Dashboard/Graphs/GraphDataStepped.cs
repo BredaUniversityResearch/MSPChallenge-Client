@@ -27,6 +27,8 @@ namespace MSP2050.Scripts
 
 		//Patterns
 		public List<string> m_patternNames;
+		public List<int> m_patternIndices; //Pattern indices for all values per step
+		public int m_patternSetsPerStep; //Number of pattern sets per step, for grouping
 		public bool m_overLapPatternSet;
 
 		public string FormatValue(float a_value)

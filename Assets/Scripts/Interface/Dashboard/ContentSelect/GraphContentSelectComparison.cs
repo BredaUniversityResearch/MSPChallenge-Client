@@ -13,6 +13,7 @@ namespace MSP2050.Scripts
 		public enum KPISource { Ecology, Energy, Shipping, Geometry, Other }
 		[SerializeField] protected string[] m_categoryNames;
 		[SerializeField] protected string[] m_categoryDisplayNames;
+		[SerializeField] protected int[] m_kpiNameCutLength;
 		[SerializeField] protected KPISource m_kpiSource;
 		[SerializeField] bool m_overLapPatternSet;
 
@@ -75,25 +76,26 @@ namespace MSP2050.Scripts
 			m_selectedIDs = new HashSet<string>();
 			foreach (KPIValueCollection valueColl in kvcs)
 			{
-				foreach (string s in m_categoryNames)
+				for(int i = 0; i < m_categoryNames.Length; i++)
 				{
-					KPICategory cat = valueColl.FindCategoryByName(s);
+					KPICategory cat = valueColl.FindCategoryByName(m_categoryNames[i]);
 					if (cat == null)
 						continue;
 					m_categories.Add(cat);
 					cat.OnValueUpdated += OnKPIChanged;
 					foreach (var value in cat.GetChildValues())
 					{
-						if (m_valuesPerId.TryGetValue(value.name, out var list))
+						string cutName = value.name.Substring(0, value.name.Length - m_kpiNameCutLength[i]);
+						if (m_valuesPerId.TryGetValue(cutName, out var list))
 						{ 
 							list.Add(value);
 						}
 						else
 						{
-							m_valuesPerId.Add(value.name, new List<KPIValue>() { value });
-							m_selectedIDs.Add(value.name);
-							m_allIDs.Add(value.name);
-							m_displayIDs.Add(value.displayName);
+							m_valuesPerId.Add(cutName, new List<KPIValue>() { value });
+							m_selectedIDs.Add(cutName);
+							m_allIDs.Add(cutName);
+							m_displayIDs.Add(value.displayName); //TODO: also cut displaynames?
 						}
 					}
 				}
@@ -187,26 +189,32 @@ namespace MSP2050.Scripts
 			GraphDataStepped data = new GraphDataStepped();
 			data.m_absoluteCategoryIndices = new List<int>();
 			data.m_overLapPatternSet = m_overLapPatternSet;
+			data.m_patternIndices = new List<int>();
+			data.m_selectedDisplayIDs = new List<string>(m_selectedIDs.Count);
 			List<KPIValue> chosenKPIs = new List<KPIValue>();
 			int index = 0;
 			foreach (var kvp in m_valuesPerId)
 			{
 				if (m_selectedIDs.Contains(kvp.Key))
 				{
-					foreach (KPIValue v in kvp.Value)
+					for (int i = 0; i < kvp.Value.Count; i++)
 					{
-						if (m_selectedCountries == null || m_selectedCountries.Contains(v.targetCountryId))
+						if (m_selectedCountries == null || m_selectedCountries.Contains(kvp.Value[i].targetCountryId))
 						{
-							chosenKPIs.Add(v);
+							chosenKPIs.Add(kvp.Value[i]);
+							data.m_patternIndices.Add(i);
+							data.m_selectedDisplayIDs.Add(kvp.Value[i].displayName);
 							data.m_absoluteCategoryIndices.Add(index);
 						}
 						index++;
+
 					}
 				}
 				else
 					index += kvp.Value.Count;
 			}
 
+			data.m_patternSetsPerStep = m_selectedIDs.Count;
 			data.m_patternNames = new List<string>();
 			foreach(string s in m_categoryDisplayNames)
 				data.m_patternNames.Add(s);
@@ -238,12 +246,6 @@ namespace MSP2050.Scripts
 				{
 					data.m_valueCountries.Add(kpi.targetCountryId);
 				}
-			}
-			data.m_selectedDisplayIDs = new List<string>(m_selectedIDs.Count);
-			for(int i = 0; i < m_allIDs.Count; i++)
-			{
-				if (m_selectedIDs.Contains(m_allIDs[i]))
-					data.m_selectedDisplayIDs.Add(m_displayIDs[i]);
 			}
 
 			FetchDataInternal(chosenKPIs, data, a_timeSettings, a_stacked, out a_maxValue, out a_minValue);
