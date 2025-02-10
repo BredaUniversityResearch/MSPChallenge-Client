@@ -16,7 +16,7 @@ namespace MSP2050.Scripts
 		public int m_height;
 		public int m_preferredWidth;
 
-		public void SetData(string a_name, Color a_colour, float a_xMin, float a_xMax, float a_xOffset, float a_yOffset)
+		public void SetData(string a_name, Color a_colour, float a_xMin, float a_xMax, float a_xOffset, float a_yOffset, int a_patternIndex = 0)
 		{
 			//xOffset is spacing from sides
 			//yOffset is offset from top
@@ -25,6 +25,16 @@ namespace MSP2050.Scripts
 			m_nameText.text = a_name; 
 			m_colourImage.color = a_colour;
 			m_tooltip.text = a_name;
+			if(a_patternIndex != 0)
+			{
+				m_colourImage.sprite = DashboardManager.Instance.ColourList.GetPattern(a_patternIndex);
+				m_colourImage.type = Image.Type.Tiled;
+				m_colourImage.pixelsPerUnitMultiplier = 2f;
+			}
+			else
+			{
+				m_colourImage.sprite = null;
+			}
 
 			RectTransform rect = GetComponent<RectTransform>();
 			rect.anchorMin = new Vector2(a_xMin, 1f);

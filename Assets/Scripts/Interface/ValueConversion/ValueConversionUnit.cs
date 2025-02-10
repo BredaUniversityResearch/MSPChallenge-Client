@@ -8,9 +8,9 @@ namespace MSP2050.Scripts
 	{
 		private static UnitEntry[] defaultMetricUnits = new UnitEntry[]
 		{
-			new UnitEntry { unitPostfix = "k", unitSize = 1000 },
-			new UnitEntry { unitPostfix = "M", unitSize = 1000000 },
-			new UnitEntry { unitPostfix = "G", unitSize = 1000000000 }
+			new UnitEntry { unitPostfix = "k", unitSize = 1000, unitEOffset = 3 },
+			new UnitEntry { unitPostfix = "M", unitSize = 1000000, unitEOffset = 6 },
+			new UnitEntry { unitPostfix = "G", unitSize = 1000000000, unitEOffset = 9 }
 		};
 
 		[Flags]
@@ -26,6 +26,7 @@ namespace MSP2050.Scripts
 		{
 			public string unitPostfix = "";
 			public float unitSize = 1;
+			public int unitEOffset = 0;
 		}
 
 		[SerializeField]
@@ -117,6 +118,11 @@ namespace MSP2050.Scripts
 		public float GetUnitEntrySize(int a_index)
 		{
 			return conversionUnits[a_index].unitSize;
+		}
+
+		public int GetUnitEntryEOffset(int a_index)
+		{
+			return conversionUnits[a_index].unitEOffset;
 		}
 
 		public void ParseUnit(string input, out float amount)

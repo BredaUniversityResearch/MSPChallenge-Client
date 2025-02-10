@@ -118,5 +118,15 @@ namespace MSP2050.Scripts
 
             return result;
         }
+
+        public List<KPIValueCollection> GetKPIForAllCountries()
+        {
+            List<KPIValueCollection> result = new List<KPIValueCollection>(geometryKPIs.Count);
+            foreach (var kvp in geometryKPIs)
+            {
+                result.Add(kvp.Value);
+            }
+            return result;
+        }
     }
 }

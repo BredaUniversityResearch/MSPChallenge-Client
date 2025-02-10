@@ -27,6 +27,7 @@ class ValueConversionUnitEditor: Editor
 				SerializedProperty unit = unitsProperty.GetArrayElementAtIndex(i);
 				SerializedProperty postFix = unit.FindPropertyRelative("unitPostfix");
 				SerializedProperty size = unit.FindPropertyRelative("unitSize");
+				SerializedProperty eOffset = unit.FindPropertyRelative("unitEOffset");
 
 				EditorGUILayout.BeginHorizontal();
 				float newUnitSize = EditorGUILayout.DelayedFloatField(size.floatValue);
@@ -36,8 +37,14 @@ class ValueConversionUnitEditor: Editor
 					size.floatValue = newUnitSize;
 				}
 
-				postFix.stringValue = EditorGUILayout.TextField(postFix.stringValue);
+				int newEOffset = EditorGUILayout.DelayedIntField(eOffset.intValue);
+				if (eOffset.intValue != newEOffset)
+				{
+					requiresSort = true;
+					eOffset.intValue = newEOffset;
+				}
 
+				postFix.stringValue = EditorGUILayout.TextField(postFix.stringValue);
 				if (GUILayout.Button("Remove"))
 				{
 					removeEntry = i;

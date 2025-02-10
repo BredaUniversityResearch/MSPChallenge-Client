@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -117,6 +118,16 @@ namespace MSP2050.Scripts
             if(energyKPIs.ContainsKey(country))
                 return energyKPIs[country];
             return null;
+        }
+
+        public List<KPIValueCollection> GetKPIForAllCountries()
+		{
+            List<KPIValueCollection> result = new List<KPIValueCollection>(energyKPIs.Count);
+            foreach(var kvp in energyKPIs)
+			{
+                result.Add(kvp.Value);
+			}
+            return result;
         }
     }
 }

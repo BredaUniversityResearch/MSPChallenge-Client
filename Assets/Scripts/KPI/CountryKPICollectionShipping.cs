@@ -46,5 +46,15 @@ namespace MSP2050.Scripts
 				return shippingKPIs[country];
 			return null;
 		}
+
+		public List<KPIValueCollection> GetKPIForAllCountries()
+		{
+			List<KPIValueCollection> result = new List<KPIValueCollection>(shippingKPIs.Count);
+			foreach (var kvp in shippingKPIs)
+			{
+				result.Add(kvp.Value);
+			}
+			return result;
+		}
 	}
 }

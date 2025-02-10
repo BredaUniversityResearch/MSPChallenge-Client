@@ -20,6 +20,7 @@ namespace MSP2050.Scripts
 		[SerializeField] int m_rangeMax;
 		[SerializeField] int m_latestAmount;
 		[SerializeField] int m_aggregationOption;
+		[SerializeField] bool m_showYearToggleSection = true;
 
 		GraphTimeSelectWindow m_windowInstance;
 		bool m_ignoreCallback;
@@ -54,9 +55,12 @@ namespace MSP2050.Scripts
 			//Set current values
 			m_windowInstance.m_aggregationDropdown.ClearOptions();
 			m_windowInstance.m_aggregationDropdown.options = new List<TMP_Dropdown.OptionData>() {
-				new TMP_Dropdown.OptionData("Yearly average"),
-				new TMP_Dropdown.OptionData("Yearly minimum"),
-				new TMP_Dropdown.OptionData("Yearly maximum")};
+				new TMP_Dropdown.OptionData("Yearly Average"),
+				new TMP_Dropdown.OptionData("Yearly Minimum"),
+				new TMP_Dropdown.OptionData("Yearly Maximum"),
+				new TMP_Dropdown.OptionData("Yearly Sum"),
+				new TMP_Dropdown.OptionData("Full Tear Sum")
+			};
 			m_windowInstance.m_aggregationDropdown.value = m_aggregationOption;
 			m_windowInstance.m_yearToggle.isOn = m_yearToggleValue;
 			m_windowInstance.m_aggregationDropdown.gameObject.SetActive(m_yearToggleValue);
@@ -76,6 +80,13 @@ namespace MSP2050.Scripts
 			m_windowInstance.m_rangeMaxSlider.onValueChanged.AddListener(OnSliderMaxChanged);
 			m_windowInstance.m_rangeToggle.onValueChanged.AddListener(OnRangeToggleChanged);
 			m_windowInstance.m_yearToggle.onValueChanged.AddListener(OnYearToggleChanged);
+
+			if(!m_showYearToggleSection)
+			{
+				m_windowInstance.m_aggregationDropdown.gameObject.SetActive(false);
+				m_windowInstance.m_sectionSeparator.gameObject.SetActive(false);
+				m_windowInstance.m_yearToggle.gameObject.SetActive(false);
+			}
 		}
 
 		private void OnDestroy()
@@ -253,9 +264,9 @@ namespace MSP2050.Scripts
 					m_summaryText.text = $"{Util.MonthToText(m_rangeMin, true)} - {Util.MonthToText(m_rangeMax, true)}";
 			}
 			else if (m_yearToggleValue)
-				m_summaryText.text = $"Last {m_latestAmount} years ({GetAggregationText()})";
+				m_summaryText.text = $"Last {m_latestAmount} Years ({GetAggregationText()})";
 			else
-				m_summaryText.text = $"Last {m_latestAmount} months";
+				m_summaryText.text = $"Last {m_latestAmount} Months";
 		}
 
 		string GetAggregationText()
@@ -266,8 +277,12 @@ namespace MSP2050.Scripts
 					return "Min";
 				case 2:
 					return "Max";
-				default:
+				case 3:
 					return "Avg";
+				case 4:
+					return "Sum";
+				default:
+					return "FSum";
 			}
 		}
 
@@ -286,8 +301,14 @@ namespace MSP2050.Scripts
 					case 2:
 						m_currentSettings.m_aggregationFunction = AggregateYearsMax;
 						break;
-					default:
+					case 3:
 						m_currentSettings.m_aggregationFunction = AggregateYearsAvg;
+						break;
+					case 4:
+						m_currentSettings.m_aggregationFunction = AggregateYearsSum;
+						break;
+					default:
+						m_currentSettings.m_aggregationFunction = AggregateFullYearsSum;
 						break;
 				}
 			}
@@ -408,6 +429,36 @@ namespace MSP2050.Scripts
 			if (count == 0)
 				return null;
 			return result / count;
+		}
+
+		float? AggregateYearsSum(List<float?> a_monthData)
+		{
+			if (a_monthData.Count == 0)
+				return null;
+
+			float result = 0f;
+			foreach (float? data in a_monthData)
+			{
+				if (!data.HasValue)
+					continue;
+				result += data.Value;
+			}
+			return result;
+		}
+
+		float? AggregateFullYearsSum(List<float?> a_monthData)
+		{
+			if (a_monthData.Count < 12)
+				return null;
+
+			float result = 0f;
+			foreach (float? data in a_monthData)
+			{
+				if (!data.HasValue)
+					continue;
+				result += data.Value;
+			}
+			return result;
 		}
 	}
 
