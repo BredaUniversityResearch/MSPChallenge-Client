@@ -67,6 +67,7 @@ namespace MSP2050.Scripts
 			}
 			else if (m_currentCategory != null)
 				m_catSelectedWidgets[m_currentCategory].RepositionAllWidgets();
+			m_widgetParent.sizeDelta = new Vector2(0f, m_cellsize * (m_catalogueLayout.Visible ? m_catalogueLayout.Rows : m_catSelectedWidgets[m_currentCategory].Rows));
 		}
 
 		void CloseDashboard()
@@ -121,7 +122,7 @@ namespace MSP2050.Scripts
 				}
             }
 			m_categoryToggles[0].ForceActive();
-			OnCategorySelected(m_catSelectedWidgets.GetFirstKey<DashboardCategory, DashboardWidgetLayout>());
+			OnCategorySelected(m_catSelectedWidgets.GetFirstKey());
 		}
 
 		void AddCategoryToggle(DashboardCategory a_category)

@@ -21,15 +21,9 @@ namespace MSP2050.Scripts
 		public float m_graphRange;
 
 		public List<string> m_stepNames;
-		public List<int> m_absoluteCategoryIndices; //Used to keep colours consistent when values are hidden
+		public List<int> m_absoluteCategoryIndices; //Used to keep colours consistent when values are hidden, behaves different with patterns
 		public List<int> m_valueCountries;			//Country of all the selected values
 		public List<string> m_selectedDisplayIDs;
-
-		//Patterns
-		public List<string> m_patternNames;
-		public List<int> m_patternIndices; //Pattern indices for all values per step
-		public int m_patternSetsPerStep; //Number of pattern sets per step, for grouping
-		public bool m_overLapPatternSet;
 
 		public string FormatValue(float a_value)
 		{
@@ -47,6 +41,33 @@ namespace MSP2050.Scripts
 			if (m_scalePower - m_unitEOffset != 0)
 				return $"e{m_scalePower - m_unitEOffset} {m_unit.GetUnitStringForUnitIndex(m_unitIndex)}";
 			return m_unit.GetUnitStringForUnitIndex(m_unitIndex);
+		}
+
+
+		public virtual string GetDisplayName(int a_categoryIndex)
+		{
+			return m_selectedDisplayIDs[a_categoryIndex];
+		}
+
+		public virtual Color GetBarDisplayColor(int a_categoryIndex)
+		{
+			return DashboardManager.Instance.ColourList.GetColour(m_absoluteCategoryIndices[a_categoryIndex]);
+		}
+
+		public virtual Color GetLegendDisplayColor(int a_categoryIndex)
+		{
+			return DashboardManager.Instance.ColourList.GetColour(m_absoluteCategoryIndices[a_categoryIndex]);
+		}
+
+		public virtual bool UsesPattern => false;
+		public virtual bool OverLapPatternSet => false;
+		public virtual List<string> PatternNames => null;
+
+		public virtual int PatternSetsPerStep => 0;
+
+		public virtual int GetPatternIndex(int a_categoryIndex)
+		{
+			return 0;
 		}
 	}
 }

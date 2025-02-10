@@ -33,7 +33,7 @@ namespace MSP2050.Scripts
 			//if (a_data.m_selectedCountries != null)
 			//	entriesPerStep *= a_data.m_selectedCountries.Count;
 			int nextEntryIndex = 0;
-			if(a_data.m_overLapPatternSet)
+			if(a_data.OverLapPatternSet)
 			{
 				if(m_stacked) //Stacked and overlapping sets
 				{
@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 					for (int i = 0; i < entriesPerStep; i++)
 					{
 						float nextMin = 0f;
-						if (a_data.m_patternIndices[i] == 0)
+						if (a_data.GetPatternIndex(i) == 0)
 						{
 							setIndex++;
 							ymin = nextMin;
@@ -65,7 +65,7 @@ namespace MSP2050.Scripts
 					int setIndex = -1;
 					for (int i = 0; i < entriesPerStep; i++)
 					{
-						if (a_data.m_patternIndices[i] == 0)
+						if (a_data.GetPatternIndex(i) == 0)
 							setIndex++;
 						if (!a_data.m_steps[a_step][i].HasValue)
 							continue;
@@ -73,8 +73,8 @@ namespace MSP2050.Scripts
 							m_bars.Add(Instantiate(m_barPrefab, m_barParent).GetComponent<SteppedGraphBarSingle>());
 
 						m_bars[nextEntryIndex].SetData(a_data, a_step, i,
-							setIndex / (float)a_data.m_patternSetsPerStep,
-							(setIndex + 1) / (float)a_data.m_patternSetsPerStep,
+							setIndex / (float)a_data.PatternSetsPerStep,
+							(setIndex + 1) / (float)a_data.PatternSetsPerStep,
 							0f,
 							(a_data.m_steps[a_step][i].Value - a_data.m_graphMin) / a_data.m_graphRange);
 						nextEntryIndex++;

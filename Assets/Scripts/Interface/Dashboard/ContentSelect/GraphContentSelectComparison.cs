@@ -95,7 +95,7 @@ namespace MSP2050.Scripts
 							m_valuesPerId.Add(cutName, new List<KPIValue>() { value });
 							m_selectedIDs.Add(cutName);
 							m_allIDs.Add(cutName);
-							m_displayIDs.Add(value.displayName); //TODO: also cut displaynames?
+							m_displayIDs.Add(value.displayName.Substring(0, value.name.Length - m_kpiNameCutLength[i]));
 						}
 					}
 				}
@@ -186,32 +186,49 @@ namespace MSP2050.Scripts
 
 		public override GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, bool a_stacked, out float a_maxValue, out float a_minValue)
 		{
-			GraphDataStepped data = new GraphDataStepped();
+			GraphDataSteppedPattern data = new GraphDataSteppedPattern();
 			data.m_absoluteCategoryIndices = new List<int>();
 			data.m_overLapPatternSet = m_overLapPatternSet;
 			data.m_patternIndices = new List<int>();
 			data.m_selectedDisplayIDs = new List<string>(m_selectedIDs.Count);
 			List<KPIValue> chosenKPIs = new List<KPIValue>();
-			int index = 0;
-			foreach (var kvp in m_valuesPerId)
-			{
-				if (m_selectedIDs.Contains(kvp.Key))
-				{
-					for (int i = 0; i < kvp.Value.Count; i++)
-					{
-						if (m_selectedCountries == null || m_selectedCountries.Contains(kvp.Value[i].targetCountryId))
-						{
-							chosenKPIs.Add(kvp.Value[i]);
-							data.m_patternIndices.Add(i);
-							data.m_selectedDisplayIDs.Add(kvp.Value[i].displayName);
-							data.m_absoluteCategoryIndices.Add(index);
-						}
-						index++;
+			//foreach (var kvp in m_valuesPerId)
+			//{
+			//	if (m_selectedIDs.Contains(kvp.Key))
+			//	{
+			//		for (int i = 0; i < kvp.Value.Count; i++)
+			//		{
+			//			if (m_selectedCountries == null || m_selectedCountries.Contains(kvp.Value[i].targetCountryId))
+			//			{
+			//				chosenKPIs.Add(kvp.Value[i]);
+			//				data.m_patternIndices.Add(i);
+			//				data.m_absoluteCategoryIndices.Add(entryIndex);
+			//			}
+			//			entryIndex++;
+			//		}
+			//		data.m_selectedDisplayIDs.Add(kvp.Value[0].displayName);
+			//	}
+			//	else
+			//		entryIndex += kvp.Value.Count;
+			//	valueIndex++;
+			//}
 
+			for(int i = 0; i < m_allIDs.Count; i++)
+			{
+				if (!m_selectedIDs.Contains(m_allIDs[i]))
+					continue;
+				int patternIndex = 0;
+				data.m_selectedDisplayIDs.Add(m_displayIDs[i]);
+				foreach(KPIValue value in m_valuesPerId[m_allIDs[i]])
+				{
+					if (m_selectedCountries == null || m_selectedCountries.Contains(value.targetCountryId))
+					{
+						chosenKPIs.Add(value);
+						data.m_patternIndices.Add(patternIndex);
+						data.m_absoluteCategoryIndices.Add(data.m_selectedDisplayIDs.Count-1);
 					}
+					patternIndex++;
 				}
-				else
-					index += kvp.Value.Count;
 			}
 
 			data.m_patternSetsPerStep = m_selectedIDs.Count;

@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
 
 			if (a_timeSettings.m_aggregationFunction != null)
 			{
-				if (a_data.m_overLapPatternSet && a_stacked)
+				if (a_data.OverLapPatternSet && a_stacked)
 				{
 					//Aggregated with max per set
 					for (int i = 0; i < a_timeSettings.m_months.Count; i++)
@@ -72,7 +72,7 @@ namespace MSP2050.Scripts
 							{
 								maxInSet = Mathf.Max(maxInSet, aggregatedV.Value);
 							}
-							if (j == a_chosenKPIs.Count - 1 || a_data.m_patternIndices[j + 1] == 0)
+							if (j == a_chosenKPIs.Count - 1 || a_data.GetPatternIndex(j + 1) == 0)
 							{
 								stackedV += aggregatedV.Value;
 								maxInSet = 0f;
@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 					}
 				}
 			}
-			else if(a_data.m_overLapPatternSet && a_stacked)
+			else if(a_data.OverLapPatternSet && a_stacked)
 			{
 				//Non-aggregated, but using max per set
 				for (int i = 0; i < a_timeSettings.m_months.Count; i++)
@@ -133,7 +133,7 @@ namespace MSP2050.Scripts
 						{
 							maxInSet = Mathf.Max(maxInSet, v.Value);
 						}
-						if(j == a_chosenKPIs.Count-1 || a_data.m_patternIndices[j+1] == 0)
+						if(j == a_chosenKPIs.Count-1 || a_data.GetPatternIndex(j+1) == 0)
 						{
 							stackedV += v.Value;
 							maxInSet = 0f;

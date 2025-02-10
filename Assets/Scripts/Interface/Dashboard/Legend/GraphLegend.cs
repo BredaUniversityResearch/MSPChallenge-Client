@@ -46,15 +46,14 @@ namespace MSP2050.Scripts
 		public float SetData(GraphDataStepped a_data, float a_sideSpacing, float a_spacing, float a_topSpacing)
 		{
 			m_data = a_data;
-			//string postFix = a_data.m_patternNames == null ? " " : " " + a_data.m_patternNames[0];
 			//Start positioning from top row
 			int i = 0;
 			int rows;
 			int startingRow = 0;
 
-			if (a_data.m_patternNames != null && a_data.m_patternNames.Count > 1)
+			if (a_data.UsesPattern)
 			{
-				startingRow = Mathf.CeilToInt(a_data.m_patternNames.Count / (float)m_columns);
+				startingRow = Mathf.CeilToInt(a_data.PatternNames.Count / (float)m_columns);
 			}
 
 			//Value entries
@@ -70,7 +69,7 @@ namespace MSP2050.Scripts
 						{
 							m_entries.Add(Instantiate(m_entryPrefab, m_entryParent).GetComponent<GraphLegendEntry>());
 						}
-						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i] /*+ postFix*/, DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[i]),
+						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i], a_data.GetLegendDisplayColor(i),
 							x / (float)m_columns,
 							(x + 1) / (float)m_columns,
 							a_spacing / 2f,
@@ -114,7 +113,7 @@ namespace MSP2050.Scripts
 							else
 								color = team.color;
 						}
-						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i % a_data.m_selectedDisplayIDs.Count] /*+ postFix*/, color,
+						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i % a_data.m_selectedDisplayIDs.Count], color,
 													x / (float)m_columns,
 													(x + 1) / (float)m_columns,
 													a_spacing / 2f,
@@ -126,16 +125,16 @@ namespace MSP2050.Scripts
 			}
 
 			//Pattern entries
-			if (a_data.m_patternNames != null && a_data.m_patternNames.Count > 1)
+			if (a_data.UsesPattern)
 			{
-				for (int p = 0; p < a_data.m_patternNames.Count; p++)
+				for (int p = 0; p < a_data.PatternNames.Count; p++)
 				{
 					if (i >= m_entries.Count)
 					{
 						m_entries.Add(Instantiate(m_entryPrefab, m_entryParent).GetComponent<GraphLegendEntry>());
 					}
 					int x = p % m_columns;
-					m_entries[i].SetData(a_data.m_patternNames[p], p == 0 ? Color.white : Color.black,
+					m_entries[i].SetData(a_data.PatternNames[p], p == 0 ? Color.white : Color.black,
 							x / (float)m_columns,
 							(x + 1) / (float)m_columns,
 							a_spacing / 2f,

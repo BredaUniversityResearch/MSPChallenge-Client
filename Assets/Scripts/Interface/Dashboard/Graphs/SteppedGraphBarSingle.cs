@@ -15,12 +15,14 @@ namespace MSP2050.Scripts
 		public void SetData(GraphDataStepped a_data, int a_step, int a_cat, float a_xMin, float a_xMax, float a_yMin, float a_yMax)
 		{
 			RectTransform rect = GetComponent<RectTransform>();
-			if (a_data.m_patternNames != null && a_data.m_patternNames.Count > 0)
+			if (a_data.UsesPattern)
 			{
-				int patternIndex = a_cat % a_data.m_patternNames.Count;
+				//Pattern
+				int patternIndex = a_data.GetPatternIndex(a_cat);
 				if (patternIndex == 0)
 				{
-					m_image.color = DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[a_cat] / a_data.m_patternNames.Count);
+					m_image.color =  a_data.GetBarDisplayColor(a_cat);
+					m_image.sprite = null;
 				}
 				else
 				{
@@ -29,16 +31,18 @@ namespace MSP2050.Scripts
 					m_image.type = Image.Type.Tiled;
 					m_image.pixelsPerUnitMultiplier = 2f;
 				}
-				m_tooltip.text = $"{a_data.m_selectedDisplayIDs[a_cat/ a_data.m_patternNames.Count]} {a_data.m_patternNames[patternIndex]}: {a_data.FormatValue(a_data.m_steps[a_step][a_cat].Value)} {a_data.GetUnitString()}";				
+				m_tooltip.text = $"{a_data.GetDisplayName(a_cat)} {a_data.PatternNames[patternIndex]}: {a_data.FormatValue(a_data.m_steps[a_step][a_cat].Value)} {a_data.GetUnitString()}";				
 
 			}
 			else if (a_data.m_valueCountries == null)
 			{
-				m_image.color = DashboardManager.Instance.ColourList.GetColour(a_data.m_absoluteCategoryIndices[a_cat]);
-				m_tooltip.text = $"{a_data.m_selectedDisplayIDs[a_cat]}: {a_data.FormatValue(a_data.m_steps[a_step][a_cat].Value)} {a_data.GetUnitString()}";
+				//Regular
+				m_image.color = a_data.GetBarDisplayColor(a_cat);
+				m_tooltip.text = $"{a_data.GetDisplayName(a_cat)}: {a_data.FormatValue(a_data.m_steps[a_step][a_cat].Value)} {a_data.GetUnitString()}";
 			}
 			else
 			{
+				//Country
 				SetCountryColour(a_data, a_step, a_cat);
 			}
 			rect.anchorMin = new Vector2(a_xMin, a_yMin);
