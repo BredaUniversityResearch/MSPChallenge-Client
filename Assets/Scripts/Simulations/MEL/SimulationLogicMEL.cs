@@ -46,6 +46,11 @@ namespace MSP2050.Scripts
 			return m_ecologyKPI;
 		}
 
+		public override List<KPIValueCollection> GetKPIValuesForAllCountries()
+		{
+			return new List<KPIValueCollection>() { m_ecologyKPI };
+		}
+
 		public void CreateEcologyKPIs()
 		{
 			List<KPICategoryDefinition> categoryDefinitions = m_config.content["ecologyCategories"].ToObject<List<KPICategoryDefinition>>();

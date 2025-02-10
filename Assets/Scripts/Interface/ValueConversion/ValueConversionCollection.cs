@@ -79,6 +79,11 @@ namespace MSP2050.Scripts
 
 		public bool TryGetConverter(string unit, out ValueConversionUnit result)
 		{
+			if (unit == null)
+			{
+				result = null;
+				return false;
+			}
 			return conversionUnits.TryGetValue(unit, out result);
 		}
 	}

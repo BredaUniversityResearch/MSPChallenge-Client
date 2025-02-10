@@ -152,9 +152,9 @@ namespace MSP2050.Scripts
 
 		public Team FindTeamByID(int teamID)
 		{
-			Team result;
-			teamsByID.TryGetValue(teamID, out result);
-			return result;
+			if(teamsByID.TryGetValue(teamID, out var result))
+				return result;
+			return null;
 		}
 
 		public IEnumerable<Team> GetTeams()

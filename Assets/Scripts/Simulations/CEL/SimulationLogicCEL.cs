@@ -138,5 +138,10 @@ namespace MSP2050.Scripts
 		{
 			return m_energyKPIs.GetKPIForCountry(a_countryId);
 		}
+
+		public override List<KPIValueCollection> GetKPIValuesForAllCountries()
+		{
+			return m_energyKPIs.GetKPIForAllCountries();
+		}
 	}
 }
