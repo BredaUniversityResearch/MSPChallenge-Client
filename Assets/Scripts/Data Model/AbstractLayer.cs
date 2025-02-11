@@ -86,7 +86,6 @@ namespace MSP2050.Scripts
 
 			if (a_layerMeta.layer_editing_type == "protection")
 			{
-				m_multiTypeSelect = true;
 				LayerManager.Instance.m_protectedAreaLayers.Add(this);
 			}
 			else
