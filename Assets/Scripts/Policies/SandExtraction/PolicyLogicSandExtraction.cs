@@ -29,23 +29,27 @@ namespace MSP2050.Scripts
         {
             if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
             {
-                PolicyUpdateSandExtractionPlan update = (PolicyUpdateSandExtractionPlan)a_updateData;
-
-                PolicyPlanDataSandExtraction planData = new PolicyPlanDataSandExtraction(this);
-                if(update != null)
+                //Update the sand extraction value in the plan
+                if (a_updateData is PolicyUpdateSandExtractionPlan update)
                 {
-                    planData.m_value = update.m_distanceValue;
+                    PolicyPlanDataSandExtraction planData = new PolicyPlanDataSandExtraction(this)
+                    {
+                        m_value = update.m_distanceValue
+                    };
+
+                    a_plan.SetPolicyData(planData);
                 }
-                
-                a_plan.SetPolicyData(planData);
             }
         }
 
         public override void HandleGeneralUpdate(APolicyData a_data, EPolicyUpdateStage a_stage)
-        { }
+        {
+            //No general updates needed for sand extraction
+        }
 
         public override void RemoveFromPlan(Plan a_plan)
         {
+            //Remove sand extraction policy data from the plan
             a_plan.Policies.Remove(PolicyManager.SANDEXTRACTION_POLICY_NAME);
         }
 
@@ -60,8 +64,10 @@ namespace MSP2050.Scripts
             {
                 m_wasSandExtractionPlanBeforeEditing = true;
 
-                m_backup = new PolicyPlanDataSandExtraction(this);
-                m_backup.m_value = data.m_value;
+                m_backup = new PolicyPlanDataSandExtraction(this)
+                {
+                    m_value = data.m_value
+                };
             }
             else
             {
@@ -71,6 +77,7 @@ namespace MSP2050.Scripts
 
         public override void StopEditingPlan(Plan a_plan)
         {
+            //Clear the backup when editing stops
             m_backup = null;
         }
 
@@ -78,10 +85,12 @@ namespace MSP2050.Scripts
         {
             if (m_wasSandExtractionPlanBeforeEditing)
             {
+                //Restore the backup value
                 a_plan.SetPolicyData(m_backup);
             }
             else
             {
+                //Remove the policy if it wasn't part of the plan before editing
                 RemoveFromPlan(a_plan);
             }
         }
@@ -91,11 +100,18 @@ namespace MSP2050.Scripts
             if (a_plan.TryGetPolicyData<PolicyPlanDataSandExtraction>(PolicyManager.SANDEXTRACTION_POLICY_NAME, out var data))
             {
                 if (!m_wasSandExtractionPlanBeforeEditing)
-                    SetGeneralPolicyData(a_plan, new PolicyUpdateSandExtractionPlan() { m_distanceValue = data.m_value, policy_type = PolicyManager.SANDEXTRACTION_POLICY_NAME }, a_batch);
-                
+                {
+                    //Submit the new sand extraction value to the server
+                    SetGeneralPolicyData(a_plan, new PolicyUpdateSandExtractionPlan()
+                    {
+                        m_distanceValue = data.m_value,
+                        policy_type = PolicyManager.SANDEXTRACTION_POLICY_NAME
+                    }, a_batch);
+                }
             }
             else if (m_wasSandExtractionPlanBeforeEditing)
             {
+                //Remove the policy data if it was part of the plan before editing but is no longer
                 DeleteGeneralPolicyData(a_plan, PolicyManager.SANDEXTRACTION_POLICY_NAME, a_batch);
             }
         }
@@ -107,6 +123,7 @@ namespace MSP2050.Scripts
 
         public override void OnPlanLayerRemoved(PlanLayer a_layer)
         {
+            //No specific logic needed for sand extraction when a plan layer is removed
         }
 
         public int GetSandExtractionSettingBeforePlan(Plan a_plan)
