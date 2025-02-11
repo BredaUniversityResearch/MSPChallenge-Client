@@ -29,7 +29,14 @@ public class SandExtractionSlider : MonoBehaviour
     {
         if (int.TryParse(value, out int intValue))
         {
+            // Clamp the value to the maximum allowed (30)
+            intValue = (int)Mathf.Clamp(intValue, 0, m_slider.maxValue);
+
+            // Update the slider with the clamped value
             m_slider.SetValueWithoutNotify(intValue);
+
+            // Update the input field with the clamped value (in case it was out of bounds)
+            m_inputField.SetValueWithoutNotify(intValue.ToString());
         }
     }
 

@@ -43,7 +43,7 @@ namespace MSP2050.Scripts
             //Then plan.setpolicydata and apply the value to the policy/plan.
             //Check the AP_EcoGear from Kevin.
 
-            string m_sandExtractionString = m_sandExtractionSliderPrefab.GetComponent<TextMeshProUGUI>().text;
+            string m_sandExtractionString = m_sandExtractionSliderPrefab.m_inputField.text;
             m_sandExtractionValue = int.Parse(m_sandExtractionString);
 
 
