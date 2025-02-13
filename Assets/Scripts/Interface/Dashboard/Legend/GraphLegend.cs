@@ -14,7 +14,7 @@ namespace MSP2050.Scripts
 
 		GraphDataStepped m_data;
 		int m_columns = 1;
-		List<GraphLegendEntry> m_entries = new List<GraphLegendEntry>();
+		List<GraphLegendEntry> m_entries;
 		bool m_horizontal = true;
 		int m_w, m_h;
 
@@ -27,6 +27,7 @@ namespace MSP2050.Scripts
 					Destroy(child.gameObject);
 				}
 			}
+			m_entries = new List<GraphLegendEntry>();
 		}
 
 		public float SetSize(int a_w, int a_h, bool a_horizontal, float a_sideSpacing, float a_spacing, float a_topSpacing)

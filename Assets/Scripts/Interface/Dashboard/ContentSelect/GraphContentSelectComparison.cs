@@ -104,10 +104,15 @@ namespace MSP2050.Scripts
 			{
 				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
 				m_noDataEntry.text = "NO DATA AVAILABLE";
+				DetermineUnit(null);
+			}
+			else
+			{
+				DetermineUnit(m_categories[0]);
 			}
 
 			//Setup toggle values
-			if(kvcs.Count > 1)
+			if (kvcs.Count > 1)
 			{
 				m_allCountries = new List<int>();
 				foreach(Team team in SessionManager.Instance.GetTeams())
@@ -191,27 +196,9 @@ namespace MSP2050.Scripts
 			data.m_overLapPatternSet = m_overLapPatternSet;
 			data.m_patternIndices = new List<int>();
 			data.m_selectedDisplayIDs = new List<string>(m_selectedIDs.Count);
+			data.m_unit = m_unit;
+			data.m_undefinedUnit = m_undefinedUnit;
 			List<KPIValue> chosenKPIs = new List<KPIValue>();
-			//foreach (var kvp in m_valuesPerId)
-			//{
-			//	if (m_selectedIDs.Contains(kvp.Key))
-			//	{
-			//		for (int i = 0; i < kvp.Value.Count; i++)
-			//		{
-			//			if (m_selectedCountries == null || m_selectedCountries.Contains(kvp.Value[i].targetCountryId))
-			//			{
-			//				chosenKPIs.Add(kvp.Value[i]);
-			//				data.m_patternIndices.Add(i);
-			//				data.m_absoluteCategoryIndices.Add(entryIndex);
-			//			}
-			//			entryIndex++;
-			//		}
-			//		data.m_selectedDisplayIDs.Add(kvp.Value[0].displayName);
-			//	}
-			//	else
-			//		entryIndex += kvp.Value.Count;
-			//	valueIndex++;
-			//}
 
 			for(int i = 0; i < m_allIDs.Count; i++)
 			{
@@ -236,23 +223,13 @@ namespace MSP2050.Scripts
 			foreach(string s in m_categoryDisplayNames)
 				data.m_patternNames.Add(s);
 
-			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
-			if (chosenKPIs.Count > 0)
+			if (chosenKPIs.Count  == 0 && m_valuesPerId.Count > 0)
 			{
-				vcc.TryGetConverter(chosenKPIs[0].unit, out data.m_unit);
-				if (data.m_unit == null)
-					data.m_undefinedUnit = string.IsNullOrEmpty(chosenKPIs[0].unit) ? "N/A" : chosenKPIs[0].unit;
-				m_noDataEntry.gameObject.SetActive(false);
+				m_noDataEntry.gameObject.SetActive(true);
+				m_noDataEntry.text = "NO CONTENT SELECTED";
 			}
 			else
-			{
-				vcc.TryGetConverter("", out data.m_unit);
-				if(m_valuesPerId.Count > 0)
-				{
-					m_noDataEntry.gameObject.SetActive(true);
-					m_noDataEntry.text = "NO CONTENT SELECTED";
-				}
-			}
+				m_noDataEntry.gameObject.SetActive(false);
 
 			data.m_stepNames = a_timeSettings.m_stepNames;
 			data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);

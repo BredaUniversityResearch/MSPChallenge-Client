@@ -16,6 +16,8 @@ namespace MSP2050.Scripts
 
 		protected ADashboardWidget m_widget;
 		protected Action m_onSettingsChanged;
+		protected ValueConversionUnit m_unit;
+		protected string m_undefinedUnit;
 		//Fixed category, toggles for content
 		//Fixed category, selectable country (or: all)
 		//2 fixed categories, grouped by content (different name)
@@ -29,6 +31,29 @@ namespace MSP2050.Scripts
 				int index = i;
 				m_contentToggles[i].m_detailsToggle.onValueChanged.AddListener((b) => ToggleDetails(b, index));
 				m_contentToggles[i].m_summaryText.text = m_contentToggleNames[i];
+			}
+		}
+
+		protected void DetermineUnit(KPICategory a_cat, KPIValue a_val = null)
+		{
+			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
+			if (a_cat != null && !string.IsNullOrEmpty(a_cat.unit))
+			{
+				vcc.TryGetConverter(a_cat.unit, out m_unit);
+				if (m_unit == null)
+					m_undefinedUnit = string.IsNullOrEmpty(a_cat.unit) ? "N/A" : a_cat.unit;
+				m_noDataEntry.gameObject.SetActive(false);
+			}
+			else if(a_val != null && !string.IsNullOrEmpty(a_val.unit))
+			{
+				vcc.TryGetConverter(a_val.unit, out m_unit);
+				if (m_unit == null)
+					m_undefinedUnit = string.IsNullOrEmpty(a_val.unit) ? "N/A" : a_val.unit;
+				m_noDataEntry.gameObject.SetActive(false);
+			}
+			else
+			{
+				m_undefinedUnit = "N/A";
 			}
 		}
 
