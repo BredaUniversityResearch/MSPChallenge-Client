@@ -142,6 +142,11 @@ namespace MSP2050.Scripts
 			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);
 		}
 
+		public void RemoveWidget(ADashboardWidget a_widget)
+		{
+			m_catSelectedWidgets[a_widget.m_category].Remove(a_widget);
+		}
+
 		void OnCategorySelected(DashboardCategory a_category)
 		{
 			if (m_catalogueLayout.Visible)

@@ -22,7 +22,7 @@ namespace MSP2050.Scripts
 		{
 			if (m_entryParent.childCount > 0)
 			{
-				foreach (Transform child in transform)
+				foreach (Transform child in m_entryParent)
 				{
 					Destroy(child.gameObject);
 				}
