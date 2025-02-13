@@ -36,7 +36,7 @@ namespace MSP2050.Scripts
 			{
 				if (m_scalePower != 0)
 					return $"e{m_scalePower} {m_undefinedUnit}";
-				return "N/A";
+				return m_undefinedUnit;
 			}
 			if (m_scalePower - m_unitEOffset != 0)
 				return $"e{m_scalePower - m_unitEOffset} {m_unit.GetUnitStringForUnitIndex(m_unitIndex)}";

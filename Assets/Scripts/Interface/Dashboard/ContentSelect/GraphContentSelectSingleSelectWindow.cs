@@ -40,6 +40,8 @@ namespace MSP2050.Scripts
 				entry.m_text.text = a_displayIDs[i]; 
 				m_entries.Add(entry);
 			}
+			if (m_selectedIndex < 0)
+				m_selectedIndex = 0;
 		}
 
 		public override void SetContent(HashSet<KPIValue> a_selectedValues, List<KPIValue> a_allValues,  Action<int, bool> a_callback, Action<bool> a_allChangeCallback)
@@ -64,6 +66,8 @@ namespace MSP2050.Scripts
 				entry.m_text.text = a_allValues[i].displayName;
 				m_entries.Add(entry);
 			}
+			if (m_selectedIndex < 0)
+				m_selectedIndex = 0;
 		}
 
 		public override void SetContent(HashSet<int> a_selectedCountries, List<int> a_allCountries, Action<int, bool> a_callback, Action<bool> a_allChangeCallback)
@@ -93,6 +97,8 @@ namespace MSP2050.Scripts
 					entry.m_text.text = SessionManager.Instance.GetTeamByTeamID(a_allCountries[i]).name;
 				m_entries.Add(entry);
 			}
+			if (m_selectedIndex < 0)
+				m_selectedIndex = 0;
 		}
 
 		void ClearEntries()
