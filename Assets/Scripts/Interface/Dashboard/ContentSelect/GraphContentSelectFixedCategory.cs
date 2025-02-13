@@ -107,8 +107,14 @@ namespace MSP2050.Scripts
 			{
 				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
 				m_noDataEntry.text = "NO DATA AVAILABLE";
+				DetermineUnit(null);
 			}
-			if(m_focusSelection != null && m_allIDs.Count > 0)
+			else
+			{
+				DetermineUnit(m_categories[0]);
+			}
+
+			if (m_focusSelection != null && m_allIDs.Count > 0)
 			{
 				m_selectedIDs.Add(m_allIDs[0]);
 			}
@@ -218,6 +224,8 @@ namespace MSP2050.Scripts
 		{
 			GraphDataStepped data = new GraphDataStepped();
 			data.m_absoluteCategoryIndices = new List<int>();
+			data.m_unit = m_unit;
+			data.m_undefinedUnit = m_undefinedUnit;
 			List<KPIValue> chosenKPIs = new List<KPIValue>();
 			int index = 0;
 			foreach (KPIValue v in m_values)
@@ -230,23 +238,13 @@ namespace MSP2050.Scripts
 				index++;
 			}
 
-			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
-			if (chosenKPIs.Count > 0)
+			if (chosenKPIs.Count == 0 && m_values.Count > 0)
 			{
-				vcc.TryGetConverter(chosenKPIs[0].unit, out data.m_unit);
-				if (data.m_unit == null)
-					data.m_undefinedUnit = string.IsNullOrEmpty(chosenKPIs[0].unit) ? "N/A" : chosenKPIs[0].unit;
-				m_noDataEntry.gameObject.SetActive(false);
+				m_noDataEntry.gameObject.SetActive(true);
+				m_noDataEntry.text = "NO CONTENT SELECTED";
 			}
 			else
-			{
-				vcc.TryGetConverter("", out data.m_unit);
-				if(m_values.Count > 0)
-				{
-					m_noDataEntry.gameObject.SetActive(true);
-					m_noDataEntry.text = "NO CONTENT SELECTED";
-				}
-			}
+				m_noDataEntry.gameObject.SetActive(false);
 
 			data.m_stepNames = a_timeSettings.m_stepNames;
 			data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);

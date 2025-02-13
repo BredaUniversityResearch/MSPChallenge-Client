@@ -80,8 +80,12 @@ namespace MSP2050.Scripts
 			{
 				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
 				m_noDataEntry.text = "NO DATA AVAILABLE";
+				DetermineUnit(null);
 			}
-
+			else
+			{
+				DetermineUnit(m_categories[0]);
+			}
 		}
 
 		private void OnDestroy()
@@ -101,29 +105,21 @@ namespace MSP2050.Scripts
 		{
 			GraphDataStepped data = new GraphDataStepped();
 			data.m_absoluteCategoryIndices = new List<int>();
+			data.m_unit = m_unit;
+			data.m_undefinedUnit = m_undefinedUnit;
 
-			for(int i = 0; i < m_values.Count; i++ )
+			for (int i = 0; i < m_values.Count; i++ )
 			{
 				data.m_absoluteCategoryIndices.Add(i);
 			}
 
-			ValueConversionCollection vcc = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
-			if (m_values.Count > 0)
+			if (m_values.Count == 0)
 			{
-				vcc.TryGetConverter(m_values[0].unit, out data.m_unit);
-				if (data.m_unit == null)
-					data.m_undefinedUnit = string.IsNullOrEmpty(m_values[0].unit) ? "N/A" : m_values[0].unit;
-				m_noDataEntry.gameObject.SetActive(false);
+				m_noDataEntry.gameObject.SetActive(true);
+				m_noDataEntry.text = "NO CONTENT SELECTED";
 			}
 			else
-			{
-				vcc.TryGetConverter("", out data.m_unit);
-				if(m_values.Count > 0)
-				{
-					m_noDataEntry.gameObject.SetActive(true);
-					m_noDataEntry.text = "NO CONTENT SELECTED";
-				}
-			}
+				m_noDataEntry.gameObject.SetActive(false);
 
 			data.m_stepNames = a_timeSettings.m_stepNames;
 			data.m_steps = new List<float?[]>(a_timeSettings.m_stepNames.Count);

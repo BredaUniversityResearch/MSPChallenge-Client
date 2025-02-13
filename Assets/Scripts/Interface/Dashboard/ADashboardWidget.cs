@@ -16,6 +16,7 @@ namespace MSP2050.Scripts
 		[SerializeField] int m_minW = 1;
 		[SerializeField] int m_minH = 1;
 		[SerializeField] Button m_addButton;
+		[SerializeField] Button m_removeButton;
 		[SerializeField] Toggle m_favouriteToggle;
 		[SerializeField] Toggle m_optionsToggle;
 		[SerializeField] ResizeHandle m_resizeHandle;
@@ -53,6 +54,7 @@ namespace MSP2050.Scripts
 
 			//Show right buttons
 			m_addButton.gameObject.SetActive(true);
+			m_removeButton.gameObject.SetActive(false);
 			m_addButton.onClick.AddListener(AddFromCatalogue);
 			m_favouriteToggle.gameObject.SetActive(false);
 			UpdateData();
@@ -69,6 +71,8 @@ namespace MSP2050.Scripts
 
 			//Show right buttons
 			m_addButton.gameObject.SetActive(false);
+			m_removeButton.gameObject.SetActive(true);
+			m_removeButton.onClick.AddListener(RemoveWidget);
 			m_favouriteToggle.gameObject.SetActive(true);
 			m_favouriteToggle.onValueChanged.AddListener(OnFavouriteToggled);
 			UpdateData();
@@ -114,6 +118,12 @@ namespace MSP2050.Scripts
 		void AddFromCatalogue()
 		{
 			DashboardManager.Instance.AddFromCatalogue(this);
+		}
+
+		void RemoveWidget()
+		{
+			DashboardManager.Instance.RemoveWidget(this);
+			Destroy(gameObject);
 		}
 
 		void OnFavouriteToggled(bool a_value)
