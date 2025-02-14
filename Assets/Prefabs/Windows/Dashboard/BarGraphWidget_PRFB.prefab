@@ -169,10 +169,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8407935643628353950}
-  - {fileID: 8681839739118545073}
   - {fileID: 1747973085286003429}
   - {fileID: 6106979117747319399}
+  - {fileID: 8407935643628353950}
+  - {fileID: 8681839739118545073}
   m_Father: {fileID: 3930061073597347529}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
@@ -885,7 +885,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 111.171875, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &326982584864807635
@@ -1330,6 +1330,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6463690881930446475}
   - component: {fileID: 7690416954969916493}
+  - component: {fileID: 3529465923924683861}
   m_Layer: 5
   m_Name: BarGraphWidget_PRFB
   m_TagString: Untagged
@@ -1384,6 +1385,7 @@ MonoBehaviour:
   m_optionsWindowPrefab: {fileID: 6554140728592820780, guid: 9a8ddec48da395744906ca1db616e919,
     type: 3}
   m_optionsWindowParent: {fileID: 6463690881930446475}
+  m_catalogueLayout: {fileID: 3529465923924683861}
   m_category: {fileID: 0}
   m_startingWidget: 1
   m_valueAxis: {fileID: 3570428555805728836}
@@ -1397,6 +1399,26 @@ MonoBehaviour:
   m_topSpacing: 48
   m_spacing: 12
   m_stacked: 0
+--- !u!114 &3529465923924683861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4280468386128911224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: 300
+  m_PreferredHeight: 300
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &4671403960083137515
 GameObject:
   m_ObjectHideFlags: 0
@@ -1930,7 +1952,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 14, y: 14}
+  m_SizeDelta: {x: 12, y: 12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1117874347050067724
 CanvasRenderer:
@@ -1960,7 +1982,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6e940f70988a7624b8d683b22a37d594, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ca3e4cce450ee18459ccc858d2e419b8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
