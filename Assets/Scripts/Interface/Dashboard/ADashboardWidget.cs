@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using static UnityEditor.PlayerSettings;
 
 namespace MSP2050.Scripts
 {
@@ -22,6 +23,7 @@ namespace MSP2050.Scripts
 		[SerializeField] ResizeHandle m_resizeHandle;
 		[SerializeField] GameObject m_optionsWindowPrefab;
 		[SerializeField] Transform m_optionsWindowParent;
+		[SerializeField] LayoutElement m_catalogueLayout;
 
 		//Set in individual prefabs
 		public DashboardCategory m_category;
@@ -39,10 +41,6 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			m_header.m_onDragStart = OnDragStart;
-			m_header.m_onDrag = OnDrag;
-			m_header.m_onDragEnd = OnDragEnd;
-			m_resizeHandle.onHandleDragged = HandleResize;
 			m_optionsToggle.onValueChanged.AddListener(ToggleOptionsWindow);
 		}
 
@@ -51,12 +49,16 @@ namespace MSP2050.Scripts
 			//Catalogue widget
 			m_position = new DashboardWidgetPosition();
 			m_position.SetSize(m_defaultW, m_defaultH);
+			m_catalogueLayout.preferredWidth = m_defaultW * DashboardManager.Instance.m_cellsize;
+			m_catalogueLayout.preferredHeight = m_defaultH * DashboardManager.Instance.m_cellsize;
+			m_resizeHandle.gameObject.SetActive(false);
 
 			//Show right buttons
 			m_addButton.gameObject.SetActive(true);
 			m_removeButton.gameObject.SetActive(false);
 			m_addButton.onClick.AddListener(AddFromCatalogue);
 			m_favouriteToggle.gameObject.SetActive(false);
+			OnSizeChanged(m_defaultW, m_defaultH);
 			UpdateData();
 		}
 
@@ -75,6 +77,11 @@ namespace MSP2050.Scripts
 			m_removeButton.onClick.AddListener(RemoveWidget);
 			m_favouriteToggle.gameObject.SetActive(true);
 			m_favouriteToggle.onValueChanged.AddListener(OnFavouriteToggled);
+			m_resizeHandle.gameObject.SetActive(true);
+			m_header.m_onDragStart = OnDragStart;
+			m_header.m_onDrag = OnDrag;
+			m_header.m_onDragEnd = OnDragEnd;
+			m_resizeHandle.onHandleDragged = HandleResize;
 			UpdateData();
 		}
 
@@ -106,12 +113,20 @@ namespace MSP2050.Scripts
 			m_contentContainer.SetActive(true);
 		}
 
-		public void Reposition(bool a_favoriteLayout = false)
+		public void Reposition(bool a_favoriteLayout = false, bool a_catalogue = false)
 		{
-			RectTransform rect = GetComponent<RectTransform>();
 			DashboardWidgetPosition pos = a_favoriteLayout ? m_favPosition : m_position;
-			rect.sizeDelta = new Vector2(pos.W * DashboardManager.Instance.m_cellsize, pos.H * DashboardManager.Instance.m_cellsize);
-			rect.localPosition = new Vector3(pos.X * DashboardManager.Instance.m_cellsize, -pos.Y * DashboardManager.Instance.m_cellsize);
+			if(!a_catalogue)
+			{ 
+				RectTransform rect = GetComponent<RectTransform>();
+				rect.anchorMin = new Vector2(0f, 1f);
+				rect.anchorMax = new Vector2(0f, 1f);
+				rect.sizeDelta = new Vector2(pos.W * DashboardManager.Instance.m_cellsize, pos.H * DashboardManager.Instance.m_cellsize);
+				rect.localPosition = new Vector3(pos.X * DashboardManager.Instance.m_cellsize, -pos.Y * DashboardManager.Instance.m_cellsize);
+			}
+
+			m_catalogueLayout.preferredWidth = pos.W * DashboardManager.Instance.m_cellsize;
+			m_catalogueLayout.preferredHeight = pos.H * DashboardManager.Instance.m_cellsize;
 			OnSizeChanged(pos.W, pos.H);
 		}
 
