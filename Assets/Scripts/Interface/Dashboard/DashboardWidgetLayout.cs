@@ -167,7 +167,7 @@ namespace MSP2050.Scripts
 				m_widgetLayout.Add(new ADashboardWidget[m_columns]);
 				rowsInserted = true;
 			}
-			if(rowsInserted)
+			if(rowsInserted && m_visible)
 				DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
 
 			for (int y = layout.Y; y < layout.Y + layout.H; y++)

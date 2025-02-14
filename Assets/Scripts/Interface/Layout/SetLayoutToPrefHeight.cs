@@ -9,6 +9,8 @@ namespace MSP2050.Scripts
 		[SerializeField] private LayoutGroup m_targetGroup = null;
 		[SerializeField] private ILayoutElement m_sourceElement = null;
 		[SerializeField] private LayoutElement m_targetElement = null;
+		[SerializeField] private RectTransform m_targetRect = null;
+
 		[SerializeField] private float m_maxHeight = 10000f;
 		[SerializeField] private bool m_setMin = false;
 		
@@ -27,13 +29,21 @@ namespace MSP2050.Scripts
 				newHeight = Mathf.Min(m_maxHeight, m_targetGroup.preferredHeight);
 			else
 				newHeight = Mathf.Min(m_maxHeight, m_sourceElement.preferredHeight);
-			
+
 			if (!Mathf.Approximately(newHeight, oldHeight))
 			{
-				if(m_setMin)
-					m_targetElement.minHeight = newHeight;
-				else
-					m_targetElement.preferredHeight = newHeight;
+				if (m_targetElement != null)
+				{
+					if (m_setMin)
+						m_targetElement.minHeight = newHeight;
+					else
+						m_targetElement.preferredHeight = newHeight;
+				}
+				if (m_targetRect != null)
+				{
+					m_targetRect.sizeDelta = new Vector2(m_targetRect.sizeDelta.x, newHeight);
+				}
+
 			}
 			oldHeight = newHeight;
 		}
