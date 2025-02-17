@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
-using static UnityEditor.PlayerSettings;
 
 namespace MSP2050.Scripts
 {
