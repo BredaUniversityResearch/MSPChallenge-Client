@@ -23,6 +23,7 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_optionsWindowPrefab;
 		[SerializeField] Transform m_optionsWindowParent;
 		[SerializeField] LayoutElement m_catalogueLayout;
+		public TextMeshProUGUI m_title;
 
 		//Set in individual prefabs
 		public DashboardCategory m_category;

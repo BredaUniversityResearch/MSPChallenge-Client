@@ -28,6 +28,8 @@ namespace MSP2050.Scripts
 		[SerializeField] TextMeshProUGUI m_categoryNameText;
 		[SerializeField] RectTransform m_rowInsertPreview;
 		[SerializeField] RectTransform m_movePreview;
+		[SerializeField] DashboardCategory m_otherCategory;
+		[SerializeField] ADashboardWidget m_genericOtherWidgetPrefab;
 
 		//Categories
 		List<DashboardCategoryToggle> m_categoryToggles;
@@ -114,6 +116,13 @@ namespace MSP2050.Scripts
 				}
 			}
 
+			if(SimulationManager.Instance.TryGetSettings(SimulationManager.OTHER_SIM_NAME, out var rawSettings))
+			{
+				SimulationSettingsOther settings = (SimulationSettingsOther)rawSettings;
+				foreach(KPICategoryDefinition catDef in settings.kpis)
+					AddGenericWidget(catDef);
+			}
+
             foreach (GameObject widgetObj in widgetObjs)
             {
 				ADashboardWidget widget = widgetObj.GetComponent<ADashboardWidget>();
@@ -146,7 +155,19 @@ namespace MSP2050.Scripts
 			ADashboardWidget instance = Instantiate(a_widget, m_widgetParent).GetComponent<ADashboardWidget>();
 			instance.Initialise(a_copySize ? a_widget : null);
 			instance.gameObject.SetActive(false);
-			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);
+			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);		
+		}
+
+		void AddGenericWidget(KPICategoryDefinition a_definition)
+		{
+			ADashboardWidget instance = Instantiate(m_genericOtherWidgetPrefab.gameObject, m_widgetParent).GetComponent<ADashboardWidget>();
+			instance.gameObject.SetActive(false);
+			instance.m_category = m_otherCategory;
+			instance.m_title.text = a_definition.categoryDisplayName;
+			GraphContentSelectFixedCategory cs = instance.GetComponentInChildren<GraphContentSelectFixedCategory>();
+			cs.m_categoryNames = new string[1] { a_definition.categoryName };
+			m_loadedWidgets.Add(instance);
+			instance.Initialise(null);
 		}
 
 		public void RemoveWidget(ADashboardWidget a_widget)

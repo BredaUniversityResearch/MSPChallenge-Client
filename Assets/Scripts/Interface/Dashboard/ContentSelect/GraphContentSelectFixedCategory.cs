@@ -8,7 +8,7 @@ namespace MSP2050.Scripts
 	public class GraphContentSelectFixedCategory : AGraphContentSelect
 	{
 		public enum KPISource { Ecology, Energy, Shipping, Geometry, Other }
-		[SerializeField] protected string[] m_categoryNames;
+		public string[] m_categoryNames;
 		[SerializeField] protected KPISource m_kpiSource;
 		[SerializeField] protected ContentSelectFocusSelection m_focusSelection;
 		[SerializeField] protected GameObject m_singleSelectWindowPrefab;
@@ -61,6 +61,11 @@ namespace MSP2050.Scripts
 			else if (kvcs.Count == 1)
 			{
 				m_contentToggles[1].gameObject.SetActive(false);
+				if(m_focusSelection != null)
+				{
+					Destroy(m_focusSelection.gameObject);
+					m_focusSelection = null;
+				}
 			}
 
 			if(m_focusSelection != null)
