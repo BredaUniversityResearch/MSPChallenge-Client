@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using Sirenix.Utilities;
 
 namespace MSP2050.Scripts
 {
@@ -116,13 +117,6 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			if(SimulationManager.Instance.TryGetSettings(SimulationManager.OTHER_SIM_NAME, out var rawSettings))
-			{
-				SimulationSettingsOther settings = (SimulationSettingsOther)rawSettings;
-				foreach(KPICategoryDefinition catDef in settings.kpis)
-					AddGenericWidget(catDef);
-			}
-
             foreach (GameObject widgetObj in widgetObjs)
             {
 				ADashboardWidget widget = widgetObj.GetComponent<ADashboardWidget>();
@@ -136,6 +130,16 @@ namespace MSP2050.Scripts
 					}
 				}
             }
+			if(SimulationManager.Instance.TryGetSettings(SimulationManager.OTHER_SIM_NAME, out var rawSettings))
+			{
+				SimulationSettingsOther settings = (SimulationSettingsOther)rawSettings;
+				foreach(KPICategoryDefinition catDef in settings.kpis)
+				{
+					ADashboardWidget widget = CreateGenericWidget(catDef);
+					m_loadedWidgets.Add(widget);
+					AddFromCatalogue(widget, false);
+				}
+			}
 			m_catalogueParent.gameObject.SetActive(false);
 			m_categoryToggles[0].ForceActive();
 			OnCategorySelected(m_catSelectedWidgets.GetFirstKey());
@@ -158,16 +162,17 @@ namespace MSP2050.Scripts
 			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);		
 		}
 
-		void AddGenericWidget(KPICategoryDefinition a_definition)
+		ADashboardWidget CreateGenericWidget(KPICategoryDefinition a_definition)
 		{
 			ADashboardWidget instance = Instantiate(m_genericOtherWidgetPrefab.gameObject, m_widgetParent).GetComponent<ADashboardWidget>();
 			instance.gameObject.SetActive(false);
 			instance.m_category = m_otherCategory;
-			instance.m_title.text = a_definition.categoryDisplayName;
+			instance.m_title.text = string.IsNullOrEmpty(a_definition.categoryDisplayName) ? a_definition.categoryName : a_definition.categoryDisplayName;
 			GraphContentSelectFixedCategory cs = instance.GetComponentInChildren<GraphContentSelectFixedCategory>();
 			cs.m_categoryNames = new string[1] { a_definition.categoryName };
-			m_loadedWidgets.Add(instance);
+			cs.m_kpiSource = GraphContentSelectFixedCategory.KPISource.Other;
 			instance.Initialise(null);
+			return instance;
 		}
 
 		public void RemoveWidget(ADashboardWidget a_widget)

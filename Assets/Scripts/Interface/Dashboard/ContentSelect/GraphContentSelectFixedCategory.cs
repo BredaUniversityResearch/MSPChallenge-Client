@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 	{
 		public enum KPISource { Ecology, Energy, Shipping, Geometry, Other }
 		public string[] m_categoryNames;
-		[SerializeField] protected KPISource m_kpiSource;
+		public KPISource m_kpiSource;
 		[SerializeField] protected ContentSelectFocusSelection m_focusSelection;
 		[SerializeField] protected GameObject m_singleSelectWindowPrefab;
 
