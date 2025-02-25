@@ -214,20 +214,19 @@ namespace MSP2050.Scripts
 		{
 			return m_layers[a_layerID];
 		}
+		public AbstractLayer GetLayerByUniqueTag(string a_layerTag)
+		{
+			foreach (var layer in m_layers)
+			{
+				if (layer.m_tags.Contains(a_layerTag))
+				{
+					return layer;
+				}
+			}
+			return null;
+		}
 
-        public AbstractLayer GetLayerByUniqueTag(string a_layerTag)
-        {
-            foreach (var layer in m_layers)
-            {
-                if (layer.m_tags.Contains(a_layerTag))
-                {
-                    return layer;
-                }
-            }
-            return null;
-        }
-
-        public List<AbstractLayer> GetLoadedLayers(string a_category, string a_subcategory)
+		public List<AbstractLayer> GetLoadedLayers(string a_category, string a_subcategory)
 		{
 			List<AbstractLayer> result = new List<AbstractLayer>();
 			foreach (AbstractLayer layer in m_layers)
