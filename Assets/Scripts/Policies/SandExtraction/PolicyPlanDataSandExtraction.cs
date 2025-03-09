@@ -9,15 +9,7 @@ namespace MSP2050.Scripts
 
         public PolicyPlanDataSandExtraction(APolicyLogic a_logic) : base(a_logic)
         {
-            m_value = 0;
-        }
-
-        public void AddUnchangedValues(int value)
-        {
-            //Add the values that are not changed by the player here
-            if (m_value == 0)
-                return;
-            value = m_value;
+            m_value = 0; // Default value
         }
     }
 }

@@ -29,7 +29,7 @@ namespace MSP2050.Scripts
         {
             if (a_stage == APolicyLogic.EPolicyUpdateStage.General)
             {
-                //Update the sand extraction value in the plan
+                // Update the sand extraction value in the plan
                 if (a_updateData is PolicyUpdateSandExtractionPlan update)
                 {
                     PolicyPlanDataSandExtraction planData = new PolicyPlanDataSandExtraction(this)
@@ -99,19 +99,19 @@ namespace MSP2050.Scripts
         {
             if (a_plan.TryGetPolicyData<PolicyPlanDataSandExtraction>(PolicyManager.SANDEXTRACTION_POLICY_NAME, out var data))
             {
-                if (!m_wasSandExtractionPlanBeforeEditing)
+                // Create a PolicyUpdateSandExtractionPlan object with the current sand extraction value
+                PolicyUpdateSandExtractionPlan update = new PolicyUpdateSandExtractionPlan()
                 {
-                    //Submit the new sand extraction value to the server
-                    SetGeneralPolicyData(a_plan, new PolicyUpdateSandExtractionPlan()
-                    {
-                        m_distanceValue = data.m_value,
-                        policy_type = PolicyManager.SANDEXTRACTION_POLICY_NAME
-                    }, a_batch);
-                }
+                    m_distanceValue = data.m_value,
+                    policy_type = PolicyManager.SANDEXTRACTION_POLICY_NAME
+                };
+
+                // Submit the update to the server
+                SetGeneralPolicyData(a_plan, update, a_batch);
             }
             else if (m_wasSandExtractionPlanBeforeEditing)
             {
-                //Remove the policy data if it was part of the plan before editing but is no longer
+                // If the plan had sand extraction data before editing but no longer does, remove the policy data
                 DeleteGeneralPolicyData(a_plan, PolicyManager.SANDEXTRACTION_POLICY_NAME, a_batch);
             }
         }
@@ -129,14 +129,15 @@ namespace MSP2050.Scripts
         public int GetSandExtractionSettingBeforePlan(Plan a_plan)
         {
             List<Plan> plans = PlanManager.Instance.Plans;
-            int result = 0;
+            int result = 0; // Default value
 
-            //Find the index of the given plan
+            // Find the index of the given plan
             int planIndex = 0;
             for (; planIndex < plans.Count; planIndex++)
                 if (plans[planIndex] == a_plan)
                     break;
 
+            // Look for the most recent influencing plan with sand extraction data
             for (int i = planIndex - 1; i >= 0; i--)
             {
                 if (plans[i].InInfluencingState && plans[i].TryGetPolicyData<PolicyPlanDataSandExtraction>(PolicyManager.SANDEXTRACTION_POLICY_NAME, out var planData))
@@ -144,6 +145,8 @@ namespace MSP2050.Scripts
                     return planData.m_value;
                 }
             }
+
+            // If no influencing plan is found, return the default value
             return result;
         }
     }
