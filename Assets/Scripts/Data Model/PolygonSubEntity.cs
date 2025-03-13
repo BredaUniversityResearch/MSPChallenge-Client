@@ -617,7 +617,7 @@ namespace MSP2050.Scripts
 				//Calculate "reasonable" epsilon. Considering we have 7 digits of precision, we take a '1' value on the 7th digit as the maximum distance.
 				//1000 = 0.001 (log10(1000) = 3, 7-3 = 4, 10^4 = 10000, 1/10000 = 0.0001)
 				//10000 = 0.01 (log10(10000) = 4, 7-4 = 3, 10^3 = 1000, 1/1000 = 0.001)
-				float epsilon = 1.0f / Mathf.Pow(10, 7 - Mathf.Floor(Mathf.Log10(x0)));
+				float epsilon = 1.0f / Mathf.Pow(10, 7 - Mathf.Floor(Mathf.Log10(Mathf.Abs(x0))));
 
 				Vector2 v1 = new Vector2(x1, y1);
 
@@ -671,32 +671,32 @@ namespace MSP2050.Scripts
 			return geo;
 		}
 
-		public void Simplify(float tolerance)
-		{
-			List<Vector3> simplePoly = Optimization.DouglasPeuckerReduction(polygon, tolerance);
+		//public void Simplify(float tolerance)
+		//{
+		//	List<Vector3> simplePoly = Optimization.DouglasPeuckerReduction(polygon, tolerance);
 
-			if (simplePoly.Count >= 3)
-			{
-				polygon = simplePoly;
-			}
+		//	if (simplePoly.Count >= 3)
+		//	{
+		//		polygon = simplePoly;
+		//	}
 
-			if (holes != null)
-			{
-				for (int i = 0; i < holes.Count; ++i)
-				{
-					List<Vector3> simpleHole = Optimization.DouglasPeuckerReduction(holes[i], tolerance);
-					if (simpleHole.Count >= 3)
-					{
-						holes[i] = simpleHole;
-					}
-				}
-			}
+		//	if (holes != null)
+		//	{
+		//		for (int i = 0; i < holes.Count; ++i)
+		//		{
+		//			List<Vector3> simpleHole = Optimization.DouglasPeuckerReduction(holes[i], tolerance);
+		//			if (simpleHole.Count >= 3)
+		//			{
+		//				holes[i] = simpleHole;
+		//			}
+		//		}
+		//	}
 
-			PerformValidityCheck(false);
-			//TryFixingSelfIntersectionsWithIncreasingOffsets(0.01f, tolerance);
+		//	PerformValidityCheck(false);
+		//	//TryFixingSelfIntersectionsWithIncreasingOffsets(0.01f, tolerance);
 
-			UpdateBoundingBox();
-		}
+		//	UpdateBoundingBox();
+		//}
 
 		public override void UpdateGeometry(GeometryObject geo)
 		{

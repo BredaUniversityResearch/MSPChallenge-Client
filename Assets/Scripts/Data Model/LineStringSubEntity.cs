@@ -266,11 +266,11 @@ namespace MSP2050.Scripts
 			return true;
 		}
 
-		public void Simplify(float tolerance)
-		{
-			m_points = Optimization.DouglasPeuckerReduction(m_points, tolerance);
-			OnPointsDataChanged();
-		}
+		//public void Simplify(float tolerance)
+		//{
+		//	m_points = Optimization.DouglasPeuckerReduction(m_points, tolerance);
+		//	OnPointsDataChanged();
+		//}
 
 		public override void UpdateGeometry(GeometryObject geo)
 		{
