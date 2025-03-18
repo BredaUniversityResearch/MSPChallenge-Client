@@ -59,7 +59,7 @@ namespace MSP2050.Scripts
 				new TMP_Dropdown.OptionData("Yearly Minimum"),
 				new TMP_Dropdown.OptionData("Yearly Maximum"),
 				new TMP_Dropdown.OptionData("Yearly Sum"),
-				new TMP_Dropdown.OptionData("Full Tear Sum")
+				new TMP_Dropdown.OptionData("Full Year Sum")
 			};
 			m_windowInstance.m_aggregationDropdown.value = m_aggregationOption;
 			m_windowInstance.m_yearToggle.isOn = m_yearToggleValue;
@@ -278,11 +278,11 @@ namespace MSP2050.Scripts
 				case 2:
 					return "Max";
 				case 3:
-					return "Avg";
-				case 4:
 					return "Sum";
-				default:
+				case 4:
 					return "FSum";
+				default:
+					return "Avg";
 			}
 		}
 
@@ -302,13 +302,13 @@ namespace MSP2050.Scripts
 						m_currentSettings.m_aggregationFunction = AggregateYearsMax;
 						break;
 					case 3:
-						m_currentSettings.m_aggregationFunction = AggregateYearsAvg;
-						break;
-					case 4:
 						m_currentSettings.m_aggregationFunction = AggregateYearsSum;
 						break;
-					default:
+					case 4:
 						m_currentSettings.m_aggregationFunction = AggregateFullYearsSum;
+						break;
+					default:
+						m_currentSettings.m_aggregationFunction = AggregateYearsAvg;
 						break;
 				}
 			}
