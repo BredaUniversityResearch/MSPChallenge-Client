@@ -9,8 +9,6 @@ namespace MSP2050.Scripts
 {
 	public abstract class ADashboardWidget : MonoBehaviour
 	{
-		
-
 		[SerializeField] DashboardWidgetHeader m_header;
 		[SerializeField] GameObject m_contentContainer;
 		[SerializeField] int m_defaultW = 1;
@@ -18,9 +16,14 @@ namespace MSP2050.Scripts
 		[SerializeField] int m_minW = 1;
 		[SerializeField] int m_minH = 1;
 		[SerializeField] Button m_addButton;
+		[SerializeField] Button m_removeButton;
 		[SerializeField] Toggle m_favouriteToggle;
-		[SerializeField] Button m_optionsButton;
+		[SerializeField] Toggle m_optionsToggle;
 		[SerializeField] ResizeHandle m_resizeHandle;
+		[SerializeField] GameObject m_optionsWindowPrefab;
+		[SerializeField] Transform m_optionsWindowParent;
+		[SerializeField] LayoutElement m_catalogueLayout;
+		public TextMeshProUGUI m_title;
 
 		//Set in individual prefabs
 		public DashboardCategory m_category;
@@ -29,6 +32,8 @@ namespace MSP2050.Scripts
 		public DashboardWidgetPosition m_position;
 		public DashboardWidgetPosition m_favPosition;
 
+		protected WidgetOptionsWindow m_optionsWindow;
+
 		public int DefaultW => m_defaultW;
 		public int DefaultH => m_defaultH;
 		public int MinW => m_minW;
@@ -36,22 +41,25 @@ namespace MSP2050.Scripts
 
 		private void Awake()
 		{
-			m_header.m_onDragStart = OnDragStart;
-			m_header.m_onDrag = OnDrag;
-			m_header.m_onDragEnd = OnDragEnd;
-			m_resizeHandle.onHandleDragged = HandleResize;
+			m_optionsToggle.onValueChanged.AddListener(ToggleOptionsWindow);
 		}
 
 		public virtual void InitialiseCatalogue()
 		{
 			//Catalogue widget
+			gameObject.SetActive(true);
 			m_position = new DashboardWidgetPosition();
 			m_position.SetSize(m_defaultW, m_defaultH);
+			m_catalogueLayout.preferredWidth = m_defaultW * DashboardManager.Instance.m_cellsize;
+			m_catalogueLayout.preferredHeight = m_defaultH * DashboardManager.Instance.m_cellsize;
+			m_resizeHandle.gameObject.SetActive(false);
 
 			//Show right buttons
 			m_addButton.gameObject.SetActive(true);
+			m_removeButton.gameObject.SetActive(false);
 			m_addButton.onClick.AddListener(AddFromCatalogue);
 			m_favouriteToggle.gameObject.SetActive(false);
+			OnSizeChanged(m_defaultW, m_defaultH);
 			UpdateData();
 		}
 
@@ -66,8 +74,15 @@ namespace MSP2050.Scripts
 
 			//Show right buttons
 			m_addButton.gameObject.SetActive(false);
+			m_removeButton.gameObject.SetActive(true);
+			m_removeButton.onClick.AddListener(RemoveWidget);
 			m_favouriteToggle.gameObject.SetActive(true);
 			m_favouriteToggle.onValueChanged.AddListener(OnFavouriteToggled);
+			m_resizeHandle.gameObject.SetActive(true);
+			m_header.m_onDragStart = OnDragStart;
+			m_header.m_onDrag = OnDrag;
+			m_header.m_onDragEnd = OnDragEnd;
+			m_resizeHandle.onHandleDragged = HandleResize;
 			UpdateData();
 		}
 
@@ -99,18 +114,32 @@ namespace MSP2050.Scripts
 			m_contentContainer.SetActive(true);
 		}
 
-		public void Reposition(bool a_favoriteLayout = false)
+		public void Reposition(bool a_favoriteLayout = false, bool a_catalogue = false)
 		{
-			RectTransform rect = GetComponent<RectTransform>();
 			DashboardWidgetPosition pos = a_favoriteLayout ? m_favPosition : m_position;
-			rect.sizeDelta = new Vector2(pos.W * DashboardManager.Instance.m_cellsize, pos.H * DashboardManager.Instance.m_cellsize);
-			rect.localPosition = new Vector3(pos.X * DashboardManager.Instance.m_cellsize, -pos.Y * DashboardManager.Instance.m_cellsize);
+			if(!a_catalogue)
+			{ 
+				RectTransform rect = GetComponent<RectTransform>();
+				rect.anchorMin = new Vector2(0f, 1f);
+				rect.anchorMax = new Vector2(0f, 1f);
+				rect.sizeDelta = new Vector2(pos.W * DashboardManager.Instance.m_cellsize, pos.H * DashboardManager.Instance.m_cellsize);
+				rect.localPosition = new Vector3(pos.X * DashboardManager.Instance.m_cellsize, -pos.Y * DashboardManager.Instance.m_cellsize);
+			}
+
+			m_catalogueLayout.preferredWidth = pos.W * DashboardManager.Instance.m_cellsize;
+			m_catalogueLayout.preferredHeight = pos.H * DashboardManager.Instance.m_cellsize;
 			OnSizeChanged(pos.W, pos.H);
 		}
 
 		void AddFromCatalogue()
 		{
 			DashboardManager.Instance.AddFromCatalogue(this);
+		}
+
+		void RemoveWidget()
+		{
+			DashboardManager.Instance.RemoveWidget(this);
+			Destroy(gameObject);
 		}
 
 		void OnFavouriteToggled(bool a_value)
@@ -138,5 +167,21 @@ namespace MSP2050.Scripts
 				return m_position.X.CompareTo(a_other.m_position.X);
 			return m_position.X.CompareTo(a_other.m_position.X);
 		}
+
+		void ToggleOptionsWindow(bool a_value)
+		{
+			if (a_value)
+			{
+				m_optionsWindow = Instantiate(m_optionsWindowPrefab, m_optionsWindowParent).GetComponent<WidgetOptionsWindow>();
+				PopulateOptions();
+			}
+			else
+			{
+				Destroy(m_optionsWindow.gameObject);
+				m_optionsWindow = null;
+			}
+		}
+
+		protected abstract void PopulateOptions();
 	}
 }

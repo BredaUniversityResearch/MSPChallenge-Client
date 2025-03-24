@@ -18,9 +18,9 @@ namespace MSP2050.Scripts
 		[SerializeField] float m_sideSpacing = 16f;
 		[SerializeField] float m_topSpacing = 44f;
 		[SerializeField] float m_spacing = 12f;
+		[SerializeField] bool m_stacked = false;
 
         bool m_legendBottom = true;
-		bool m_stacked = false;
 
 		public override void InitialiseCatalogue()
 		{
@@ -80,10 +80,6 @@ namespace MSP2050.Scripts
 				graphCorner = new Vector2(a_legendSize + m_spacing + m_valueAxis.m_size, m_sideSpacing + m_stepAxis.m_size);
 				axisCorner = new Vector2(a_legendSize + m_spacing, m_sideSpacing);
 			}
-			//m_valueAxis.SetRectOffset(
-			//	new Vector2(0f, 1f),
-			//	new Vector2(axisCorner.x, graphCorner.y),
-			//	new Vector2(graphCorner.x, -m_topSpacing));
 			m_valueAxis.SetRectOffset(
 				new Vector2(1f, 1f),
 				new Vector2(axisCorner.x, graphCorner.y),
@@ -112,5 +108,16 @@ namespace MSP2050.Scripts
             return result;
 		}
 
+		protected override void PopulateOptions()
+		{
+			m_optionsWindow.AddToggle("Stacked", m_stacked, SetStacked);
+		}
+
+		void SetStacked(bool a_stacked)
+		{
+			m_stacked = a_stacked;
+			m_graph.Stacked = a_stacked;
+			UpdateData();
+		}
 	}
 }

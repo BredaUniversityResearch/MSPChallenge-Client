@@ -73,10 +73,11 @@ namespace MSP2050.Scripts
 			if (a_data.m_unit != null)
 			{
 				a_data.m_unitIndex = a_data.m_unit.GetConversionUnitIndexForSize(maxScaled);
-				a_data.m_unitPower = FindPower(maxScaled * a_data.m_unit.GetUnitEntrySize(a_data.m_unitIndex));
+				a_data.m_scalePower = FindPower(maxScaled);// * a_data.m_unit.GetUnitEntrySize(a_data.m_unitIndex));
+				a_data.m_unitEOffset = a_data.m_unit.GetUnitEntryEOffset(a_data.m_unitIndex);
 			}
 			else
-				a_data.m_unitPower = FindPower(maxScaled);
+				a_data.m_scalePower = FindPower(maxScaled);
 
 			m_unitText.text = a_data.GetUnitString();
 
@@ -85,7 +86,7 @@ namespace MSP2050.Scripts
 			for(; i < 6; i++)
 			{
 				float v = minT + i * step;
-				SetEntry(a_data.m_unit != null ? a_data.FormatValue(v) : v.ToString(),
+				SetEntry(a_data.FormatValue(v),
 					(v - minT) / maxScaled,
 					i,
 					i == 0 ? m_firstAndLastOffset : i == 5 ? -m_firstAndLastOffset : 0f);
@@ -119,12 +120,20 @@ namespace MSP2050.Scripts
 					formatValue /= 10f;
 					power++;
 				}
+				if(formatValue > 10f && (power == 2 || power == 5 || power == 8 || power == 11 || power == 14)) //Only move lower than 10 if it round out the scale
+				{
+					power++;
+				}
 			}
 			else if(formatValue != 0 && formatValue <= 0.1f)
 			{
-				while (formatValue <= 10f)
+				while (formatValue <= 1f)
 				{
 					formatValue *= 10f;
+					power--;
+				}
+				if (formatValue > 10f && (power == -2 || power == -5 || power == -8 || power == -11 || power == -14)) //Only move lower than 10 if it round out the scale
+				{
 					power--;
 				}
 			}

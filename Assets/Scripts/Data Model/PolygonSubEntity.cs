@@ -617,7 +617,7 @@ namespace MSP2050.Scripts
 				//Calculate "reasonable" epsilon. Considering we have 7 digits of precision, we take a '1' value on the 7th digit as the maximum distance.
 				//1000 = 0.001 (log10(1000) = 3, 7-3 = 4, 10^4 = 10000, 1/10000 = 0.0001)
 				//10000 = 0.01 (log10(10000) = 4, 7-4 = 3, 10^3 = 1000, 1/1000 = 0.001)
-				float epsilon = 1.0f / Mathf.Pow(10, 7 - Mathf.Floor(Mathf.Log10(x0)));
+				float epsilon = 1.0f / Mathf.Pow(10, 7 - Mathf.Floor(Mathf.Log10(Mathf.Abs(x0))));
 
 				Vector2 v1 = new Vector2(x1, y1);
 
@@ -671,32 +671,32 @@ namespace MSP2050.Scripts
 			return geo;
 		}
 
-		public void Simplify(float tolerance)
-		{
-			List<Vector3> simplePoly = Optimization.DouglasPeuckerReduction(polygon, tolerance);
+		//public void Simplify(float tolerance)
+		//{
+		//	List<Vector3> simplePoly = Optimization.DouglasPeuckerReduction(polygon, tolerance);
 
-			if (simplePoly.Count >= 3)
-			{
-				polygon = simplePoly;
-			}
+		//	if (simplePoly.Count >= 3)
+		//	{
+		//		polygon = simplePoly;
+		//	}
 
-			if (holes != null)
-			{
-				for (int i = 0; i < holes.Count; ++i)
-				{
-					List<Vector3> simpleHole = Optimization.DouglasPeuckerReduction(holes[i], tolerance);
-					if (simpleHole.Count >= 3)
-					{
-						holes[i] = simpleHole;
-					}
-				}
-			}
+		//	if (holes != null)
+		//	{
+		//		for (int i = 0; i < holes.Count; ++i)
+		//		{
+		//			List<Vector3> simpleHole = Optimization.DouglasPeuckerReduction(holes[i], tolerance);
+		//			if (simpleHole.Count >= 3)
+		//			{
+		//				holes[i] = simpleHole;
+		//			}
+		//		}
+		//	}
 
-			PerformValidityCheck(false);
-			//TryFixingSelfIntersectionsWithIncreasingOffsets(0.01f, tolerance);
+		//	PerformValidityCheck(false);
+		//	//TryFixingSelfIntersectionsWithIncreasingOffsets(0.01f, tolerance);
 
-			UpdateBoundingBox();
-		}
+		//	UpdateBoundingBox();
+		//}
 
 		public override void UpdateGeometry(GeometryObject geo)
 		{
@@ -723,28 +723,25 @@ namespace MSP2050.Scripts
 			}
 			m_drawSettings = m_entity.EntityTypes[0].DrawSettings;
 
-			if (!m_entity.Layer.Optimized)
+			m_gameObject = new GameObject(m_databaseID != -1 ? "" + m_databaseID : "<undefined database ID>");
+			m_gameObject.transform.SetParent(parent);
+
+			PolygonLayer layer = (PolygonLayer)m_entity.Layer;
+			if (m_drawSettings.InnerGlowEnabled)
 			{
-				m_gameObject = new GameObject(m_databaseID != -1 ? "" + m_databaseID : "<undefined database ID>");
-				m_gameObject.transform.SetParent(parent);
-
-				PolygonLayer layer = (PolygonLayer)m_entity.Layer;
-				if (m_drawSettings.InnerGlowEnabled)
-				{
-					layer.UpdateInnerGlow(m_drawSettings.InnerGlowRadius, m_drawSettings.InnerGlowIterations, m_drawSettings.InnerGlowMultiplier, m_drawSettings.InnerGlowPixelSize);
-				}
-
-				if (m_entity.Layer.m_textInfo != null)
-				{
-					CreateTextMesh(m_gameObject.transform, Vector3.zero);
-				}
-
-				RebuildLods();
-
-				RedrawGameObject(drawMode, selectedPoints, hoverPoints);
-
-				SetOrderBasedOnType();
+				layer.UpdateInnerGlow(m_drawSettings.InnerGlowRadius, m_drawSettings.InnerGlowIterations, m_drawSettings.InnerGlowMultiplier, m_drawSettings.InnerGlowPixelSize);
 			}
+
+			if (m_entity.Layer.m_textInfo != null)
+			{
+				CreateTextMesh(m_gameObject.transform, Vector3.zero);
+			}
+
+			RebuildLods();
+
+			RedrawGameObject(drawMode, selectedPoints, hoverPoints);
+
+			SetOrderBasedOnType();
 		}
 
 		public override void RedrawGameObject(SubEntityDrawMode drawMode = SubEntityDrawMode.Default, HashSet<int> selectedPoints = null, HashSet<int> hoverPoints = null, bool updatePlanState = true)
@@ -1216,6 +1213,11 @@ namespace MSP2050.Scripts
 		{
 			this.polygon = points;
 			UpdateBoundingBox();
+		}
+
+		protected override void SetHoles(List<List<Vector3>> a_holes)
+		{ 
+			this.holes = a_holes;
 		}
 
 		public override List<List<Vector3>> GetHoles(bool copy = false)

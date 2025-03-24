@@ -311,7 +311,6 @@ namespace MSP2050.Scripts
 		public string name;
 		public float value;
 		public int month;
-		//public string type;
 		public double lastupdate;
 	}
 

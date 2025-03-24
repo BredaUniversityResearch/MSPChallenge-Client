@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 		TutorialUI m_UI;
 		TutorialData m_data;
 		int m_currentStep;
-		int m_currentChapterStep = -1, m_nextChapterStep= -1, m_previousChapterStep= -1;
+		int m_currentChapterStep = -1, m_nextChapterStep = -1, m_previousChapterStep = -1;
 
 		public TutorialUI UI => m_UI;
 
@@ -39,8 +39,19 @@ namespace MSP2050.Scripts
 		{
 			if (m_data == a_tutorialData)
 				return;
-
 			m_data = a_tutorialData;
+
+			if (Main.InEditMode)
+			{
+				DialogBoxManager.instance.ConfirmationWindow("Stop editing", "Starting the tutorial will leave edit mode. All changes made to the plan will be lost. Are you sure you want to open the tutorial?", null, () => StartTutorialConfirmed());
+			}
+			else
+				StartTutorialConfirmed();
+		}
+
+		void StartTutorialConfirmed()
+		{
+			InterfaceCanvas.Instance.activePlanWindow.ForceCancel(true);
 			if (m_UI == null)
 			{
 				m_UI = Instantiate(m_tutorialUIPrefab, transform).GetComponent<TutorialUI>();
@@ -56,6 +67,7 @@ namespace MSP2050.Scripts
 			{
 				m_data.m_steps[m_currentStep].ExitStep(this);
 			}
+			InterfaceCanvas.Instance.activePlanWindow.SetTutorialButtonCoverActive(false); //Enforce this is turned off, if tutorial closed halfway
 			Destroy(m_UI.gameObject);
 			m_data = null;
 			m_UI = null;

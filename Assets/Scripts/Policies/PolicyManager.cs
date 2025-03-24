@@ -128,7 +128,7 @@ namespace MSP2050.Scripts
                 m_logicType = typeof(PolicyLogicSandExtraction),
                 m_settingsType = typeof(APolicyData),
                 m_windowPrefab = Resources.Load<GameObject>("AP_PolicySandExtraction_PRFB"),
-                m_policyIcon = Resources.Load<Sprite>("Icons/sandextraction")
+                m_policyIcon = Resources.Load<Sprite>("Icons/mining_&_aggregate_extraction")
             });
         }
 

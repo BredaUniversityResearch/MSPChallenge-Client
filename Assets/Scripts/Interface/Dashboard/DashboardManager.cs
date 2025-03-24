@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using Sirenix.Utilities;
 
 namespace MSP2050.Scripts
 {
@@ -28,6 +29,8 @@ namespace MSP2050.Scripts
 		[SerializeField] TextMeshProUGUI m_categoryNameText;
 		[SerializeField] RectTransform m_rowInsertPreview;
 		[SerializeField] RectTransform m_movePreview;
+		[SerializeField] DashboardCategory m_otherCategory;
+		[SerializeField] ADashboardWidget m_genericOtherWidgetPrefab;
 
 		//Categories
 		List<DashboardCategoryToggle> m_categoryToggles;
@@ -35,7 +38,10 @@ namespace MSP2050.Scripts
 		DashboardCategory m_currentCategory;
 
 		//Catalogue
-		DashboardWidgetLayout m_catalogueLayout;
+		//DashboardWidgetLayout m_catalogueLayout;
+		bool m_showingCatalogue;
+		[SerializeField] VerticalLayoutGroup m_catalogueParent;
+		List<ADashboardWidget> m_catalogueWidgets;
 
 		//Widgets
 		public float m_cellsize = 150f;
@@ -58,15 +64,20 @@ namespace MSP2050.Scripts
 			HandleResolutionOrScaleChange();
 		}
 
+
 		public void HandleResolutionOrScaleChange()
 		{
 			m_cellsize = Mathf.Round((Screen.width -36f) * InterfaceCanvas.Instance.canvas.scaleFactor / m_numberColumns);
-			if (m_catalogueLayout != null && m_catalogueLayout.Visible)
+			if (m_showingCatalogue)
 			{
-				m_catalogueLayout.RepositionAllWidgets();
+				foreach (ADashboardWidget widget in m_catalogueWidgets)
+					widget.Reposition(false, true);
 			}
 			else if (m_currentCategory != null)
+			{
 				m_catSelectedWidgets[m_currentCategory].RepositionAllWidgets();
+				m_widgetParent.sizeDelta = new Vector2(0f, m_cellsize * m_catSelectedWidgets[m_currentCategory].Rows);
+			}
 		}
 
 		void CloseDashboard()
@@ -83,7 +94,6 @@ namespace MSP2050.Scripts
 			m_categoryToggles = new List<DashboardCategoryToggle>();
 			m_catSelectedWidgets = new Dictionary<DashboardCategory, DashboardWidgetLayout>();
 			m_loadedWidgets = new List<ADashboardWidget>();
-			m_catalogueLayout = new DashboardWidgetLayout(false, m_numberColumns);
 
 			foreach (var cat in categories)
 			{
@@ -120,8 +130,19 @@ namespace MSP2050.Scripts
 					}
 				}
             }
+			if(SimulationManager.Instance.TryGetSettings(SimulationManager.OTHER_SIM_NAME, out var rawSettings))
+			{
+				SimulationSettingsOther settings = (SimulationSettingsOther)rawSettings;
+				foreach(KPICategoryDefinition catDef in settings.kpis)
+				{
+					ADashboardWidget widget = CreateGenericWidget(catDef);
+					m_loadedWidgets.Add(widget);
+					AddFromCatalogue(widget, false);
+				}
+			}
+			m_catalogueParent.gameObject.SetActive(false);
 			m_categoryToggles[0].ForceActive();
-			OnCategorySelected(m_catSelectedWidgets.GetFirstKey<DashboardCategory, DashboardWidgetLayout>());
+			OnCategorySelected(m_catSelectedWidgets.GetFirstKey());
 		}
 
 		void AddCategoryToggle(DashboardCategory a_category)
@@ -138,15 +159,36 @@ namespace MSP2050.Scripts
 			ADashboardWidget instance = Instantiate(a_widget, m_widgetParent).GetComponent<ADashboardWidget>();
 			instance.Initialise(a_copySize ? a_widget : null);
 			instance.gameObject.SetActive(false);
-			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);
+			m_catSelectedWidgets[a_widget.m_category].AddWidget(instance);		
+		}
+
+		ADashboardWidget CreateGenericWidget(KPICategoryDefinition a_definition)
+		{
+			ADashboardWidget instance = Instantiate(m_genericOtherWidgetPrefab.gameObject, m_widgetParent).GetComponent<ADashboardWidget>();
+			instance.gameObject.SetActive(false);
+			instance.m_category = m_otherCategory;
+			instance.m_title.text = string.IsNullOrEmpty(a_definition.categoryDisplayName) ? a_definition.categoryName : a_definition.categoryDisplayName;
+			GraphContentSelectFixedCategory cs = instance.GetComponentInChildren<GraphContentSelectFixedCategory>();
+			cs.m_categoryNames = new string[1] { a_definition.categoryName };
+			cs.m_kpiSource = GraphContentSelectFixedCategory.KPISource.Other;
+			instance.Initialise(null);
+			return instance;
+		}
+
+		public void RemoveWidget(ADashboardWidget a_widget)
+		{
+			m_catSelectedWidgets[a_widget.m_category].Remove(a_widget);
 		}
 
 		void OnCategorySelected(DashboardCategory a_category)
 		{
-			if (m_catalogueLayout.Visible)
+			if (m_showingCatalogue)
 			{
-				m_catalogueLayout.DeleteAndClear();
-				m_catalogueLayout.Visible = false;
+				foreach (ADashboardWidget widget in m_catalogueWidgets)
+					Destroy(widget.gameObject);
+				m_catalogueWidgets = null;
+				m_catalogueParent.gameObject.SetActive(false);
+				m_showingCatalogue = false;
 			}
 			else if(m_currentCategory != null)
 				m_catSelectedWidgets[m_currentCategory].Visible = false;
@@ -173,18 +215,21 @@ namespace MSP2050.Scripts
 			if (m_currentCategory != null)
 				m_catSelectedWidgets[m_currentCategory].Visible = false;
 
-			m_catalogueLayout.Visible = true;
+			m_catalogueWidgets = new List<ADashboardWidget>();
+			m_catalogueParent.gameObject.SetActive(true);
+			m_showingCatalogue = true;
 			m_catalogueButton.gameObject.SetActive(false);
-			m_categoryNameText.text = $"{m_currentCategory.m_displayName} Widget Catalogue";
+			m_categoryNameText.text = $"{m_currentCategory.m_displayName} - Widget Catalogue";
 			foreach (ADashboardWidget widget in m_loadedWidgets)
 			{
 				if(widget.m_category == m_currentCategory)
 				{
-					ADashboardWidget instance = Instantiate(widget.gameObject, m_widgetParent).GetComponent<ADashboardWidget>();
+					ADashboardWidget instance = Instantiate(widget.gameObject, m_catalogueParent.transform).GetComponent<ADashboardWidget>();
 					instance.InitialiseCatalogue();
-					m_catalogueLayout.AddWidget(instance);
+					m_catalogueWidgets.Add(instance);
 				}
 			}
+			m_widgetParent.sizeDelta = new Vector2(0f, m_catalogueParent.preferredHeight);
 		}
 
 		public void SetWidgetAsFavorite(ADashboardWidget a_widget, bool a_favorite)
@@ -281,6 +326,20 @@ namespace MSP2050.Scripts
 			if (x >= m_numberColumns)
 				x = m_numberColumns - 1;
 			return (x, y);
+		}
+
+		public static Color GetLerpedCountryColour(Color a_teamColour, float a_t)
+		{
+			if (a_t > 0.5f)
+			{
+				float t = (a_t - 0.5f) * 2f;
+				return new Color(Mathf.Lerp(a_teamColour.r, 1f, t), Mathf.Lerp(a_teamColour.g, 1f, t), Mathf.Lerp(a_teamColour.b, 1f, t), 1f);
+			}
+			else
+			{
+				float t = a_t * 2f;
+				return new Color(a_teamColour.r *t, a_teamColour.g * t, a_teamColour.b * t, 1f);
+			}
 		}
 	}
 }

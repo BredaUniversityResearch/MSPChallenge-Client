@@ -160,15 +160,18 @@ namespace MSP2050.Scripts
 					{
 						if (tPolyEntity.Country > 0)
 							continue;
+						float largestOverlap = float.NegativeInfinity;
+						int country = Entity.INVALID_COUNTRY_ID;
 						foreach (PolygonEntity tCountryEntity in m_eezLayer.Entities)
 						{
-							if (!Util.PolygonPolygonIntersection(tCountryEntity.GetPolygonSubEntity(),
-								tPolyEntity.GetPolygonSubEntity()))
-								continue;
-							//the .value from EntityType in EEZLayers is the ID
-							tPolyEntity.Country = tCountryEntity.EntityTypes[0].value;
-							break; //Early out skip to the next PolyEntity
+							float area = Util.GetPolygonOverlapArea(tCountryEntity.GetPolygonSubEntity().GetPoints(), tPolyEntity.GetPolygonSubEntity().GetPoints());
+							if (area >= 0.0001f && area > largestOverlap)
+							{
+								country = tCountryEntity.EntityTypes[0].value; //the .value from EntityType in EEZLayers is the country ID
+								largestOverlap = area;
+							}
 						}
+						tPolyEntity.Country = country;
 					}
 					continue;
 				}
@@ -178,15 +181,18 @@ namespace MSP2050.Scripts
 					{
 						if (tLineStringEntity.Country > 0)
 							continue;
+						float largestOverlap = float.NegativeInfinity;
+						int country = Entity.INVALID_COUNTRY_ID;
 						foreach (PolygonEntity tCountryEntity in m_eezLayer.Entities)
 						{
-							if (!Util.PolygonLineIntersection(tCountryEntity.GetPolygonSubEntity(),
-								tLineStringEntity.GetLineStringSubEntity()))
-								continue;
-							//the .value from EntityType in EEZLayers is the ID
-							tLineStringEntity.Country = tCountryEntity.EntityTypes[0].value;
-							break; //Early out skip to the next LineStringEntity
+							float area = Util.GetPolygonLineOverlapLength(tCountryEntity.GetPolygonSubEntity().GetPoints(), tLineStringEntity.GetLineStringSubEntity().GetPoints());
+							if (area >= 0.0001f && area > largestOverlap)
+							{
+								country = tCountryEntity.EntityTypes[0].value; //the .value from EntityType in EEZLayers is the country ID
+								largestOverlap = area;
+							}
 						}
+						tLineStringEntity.Country = country;
 					}
 				}
 			}
@@ -718,7 +724,22 @@ namespace MSP2050.Scripts
 
 		public void InvokeLayerLoaded(AbstractLayer a_layer)
 		{
-			OnLayerLoaded.Invoke(a_layer);
+			OnLayerLoaded?.Invoke(a_layer);
+		}
+
+		public void ResetVisibleLayersToBase()
+		{
+			foreach(AbstractLayer layer in m_loadedLayers)
+			{
+				if (layer.ActiveOnStart)
+				{
+					ShowLayer(layer);
+				}
+				else 
+				{
+					HideLayer(layer);
+				}
+			}
 		}
 	}
 }

@@ -478,7 +478,7 @@ namespace MSP2050.Scripts
 
 			for (int i = 0; i < m_planLayers.Count; i++)
 				if (m_planLayers[i].Plan.StartTime > a_planLayer.Plan.StartTime ||
-				    (m_planLayers[i].Plan.StartTime == a_planLayer.Plan.StartTime && m_planLayers[i].Plan.ID > a_planLayer.Plan.ID)) //If plan time is the same, sort by databaseID of the plan
+				    (m_planLayers[i].Plan.StartTime == a_planLayer.Plan.StartTime && a_planLayer.Plan.ID >= 0 && m_planLayers[i].Plan.ID > a_planLayer.Plan.ID)) //If plan time is the same, sort by databaseID of the plan
 				{
 					if (i <= m_lastImplementedPlanIndex)
 						Debug.LogError("PlanLayer added with an index lower than last implemented plan. Plans before the current time should be impossible.");

@@ -96,7 +96,7 @@ namespace MSP2050.Scripts
 				//Find available indices in current row
 				int x = 0;
 				int lastEmptyindex = -1;
-				while (x <= m_columns - a_w + 1)
+				while (x < m_columns && m_columns - lastEmptyindex >= a_w)
 				{
 					if (m_widgetLayout[y][x] != null)
 					{
@@ -167,7 +167,7 @@ namespace MSP2050.Scripts
 				m_widgetLayout.Add(new ADashboardWidget[m_columns]);
 				rowsInserted = true;
 			}
-			if(rowsInserted)
+			if(rowsInserted && m_visible)
 				DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
 
 			for (int y = layout.Y; y < layout.Y + layout.H; y++)
