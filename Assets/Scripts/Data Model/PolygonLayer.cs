@@ -16,7 +16,13 @@ namespace MSP2050.Scripts
 				PolygonSubEntity polygonEntity = (PolygonSubEntity)a_subent;
 				return polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>";
 			});
-		}
+
+            m_presetProperties.Add("Volume", (a_subent) =>
+            {
+                PolygonSubEntity polygonEntity = (PolygonSubEntity)a_subent;
+                return polygonEntity.Volume.ToString("0.00") + "e6 m<sup>3</sup>";
+            });
+        }
 
 		public override void LoadLayerObjects(List<SubEntityObject> a_layerObjects)
 		{

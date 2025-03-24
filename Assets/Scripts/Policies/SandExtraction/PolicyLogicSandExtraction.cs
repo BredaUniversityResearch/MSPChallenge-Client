@@ -1,8 +1,11 @@
-using System.Collections;
+﻿using System.Collections;
 using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Numerics;
+using static Codice.CM.WorkspaceServer.DataStore.IncomingChanges.StoreIncomingChanges.FileConflicts;
+using static SoftwareRasterizerLib.PolygonRasterizer;
+using UnityEngine.SocialPlatforms;
 
 namespace MSP2050.Scripts
 {
@@ -15,9 +18,9 @@ namespace MSP2050.Scripts
         static PolicyLogicSandExtraction m_instance;
         public static PolicyLogicSandExtraction Instance => m_instance;
 
-		//Editing backups
-		bool m_wasSandExtractionPlanBeforeEditing;
-		PolicyPlanDataSandExtraction m_backup;
+        //Editing backups
+        bool m_wasSandExtractionPlanBeforeEditing;
+        PolicyPlanDataSandExtraction m_backup;
 
         RasterLayer m_maxDepthRasterLayer;
 
@@ -28,57 +31,85 @@ namespace MSP2050.Scripts
             m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTag(LAYER_TAG);
         }
 
-		public float CalculatePitVolume(PolygonSubEntity a_subEntity)
-		{
-			float volume = 0;
+        public float CalculatePitVolume(PolygonSubEntity a_subEntity)
+        {
+            float volume = 0;
+            int pitDepth = 0;
 
-			Rect surfaceBoundingBox = a_subEntity.m_boundingBox;
-			Rect rasterSurfaceBoundingBox = m_maxDepthRasterLayer.RasterBounds;
+            if (m_maxDepthRasterLayer == null)
+                m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTag(LAYER_TAG);
 
-			// Relative normalized position of the bounding box of the SubEntity within the Raster bounding box.
-			float relativeXNormalized = (surfaceBoundingBox.x - rasterSurfaceBoundingBox.x) / rasterSurfaceBoundingBox.width;
-			float relativeYNormalized = (surfaceBoundingBox.y - rasterSurfaceBoundingBox.y) / rasterSurfaceBoundingBox.height;
+            if(!int.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName("PitExtractionDepth")), out pitDepth))
+            {
+                return 0;
+            }
 
-			// Height and Width of the texture of the Raster Layer
-			int rasterHeight = m_maxDepthRasterLayer.GetRasterImageHeight();
-			int rasterWidth = m_maxDepthRasterLayer.GetRasterImageWidth();
+            //Area of the polygon to analyze
+            Rect surfaceBoundingBox = a_subEntity.m_boundingBox;
+            //Total area covered by the raster layer
+            Rect rasterSurfaceBoundingBox = m_maxDepthRasterLayer.RasterBounds;
 
-			// Calculate the pixel range in the raster that corresponds to the bounding box of the PolygonSubEntity
-			int startX = Mathf.FloorToInt(relativeXNormalized * rasterWidth);
-			int startY = Mathf.FloorToInt(relativeYNormalized * rasterHeight);
-			int endX = Mathf.CeilToInt((relativeXNormalized + surfaceBoundingBox.width / rasterSurfaceBoundingBox.width) * rasterWidth + 1);
-			int endY = Mathf.CeilToInt((relativeYNormalized + surfaceBoundingBox.height / rasterSurfaceBoundingBox.height) * rasterHeight + 1);
+            //Relative normalized position of the bounding box of the SubEntity within the Raster bounding box.
+            //Converts world coordinates to normalized[0, 1] range relative to the raster's bounds.
+            float relativeXNormalized = (surfaceBoundingBox.x - rasterSurfaceBoundingBox.x) / rasterSurfaceBoundingBox.width;
+            float relativeYNormalized = (surfaceBoundingBox.y - rasterSurfaceBoundingBox.y) / rasterSurfaceBoundingBox.height;
 
-			// Convert PolygonSubEntity to a list of Vector3 points
-			List<UnityEngine.Vector3> polygonPoints = a_subEntity.GetPoints();
+            //Gets pixel dimensions of the raster texture
+            int rasterHeight = m_maxDepthRasterLayer.GetRasterImageHeight();
+            int rasterWidth = m_maxDepthRasterLayer.GetRasterImageWidth();
 
-			// Iterate over the pixels in the calculated range
-			for (int x = startX; x < endX; x++)
-			{
-				for (int y = startY; y < endY; y++)
-				{
-					// Convert pixel coordinates to world coordinates
-					UnityEngine.Vector2 worldPos = m_maxDepthRasterLayer.GetWorldPositionForTextureLocation(x, y);
+            //Calculates the range of raster pixels that overlap with the polygon's bounding box.
+            int startX = Mathf.FloorToInt(relativeXNormalized * rasterWidth);
+            int startY = Mathf.FloorToInt(relativeYNormalized * rasterHeight);
+            int endX = Mathf.CeilToInt((relativeXNormalized + surfaceBoundingBox.width / rasterSurfaceBoundingBox.width) * rasterWidth + 1);
+            int endY = Mathf.CeilToInt((relativeYNormalized + surfaceBoundingBox.height / rasterSurfaceBoundingBox.height) * rasterHeight + 1);
 
-					// Check if the world position is inside the PolygonSubEntity
-					List<UnityEngine.Vector3> worldPosList = new List<UnityEngine.Vector3> { new UnityEngine.Vector3(worldPos.x, worldPos.y, 0) };
-					if (Util.GetPolygonOverlap(polygonPoints, worldPosList).Count > 0)
-					{
-						// Retrieve the value of the raster at this pixel
-						float? rasterValue = m_maxDepthRasterLayer.GetRasterValueAt(worldPos);
+            //Extracts the polygon's vertices for point-in-polygon checks.
+            List<UnityEngine.Vector3> polygonPoints = a_subEntity.GetPoints();
 
-						// If the raster value is valid, add it to the volume
-						if (rasterValue.HasValue)
-						{
-							volume += rasterValue.Value * MAX_DEPTH;
-						}
-					}
-				}
-			}
+            // Computes the area of a single pixel in square kilometers (km²).
+            float pixelWidth = rasterSurfaceBoundingBox.width / rasterWidth;
+            float pixelHeight = rasterSurfaceBoundingBox.height / rasterHeight;
 
-			return volume;
-		}
-	}
+            //Iterates through every pixel in the calculated range.
+            for (int x = startX; x < endX; x++)
+            {
+                for (int y = startY; y < endY; y++)
+                {
+                    //Converts pixel coordinates (x,y) to world-space coordinates.
+                    UnityEngine.Vector2 worldPos = m_maxDepthRasterLayer.GetWorldPositionForTextureLocation(x, y);
+
+                    List<UnityEngine.Vector3> pixelPoints = new List<UnityEngine.Vector3> () 
+                        { new UnityEngine.Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight),
+                        new UnityEngine.Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
+                        new UnityEngine.Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
+                        new UnityEngine.Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight)};
+
+                    //Retrieve the value of the raster at this pixel
+                    float? rasterValue = m_maxDepthRasterLayer.GetRasterValueAt(worldPos);
+
+                    if (rasterValue.HasValue)
+                    {
+                        //Map raster value to actual depth based on your JSON data
+                        float depth = 0f;
+
+                        switch (rasterValue.Value)
+                        {
+                            case 43: depth = 2f; break;    // 0-2m
+                            case 85: depth = 4f; break;    // 2-4m
+                            case 128: depth = 6f; break;   // 4-6m
+                            case 170: depth = 8f; break;   // 6-8m
+                            case 213: depth = 10f; break;  // 8-10m
+                            case 255: depth = 12f; break;  // 10-12m
+                            default: depth = 0f; break;   // Unknown value
+                        }
+                        volume += Util.GetPolygonOverlapArea(polygonPoints, pixelPoints) * Mathf.Min(depth, pitDepth);
+                    }
+                }
+            }
+            return volume; // Now returns volume in million m3
+        }
+
         public override void AddToPlan(Plan a_plan)
         {
             a_plan.AddPolicyData(new PolicyPlanDataSandExtraction(this));

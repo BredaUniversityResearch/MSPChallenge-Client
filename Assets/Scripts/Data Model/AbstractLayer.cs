@@ -12,7 +12,7 @@ namespace MSP2050.Scripts
 		public enum EditingType { Normal, Cable, Transformer, Socket, SourcePoint, SourcePolygon, SourcePolygonPoint };
 
 		public int m_id;
-		public string m_tags;
+		public string[] m_tags;
 		public string FileName { get; set; }
 		public string ShortName { get; set; }
 		public string Media { get; private set; }
