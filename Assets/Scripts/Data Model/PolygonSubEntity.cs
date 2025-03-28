@@ -32,24 +32,15 @@ namespace MSP2050.Scripts
 
 		private bool volumeNeeded;
 		private float volume;
-		private bool volumeCalculationInProgress; // Safety flag
 
 		public float Volume
 		{
 			get
 			{
-				if (!volumeNeeded && !volumeCalculationInProgress)
+				if (!volumeNeeded)
 				{
-					volumeCalculationInProgress = true;
-					try
-					{
-						volumeNeeded = true;
-						volume = PolicyLogicSandExtraction.Instance?.CalculatePitVolume(this) ?? 0f;
-					}
-					finally
-					{
-						volumeCalculationInProgress = false;
-					}
+					volumeNeeded = true;
+					volume = PolicyLogicSandExtraction.Instance?.CalculatePitVolume(this) ?? 0f;
 				}
 				return volume;
 			}
@@ -197,14 +188,6 @@ namespace MSP2050.Scripts
 			//Update surfface area if it was required before (avoids calculating on load)
 			if(surfaceAreaNeeded)
 				surfaceAreaSqrKm = InterfaceCanvas.Instance.mapScale.GetRealWorldPolygonAreaInSquareKm(polygon, holes);
-		}
-
-		public void RecalculateVolumeIfNeeded()
-		{
-			if (volumeNeeded)
-			{
-				volume = PolicyLogicSandExtraction.Instance?.CalculatePitVolume(this) ?? 0f;
-			}
 		}
 
 		private void RebuildLods()
