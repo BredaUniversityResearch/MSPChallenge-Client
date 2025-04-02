@@ -49,6 +49,7 @@ namespace MSP2050.Scripts
 			SetTabActive(ELoginMenuTab.Home);
 
 			m_optionsButton.onClick.AddListener(OnOptionsButtonClicked);
+			ServerCommunication.Instance.ResetAPIAccessToken();
 		}
 
 		void Update()

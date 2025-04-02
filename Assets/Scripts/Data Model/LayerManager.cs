@@ -712,7 +712,7 @@ namespace MSP2050.Scripts
 
 		public void InvokeLayerLoaded(AbstractLayer a_layer)
 		{
-			OnLayerLoaded.Invoke(a_layer);
+			OnLayerLoaded?.Invoke(a_layer);
 		}
 
 		public void ResetVisibleLayersToBase()

@@ -23,6 +23,7 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_optionsWindowPrefab;
 		[SerializeField] Transform m_optionsWindowParent;
 		[SerializeField] LayoutElement m_catalogueLayout;
+		public TextMeshProUGUI m_title;
 
 		//Set in individual prefabs
 		public DashboardCategory m_category;
@@ -46,6 +47,7 @@ namespace MSP2050.Scripts
 		public virtual void InitialiseCatalogue()
 		{
 			//Catalogue widget
+			gameObject.SetActive(true);
 			m_position = new DashboardWidgetPosition();
 			m_position.SetSize(m_defaultW, m_defaultH);
 			m_catalogueLayout.preferredWidth = m_defaultW * DashboardManager.Instance.m_cellsize;
