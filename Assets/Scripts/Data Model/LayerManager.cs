@@ -729,20 +729,5 @@ namespace MSP2050.Scripts
 				}
 			}
 		}
-
-		public void ResetVisibleLayersToBase()
-		{
-			foreach(AbstractLayer layer in m_loadedLayers)
-			{
-				if (layer.ActiveOnStart)
-				{
-					ShowLayer(layer);
-				}
-				else 
-				{
-					HideLayer(layer);
-				}
-			}
-		}
 	}
 }
