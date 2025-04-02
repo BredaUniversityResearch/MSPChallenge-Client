@@ -283,10 +283,6 @@ namespace MSP2050.Scripts
 					return "FSum";
 				default:
 					return "Avg";
-				case 4:
-					return "Sum";
-				default:
-					return "FSum";
 			}
 		}
 
@@ -313,12 +309,6 @@ namespace MSP2050.Scripts
 						break;
 					default:
 						m_currentSettings.m_aggregationFunction = AggregateYearsAvg;
-						break;
-					case 4:
-						m_currentSettings.m_aggregationFunction = AggregateYearsSum;
-						break;
-					default:
-						m_currentSettings.m_aggregationFunction = AggregateFullYearsSum;
 						break;
 				}
 			}
