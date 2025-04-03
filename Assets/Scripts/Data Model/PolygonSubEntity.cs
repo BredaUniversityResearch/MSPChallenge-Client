@@ -193,11 +193,6 @@ namespace MSP2050.Scripts
 
 		private void UpdateLod(PolygonLOD targetLod)
 		{
-			//LODs disabled as it was not properly used and the simplification was causing trigulation issues
-			targetLod.SetMeshData(polygon, holes);
-			return;
-
-
 			List<Vector3> lodPolygon = Optimization.DouglasPeuckerReduction(polygon, targetLod.Settings.SimplificationTolerance);
 
 			//if (lodPolygon.Count < 3 || Util.GetPolygonArea(lodPolygon) < targetLod.Settings.MinPolygonArea)
