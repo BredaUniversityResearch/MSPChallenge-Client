@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -218,6 +219,43 @@ namespace MSP2050.Scripts
 		public AbstractLayer GetLayerByID(int a_layerID)
 		{
 			return m_layers[a_layerID];
+		}
+
+		public AbstractLayer GetLayerByUniqueTag(string a_layerTag)
+		{
+			if (string.IsNullOrEmpty(a_layerTag))
+			{
+				Debug.LogError("Layer tag parameter is null or empty");
+				return null;
+			}
+
+			if (m_layers == null)
+			{
+				Debug.LogError("Layers collection is not initialized");
+				return null;
+			}
+
+			foreach (AbstractLayer layer in m_layers)
+			{
+				// Skip null layers
+				if (layer == null)
+				{
+					//Debug.LogWarning("Null layer found in layers collection");
+					continue;
+				}
+
+				// Skip layers with null tags
+				if (layer.m_tags == null)
+					continue;
+
+				if (layer.m_tags.Contains(a_layerTag))
+				{
+					return layer;
+				}
+			}
+
+			//Debug.LogWarning($"No layer found with tag: {a_layerTag}");
+			return null;
 		}
 
 		public List<AbstractLayer> GetLoadedLayers(string a_category, string a_subcategory)
@@ -626,8 +664,8 @@ namespace MSP2050.Scripts
 
 			//Only update if we are viewing the plan or one further in the future
 			if (PlanManager.Instance.m_planViewing == null ||
-			    (PlanManager.Instance.m_planViewing.StartTime < a_plan.StartTime ||
-			     (PlanManager.Instance.m_planViewing.StartTime == a_plan.StartTime && PlanManager.Instance.m_planViewing.ID < a_plan.ID)))
+				(PlanManager.Instance.m_planViewing.StartTime < a_plan.StartTime ||
+				 (PlanManager.Instance.m_planViewing.StartTime == a_plan.StartTime && PlanManager.Instance.m_planViewing.ID < a_plan.ID)))
 				return;
 
 			//Only update if already visible
