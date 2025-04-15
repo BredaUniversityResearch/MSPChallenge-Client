@@ -1451,6 +1451,14 @@ namespace MSP2050.Scripts
 			return length;
 		}
 
+		public static float GetPolygonPerimeter(List<Vector3> polygon)
+		{
+			float length = Vector3.Distance(polygon[0], polygon[polygon.Count-1]);
+			for (int i = 1; i < polygon.Count; ++i)
+				length += Vector3.Distance(polygon[i], polygon[i - 1]);
+			return length;
+		}
+
 		// input should be a list with one polygon and a list with a single list containing the holes of that polygon
 		// the result can be one or multiple polygons (the holes list should have the same number of items as the polygons list)
 		public static void SeparatePolygons(ref List<List<Vector3>> polygons, ref List<List<List<Vector3>>> holes)
