@@ -193,29 +193,30 @@ namespace MSP2050.Scripts
 
 		private void UpdateLod(PolygonLOD targetLod)
 		{
-			List<Vector3> lodPolygon = Optimization.DouglasPeuckerReduction(polygon, targetLod.Settings.SimplificationTolerance);
+			targetLod.SetMeshData(polygon, holes);
+			//List<Vector3> lodPolygon = Optimization.DouglasPeuckerReduction(polygon, targetLod.Settings.SimplificationTolerance);
 
-			//if (lodPolygon.Count < 3 || Util.GetPolygonArea(lodPolygon) < targetLod.Settings.MinPolygonArea)
+			////if (lodPolygon.Count < 3 || Util.GetPolygonArea(lodPolygon) < targetLod.Settings.MinPolygonArea)
+			////{
+			////	targetLod.SetMeshData(null, null);
+			////}
+			////else
+			////{
+			//List<List<Vector3>> lodHoles = null;
+			//if (holes != null)
 			//{
-			//	targetLod.SetMeshData(null, null);
+			//	lodHoles = new List<List<Vector3>>();
+			//	foreach (List<Vector3> hole in holes)
+			//	{
+			//		List<Vector3> lodHole = Optimization.DouglasPeuckerReduction(hole, targetLod.Settings.SimplificationTolerance);
+			//		if (lodHole.Count >= 3)
+			//		{
+			//			lodHoles.Add(lodHole);
+			//		}
+			//	}
 			//}
-			//else
-			//{
-			List<List<Vector3>> lodHoles = null;
-			if (holes != null)
-			{
-				lodHoles = new List<List<Vector3>>();
-				foreach (List<Vector3> hole in holes)
-				{
-					List<Vector3> lodHole = Optimization.DouglasPeuckerReduction(hole, targetLod.Settings.SimplificationTolerance);
-					if (lodHole.Count >= 3)
-					{
-						lodHoles.Add(lodHole);
-					}
-				}
-			}
-			targetLod.SetMeshData(lodPolygon, lodHoles);
-			//}
+			//targetLod.SetMeshData(lodPolygon, lodHoles);
+			////}
 		}
 
 		public override void UpdateGameObjectForEveryLOD()
