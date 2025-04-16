@@ -20,7 +20,7 @@ namespace MSP2050.Scripts
             m_presetProperties.Add("Volume", (a_subent) =>
             {
                 PolygonSubEntity polygonEntity = (PolygonSubEntity)a_subent;
-                return polygonEntity.Volume.ToString("0.00") + "e6 m<sup>3</sup>";
+				return VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(polygonEntity.Volume, ValueConversionCollection.UNIT_M3).FormatAsString();
             });
         }
 

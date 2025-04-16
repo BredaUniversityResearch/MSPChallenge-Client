@@ -9,6 +9,7 @@ namespace MSP2050.Scripts
 	{
 		public const string UNIT_WATT = "W";
 		public const string UNIT_KM2 = "km2";
+		public const string UNIT_M3 = "m3";
 
 		[SerializeField]
 		private ValueConversionUnit[] availableConversionUnits = null;

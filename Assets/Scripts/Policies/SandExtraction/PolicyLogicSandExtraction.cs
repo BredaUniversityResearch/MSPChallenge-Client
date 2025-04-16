@@ -64,8 +64,8 @@ namespace MSP2050.Scripts
             //Calculates the range of raster pixels that overlap with the polygon's bounding box.
             int startX = Mathf.FloorToInt(relativeXNormalized * rasterWidth);
             int startY = Mathf.FloorToInt(relativeYNormalized * rasterHeight);
-            int endX = Mathf.CeilToInt((relativeXNormalized + surfaceBoundingBox.width / rasterSurfaceBoundingBox.width) * rasterWidth + 1);
-            int endY = Mathf.CeilToInt((relativeYNormalized + surfaceBoundingBox.height / rasterSurfaceBoundingBox.height) * rasterHeight + 1);
+            int endX = Mathf.CeilToInt((relativeXNormalized + surfaceBoundingBox.width / rasterSurfaceBoundingBox.width) * rasterWidth);
+            int endY = Mathf.CeilToInt((relativeYNormalized + surfaceBoundingBox.height / rasterSurfaceBoundingBox.height) * rasterHeight);
 
             //Extracts the polygon's vertices for point-in-polygon checks.
             List<UnityEngine.Vector3> polygonPoints = a_subEntity.GetPoints();
@@ -73,7 +73,8 @@ namespace MSP2050.Scripts
             // Computes the area of a single pixel in square kilometers (km²).
             float pixelWidth = rasterSurfaceBoundingBox.width / rasterWidth;
             float pixelHeight = rasterSurfaceBoundingBox.height / rasterHeight;
-            float pitArea = Util.GetPolygonArea(polygonPoints);
+            float areaScale = Main.SCALE * Main.SCALE;
+            float pitArea = Util.GetPolygonArea(polygonPoints) * areaScale;
 			float averageDepth = 0;
 
 			//Iterates through every pixel in the calculated range.
@@ -109,20 +110,23 @@ namespace MSP2050.Scripts
                             default: depth = 0f; break;   // Unknown value
                         }
                         float actualDepth = Mathf.Min(depth, pitDepth);
-                        float pixelPitOverlapArea = Util.GetPolygonOverlapArea(polygonPoints, pixelPoints);
+                        float pixelPitOverlapArea = Util.GetPolygonOverlapArea(polygonPoints, pixelPoints) * areaScale;
 
 						volume += pixelPitOverlapArea * actualDepth;
 						averageDepth += actualDepth * pixelPitOverlapArea / pitArea; //Add pre-averaged depth
 					}
                 }
             }
-			//Correct for slopes: Depth * (slope * depth = offset) * circumfence * (correction for corner overlap)
-			volume -= averageDepth * averageDepth * pitSlope / 2d * Util.GetPolygonPerimeter(polygonPoints) * 0.66667f;
-            Util.GetLineStringLength
-			return volume; // Now returns volume in million m3
+            //Correct for slopes: Depth * (slope * depth = offset) * circumfence * (correction for corner overlap)
+            float perimeter = Util.GetPolygonPerimeter(polygonPoints) * Main.SCALE;
+			float slopeVolume = averageDepth * averageDepth * pitSlope * perimeter * 0.333333f; // Combined: div by 2 for slope, multiply by 0.66667f for correction
+			Debug.Log($"Total volume: {volume}, slope volume: {slopeVolume}, avg depth: {averageDepth}, perimeter: {perimeter}");
+			volume -= slopeVolume;
+			return Mathf.Max(0f, volume); // Now returns volume in m3
         }
 
-        public override void AddToPlan(Plan a_plan)
+
+		public override void AddToPlan(Plan a_plan)
         {
             a_plan.AddPolicyData(new PolicyPlanDataSandExtraction(this));
         }
