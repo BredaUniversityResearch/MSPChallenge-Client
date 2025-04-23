@@ -30,22 +30,6 @@ namespace MSP2050.Scripts
 			}
 		}//Surface size in KM2
 
-		private bool volumeNeeded;
-		private float volume;
-
-		public float Volume
-		{
-			get
-			{
-				if (!volumeNeeded)
-				{
-					volumeNeeded = true;
-					volume = PolicyLogicSandExtraction.Instance?.CalculatePitVolume(this) ?? 0f;
-				}
-				return volume;
-			}
-		}
-
 		public HashSet<int> InvalidPoints = null;
 		public bool firstToLastInvalid = false;//is the first to last point valid
 		public RestrictionArea restrictionArea;
@@ -136,11 +120,6 @@ namespace MSP2050.Scripts
 		public virtual void Initialise()
 		{
 			UpdateBoundingBox();
-		}
-
-		public void ResetVolumeCache()
-		{
-			volumeNeeded = false;
 		}
 
 		public override void RemoveGameObject()
@@ -340,7 +319,6 @@ namespace MSP2050.Scripts
 		{
 			polygon.Add(point);
 			UpdateBoundingBox();
-			ResetVolumeCache();
 		}
 
 		public void AddHole(List<Vector3> vertices)
@@ -352,7 +330,6 @@ namespace MSP2050.Scripts
 			holes.Add(vertices);
 
 			meshIsDirty = true;
-			ResetVolumeCache();
 		}
 
 		public int AddPointBetween(Vector3 newPoint, int pointA, int pointB)
@@ -553,7 +530,6 @@ namespace MSP2050.Scripts
 				{
 					UpdateBoundingBox();
 				}
-				volumeNeeded = false;
 				meshIsDirty = true;
 				return;
 			}
@@ -587,7 +563,6 @@ namespace MSP2050.Scripts
 			}
 
 			UpdateBoundingBox();
-			ResetVolumeCache();
 		}
 
 		private void removePoint(int point)
@@ -619,14 +594,12 @@ namespace MSP2050.Scripts
 		{
 			holes.RemoveAt(holeIndex);
 			meshIsDirty = true;
-			ResetVolumeCache();
 		}
 
 		public void RemoveAllHoles()
 		{
 			holes = null;
 			meshIsDirty = true;
-			ResetVolumeCache();
 		}
 
 		private List<Vector3> GetPolygonFromGeometryObject(SubEntityObject geo)
@@ -840,6 +813,7 @@ namespace MSP2050.Scripts
 			{
 				UpdateLod(currentLod);
 				RebuildPolygon(currentLod);
+				((PolygonLayer)m_entity.Layer).OnSubentityMeshChange(this);
 				meshIsDirty = false;
 			}
 
@@ -1240,13 +1214,11 @@ namespace MSP2050.Scripts
 		{
 			this.polygon = points;
 			UpdateBoundingBox();
-			ResetVolumeCache();
 		}
 
 		protected override void SetHoles(List<List<Vector3>> a_holes)
 		{ 
 			this.holes = a_holes;
-			ResetVolumeCache();
 		}
 
 		public override List<List<Vector3>> GetHoles(bool copy = false)

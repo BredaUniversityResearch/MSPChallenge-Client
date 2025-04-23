@@ -19,6 +19,8 @@ namespace MSP2050.Scripts
 			m_definition = a_definition;
 		}
 
+		public virtual void PostLayerMetaInitialise() { }
+
 		public virtual void Destroy()
 		{ }
 		public abstract void GetRequiredApproval(APolicyPlanData a_planData, Plan a_plan, Dictionary<int, EPlanApprovalState> a_approvalStates, Dictionary<int, List<IApprovalReason>> a_approvalReasons, ref EApprovalType a_requiredApprovalLevel, bool a_reasonOnly);

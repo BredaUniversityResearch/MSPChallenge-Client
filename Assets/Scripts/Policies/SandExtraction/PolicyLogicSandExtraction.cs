@@ -12,7 +12,9 @@ namespace MSP2050.Scripts
     public class PolicyLogicSandExtraction : APolicyLogic
     {
 
-        const string LAYER_TAG = "SandDepth";
+        const string SANDDEPTH_TAG = "SandDepth";
+        const string SANDPITS_TAG1 = "SandAndGravel";
+        const string SANDPITS_TAG2 = "Extraction";
         const int MAX_DEPTH = 12;
 
         static PolicyLogicSandExtraction m_instance;
@@ -23,22 +25,47 @@ namespace MSP2050.Scripts
         PolicyPlanDataSandExtraction m_backup;
 
         RasterLayer m_maxDepthRasterLayer;
+        EntityPropertyMetaData m_volumeProperty;
 
         public override void Initialise(APolicyData a_settings, PolicyDefinition a_definition)
         {
             base.Initialise(a_settings, a_definition);
             m_instance = this;
-            m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTag(LAYER_TAG);
         }
+        public override void PostLayerMetaInitialise()
+        { 
+            m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDDEPTH_TAG });
+            PolygonLayer pitLayer = (PolygonLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDPITS_TAG1, SANDPITS_TAG2 });
+   //         pitLayer.m_presetProperties.Add("Volume", (a_subent) =>
+			//{
+			//	PolygonSubEntity polygonEntity = (PolygonSubEntity)a_subent;
+			//	return VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(polygonEntity.Volume, ValueConversionCollection.UNIT_M3).FormatAsString();
+			//});
+            pitLayer.m_onSubentityMeshChange += OnPitMeshChange;
+            pitLayer.m_onCalculationPropertyChanged += OnPitPropertyChange;
+            m_volumeProperty = new EntityPropertyMetaData("Volume", true, false, "Sand Volume", null, null, "0", false, true, false,
+                TMPro.TMP_InputField.ContentType.Standard, LayerInfoPropertiesObject.ContentValidation.None, "");
+			pitLayer.AddPropertyMetaData(m_volumeProperty);
+		}
 
-        public float CalculatePitVolume(PolygonSubEntity a_subEntity)
+        void OnPitMeshChange(PolygonSubEntity a_pit)
+        {
+            a_pit.m_entity.SetPropertyMetaData(m_volumeProperty, VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(CalculatePitVolume(a_pit), ValueConversionCollection.UNIT_M3).FormatAsString());
+		}
+
+		void OnPitPropertyChange(Entity a_pit, EntityPropertyMetaData a_property)
+		{
+            a_pit.SetPropertyMetaData(m_volumeProperty, VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(CalculatePitVolume((PolygonSubEntity)a_pit.GetSubEntity(0)), ValueConversionCollection.UNIT_M3).FormatAsString());
+		}
+
+		public float CalculatePitVolume(PolygonSubEntity a_subEntity)
         {
             float volume = 0;
             int pitDepth = 0;
             int pitSlope = 1;
 
-            if (m_maxDepthRasterLayer == null)
-                m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTag(LAYER_TAG);
+            //if (m_maxDepthRasterLayer == null)
+            //    m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDDEPTH_TAG });
 
             if(!int.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName("PitExtractionDepth")), out pitDepth))
             {
@@ -120,7 +147,7 @@ namespace MSP2050.Scripts
             //Correct for slopes: Depth * (slope * depth = offset) * circumfence * (correction for corner overlap)
             float perimeter = Util.GetPolygonPerimeter(polygonPoints) * Main.SCALE;
 			float slopeVolume = averageDepth * averageDepth * pitSlope * perimeter * 0.333333f; // Combined: div by 2 for slope, multiply by 0.66667f for correction
-			Debug.Log($"Total volume: {volume}, slope volume: {slopeVolume}, avg depth: {averageDepth}, perimeter: {perimeter}");
+			//Debug.Log($"Total volume: {volume}, slope volume: {slopeVolume}, avg depth: {averageDepth}, perimeter: {perimeter}");
 			volume -= slopeVolume;
 			return Mathf.Max(0f, volume); // Now returns volume in m3
         }

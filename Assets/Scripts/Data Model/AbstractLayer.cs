@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace MSP2050.Scripts
 {
@@ -56,6 +58,9 @@ namespace MSP2050.Scripts
 
 		public delegate void EntityTypeVisibilityChangedDelegate(EntityType a_entityType, bool a_newVisibilityState);
 		public event EntityTypeVisibilityChangedDelegate OnEntityTypeVisibilityChanged;
+
+		public delegate void OnCalculationPropertyChanged(Entity a_entity, EntityPropertyMetaData a_property);
+		public event OnCalculationPropertyChanged m_onCalculationPropertyChanged;
 
 		public List<EntityPropertyMetaData> m_propertyMetaData = new List<EntityPropertyMetaData>();
 		public Dictionary<string, PresetPropertyDelegate> m_presetProperties;
@@ -396,6 +401,16 @@ namespace MSP2050.Scripts
 				}
 			}
 			return result;
+		}
+
+		public void AddPropertyMetaData(EntityPropertyMetaData a_property)
+		{
+			m_propertyMetaData.Add(a_property);
+		}
+
+		public void OnCalculationPropertyChange(Entity a_entity, EntityPropertyMetaData a_property)
+		{
+			m_onCalculationPropertyChanged?.Invoke(a_entity, a_property);
 		}
 	}
 }

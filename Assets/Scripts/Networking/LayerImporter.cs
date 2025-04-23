@@ -46,6 +46,8 @@ namespace MSP2050.Scripts
 		{
 			//Load layers
 			LayerInfo.Load(layerMeta);
+			SimulationManager.Instance.PostLayerMetaInitialise();
+			PolicyManager.Instance.PostLayerMetaInitialise();
 
 			var autoLoginEnabled = null != CommandLineArgumentsManager.GetInstance().GetCommandLineArgumentValue(
 				CommandLineArgumentsManager.CommandLineArgumentName.AutoLogin);

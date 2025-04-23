@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
@@ -35,14 +36,14 @@ namespace MSP2050.Scripts
 		public EnergyLineStringSubEntity(Entity a_entity) : base(a_entity)
 		{
 			Connections = new List<Connection>();
-			CalculationPropertyUpdated();
+			CalculationPropertyUpdated(m_entity.Layer.FindPropertyMetaDataByName(NUMBER_CABLES_META_KEY));
 		}
 
 		public EnergyLineStringSubEntity(Entity a_entity, SubEntityObject a_geometry, int a_databaseID) : base(a_entity, a_geometry, a_databaseID)
 		{
 			Connections = new List<Connection>();
 			PolicyLogicEnergy.Instance.AddEnergySubEntityReference(a_databaseID, this);
-			CalculationPropertyUpdated();
+			CalculationPropertyUpdated(m_entity.Layer.FindPropertyMetaDataByName(NUMBER_CABLES_META_KEY));
 		}
 
 		protected override void SetDatabaseID(int a_databaseID)
@@ -269,13 +270,16 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public override void CalculationPropertyUpdated()
+		public override void CalculationPropertyUpdated(EntityPropertyMetaData a_property)
 		{
-			EntityPropertyMetaData propertyMeta = m_entity.Layer.FindPropertyMetaDataByName(NUMBER_CABLES_META_KEY);
+			base.CalculationPropertyUpdated(a_property);
+
+			if (a_property != null && a_property.PropertyName != NUMBER_CABLES_META_KEY) //Should continue on null
+				return;
 			int defaultValue = 1;
-			if (propertyMeta != null)
+			if (a_property != null)
 			{
-				defaultValue = Util.ParseToInt(propertyMeta.DefaultValue, 1);
+				defaultValue = Util.ParseToInt(a_property.DefaultValue, 1);
 			}
 
 			if (m_entity.DoesPropertyExist(NUMBER_CABLES_META_KEY))

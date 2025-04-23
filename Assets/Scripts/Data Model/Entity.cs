@@ -132,7 +132,10 @@ namespace MSP2050.Scripts
 		{
 			SetMetaData(property.PropertyName, value);
 			if (property.UpateCalculation)
-				GetSubEntity(0).CalculationPropertyUpdated();
+			{
+				GetSubEntity(0).CalculationPropertyUpdated(property);
+				Layer.OnCalculationPropertyChange(this, property);
+			}
 			if(property.UpateText)
 				GetSubEntity(0).UpdateTextMeshText();
 			if (property.UpateVisuals)

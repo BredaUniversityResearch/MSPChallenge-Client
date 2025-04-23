@@ -221,40 +221,42 @@ namespace MSP2050.Scripts
 			return m_layers[a_layerID];
 		}
 
-		public AbstractLayer GetLayerByUniqueTag(string a_layerTag)
+		public AbstractLayer GetLayerByUniqueTags(string[] a_layerTagsQuery)
 		{
-			if (string.IsNullOrEmpty(a_layerTag))
+			if (a_layerTagsQuery == null || a_layerTagsQuery.Length == 0)
 			{
-				Debug.LogError("Layer tag parameter is null or empty");
+				Debug.LogError("Layer tag parameters missing");
 				return null;
 			}
 
-			if (m_layers == null)
+			if (m_layers == null || m_layers.Count == 0)
 			{
-				Debug.LogError("Layers collection is not initialized");
+				Debug.LogWarning("Layers collection is not initialized");
 				return null;
 			}
 
 			foreach (AbstractLayer layer in m_layers)
 			{
 				// Skip null layers
-				if (layer == null)
+				if (layer == null || layer.m_tags == null)
 				{
-					//Debug.LogWarning("Null layer found in layers collection");
 					continue;
 				}
 
-				// Skip layers with null tags
-				if (layer.m_tags == null)
-					continue;
-
-				if (layer.m_tags.Contains(a_layerTag))
+				bool match = true;
+				foreach (string tag in a_layerTagsQuery)
 				{
+					if (!layer.m_tags.Contains(tag))
+					{
+						match = false;
+						break;
+					}
+				}
+				if (match)
 					return layer;
-				}
 			}
 
-			//Debug.LogWarning($"No layer found with tag: {a_layerTag}");
+			Debug.LogWarning($"No layer found with tags: {a_layerTagsQuery}");
 			return null;
 		}
 
