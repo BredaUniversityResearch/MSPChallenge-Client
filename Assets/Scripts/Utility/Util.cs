@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using ClipperLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using UnityEngine;
@@ -239,12 +240,6 @@ namespace MSP2050.Scripts
 			//errorArgs.ErrorContext.Handled = true;
 			Debug.LogError(currentError + " in " + sender.ToString());
 			//throw new System.Exception("exception!");
-		}
-
-		public static void MoveInHierarchy(GameObject go, int offset)
-		{
-			int index = go.transform.GetSiblingIndex();
-			go.transform.SetSiblingIndex(index + offset);
 		}
 
 		public static Vector3 GetCenter(List<Vector3> points)
@@ -1443,6 +1438,16 @@ namespace MSP2050.Scripts
 			return Mathf.Abs(area * 0.5f);
 		}
 
+		public static float GetPolygonArea(List<List<ClipperLib.IntPoint>> polygon)
+		{
+			float area = 0;
+			foreach(var poly in polygon)
+			{
+				area += (float)Clipper.Area(poly);
+			}
+			return area / GeometryOperations.intConversion;
+		}
+
 		public static float GetLineStringLength(List<Vector3> line)
 		{
 			float length = 0;
@@ -1631,6 +1636,25 @@ namespace MSP2050.Scripts
 			return result;
 		}
 
+		public static List<List<Vector3>> GetPolygonOverlap(List<List<ClipperLib.IntPoint>> a_polygon1, List<ClipperLib.IntPoint> a_polygon2)
+		{
+			ClipperLib.Clipper co = new ClipperLib.Clipper();
+			co.AddPaths(a_polygon1, ClipperLib.PolyType.ptClip, true);
+			co.AddPath(a_polygon2, ClipperLib.PolyType.ptSubject, true);
+
+			List<List<ClipperLib.IntPoint>> csolution = new List<List<ClipperLib.IntPoint>>();
+			co.Execute(ClipperLib.ClipType.ctIntersection, csolution);
+			List<List<Vector3>> result = new List<List<Vector3>>();
+			if (csolution.Count > 0)
+			{
+				for (int i = 0; i < csolution.Count; i++)
+				{
+					result.Add(GeometryOperations.IntPointToVector(csolution[i]));
+				}
+			}
+			return result;
+		}
+
 		public static float GetPolygonOverlapArea(List<Vector3> a_polygon1, List<Vector3> a_polygon2)
 		{
 			List<List<Vector3>> overlap = GetPolygonOverlap(a_polygon1, a_polygon2);
@@ -1643,6 +1667,39 @@ namespace MSP2050.Scripts
 				}
 			}
 			return result;
+		}
+
+		public static float GetPolygonOverlapArea(List<List<ClipperLib.IntPoint>> a_polygon1, List<ClipperLib.IntPoint> a_polygon2)
+		{
+			List<List<Vector3>> overlap = GetPolygonOverlap(a_polygon1, a_polygon2);
+			float result = 0f;
+			if (overlap.Count > 0)
+			{
+				for (int i = 0; i < overlap.Count; i++)
+				{
+					result += InterfaceCanvas.Instance.mapScale.GetRealWorldPolygonAreaInSquareKm(overlap[i]);
+				}
+			}
+			return result;
+		}
+
+		public static List<List<ClipperLib.IntPoint>> ClipFromPolygon(List<List<ClipperLib.IntPoint>> a_polygon1, List<ClipperLib.IntPoint> a_clip)
+		{
+			List<List<ClipperLib.IntPoint>> csolution = new List<List<ClipperLib.IntPoint>>();
+			ClipperLib.Clipper co = new ClipperLib.Clipper();
+			co.AddPaths(a_polygon1, ClipperLib.PolyType.ptSubject, true);
+			co.AddPath(a_clip, ClipperLib.PolyType.ptClip, true);
+			co.Execute(ClipperLib.ClipType.ctDifference, csolution);
+			return csolution;
+		}
+
+		public static List<List<ClipperLib.IntPoint>> OffsetPolygon(List<List<ClipperLib.IntPoint>> a_polygon1, double a_offset)
+		{
+			List<List<ClipperLib.IntPoint>> csolution = new List<List<ClipperLib.IntPoint>>();
+			ClipperLib.ClipperOffset co = new ClipperOffset();
+			co.AddPaths(a_polygon1, JoinType.jtSquare, EndType.etClosedPolygon);
+			co.Execute(ref csolution, a_offset);
+			return csolution;
 		}
 
 		public static List<List<Vector3>> GetLineInsidePolygon(List<Vector3> a_polygon, List<Vector3> a_line)
