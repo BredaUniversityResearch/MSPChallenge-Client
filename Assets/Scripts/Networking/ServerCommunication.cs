@@ -404,6 +404,11 @@ namespace MSP2050.Scripts
 			return tokenHandler.FormatAccessToken();
 		}
 
+		public void ResetAPIAccessToken()
+		{
+			tokenHandler = new ApiTokenHandler();
+		}
+
 		public void RequestSession(
 			int countryId, string userName, Action<RequestSessionResponse> successCallback,
 			System.Action<ARequest, string> failureCallback, [CanBeNull] string password = null)
