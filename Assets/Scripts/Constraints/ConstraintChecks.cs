@@ -43,18 +43,18 @@ namespace MSP2050.Scripts
 			try
 			{
 				// Scale the point coordinate values to prevent float precision issues
-				const float pointScale = 100000.0f;
-				var points = poly.GetPoints();
-				foreach (var p in points)
-				{
-					p.Set(p.x * pointScale, p.y * pointScale, p.z);
-				}
+				//const float pointScale = 100000.0f;
+				//var points = poly.GetPoints();
+				//foreach (var p in points)
+				//{
+				//	p.Set(p.x * pointScale, p.y * pointScale, p.z);
+				//}
 				rasterizedPolygon = Rasterizer.CreateScanlinesForPolygon(rasterLayer.GetRasterImageWidth(),
 					rasterLayer.GetRasterImageHeight(), poly.GetPoints(), rasterBounds);	
 			}
 			catch (System.Exception e)
 			{
-				Debug.LogError(e.Message);
+				Debug.LogWarning(e.Message);
 				return false;
 			}
 

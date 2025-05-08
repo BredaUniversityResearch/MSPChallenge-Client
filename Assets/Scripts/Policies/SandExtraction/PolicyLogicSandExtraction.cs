@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using ClipperLib;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
@@ -32,7 +33,9 @@ namespace MSP2050.Scripts
         public override void PostLayerMetaInitialise()
         { 
             m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDDEPTH_TAG });
-            PolygonLayer pitLayer = (PolygonLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDPITS_TAG1, SANDPITS_TAG2 });
+            m_maxDepthRasterLayer.DrawGameObject();
+			m_maxDepthRasterLayer.ReloadLatestRaster();
+			PolygonLayer pitLayer = (PolygonLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDPITS_TAG1, SANDPITS_TAG2 });
    //         pitLayer.m_presetProperties.Add("Volume", (a_subent) =>
 			//{
 			//	PolygonSubEntity polygonEntity = (PolygonSubEntity)a_subent;
@@ -60,9 +63,6 @@ namespace MSP2050.Scripts
             float volume = 0;
             int pitDepth = 0;
             double pitSlope = 1;
-
-            //if (m_maxDepthRasterLayer == null)
-            //    m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDDEPTH_TAG });
 
             if(!int.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName("PitExtractionDepth")), out pitDepth))
             {
@@ -141,7 +141,7 @@ namespace MSP2050.Scripts
                                 pixelComplete[x - startX, y - startY] = true;
                                 activePixels--;
                                 if (pixelPitOverlapArea > 0f)
-								    Util.ClipFromPolygon(pitBounds, pixelPoints);
+									pitBounds = Util.ClipFromPolygon(pitBounds, pixelPoints);
 							}
                         }
                         else
@@ -159,28 +159,27 @@ namespace MSP2050.Scripts
                     }
                 }
                 float depthVolume = Mathf.Abs(Util.GetPolygonArea(pitBounds));
-                Debug.Log($"Volume at depth {currentDepth}: {depthVolume}");
 				volume += depthVolume; //Add volume of remaining bounds (for 1m depth)
                 pitBounds = Util.OffsetPolygon(pitBounds, pitSlope);
                 if (pitBounds == null || pitBounds.Count == 0)
                 {
-                    Debug.Log($"No results from offset at depth: {currentDepth}");
+                    //Debug.Log($"No results from offset at depth: {currentDepth}");
                     break;
                 }
-                else
-                {
-                    List<List<Vector3>> convertedPoints = new List<List<Vector3>>();
-                    foreach (var poly in pitBounds)
-                    {
-						List<Vector3> points = GeometryOperations.IntPointToVector(poly);
-                        for(int i = 0; i < points.Count-1; i++)
-                        {
-                            Debug.DrawLine(points[i], points[i + 1], Color.green, 5f);
+     //           else
+     //           {
+     //               List<List<Vector3>> convertedPoints = new List<List<Vector3>>();
+     //               foreach (var poly in pitBounds)
+     //               {
+					//	List<Vector3> points = GeometryOperations.IntPointToVector(poly);
+     //                   for(int i = 0; i < points.Count-1; i++)
+     //                   {
+     //                       Debug.DrawLine(points[i], points[i + 1], Color.green, 5f);
 
-                        }
-                        Debug.DrawLine(points[points.Count-1], points[0], Color.green, 5f);
-					}
-                }
+     //                   }
+     //                   Debug.DrawLine(points[points.Count-1], points[0], Color.green, 5f);
+					//}
+     //           }
 
 			}
 			return Mathf.Max(0f, volume * areaScale / GeometryOperations.intConversion); // Now returns volume in m3
@@ -323,19 +322,24 @@ namespace MSP2050.Scripts
                 m_wasSandExtractionPlanBeforeEditing = false;
                 m_backup = null;
             }
-            else if (a_plan.TryGetPolicyData<PolicyPlanDataSandExtraction>(PolicyManager.SANDEXTRACTION_POLICY_NAME, out var data))
-            {
-                m_wasSandExtractionPlanBeforeEditing = true;
-
-                m_backup = new PolicyPlanDataSandExtraction(this)
-                {
-                    m_value = data.m_value
-                };
-            }
             else
             {
-                m_wasSandExtractionPlanBeforeEditing = false;
-            }
+                if (a_plan.TryGetPolicyData<PolicyPlanDataSandExtraction>(PolicyManager.SANDEXTRACTION_POLICY_NAME, out var data))
+                {
+                    m_wasSandExtractionPlanBeforeEditing = true;
+
+                    m_backup = new PolicyPlanDataSandExtraction(this)
+                    {
+                        m_value = data.m_value
+                    };
+                }
+                else
+                {
+                    m_wasSandExtractionPlanBeforeEditing = false;
+                }
+                m_maxDepthRasterLayer.SetEntitiesActiveUpTo(a_plan);
+
+			}
         }
 
         public override void StopEditingPlan(Plan a_plan)
