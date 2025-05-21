@@ -97,6 +97,12 @@ namespace MSP2050.Scripts
 			m_initialised = true;
 		}
 
+		public void PostLayerMetaInitialise()
+		{ 
+			foreach(var kvp in m_simulationLogic)
+				kvp.Value.PostLayerMetaInitialise();
+		}
+
 		public bool TryGetDefinition(string a_name, out SimulationDefinition a_definition)
 		{
 			return m_simulationDefinitions.TryGetValue(a_name, out a_definition);

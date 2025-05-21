@@ -157,6 +157,12 @@ namespace MSP2050.Scripts
 			m_initialised = true;
 		}
 
+		public void PostLayerMetaInitialise()
+		{
+			foreach (var kvp in m_policyLogic)
+				kvp.Value.PostLayerMetaInitialise();
+		}
+
 		public bool TryGetDefinition(string a_name, out PolicyDefinition a_definition)
 		{
 			return m_policyDefinitions.TryGetValue(a_name, out a_definition);
