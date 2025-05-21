@@ -546,7 +546,7 @@ namespace MSP2050.Scripts
 			//Children should disable the restriction gameobject
 		}
 
-		public virtual void CalculationPropertyUpdated()
+		public virtual void CalculationPropertyUpdated(EntityPropertyMetaData a_property)
 		{ }
 		#endregion
 

@@ -814,6 +814,7 @@ namespace MSP2050.Scripts
 			{
 				UpdateLod(currentLod);
 				RebuildPolygon(currentLod);
+				((PolygonLayer)m_entity.Layer).OnSubentityMeshChange(this);
 				meshIsDirty = false;
 			}
 
@@ -1005,7 +1006,7 @@ namespace MSP2050.Scripts
 		private void RebuildPolygon(PolygonLOD targetLod)
 		{
 			//if (Entity.Layer.Optimized)
-			//    return;
+			//	return;
 
 			MeshFilter filter = targetLod.GameObject.GetComponent<MeshFilter>();
 			Object.Destroy(filter.mesh);
@@ -1073,7 +1074,7 @@ namespace MSP2050.Scripts
 		private void UpdatePolygonSubEntity(PolygonLOD targetLod, SubEntityDrawSettings targetDrawSettings, HashSet<int> selectedPoints, HashSet<int> hoverPoints)
 		{
 			//if (Entity.Layer.Optimized)
-			//    return;
+			//	return;
 
 			int totalVertexCount = targetLod.Polygon.Count;
 			if (targetLod.Holes != null)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -7,6 +8,7 @@ namespace MSP2050.Scripts
 	{
 		public Texture2D m_innerGlowTexture = null;
 		public Rect m_innerGlowBounds = new Rect();
+		public event Action<PolygonSubEntity> m_onSubentityMeshChange;
 
 		public PolygonLayer(LayerMeta a_layerMeta, List<SubEntityObject> a_layerObjects) : base(a_layerMeta)
 		{
@@ -16,7 +18,7 @@ namespace MSP2050.Scripts
 				PolygonSubEntity polygonEntity = (PolygonSubEntity)a_subent;
 				return polygonEntity.SurfaceAreaSqrKm.ToString("0.00") + " km<sup>2</sup>";
 			});
-		}
+        }
 
 		public override void LoadLayerObjects(List<SubEntityObject> a_layerObjects)
 		{
@@ -237,6 +239,11 @@ namespace MSP2050.Scripts
 		public override  LayerManager.EGeoType GetGeoType()
 		{
 			return  LayerManager.EGeoType.Polygon;
+		}
+
+		public void OnSubentityMeshChange(PolygonSubEntity a_subent)
+		{
+			m_onSubentityMeshChange?.Invoke(a_subent);
 		}
 	}
 }
