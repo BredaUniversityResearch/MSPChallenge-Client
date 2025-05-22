@@ -178,6 +178,10 @@ namespace MSP2050.Scripts
 		public void RemoveWidget(ADashboardWidget a_widget)
 		{
 			m_catSelectedWidgets[a_widget.m_category].Remove(a_widget);
+			if(a_widget.m_favPosition != null)
+			{
+				m_catSelectedWidgets[m_favoriteCategory].Remove(a_widget);
+			}
 		}
 
 		void OnCategorySelected(DashboardCategory a_category)
