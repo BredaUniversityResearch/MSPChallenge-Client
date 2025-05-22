@@ -136,10 +136,16 @@ namespace MSP2050.Scripts
 			m_subEntity.UnHideRestrictionArea();
 			m_subEntity.RedrawGameObject(SubEntityDrawMode.Default);
 
+			HashSet<PolygonSubEntity> selection = new HashSet<PolygonSubEntity> { m_subEntity };
 			m_subEntity = null; // set polygon to null so the exit state function doesn't remove it
 
 			m_fsm.TriggerGeometryComplete();
-			m_fsm.SetCurrentState(new StartCreatingPolygonState(m_fsm, m_planLayer));
+			if (Input.GetKey(KeyCode.LeftShift))
+				m_fsm.SetCurrentState(new StartCreatingPolygonState(m_fsm, m_planLayer));
+			else if (m_planLayer.BaseLayer.IsEnergyPolyLayer())
+				m_fsm.SetCurrentState(new EditEnergyPolygonState(m_fsm, m_planLayer, selection));
+			else
+				m_fsm.SetCurrentState(new EditPolygonsState(m_fsm, m_planLayer, selection));
 		}
 
 		public override void HandleKeyboardEvents()

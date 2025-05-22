@@ -7,7 +7,7 @@ namespace MSP2050.Scripts
 	{
 		private PlanLayer m_cablePlanLayer;
 
-		public EditEnergyPointsState(FSM a_fsm, PlanLayer a_planLayer) : base(a_fsm, a_planLayer)
+		public EditEnergyPointsState(FSM a_fsm, PlanLayer a_planLayer, HashSet<PointSubEntity> a_selectedSubEntities = null) : base(a_fsm, a_planLayer, a_selectedSubEntities)
 		{
 			m_cablePlanLayer = a_planLayer.BaseLayer.m_greenEnergy ? PolicyLogicEnergy.Instance.m_energyCableLayerGreen.CurrentPlanLayer() : PolicyLogicEnergy.Instance.m_energyCableLayerGrey.CurrentPlanLayer();
 		}
