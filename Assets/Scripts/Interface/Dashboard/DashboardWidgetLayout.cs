@@ -57,6 +57,27 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public void ChangeNumberColumns(int a_columns)
+		{
+			m_columns = a_columns;
+			m_widgetLayout = new List<ADashboardWidget[]>() { new ADashboardWidget[m_columns] };
+			foreach(ADashboardWidget widget in m_widgets)
+			{
+				if (m_favorites)
+				{
+					widget.m_favPosition = new DashboardWidgetPosition();
+					widget.m_favPosition.SetSize(widget.m_position.W, widget.m_position.H);
+					widget.m_favPosition.SetPosition(FindFittingPosition(widget.m_favPosition.W, widget.m_favPosition.H));
+				}
+				else
+				{
+					widget.m_position.SetPosition(FindFittingPosition(widget.m_position.W, widget.m_position.H));
+				}
+				InsertWidget(widget);
+			}
+			SortAndSetHierarchy();
+		}
+
 		void SortAndSetHierarchy()
 		{
 			m_widgets.Sort((a, b) => a.CompareTo(b, m_favorites));
@@ -169,6 +190,9 @@ namespace MSP2050.Scripts
 			}
 			if(rowsInserted && m_visible)
 				DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
+
+			if (layout.W > m_columns) //Squeeze widgets that would not fit at the current size
+				layout.SetSize(m_columns, layout.H);
 
 			for (int y = layout.Y; y < layout.Y + layout.H; y++)
 			{

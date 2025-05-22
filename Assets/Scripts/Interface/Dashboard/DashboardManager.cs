@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 using Sirenix.Utilities;
+using Sirenix.OdinInspector;
 
 namespace MSP2050.Scripts
 {
@@ -44,7 +45,7 @@ namespace MSP2050.Scripts
 		List<ADashboardWidget> m_catalogueWidgets;
 
 		//Widgets
-		public float m_cellsize = 150f;
+		public float m_cellsize;
 		List<ADashboardWidget> m_loadedWidgets;
 		Dictionary<DashboardCategory, DashboardWidgetLayout> m_catSelectedWidgets;
 
@@ -64,19 +65,43 @@ namespace MSP2050.Scripts
 			HandleResolutionOrScaleChange();
 		}
 
-
 		public void HandleResolutionOrScaleChange()
 		{
-			m_cellsize = Mathf.Round((Screen.width -36f) * InterfaceCanvas.Instance.canvas.scaleFactor / m_numberColumns);
+			RescaleToResolution(Screen.width, Screen.height, InterfaceCanvas.Instance.canvas.scaleFactor);
+		}
+
+		[Button("Force update resolution F")]
+		public void HandleResolutionOrScaleChange(int a_width, int a_height)
+		{
+			RescaleToResolution(a_width, a_height, InterfaceCanvas.Instance.canvas.scaleFactor);
+		}
+
+		[Button("Force update resolution")]
+		public void RescaleToResolution(int a_width, int a_height, float a_scale)
+		{
+			//m_cellsize = Mathf.Round((Screen.width -36f) * InterfaceCanvas.Instance.canvas.scaleFactor / m_numberColumns);
+			//float scaledWidth = (a_width - 36f) * a_scale;
+			m_cellsize = 150f;
+			m_numberColumns = Mathf.FloorToInt((a_width - 36f) / a_scale / m_cellsize);
+			if(m_numberColumns < 5)
+			{
+				m_numberColumns = 5;
+				m_cellsize = Mathf.Round((a_width - 36f) / a_scale / m_numberColumns);
+			}
+
 			if (m_showingCatalogue)
 			{
 				foreach (ADashboardWidget widget in m_catalogueWidgets)
 					widget.Reposition(false, true);
 			}
-			else if (m_currentCategory != null)
+			//else if (m_currentCategory != null)
+			//{
+			//	m_catSelectedWidgets[m_currentCategory].RepositionAllWidgets();
+			//	m_widgetParent.sizeDelta = new Vector2(0f, m_cellsize * m_catSelectedWidgets[m_currentCategory].Rows);
+			//}
+			foreach (var kvp in m_catSelectedWidgets)
 			{
-				m_catSelectedWidgets[m_currentCategory].RepositionAllWidgets();
-				m_widgetParent.sizeDelta = new Vector2(0f, m_cellsize * m_catSelectedWidgets[m_currentCategory].Rows);
+				kvp.Value.ChangeNumberColumns(m_numberColumns);
 			}
 		}
 
