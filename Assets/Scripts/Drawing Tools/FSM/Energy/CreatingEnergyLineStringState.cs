@@ -116,10 +116,14 @@ namespace MSP2050.Scripts
 			subEntity.UnHideRestrictionArea();
 			subEntity.RedrawGameObject(SubEntityDrawMode.Default);
 
+			HashSet<LineStringSubEntity> selection = new HashSet<LineStringSubEntity>() { subEntity };
 			subEntity = null; // set line string to null so the exit state function doesn't remove it
 
 			m_fsm.TriggerGeometryComplete();
-			m_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(m_fsm, planLayer));
+			if (Input.GetKey(KeyCode.LeftShift))
+				m_fsm.SetCurrentState(new StartCreatingEnergyLineStringState(m_fsm, planLayer));
+			else
+				m_fsm.SetCurrentState(new EditEnergyLineStringsState(m_fsm, planLayer, selection));
 		}
 
 		public override void HandleKeyboardEvents()

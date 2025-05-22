@@ -22,6 +22,8 @@ namespace MSP2050.Scripts
 
 			m_fsm.TriggerGeometryComplete();
 			m_fsm.AddToUndoStack(new CreateEnergyPointOperation(subEntity, planLayer));
+			if (!Input.GetKey(KeyCode.LeftShift))
+				m_fsm.SetCurrentState(new EditEnergyPointsState(m_fsm, planLayer, new HashSet<PointSubEntity>() { subEntity }));
 		}
 	}
 }

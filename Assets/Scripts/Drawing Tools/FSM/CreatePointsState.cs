@@ -83,6 +83,8 @@ namespace MSP2050.Scripts
 
 			m_fsm.TriggerGeometryComplete();
 			m_fsm.AddToUndoStack(new CreatePointOperation(subEntity, planLayer));
+			if(!Input.GetKey(KeyCode.LeftShift))
+				m_fsm.SetCurrentState(new EditPointsState(m_fsm, planLayer, new HashSet<PointSubEntity>() { subEntity }));
 		}
 
 		public override void HandleKeyboardEvents()

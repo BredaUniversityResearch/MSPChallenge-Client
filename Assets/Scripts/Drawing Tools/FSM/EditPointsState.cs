@@ -24,10 +24,14 @@ namespace MSP2050.Scripts
 		public override bool HasGeometrySelected => m_selection != null && m_selection.Count > 0;
 
 
-		public EditPointsState(FSM a_fsm, PlanLayer a_planLayer) : base(a_fsm)
+		public EditPointsState(FSM a_fsm, PlanLayer a_planLayer, HashSet<PointSubEntity> a_selectedSubEntities = null) : base(a_fsm)
 		{
 			m_planLayer = a_planLayer;
 			m_baseLayer = a_planLayer.BaseLayer as PointLayer;
+			if(a_selectedSubEntities != null)
+			{
+				Select(a_selectedSubEntities, false);
+			}
 		}
 
 		public override void EnterState(Vector3 a_currentMousePosition)
@@ -36,10 +40,10 @@ namespace MSP2050.Scripts
 
 			AP_GeometryTool gt = InterfaceCanvas.Instance.activePlanWindow.m_geometryTool;
 			gt.m_toolBar.SetCreateMode(false);
-			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, false);
-			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, false);
-			//ic.ToolbarEnable(true, FSM.ToolbarInput.Abort);
-			gt.SetActivePlanWindowInteractability(false);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Delete, m_selection.Count > 0);
+			gt.m_toolBar.SetButtonInteractable(FSM.ToolbarInput.Recall, m_selectedRemovedEntity);
+			if(m_selection.Count == 0)
+				gt.SetActivePlanWindowInteractability(false);
 
 			PointSubEntity hover = m_baseLayer.GetPointAt(a_currentMousePosition);
 
