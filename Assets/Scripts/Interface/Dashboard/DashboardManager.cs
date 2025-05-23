@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
-using Sirenix.Utilities;
-using Sirenix.OdinInspector;
 
 namespace MSP2050.Scripts
 {
@@ -70,13 +68,11 @@ namespace MSP2050.Scripts
 			RescaleToResolution(Screen.width, Screen.height, InterfaceCanvas.Instance.canvas.scaleFactor);
 		}
 
-		[Button("Force update resolution F")]
 		public void HandleResolutionOrScaleChange(int a_width, int a_height)
 		{
 			RescaleToResolution(a_width, a_height, InterfaceCanvas.Instance.canvas.scaleFactor);
 		}
 
-		[Button("Force update resolution")]
 		public void RescaleToResolution(int a_width, int a_height, float a_scale)
 		{
 			float scaledWidth = (a_width - 36f) / a_scale;
