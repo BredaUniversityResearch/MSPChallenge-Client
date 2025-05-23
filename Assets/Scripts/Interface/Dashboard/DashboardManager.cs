@@ -79,14 +79,13 @@ namespace MSP2050.Scripts
 		[Button("Force update resolution")]
 		public void RescaleToResolution(int a_width, int a_height, float a_scale)
 		{
-			//m_cellsize = Mathf.Round((Screen.width -36f) * InterfaceCanvas.Instance.canvas.scaleFactor / m_numberColumns);
-			//float scaledWidth = (a_width - 36f) * a_scale;
+			float scaledWidth = (a_width - 36f) / a_scale;
 			m_cellsize = 150f;
-			m_numberColumns = Mathf.FloorToInt((a_width - 36f) / a_scale / m_cellsize);
+			m_numberColumns = Mathf.FloorToInt(scaledWidth / m_cellsize);
 			if(m_numberColumns < 5)
 			{
 				m_numberColumns = 5;
-				m_cellsize = Mathf.Round((a_width - 36f) / a_scale / m_numberColumns);
+				m_cellsize = Mathf.Round(scaledWidth / m_numberColumns);
 			}
 
 			if (m_showingCatalogue)
@@ -94,11 +93,6 @@ namespace MSP2050.Scripts
 				foreach (ADashboardWidget widget in m_catalogueWidgets)
 					widget.Reposition(false, true);
 			}
-			//else if (m_currentCategory != null)
-			//{
-			//	m_catSelectedWidgets[m_currentCategory].RepositionAllWidgets();
-			//	m_widgetParent.sizeDelta = new Vector2(0f, m_cellsize * m_catSelectedWidgets[m_currentCategory].Rows);
-			//}
 			foreach (var kvp in m_catSelectedWidgets)
 			{
 				kvp.Value.ChangeNumberColumns(m_numberColumns);
