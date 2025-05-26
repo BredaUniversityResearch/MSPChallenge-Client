@@ -125,7 +125,7 @@ namespace MSP2050.Scripts
 
 		void OnCountryChanged(int a_newIndex)
 		{
-			bool isAdmin = SessionManager.Instance.IsGameMaster(m_countryDropdownIndexToID[m_countryDropdown.value]);
+			bool isAdmin = SessionManager.Instance.IsManager(m_countryDropdownIndexToID[m_countryDropdown.value]);
 			if (isAdmin)
 			{
 				m_passwordContainer.SetActive(SessionManager.Instance.MspGlobalData.user_admin_has_password);
@@ -145,12 +145,12 @@ namespace MSP2050.Scripts
 		{
 			if (m_usernameField.text == "")
 			{
-				DialogBoxManager.instance.NotificationWindow("No username set", "Please fill in a username and try again", null, "Continue");
+				DialogBoxManager.instance.NotificationWindow("No username set", "Please fill in a username and try again.", null, "Continue");
 				return;
 			}
 			else if (m_passwordContainer.activeInHierarchy && string.IsNullOrEmpty(m_passwordField.text))
 			{
-				DialogBoxManager.instance.NotificationWindow("Incorrect password", "The provided password is incorrect, please try again", null, "Continue");
+				DialogBoxManager.instance.NotificationWindow("Incorrect password", "The provided password is incorrect, please try again.", null, "Continue");
 				return;
 			}
 			else
@@ -186,7 +186,14 @@ namespace MSP2050.Scripts
 		void RequestSessionFailure(ARequest request, string message)
 		{
 			LoginManager.Instance.SetLoadingOverlayActive(false);
-			DialogBoxManager.instance.NotificationWindow("Connecting failed", message.Split('\n')[0], null, "Continue");
+			if(request.Www.responseCode == 500)
+			{
+				DialogBoxManager.instance.NotificationWindow("Connecting failed", "Either the provided password is incorrect or the server has encountered an error, please try again.", null, "Continue");
+			}
+            else
+            {
+				DialogBoxManager.instance.NotificationWindow("Connecting failed", message.Split('\n')[0], null, "Continue");           
+            }
 			Debug.LogWarning(message);
 		}
 	}
