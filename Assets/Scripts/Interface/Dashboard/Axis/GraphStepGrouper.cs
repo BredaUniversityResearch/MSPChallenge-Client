@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 				//Each step is a group
 				for(; nextGroupIndex < a_timeSettings.m_months.Count; nextGroupIndex++)
 				{
-					SetGroup(nextGroupIndex, a_timeSettings.m_stepNames[nextGroupIndex],
+					SetGroup(nextGroupIndex, "",//a_timeSettings.m_stepNames[nextGroupIndex],
 						nextGroupIndex / (float)a_timeSettings.m_months.Count,
 						(nextGroupIndex + 1) / (float)a_timeSettings.m_months.Count);
 				}
@@ -60,18 +60,19 @@ namespace MSP2050.Scripts
 				else
 				{
 					int groupStartIndex = 0;
+					bool shorten = a_timeSettings.m_months.Count > 10;
 					for (int i = 1; i < a_timeSettings.m_months.Count; i++)
 					{
 						if(a_timeSettings.m_months[i][0] % 12 == 0)
 						{
-							SetGroup(nextGroupIndex, Util.MonthToYearText(a_timeSettings.m_months[groupStartIndex][0]),
+							SetGroup(nextGroupIndex, shorten ? Util.MonthToYearText(a_timeSettings.m_months[groupStartIndex][0]).Substring(2, 2) : Util.MonthToYearText(a_timeSettings.m_months[groupStartIndex][0]),
 								groupStartIndex / (float)a_timeSettings.m_months.Count,
 								i / (float)a_timeSettings.m_months.Count);
 							nextGroupIndex++;
 							groupStartIndex = i;
 						}
 					}
-					SetGroup(nextGroupIndex, Util.MonthToYearText(a_timeSettings.m_months[groupStartIndex][0]),
+					SetGroup(nextGroupIndex, shorten ? Util.MonthToYearText(a_timeSettings.m_months[groupStartIndex][0]).Substring(2, 2) : Util.MonthToYearText(a_timeSettings.m_months[groupStartIndex][0]),
 								groupStartIndex / (float)a_timeSettings.m_months.Count,
 								1f);
 					nextGroupIndex++;

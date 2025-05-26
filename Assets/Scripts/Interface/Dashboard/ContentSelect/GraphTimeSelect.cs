@@ -316,7 +316,7 @@ namespace MSP2050.Scripts
 			int currentMonth = TimeManager.Instance.GetCurrentMonth();
 			if(m_rangeToggleValue)
 			{
-				bool shorten = m_rangeMax - m_rangeMin >= 20;
+				bool shorten = m_rangeMax - m_rangeMin >= 10;
 				if (m_yearToggleValue)
 				{
 					for (int i = m_rangeMin; i <= m_rangeMax; i++)
@@ -347,8 +347,8 @@ namespace MSP2050.Scripts
 			{
 				if(m_yearToggleValue)
 				{
-					int first = Math.Max(0, currentMonth % 12 - 12 * (m_latestAmount - 1));
-					bool shorten = (currentMonth - first) / 12 >= 20;
+					int first = Math.Max(0, currentMonth - currentMonth % 12 - 12 * (m_latestAmount - 1));
+					bool shorten = (currentMonth - first) / 12 >= 10;
 					for (int i = first; i <= currentMonth; i+= 12)
 					{
 						List<int> newSet = new List<int>(12);
