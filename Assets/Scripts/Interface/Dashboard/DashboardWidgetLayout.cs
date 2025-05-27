@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -55,6 +54,27 @@ namespace MSP2050.Scripts
 			{
 				widget.Reposition(m_favorites);
 			}
+		}
+
+		public void ChangeNumberColumns(int a_columns)
+		{
+			m_columns = a_columns;
+			m_widgetLayout = new List<ADashboardWidget[]>() { new ADashboardWidget[m_columns] };
+			foreach(ADashboardWidget widget in m_widgets)
+			{
+				if (m_favorites)
+				{
+					widget.m_favPosition = new DashboardWidgetPosition();
+					widget.m_favPosition.SetSize(widget.m_position.W, widget.m_position.H);
+					widget.m_favPosition.SetPosition(FindFittingPosition(widget.m_favPosition.W, widget.m_favPosition.H));
+				}
+				else
+				{
+					widget.m_position.SetPosition(FindFittingPosition(widget.m_position.W, widget.m_position.H));
+				}
+				InsertWidget(widget);
+			}
+			SortAndSetHierarchy();
 		}
 
 		void SortAndSetHierarchy()
@@ -169,6 +189,9 @@ namespace MSP2050.Scripts
 			}
 			if(rowsInserted && m_visible)
 				DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
+
+			if (layout.W > m_columns) //Squeeze widgets that would not fit at the current size
+				layout.SetSize(m_columns, layout.H);
 
 			for (int y = layout.Y; y < layout.Y + layout.H; y++)
 			{
@@ -410,21 +433,6 @@ namespace MSP2050.Scripts
 					widget.Reposition(m_favorites);
 				}	
 			}
-
-			//for (int y = a_newY + 1; y < m_widgetLayout.Count; y++)
-			//{
-			//	for (int x = 0; x < m_columns; x++)
-			//	{
-			//		if (m_widgetLayout[y][x] == null)
-			//			continue;
-			//		DashboardWidgetPosition newLayout = m_favorites ? m_widgetLayout[y][x].m_favPosition : m_widgetLayout[y][x].m_position;
-			//		if (newLayout.Y < y)
-			//		{
-			//			newLayout.SetPosition(newLayout.X, newLayout.Y + layout.H);
-			//			m_widgetLayout[y][x].Reposition(m_favorites);
-			//		}
-			//	}
-			//}
 			DashboardManager.Instance.OnNumberRowsChanged(m_widgetLayout.Count);
 		}
 	}
