@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System;
+using UnityEngine.UI;
 
 namespace MSP2050.Scripts
 {
@@ -13,6 +14,7 @@ namespace MSP2050.Scripts
 		[SerializeField] float m_maxOuterSize;
 
 		GraphDataStepped m_data;
+		ScrollRect m_scrollRect;
 		int m_columns = 1;
 		List<GraphLegendEntry> m_entries;
 		bool m_horizontal = true;
@@ -20,6 +22,7 @@ namespace MSP2050.Scripts
 
 		public void Initialise()
 		{
+			m_scrollRect = GetComponentInChildren<ScrollRect>();
 			if (m_entryParent.childCount > 0)
 			{
 				foreach (Transform child in m_entryParent)
@@ -170,7 +173,17 @@ namespace MSP2050.Scripts
 				rect.offsetMin = new Vector2(a_sideSpacing, a_sideSpacing);
 				rect.offsetMax = new Vector2(size, -a_topSpacing);
 			}
+			m_scrollRect.enabled = true;
+			StartCoroutine(SetScrollViewActivity());
 			return size;
+		}
+
+		IEnumerator SetScrollViewActivity()
+		{
+			yield return new WaitForEndOfFrame();
+			if(m_scrollRect != null)
+				//m_scrollRect.enabled = m_scrollRect.verticalScrollbar.size < 0.99f;
+				m_scrollRect.enabled = m_scrollRect.verticalScrollbar.gameObject.activeSelf;
 		}
 	}
 }
