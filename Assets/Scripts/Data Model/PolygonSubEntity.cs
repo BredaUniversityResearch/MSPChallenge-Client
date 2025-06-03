@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
 using Newtonsoft.Json;
@@ -16,7 +17,7 @@ namespace MSP2050.Scripts
 		protected List<List<Vector3>> holes;
 
 		private bool surfaceAreaNeeded; //Was the surfacearea requested before?
-		private float surfaceAreaSqrKm; 
+		private float surfaceAreaSqrKm;
 		public float SurfaceAreaSqrKm
 		{
 			get
@@ -270,9 +271,9 @@ namespace MSP2050.Scripts
 		{
 			InvalidPoints = null;
 			firstToLastInvalid = false;
-			if (polygon.Count < 4)		
+			if (polygon.Count < 4)
 				return;
-		
+
 			int points = polygon.Count;
 			if (completing)
 			{
@@ -610,10 +611,10 @@ namespace MSP2050.Scripts
 
 			for (int i = 0; i < total; i++)
 			{
-				float x0 = geo.geometry[i][0] / Main.SCALE;
-				float y0 = geo.geometry[i][1] / Main.SCALE;
-				float x1 = geo.geometry[(i + 1) % total][0] / Main.SCALE;
-				float y1 = geo.geometry[(i + 1) % total][1] / Main.SCALE;
+				float x0 = geo.geometry[i][0] * Main.SCALE_FACTOR;
+				float y0 = geo.geometry[i][1] * Main.SCALE_FACTOR;
+				float x1 = geo.geometry[(i + 1) % total][0] * Main.SCALE_FACTOR;
+				float y1 = geo.geometry[(i + 1) % total][1] * Main.SCALE_FACTOR;
 
 				//Calculate "reasonable" epsilon. Considering we have 7 digits of precision, we take a '1' value on the 7th digit as the maximum distance.
 				//1000 = 0.001 (log10(1000) = 3, 7-3 = 4, 10^4 = 10000, 1/10000 = 0.0001)
@@ -628,6 +629,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
+			ValidatePolygon(polygon, geo.id, geo.mspid);
 			return polygon;
 		}
 
@@ -638,10 +640,10 @@ namespace MSP2050.Scripts
 
 			for (int i = 0; i < total; i++)
 			{
-				float x0 = geo.geometry[i][0] / Main.SCALE;
-				float y0 = geo.geometry[i][1] / Main.SCALE;
-				//float x1 = geo.geometry[(i + 1) % total][0] / Main.SCALE;
-				//float y1 = geo.geometry[(i + 1) % total][1] / Main.SCALE;
+				float x0 = geo.geometry[i][0] * Main.SCALE_FACTOR;
+				float y0 = geo.geometry[i][1] * Main.SCALE_FACTOR;
+				//float x1 = geo.geometry[(i + 1) % total][0] * Main.SCALE_FACTOR;
+				//float y1 = geo.geometry[(i + 1) % total][1] * Main.SCALE_FACTOR;
 
 				Vector2 v1 = new Vector2(x0, y0);
 
@@ -651,6 +653,7 @@ namespace MSP2050.Scripts
 				}
 			}
 
+			ValidatePolygon(polygon, geo.id, geo.mspid);
 			return polygon;
 		}
 
@@ -755,7 +758,7 @@ namespace MSP2050.Scripts
 			// Bathymetry and Countries/Councils are not selectable, and will not change drawmode
 			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(m_entity.Layer) && m_entity.Layer.m_selectable)
 			{
-				drawMode = SubEntityDrawMode.PlanReference;			
+				drawMode = SubEntityDrawMode.PlanReference;
 			}
 
 			if (InvalidPoints != null /*&& Main.InEditMode && Main.Instance.CurrentlyEditingBaseLayer == Entity.Layer*/)
@@ -826,7 +829,7 @@ namespace MSP2050.Scripts
 			if (InvalidPoints != null)
 			{
 				VisualizationUtil.Instance.SelectionColor = VisualizationUtil.Instance.DEFAULT_SELECTION_COLOR;
-			}	
+			}
 		}
 
 		protected override void UpdateRestrictionArea(float newRestrictionSize)
@@ -1067,7 +1070,7 @@ namespace MSP2050.Scripts
 			{
 				lineVertices[i] = new Vector3(lod.Polygon[i].x, lod.Polygon[i].y, 0);
 			}
-		
+
 			lineRenderer.SetPositions(lineVertices);
 		}
 
@@ -1117,7 +1120,7 @@ namespace MSP2050.Scripts
 					pointColor = selected ? Color.white : pointColor;
 
 					VisualizationUtil.PointRenderMode pointRenderMode = VisualizationUtil.Instance.GetPointRenderMode(targetDrawSettings, PlanState, selected);
-				
+
 					VisualizationUtil.Instance.UpdatePoint(point, targetLod.GetPointPosition(i), pointColor, targetDrawSettings.PointSize, pointRenderMode);
 				}
 
@@ -1218,7 +1221,7 @@ namespace MSP2050.Scripts
 		}
 
 		protected override void SetHoles(List<List<Vector3>> a_holes)
-		{ 
+		{
 			this.holes = a_holes;
 		}
 
@@ -1282,6 +1285,40 @@ namespace MSP2050.Scripts
 		public virtual Dictionary<string, object> GetGeoJSONProperties()
 		{
 			return new Dictionary<string, object>();
+		}
+
+		private static void ValidatePolygon(List<Vector3> poly, int geoDatabaseId, string geoMspId)
+		{
+			if (poly.Count == 0) return;
+
+			// the == operator for Vector3 if not fuzzy enough, so we use a custom epsilon check
+			float xdiff = Mathf.Abs(poly[0].x - poly[^1].x);
+			float ydiff = Mathf.Abs(poly[0].y - poly[^1].y);
+			bool hasClosingVertex = xdiff < Single.Epsilon && ydiff < Single.Epsilon;
+
+			StackTraceLogType prevLogType = Application.GetStackTraceLogType(LogType.Log);
+			Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+			if (hasClosingVertex) {
+				// remove the "closing" vertex since it is not mandatory
+				poly.RemoveAt(poly.Count - 1);
+			}
+
+			// validate the polygon
+			string errorFormatMsg = "Invalid polygon: {0} in geometry with database ID: " + geoDatabaseId +
+			    " and msp ID: " + geoMspId;
+			if (poly.Count < 3) { // note that the polygon must have at least 3 vertices
+				Debug.Log(string.Format(errorFormatMsg, "Less than 3 vertices"));
+			}
+			// there are duplicate vertices in the polygon
+			HashSet<Vector3> uniqVerts = new HashSet<Vector3>(poly);
+			var duplicateCount = poly.Count - uniqVerts.Count;
+			if (duplicateCount > 0) {
+				Debug.Log(string.Format(errorFormatMsg, "Found " + duplicateCount + " duplicates") +
+				    (hasClosingVertex ? " * closing vertex was already removed *" : "") + "\n" +
+				    JsonConvert.SerializeObject(poly.Select(v => new { v.x, v.y })));
+			}
+
+			Application.SetStackTraceLogType(LogType.Log, prevLogType);
 		}
 	}
 }

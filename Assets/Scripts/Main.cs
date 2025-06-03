@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 	public class Main : MonoBehaviour
 	{
 		public const float SCALE = 1000.0f;
+		public const float SCALE_FACTOR = 0.001f;
 		public const double SCALE_DOUBLE = 1000.0;
 		public const string FIRST_TIME_KEY = "FirstTimePlaying";
 
