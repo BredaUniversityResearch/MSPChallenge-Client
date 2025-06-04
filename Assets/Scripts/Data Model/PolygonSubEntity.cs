@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -108,7 +109,9 @@ namespace MSP2050.Scripts
 				holes = new List<List<Vector3>>();
 				foreach (GeometryObject subtractiveGeo in geometry.subtractive)
 				{
-					holes.Add(GetPolygonFromGeometryObject(subtractiveGeo));
+					List<Vector3> hole = GetPolygonFromGeometryObject(subtractiveGeo);
+					if (hole == null) continue;
+					holes.Add(hole);
 				}
 			}
 
@@ -142,7 +145,11 @@ namespace MSP2050.Scripts
 			{
 				holes = new List<List<Vector3>>();
 				foreach (GeometryObject subtractiveGeo in subEntityObject.subtractive)
-					holes.Add(GetPolygonFromGeometryObject(subtractiveGeo));
+				{
+					List<Vector3> hole = GetPolygonFromGeometryObject(subtractiveGeo);
+					if (hole == null) continue;
+					holes.Add(hole);
+				}
 			}
 
 			UpdateBoundingBox();
@@ -604,6 +611,7 @@ namespace MSP2050.Scripts
 			meshIsDirty = true;
 		}
 
+		[CanBeNull]
 		private List<Vector3> GetPolygonFromGeometryObject(SubEntityObject geo)
 		{
 			int total = geo.geometry.Count;
@@ -628,11 +636,13 @@ namespace MSP2050.Scripts
 					polygon.Add(v1);
 				}
 			}
-
-			ValidatePolygon(polygon, geo.id, geo.mspid);
+			if (!ValidatePolygon(polygon, geo.id, geo.mspid)) {
+				return null;
+			}
 			return polygon;
 		}
 
+		[CanBeNull]
 		private List<Vector3> GetPolygonFromGeometryObject(GeometryObject geo)
 		{
 			int total = geo.geometry.Count;
@@ -652,8 +662,9 @@ namespace MSP2050.Scripts
 					polygon.Add(v1);
 				}
 			}
-
-			ValidatePolygon(polygon, geo.id, geo.mspid);
+			if (!ValidatePolygon(polygon, geo.id, geo.mspid)) {
+				return null;
+			}
 			return polygon;
 		}
 
@@ -704,7 +715,9 @@ namespace MSP2050.Scripts
 
 		public override void UpdateGeometry(GeometryObject geo)
 		{
-			polygon = GetPolygonFromGeometryObject(geo);
+			List<Vector3> newPolygon = GetPolygonFromGeometryObject(geo);
+			if (newPolygon == null) return;
+			polygon = newPolygon;
 			UpdateBoundingBox();
 		}
 
@@ -1287,9 +1300,9 @@ namespace MSP2050.Scripts
 			return new Dictionary<string, object>();
 		}
 
-		private static void ValidatePolygon(List<Vector3> poly, int geoDatabaseId, string geoMspId)
+		private static bool ValidatePolygon(List<Vector3> poly, int geoDatabaseId, string geoMspId)
 		{
-			if (poly.Count == 0) return;
+			if (poly.Count == 0) return true;
 			bool hasClosingVertex = poly[0] == poly[^1];
 
 			StackTraceLogType prevLogType = Application.GetStackTraceLogType(LogType.Log);
@@ -1300,10 +1313,12 @@ namespace MSP2050.Scripts
 			}
 
 			// validate the polygon
+			bool valid = true;
 			string errorFormatMsg = "Invalid polygon: {0} in geometry with database ID: " + geoDatabaseId +
 			    " and msp ID: " + geoMspId;
 			if (poly.Count < 3) { // note that the polygon must have at least 3 vertices
-				Debug.Log(string.Format(errorFormatMsg, "Less than 3 vertices"));
+				Debug.Log(string.Format(errorFormatMsg, "Less than 3 vertices. *** POLYGON SKIPPED ***"));
+				valid = false;
 			}
 			// there are duplicate vertices in the polygon
 			HashSet<Vector3> uniqVerts = new HashSet<Vector3>(poly);
@@ -1312,9 +1327,13 @@ namespace MSP2050.Scripts
 				Debug.Log(string.Format(errorFormatMsg, "Found " + duplicateCount + " duplicates") +
 				    (hasClosingVertex ? " * closing vertex was already removed *" : "") + "\n" +
 				    JsonConvert.SerializeObject(poly.Select(v => new { v.x, v.y })));
+				// only allow if the polygon has at least 3 unique vertices
+				valid = uniqVerts.Count - duplicateCount > 2;
+				Debug.Log(string.Format(errorFormatMsg, "Less than 3 vertices. *** POLYGON SKIPPED ***"));
 			}
 
 			Application.SetStackTraceLogType(LogType.Log, prevLogType);
+			return valid;
 		}
 	}
 }
