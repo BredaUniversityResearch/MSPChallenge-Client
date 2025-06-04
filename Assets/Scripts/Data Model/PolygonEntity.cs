@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MSP2050.Scripts
@@ -16,10 +17,20 @@ namespace MSP2050.Scripts
 		public PolygonEntity(PolygonLayer layer, SubEntityObject layerObject) : base(layer, layerObject)
 		{
 			polygonSubEntities = new List<PolygonSubEntity>();
-			if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
-				polygonSubEntities.Add(new EnergyPolygonSubEntity(this, layerObject, layerObject.id));
-			else
-				polygonSubEntities.Add(new PolygonSubEntity(this, layerObject, layerObject.id));
+
+			try
+			{
+				if (layer.m_editingType == AbstractLayer.EditingType.SourcePolygon)
+					polygonSubEntities.Add(new EnergyPolygonSubEntity(this, layerObject, layerObject.id));
+				else
+					polygonSubEntities.Add(new PolygonSubEntity(this, layerObject, layerObject.id));
+			}
+			catch (InvalidPolygonException e)
+			{
+				// If the polygon is invalid, so we do not add it to polygonSubEntities
+				//   Note that there will already be a log message of this exception from
+				//   PolygonSubEntity::ValidatePolygon
+			}
 		}
 
 		public override SubEntity GetSubEntity(int index)

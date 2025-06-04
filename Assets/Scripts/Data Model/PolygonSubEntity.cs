@@ -101,7 +101,8 @@ namespace MSP2050.Scripts
 		public PolygonSubEntity(Entity entity, SubEntityObject geometry, int databaseID)
 			: base(entity, databaseID, geometry.persistent)
 		{
-			polygon = GetPolygonFromGeometryObject(geometry);
+			List<Vector3> newPolygon = GetPolygonFromGeometryObject(geometry);
+			polygon = newPolygon ?? throw new InvalidPolygonException("Invalid polygon data in geometry with ID: " + databaseID);
 			holes = null;
 
 			if (geometry.subtractive != null)
@@ -138,7 +139,9 @@ namespace MSP2050.Scripts
 
 		public override void SetDataToObject(SubEntityObject subEntityObject)
 		{
-			polygon = GetPolygonFromGeometryObject(subEntityObject);
+			List<Vector3> newPolygon = GetPolygonFromGeometryObject(subEntityObject);
+			if (newPolygon == null) return;
+			polygon = newPolygon;
 			holes = null;
 
 			if (subEntityObject.subtractive != null)
