@@ -1290,11 +1290,7 @@ namespace MSP2050.Scripts
 		private static void ValidatePolygon(List<Vector3> poly, int geoDatabaseId, string geoMspId)
 		{
 			if (poly.Count == 0) return;
-
-			// the == operator for Vector3 if not fuzzy enough, so we use a custom epsilon check
-			float xdiff = Mathf.Abs(poly[0].x - poly[^1].x);
-			float ydiff = Mathf.Abs(poly[0].y - poly[^1].y);
-			bool hasClosingVertex = xdiff < Single.Epsilon && ydiff < Single.Epsilon;
+			bool hasClosingVertex = poly[0] == poly[^1];
 
 			StackTraceLogType prevLogType = Application.GetStackTraceLogType(LogType.Log);
 			Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
