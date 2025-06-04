@@ -1317,7 +1317,7 @@ namespace MSP2050.Scripts
 			string errorFormatMsg = "Invalid polygon: {0} in geometry with database ID: " + geoDatabaseId +
 			    " and msp ID: " + geoMspId;
 			if (poly.Count < 3) { // note that the polygon must have at least 3 vertices
-				Debug.Log(string.Format(errorFormatMsg, "Less than 3 vertices. *** POLYGON SKIPPED ***"));
+				Debug.Log(string.Format(errorFormatMsg, "Less than 3 vertices. *** POLYGON WILL BE SKIPPED ***"));
 				valid = false;
 			}
 			// there are duplicate vertices in the polygon
@@ -1329,7 +1329,9 @@ namespace MSP2050.Scripts
 				    JsonConvert.SerializeObject(poly.Select(v => new { v.x, v.y })));
 				// only allow if the polygon has at least 3 unique vertices
 				valid = uniqVerts.Count - duplicateCount > 2;
-				Debug.Log(string.Format(errorFormatMsg, "Less than 3 vertices. *** POLYGON SKIPPED ***"));
+				if (!valid) {
+					Debug.Log(string.Format(errorFormatMsg, "Less than 3 unique vertices. *** POLYGON WILL BE SKIPPED ***"));
+				}
 			}
 
 			Application.SetStackTraceLogType(LogType.Log, prevLogType);
