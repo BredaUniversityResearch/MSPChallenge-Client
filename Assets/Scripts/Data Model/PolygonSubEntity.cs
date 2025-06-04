@@ -1040,7 +1040,7 @@ namespace MSP2050.Scripts
 				}
 				catch (Exception ex)
 				{
-					Debug.LogError(string.Format("Triangulation error occurred in layer: {0}, database ID: {1}. Exception: {2}", layer.m_id, m_databaseID, ex.Message));
+					Debug.LogError(string.Format("Triangulation error occurred in layer: {0}, database ID: {1}, msp ID: {2}. Exception: {3}", layer.m_id, m_databaseID, m_mspID, ex.Message));
 					throw;
 				}
 
