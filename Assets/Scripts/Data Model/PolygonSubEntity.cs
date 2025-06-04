@@ -1307,7 +1307,7 @@ namespace MSP2050.Scripts
 			}
 			// there are duplicate vertices in the polygon
 			HashSet<Vector3> uniqVerts = new HashSet<Vector3>(poly);
-			var duplicateCount = poly.Count - uniqVerts.Count;
+			int duplicateCount = poly.Count - uniqVerts.Count;
 			if (duplicateCount > 0) {
 				Debug.Log(string.Format(errorFormatMsg, "Found " + duplicateCount + " duplicates") +
 				    (hasClosingVertex ? " * closing vertex was already removed *" : "") + "\n" +
