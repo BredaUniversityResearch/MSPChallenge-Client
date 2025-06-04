@@ -1,0 +1,263 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\AUTHORS.txt">
+        <Link>Poly2Tri\AUTHORS.txt</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\AUTHORS.txt.meta">
+        <Link>Poly2Tri\AUTHORS.txt.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\LICENSE.txt">
+        <Link>Poly2Tri\LICENSE.txt</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\LICENSE.txt.meta">
+        <Link>Poly2Tri\LICENSE.txt.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation.meta">
+        <Link>Poly2Tri\Triangulation.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\DelaunayTriangle.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\DelaunayTriangle.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\AdvancingFront.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\AdvancingFront.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\AdvancingFrontNode.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\AdvancingFrontNode.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweep.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweep.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepBasin.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepBasin.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepConstraint.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepConstraint.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepContext.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepContext.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepDebugContext.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepDebugContext.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepEdgeEvent.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepEdgeEvent.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepPointComparator.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepPointComparator.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\PointOnEdgeException.cs.meta">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\PointOnEdgeException.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\ITriangulatable.cs.meta">
+        <Link>Poly2Tri\Triangulation\ITriangulatable.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Orientation.cs.meta">
+        <Link>Poly2Tri\Triangulation\Orientation.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon.meta">
+        <Link>Poly2Tri\Triangulation\Polygon.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\Contour.cs.meta">
+        <Link>Poly2Tri\Triangulation\Polygon\Contour.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\Polygon.cs.meta">
+        <Link>Poly2Tri\Triangulation\Polygon\Polygon.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\PolygonPoint.cs.meta">
+        <Link>Poly2Tri\Triangulation\Polygon\PolygonPoint.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\PolygonSet.cs.meta">
+        <Link>Poly2Tri\Triangulation\Polygon\PolygonSet.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\PolygonUtil.cs.meta">
+        <Link>Poly2Tri\Triangulation\Polygon\PolygonUtil.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Sets.meta">
+        <Link>Poly2Tri\Triangulation\Sets.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Sets\ConstrainedPointSet.cs.meta">
+        <Link>Poly2Tri\Triangulation\Sets\ConstrainedPointSet.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Sets\PointSet.cs.meta">
+        <Link>Poly2Tri\Triangulation\Sets\PointSet.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationAlgorithm.cs.meta">
+        <Link>Poly2Tri\Triangulation\TriangulationAlgorithm.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationConstraint.cs.meta">
+        <Link>Poly2Tri\Triangulation\TriangulationConstraint.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationContext.cs.meta">
+        <Link>Poly2Tri\Triangulation\TriangulationContext.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationDebugContext.cs.meta">
+        <Link>Poly2Tri\Triangulation\TriangulationDebugContext.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationMode.cs.meta">
+        <Link>Poly2Tri\Triangulation\TriangulationMode.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationPoint.cs.meta">
+        <Link>Poly2Tri\Triangulation\TriangulationPoint.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Util.meta">
+        <Link>Poly2Tri\Triangulation\Util.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Util\PointGenerator.cs.meta">
+        <Link>Poly2Tri\Triangulation\Util\PointGenerator.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Util\PolygonGenerator.cs.meta">
+        <Link>Poly2Tri\Triangulation\Util\PolygonGenerator.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Util\TriangulationUtil.cs.meta">
+        <Link>Poly2Tri\Triangulation\Util\TriangulationUtil.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility.meta">
+        <Link>Poly2Tri\Utility.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\FixedArray3.cs.meta">
+        <Link>Poly2Tri\Utility\FixedArray3.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\FixedBitArray3.cs.meta">
+        <Link>Poly2Tri\Utility\FixedBitArray3.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\MathUtil.cs.meta">
+        <Link>Poly2Tri\Utility\MathUtil.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\Point2D.cs.meta">
+        <Link>Poly2Tri\Utility\Point2D.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\Point2DList.cs.meta">
+        <Link>Poly2Tri\Utility\Point2DList.cs.meta</Link>
+      </Content>
+      <Content Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\Rect2D.cs.meta">
+        <Link>Poly2Tri\Utility\Rect2D.cs.meta</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\DelaunayTriangle.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\DelaunayTriangle.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\AdvancingFront.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\AdvancingFront.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\AdvancingFrontNode.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\AdvancingFrontNode.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweep.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweep.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepBasin.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepBasin.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepConstraint.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepConstraint.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepContext.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepContext.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepDebugContext.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepDebugContext.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepEdgeEvent.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepEdgeEvent.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepPointComparator.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\DTSweepPointComparator.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Delaunay\Sweep\PointOnEdgeException.cs">
+        <Link>Poly2Tri\Triangulation\Delaunay\Sweep\PointOnEdgeException.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\ITriangulatable.cs">
+        <Link>Poly2Tri\Triangulation\ITriangulatable.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Orientation.cs">
+        <Link>Poly2Tri\Triangulation\Orientation.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\Contour.cs">
+        <Link>Poly2Tri\Triangulation\Polygon\Contour.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\Polygon.cs">
+        <Link>Poly2Tri\Triangulation\Polygon\Polygon.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\PolygonPoint.cs">
+        <Link>Poly2Tri\Triangulation\Polygon\PolygonPoint.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\PolygonSet.cs">
+        <Link>Poly2Tri\Triangulation\Polygon\PolygonSet.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Polygon\PolygonUtil.cs">
+        <Link>Poly2Tri\Triangulation\Polygon\PolygonUtil.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Sets\ConstrainedPointSet.cs">
+        <Link>Poly2Tri\Triangulation\Sets\ConstrainedPointSet.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Sets\PointSet.cs">
+        <Link>Poly2Tri\Triangulation\Sets\PointSet.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationAlgorithm.cs">
+        <Link>Poly2Tri\Triangulation\TriangulationAlgorithm.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationConstraint.cs">
+        <Link>Poly2Tri\Triangulation\TriangulationConstraint.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationContext.cs">
+        <Link>Poly2Tri\Triangulation\TriangulationContext.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationDebugContext.cs">
+        <Link>Poly2Tri\Triangulation\TriangulationDebugContext.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationMode.cs">
+        <Link>Poly2Tri\Triangulation\TriangulationMode.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\TriangulationPoint.cs">
+        <Link>Poly2Tri\Triangulation\TriangulationPoint.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Util\PointGenerator.cs">
+        <Link>Poly2Tri\Triangulation\Util\PointGenerator.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Util\PolygonGenerator.cs">
+        <Link>Poly2Tri\Triangulation\Util\PolygonGenerator.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Triangulation\Util\TriangulationUtil.cs">
+        <Link>Poly2Tri\Triangulation\Util\TriangulationUtil.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\FixedArray3.cs">
+        <Link>Poly2Tri\Utility\FixedArray3.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\FixedBitArray3.cs">
+        <Link>Poly2Tri\Utility\FixedBitArray3.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\MathUtil.cs">
+        <Link>Poly2Tri\Utility\MathUtil.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\Point2D.cs">
+        <Link>Poly2Tri\Utility\Point2D.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\Point2DList.cs">
+        <Link>Poly2Tri\Utility\Point2DList.cs</Link>
+      </Compile>
+      <Compile Include="..\..\Assets\Plugins\Poly2Mesh\Poly2Tri\Utility\Rect2D.cs">
+        <Link>Poly2Tri\Utility\Rect2D.cs</Link>
+      </Compile>
+    </ItemGroup>
+
+</Project>
