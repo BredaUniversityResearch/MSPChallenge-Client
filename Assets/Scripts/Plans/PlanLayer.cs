@@ -19,7 +19,7 @@ namespace MSP2050.Scripts
 		private List<Entity> newGeometry; //Object
 		public HashSet<int> RemovedGeometry; //Indexed by persistent ID
 		public HashSet<PlanIssueObject> issues;
-    
+
 		bool isEnabled = false;
 		public bool updating = false;
 
@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 			ID = layerObject.layerid;
 			issues = new HashSet<PlanIssueObject>(new IssueObjectEqualityComparer());
 			foreach (PlanIssueObject issue in layerObject.issues)
-			{ 
+			{
 				if(issue.active)
 					issues.Add(issue);
 			}
@@ -47,7 +47,16 @@ namespace MSP2050.Scripts
 				layerNeedsUpdate = true;
 				for (int i = 0; i < entityCount; i++)
 				{
-					Entity entity = BaseLayer.CreateEntity(layerObject.geometry[i]);
+					Entity entity = null;
+					try {
+						entity = BaseLayer.CreateEntity(layerObject.geometry[i]);
+					}
+					catch (InvalidPolygonException e) {
+						// If the polygon is invalid, we do not add it
+						//   Note that there will already be a log message of this exception from
+						//   PolygonSubEntity::ValidatePolygon
+						continue;
+					}
 					entity.PlanLayer = this;
 					newGeometry.Add(entity);
 				}
@@ -177,7 +186,16 @@ namespace MSP2050.Scripts
 				else
 				{
 					//Create new entity
-					Entity entity = BaseLayer.CreateEntity(subEntObj);
+					Entity entity = null;
+					try {
+						entity = BaseLayer.CreateEntity(subEntObj);
+					}
+					catch (InvalidPolygonException e) {
+						// If the polygon is invalid, we do not add it
+						//   Note that there will already be a log message of this exception from
+						//   PolygonSubEntity::ValidatePolygon
+						continue;
+					}
 					entity.PlanLayer = this;
 					newGeometry.Add(entity);
 					entity.DrawGameObjects(BaseLayer.LayerGameObject.transform);

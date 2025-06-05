@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -16,7 +18,7 @@ namespace MSP2050.Scripts
 		protected List<List<Vector3>> holes;
 
 		private bool surfaceAreaNeeded; //Was the surfacearea requested before?
-		private float surfaceAreaSqrKm; 
+		private float surfaceAreaSqrKm;
 		public float SurfaceAreaSqrKm
 		{
 			get
@@ -99,7 +101,8 @@ namespace MSP2050.Scripts
 		public PolygonSubEntity(Entity entity, SubEntityObject geometry, int databaseID)
 			: base(entity, databaseID, geometry.persistent)
 		{
-			polygon = GetPolygonFromGeometryObject(geometry);
+			List<Vector3> newPolygon = GetPolygonFromGeometryObject(geometry);
+			polygon = newPolygon ?? throw new InvalidPolygonException("Invalid polygon data in geometry with ID: " + databaseID);
 			holes = null;
 
 			if (geometry.subtractive != null)
@@ -107,7 +110,9 @@ namespace MSP2050.Scripts
 				holes = new List<List<Vector3>>();
 				foreach (GeometryObject subtractiveGeo in geometry.subtractive)
 				{
-					holes.Add(GetPolygonFromGeometryObject(subtractiveGeo));
+					List<Vector3> hole = GetPolygonFromGeometryObject(subtractiveGeo);
+					if (hole == null) continue;
+					holes.Add(hole);
 				}
 			}
 
@@ -134,14 +139,20 @@ namespace MSP2050.Scripts
 
 		public override void SetDataToObject(SubEntityObject subEntityObject)
 		{
-			polygon = GetPolygonFromGeometryObject(subEntityObject);
+			List<Vector3> newPolygon = GetPolygonFromGeometryObject(subEntityObject);
+			if (newPolygon == null) return;
+			polygon = newPolygon;
 			holes = null;
 
 			if (subEntityObject.subtractive != null)
 			{
 				holes = new List<List<Vector3>>();
 				foreach (GeometryObject subtractiveGeo in subEntityObject.subtractive)
-					holes.Add(GetPolygonFromGeometryObject(subtractiveGeo));
+				{
+					List<Vector3> hole = GetPolygonFromGeometryObject(subtractiveGeo);
+					if (hole == null) continue;
+					holes.Add(hole);
+				}
 			}
 
 			UpdateBoundingBox();
@@ -270,9 +281,9 @@ namespace MSP2050.Scripts
 		{
 			InvalidPoints = null;
 			firstToLastInvalid = false;
-			if (polygon.Count < 4)		
+			if (polygon.Count < 4)
 				return;
-		
+
 			int points = polygon.Count;
 			if (completing)
 			{
@@ -603,6 +614,7 @@ namespace MSP2050.Scripts
 			meshIsDirty = true;
 		}
 
+		[CanBeNull]
 		private List<Vector3> GetPolygonFromGeometryObject(SubEntityObject geo)
 		{
 			int total = geo.geometry.Count;
@@ -610,10 +622,10 @@ namespace MSP2050.Scripts
 
 			for (int i = 0; i < total; i++)
 			{
-				float x0 = geo.geometry[i][0] / Main.SCALE;
-				float y0 = geo.geometry[i][1] / Main.SCALE;
-				float x1 = geo.geometry[(i + 1) % total][0] / Main.SCALE;
-				float y1 = geo.geometry[(i + 1) % total][1] / Main.SCALE;
+				float x0 = geo.geometry[i][0] * Main.SCALE_FACTOR;
+				float y0 = geo.geometry[i][1] * Main.SCALE_FACTOR;
+				float x1 = geo.geometry[(i + 1) % total][0] * Main.SCALE_FACTOR;
+				float y1 = geo.geometry[(i + 1) % total][1] * Main.SCALE_FACTOR;
 
 				//Calculate "reasonable" epsilon. Considering we have 7 digits of precision, we take a '1' value on the 7th digit as the maximum distance.
 				//1000 = 0.001 (log10(1000) = 3, 7-3 = 4, 10^4 = 10000, 1/10000 = 0.0001)
@@ -627,10 +639,13 @@ namespace MSP2050.Scripts
 					polygon.Add(v1);
 				}
 			}
-
+			if (!ValidatePolygon(polygon, geo.id, geo.mspid)) {
+				return null;
+			}
 			return polygon;
 		}
 
+		[CanBeNull]
 		private List<Vector3> GetPolygonFromGeometryObject(GeometryObject geo)
 		{
 			int total = geo.geometry.Count;
@@ -638,10 +653,10 @@ namespace MSP2050.Scripts
 
 			for (int i = 0; i < total; i++)
 			{
-				float x0 = geo.geometry[i][0] / Main.SCALE;
-				float y0 = geo.geometry[i][1] / Main.SCALE;
-				//float x1 = geo.geometry[(i + 1) % total][0] / Main.SCALE;
-				//float y1 = geo.geometry[(i + 1) % total][1] / Main.SCALE;
+				float x0 = geo.geometry[i][0] * Main.SCALE_FACTOR;
+				float y0 = geo.geometry[i][1] * Main.SCALE_FACTOR;
+				//float x1 = geo.geometry[(i + 1) % total][0] * Main.SCALE_FACTOR;
+				//float y1 = geo.geometry[(i + 1) % total][1] * Main.SCALE_FACTOR;
 
 				Vector2 v1 = new Vector2(x0, y0);
 
@@ -650,7 +665,9 @@ namespace MSP2050.Scripts
 					polygon.Add(v1);
 				}
 			}
-
+			if (!ValidatePolygon(polygon, geo.id, geo.mspid)) {
+				return null;
+			}
 			return polygon;
 		}
 
@@ -701,7 +718,9 @@ namespace MSP2050.Scripts
 
 		public override void UpdateGeometry(GeometryObject geo)
 		{
-			polygon = GetPolygonFromGeometryObject(geo);
+			List<Vector3> newPolygon = GetPolygonFromGeometryObject(geo);
+			if (newPolygon == null) return;
+			polygon = newPolygon;
 			UpdateBoundingBox();
 		}
 
@@ -755,7 +774,7 @@ namespace MSP2050.Scripts
 			// Bathymetry and Countries/Councils are not selectable, and will not change drawmode
 			if (drawMode == SubEntityDrawMode.Default && LayerManager.Instance.IsReferenceLayer(m_entity.Layer) && m_entity.Layer.m_selectable)
 			{
-				drawMode = SubEntityDrawMode.PlanReference;			
+				drawMode = SubEntityDrawMode.PlanReference;
 			}
 
 			if (InvalidPoints != null /*&& Main.InEditMode && Main.Instance.CurrentlyEditingBaseLayer == Entity.Layer*/)
@@ -826,7 +845,7 @@ namespace MSP2050.Scripts
 			if (InvalidPoints != null)
 			{
 				VisualizationUtil.Instance.SelectionColor = VisualizationUtil.Instance.DEFAULT_SELECTION_COLOR;
-			}	
+			}
 		}
 
 		protected override void UpdateRestrictionArea(float newRestrictionSize)
@@ -1021,7 +1040,7 @@ namespace MSP2050.Scripts
 				}
 				catch (Exception ex)
 				{
-					Debug.LogError(string.Format("Triangulation error occurred in layer: {0}, database ID: {1}. Exception: {2}", layer.m_id, m_databaseID, ex.Message));
+					Debug.LogError(string.Format("Triangulation error occurred in layer: {0}, database ID: {1}, msp ID: {2}. Exception: {3}", layer.m_id, m_databaseID, m_mspID, ex.Message));
 					throw;
 				}
 
@@ -1067,7 +1086,7 @@ namespace MSP2050.Scripts
 			{
 				lineVertices[i] = new Vector3(lod.Polygon[i].x, lod.Polygon[i].y, 0);
 			}
-		
+
 			lineRenderer.SetPositions(lineVertices);
 		}
 
@@ -1117,7 +1136,7 @@ namespace MSP2050.Scripts
 					pointColor = selected ? Color.white : pointColor;
 
 					VisualizationUtil.PointRenderMode pointRenderMode = VisualizationUtil.Instance.GetPointRenderMode(targetDrawSettings, PlanState, selected);
-				
+
 					VisualizationUtil.Instance.UpdatePoint(point, targetLod.GetPointPosition(i), pointColor, targetDrawSettings.PointSize, pointRenderMode);
 				}
 
@@ -1218,7 +1237,7 @@ namespace MSP2050.Scripts
 		}
 
 		protected override void SetHoles(List<List<Vector3>> a_holes)
-		{ 
+		{
 			this.holes = a_holes;
 		}
 
@@ -1282,6 +1301,44 @@ namespace MSP2050.Scripts
 		public virtual Dictionary<string, object> GetGeoJSONProperties()
 		{
 			return new Dictionary<string, object>();
+		}
+
+		private static bool ValidatePolygon(List<Vector3> a_poly, int a_databaseId, string a_mspId)
+		{
+			if (a_poly.Count == 0) return true;
+			bool hasClosingVertex = a_poly[0] == a_poly[^1];
+
+			StackTraceLogType prevLogType = Application.GetStackTraceLogType(LogType.Log);
+			Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+			if (hasClosingVertex) {
+				// remove the "closing" vertex since it is not mandatory
+				a_poly.RemoveAt(a_poly.Count - 1);
+			}
+
+			// validate the polygon
+			bool valid = true;
+			string errorFormatMsg = "Invalid polygon: {0} in geometry with database ID: " + a_databaseId +
+			    " and msp ID: " + a_mspId;
+			if (a_poly.Count < 3) { // note that the polygon must have at least 3 vertices
+				Debug.Log(string.Format(errorFormatMsg, "Less than 3 vertices. *** POLYGON WILL BE SKIPPED ***"));
+				valid = false;
+			}
+			// there are duplicate vertices in the polygon
+			HashSet<Vector3> uniqVerts = new HashSet<Vector3>(a_poly);
+			int duplicateCount = a_poly.Count - uniqVerts.Count;
+			if (duplicateCount > 0) {
+				Debug.Log(string.Format(errorFormatMsg, "Found " + duplicateCount + " duplicates") +
+				    (hasClosingVertex ? " * closing vertex was already removed *" : "") + "\n" +
+				    JsonConvert.SerializeObject(a_poly.Select(v => new { v.x, v.y })));
+				// only allow if the polygon has at least 3 unique vertices
+				valid = uniqVerts.Count - duplicateCount > 2;
+				if (!valid) {
+					Debug.Log(string.Format(errorFormatMsg, "Less than 3 unique vertices. *** POLYGON WILL BE SKIPPED ***"));
+				}
+			}
+
+			Application.SetStackTraceLogType(LogType.Log, prevLogType);
+			return valid;
 		}
 	}
 }
