@@ -235,22 +235,6 @@ namespace MSP2050.Scripts
 
 		void UpdateContentToggleNames()
 		{
-			//if (m_focusSelection != null)
-			//{
-			//	string[] names = new string[m_contentToggles.Length];
-			//	if (m_focusSelection.CurrentIndex == 0)
-			//	{
-			//		names[0] = m_selectedIDs.FirstOrDefault();
-			//	}
-			//	else
-			//	{
-			//		if(m_selectedCountries.Count > 0)
-			//			names[1] = SessionManager.Instance.GetTeamByTeamID(m_selectedCountries.FirstOrDefault()).name;
-			//		if(m_selectedIDs.Count == 1)
-			//			names[0] = m_selectedIDs.FirstOrDefault();
-			//	}
-			//	SetContentToggleNames(names);
-			//}
 			string[] names = new string[m_contentToggles.Length];
 			if (m_selectedCountries != null && m_selectedCountries.Count == 1)
 				names[1] = SessionManager.Instance.GetTeamByTeamID(m_selectedCountries.FirstOrDefault()).name;
