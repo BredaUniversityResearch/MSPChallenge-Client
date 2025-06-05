@@ -12,11 +12,11 @@ namespace MSP2050.Scripts
 		public HashSet<T> m_activeEntities; //Entities at the time of currently active plan
 		public HashSet<T> PreModifiedEntities { get; private set; }	//Lastest geometry with the same persisID as new geometry in the current active planlayer
 		private HashSet<int> PreExistingPersisIDs
-		{ 
+		{
 			get;
 			set;
 		}	//Persistent IDs that existed before the current plan
-		
+
 		public override bool LayerTextVisible
 		{
 			get => m_layerTextVisible;
@@ -46,15 +46,15 @@ namespace MSP2050.Scripts
 				}
 				else
 				{
-					foreach (T entity in Entities)                    
-						entity.GetSubEntity(0).SetTextMeshActivity(false);                   
+					foreach (T entity in Entities)
+						entity.GetSubEntity(0).SetTextMeshActivity(false);
 
-					foreach (PlanLayer p in m_planLayers)                  
+					foreach (PlanLayer p in m_planLayers)
 						for (int i = 0; i < p.GetNewGeometryCount(); ++i)
 							p.GetNewGeometryByIndex(i).GetSubEntity(0).SetTextMeshActivity(false);
 				}
 			}
-		}		
+		}
 
 		protected Layer(LayerMeta a_layerMeta)
 			: base(a_layerMeta)
@@ -502,14 +502,6 @@ namespace MSP2050.Scripts
 			return AddPlanLayer(a_planLayer);
 		}
 
-		public override Entity AddObject(SubEntityObject a_obj)
-		{
-			T entity = (T)CreateEntity(a_obj);
-			Entities.Add(entity);
-			InitialEntities.Add(entity);
-			return entity;
-		}
-
 		public override void RemovePlanLayer(PlanLayer a_planLayer)
 		{
 			m_planLayers.Remove(a_planLayer);
@@ -627,7 +619,7 @@ namespace MSP2050.Scripts
 			//Add addedgeometry to the activeEntities and keep a hashset of persistentIDs that should be excluded
 			HashSet<int> excludedPersistentIDs = new HashSet<int>(m_currentPlanLayer.RemovedGeometry);
 			//Keeps IDs that were removed in the most recent plan
-			HashSet<int> removedDisplayedIDs = a_showRemovedInLatestPlan ? new HashSet<int>(m_currentPlanLayer.RemovedGeometry) : new HashSet<int>(); 
+			HashSet<int> removedDisplayedIDs = a_showRemovedInLatestPlan ? new HashSet<int>(m_currentPlanLayer.RemovedGeometry) : new HashSet<int>();
 			HashSet<int> preModifiedPersisIDs = new HashSet<int>();
 			m_activeEntities = new HashSet<T>();
 			PreModifiedEntities = new HashSet<T>();
@@ -1021,7 +1013,7 @@ namespace MSP2050.Scripts
 
 		/// <summary>
 		/// Should be called on socket layer.
-		/// Returns a list of all updated/new grids for the given plan. 
+		/// Returns a list of all updated/new grids for the given plan.
 		/// Grids will have the same name, persisID and distribution if they existed in the given previousEnergyPlan.
 		/// Grids that will be there after the plan are removed from removedGrids.
 		/// </summary>
@@ -1117,7 +1109,7 @@ namespace MSP2050.Scripts
 							//Oldgrid is still present, remove its ID from removed IDs
 							if (a_removedGrids.Contains(oldGrid.m_persistentID))
 								a_removedGrids.Remove(oldGrid.m_persistentID);
-						}							
+						}
 						else	//Grids are not sourcewise identical, so take over values from previous one
 						{
 							initialDistributionSet = true;
@@ -1148,7 +1140,7 @@ namespace MSP2050.Scripts
 		}
 
 		/// <summary>
-		/// Adds the cables connections to the points that are connected to them. 
+		/// Adds the cables connections to the points that are connected to them.
 		/// </summary>
 		public override void ActivateCableLayerConnections()
 		{
@@ -1296,7 +1288,7 @@ namespace MSP2050.Scripts
 		}
 
 		private Dictionary<int, List<DirectionalConnection>> GetCableNetworkAtPlanIndex(int a_index)
-		{  
+		{
 			Dictionary<int, List<DirectionalConnection>> network = new Dictionary<int, List<DirectionalConnection>>();
 			HashSet<int> excludedPersistentIDs = new HashSet<int>(m_planLayers[a_index].RemovedGeometry);
 

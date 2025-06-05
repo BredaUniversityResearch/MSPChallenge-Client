@@ -112,8 +112,8 @@ namespace MSP2050.Scripts
 			m_entityTypes = ParseEntityTypes(a_layerMeta.layer_type);
 			m_visibleEntityTypes.UnionWith(m_entityTypes.Values);
 			if(a_layerMeta.layer_text_info != null && a_layerMeta.layer_text_info.property_per_state != null)
-				m_textInfo = new LayerTextInfo(a_layerMeta.layer_text_info);	
-		
+				m_textInfo = new LayerTextInfo(a_layerMeta.layer_text_info);
+
 			if (a_layerMeta.layer_states != null && a_layerMeta.layer_states != "")
 			{
 				List<LayerStateObject> layerstateObject = new List<LayerStateObject>();
@@ -161,7 +161,7 @@ namespace MSP2050.Scripts
 			}
 			if (m_editingType == EditingType.Normal)
 				return;
-			m_presetProperties.Add("MaxCapacity", (a_subent) => 
+			m_presetProperties.Add("MaxCapacity", (a_subent) =>
 			{
 				ValueConversionCollection valueConversions = VisualizationUtil.Instance.VisualizationSettings.ValueConversions;
 				IEnergyDataHolder data = (IEnergyDataHolder)a_subent;
@@ -242,7 +242,6 @@ namespace MSP2050.Scripts
 		public abstract PlanLayer CurrentPlanLayer();
 		public abstract int AddPlanLayer(PlanLayer a_planLayer);
 		public abstract int UpdatePlanLayerTime(PlanLayer a_planLayer);
-		public abstract Entity AddObject(SubEntityObject a_obj);
 		public abstract void RemovePlanLayer(PlanLayer a_planLayer);
 		public abstract void RemovePlanLayerAndEntities(PlanLayer a_planLayer);
 		public abstract void SetEntitiesActiveUpToTime(int a_month);
