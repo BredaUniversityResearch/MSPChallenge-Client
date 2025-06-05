@@ -1303,33 +1303,33 @@ namespace MSP2050.Scripts
 			return new Dictionary<string, object>();
 		}
 
-		private static bool ValidatePolygon(List<Vector3> poly, int geoDatabaseId, string geoMspId)
+		private static bool ValidatePolygon(List<Vector3> a_poly, int a_databaseId, string a_mspId)
 		{
-			if (poly.Count == 0) return true;
-			bool hasClosingVertex = poly[0] == poly[^1];
+			if (a_poly.Count == 0) return true;
+			bool hasClosingVertex = a_poly[0] == a_poly[^1];
 
 			StackTraceLogType prevLogType = Application.GetStackTraceLogType(LogType.Log);
 			Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
 			if (hasClosingVertex) {
 				// remove the "closing" vertex since it is not mandatory
-				poly.RemoveAt(poly.Count - 1);
+				a_poly.RemoveAt(a_poly.Count - 1);
 			}
 
 			// validate the polygon
 			bool valid = true;
-			string errorFormatMsg = "Invalid polygon: {0} in geometry with database ID: " + geoDatabaseId +
-			    " and msp ID: " + geoMspId;
-			if (poly.Count < 3) { // note that the polygon must have at least 3 vertices
+			string errorFormatMsg = "Invalid polygon: {0} in geometry with database ID: " + a_databaseId +
+			    " and msp ID: " + a_mspId;
+			if (a_poly.Count < 3) { // note that the polygon must have at least 3 vertices
 				Debug.Log(string.Format(errorFormatMsg, "Less than 3 vertices. *** POLYGON WILL BE SKIPPED ***"));
 				valid = false;
 			}
 			// there are duplicate vertices in the polygon
-			HashSet<Vector3> uniqVerts = new HashSet<Vector3>(poly);
-			int duplicateCount = poly.Count - uniqVerts.Count;
+			HashSet<Vector3> uniqVerts = new HashSet<Vector3>(a_poly);
+			int duplicateCount = a_poly.Count - uniqVerts.Count;
 			if (duplicateCount > 0) {
 				Debug.Log(string.Format(errorFormatMsg, "Found " + duplicateCount + " duplicates") +
 				    (hasClosingVertex ? " * closing vertex was already removed *" : "") + "\n" +
-				    JsonConvert.SerializeObject(poly.Select(v => new { v.x, v.y })));
+				    JsonConvert.SerializeObject(a_poly.Select(v => new { v.x, v.y })));
 				// only allow if the polygon has at least 3 unique vertices
 				valid = uniqVerts.Count - duplicateCount > 2;
 				if (!valid) {
