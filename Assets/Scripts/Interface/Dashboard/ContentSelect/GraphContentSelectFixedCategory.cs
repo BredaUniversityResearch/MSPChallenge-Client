@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MSP2050.Scripts
 {
@@ -140,6 +141,7 @@ namespace MSP2050.Scripts
 				}
 				//TODO: add all country option if relevant?
 			}
+			UpdateContentToggleNames();
 		}
 
 		private void OnDestroy()
@@ -169,12 +171,12 @@ namespace MSP2050.Scripts
 				m_selectedCountries.Clear();
 				m_selectedCountries.Add(m_AllCountries[0]);
 			}
-			m_onSettingsChanged.Invoke();
+			OnSettingsChanged();
 		}
 
 		void OnKPIChanged(KPIValue a_newValue)
 		{
-			m_onSettingsChanged.Invoke();
+			OnSettingsChanged();
 		}
 
 		void OnIDToggleChanged(int a_index, bool a_value)
@@ -183,7 +185,7 @@ namespace MSP2050.Scripts
 				m_selectedIDs.Add(m_allIDs[a_index]);
 			else
 				m_selectedIDs.Remove(m_allIDs[a_index]);
-			m_onSettingsChanged.Invoke();
+			OnSettingsChanged();
 		}
 
 		void OnAllIDTogglesChanged(bool a_value)
@@ -198,7 +200,7 @@ namespace MSP2050.Scripts
 			}
 			else
 				m_selectedIDs = new HashSet<string>();
-			m_onSettingsChanged.Invoke();
+			OnSettingsChanged();
 		}
 
 		void OnCountryToggleChanged(int a_index, bool a_value)
@@ -207,7 +209,7 @@ namespace MSP2050.Scripts
 				m_selectedCountries.Add(m_AllCountries[a_index]);
 			else
 				m_selectedCountries.Remove(m_AllCountries[a_index]);
-			m_onSettingsChanged.Invoke();
+			OnSettingsChanged();
 		}
 
 		void OnAllCountriesToggleChanged(bool a_value)
@@ -222,7 +224,39 @@ namespace MSP2050.Scripts
 			}
 			else
 				m_selectedCountries = new HashSet<int>();
+			OnSettingsChanged();
+		}
+
+		void OnSettingsChanged()
+		{
+			UpdateContentToggleNames();
 			m_onSettingsChanged.Invoke();
+		}
+
+		void UpdateContentToggleNames()
+		{
+			//if (m_focusSelection != null)
+			//{
+			//	string[] names = new string[m_contentToggles.Length];
+			//	if (m_focusSelection.CurrentIndex == 0)
+			//	{
+			//		names[0] = m_selectedIDs.FirstOrDefault();
+			//	}
+			//	else
+			//	{
+			//		if(m_selectedCountries.Count > 0)
+			//			names[1] = SessionManager.Instance.GetTeamByTeamID(m_selectedCountries.FirstOrDefault()).name;
+			//		if(m_selectedIDs.Count == 1)
+			//			names[0] = m_selectedIDs.FirstOrDefault();
+			//	}
+			//	SetContentToggleNames(names);
+			//}
+			string[] names = new string[m_contentToggles.Length];
+			if (m_selectedCountries != null && m_selectedCountries.Count == 1)
+				names[1] = SessionManager.Instance.GetTeamByTeamID(m_selectedCountries.FirstOrDefault()).name;
+			if (m_selectedIDs != null && m_selectedIDs.Count == 1)
+				names[0] = m_displayIDs[m_allIDs.IndexOf(m_selectedIDs.FirstOrDefault())];
+			SetContentToggleNames(names);
 		}
 
 		public override GraphDataStepped FetchData(GraphTimeSettings a_timeSettings, bool a_stacked, out float a_maxValue, out float a_minValue)
