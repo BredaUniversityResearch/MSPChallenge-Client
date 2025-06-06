@@ -28,7 +28,16 @@ namespace MSP2050.Scripts
 				return;
 			foreach (SubEntityObject layerObject in a_layerObjects)
 			{
-				PolygonEntity ent = new PolygonEntity(this, layerObject);
+				PolygonEntity ent = null;
+				try {
+					ent = new PolygonEntity(this, layerObject);
+				}
+				catch (InvalidPolygonException e) {
+					// If the polygon is invalid, we do not add it
+					//   Note that there will already be a log message of this exception from
+					//   PolygonSubEntity::ValidatePolygon
+					continue;
+				}
 				Entities.Add(ent);
 				InitialEntities.Add(ent);
 			}
