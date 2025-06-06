@@ -204,5 +204,13 @@ namespace MSP2050.Scripts
 				a_maxValue = a_minValue + 0.001f;
 
 		}
+
+		protected void SetContentToggleNames(string[] a_names)
+		{
+			for (int i = 0; i < a_names.Length; i++)
+			{
+				m_contentToggles[i].m_summaryText.text = a_names[i] == null ? m_contentToggleNames[i] : a_names[i];
+			}
+		}
 	}
 }

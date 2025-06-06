@@ -96,6 +96,7 @@ namespace MSP2050.Scripts
 							m_entries.Add(Instantiate(m_entryPrefab, m_entryParent).GetComponent<GraphLegendEntry>());
 						}
 						Color color;
+						string entryName;
 						if (a_data.m_selectedDisplayIDs.Count > 1)
 						{
 							//Focused per country, offset colour darkness
@@ -107,6 +108,7 @@ namespace MSP2050.Scripts
 							{
 								color = DashboardManager.GetLerpedCountryColour(team.color, t);
 							}
+							entryName = a_data.m_selectedDisplayIDs[i % a_data.m_selectedDisplayIDs.Count];
 						}
 						else
 						{
@@ -116,8 +118,9 @@ namespace MSP2050.Scripts
 								color = new Color(0.5f, 0.5f, 0.5f, 1f);
 							else
 								color = team.color;
+							entryName = team.name;
 						}
-						m_entries[i].SetData(a_data.m_selectedDisplayIDs[i % a_data.m_selectedDisplayIDs.Count], color,
+						m_entries[i].SetData(entryName, color,
 													x / (float)m_columns,
 													(x + 1) / (float)m_columns,
 													a_spacing / 2f,
