@@ -274,7 +274,7 @@ namespace MSP2050.Scripts
 				{
 					break;
 				}
-				else
+				else if(plan.State != Plan.PlanState.DELETED)
 				{
 					if (plan.TryGetPolicyData<PolicyPlanDataFishing>(PolicyManager.FISHING_POLICY_NAME, out var fishingData) && fishingData.fishingDistributionDelta != null)
 					{
