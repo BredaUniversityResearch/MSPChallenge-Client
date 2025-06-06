@@ -163,25 +163,24 @@ namespace MSP2050.Scripts
                 pitBounds = Util.OffsetPolygon(pitBounds, pitSlope);
                 if (pitBounds == null || pitBounds.Count == 0)
                 {
-                    //Debug.Log($"No results from offset at depth: {currentDepth}");
                     break;
                 }
-     //           else
-     //           {
-     //               List<List<Vector3>> convertedPoints = new List<List<Vector3>>();
-     //               foreach (var poly in pitBounds)
-     //               {
-					//	List<Vector3> points = GeometryOperations.IntPointToVector(poly);
-     //                   for(int i = 0; i < points.Count-1; i++)
-     //                   {
-     //                       Debug.DrawLine(points[i], points[i + 1], Color.green, 5f);
+                else
+                {
+                    List<List<Vector3>> convertedPoints = new List<List<Vector3>>();
+                    foreach (var poly in pitBounds)
+                    {
+                        List<Vector3> points = GeometryOperations.IntPointToVector(poly);
+                        for (int i = 0; i < points.Count - 1; i++)
+                        {
+                            Debug.DrawLine(points[i], points[i + 1], Color.black, 5f);
 
-     //                   }
-     //                   Debug.DrawLine(points[points.Count-1], points[0], Color.green, 5f);
-					//}
-     //           }
+                        }
+                        Debug.DrawLine(points[points.Count - 1], points[0], Color.black, 5f);
+                    }
+                }
 
-			}
+            }
 			return Mathf.Max(0f, volume * areaScale / GeometryOperations.intConversion); // Now returns volume in m3
         }
 
