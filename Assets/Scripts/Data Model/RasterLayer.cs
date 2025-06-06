@@ -24,7 +24,7 @@ namespace MSP2050.Scripts
 
 		public RasterObject rasterObject { get; private set; }
 		private Texture2D viewingRaster;	//The raster that is displayed, reference to either rasterAtRequestedTime, or rasterAtLatestTime
-		private Texture2D rasterAtRequestedTime = new Texture2D(1, 1, TextureFormat.ARGB32, false);	
+		private Texture2D rasterAtRequestedTime = new Texture2D(1, 1, TextureFormat.ARGB32, false);
 		private Texture2D rasterAtLatestTime = new Texture2D(1, 1, TextureFormat.ARGB32, false);
 		private int viewingRasterTime = -1; //-1 if latest
 		private Vector2 scale;
@@ -245,7 +245,7 @@ namespace MSP2050.Scripts
 			int x = Mathf.FloorToInt(uvPos.x * viewingRaster.width);
 			int y = Mathf.FloorToInt(uvPos.y * viewingRaster.height);
 
-			Color value = viewingRaster.GetPixel(x, y); // maybe cache all the pixels when loading 
+			Color value = viewingRaster.GetPixel(x, y); // maybe cache all the pixels when loading
 
 			return value;
 		}
@@ -350,11 +350,6 @@ namespace MSP2050.Scripts
 			{
 				re.SetNewRaster(newRaster);
 			}
-		}
-
-		public override Entity AddObject(SubEntityObject obj)
-		{
-			throw new NotImplementedException();
 		}
 
 		public override Entity GetEntity(int index)
@@ -508,7 +503,7 @@ namespace MSP2050.Scripts
 		}
 
 		public override void ActivateLastEntityWith(int persistentID)
-		{ 
+		{
 		}
 
 		public int GetRasterImageWidth()
