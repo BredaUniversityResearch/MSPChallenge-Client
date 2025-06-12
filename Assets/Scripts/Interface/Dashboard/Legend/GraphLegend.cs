@@ -33,6 +33,11 @@ namespace MSP2050.Scripts
 			m_entries = new List<GraphLegendEntry>();
 		}
 
+		private void OnEnable()
+		{
+			StartCoroutine(SetScrollViewActivity());
+		}
+
 		public float SetSize(int a_w, int a_h, bool a_horizontal, float a_sideSpacing, float a_spacing, float a_topSpacing)
 		{
 			//Currently assumes it fills a full horizontal edge
@@ -177,7 +182,8 @@ namespace MSP2050.Scripts
 				rect.offsetMax = new Vector2(size, -a_topSpacing);
 			}
 			m_scrollRect.enabled = true;
-			StartCoroutine(SetScrollViewActivity());
+			if(gameObject.activeInHierarchy)
+				StartCoroutine(SetScrollViewActivity());
 			return size;
 		}
 
@@ -185,7 +191,6 @@ namespace MSP2050.Scripts
 		{
 			yield return new WaitForEndOfFrame();
 			if(m_scrollRect != null)
-				//m_scrollRect.enabled = m_scrollRect.verticalScrollbar.size < 0.99f;
 				m_scrollRect.enabled = m_scrollRect.verticalScrollbar.gameObject.activeSelf;
 		}
 	}
