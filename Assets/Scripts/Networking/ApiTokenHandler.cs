@@ -89,12 +89,12 @@ namespace MSP2050.Scripts
 					if (requestSessionAttempts > MAX_REQUEST_SESSION_ATTEMPTS)
 					{
 						// fatal error, user has to quit the game
-						string msg = "Failed to request new API token, request error: " + response.message;
+						string msg = "Failed to request new API token, response message: " + response?.message;
 						Debug.LogError(msg);
 						throw new Exception(msg);
 					}
 
-					string message = "Failed to renew api access token. Message: " + response.message;
+					string message = "Failed to renew api access token. response message: " + response?.message;
 					if (refreshTokenRequest != null)
 					{
 						message += ", Request error: " + refreshTokenRequest.error;
