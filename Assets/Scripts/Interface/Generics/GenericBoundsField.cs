@@ -57,23 +57,31 @@ namespace MSP2050.Scripts
         void UpdateTextFieldToBounds()
         {
             m_ignoreCallback = true;
-            //TODO
-
-            m_ignoreCallback = false;
+            m_blX.SetContent(m_currentValue.x.ToString(), true);
+            m_blY.SetContent(m_currentValue.y.ToString(), true);
+            m_tlX.SetContent(m_currentValue.z.ToString(), true);
+            m_tlY.SetContent(m_currentValue.w.ToString(), true);
+			m_ignoreCallback = false;
 		}
 
         void OnTextFieldChanged(string a_newValue)
         {
             if (m_ignoreCallback)
                 return;
-            m_currentValue = new Vector4(GetCoordinate(m_blX), GetCoordinate(m_blY), GetCoordinate(m_tlX), GetCoordinate(m_tlY));
+            m_currentValue = new Vector4(
+                GetCoordinate(m_blX), 
+                GetCoordinate(m_blY), 
+                GetCoordinate(m_tlX), 
+                GetCoordinate(m_tlY));
 			m_changeCallback.Invoke(m_currentValue);
 		}
 
-        float GetCoordinate(GenericTextField a_textField)
+        float GetCoordinate(GenericTextField a_textField, float a_default)
         {
             //TODO: Get coordinate from text
-            return 0f;
+            float result = a_default;
+            float.TryParse(a_textField.CurrentValue, out result);
+            return result;
         }
 
         void OnBoundsButtonClicked()
