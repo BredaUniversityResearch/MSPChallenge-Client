@@ -68,17 +68,18 @@ namespace MSP2050.Scripts
         {
             if (m_ignoreCallback)
                 return;
+
+            Rect bounds = CameraManager.Instance.zoomRect;
             m_currentValue = new Vector4(
-                GetCoordinate(m_blX), 
-                GetCoordinate(m_blY), 
-                GetCoordinate(m_tlX), 
-                GetCoordinate(m_tlY));
+                GetCoordinate(m_blX, bounds.xMin), 
+                GetCoordinate(m_blY, bounds.yMin), 
+                GetCoordinate(m_tlX, bounds.xMax), 
+                GetCoordinate(m_tlY, bounds.yMax));
 			m_changeCallback.Invoke(m_currentValue);
 		}
 
         float GetCoordinate(GenericTextField a_textField, float a_default)
         {
-            //TODO: Get coordinate from text
             float result = a_default;
             float.TryParse(a_textField.CurrentValue, out result);
             return result;

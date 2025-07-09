@@ -51,7 +51,7 @@ namespace MSP2050.Scripts
             if (m_ignoreCallback || m_changeCallback == null)
                 return;
 
-			m_changeCallback.Invoke(a_value)`;
+			m_changeCallback.Invoke(a_value);
 
 		}
     }
