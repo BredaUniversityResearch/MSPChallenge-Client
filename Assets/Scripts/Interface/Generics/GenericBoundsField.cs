@@ -32,10 +32,10 @@ namespace MSP2050.Scripts
             m_contentContainer.anchorMin = new Vector2((a_nameSizeSteps + 2) * m_spacePerStep, 0f);
             m_maxBoundsSize = a_maxBoundsSize;
 			m_changeCallback = a_changeCallback;
-            m_blX.Initialise("Bottom left X", a_nameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-            m_blY.Initialise("Bottom left Y", a_nameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-            m_tlX.Initialise("Top left X", a_nameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-            m_tlY.Initialise("Top left Y", a_nameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
+            m_blX.Initialise("Bottom left X", 0, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
+            m_blY.Initialise("Bottom left Y", 0, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
+            m_tlX.Initialise("Top left X", 0, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
+            m_tlY.Initialise("Top left Y", 0, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
 			m_selectBoundsButton.onClick.AddListener(OnBoundsButtonClicked);
 		}
 
