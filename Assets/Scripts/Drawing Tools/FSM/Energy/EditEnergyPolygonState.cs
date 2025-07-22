@@ -95,7 +95,7 @@ namespace MSP2050.Scripts
 		}
 
 		protected override PolygonSubEntity StartModifyingSubEntity(PolygonSubEntity a_subEntity, bool a_insideUndoBatch)
-		{
+		{			
 			if (a_subEntity.m_entity.PlanLayer == m_planLayer)
 			{
 				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
@@ -105,7 +105,7 @@ namespace MSP2050.Scripts
 
 				//Create undo operations for cables attached to sourcepoint
 				foreach (Connection con in (a_subEntity as EnergyPolygonSubEntity).m_sourcePoint.Connections)
-				{ 
+				{
 					con.cable.AddModifyLineUndoOperation(m_fsm);
 					con.cable.m_edited = true;
 				}
@@ -142,6 +142,10 @@ namespace MSP2050.Scripts
 
 				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}
+			a_subEntity.WarningIfEditingExisting(
+				"Energy Grid",
+				"In plan {0} you have altered an energy polygon first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
+			);
 			return a_subEntity;
 		}
 	}

@@ -186,6 +186,10 @@ namespace MSP2050.Scripts
 
 				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}
+			a_subEntity.WarningIfEditingExisting(
+				"Energy Grid",
+				"In plan {0} you have altered an energy point first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
+			);
 			return a_subEntity;
 		}
 

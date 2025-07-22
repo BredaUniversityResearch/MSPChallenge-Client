@@ -518,6 +518,28 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public void WarningIfEditingExisting(string existingType, string warningText)
+		{
+			if (GetDatabaseID() != GetPersistentID())
+			{
+				Plan originalPlan = new();
+				SubEntity originalSubEntity = LayerManager.Instance.FindSubEntityByPersistentID(GetPersistentID());
+				if (originalSubEntity != null)
+				{
+					originalPlan = originalSubEntity.m_entity.PlanLayer.Plan;
+				}
+				PlayerNotifications.AddWarningEditingExisting(m_entity.PlanLayer.Plan, originalPlan, existingType, warningText);
+			}
+		}
+
+		public void WarningIfAddingToExisting(string existingType, string warningText, Plan affectingPlan)
+		{
+			if (GetPersistentID() != -1)
+			{
+				PlayerNotifications.AddWarningAddingToExisting(affectingPlan, m_entity.PlanLayer.Plan, existingType, warningText);
+			}
+		}
+
 		#region Virtual methods
 		//Overridden for energy & shipping functions
 		public virtual void RemoveDependencies()

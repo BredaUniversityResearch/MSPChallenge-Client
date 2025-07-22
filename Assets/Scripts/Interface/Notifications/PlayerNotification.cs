@@ -42,7 +42,8 @@ namespace MSP2050.Scripts
 				"Approval Action Required",
 				string.Format("Plan {0} requires an approval decision from your team", targetPlan.Name));
 			data.buttonText = "Open Plan Monitor";
-			data.onButtonPress = () => {
+			data.onButtonPress = () =>
+			{
 				if (Main.InEditMode)
 				{
 					DialogBoxManager.instance.NotificationWindow("Editing plan content", "Other plans cannot be viewed while editing a plan's content.", () => { }, "Dismiss");
@@ -54,6 +55,46 @@ namespace MSP2050.Scripts
 				}
 			};
 			AddNotification(data);
+		}
+
+		public static void AddWarningAboutExisting(Plan targetPlan, string notificationIdentifier, string notificationTitle, string notificationText)
+		{
+            NotificationData data = new(notificationIdentifier, notificationTitle, notificationText)
+            {
+                buttonText = "Open Plan Monitor",
+                onButtonPress = () =>
+                    {
+                        if (Main.InEditMode)
+                        {
+                            DialogBoxManager.instance.NotificationWindow("Editing plan content", "Other plans cannot be viewed while editing a plan's content.", () => { }, "Dismiss");
+                        }
+                        else
+                        {
+                            PlanManager.Instance.ShowPlan(targetPlan);
+                        }
+                    }
+            };
+            AddNotification(data);
+		}
+
+		public static void AddWarningEditingExisting(Plan targetPlan, Plan originalPlan, string existingType, string warningText)
+		{
+			AddWarningAboutExisting(
+				targetPlan,
+				string.Format("WarningEditingExisting.{0}", targetPlan.ID),
+				string.Format("Warning: Editing Existing {0}", existingType),
+				string.Format(warningText, targetPlan.Name, originalPlan.StartTime < 0 ? "at the start of the game" : "in plan " + originalPlan.Name)
+			);
+		}
+
+		public static void AddWarningAddingToExisting(Plan targetPlan, Plan originalPlan, string existingType, string warningText)
+		{
+			AddWarningAboutExisting(
+				targetPlan,
+				string.Format("WarningAddingToExisting.{0}", targetPlan.ID),
+				string.Format("Warning: Adding To Existing {0}", existingType),
+				string.Format(warningText, targetPlan.Name, originalPlan.StartTime < 0 ? "at the start of the game" : "in plan " + originalPlan.Name)
+			);
 		}
 
 		public static void RemoveApprovalActionRequiredNotification(Plan targetPlan)

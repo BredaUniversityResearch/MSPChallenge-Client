@@ -261,7 +261,7 @@ namespace MSP2050.Scripts
 				//Duplicate linestring
 				EnergyLineStringSubEntity duplicate = CreateNewPlanLineString(a_subEntity.GetPersistentID(), a_subEntity.GetDataCopy()) as EnergyLineStringSubEntity;
 				SwitchSelectionFromBaseLineStringToDuplicate(a_subEntity, duplicate);
-            
+
 				//Add connections to new cable and reconnect attached points
 				foreach (Connection con in (a_subEntity as EnergyLineStringSubEntity).Connections)
 				{
@@ -275,6 +275,10 @@ namespace MSP2050.Scripts
 
 				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}
+			a_subEntity.WarningIfEditingExisting(
+				"Energy Grid",
+				"In plan {0} you have altered an energy line first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
+			);
 			return a_subEntity;
 		}
 	}
