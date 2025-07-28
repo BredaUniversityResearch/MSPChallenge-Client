@@ -77,13 +77,23 @@ namespace MSP2050.Scripts
             AddNotification(data);
 		}
 
+		public static void AddWarningDeletingExisting(Plan targetPlan, Plan originalPlan, string existingType, string warningText)
+		{
+			AddWarningAboutExisting(
+				targetPlan,
+				string.Format("WarningDeletingExisting.{0}", targetPlan.ID),
+				string.Format("Warning: Deleting Existing {0}", existingType),
+				string.Format(warningText, targetPlan.Name, originalPlan.StartTime < 0 ? "at the start of the game" : "in plan '" + originalPlan.Name + "'")
+			);
+		}
+
 		public static void AddWarningEditingExisting(Plan targetPlan, Plan originalPlan, string existingType, string warningText)
 		{
 			AddWarningAboutExisting(
 				targetPlan,
 				string.Format("WarningEditingExisting.{0}", targetPlan.ID),
 				string.Format("Warning: Editing Existing {0}", existingType),
-				string.Format(warningText, targetPlan.Name, originalPlan.StartTime < 0 ? "at the start of the game" : "in plan " + originalPlan.Name)
+				string.Format(warningText, targetPlan.Name, originalPlan.StartTime < 0 ? "at the start of the game" : "in plan '" + originalPlan.Name + "'")
 			);
 		}
 
@@ -93,7 +103,7 @@ namespace MSP2050.Scripts
 				targetPlan,
 				string.Format("WarningAddingToExisting.{0}", targetPlan.ID),
 				string.Format("Warning: Adding To Existing {0}", existingType),
-				string.Format(warningText, targetPlan.Name, originalPlan.StartTime < 0 ? "at the start of the game" : "in plan " + originalPlan.Name)
+				string.Format(warningText, targetPlan.Name, originalPlan.StartTime < 0 ? "at the start of the game" : "in plan '" + originalPlan.Name + "'")
 			);
 		}
 

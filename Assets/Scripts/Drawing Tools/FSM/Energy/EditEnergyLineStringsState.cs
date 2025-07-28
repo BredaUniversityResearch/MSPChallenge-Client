@@ -33,6 +33,11 @@ namespace MSP2050.Scripts
 						m_baseLayer.RemoveSubEntity(subEntity);
 						subEntity.RedrawGameObject();
 					}
+					subEntity.WarningIfDeletingExisting(
+						"Energy Grid",
+						"In plan '{0}' you have removed an energy line first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+						m_planLayer.Plan
+					);
 				}
 
 				m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
@@ -79,6 +84,11 @@ namespace MSP2050.Scripts
 						subEntityToModify.RedrawGameObject();
 						m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 					}
+					subEntity.WarningIfDeletingExisting(
+						"Energy Grid",
+						"In plan '{0}' you have removed a part of an energy line first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+						m_planLayer.Plan
+					);
 				}
 			}
 
@@ -277,7 +287,7 @@ namespace MSP2050.Scripts
 			}
 			a_subEntity.WarningIfEditingExisting(
 				"Energy Grid",
-				"In plan {0} you have altered an energy line first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
+				"In plan '{0}' you have altered an energy line first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
 			);
 			return a_subEntity;
 		}

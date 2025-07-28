@@ -518,6 +518,14 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public void WarningIfDeletingExisting(string existingType, string warningText, Plan affectingPlan)
+		{
+			if (affectingPlan.ID != m_entity.PlanLayer.Plan.ID)
+			{
+				PlayerNotifications.AddWarningDeletingExisting(affectingPlan, m_entity.PlanLayer.Plan, existingType, warningText);
+			}
+		}
+
 		public void WarningIfEditingExisting(string existingType, string warningText)
 		{
 			if (GetDatabaseID() != GetPersistentID())

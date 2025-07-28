@@ -44,6 +44,11 @@ namespace MSP2050.Scripts
 					m_fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(con.cable, m_cablePlanLayer, false));
 				m_cablePlanLayer.BaseLayer.RemoveSubEntity(con.cable);
 			}
+			a_modifiedSubEntity.WarningIfDeletingExisting(
+				"Energy Grid",
+				"In plan '{0}' you have removed an energy polygon first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+				m_planLayer.Plan
+			);
 		}
 
 		public override void Dragging(Vector3 a_dragStartPosition, Vector3 a_currentPosition)
@@ -144,7 +149,7 @@ namespace MSP2050.Scripts
 			}
 			a_subEntity.WarningIfEditingExisting(
 				"Energy Grid",
-				"In plan {0} you have altered an energy polygon first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
+				"In plan '{0}' you have altered an energy polygon first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
 			);
 			return a_subEntity;
 		}
