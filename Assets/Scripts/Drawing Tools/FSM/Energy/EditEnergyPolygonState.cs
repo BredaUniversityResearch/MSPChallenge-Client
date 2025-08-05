@@ -45,7 +45,7 @@ namespace MSP2050.Scripts
 				m_cablePlanLayer.BaseLayer.RemoveSubEntity(con.cable);
 			}
 			a_modifiedSubEntity.WarningIfDeletingExisting(
-				"Energy Grid",
+				"Energy Polygon",
 				"In plan '{0}' you have removed an energy polygon first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
 				m_planLayer.Plan
 			);
@@ -148,7 +148,7 @@ namespace MSP2050.Scripts
 				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}
 			a_subEntity.WarningIfEditingExisting(
-				"Energy Grid",
+				"Energy Polygon",
 				"In plan '{0}' you have altered an energy polygon first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
 			);
 			return a_subEntity;

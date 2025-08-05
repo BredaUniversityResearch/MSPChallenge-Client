@@ -117,7 +117,7 @@ namespace MSP2050.Scripts
 			subEntity.RedrawGameObject(SubEntityDrawMode.Default);
 
 			a_point.WarningIfAddingToExisting(
-				"Energy Grid",
+				"Energy Point",
 				"In plan '{0}' you have added a cable to an energy point first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
 				subEntity.m_entity.PlanLayer.Plan
 			);

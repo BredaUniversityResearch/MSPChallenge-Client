@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using GeoJSON.Net.Feature;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -520,9 +521,13 @@ namespace MSP2050.Scripts
 
 		public void WarningIfDeletingExisting(string existingType, string warningText, Plan affectingPlan)
 		{
-			if (affectingPlan.ID != m_entity.PlanLayer.Plan.ID)
+			if (m_entity != null && m_entity.PlanLayer != null && m_entity.PlanLayer.Plan != null && affectingPlan.ID != m_entity.PlanLayer.Plan.ID)
 			{
-				PlayerNotifications.AddWarningDeletingExisting(affectingPlan, m_entity.PlanLayer.Plan, existingType, warningText);
+				PlayerNotifications.AddNotification(
+					string.Format("WarningDeletingExisting{0}.{1}", Regex.Replace(existingType, @"\s+", ""), affectingPlan.ID),
+					string.Format("{0} Removed", existingType),
+					string.Format(warningText, affectingPlan.Name, m_entity.PlanLayer.Plan.StartTime < 0 ? "at the start of the game" : "in plan '" + affectingPlan.Name + "'")
+				);
 			}
 		}
 
@@ -532,19 +537,27 @@ namespace MSP2050.Scripts
 			{
 				Plan originalPlan = new();
 				SubEntity originalSubEntity = LayerManager.Instance.FindSubEntityByPersistentID(GetPersistentID());
-				if (originalSubEntity != null)
+				if (originalSubEntity != null && originalSubEntity.m_entity != null && originalSubEntity.m_entity.PlanLayer != null && originalSubEntity.m_entity.PlanLayer.Plan != null)
 				{
 					originalPlan = originalSubEntity.m_entity.PlanLayer.Plan;
 				}
-				PlayerNotifications.AddWarningEditingExisting(m_entity.PlanLayer.Plan, originalPlan, existingType, warningText);
+				PlayerNotifications.AddNotification(
+					string.Format("WarningEditingExisting{0}.{1}", Regex.Replace(existingType, @"\s+", ""), m_entity.PlanLayer.Plan.ID),
+					string.Format("{0} Edited", existingType),
+					string.Format(warningText, m_entity.PlanLayer.Plan.Name, originalPlan.StartTime < 0 ? "at the start of the game" : "in plan '" + originalPlan.Name + "'")
+				);
 			}
 		}
 
 		public void WarningIfAddingToExisting(string existingType, string warningText, Plan affectingPlan)
 		{
-			if (GetPersistentID() != -1)
+			if (m_entity != null && m_entity.PlanLayer != null && m_entity.PlanLayer.Plan != null && affectingPlan.ID != m_entity.PlanLayer.Plan.ID)
 			{
-				PlayerNotifications.AddWarningAddingToExisting(affectingPlan, m_entity.PlanLayer.Plan, existingType, warningText);
+				PlayerNotifications.AddNotification(
+					string.Format("WarningAddingToExisting{0}.{1}", Regex.Replace(existingType, @"\s+", ""), affectingPlan.ID),
+					string.Format("{0} Affected", existingType),
+					string.Format(warningText, affectingPlan.Name, m_entity.PlanLayer.Plan.StartTime < 0 ? "at the start of the game" : "in plan '" + m_entity.PlanLayer.Plan.Name + "'")
+				);
 			}
 		}
 

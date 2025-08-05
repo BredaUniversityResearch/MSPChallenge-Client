@@ -94,8 +94,8 @@ namespace MSP2050.Scripts
 
 			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
 			point.WarningIfAddingToExisting(
-				"Energy Grid",
-				"In plan {0} you have added a cable to an energy point first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+				"Energy Point",
+				"In plan '{0}' you have added a cable to an energy point first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
 				subEntity.m_entity.PlanLayer.Plan
 			);
 		}

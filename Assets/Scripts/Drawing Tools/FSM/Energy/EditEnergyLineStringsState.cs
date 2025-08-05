@@ -34,8 +34,8 @@ namespace MSP2050.Scripts
 						subEntity.RedrawGameObject();
 					}
 					subEntity.WarningIfDeletingExisting(
-						"Energy Grid",
-						"In plan '{0}' you have removed an energy line first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+						"Energy Cable",
+						"In plan '{0}' you have removed an energy cable first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
 						m_planLayer.Plan
 					);
 				}
@@ -85,8 +85,8 @@ namespace MSP2050.Scripts
 						m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 					}
 					subEntity.WarningIfDeletingExisting(
-						"Energy Grid",
-						"In plan '{0}' you have removed a part of an energy line first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+						"Energy Cable",
+						"In plan '{0}' you have removed a part of an energy cable first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
 						m_planLayer.Plan
 					);
 				}
@@ -286,8 +286,8 @@ namespace MSP2050.Scripts
 				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}
 			a_subEntity.WarningIfEditingExisting(
-				"Energy Grid",
-				"In plan '{0}' you have altered an energy line first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
+				"Energy Cable",
+				"In plan '{0}' you have affected an energy cable first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
 			);
 			return a_subEntity;
 		}
