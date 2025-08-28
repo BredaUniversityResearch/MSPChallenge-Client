@@ -104,6 +104,7 @@ namespace MSP2050.Scripts
 
 		// used to store error messages with their IDs to avoid passing around long strings
 		private Dictionary<int, string> restrictionIdToMessage = new Dictionary<int, string>();
+		int m_nextNonOverlapRestrictionMessageId = 10000;
 
 		/// <summary>
 		/// Separate dictionary for inclusions and exclusions
@@ -210,6 +211,7 @@ namespace MSP2050.Scripts
 		public void CheckConstraints(Plan a_plan, out List<string> a_unavailableTypeNames)
 		{
 			CheckConstraints(a_plan);
+			PolicyManager.Instance.CheckPolicyLayerIssues(a_plan);
 			a_unavailableTypeNames = CheckTypeUnavailableConstraints(a_plan, a_plan.StartTime);
 		}
 
@@ -489,7 +491,7 @@ namespace MSP2050.Scripts
 
 		private void HandleLoadRestrictionsCallback(RestrictionConfigObject a_restrictionConfig)
 		{
-			restrictionIdToMessage.Clear();
+			//restrictionIdToMessage.Clear(); //Messes with NonOverlapRestrictionMessages
 			ConstraintPointCollisionSize = a_restrictionConfig.restriction_point_size;
 
 			foreach (RestrictionObject restriction in a_restrictionConfig.restrictions)
@@ -529,6 +531,22 @@ namespace MSP2050.Scripts
 				restrictionIdToMessage[restriction.id] = restriction.message;
 			}
 		}
+
+		public int AddNonOverlapRestrictionMessage(string a_message)
+		{
+			int id = m_nextNonOverlapRestrictionMessageId;
+			m_nextNonOverlapRestrictionMessageId++;
+			restrictionIdToMessage[id] = a_message;
+			return id;
+		}
+
+		public void AddNonOverlapRestrictionLayers(int a_id, AbstractLayer a_layer1, AbstractLayer a_layer2)
+		{
+			restrictionIdToConstraint.Add(a_id, new KeyValuePair<ConstraintSource, ConstraintTarget>(
+				new ConstraintSource() { m_layer = a_layer1}, 
+				new ConstraintTarget(-1, a_layer2, null, ERestrictionIssueType.Warning, null, -1f)));
+		}
+
 
 		public string GetRestrictionMessage(int a_restrictionId)
 		{

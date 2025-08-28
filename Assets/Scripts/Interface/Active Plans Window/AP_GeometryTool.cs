@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Reactive.Joins;
 
 namespace MSP2050.Scripts
 {
@@ -86,6 +87,7 @@ namespace MSP2050.Scripts
 				LayerManager.Instance.RedrawVisibleLayers(); //This will cause a double redraw if the new AP state is also layer editing
 
 				ConstraintManager.Instance.CheckConstraints(m_plan);
+				PolicyManager.Instance.CheckPolicyLayerIssues(m_plan);
 				IssueManager.Instance.SetIssueInstancesToPlan(m_plan);
 				m_APWindow.RefreshIssueText();
 			}
