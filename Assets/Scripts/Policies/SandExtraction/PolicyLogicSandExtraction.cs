@@ -288,16 +288,17 @@ namespace MSP2050.Scripts
 
         float GetDepthForRasterValue(float a_rasterValue)
         {
-			switch (a_rasterValue)
-			{
-				case 43: return 2f;     // 0-2m
-				case 85: return 4f;     // 2-4m
-				case 128: return 6f;   // 4-6m
-				case 170: return 8f;   // 6-8m
-				case 213: return 10f;  // 8-10m
-				case 255: return 12f;  // 10-12m
-			}
-			return 0f;    // Unknown value
+			return m_availableSandDepthRasterLayer.rasterValueScale.EvaluateOutput(a_rasterValue);
+			//switch (a_rasterValue)
+			//{
+			//	case 43: return 2f;     // 0-2m
+			//	case 85: return 4f;     // 2-4m
+			//	case 128: return 6f;   // 4-6m
+			//	case 170: return 8f;   // 6-8m
+			//	case 213: return 10f;  // 8-10m
+			//	case 255: return 12f;  // 10-12m
+			//}
+			//return 0f;    // Unknown value
 		}
 
 
@@ -418,29 +419,37 @@ namespace MSP2050.Scripts
                         foreach(Entity pit in planLayer.GetNewGeometry())
                         {
                             PolygonSubEntity pitPoly = (PolygonSubEntity)pit.GetSubEntity(0);
-							//Get max bounding box size, compare to max tidal excursion length
 							Rect bounds = pit.GetEntityBounds();
-                            float maxTidalExcursionLength = GetRasterOverlapMinMax(m_excursionLengthRasterLayer, pitPoly, false);
-							if (maxTidalExcursionLength > MathF.Max(bounds.width, bounds.height))
-                                planLayer.issues.Add(new PlanIssueObject(ERestrictionIssueType.Warning, bounds.center.x, bounds.center.y, m_pitLayer.m_id, m_excursionLengthWarningId));
+
+							//Get max bounding box size, compare to max tidal excursion length
+                            if (GetRasterOverlapMinMax(m_excursionLengthRasterLayer, pitPoly, false, out float maxTidalExcursionLength))
+                            {
+                                float TELinKM = m_excursionLengthRasterLayer.rasterValueScale.EvaluateOutput(maxTidalExcursionLength);
+                                if(TELinKM > MathF.Max(bounds.width, bounds.height))
+								    planLayer.issues.Add(new PlanIssueObject(ERestrictionIssueType.Warning, bounds.center.x, bounds.center.y, m_pitLayer.m_id, m_excursionLengthWarningId));
+                            }
 
 							//Get pit depth, compare to max stratification depth
-							int pitDepth = 1;
-                            int.TryParse(pit.GetPropertyMetaData(pit.Layer.FindPropertyMetaDataByName(PITDEPTHPROPERTY)), out pitDepth);
-							float maxStratDepth = GetRasterOverlapMinMax(m_stratificationDepthRasterLayer, pitPoly, true);
-							if (maxStratDepth > pitDepth)
-								planLayer.issues.Add(new PlanIssueObject(ERestrictionIssueType.Warning, bounds.center.x, bounds.center.y, m_pitLayer.m_id, m_stratificationDepthWarningId));
+                            if (GetRasterOverlapMinMax(m_stratificationDepthRasterLayer, pitPoly, true, out float maxStratDepth))
+                            {
+							    int pitDepth = 1;
+                                int.TryParse(pit.GetPropertyMetaData(pit.Layer.FindPropertyMetaDataByName(PITDEPTHPROPERTY)), out pitDepth);
+								float stratDepthInM = m_stratificationDepthRasterLayer.rasterValueScale.EvaluateOutput(maxStratDepth);
+								if (stratDepthInM > pitDepth)
+                                    planLayer.issues.Add(new PlanIssueObject(ERestrictionIssueType.Warning, bounds.center.x, bounds.center.y, m_pitLayer.m_id, m_stratificationDepthWarningId));
+                            }
 						}
                     }
 				}
             }
         }
 
-        public float GetRasterOverlapMinMax(RasterLayer a_raster, PolygonSubEntity a_pit, bool a_min)
+        public bool GetRasterOverlapMinMax(RasterLayer a_raster, PolygonSubEntity a_pit, bool a_min, out float a_result)
         {
-            float result = a_min ? float.PositiveInfinity : float.NegativeInfinity;
+            a_result = a_min ? float.PositiveInfinity : float.NegativeInfinity;
 			Rect surfaceBoundingBox = a_pit.m_boundingBox;
 			Rect rasterSurfaceBoundingBox = a_raster.RasterBounds;
+            bool validResult = false;
 
 			//Relative normalized position of the bounding box of the SubEntity within the Raster bounding box.
 			//Converts world coordinates to normalized[0, 1] range relative to the raster's bounds.
@@ -463,16 +472,17 @@ namespace MSP2050.Scripts
 				{
 					float? rasterValue = m_availableSandDepthRasterLayer.GetRasterValueAt(x, y);
 
-					if (rasterValue.HasValue)
+					if (rasterValue.HasValue && rasterValue.Value > a_raster.rasterObject.layer_raster_minimum_value_cutoff)
 					{
+                        validResult = true;
                         if (a_min)
-                            result = Mathf.Min(result, rasterValue.Value);
+                            a_result = Mathf.Min(a_result, rasterValue.Value);
                         else
-                            result = Mathf.Max(result, rasterValue.Value);
+							a_result = Mathf.Max(a_result, rasterValue.Value);
 					}
 				}
 			}
-            return result;
+            return validResult;
 		}
 
 		public int GetSandExtractionSettingBeforePlan(Plan a_plan)

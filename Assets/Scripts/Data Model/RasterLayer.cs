@@ -23,6 +23,8 @@ namespace MSP2050.Scripts
 		private const float REFERENCE_PIXELS_PER_UNIT = 100.0f;
 
 		public RasterObject rasterObject { get; private set; }
+		public RasterScaleConfig rasterValueScale { get; private set; }
+
 		private Texture2D viewingRaster;	//The raster that is displayed, reference to either rasterAtRequestedTime, or rasterAtLatestTime
 		private Texture2D rasterAtRequestedTime = new Texture2D(1, 1, TextureFormat.ARGB32, false);
 		private Texture2D rasterAtLatestTime = new Texture2D(1, 1, TextureFormat.ARGB32, false);
@@ -53,13 +55,14 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public RasterLayer(LayerMeta layerMeta/*, PlanLayer planLayer = null*/)
-			: base(layerMeta/*, planLayer*/)
+		public RasterLayer(LayerMeta layerMeta)
+			: base(layerMeta)
 		{
 			entityTypesSortedByValue = new List<EntityType>(m_entityTypes.Values);
 			entityTypesSortedByValue.Sort(SortMethodEntityTypesByValue);
 			viewingRaster = rasterAtLatestTime;
 			rasterValueToEntityValueMultiplier = layerMeta.layer_entity_value_max ?? DEFAULT_RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
+			rasterValueScale = layerMeta.raster_value_scale;
 
 			try
 			{
@@ -429,15 +432,8 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		//public override void TransformAllEntities(float scale, Vector3 translate)
-		//{
-		//    throw new NotImplementedException();
-		//}
-
 		public override void UpdateScale(Camera targetCamera)
-		{
-
-		}
+		{ }
 
 		public override HashSet<Entity> GetEntitiesOfType(EntityType type)
 		{

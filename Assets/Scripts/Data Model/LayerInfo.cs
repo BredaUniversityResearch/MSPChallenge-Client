@@ -131,6 +131,7 @@ namespace MSP2050.Scripts
 			layer_special_entity_type = ELayerSpecialEntityType.Default;
 			layer_filecreationtime = -1;
 			layer_entity_value_max = null;
+			raster_value_scale = null;
 		}
 
 		public int layer_id { get; set; }
@@ -166,6 +167,7 @@ namespace MSP2050.Scripts
 		public int layer_green { get; set; }
 		public int layer_filecreationtime { get; set; }
 		public float? layer_entity_value_max { get; set; }
+		public RasterScaleConfig raster_value_scale { get; set; }
 	}
 
 	[SuppressMessage("ReSharper", "InconsistentNaming")] // needs to match json
