@@ -95,6 +95,7 @@ namespace MSP2050.Scripts
 		void OnCreateButtonPressed()
 		{
 			//TODO
+			ServerCommunication.Instance.DoRequest()
 		}
 
 		public void Hide()

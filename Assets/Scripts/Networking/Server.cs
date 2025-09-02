@@ -528,5 +528,10 @@ namespace MSP2050.Scripts
 		{
 			return "api/Batch/ExecuteBatch";
 		}
+
+		public static string ExecuteBatch()
+		{
+			return "api/immersive_sessions";
+		}
 	}
 }
