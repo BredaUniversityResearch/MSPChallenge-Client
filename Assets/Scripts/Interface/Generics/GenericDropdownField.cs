@@ -20,7 +20,7 @@ namespace MSP2050.Scripts
 		public string CurrentValueText => m_dropdown.options[m_dropdown.value].text;
 		public int CurrentValue => m_dropdown.value;
 
-		public void Initialise(string a_name, int a_nameSizeSteps, Action<int> a_changeCallback, List<string> a_options)
+		public void Initialise(string a_name, int a_nameSizeSteps, Action<int> a_changeCallback, IEnumerable<string> a_options)
         {
             m_nameField.text = a_name;
             RectTransform nameRect = m_nameField.GetComponent<RectTransform>();
@@ -45,11 +45,11 @@ namespace MSP2050.Scripts
 			m_dropdown.interactable = a_interactable;
 		}
 
-		public void SetOptions(List<string> a_options, int a_selectedIndex)
+		public void SetOptions(IEnumerable<string> a_options, int a_selectedIndex)
         {
             m_ignoreCallback = true;
 			m_dropdown.ClearOptions();
-            List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>(a_options.Count);
+            List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
             foreach (string s in a_options)
             {
                 options.Add(new TMP_Dropdown.OptionData(s));
