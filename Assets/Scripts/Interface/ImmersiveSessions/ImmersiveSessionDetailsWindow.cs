@@ -1,3 +1,5 @@
+using QRCoder;
+using QRCoder.Unity;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -15,7 +17,8 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_sessionCreateButton;
 
 		[SerializeField] GameObject m_qrCodeSection;
-		[SerializeField] Image m_qrCode;
+		//[SerializeField] Image m_qrCode;
+		[SerializeField] RawImage m_qrCode;
 		[SerializeField] Button m_qrCodeFullscreenButton;
 
 		[SerializeField] GameObject m_connectionSection;
@@ -44,6 +47,7 @@ namespace MSP2050.Scripts
 			m_connectionPort.SetInteractable(false);
 			m_connectionDockerContainer.SetInteractable(false);
 			m_sessionCreateButton.onClick.AddListener(OnCreateButtonPressed);
+			m_qrCodeFullscreenButton.onClick.AddListener(OnQRFullscreenPressed);
 		}
 
 		public void SetToSession(ImmersiveSession a_session)
@@ -68,6 +72,7 @@ namespace MSP2050.Scripts
 			m_connectionDockerContainer.SetContent(a_session.connection.dockerContainerID.ToString());
 
 			m_qrCodeSection.SetActive(true);
+			m_qrCode.texture = GenerateQR(a_session);
 			//TODO: set qr code image
 			gameObject.SetActive(true);
 		}
@@ -95,12 +100,25 @@ namespace MSP2050.Scripts
 		void OnCreateButtonPressed()
 		{
 			//TODO
-			ServerCommunication.Instance.DoRequest()
+			//ServerCommunication.Instance.DoRequest()
+		}
+
+		void OnQRFullscreenPressed()
+		{
+			//TODO
 		}
 
 		public void Hide()
 		{
 			gameObject.SetActive(false);
+		}
+
+		Texture2D GenerateQR(ImmersiveSession a_session)
+		{
+			QRCodeGenerator qrGenerator = new QRCodeGenerator();
+			QRCodeData qrCodeData = qrGenerator.CreateQrCode($"{{\"ip\":\"{a_session.connection.session}\",\"port\":{a_session.connection.port}}}", QRCodeGenerator.ECCLevel.Q);
+			UnityQRCode qrCode = new UnityQRCode(qrCodeData);
+			return qrCode.GetGraphic(20);
 		}
 	}
 }

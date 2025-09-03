@@ -20,10 +20,10 @@ namespace MSP2050.Scripts
         public ImmersiveSessionState state;
         [JsonConverter(typeof(StringEnumConverter))]
         public ImmersiveSessionType type;
-        public int bottom_left_x;
-        public int bottom_left_y;
-        public int top_right_x;
-        public int top_right_y;
+        public float bottom_left_x;
+        public float bottom_left_y;
+        public float top_right_x;
+        public float top_right_y;
     }
 
     public class ImmersiveSessionConnection

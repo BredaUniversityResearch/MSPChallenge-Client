@@ -529,7 +529,7 @@ namespace MSP2050.Scripts
 			return "api/Batch/ExecuteBatch";
 		}
 
-		public static string ExecuteBatch()
+		public static string ImmersiveSessions()
 		{
 			return "api/immersive_sessions";
 		}
