@@ -8,8 +8,8 @@ namespace MSP2050.Scripts
 	public class ImmersiveSessionEntry : MonoBehaviour
 	{
 		[SerializeField] TextMeshProUGUI m_sessionName;
-		[SerializeField] TextMeshProUGUI m_users;
-		[SerializeField] TextMeshProUGUI m_state;
+		//[SerializeField] TextMeshProUGUI m_users;
+		//[SerializeField] TextMeshProUGUI m_state;
 		[SerializeField] Toggle m_barToggle;
 
 		ImmersiveSession m_session;
@@ -25,7 +25,7 @@ namespace MSP2050.Scripts
 		public void SetToSession(ImmersiveSession a_session)
 		{
 			m_session = a_session;
-			//TODO: set details
+			m_sessionName.text = m_session.name;
 			gameObject.SetActive(true);
 		}
 

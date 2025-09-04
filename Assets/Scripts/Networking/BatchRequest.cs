@@ -95,7 +95,7 @@ namespace MSP2050.Scripts
 				group = a_queuedBatchCall.m_group
 			}));
 			UpdateManager.Instance.WsServerCommunicationInteractor?.RegisterBatchRequestCallbacks(m_batchGuid, HandleBatchSuccess,
-				CreateHandleBatchFailureAction(ServerCommunication.Instance.DoRequest(Server.ExecuteBatch(), form)));
+				CreateHandleBatchFailureAction(ServerCommunication.Instance.DoRequestForm(Server.ExecuteBatch(), form)));
 		}
 
 		private Action<string> CreateHandleBatchFailureAction(ARequest a_request)

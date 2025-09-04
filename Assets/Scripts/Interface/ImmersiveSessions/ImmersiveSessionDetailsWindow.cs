@@ -14,10 +14,12 @@ namespace MSP2050.Scripts
 		[SerializeField] GenericTimeField m_sessionMonth;
 		[SerializeField] GenericDropdownField m_sessionType;
 		[SerializeField] GenericBoundsField m_sessionBounds;
+
+		[SerializeField] GameObject m_buttonSection;
 		[SerializeField] Button m_sessionCreateButton;
+		[SerializeField] Button m_sessionCancelButton;
 
 		[SerializeField] GameObject m_qrCodeSection;
-		//[SerializeField] Image m_qrCode;
 		[SerializeField] RawImage m_qrCode;
 		[SerializeField] Button m_qrCodeFullscreenButton;
 
@@ -28,8 +30,11 @@ namespace MSP2050.Scripts
 		[SerializeField] GenericTextField m_connectionPort;
 		[SerializeField] GenericTextField m_connectionDockerContainer;
 
-		public void Initialise()
+		ImmersiveSessionsWindow m_baseWindow;
+
+		public void Initialise(ImmersiveSessionsWindow a_baseWindow)
 		{
+			m_baseWindow = a_baseWindow;
 			m_sessionName.Initialise("Session Name", 5, null, "Name");
 			m_sessionMonth.Initialise("Month", 5, null);
 			m_sessionType.Initialise("Type", 5, null, Enum.GetNames(typeof(ImmersiveSession.ImmersiveSessionType)));
@@ -48,21 +53,16 @@ namespace MSP2050.Scripts
 			m_connectionDockerContainer.SetInteractable(false);
 			m_sessionCreateButton.onClick.AddListener(OnCreateButtonPressed);
 			m_qrCodeFullscreenButton.onClick.AddListener(OnQRFullscreenPressed);
+			m_sessionCancelButton.onClick.AddListener(() => gameObject.SetActive(false));
 		}
 
 		public void SetToSession(ImmersiveSession a_session)
 		{
 			m_sessionName.SetContent(a_session.name);
-			m_sessionName.SetInteractable(false);
-
 			m_sessionMonth.SetContent(a_session.month);
-			m_sessionMonth.SetInteractable(false);
-
 			m_sessionType.SetContent((int)a_session.type);
-			m_sessionType.SetInteractable(false);
-
 			m_sessionBounds.SetContent(new Vector4(a_session.bottom_left_x, a_session.bottom_left_y, a_session.top_right_x, a_session.top_right_y));
-			m_sessionBounds.SetInteractable(false);
+			SetCreationElementsInteractable(false);
 
 			m_connectionSection.SetActive(true);
 			m_connectionId.SetContent(a_session.connection.id.ToString());
@@ -71,36 +71,68 @@ namespace MSP2050.Scripts
 			m_connectionPort.SetContent(a_session.connection.port.ToString());
 			m_connectionDockerContainer.SetContent(a_session.connection.dockerContainerID.ToString());
 
+			m_buttonSection.gameObject.SetActive(false);
 			m_qrCodeSection.SetActive(true);
 			m_qrCode.texture = GenerateQR(a_session);
-			//TODO: set qr code image
 			gameObject.SetActive(true);
 		}
 
 		public void StartCreatingNewSession()
 		{
-			//TODO
 			m_sessionName.SetContent(null);
-			m_sessionName.SetInteractable(true);
-
 			m_sessionMonth.SetContent(TimeManager.Instance.GetCurrentMonth());
-			m_sessionMonth.SetInteractable(true);
-
 			m_sessionType.SetContent(0);
-			m_sessionType.SetInteractable(true);
-
 			m_sessionBounds.SetContent(new Vector4(0f, 0f));
-			m_sessionBounds.SetInteractable(true);
+			SetCreationElementsInteractable(true);
 
+			m_buttonSection.gameObject.SetActive(true);
 			m_qrCodeSection.SetActive(false);
 			m_connectionSection.SetActive(false);
 			gameObject.SetActive(true);
 		}
 
+		void SetCreationElementsInteractable(bool a_value)
+		{
+			m_sessionName.SetInteractable(a_value);
+			m_sessionMonth.SetInteractable(a_value);
+			m_sessionType.SetInteractable(a_value);
+			m_sessionBounds.SetInteractable(a_value);
+			m_sessionCreateButton.interactable = a_value;
+			m_sessionCancelButton.interactable = a_value;
+		}
+
 		void OnCreateButtonPressed()
 		{
-			//TODO
-			//ServerCommunication.Instance.DoRequest()
+			SetCreationElementsInteractable(false);
+			NetworkForm form = new NetworkForm();
+			form.AddField("name", m_sessionName.CurrentValue);
+			form.AddField("month", m_sessionMonth.CurrentValue);
+			form.AddField("type", m_sessionType.CurrentValue);
+			Vector4 bounds = m_sessionBounds.CurrentValue;
+			form.AddField("bottom_left_x", bounds.x.ToString());
+			form.AddField("bottom_left_y", bounds.y.ToString());
+			form.AddField("top_right_x", bounds.z.ToString());
+			form.AddField("top_right_y", bounds.w.ToString());
+			ServerCommunication.Instance.DoRequestForm<ImmersiveSession>(Server.ImmersiveSessions(), form, SessionCreationSuccess, SessionCreationFailure);
+		}
+
+		void SessionCreationSuccess(ImmersiveSession a_session)
+		{
+			m_baseWindow.AddAndSelectSession(a_session);
+		}
+
+		void SessionCreationFailure(ARequest request, string message)
+		{
+			if (request.retriesRemaining > 0)
+			{
+				Debug.Log($"Request failed with message: {message}.. Retrying {request.retriesRemaining} more times.");
+				ServerCommunication.Instance.RetryRequest(request);
+			}
+			else
+			{
+				SetCreationElementsInteractable(true);
+				Debug.LogError(message);
+			}
 		}
 
 		void OnQRFullscreenPressed()
