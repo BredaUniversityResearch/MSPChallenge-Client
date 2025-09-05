@@ -10,6 +10,8 @@ namespace MSP2050.Scripts
 {
 	public class ImmersiveSessionDetailsWindow : MonoBehaviour
 	{
+		[SerializeField] TextMeshProUGUI m_windowTitle;
+
 		[SerializeField] GenericTextField m_sessionName;
 		[SerializeField] GenericTimeField m_sessionMonth;
 		[SerializeField] GenericDropdownField m_sessionType;
@@ -38,7 +40,7 @@ namespace MSP2050.Scripts
 			m_sessionName.Initialise("Session Name", 5, null, "Name");
 			m_sessionMonth.Initialise("Month", 5, null);
 			m_sessionType.Initialise("Type", 5, null, Enum.GetNames(typeof(ImmersiveSession.ImmersiveSessionType)));
-			m_sessionBounds.Initialise("Area", 5, 25000, null);
+			m_sessionBounds.Initialise("Area", 4, 5, 25000, null);
 
 			m_connectionId.Initialise("ID", 5, null, "");
 			m_connectionSession.Initialise("Session", 5, null, "");
@@ -58,6 +60,7 @@ namespace MSP2050.Scripts
 
 		public void SetToSession(ImmersiveSession a_session)
 		{
+			m_windowTitle.text = "Immersive Session Details";
 			m_sessionName.SetContent(a_session.name);
 			m_sessionMonth.SetContent(a_session.month);
 			m_sessionType.SetContent((int)a_session.type);
@@ -79,6 +82,7 @@ namespace MSP2050.Scripts
 
 		public void StartCreatingNewSession()
 		{
+			m_windowTitle.text = "Create Immersive Session";
 			m_sessionName.SetContent(null);
 			m_sessionMonth.SetContent(TimeManager.Instance.GetCurrentMonth());
 			m_sessionType.SetContent(0);

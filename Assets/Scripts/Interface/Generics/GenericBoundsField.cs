@@ -24,18 +24,18 @@ namespace MSP2050.Scripts
 
 		public Vector4 CurrentValue => m_currentValue;
 
-		public void Initialise(string a_name, int a_nameSizeSteps, float a_maxBoundsSize, Action<Vector4> a_changeCallback)
+		public void Initialise(string a_name, int a_nameSizeSteps, int a_subNameSizeSteps, float a_maxBoundsSize, Action<Vector4> a_changeCallback)
         {
             m_nameField.text = a_name;
             RectTransform nameRect = m_nameField.GetComponent<RectTransform>();
             nameRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, a_nameSizeSteps * m_spacePerStep);
-            m_contentContainer.anchorMin = new Vector2((a_nameSizeSteps + 2) * m_spacePerStep, 0f);
+            m_contentContainer.offsetMin = new Vector2((a_nameSizeSteps + 2) * m_spacePerStep, 0f);
             m_maxBoundsSize = a_maxBoundsSize;
 			m_changeCallback = a_changeCallback;
-            m_blX.Initialise("Bottom left X", 0, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-            m_blY.Initialise("Bottom left Y", 0, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-            m_tlX.Initialise("Top left X", 0, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-            m_tlY.Initialise("Top left Y", 0, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
+            m_blX.Initialise("Bottom left X", a_subNameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
+            m_blY.Initialise("Bottom left Y", a_subNameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
+            m_tlX.Initialise("Top left X", a_subNameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
+            m_tlY.Initialise("Top left Y", a_subNameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
 			m_selectBoundsButton.onClick.AddListener(OnBoundsButtonClicked);
 		}
 

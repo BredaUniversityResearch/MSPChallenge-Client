@@ -23,7 +23,7 @@ namespace MSP2050.Scripts
             m_nameField.text = a_name;
             RectTransform nameRect = m_nameField.GetComponent<RectTransform>();
             nameRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, a_nameSizeSteps * m_spacePerStep);
-            m_contentContainer.anchorMin = new Vector2((a_nameSizeSteps + 2) * m_spacePerStep, 0f);
+            m_contentContainer.offsetMin = new Vector2((a_nameSizeSteps + 2) * m_spacePerStep, 0f);
 
 			m_inputFieldPlaceHolder.text = a_placeHolderText;
             m_inputField.onValueChanged.AddListener(OnValueChanged);

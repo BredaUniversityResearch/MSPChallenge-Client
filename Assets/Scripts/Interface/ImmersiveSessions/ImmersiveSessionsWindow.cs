@@ -14,13 +14,22 @@ namespace MSP2050.Scripts
 		[SerializeField] Button m_refreshButton;
 		[SerializeField] GameObject m_noSessionsEntry;
 		[SerializeField] ImmersiveSessionDetailsWindow m_detailsWindow;
+		[SerializeField] MenuBarToggle m_menuToggle;
 
 		List<ImmersiveSessionEntry> m_sessionEntries;
 		ImmersiveSessionEntry m_selectedEntry;
 		int m_nextEntryID;
+		bool m_initialised;
+
+		private void Awake()
+		{
+			if(!m_initialised)
+				Initialise();
+		}
 
 		public void Initialise()
 		{
+			m_initialised = true;
 			m_sessionEntries = new List<ImmersiveSessionEntry>();
 			m_nextEntryID = 0;
 			m_createSessionButton.onClick.AddListener(OnCreateButtonClicked);
@@ -31,6 +40,11 @@ namespace MSP2050.Scripts
 		private void OnEnable()
 		{
 			RefreshSessions();
+		}
+
+		private void OnDisable()
+		{
+			m_menuToggle.toggle.isOn = false;
 		}
 
 		void RefreshSessions()
