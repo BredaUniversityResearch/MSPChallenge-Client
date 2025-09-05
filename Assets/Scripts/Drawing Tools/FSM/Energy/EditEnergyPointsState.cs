@@ -23,7 +23,7 @@ namespace MSP2050.Scripts
 				{
 					//Point undo added first so it is undone last
 					m_fsm.AddToUndoStack(new RemoveEnergyPointOperation(subEntity, m_planLayer));
-                
+
 					//Connected cables removed second so connections stay intact in cables
 					List<Connection> removedConnections = new List<Connection>(energyEnt.Connections);
 					foreach (Connection con in removedConnections)
@@ -45,7 +45,7 @@ namespace MSP2050.Scripts
 					//Cables removed second
 					List<Connection> removedConnections = new List<Connection>(energyEnt.Connections);
 					foreach (Connection con in removedConnections)
-					{  
+					{
 						//Undooperation depends on wether the cable was on the current planlayer
 						if (con.cable.m_entity.PlanLayer == m_cablePlanLayer)
 						{
@@ -54,12 +54,17 @@ namespace MSP2050.Scripts
 						}
 						else
 							m_fsm.AddToUndoStack(new ModifyLineStringRemovalPlanOperation(con.cable, m_cablePlanLayer, false));
-						m_cablePlanLayer.BaseLayer.RemoveSubEntity(con.cable);  
+						m_cablePlanLayer.BaseLayer.RemoveSubEntity(con.cable);
 					}
 
 					//Point itself removed last
 					m_baseLayer.RemoveSubEntity(subEntity);
 				}
+				subEntity.WarningIfDeletingExisting(
+					"Energy Point",
+					"In plan '{0}' you have removed an energy point first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+					m_planLayer.Plan
+				);
 			}
 			m_selection = new HashSet<PointSubEntity>();
 
@@ -186,6 +191,10 @@ namespace MSP2050.Scripts
 
 				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}
+			a_subEntity.WarningIfEditingExisting(
+				"Energy Point",
+				"In plan '{0}' you have altered an energy point first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
+			);
 			return a_subEntity;
 		}
 

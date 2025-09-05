@@ -77,7 +77,7 @@ namespace MSP2050.Scripts
 		}
 
 		public override void LeftMouseButtonUp(Vector3 a_startPosition, Vector3 a_finalPosition)
-		{        
+		{
 			EnergyPointSubEntity point = PolicyLogicEnergy.Instance.GetEnergyPointAtPosition(a_finalPosition);
 			if (point == null || !point.CanCableStartAtSubEntity(m_planLayer.BaseLayer.m_greenEnergy))
 				return;
@@ -91,8 +91,13 @@ namespace MSP2050.Scripts
 			subEntity.DrawGameObject(entity.Layer.LayerGameObject.transform, SubEntityDrawMode.BeingCreated);
 			m_fsm.SetCurrentState(new CreatingEnergyLineStringState(m_fsm, m_planLayer, subEntity));
 			m_fsm.AddToUndoStack(new CreateEnergyLineStringOperation(subEntity, m_planLayer, UndoOperation.EditMode.Create));
- 
+
 			AudioMain.Instance.PlaySound(AudioMain.ITEM_PLACED);
+			point.WarningIfAddingToExisting(
+				"Energy Point",
+				"In plan '{0}' you have added a cable to an energy point first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+				subEntity.m_entity.PlanLayer.Plan
+			);
 		}
 
 		public override void ExitState(Vector3 a_currentMousePosition)
