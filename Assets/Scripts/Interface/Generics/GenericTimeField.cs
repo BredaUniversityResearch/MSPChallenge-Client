@@ -100,6 +100,8 @@ namespace MSP2050.Scripts
 		{
 			//Update options in dropdowns
 			int currentMonth = TimeManager.Instance.GetCurrentMonth();
+			if (currentMonth < 0)
+				currentMonth = 0;
 			int maxSelectableMonth = currentMonth % 12;
 			int maxSelectableYear = (currentMonth - maxSelectableMonth) / 12;
 			int targetMonth = m_selectedTime % 12;

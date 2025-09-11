@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Schema;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,14 +16,25 @@ namespace MSP2050.Scripts
         [SerializeField] GenericTextField m_tlX;
         [SerializeField] GenericTextField m_tlY;
         [SerializeField] Button m_selectBoundsButton;
+        [SerializeField] Button m_zoomToBoundsButton;
         [SerializeField] float m_spacePerStep;
+        [SerializeField] RectTransform m_previewObject;
 
-        bool m_ignoreCallback;
+		bool m_ignoreCallback;
         Action<Vector4> m_changeCallback;
         float m_maxBoundsSize;
         Vector4 m_currentValue;
 
 		public Vector4 CurrentValue => m_currentValue;
+
+		private void OnEnable()
+		{
+            m_previewObject.gameObject.SetActive(true);
+		}
+		private void OnDisable()
+		{
+			m_previewObject.gameObject.SetActive(false);
+		}
 
 		public void Initialise(string a_name, int a_nameSizeSteps, int a_subNameSizeSteps, float a_maxBoundsSize, Action<Vector4> a_changeCallback)
         {
@@ -32,17 +44,19 @@ namespace MSP2050.Scripts
             m_contentContainer.offsetMin = new Vector2((a_nameSizeSteps + 2) * m_spacePerStep, 0f);
             m_maxBoundsSize = a_maxBoundsSize;
 			m_changeCallback = a_changeCallback;
-            m_blX.Initialise("Bottom left X", a_subNameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-            m_blY.Initialise("Bottom left Y", a_subNameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-            m_tlX.Initialise("Top left X", a_subNameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-            m_tlY.Initialise("Top left Y", a_subNameSizeSteps, OnTextFieldChanged, "Coordinate", TMP_InputField.ContentType.DecimalNumber);
-			m_selectBoundsButton.onClick.AddListener(OnBoundsButtonClicked);
+            m_blY.Initialise("Bottom left Y", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
+            m_blX.Initialise("Bottom left X", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
+            m_tlX.Initialise("Top right X", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
+            m_tlY.Initialise("Top right Y", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
+			m_selectBoundsButton.onClick.AddListener(OnSelectBoundsButtonClicked);
+			m_zoomToBoundsButton.onClick.AddListener(OnZoomToBoundsButtonClicked);
 		}
 
         public void SetContent(Vector4 a_value)
         {
             m_currentValue = a_value;
             UpdateTextFieldToBounds();
+            UpdatePreview();
 		}
 
 		public void SetInteractable(bool a_interactable)
@@ -51,7 +65,7 @@ namespace MSP2050.Scripts
 			m_blY.SetInteractable(a_interactable);
 			m_tlX.SetInteractable(a_interactable);
 			m_tlY.SetInteractable(a_interactable);
-            m_selectBoundsButton.interactable = a_interactable;
+            m_selectBoundsButton.gameObject.SetActive(a_interactable);
 		}
 
         void UpdateTextFieldToBounds()
@@ -69,13 +83,28 @@ namespace MSP2050.Scripts
             if (m_ignoreCallback)
                 return;
 
-            Rect bounds = CameraManager.Instance.zoomRect;
-            m_currentValue = new Vector4(
-                GetCoordinate(m_blX, bounds.xMin), 
-                GetCoordinate(m_blY, bounds.yMin), 
-                GetCoordinate(m_tlX, bounds.xMax), 
-                GetCoordinate(m_tlY, bounds.yMax));
-			m_changeCallback.Invoke(m_currentValue);
+			Rect bounds = CameraManager.Instance.zoomRect;
+            float xMin = GetCoordinate(m_blX, bounds.xMin);
+            float yMin = GetCoordinate(m_blX, bounds.yMin);
+            float xMax = GetCoordinate(m_blX, bounds.xMax);
+            float yMax = GetCoordinate(m_blX, bounds.yMax);
+
+            if(xMin < xMax)
+            {
+                float t = xMin;
+                xMin = xMax;
+                xMax = t;
+            }
+			if (yMin < yMax)
+			{
+				float t = yMin;
+				yMin = yMax;
+				yMax = t;
+			}
+			m_currentValue = new Vector4(xMin, yMin, xMax, yMax);
+            if(m_changeCallback != null)
+			    m_changeCallback.Invoke(m_currentValue);
+			UpdatePreview();
 		}
 
         float GetCoordinate(GenericTextField a_textField, float a_default)
@@ -85,9 +114,42 @@ namespace MSP2050.Scripts
             return result;
         }
 
-        void OnBoundsButtonClicked()
+        void OnSelectBoundsButtonClicked()
         {
-            //TODO
+            Main.Instance.InterruptFSMState((fsm) => new BoundsSelectState(fsm, this));
         }
-    }
+
+        void OnZoomToBoundsButtonClicked()
+        {
+			CameraManager.Instance.ZoomToBounds(
+                new Rect(
+                    m_currentValue.x * Main.SCALE_FACTOR, 
+                    m_currentValue.y * Main.SCALE_FACTOR, 
+                    (m_currentValue.z - m_currentValue.x) * Main.SCALE_FACTOR, 
+                    (m_currentValue.w - m_currentValue.y) * Main.SCALE_FACTOR), 
+                1f);
+		}
+
+        void UpdatePreview()
+        {
+            if (m_previewObject == null)
+                return;
+
+            Vector3 from = CameraManager.Instance.gameCamera.WorldToScreenPoint(new Vector3(
+                m_currentValue.x * Main.SCALE_FACTOR, 
+                m_currentValue.y * Main.SCALE_FACTOR));
+			Vector3 to = CameraManager.Instance.gameCamera.WorldToScreenPoint(new Vector3(
+                m_currentValue.z * Main.SCALE_FACTOR, 
+                m_currentValue.w * Main.SCALE_FACTOR));
+            float scale = InterfaceCanvas.Instance.canvas.scaleFactor;
+
+            Vector3 min = Vector3.Min(from, to) - Vector3.one;
+            Vector3 max = Vector3.Max(from, to) + Vector3.one;
+            // (1 pixel offset because the box in the sprite has a 1 pixel offset from the sprite border)
+
+            m_previewObject.anchoredPosition = min / scale;
+			m_previewObject.sizeDelta = (max - min) / scale;
+            //TODO: put this in immersive sessions window instead
+        }
+	}
 }

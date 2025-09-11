@@ -103,9 +103,10 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
+				
 				m_refreshButton.interactable = true;
 				m_noSessionsEntry.SetActive(true);
-				Debug.LogError(message);
+				Debug.LogError($"Request failed with code {request.Www.responseCode.ToString()}: {message ?? ""}");
 			}
 		}
 
