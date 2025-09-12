@@ -24,6 +24,7 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_qrCodeSection;
 		[SerializeField] RawImage m_qrCode;
 		[SerializeField] Button m_qrCodeFullscreenButton;
+		[SerializeField] GameObject m_fullscreenQRPrefab;
 
 		[SerializeField] GameObject m_connectionSection;
 		[SerializeField] GenericTextField m_connectionId;
@@ -135,13 +136,14 @@ namespace MSP2050.Scripts
 			else
 			{
 				SetCreationElementsInteractable(true);
-				Debug.LogError(message);
+				Debug.LogError($"Request failed with code {request.Www.responseCode.ToString()}: {message ?? ""}");
 			}
 		}
 
 		void OnQRFullscreenPressed()
 		{
-			//TODO
+			FullscreenQR fs = Instantiate(m_fullscreenQRPrefab, InterfaceCanvas.Instance.canvas.transform).GetComponent<FullscreenQR>();
+			fs.m_qrImage.texture = m_qrCode.texture;
 		}
 
 		public void Hide()

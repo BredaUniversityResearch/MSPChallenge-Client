@@ -31,9 +31,15 @@ namespace MSP2050.Scripts
 		{
             m_previewObject.gameObject.SetActive(true);
 		}
+
 		private void OnDisable()
 		{
 			m_previewObject.gameObject.SetActive(false);
+		}
+
+		private void Update()
+		{
+            UpdatePreview();
 		}
 
 		public void Initialise(string a_name, int a_nameSizeSteps, int a_subNameSizeSteps, float a_maxBoundsSize, Action<Vector4> a_changeCallback)
@@ -56,7 +62,6 @@ namespace MSP2050.Scripts
         {
             m_currentValue = a_value;
             UpdateTextFieldToBounds();
-            UpdatePreview();
 		}
 
 		public void SetInteractable(bool a_interactable)
@@ -104,7 +109,6 @@ namespace MSP2050.Scripts
 			m_currentValue = new Vector4(xMin, yMin, xMax, yMax);
             if(m_changeCallback != null)
 			    m_changeCallback.Invoke(m_currentValue);
-			UpdatePreview();
 		}
 
         float GetCoordinate(GenericTextField a_textField, float a_default)
