@@ -34,4 +34,19 @@ namespace MSP2050.Scripts
         public int port;
         public string dockerContainerID;
     }
+
+	public class ImmersiveSessionSubmit
+	{
+
+		public string name;
+		public int month;
+		//[JsonConverter(typeof(StringEnumConverter))]
+		//public ImmersiveSessionState state;
+		[JsonConverter(typeof(StringEnumConverter))]
+		public ImmersiveSession.ImmersiveSessionType type;
+		public float bottomLeftX;
+		public float bottomLeftY;
+		public float topRightX;
+		public float topRightY;
+	}
 }

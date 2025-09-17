@@ -69,16 +69,24 @@ namespace MSP2050.Scripts
 			m_sessionBounds.SetContent(new Vector4(a_session.bottomLeftX, a_session.bottomLeftY, a_session.topRightX, a_session.topRightY));
 			SetCreationElementsInteractable(false);
 
-			m_connectionSection.SetActive(true);
-			m_connectionId.SetContent(a_session.connection.id.ToString());
-			m_connectionSession.SetContent(a_session.connection.session);
-			m_connectionDockerAPI.SetContent(a_session.connection.dockerApiID.ToString());
-			m_connectionPort.SetContent(a_session.connection.port.ToString());
-			m_connectionDockerContainer.SetContent(a_session.connection.dockerContainerID.ToString());
-
+			if (a_session.connection != null)
+			{
+				m_connectionSection.SetActive(true);
+				m_connectionId.SetContent(a_session.connection.id.ToString());
+				m_connectionSession.SetContent(a_session.connection.session);
+				m_connectionDockerAPI.SetContent(a_session.connection.dockerApiID.ToString());
+				m_connectionPort.SetContent(a_session.connection.port.ToString());
+				m_connectionDockerContainer.SetContent(a_session.connection.dockerContainerID.ToString());
+				m_qrCodeSection.SetActive(true);
+				m_qrCode.texture = GenerateQR(a_session);
+			}
+			else
+			{
+				m_connectionSection.SetActive(false);
+				m_qrCodeSection.SetActive(false);
+			}
 			m_buttonSection.gameObject.SetActive(false);
-			m_qrCodeSection.SetActive(true);
-			m_qrCode.texture = GenerateQR(a_session);
+
 			gameObject.SetActive(true);
 		}
 
@@ -110,7 +118,7 @@ namespace MSP2050.Scripts
 		void OnCreateButtonPressed()
 		{
 			SetCreationElementsInteractable(false);
-			ImmersiveSession newSession = new ImmersiveSession();
+			ImmersiveSessionSubmit newSession = new ImmersiveSessionSubmit();
 			newSession.name = m_sessionName.CurrentValue;
 			newSession.month = m_sessionMonth.CurrentValue;
 			newSession.type = (ImmersiveSession.ImmersiveSessionType)m_sessionType.CurrentValue;
