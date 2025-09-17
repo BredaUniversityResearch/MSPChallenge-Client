@@ -10,7 +10,7 @@ namespace MSP2050.Scripts
     public class ImmersiveSession
     {
         //public enum ImmersiveSessionState { Active, Inactive };
-        public enum ImmersiveSessionType { AugGIS, IO };
+        public enum ImmersiveSessionType { mr, vr };
 
         public int id;
         public string name;
@@ -20,10 +20,10 @@ namespace MSP2050.Scripts
         //public ImmersiveSessionState state;
         [JsonConverter(typeof(StringEnumConverter))]
         public ImmersiveSessionType type;
-        public float bottom_left_x;
-        public float bottom_left_y;
-        public float top_right_x;
-        public float top_right_y;
+        public float bottomLeftX;
+        public float bottomLeftY;
+        public float topRightX;
+        public float topRightY;
     }
 
     public class ImmersiveSessionConnection

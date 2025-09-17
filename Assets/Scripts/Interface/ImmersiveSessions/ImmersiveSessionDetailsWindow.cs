@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Newtonsoft.Json;
 
 namespace MSP2050.Scripts
 {
@@ -65,7 +66,7 @@ namespace MSP2050.Scripts
 			m_sessionName.SetContent(a_session.name);
 			m_sessionMonth.SetContent(a_session.month);
 			m_sessionType.SetContent((int)a_session.type);
-			m_sessionBounds.SetContent(new Vector4(a_session.bottom_left_x, a_session.bottom_left_y, a_session.top_right_x, a_session.top_right_y));
+			m_sessionBounds.SetContent(new Vector4(a_session.bottomLeftX, a_session.bottomLeftY, a_session.topRightX, a_session.topRightY));
 			SetCreationElementsInteractable(false);
 
 			m_connectionSection.SetActive(true);
@@ -109,16 +110,25 @@ namespace MSP2050.Scripts
 		void OnCreateButtonPressed()
 		{
 			SetCreationElementsInteractable(false);
-			NetworkForm form = new NetworkForm();
-			form.AddField("name", m_sessionName.CurrentValue);
-			form.AddField("month", m_sessionMonth.CurrentValue);
-			form.AddField("type", m_sessionType.CurrentValue);
+			ImmersiveSession newSession = new ImmersiveSession();
+			newSession.name = m_sessionName.CurrentValue;
+			newSession.month = m_sessionMonth.CurrentValue;
+			newSession.type = (ImmersiveSession.ImmersiveSessionType)m_sessionType.CurrentValue;
 			Vector4 bounds = m_sessionBounds.CurrentValue;
-			form.AddField("bottom_left_x", bounds.x.ToString());
-			form.AddField("bottom_left_y", bounds.y.ToString());
-			form.AddField("top_right_x", bounds.z.ToString());
-			form.AddField("top_right_y", bounds.w.ToString());
-			ServerCommunication.Instance.DoRequestForm<ImmersiveSession>(Server.ImmersiveSessions(), form, SessionCreationSuccess, SessionCreationFailure);
+			newSession.bottomLeftX = bounds.x;
+			newSession.bottomLeftY = bounds.y;
+			newSession.topRightX = bounds.z;
+			newSession.topRightY = bounds.w;
+
+			//NetworkForm form = new NetworkForm();
+			//form.AddField("name", m_sessionName.CurrentValue);
+			//form.AddField("month", m_sessionMonth.CurrentValue);
+			//form.AddField("type", m_sessionType.CurrentValue);
+			//form.AddField("bottom_left_x", bounds.x.ToString());
+			//form.AddField("bottom_left_y", bounds.y.ToString());
+			//form.AddField("top_right_x", bounds.z.ToString());
+			//form.AddField("top_right_y", bounds.w.ToString());
+			ServerCommunication.Instance.DoRequestRaw<ImmersiveSession>(Server.ImmersiveSessions(), JsonConvert.SerializeObject(newSession), SessionCreationSuccess, SessionCreationFailure);
 		}
 
 		void SessionCreationSuccess(ImmersiveSession a_session)
