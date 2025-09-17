@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6729280243691791290}
   - component: {fileID: 9152818501861362350}
   - component: {fileID: 972045717231675888}
+  - component: {fileID: 4371115411786488189}
   m_Layer: 5
   m_Name: TextField
   m_TagString: Untagged
@@ -167,6 +168,7 @@ MonoBehaviour:
     ReferencedUnityObjects:
     - {fileID: 11400000, guid: 3b79a61ad45fcd148b65dd050143533b, type: 2}
     - {fileID: 11400000, guid: 86ed3f28ceb93f746af1ec12ed3d9a57, type: 2}
+    - {fileID: 11400000, guid: fc49e36aa257a8e45b5d4b8d4a02850e, type: 2}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -179,29 +181,8 @@ MonoBehaviour:
       Entry: 10
       Data: 1
     - Name: colorDisabled
-      Entry: 7
-      Data: 0|ColourPalette.ConstColour, MSP2050Plugins
-    - Name: m_colour
-      Entry: 7
-      Data: UnityEngine.Color, UnityEngine.CoreModule
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
+      Entry: 10
+      Data: 2
   targetGraphics:
   - {fileID: 972045717231675888}
   useHighlightColor: 1
@@ -229,6 +210,42 @@ MonoBehaviour:
   m_FillCenter: 1
   m_slice: 0
   m_rounding: 12
+--- !u!114 &4371115411786488189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2739404557914858628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc054043880e7a5448a97ebba9ce43a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
+    - {fileID: 11400000, guid: 7253934c354e9064ba17d33b61374e48, type: 2}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: colorNormal
+      Entry: 10
+      Data: 0
+    - Name: colorHighlight
+      Entry: 6
+      Data: 
+    - Name: colorDisabled
+      Entry: 10
+      Data: 1
+  targetGraphics:
+  - {fileID: 3244192912274136409}
+  useHighlightColor: 0
+  useDisabledColor: 1
 --- !u!1 &4323869100101746895
 GameObject:
   m_ObjectHideFlags: 0
@@ -375,7 +392,6 @@ GameObject:
   - component: {fileID: 8134960442848741814}
   - component: {fileID: 1973802722271220883}
   - component: {fileID: 3244192912274136409}
-  - component: {fileID: 7970011744171451469}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -500,24 +516,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &7970011744171451469
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4872081988780305777}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef4c00f50fb0be243a14fabcb408cd5d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  colourAsset: {fileID: 11400000, guid: c22bdf8390c67bc489cb77221b6cb55b, type: 2}
-  graphics:
-  - {fileID: 3244192912274136409}
-  colourChanged:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &6655636395327604046
 GameObject:
   m_ObjectHideFlags: 0
