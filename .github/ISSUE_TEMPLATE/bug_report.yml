@@ -1,0 +1,63 @@
+name: Bug Report
+description: Report a bug
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the sections below to help us identify and fix the bug
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe your issue
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What was the expected result?
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Version
+      description: What version of MSP Challenge are you running?
+      multiple: false
+      options:
+        - "5.2"
+        - "5.1"
+        - "5.0"
+        - "4.0.2"
+        - "4.0.1"
+        - "4.0-beta9-2"
+        - "4.0-beta9-1"
+        - "4.0-beta9"
+        - "4.0-beta8"
+        - "4.0-beta7"
+        - "4.0-beta6"
+        - "4.0-beta5"
+        - "4.0-beta4"
+        - "4.0-beta3"
+        - "4.0-beta2"
+        - "4.0-beta10"
+        - "4.0-RC3"
+        - "4.0-RC2"
+        - "4.0-RC1"
+        - "4.0"
+      default: 0
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Put here any screenshots or videos
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this issue! We will get back to you as soon as possible.
