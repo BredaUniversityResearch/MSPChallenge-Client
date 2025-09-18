@@ -11,7 +11,7 @@ namespace MSP2050.Scripts
 	public class GraphContentSelectUniquePerTeam : AGraphContentSelect
 	{
 		[SerializeField] protected string[] m_categoryNames;
-		[SerializeField] protected GraphContentSelectFixedCategory.KPISource m_kpiSource;
+		[SerializeField] protected KPISource m_kpiSource;
 		[SerializeField] protected GameObject m_singleSelectWindowPrefab;
 
 		int m_selectedCountry;
@@ -27,25 +27,9 @@ namespace MSP2050.Scripts
 		{
 			base.Initialise(a_onSettingsChanged, a_widget);
 			m_detailsWindows = new GraphContentSelectWindow[m_contentToggles.Length];
+			List<KPIValueCollection> kvcs = GetKVCs(m_kpiSource);
 
-			List<KPIValueCollection> kvcs = null;
-			switch(m_kpiSource)
-			{
-				case GraphContentSelectFixedCategory.KPISource.Ecology:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.MEL_SIM_NAME); 
-					break;
-				case GraphContentSelectFixedCategory.KPISource.Energy:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.CEL_SIM_NAME);
-					break;
-				case GraphContentSelectFixedCategory.KPISource.Shipping:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SEL_SIM_NAME);
-					break;
-				case GraphContentSelectFixedCategory.KPISource.Geometry:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(null);
-					break;
-			}
-			
-			if(kvcs == null || kvcs.Count == 0)
+			if (kvcs == null || kvcs.Count == 0)
 			{
 				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
 				m_noDataEntry.text = "NO DATA AVAILABLE";
