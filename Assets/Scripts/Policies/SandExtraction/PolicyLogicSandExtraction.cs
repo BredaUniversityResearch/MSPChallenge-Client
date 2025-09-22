@@ -47,16 +47,27 @@ namespace MSP2050.Scripts
         public override void PostLayerMetaInitialise()
         { 
             m_availableSandDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDDEPTH_TAG });
-            m_availableSandDepthRasterLayer.DrawGameObject();
-			m_availableSandDepthRasterLayer.ReloadLatestRaster();
+            if (m_availableSandDepthRasterLayer != null)
+            {
+                m_availableSandDepthRasterLayer.DrawGameObject();
+                m_availableSandDepthRasterLayer.ReloadLatestRaster();
+            }
+            else
+                Debug.LogError($"Missing sand depth raster, no layers found with tag \"{SANDDEPTH_TAG}\". Sand extraction volume estimation will break.");
 
-			m_stratificationDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { STRATIFICATION_TAG });
-			m_stratificationDepthRasterLayer.DrawGameObject();
-			m_stratificationDepthRasterLayer.ReloadLatestRaster();
+                m_stratificationDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { STRATIFICATION_TAG });
+            if (m_stratificationDepthRasterLayer != null)
+            {
+                m_stratificationDepthRasterLayer.DrawGameObject();
+                m_stratificationDepthRasterLayer.ReloadLatestRaster();
+            }
 
 			m_excursionLengthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { TIDALEXCURSION_TAG });
-			m_excursionLengthRasterLayer.DrawGameObject();
-			m_excursionLengthRasterLayer.ReloadLatestRaster();
+            if (m_excursionLengthRasterLayer != null)
+            {
+                m_excursionLengthRasterLayer.DrawGameObject();
+                m_excursionLengthRasterLayer.ReloadLatestRaster();
+            }
 
 			m_pitLayer = (PolygonLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDPITS_TAG1, SANDPITS_TAG2 });
             ConstraintManager.Instance.AddNonOverlapRestrictionLayers(m_stratificationDepthWarningId, m_pitLayer, m_stratificationDepthRasterLayer);

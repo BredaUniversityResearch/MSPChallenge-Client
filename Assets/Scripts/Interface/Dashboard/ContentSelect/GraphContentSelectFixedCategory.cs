@@ -42,7 +42,8 @@ namespace MSP2050.Scripts
 			}
 			else if (kvcs.Count == 1)
 			{
-				m_contentToggles[1].gameObject.SetActive(false);
+				if(m_contentToggles.Length > 1 && m_contentToggles[1] != null)
+					m_contentToggles[1].gameObject.SetActive(false);
 				if(m_focusSelection != null)
 				{
 					Destroy(m_focusSelection.gameObject);

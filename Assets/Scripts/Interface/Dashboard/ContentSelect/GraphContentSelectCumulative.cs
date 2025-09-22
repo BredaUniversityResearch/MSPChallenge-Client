@@ -76,6 +76,9 @@ namespace MSP2050.Scripts
 			a_minValue = 0f;
 			a_maxValue = float.NegativeInfinity;
 
+			if (a_timeSettings.m_months.Count == 0)
+				return;
+
 			if (a_data.OverLapPatternSet && a_stacked)
 			{
 				//Aggregated with max per set
