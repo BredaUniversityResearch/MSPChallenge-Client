@@ -44,6 +44,36 @@ namespace MSP2050.Scripts
 		private Queue<BatchRequestResultAndFailureCallback> m_batchRequestResultAndFailureCallbackQueue =
 			new Queue<BatchRequestResultAndFailureCallback>();
 
+		public event Action<List<ImmersiveSession>> OnImmersiveSessionUpdate;
+		public event Action<string> OnImmersiveSessionUpdateFailed;
+
+		public class ImmersiveSessionsUpdateRequest : Request<List<ImmersiveSession>>
+		{
+			private Action<string> m_onFailureCallback;
+			
+			public ImmersiveSessionsUpdateRequest(
+				string a_url,
+				Action<List<ImmersiveSession>> a_onSuccessCallback,
+				Action<string> a_OnFailureCallback
+			) : base(
+				a_url,
+				a_onSuccessCallback,
+				(req, msg) => ((ImmersiveSessionsUpdateRequest)req).HandleUpdateFailCallback(req, msg), 
+				1
+			) {
+				m_onFailureCallback = a_OnFailureCallback;
+			}
+			
+			public override void CreateRequest(Dictionary<string, string> a_defaultHeaders)
+			{
+			}			
+			
+			private void HandleUpdateFailCallback(ARequest a_request, string a_message)
+			{
+				m_onFailureCallback?.Invoke(a_message);
+			}
+		}
+
 		private class UpdateRequest : Request<UpdateObject>
 		{
 			public UpdateRequest(string a_url, Action<UpdateObject> a_successCallback) :
@@ -175,6 +205,9 @@ namespace MSP2050.Scripts
 		{
 			switch (a_result.header_type)
 			{
+                case "ImmersiveSessions/Update":
+                	ProcessImmersiveSessionsUpdatePayload(a_result);
+					break;
 				case "Game/Latest":
 					ProcessGameLatestPayload(a_result, a_updateSuccessCallback);
 					break;
@@ -185,6 +218,33 @@ namespace MSP2050.Scripts
 					throw new NotImplementedException();
 			}
 		}
+		
+		private void ProcessImmersiveSessionsUpdatePayload(RequestResult a_result)
+		{
+			if (!a_result.success)
+			{
+				return;
+			}
+			
+			ImmersiveSessionsUpdateRequest request = new ImmersiveSessionsUpdateRequest(
+				Server.Url,
+				sessions => OnImmersiveSessionUpdate?.Invoke(sessions),
+				message => OnImmersiveSessionUpdateFailed?.Invoke(message)
+			);
+			try
+			{
+				List<ImmersiveSession> sessions = request.ToObject(a_result.payload);
+			}
+			catch (System.Exception e)
+			{
+				request.failureCallback(request, e.Message + "\n" + e.StackTrace);
+				Debug.LogError("Exception in ProcessImmersiveSessionsUpdatePayload: " + e.Message + "\n" + e.StackTrace);
+				Debug.LogError("ImmersiveSessions/Update payload: " + a_result.payload);
+				return;
+			}
+			Debug.Log(a_result.payload.ToString().Substring(0, 80));
+			request.ProcessPayload(a_result.payload);
+		}		
 
 		private void ProcessBatchExecuteBatchPayload(RequestResult a_result)
 		{

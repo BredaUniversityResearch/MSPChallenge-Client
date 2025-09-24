@@ -28,8 +28,6 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_fullscreenQRPrefab;
 
 		[SerializeField] GameObject m_connectionSection;
-		[SerializeField] GenericTextField m_connectionId;
-		[SerializeField] GenericTextField m_connectionSession;
 		[SerializeField] GenericTextField m_connectionDockerAPI;
 		[SerializeField] GenericTextField m_connectionPort;
 		[SerializeField] GenericTextField m_connectionDockerContainer;
@@ -44,14 +42,10 @@ namespace MSP2050.Scripts
 			m_sessionType.Initialise("Type", 5, null, Enum.GetNames(typeof(ImmersiveSession.ImmersiveSessionType)));
 			m_sessionBounds.Initialise("Area", 4, 5, 25000, null);
 
-			m_connectionId.Initialise("ID", 5, null, "");
-			m_connectionSession.Initialise("Session", 5, null, "");
 			m_connectionDockerAPI.Initialise("Docker API", 5, null, "");
 			m_connectionPort.Initialise("Port", 5, null, "");
 			m_connectionDockerContainer.Initialise("Docker Container", 5, null, "");
 
-			m_connectionId.SetInteractable(false);
-			m_connectionSession.SetInteractable(false);
 			m_connectionDockerAPI.SetInteractable(false);
 			m_connectionPort.SetInteractable(false);
 			m_connectionDockerContainer.SetInteractable(false);
@@ -72,9 +66,7 @@ namespace MSP2050.Scripts
 			if (a_session.connection != null)
 			{
 				m_connectionSection.SetActive(true);
-				m_connectionId.SetContent(a_session.connection.id.ToString());
-				m_connectionSession.SetContent(a_session.connection.session);
-				m_connectionDockerAPI.SetContent(a_session.connection.dockerApiID.ToString());
+				m_connectionDockerAPI.SetContent(a_session.connection.dockerApi.address.ToString());
 				m_connectionPort.SetContent(a_session.connection.port.ToString());
 				m_connectionDockerContainer.SetContent(a_session.connection.dockerContainerID.ToString());
 				m_qrCodeSection.SetActive(true);
@@ -172,7 +164,7 @@ namespace MSP2050.Scripts
 		Texture2D GenerateQR(ImmersiveSession a_session)
 		{
 			QRCodeGenerator qrGenerator = new QRCodeGenerator();
-			QRCodeData qrCodeData = qrGenerator.CreateQrCode($"{{\"ip\":\"{a_session.connection.session}\",\"port\":{a_session.connection.port}}}", QRCodeGenerator.ECCLevel.Q);
+			QRCodeData qrCodeData = qrGenerator.CreateQrCode($"{{\"ip\":\"{a_session.connection.dockerApi.address}\",\"port\":{a_session.connection.port}}}", QRCodeGenerator.ECCLevel.Q);
 			UnityQRCode qrCode = new UnityQRCode(qrCodeData);
 			return qrCode.GetGraphic(20);
 		}
