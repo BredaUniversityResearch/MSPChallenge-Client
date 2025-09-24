@@ -35,6 +35,7 @@ namespace MSP2050.Scripts
 			m_createSessionButton.onClick.AddListener(OnCreateButtonClicked);
 			m_refreshButton.onClick.AddListener(RefreshSessions);
 			m_detailsWindow.Initialise(this);
+			UpdateManager.Instance.RegisterImmersiveSessionListener(OnSessionListUpdated, OnSessionListUpdateFailed, true);
 		}
 
 		private void OnEnable()
@@ -63,6 +64,12 @@ namespace MSP2050.Scripts
 			m_refreshButton.interactable = false;
 			ServerCommunication.Instance.DoRequestForm<ImmersiveSession[]>(Server.ImmersiveSessions(), null, OnSessionListUpdated, HandleGetSessionFailure);
 		}
+
+		void OnSessionListUpdated(List<ImmersiveSession> a_sessions)
+		{ }
+
+		void OnSessionListUpdateFailed(string a_reason)
+		{ }
 
 		void OnSessionListUpdated(ImmersiveSession[] a_sessions)
 		{

@@ -203,6 +203,20 @@ namespace MSP2050.Scripts
 				}
 			}
 		}
+
+		public void RegisterImmersiveSessionListener(Action<List<ImmersiveSession>> a_success, Action<string> a_failure, bool a_register)
+		{
+			if(a_register)
+			{
+				m_WsServerCommunication.OnImmersiveSessionUpdate += a_success;
+				m_WsServerCommunication.OnImmersiveSessionUpdateFailed += a_failure;
+			}
+			else
+			{
+				m_WsServerCommunication.OnImmersiveSessionUpdate -= a_success;
+				m_WsServerCommunication.OnImmersiveSessionUpdateFailed -= a_failure;
+			}
+		}
 	}
 	
 	public class PlanLayerObject
