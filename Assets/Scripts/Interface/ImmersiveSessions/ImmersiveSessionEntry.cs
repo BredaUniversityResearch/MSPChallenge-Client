@@ -9,7 +9,7 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField] TextMeshProUGUI m_sessionName;
 		//[SerializeField] TextMeshProUGUI m_users;
-		//[SerializeField] TextMeshProUGUI m_state;
+		[SerializeField] TextMeshProUGUI m_state;
 		[SerializeField] Toggle m_barToggle;
 
 		ImmersiveSession m_session;
@@ -26,6 +26,7 @@ namespace MSP2050.Scripts
 		{
 			m_session = a_session;
 			m_sessionName.text = m_session.name;
+			m_state.text = m_session.status.ToString();
 			gameObject.SetActive(true);
 		}
 

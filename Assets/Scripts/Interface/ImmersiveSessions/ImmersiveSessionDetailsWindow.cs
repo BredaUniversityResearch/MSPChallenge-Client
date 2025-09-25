@@ -119,15 +119,6 @@ namespace MSP2050.Scripts
 			newSession.bottomLeftY = bounds.y;
 			newSession.topRightX = bounds.z;
 			newSession.topRightY = bounds.w;
-
-			//NetworkForm form = new NetworkForm();
-			//form.AddField("name", m_sessionName.CurrentValue);
-			//form.AddField("month", m_sessionMonth.CurrentValue);
-			//form.AddField("type", m_sessionType.CurrentValue);
-			//form.AddField("bottom_left_x", bounds.x.ToString());
-			//form.AddField("bottom_left_y", bounds.y.ToString());
-			//form.AddField("top_right_x", bounds.z.ToString());
-			//form.AddField("top_right_y", bounds.w.ToString());
 			ServerCommunication.Instance.DoRequestRaw<ImmersiveSession>(Server.ImmersiveSessions(), JsonConvert.SerializeObject(newSession), SessionCreationSuccess, SessionCreationFailure);
 		}
 
