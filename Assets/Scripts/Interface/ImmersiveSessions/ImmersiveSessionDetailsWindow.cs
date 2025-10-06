@@ -28,6 +28,8 @@ namespace MSP2050.Scripts
 		[SerializeField] GameObject m_fullscreenQRPrefab;
 
 		[SerializeField] GameObject m_connectionSection;
+		[SerializeField] GenericTextField m_sessionStatus;
+		[SerializeField] GenericTextField m_sessionStatusMessage;
 		[SerializeField] GenericTextField m_connectionDockerAPI;
 		[SerializeField] GenericTextField m_connectionPort;
 		[SerializeField] GenericTextField m_connectionDockerContainer;
@@ -42,10 +44,14 @@ namespace MSP2050.Scripts
 			m_sessionType.Initialise("Type", 5, null, Enum.GetNames(typeof(ImmersiveSession.ImmersiveSessionType)));
 			m_sessionBounds.Initialise("Area", 4, 5, 25000, null);
 
+			m_sessionStatus.Initialise("Status", 5, null, "");
+			m_sessionStatusMessage.Initialise("Message", 5, null, "");
 			m_connectionDockerAPI.Initialise("Docker API", 5, null, "");
 			m_connectionPort.Initialise("Port", 5, null, "");
-			m_connectionDockerContainer.Initialise("Docker Container", 5, null, "");
+			m_connectionDockerContainer.Initialise("Container ID", 5, null, "");
 
+			m_sessionStatus.SetInteractable(false);
+			m_sessionStatusMessage.SetInteractable(false);
 			m_connectionDockerAPI.SetInteractable(false);
 			m_connectionPort.SetInteractable(false);
 			m_connectionDockerContainer.SetInteractable(false);
@@ -65,6 +71,14 @@ namespace MSP2050.Scripts
 
 			if (a_session.connection != null)
 			{
+				m_sessionStatus.SetContent(a_session.status.ToString());
+				if(a_session.statusResponse != null && a_session.statusResponse.Length > 0 && !string.IsNullOrEmpty(a_session.statusResponse[0].message))
+				{
+					m_sessionStatusMessage.gameObject.SetActive(true);
+					m_sessionStatusMessage.SetContent(a_session.statusResponse[0].message);
+				}
+				else
+					m_sessionStatusMessage.gameObject.SetActive(false);
 				m_connectionSection.SetActive(true);
 				m_connectionDockerAPI.SetContent(a_session.connection.dockerApi.address.ToString());
 				m_connectionPort.SetContent(a_session.connection.port.ToString());

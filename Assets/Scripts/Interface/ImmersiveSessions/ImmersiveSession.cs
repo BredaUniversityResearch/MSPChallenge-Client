@@ -15,6 +15,7 @@ namespace MSP2050.Scripts
         public int id;
         public string name;
         public ImmersiveSessionConnection connection;
+        public ImmersiveSessionStatusResponse[] statusResponse;
         public int month;
         [JsonConverter(typeof(StringEnumConverter))]
         public ImmersiveSessionStatus status;
@@ -39,6 +40,11 @@ namespace MSP2050.Scripts
 	    public string address;
 	    public int port;
 	    public string scheme;
+    }
+
+    public class ImmersiveSessionStatusResponse
+    {
+        public string message;
     }
 
 	public class ImmersiveSessionSubmit
