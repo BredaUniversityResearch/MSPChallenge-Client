@@ -42,7 +42,7 @@ namespace MSP2050.Scripts
 			m_sessionName.Initialise("Session Name", 5, null, "Name");
 			m_sessionMonth.Initialise("Month", 5, null);
 			m_sessionType.Initialise("Type", 5, null, Enum.GetNames(typeof(ImmersiveSession.ImmersiveSessionType)));
-			m_sessionBounds.Initialise("Area", 4, 5, 25000, null);
+			m_sessionBounds.Initialise("Area", 5, 5, 25000, null);
 
 			m_sessionStatus.Initialise("Status", 5, null, "");
 			m_sessionStatusMessage.Initialise("Message", 5, null, "");

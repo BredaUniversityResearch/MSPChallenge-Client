@@ -15,7 +15,8 @@ namespace MSP2050.Scripts
         [SerializeField] GenericTextField m_blY;
         [SerializeField] GenericTextField m_tlX;
         [SerializeField] GenericTextField m_tlY;
-        [SerializeField] Button m_selectBoundsButton;
+        [SerializeField] GameObject m_selectBoundsObject;
+        [SerializeField] Toggle m_selectBoundsToggle;
         [SerializeField] Button m_zoomToBoundsButton;
         [SerializeField] float m_spacePerStep;
         [SerializeField] RectTransform m_previewObject;
@@ -50,17 +51,19 @@ namespace MSP2050.Scripts
             m_contentContainer.offsetMin = new Vector2((a_nameSizeSteps + 2) * m_spacePerStep, 0f);
             m_maxBoundsSize = a_maxBoundsSize;
 			m_changeCallback = a_changeCallback;
-            m_blY.Initialise("Bottom left Y", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
-            m_blX.Initialise("Bottom left X", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
-            m_tlX.Initialise("Top right X", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
-            m_tlY.Initialise("Top right Y", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
-			m_selectBoundsButton.onClick.AddListener(OnSelectBoundsButtonClicked);
+            m_blY.Initialise("Bottom Left Y", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
+            m_blX.Initialise("Bottom Left X", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
+            m_tlX.Initialise("Top Right X", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
+            m_tlY.Initialise("Top Right Y", a_subNameSizeSteps, null, "Coordinate", TMP_InputField.ContentType.DecimalNumber, -1, OnTextFieldChanged);
+			m_selectBoundsToggle.onValueChanged.AddListener(OnSelectBoundsToggled);
+			m_selectBoundsToggle.isOn = false;
 			m_zoomToBoundsButton.onClick.AddListener(OnZoomToBoundsButtonClicked);
 		}
 
         public void SetContent(Vector4 a_value)
         {
             m_currentValue = a_value;
+            m_selectBoundsToggle.isOn = false;
             UpdateTextFieldToBounds();
 		}
 
@@ -70,7 +73,7 @@ namespace MSP2050.Scripts
 			m_blY.SetInteractable(a_interactable);
 			m_tlX.SetInteractable(a_interactable);
 			m_tlY.SetInteractable(a_interactable);
-            m_selectBoundsButton.gameObject.SetActive(a_interactable);
+			m_selectBoundsObject.SetActive(a_interactable);
 		}
 
         void UpdateTextFieldToBounds()
@@ -118,10 +121,14 @@ namespace MSP2050.Scripts
             return result;
         }
 
-        void OnSelectBoundsButtonClicked()
+        void OnSelectBoundsToggled(bool a_value)
         {
-            Main.Instance.InterruptFSMState((fsm) => new BoundsSelectState(fsm, this));
-        }
+            if (a_value)
+                Main.Instance.InterruptFSMState((fsm) => new BoundsSelectState(fsm, this));
+            else
+                Main.Instance.CancelFSMInterruptState();
+
+		}
 
         void OnZoomToBoundsButtonClicked()
         {
