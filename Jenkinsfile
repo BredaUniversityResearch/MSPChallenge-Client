@@ -19,7 +19,7 @@ String nexusDevRepo = "MSPChallenge-Client-Dev"
 String nexusMainRepo = "MSPChallenge-Client-Main"
 
 String unityBuildName = "MSP-Challenge"
-String unityVersion = "2022.3.20f1"
+String unityVersion = "2022.3.62f2"
 
 String windowsBuildName = "Windows"
 String windowsDevBuildName = "Windows-Dev"
