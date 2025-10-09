@@ -9,10 +9,12 @@ namespace MSP2050.Scripts
 {
 	public class PolicyGeometryDataMUPlatform : APolicyData
 	{
+		MUPlatformData m_data;
 
 		public PolicyGeometryDataMUPlatform()
 		{
 			policy_type = PolicyManager.SEASONAL_CLOSURE_POLICY_NAME;
+			m_data = new MUPlatformData();
 		}
 
 		public PolicyGeometryDataMUPlatform(string a_jsonData)
