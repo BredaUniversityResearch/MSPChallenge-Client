@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using TMPro;
-using UnityEditor.PackageManager.Requests;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.UI;
-using static System.Collections.Specialized.BitVector32;
 
 namespace MSP2050.Scripts
 {
