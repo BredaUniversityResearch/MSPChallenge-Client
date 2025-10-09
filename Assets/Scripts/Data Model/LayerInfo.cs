@@ -160,7 +160,7 @@ namespace MSP2050.Scripts
 		public bool layer_active_on_start { get; set; }
 		public LayerStateObject[] layer_states { get; set; }
 		public GeometryParameterObject[] layer_geometry_parameters { get; set; }	
-		public string layer_raster { get; set; }
+		public RasterObject layer_raster { get; set; }
 		public string layer_editing_type { get; set; }
 		public ELayerSpecialEntityType layer_special_entity_type { get; set; }
 		public int layer_green { get; set; }
