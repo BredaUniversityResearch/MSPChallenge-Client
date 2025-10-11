@@ -72,14 +72,20 @@ namespace MSP2050.Scripts
 
 		public void DependentLayerChanged(bool a_value)
 		{
-			if(a_value)
+			if (a_value)
 			{
 				m_toggle.interactable = false;
 				m_toggle.isOn = true;
+				string dependentLayerNames = "";
+				foreach (AP_LayerSelectLayer layer in m_dependentOnUs)
+					dependentLayerNames += layer.m_name.text + ", ";
+				m_tooltip.SetText(
+					$"This layer is required when any of the following layers are already added to the plan: {dependentLayerNames[..^2]}."
+				);
 			}
 			else
 			{
-				foreach(AP_LayerSelectLayer layer in m_dependentOnUs)
+				foreach (AP_LayerSelectLayer layer in m_dependentOnUs)
 				{
 					if (layer.IsOn)
 						return;
