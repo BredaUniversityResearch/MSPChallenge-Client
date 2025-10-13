@@ -79,7 +79,7 @@ namespace MSP2050.Scripts
 				string dependentLayerNames = "";
 				foreach (AP_LayerSelectLayer layer in m_dependentOnUs)
 					dependentLayerNames += layer.m_name.text + ", ";
-				m_tooltip.SetText(
+				m_tooltip.SetTempText(
 					$"This layer is required when any of the following layers are already added to the plan: {dependentLayerNames[..^2]}."
 				);
 			}
@@ -90,6 +90,7 @@ namespace MSP2050.Scripts
 					if (layer.IsOn)
 						return;
 				}
+				m_tooltip.ResetText();
 				m_toggle.interactable = true;
 			}
 		}

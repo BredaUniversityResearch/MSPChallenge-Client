@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 	{
 		[SerializeField, TextArea]
 		public string text;
+		private string originalText = "";
 		public float timeBeforeShowing = 0.5f;
 		[SerializeField]
 		bool passClickToParent = true;
@@ -108,6 +109,21 @@ namespace MSP2050.Scripts
 		{
 			TooltipManager.HideTooltip();
 			text = a_newText;
+		}
+
+		public void SetTempText(string a_tempText)
+		{
+			if (text == a_tempText)
+				return;
+			originalText = text;
+			TooltipManager.HideTooltip();
+			text = a_tempText;
+		}
+
+		public void ResetText()
+		{
+			TooltipManager.HideTooltip();
+			text = originalText;
 		}
 	}
 }
