@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using GeoJSON.Net.Feature;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
