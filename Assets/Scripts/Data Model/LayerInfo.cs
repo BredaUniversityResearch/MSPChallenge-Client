@@ -126,7 +126,7 @@ namespace MSP2050.Scripts
 			layer_editable = true;
 			layer_toggleable = true;
 			layer_active_on_start = false;
-			layer_states = "";
+			layer_states = null;
 			layer_editing_type = "";
 			layer_special_entity_type = ELayerSpecialEntityType.Default;
 			layer_filecreationtime = -1;
@@ -159,9 +159,9 @@ namespace MSP2050.Scripts
 		public bool layer_editable { get; set; }
 		public bool layer_toggleable { get; set; }
 		public bool layer_active_on_start { get; set; }
-		public string layer_states { get; set; }
+		public LayerStateObject[] layer_states { get; set; }
 		public GeometryParameterObject[] layer_geometry_parameters { get; set; }	
-		public string layer_raster { get; set; }
+		public RasterObject layer_raster { get; set; }
 		public string layer_editing_type { get; set; }
 		public ELayerSpecialEntityType layer_special_entity_type { get; set; }
 		public int layer_green { get; set; }
