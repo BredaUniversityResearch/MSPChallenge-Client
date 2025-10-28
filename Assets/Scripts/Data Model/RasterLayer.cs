@@ -58,6 +58,7 @@ namespace MSP2050.Scripts
 		public RasterLayer(LayerMeta layerMeta)
 			: base(layerMeta)
 		{
+			rasterValueScale = layerMeta.scale;
 			entityTypesSortedByValue = new List<EntityType>(m_entityTypes.Values);
 			entityTypesSortedByValue.Sort(SortMethodEntityTypesByValue);
 			viewingRaster = rasterAtLatestTime;
