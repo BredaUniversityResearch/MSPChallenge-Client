@@ -221,9 +221,6 @@ namespace MSP2050.Scripts
 			int pitDepth = 0;
 			int pitSlope = 1;
 
-			//if (m_maxDepthRasterLayer == null)
-			//    m_maxDepthRasterLayer = (RasterLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDDEPTH_TAG });
-
 			if (!int.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName(PITDEPTHPROPERTY)), out pitDepth))
 			{
 				return 0;
