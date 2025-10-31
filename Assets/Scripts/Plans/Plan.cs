@@ -934,6 +934,12 @@ namespace MSP2050.Scripts
 
 		public void AddSystemMessage(string text)
 		{
+			if (ID < 0)
+			{
+				Debug.LogWarning("Trying to send a non-batch message in a plan that's being created. Message: " + text);
+				return;
+			}
+
 			NetworkForm form = new NetworkForm();
 			form.AddField("plan", GetDataBaseOrBatchIDReference());
 			form.AddField("team_id", SessionManager.GM_ID);
@@ -945,6 +951,11 @@ namespace MSP2050.Scripts
 
 		public void SendMessage(string text)
 		{
+			if(ID < 0)
+			{
+				Debug.LogWarning("Trying to send a non-batch message in a plan that's being created. Message: " + text);
+				return;
+			}
 			NetworkForm form = new NetworkForm();
 			form.AddField("plan", GetDataBaseOrBatchIDReference());
 			form.AddField("team_id", SessionManager.Instance.CurrentUserTeamID);

@@ -57,7 +57,7 @@ namespace MSP2050.Scripts
 				m_buttonSection.SetActive(false);
 				m_infoText.text = "Implemented plans cannot change state.";
 			}
-			else
+			else if(a_content.ID != -1)
 			{ 
 				m_statusDropdown.interactable = true;
 				SetStatusDropdownOptions();
