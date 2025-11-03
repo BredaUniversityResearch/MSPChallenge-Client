@@ -6,6 +6,7 @@ namespace MSP2050.Scripts
 {
 	public class ConstraintManager : MonoBehaviour
 	{
+		public const int CUSTOM_RESTRICTION_ID_THRESHOLD = 10000;
 		public enum EConstraintType { Exclusion, Inclusion, Type_Unavailable }
 
 		private enum EConstraintSatisfyRule
@@ -104,7 +105,7 @@ namespace MSP2050.Scripts
 
 		// used to store error messages with their IDs to avoid passing around long strings
 		private Dictionary<int, string> restrictionIdToMessage = new Dictionary<int, string>();
-		int m_nextNonOverlapRestrictionMessageId = 10000;
+		int m_nextNonOverlapRestrictionMessageId = CUSTOM_RESTRICTION_ID_THRESHOLD;
 
 		/// <summary>
 		/// Separate dictionary for inclusions and exclusions

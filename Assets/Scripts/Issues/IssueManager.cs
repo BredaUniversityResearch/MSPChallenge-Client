@@ -139,7 +139,7 @@ namespace MSP2050.Scripts
 
 		public void ShowRelevantPlanLayersForIssue(PlanIssueObject planIssueData)
 		{
-			KeyValuePair<AbstractLayer, AbstractLayer> layerData = ConstraintManager.Instance.GetRestrictionLayersForRestrictionId(planIssueData.restriction_id);
+			KeyValuePair<AbstractLayer, AbstractLayer> layerData = ConstraintManager.Instance.GetRestrictionLayersForRestrictionId(planIssueData.RestrictionID);
 
 			if (layerData.Key != null)
 			{
