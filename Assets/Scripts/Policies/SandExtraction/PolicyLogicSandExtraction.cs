@@ -6,6 +6,7 @@ using ClipperLib;
 using System.Reactive.Joins;
 using Poly2Tri;
 using static UnityEngine.GUILayout;
+using UnityEngine.UIElements;
 
 namespace MSP2050.Scripts
 {
@@ -72,28 +73,33 @@ namespace MSP2050.Scripts
 			m_pitLayer = (PolygonLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDPITS_TAG1, SANDPITS_TAG2 });
             ConstraintManager.Instance.AddNonOverlapRestrictionLayers(m_stratificationDepthWarningId, m_pitLayer, m_stratificationDepthRasterLayer);
             ConstraintManager.Instance.AddNonOverlapRestrictionLayers(m_excursionLengthWarningId, m_pitLayer, m_excursionLengthRasterLayer);
-            m_pitLayer.m_onSubentityMeshChange += OnPitMeshChange;
+            m_pitLayer.m_onSubentityMeshChange += RecalculatePitVolume;
 			m_pitLayer.m_onCalculationPropertyChanged += OnPitPropertyChange;
             m_volumeProperty = new EntityPropertyMetaData("Volume", true, false, "Sand Volume", null, null, "0", false, true, false,
                 TMPro.TMP_InputField.ContentType.Standard, LayerInfoPropertiesObject.ContentValidation.None, "");
 			m_pitLayer.AddPropertyMetaData(m_volumeProperty);
 		}
 
-        void OnPitMeshChange(PolygonSubEntity a_pit)
-        {
-            a_pit.m_entity.SetPropertyMetaData(m_volumeProperty, VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(CalculatePitVolume(a_pit), ValueConversionCollection.UNIT_M3).FormatAsString());
-		}
-
 		void OnPitPropertyChange(Entity a_pit, EntityPropertyMetaData a_property)
 		{
-            a_pit.SetPropertyMetaData(m_volumeProperty, VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(CalculatePitVolume((PolygonSubEntity)a_pit.GetSubEntity(0)), ValueConversionCollection.UNIT_M3).FormatAsString());
+            RecalculatePitVolume((PolygonSubEntity)a_pit.GetSubEntity(0));
 		}
+
+        void RecalculatePitVolume(PolygonSubEntity a_pit)
+        {
+            if(a_pit.SurfaceAreaSqrKm > 150)
+                a_pit.m_entity.SetPropertyMetaData(m_volumeProperty, VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(EstimatePitVolume(a_pit), ValueConversionCollection.UNIT_M3).FormatAsString());
+            else
+                a_pit.m_entity.SetPropertyMetaData(m_volumeProperty, VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(CalculatePitVolume(a_pit), ValueConversionCollection.UNIT_M3).FormatAsString());
+        }
 
 		public float CalculatePitVolume(PolygonSubEntity a_subEntity)
         {
             float volume = 0;
             int pitDepth = 0;
             double pitSlope = 1;
+            Debug.Log("Accurate");
+            
 
             if(!int.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName(PITDEPTHPROPERTY)), out pitDepth))
             {
@@ -196,117 +202,91 @@ namespace MSP2050.Scripts
                 {
                     break;
                 }
-                else
-                {
-                    List<List<Vector3>> convertedPoints = new List<List<Vector3>>();
-                    foreach (var poly in pitBounds)
-                    {
-                        List<Vector3> points = GeometryOperations.IntPointToVector(poly);
-                        for (int i = 0; i < points.Count - 1; i++)
-                        {
-                            Debug.DrawLine(points[i], points[i + 1], Color.black, 5f);
+                //else
+                //{
+                //    List<List<Vector3>> convertedPoints = new List<List<Vector3>>();
+                //    foreach (var poly in pitBounds)
+                //    {
+                //        List<Vector3> points = GeometryOperations.IntPointToVector(poly);
+                //        for (int i = 0; i < points.Count - 1; i++)
+                //        {
+                //            Debug.DrawLine(points[i], points[i + 1], Color.black, 5f);
 
-                        }
-                        Debug.DrawLine(points[points.Count - 1], points[0], Color.black, 5f);
-                    }
-                }
+                //        }
+                //        Debug.DrawLine(points[points.Count - 1], points[0], Color.black, 5f);
+                //    }
+                //}
 
             }
 			return Mathf.Max(0f, volume * areaScale / GeometryOperations.intConversion); // Now returns volume in m3
         }
 
-		public float EstimatePitVolume(PolygonSubEntity a_subEntity)
-		{
-			float volume = 0;
-			int pitDepth = 0;
-			int pitSlope = 1;
+        public float EstimatePitVolume(PolygonSubEntity a_subEntity)
+        {
+            int pitDepth = 0;
+            double pitSlope = 1; // in metres
+			Debug.Log("Estimate");
 
 			if (!int.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName(PITDEPTHPROPERTY)), out pitDepth))
-			{
-				return 0;
-			}
-			int.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName(PITSLOPEPROPERTY)), out pitSlope);
+            {
+                return 0;
+            }
+            double.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName(PITSLOPEPROPERTY)), out pitSlope);
 
+            //Area of the polygon to analyze
+            Rect surfaceBoundingBox = a_subEntity.m_boundingBox;
+            //Total area covered by the raster layer
+            Rect rasterSurfaceBoundingBox = m_availableSandDepthRasterLayer.RasterBounds;
 
-			//Area of the polygon to analyze
-			Rect surfaceBoundingBox = a_subEntity.m_boundingBox;
-			//Total area covered by the raster layer
-			Rect rasterSurfaceBoundingBox = m_availableSandDepthRasterLayer.RasterBounds;
+            //Relative normalized position of the bounding box of the SubEntity within the Raster bounding box.
+            //Converts world coordinates to normalized[0, 1] range relative to the raster's bounds.
+            float relativeXNormalized = (surfaceBoundingBox.x - rasterSurfaceBoundingBox.x) / rasterSurfaceBoundingBox.width;
+            float relativeYNormalized = (surfaceBoundingBox.y - rasterSurfaceBoundingBox.y) / rasterSurfaceBoundingBox.height;
 
-			//Relative normalized position of the bounding box of the SubEntity within the Raster bounding box.
-			//Converts world coordinates to normalized[0, 1] range relative to the raster's bounds.
-			float relativeXNormalized = (surfaceBoundingBox.x - rasterSurfaceBoundingBox.x) / rasterSurfaceBoundingBox.width;
-			float relativeYNormalized = (surfaceBoundingBox.y - rasterSurfaceBoundingBox.y) / rasterSurfaceBoundingBox.height;
+            //Gets pixel dimensions of the raster texture
+            int rasterHeight = m_availableSandDepthRasterLayer.GetRasterImageHeight();
+            int rasterWidth = m_availableSandDepthRasterLayer.GetRasterImageWidth();
 
-			//Gets pixel dimensions of the raster texture
-			int rasterHeight = m_availableSandDepthRasterLayer.GetRasterImageHeight();
-			int rasterWidth = m_availableSandDepthRasterLayer.GetRasterImageWidth();
+            //Calculates the range of raster pixels that overlap with the polygon's bounding box.
+            int startX = Mathf.FloorToInt(relativeXNormalized * rasterWidth);
+            int startY = Mathf.FloorToInt(relativeYNormalized * rasterHeight);
+            int endX = Mathf.CeilToInt((relativeXNormalized + surfaceBoundingBox.width / rasterSurfaceBoundingBox.width) * rasterWidth);
+            int endY = Mathf.CeilToInt((relativeYNormalized + surfaceBoundingBox.height / rasterSurfaceBoundingBox.height) * rasterHeight);
 
-			//Calculates the range of raster pixels that overlap with the polygon's bounding box.
-			int startX = Mathf.FloorToInt(relativeXNormalized * rasterWidth);
-			int startY = Mathf.FloorToInt(relativeYNormalized * rasterHeight);
-			int endX = Mathf.CeilToInt((relativeXNormalized + surfaceBoundingBox.width / rasterSurfaceBoundingBox.width) * rasterWidth);
-			int endY = Mathf.CeilToInt((relativeYNormalized + surfaceBoundingBox.height / rasterSurfaceBoundingBox.height) * rasterHeight);
-
-			//Extracts the polygon's vertices for point-in-polygon checks.
-			List<UnityEngine.Vector3> polygonPoints = a_subEntity.GetPoints();
-
-			// Computes the area of a single pixel in square kilometers (km²).
-			float pixelWidth = rasterSurfaceBoundingBox.width / rasterWidth;
-			float pixelHeight = rasterSurfaceBoundingBox.height / rasterHeight;
-			float areaScale = Main.SCALE * Main.SCALE;
-			float pitArea = Util.GetPolygonArea(polygonPoints) * areaScale;
-			float averageDepth = 0;
+            double avgDepth = 0d;
 
 			//Iterates through every pixel in the calculated range.
 			for (int x = startX; x < endX; x++)
-			{
-				for (int y = startY; y < endY; y++)
-				{
-					//Converts pixel coordinates (x,y) to world-space coordinates.
-					UnityEngine.Vector2 worldPos = m_availableSandDepthRasterLayer.GetWorldPositionForTextureLocation(x, y);
+            {
+                for (int y = startY; y < endY; y++)
+                {
+                    float? pixelValue = m_availableSandDepthRasterLayer.GetRasterValueAt(x, y);
 
-					List<UnityEngine.Vector3> pixelPoints = new List<UnityEngine.Vector3>()
-						{ new UnityEngine.Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight),
-						new UnityEngine.Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
-						new UnityEngine.Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
-						new UnityEngine.Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight)};
+                    if (pixelValue.HasValue)
+                    {
+						//Map raster value to actual depth based on your JSON data
+						avgDepth += Mathf.Min(pitDepth, GetDepthForRasterValue(pixelValue.Value));
+                    }
+                }
+            }
+            avgDepth /= (endX - startX) * (endY - startY);
+            float volume = (float)avgDepth * a_subEntity.SurfaceAreaSqrKm * 1000000f;
 
-					//Retrieve the value of the raster at this pixel
-					float? rasterValue = m_availableSandDepthRasterLayer.GetRasterValueAt(worldPos);
+            //Crude estimation of loss for pit slope
+            int slopeFactor = 1;
+            for(int i = 0; i < avgDepth; i++)
+            {
+                slopeFactor += i;
+            }
+            float lossFactor = slopeFactor * (float)pitSlope / 25000f;
+            volume *= 1f - lossFactor;
 
-					if (rasterValue.HasValue)
-					{
-                        //Map raster value to actual depth based on your JSON data
-						float actualDepth = Mathf.Min(GetDepthForRasterValue(rasterValue.Value), pitDepth);
-						float pixelPitOverlapArea = Util.GetPolygonOverlapArea(polygonPoints, pixelPoints) * areaScale;
-
-						volume += pixelPitOverlapArea * actualDepth;
-						averageDepth += actualDepth * pixelPitOverlapArea / pitArea; //Add pre-averaged depth
-					}
-				}
-			}
-			//Correct for slopes: Depth * (slope * depth = offset) * circumfence * (correction for corner overlap)
-			float perimeter = Util.GetPolygonPerimeter(polygonPoints) * Main.SCALE;
-			float slopeVolume = averageDepth * averageDepth * pitSlope * perimeter * 0.333333f; // Combined: div by 2 for slope, multiply by 0.66667f for correction
-																								//Debug.Log($"Total volume: {volume}, slope volume: {slopeVolume}, avg depth: {averageDepth}, perimeter: {perimeter}");
-			volume -= slopeVolume;
-			return Mathf.Max(0f, volume); // Now returns volume in m3
-		}
+			return Mathf.Max(0, volume);
+        }
 
         float GetDepthForRasterValue(float a_rasterValue)
         {
 			return m_availableSandDepthRasterLayer.rasterValueScale.EvaluateOutput(a_rasterValue);
-			//switch (a_rasterValue)
-			//{
-			//	case 43: return 2f;     // 0-2m
-			//	case 85: return 4f;     // 2-4m
-			//	case 128: return 6f;   // 4-6m
-			//	case 170: return 8f;   // 6-8m
-			//	case 213: return 10f;  // 8-10m
-			//	case 255: return 12f;  // 10-12m
-			//}
-			//return 0f;    // Unknown value
 		}
 
 
