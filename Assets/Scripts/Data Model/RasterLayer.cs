@@ -266,6 +266,16 @@ namespace MSP2050.Scripts
 			return rasterValue;
 		}
 
+		public float GetUnscaledRasterValueAt(int rasterSpaceX, int rasterSpaceY)
+		{
+			return viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r;
+		}
+
+		public float GetConvertedRasterValueAt(int rasterSpaceX, int rasterSpaceY)
+		{
+			return rasterValueScale.EvaluateOutput(viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r);
+		}
+
 		[CanBeNull]
 		public EntityType GetEntityTypeForRasterAt(Vector2 worldPosition)
 		{

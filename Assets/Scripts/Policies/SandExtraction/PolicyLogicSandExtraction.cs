@@ -3,10 +3,6 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using ClipperLib;
-using System.Reactive.Joins;
-using Poly2Tri;
-using static UnityEngine.GUILayout;
-using UnityEngine.UIElements;
 
 namespace MSP2050.Scripts
 {
@@ -20,7 +16,6 @@ namespace MSP2050.Scripts
         const string SANDPITS_TAG2 = "Extraction";
         const string PITDEPTHPROPERTY = "PitExtractionDepth";
         const string PITSLOPEPROPERTY = "PitSlope";
-        const int MAX_DEPTH = 12;
 
         static PolicyLogicSandExtraction m_instance;
         public static PolicyLogicSandExtraction Instance => m_instance;
@@ -33,6 +28,7 @@ namespace MSP2050.Scripts
         RasterLayer m_stratificationDepthRasterLayer;
         RasterLayer m_excursionLengthRasterLayer;
         PolygonLayer m_pitLayer;
+        LineStringLayer m_coastLineLayer;
 		EntityPropertyMetaData m_volumeProperty;
         int m_stratificationDepthWarningId;
         int m_excursionLengthWarningId;
@@ -71,6 +67,7 @@ namespace MSP2050.Scripts
             }
 
 			m_pitLayer = (PolygonLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { SANDPITS_TAG1, SANDPITS_TAG2 });
+			m_coastLineLayer = (LineStringLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { "Line", "Bathymetry" });
             ConstraintManager.Instance.AddNonOverlapRestrictionLayers(m_stratificationDepthWarningId, m_pitLayer, m_stratificationDepthRasterLayer);
             ConstraintManager.Instance.AddNonOverlapRestrictionLayers(m_excursionLengthWarningId, m_pitLayer, m_excursionLengthRasterLayer);
             m_pitLayer.m_onSubentityMeshChange += RecalculatePitVolume;
@@ -87,13 +84,13 @@ namespace MSP2050.Scripts
 
         void RecalculatePitVolume(PolygonSubEntity a_pit)
         {
-            if(a_pit.SurfaceAreaSqrKm > 150)
+            if(a_pit.SurfaceAreaSqrKm > 100)
                 a_pit.m_entity.SetPropertyMetaData(m_volumeProperty, VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(EstimatePitVolume(a_pit), ValueConversionCollection.UNIT_M3).FormatAsString());
             else
                 a_pit.m_entity.SetPropertyMetaData(m_volumeProperty, VisualizationUtil.Instance.VisualizationSettings.ValueConversions.ConvertUnit(CalculatePitVolume(a_pit), ValueConversionCollection.UNIT_M3).FormatAsString());
         }
 
-		public float CalculatePitVolume(PolygonSubEntity a_subEntity)
+		float CalculatePitVolume(PolygonSubEntity a_subEntity)
         {
             float volume = 0;
             int pitDepth = 0;
@@ -157,41 +154,25 @@ namespace MSP2050.Scripts
                         if (pixelComplete[x- startX, y - startY])
                             continue;
 
-                        float? pixelValue = m_availableSandDepthRasterLayer.GetRasterValueAt(x, y);
+                        float rasterDepth = m_availableSandDepthRasterLayer.GetConvertedRasterValueAt(x, y); 
 
-                        if (pixelValue.HasValue)
+                        //Map raster value to actual depth based on your JSON data
+                        if (rasterDepth < currentDepth)
                         {
-                            //Map raster value to actual depth based on your JSON data
-                            float rasterDepth = GetDepthForRasterValue(pixelValue.Value);
-                            if (rasterDepth < currentDepth)
-                            {
-                                //Pixel needs to be excluded from bound and volume manually added
-                                List<IntPoint> pixelPoints = GeometryOperations.VectorToIntPoint(new List<Vector3>()  {
-                                    new Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight),
-                                    new Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
-                                    new Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
-                                    new Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight)
-                                });
-                                float pixelPitOverlapArea = Util.GetPolygonOverlapArea(pitBounds, pixelPoints) * areaScale;
+                            //Pixel needs to be excluded from bound and volume manually added
+                            List<IntPoint> pixelPoints = GeometryOperations.VectorToIntPoint(new List<Vector3>()  {
+                                new Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight),
+                                new Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
+                                new Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
+                                new Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight)
+                            });
+                            float pixelPitOverlapArea = Util.GetPolygonOverlapArea(pitBounds, pixelPoints) * areaScale;
 
-                                volume += pixelPitOverlapArea * (rasterDepth-currentDepth-1f); //Only add remaining difference
-                                pixelComplete[x - startX, y - startY] = true;
-                                activePixels--;
-                                if (pixelPitOverlapArea > 0f)
-									pitBounds = Util.ClipFromPolygon(pitBounds, pixelPoints);
-							}
-                        }
-                        else
-                        {
-							List<Vector3> pixelPoints = new List<Vector3>()  {
-								new Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight),
-								new Vector3 (rasterSurfaceBoundingBox.x + x * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
-								new Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + (y + 1) * pixelHeight),
-								new Vector3 (rasterSurfaceBoundingBox.x + (x + 1) * pixelWidth, rasterSurfaceBoundingBox.y + y * pixelHeight)
-							};
-							pixelComplete[x - startX, y - startY] = true;
-							activePixels--;
-							pitBounds = Util.ClipFromPolygon(pitBounds, GeometryOperations.VectorToIntPoint(pixelPoints));
+                            volume += pixelPitOverlapArea * (rasterDepth-currentDepth-1f); //Only add remaining difference
+                            pixelComplete[x - startX, y - startY] = true;
+                            activePixels--;
+                            if (pixelPitOverlapArea > 0f)
+								pitBounds = Util.ClipFromPolygon(pitBounds, pixelPoints);
 						}
                     }
                 }
@@ -221,7 +202,7 @@ namespace MSP2050.Scripts
 			return Mathf.Max(0f, volume * areaScale / GeometryOperations.intConversion); // Now returns volume in m3
         }
 
-        public float EstimatePitVolume(PolygonSubEntity a_subEntity)
+        float EstimatePitVolume(PolygonSubEntity a_subEntity)
         {
             int pitDepth = 0;
             double pitSlope = 1; // in metres
@@ -260,13 +241,7 @@ namespace MSP2050.Scripts
             {
                 for (int y = startY; y < endY; y++)
                 {
-                    float? pixelValue = m_availableSandDepthRasterLayer.GetRasterValueAt(x, y);
-
-                    if (pixelValue.HasValue)
-                    {
-						//Map raster value to actual depth based on your JSON data
-						avgDepth += Mathf.Min(pitDepth, GetDepthForRasterValue(pixelValue.Value));
-                    }
+					avgDepth += Mathf.Min(pitDepth, m_availableSandDepthRasterLayer.GetConvertedRasterValueAt(x, y));
                 }
             }
             avgDepth /= (endX - startX) * (endY - startY);
@@ -283,12 +258,6 @@ namespace MSP2050.Scripts
 
 			return Mathf.Max(0, volume);
         }
-
-        float GetDepthForRasterValue(float a_rasterValue)
-        {
-			return m_availableSandDepthRasterLayer.rasterValueScale.EvaluateOutput(a_rasterValue);
-		}
-
 
 		public override void AddToPlan(Plan a_plan)
         {
@@ -409,35 +378,90 @@ namespace MSP2050.Scripts
                             PolygonSubEntity pitPoly = (PolygonSubEntity)pit.GetSubEntity(0);
 							Rect bounds = pit.GetEntityBounds();
 
-							//Get max bounding box size, compare to max tidal excursion length
-                            if (GetRasterOverlapMinMax(m_excursionLengthRasterLayer, pitPoly, false, out float maxTidalExcursionLength))
-                            {
-                                float TELinKM = m_excursionLengthRasterLayer.rasterValueScale.EvaluateOutput(maxTidalExcursionLength);
-                                if(TELinKM > MathF.Max(bounds.width, bounds.height))
-								    planLayer.issues.Add(new PlanIssueObject(ERestrictionIssueType.Warning, bounds.center.x, bounds.center.y, m_pitLayer.m_id, m_excursionLengthWarningId));
-                            }
+                            //Get max bounding box size, compare to max tidal excursion length
+                            float maxTidalExcursionLength = GetRasterOverlapMinMax(m_excursionLengthRasterLayer, pitPoly, true);
+                            float tidalExcursionLengthInKM = m_excursionLengthRasterLayer.rasterValueScale.EvaluateOutput(maxTidalExcursionLength);
+                            if(tidalExcursionLengthInKM < GetSizeParallelToCoast(pitPoly))
+								planLayer.issues.Add(new PlanIssueObject(ERestrictionIssueType.Warning, bounds.center.x, bounds.center.y, m_pitLayer.m_id, m_excursionLengthWarningId));
 
-							//Get pit depth, compare to max stratification depth
-                            if (GetRasterOverlapMinMax(m_stratificationDepthRasterLayer, pitPoly, true, out float maxStratDepth))
-                            {
-							    int pitDepth = 1;
-                                int.TryParse(pit.GetPropertyMetaData(pit.Layer.FindPropertyMetaDataByName(PITDEPTHPROPERTY)), out pitDepth);
-								float stratDepthInM = m_stratificationDepthRasterLayer.rasterValueScale.EvaluateOutput(maxStratDepth);
-								if (stratDepthInM > pitDepth)
-                                    planLayer.issues.Add(new PlanIssueObject(ERestrictionIssueType.Warning, bounds.center.x, bounds.center.y, m_pitLayer.m_id, m_stratificationDepthWarningId));
-                            }
+                            //Get pit depth, compare to max stratification depth
+                            float maxStratDepth = GetRasterOverlapMinMax(m_stratificationDepthRasterLayer, pitPoly, true);							
+							int pitDepth = 1;
+                            int.TryParse(pit.GetPropertyMetaData(pit.Layer.FindPropertyMetaDataByName(PITDEPTHPROPERTY)), out pitDepth);
+							float stratDepthInM = m_stratificationDepthRasterLayer.rasterValueScale.EvaluateOutput(maxStratDepth);
+							if (stratDepthInM < pitDepth)
+                                planLayer.issues.Add(new PlanIssueObject(ERestrictionIssueType.Warning, bounds.center.x, bounds.center.y, m_pitLayer.m_id, m_stratificationDepthWarningId));
 						}
                     }
 				}
             }
         }
 
-        public bool GetRasterOverlapMinMax(RasterLayer a_raster, PolygonSubEntity a_pit, bool a_min, out float a_result)
+        float GetSizeParallelToCoast(PolygonSubEntity a_pit)
         {
-            a_result = a_min ? float.PositiveInfinity : float.NegativeInfinity;
+			Vector3 pitCenter = a_pit.m_boundingBox.center;
+			float closestDistSqr = Mathf.Infinity;
+			Vector2 closestLineDir = Vector3.zero;
+			if (m_coastLineLayer == null || m_coastLineLayer.m_activeEntities == null || m_coastLineLayer.m_activeEntities.Count == 0)
+			{
+				Debug.LogError("Coast reference layer has no geometry");
+                return 0f;
+			}
+
+            //Find closest line segment to pit center, use direction of that line
+			foreach (LineStringEntity lsEntity in m_coastLineLayer.m_activeEntities)
+			{
+				List<Vector3> linePoints = lsEntity.GetSubEntity(0).GetPoints();
+				for (int i = 0; i < linePoints.Count - 1; ++i)
+				{
+					float dist = Util.GetSquaredDistanceToLine(pitCenter, linePoints[i], linePoints[i + 1]);
+					if (dist < closestDistSqr)
+					{
+						closestDistSqr = dist;
+						closestLineDir = linePoints[i] - linePoints[i + 1];
+					}
+				}
+			}
+            closestLineDir.Normalize();
+            Quaternion rotation = Quaternion.FromToRotation(closestLineDir, Vector3.right);
+
+            //Rotate all points of pit into local space of coast, then get Width
+            //Note: Commented code below can be enabled for visualization in editor
+			float pitXMin = float.PositiveInfinity;
+			float pitXMax = float.NegativeInfinity;
+			//float pitYMin = float.PositiveInfinity;
+			//float pitYMax = float.NegativeInfinity;
+			foreach (Vector3 point in a_pit.GetPoints())
+            {
+                Vector3 rotatedPoint = rotation * point;
+                if (rotatedPoint.x < pitXMin)
+                    pitXMin = rotatedPoint.x;
+				if (rotatedPoint.x > pitXMax)
+					pitXMax = rotatedPoint.x;
+				//if (rotatedPoint.y < pitYMin)
+				//	pitYMin = rotatedPoint.y;
+				//if (rotatedPoint.y > pitYMax)
+				//	pitYMax = rotatedPoint.y;
+			}
+
+			//Quaternion inverseRot = Quaternion.Inverse(rotation);
+			//Vector2 p1 = inverseRot * new Vector3(pitXMin, pitYMin);
+			//Vector2 p2 = inverseRot * new Vector3(pitXMin, pitYMax);
+			//Vector2 p3 = inverseRot * new Vector3(pitXMax, pitYMax);
+			//Vector2 p4 = inverseRot * new Vector3(pitXMax, pitYMin);
+			//Debug.DrawLine(p1, p2, Color.black, 5f);
+			//Debug.DrawLine(p2, p3, Color.black, 5f);
+			//Debug.DrawLine(p3, p4, Color.black, 5f);
+			//Debug.DrawLine(p4, p1, Color.black, 5f);
+			//Debug.Log($"Pit size parallel to coast: {pitXMax - pitXMin}");
+            return pitXMax - pitXMin;
+		}
+
+        public float GetRasterOverlapMinMax(RasterLayer a_raster, PolygonSubEntity a_pit, bool a_min)
+        {
+            float result = a_min ? float.PositiveInfinity : float.NegativeInfinity;
 			Rect surfaceBoundingBox = a_pit.m_boundingBox;
 			Rect rasterSurfaceBoundingBox = a_raster.RasterBounds;
-            bool validResult = false;
 
 			//Relative normalized position of the bounding box of the SubEntity within the Raster bounding box.
 			//Converts world coordinates to normalized[0, 1] range relative to the raster's bounds.
@@ -456,21 +480,17 @@ namespace MSP2050.Scripts
 
 			for (int x = startX; x < endX; x++)
 			{
-				for (int y = startY; y < endY; y++)
-				{
-					float? rasterValue = m_availableSandDepthRasterLayer.GetRasterValueAt(x, y);
+                for (int y = startY; y < endY; y++)
+                {
+                    float rasterValue = a_raster.GetUnscaledRasterValueAt(x, y);
 
-					if (rasterValue.HasValue && rasterValue.Value > a_raster.rasterObject.layer_raster_minimum_value_cutoff)
-					{
-                        validResult = true;
-                        if (a_min)
-                            a_result = Mathf.Min(a_result, rasterValue.Value);
-                        else
-							a_result = Mathf.Max(a_result, rasterValue.Value);
-					}
-				}
+                    if (a_min)
+                        result = Mathf.Min(result, rasterValue);
+                    else
+                        result = Mathf.Max(result, rasterValue);
+                }
 			}
-            return validResult;
+            return result;
 		}
 
 		public int GetSandExtractionSettingBeforePlan(Plan a_plan)
