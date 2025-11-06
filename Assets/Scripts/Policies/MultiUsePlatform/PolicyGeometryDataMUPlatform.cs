@@ -9,12 +9,14 @@ namespace MSP2050.Scripts
 {
 	public class PolicyGeometryDataMUPlatform : APolicyData
 	{
-		MUPlatformData m_data;
+		public bool solar;
+		public bool wave;
+		public bool mussels;
+		public bool seaweed;
 
 		public PolicyGeometryDataMUPlatform()
 		{
-			policy_type = PolicyManager.SEASONAL_CLOSURE_POLICY_NAME;
-			m_data = new MUPlatformData();
+			policy_type = PolicyManager.MU_PLATFORM_POLICY_NAME;
 		}
 
 		public PolicyGeometryDataMUPlatform(string a_jsonData)
@@ -24,30 +26,16 @@ namespace MSP2050.Scripts
 		public override string GetJson()
 		{
 			//Convert from client format into server format
-			MUPlatformData data = new MUPlatformData();
-
-			//TODO: set data content
-
-			return JsonConvert.SerializeObject(data);
+			return JsonConvert.SerializeObject(this);
 		}
 
 		public override bool ContentIdentical(APolicyData a_other)
 		{
 			PolicyGeometryDataMUPlatform other = (PolicyGeometryDataMUPlatform)a_other;
-			//TODO
-			return true;
-		}
-
-		private class MUPlatformData: APolicyData
-		{
-			public MUPlatformData()
-			{
-				policy_type = PolicyManager.MU_PLATFORM_POLICY_NAME;
-			}
-			public bool solar;
-			public bool wave;
-			public bool mussels;
-			public bool seaweed;
+			return solar == other.solar &&
+				wave == other.wave &&
+				mussels == other.mussels &&
+				seaweed == other.seaweed;
 		}
 	}
 }
