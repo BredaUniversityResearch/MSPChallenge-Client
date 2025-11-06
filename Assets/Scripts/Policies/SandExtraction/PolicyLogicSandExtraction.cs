@@ -37,9 +37,8 @@ namespace MSP2050.Scripts
         {
             base.Initialise(a_settings, a_definition);
             m_instance = this;
-			m_stratificationDepthWarningId = ConstraintManager.Instance.AddNonOverlapRestrictionMessage("This sand extraction pit's size exceeds the tidal excursion length. There is a risk of stratification.");
-			m_excursionLengthWarningId = ConstraintManager.Instance.AddNonOverlapRestrictionMessage("This sand extraction pit's depth exceeds the critical stratification depth. There is a risk of stratification.");
-
+			m_excursionLengthWarningId = ConstraintManager.Instance.AddNonOverlapRestrictionMessage("This sand extraction pit's size exceeds the tidal excursion length. There is a risk of stratification.");
+			m_stratificationDepthWarningId = ConstraintManager.Instance.AddNonOverlapRestrictionMessage("This sand extraction pit's depth exceeds the critical stratification depth. There is a risk of stratification.");	
 		}
         public override void PostLayerMetaInitialise()
         { 
@@ -402,14 +401,14 @@ namespace MSP2050.Scripts
 			Vector3 pitCenter = a_pit.m_boundingBox.center;
 			float closestDistSqr = Mathf.Infinity;
 			Vector2 closestLineDir = Vector3.zero;
-			if (m_coastLineLayer == null || m_coastLineLayer.m_activeEntities == null || m_coastLineLayer.m_activeEntities.Count == 0)
+			if (m_coastLineLayer == null || m_coastLineLayer.Entities == null || m_coastLineLayer.Entities.Count == 0)
 			{
 				Debug.LogError("Coast reference layer has no geometry");
                 return 0f;
 			}
 
             //Find closest line segment to pit center, use direction of that line
-			foreach (LineStringEntity lsEntity in m_coastLineLayer.m_activeEntities)
+			foreach (LineStringEntity lsEntity in m_coastLineLayer.Entities)
 			{
 				List<Vector3> linePoints = lsEntity.GetSubEntity(0).GetPoints();
 				for (int i = 0; i < linePoints.Count - 1; ++i)
