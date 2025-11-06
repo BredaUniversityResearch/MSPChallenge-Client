@@ -21,11 +21,12 @@ namespace MSP2050.Scripts
 		public float x { get; set; }
 		public float y { get; set; }
 
-		[SerializeField]
+		[JsonProperty]
 		int? restriction_id;
-		[SerializeField]
+		[JsonProperty]
 		int? custom_restriction_id;
 
+		[JsonIgnore]
 		public int RestrictionID
 		{
 			get
