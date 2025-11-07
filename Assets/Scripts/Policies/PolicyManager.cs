@@ -15,6 +15,7 @@ namespace MSP2050.Scripts
 		public const string BUFFER_ZONE_POLICY_NAME = "buffer_zone";
 		public const string ECO_GEAR_POLICY_NAME = "eco_gear";
 		public const string SANDEXTRACTION_POLICY_NAME = "sand_extraction";
+		public const string MULTIUSEPLATFORM_POLICY_NAME = "multi_use_platform";
 
 		private static PolicyManager singleton;
 		public static PolicyManager Instance
@@ -131,7 +132,15 @@ namespace MSP2050.Scripts
                 m_windowPrefab = Resources.Load<GameObject>("AP_PolicySandExtraction_PRFB"),
                 m_policyIcon = Resources.Load<Sprite>("Icons/mining_&_aggregate_extraction")
             });
-        }
+			m_policyDefinitions.Add(MULTIUSEPLATFORM_POLICY_NAME, new PolicyDefinition
+			{
+				m_name = MULTIUSEPLATFORM_POLICY_NAME,
+				m_displayName = "Multi-use Platform",
+				m_geometryPolicy = true,
+				m_planUpdateType = typeof(PolicyGeometryDataMUPlatform),
+				m_windowPrefab = Resources.Load<GameObject>("GeometryPolicyContentMUPlatform_PRFB")
+			});
+		}
 
 		public void InitialisePolicies(List<APolicyData> a_policySettings)
 		{

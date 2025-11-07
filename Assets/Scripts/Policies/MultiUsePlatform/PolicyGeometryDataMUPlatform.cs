@@ -9,10 +9,7 @@ namespace MSP2050.Scripts
 {
 	public class PolicyGeometryDataMUPlatform : APolicyData
 	{
-		public bool solar;
-		public bool wave;
-		public bool mussels;
-		public bool seaweed;
+		public bool[] options;
 
 		public PolicyGeometryDataMUPlatform()
 		{
@@ -32,10 +29,12 @@ namespace MSP2050.Scripts
 		public override bool ContentIdentical(APolicyData a_other)
 		{
 			PolicyGeometryDataMUPlatform other = (PolicyGeometryDataMUPlatform)a_other;
-			return solar == other.solar &&
-				wave == other.wave &&
-				mussels == other.mussels &&
-				seaweed == other.seaweed;
+			for(int i = 0; i < options.Length; i++)
+			{
+				if (options[i] != other.options[i])
+					return false;
+			}
+			return true;
 		}
 	}
 }
