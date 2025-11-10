@@ -8,6 +8,7 @@ namespace MSP2050.Scripts
 		public CameraZoom cameraZoom;
 		public CameraPan cameraPan;
 		public CameraClamp cameraClamp;
+		public Rect zoomRect;
 
 		[HideInInspector]
 		public bool canIZoom = false;
@@ -103,7 +104,7 @@ namespace MSP2050.Scripts
 					smallest = newSize;
 				}
 			}
-			Rect zoomRect = layer.GetEntity(bestIndex).GetEntityBounds();
+			zoomRect = layer.GetEntity(bestIndex).GetEntityBounds();
 			BoxCollider2D zoomCollider = layer.LayerGameObject.AddComponent<BoxCollider2D>();
 			zoomCollider.size = zoomRect.size;
 			zoomCollider.offset = zoomRect.center;

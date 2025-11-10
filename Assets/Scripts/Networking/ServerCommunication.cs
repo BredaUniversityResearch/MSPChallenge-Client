@@ -89,7 +89,7 @@ namespace MSP2050.Scripts
 		}
 	
 		//Note: specifying a custom failure callback avoids all default ones, including automatic retries.
-		public ARequest DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 3)
+		public ARequest DoRequestForm<T>(string url, NetworkForm form, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 3)
 		{
 			ARequest request = new FormRequest<T>(Server.Url + url, (form != null) ? form.Form : null, successCallback, failureCallback, retriesOnFail);
 			requestsQueue.Enqueue(request);
@@ -102,26 +102,26 @@ namespace MSP2050.Scripts
 			return request;
 		}
 
-		public ARequest DoRequest<T>(string url, NetworkForm form, Action<T> successCallback, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
+		public ARequest DoRequestForm<T>(string url, NetworkForm form, Action<T> successCallback, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
 		{
 			switch(responseType)
 			{
 				case EWebRequestFailureResponse.Error:
-					return DoRequest<T>(url, form, successCallback, HandleRequestFailureError, retriesOnFail);
+					return DoRequestForm<T>(url, form, successCallback, HandleRequestFailureError, retriesOnFail);
 				case EWebRequestFailureResponse.Crash:
-					return DoRequest<T>(url, form, successCallback, HandleRequestFailureCrash, retriesOnFail);
+					return DoRequestForm<T>(url, form, successCallback, HandleRequestFailureCrash, retriesOnFail);
 				default:
-					return DoRequest<T>(url, form, successCallback, HandleRequestFailureLog, retriesOnFail);
+					return DoRequestForm<T>(url, form, successCallback, HandleRequestFailureLog, retriesOnFail);
 			}
 		}
 
-		public ARequest DoRequest(string url, NetworkForm form, int retriesOnFail = 3)
+		public ARequest DoRequestForm(string url, NetworkForm form, int retriesOnFail = 3)
 		{
-			return DoRequest<string>(url, form, null, HandleRequestFailureError, retriesOnFail);
+			return DoRequestForm<string>(url, form, null, HandleRequestFailureError, retriesOnFail);
 		}
 
 		//Note: specifying a custom failure callback avoids all default ones, including automatic retries.
-		public ARequest DoRequest<T>(string url, string rawData, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
+		public ARequest DoRequestRaw<T>(string url, string rawData, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
 		{
 			ARequest request = new RawDataRequest<T>(Server.Url + url, rawData, successCallback, failureCallback, retriesOnFail);
 			requestsQueue.Enqueue(request);
@@ -134,22 +134,22 @@ namespace MSP2050.Scripts
 			return request;
 		}
 
-		public ARequest DoRequest<T>(string url, string rawData, Action<T> successCallback, EWebRequestFailureResponse responseType, int retriesOnFail = 0)
+		public ARequest DoRequestRaw<T>(string url, string rawData, Action<T> successCallback, EWebRequestFailureResponse responseType, int retriesOnFail = 0)
 		{
 			switch (responseType)
 			{
 				case EWebRequestFailureResponse.Error:
-					return DoRequest<T>(url, rawData, successCallback, HandleRequestFailureError, retriesOnFail);
+					return DoRequestRaw<T>(url, rawData, successCallback, HandleRequestFailureError, retriesOnFail);
 				case EWebRequestFailureResponse.Crash:
-					return DoRequest<T>(url, rawData, successCallback, HandleRequestFailureCrash, retriesOnFail);
+					return DoRequestRaw<T>(url, rawData, successCallback, HandleRequestFailureCrash, retriesOnFail);
 				default:
-					return DoRequest<T>(url, rawData, successCallback, HandleRequestFailureLog, retriesOnFail);
+					return DoRequestRaw<T>(url, rawData, successCallback, HandleRequestFailureLog, retriesOnFail);
 			}
 		}
 
-		public ARequest DoRequest(string url, string rawData, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
+		public ARequest DoRequestRaw(string url, string rawData, EWebRequestFailureResponse responseType = EWebRequestFailureResponse.Error, int retriesOnFail = 3)
 		{
-			return DoRequest<string>(url, rawData, null, HandleRequestFailureError, retriesOnFail);
+			return DoRequestRaw<string>(url, rawData, null, HandleRequestFailureError, retriesOnFail);
 		}
 
 		public void DoExternalAPICall<T>(string url, Dictionary<int, SubEntity> subEntitiesToPass, Action<T> successCallback, System.Action<ARequest, string> failureCallback, int retriesOnFail = 0)
@@ -426,7 +426,7 @@ namespace MSP2050.Scripts
 
 			form.AddField("build_timestamp", ApplicationBuildIdentifier.Instance.GetBuildTime());
 
-			DoRequest(Server.RequestSession(), form, successCallback, failureCallback);
+			DoRequestForm(Server.RequestSession(), form, successCallback, failureCallback);
 		}
 
 		public class RequestSessionResponse
