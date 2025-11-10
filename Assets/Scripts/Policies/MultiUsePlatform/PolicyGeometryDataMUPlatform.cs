@@ -16,8 +16,10 @@ namespace MSP2050.Scripts
 			policy_type = PolicyManager.MU_PLATFORM_POLICY_NAME;
 		}
 
-		public PolicyGeometryDataMUPlatform(string a_jsonData)
+		public PolicyGeometryDataMUPlatform(int a_options)
 		{
+			policy_type = PolicyManager.MU_PLATFORM_POLICY_NAME;
+			options = new bool[a_options];
 		}
 
 		public override string GetJson()

@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace MSP2050.Scripts
 {
@@ -40,7 +41,14 @@ namespace MSP2050.Scripts
 
 			foreach (var kvp in a_values)
 			{
-				PolicyGeometryDataMUPlatform data = new PolicyGeometryDataMUPlatform(kvp.Value); 
+				PolicyGeometryDataMUPlatform data;
+				if (string.IsNullOrEmpty(kvp.Value))
+					data = new PolicyGeometryDataMUPlatform(m_toggles.Count);
+				else
+					data = JsonConvert.DeserializeObject<PolicyGeometryDataMUPlatform>(kvp.Value);
+				if (data.options == null || data.options.Length < m_toggles.Count)
+					data.options = new bool[m_toggles.Count];
+
 				m_policyValues.Add(kvp.Key, data);
 				if(first)
 				{
@@ -57,13 +65,12 @@ namespace MSP2050.Scripts
 					}
 				}
 			}
-			first = false;
 			foreach (Entity e in a_geometry)
 			{
 				if (!a_values.ContainsKey(e))
 				{
 					//Create empty entries for geometry that doesnt have a value yet
-					m_policyValues.Add(e, new PolicyGeometryDataMUPlatform());
+					m_policyValues.Add(e, new PolicyGeometryDataMUPlatform(m_toggles.Count));
 					for (int i = 0; i < m_toggles.Count; i++)
 					{
 						if (values[i].HasValue && values[i].Value)
@@ -75,8 +82,6 @@ namespace MSP2050.Scripts
 			{
 				m_toggles[i].Value = values[i];
 			}
-
-			//TODO: set energy capacity of geometry based on policy
 		}
 
 		void OnToggleChanged(int a_toggleIndex, bool a_value)
@@ -99,7 +104,13 @@ namespace MSP2050.Scripts
 		{
 			Initialise();
 			m_changedCallback = null;
-			PolicyGeometryDataMUPlatform data = new PolicyGeometryDataMUPlatform(a_value);
+			PolicyGeometryDataMUPlatform data;
+			if (string.IsNullOrEmpty(a_value))
+				data = new PolicyGeometryDataMUPlatform(m_toggles.Count);
+			else
+				data = JsonConvert.DeserializeObject<PolicyGeometryDataMUPlatform>(a_value);
+			if (data.options == null || data.options.Length < m_toggles.Count)
+				data.options = new bool[m_toggles.Count];
 			m_policyValues = new Dictionary<Entity, PolicyGeometryDataMUPlatform>() { { a_geometry, data } };
 
 			for (int i = 0; i < m_toggles.Count; i++)
