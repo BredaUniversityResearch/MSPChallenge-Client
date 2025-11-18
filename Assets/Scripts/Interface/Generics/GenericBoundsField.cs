@@ -97,13 +97,13 @@ namespace MSP2050.Scripts
             float xMax = GetCoordinate(m_tlX, bounds.xMax);
             float yMax = GetCoordinate(m_tlY, bounds.yMax);
 
-            if(xMin < xMax)
+            if(xMax < xMin)
             {
                 float t = xMin;
                 xMin = xMax;
                 xMax = t;
             }
-			if (yMin < yMax)
+			if (yMax < yMin)
 			{
 				float t = yMin;
 				yMin = yMax;
