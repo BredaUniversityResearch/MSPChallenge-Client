@@ -93,9 +93,9 @@ namespace MSP2050.Scripts
 
 			Rect bounds = CameraManager.Instance.zoomRect;
             float xMin = GetCoordinate(m_blX, bounds.xMin);
-            float yMin = GetCoordinate(m_blX, bounds.yMin);
-            float xMax = GetCoordinate(m_blX, bounds.xMax);
-            float yMax = GetCoordinate(m_blX, bounds.yMax);
+            float yMin = GetCoordinate(m_blY, bounds.yMin);
+            float xMax = GetCoordinate(m_tlX, bounds.xMax);
+            float yMax = GetCoordinate(m_tlY, bounds.yMax);
 
             if(xMin < xMax)
             {
