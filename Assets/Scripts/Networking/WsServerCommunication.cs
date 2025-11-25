@@ -7,11 +7,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using UnityEngine;
 using Websocket.Client;
-using BatchRequestSuccessCallbacks = System.Collections.Generic.Dictionary<System.Guid, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
-using BatchRequestFailureCallbacks = System.Collections.Generic.Dictionary<System.Guid, System.Action<string>>;
-using BatchRequestResultAndSuccessCallback =
-	System.Collections.Generic.KeyValuePair<MSP2050.Scripts.BatchExecutionResult, System.Action<MSP2050.Scripts.BatchExecutionResult>>;
-using BatchRequestResultAndFailureCallback = System.Collections.Generic.KeyValuePair<string, System.Action<string>>;
+using BatchRequestCallbacks = System.Collections.Generic.Dictionary<System.Guid, (System.Action<MSP2050.Scripts.BatchExecutionResult>, System.Action<string>)>;
 
 namespace MSP2050.Scripts
 {
@@ -36,68 +32,20 @@ namespace MSP2050.Scripts
 		private double m_lastUpdateTimestamp = 0;
 		private readonly IWebsocketClient m_client;
 
-		private BatchRequestSuccessCallbacks m_batchRequestSuccessCallbacks = new BatchRequestSuccessCallbacks();
-		private BatchRequestFailureCallbacks m_batchRequestFailureCallbacks = new BatchRequestFailureCallbacks();
-
-		private Queue<BatchRequestResultAndSuccessCallback> m_batchRequestResultAndSuccessCallbackQueue =
-			new Queue<BatchRequestResultAndSuccessCallback>();
-		private Queue<BatchRequestResultAndFailureCallback> m_batchRequestResultAndFailureCallbackQueue =
-			new Queue<BatchRequestResultAndFailureCallback>();
-
-		public event Action<List<ImmersiveSession>> OnImmersiveSessionUpdate;
-		public event Action<string> OnImmersiveSessionUpdateFailed;
-
-		public class ImmersiveSessionsUpdateRequest : Request<List<ImmersiveSession>>
-		{
-			private Action<string> m_onFailureCallback;
-			
-			public ImmersiveSessionsUpdateRequest(
-				string a_url,
-				Action<List<ImmersiveSession>> a_onSuccessCallback,
-				Action<string> a_OnFailureCallback
-			) : base(
-				a_url,
-				a_onSuccessCallback,
-				(req, msg) => ((ImmersiveSessionsUpdateRequest)req).HandleUpdateFailCallback(req, msg), 
-				1
-			) {
-				m_onFailureCallback = a_OnFailureCallback;
-			}
-			
-			public override void CreateRequest(Dictionary<string, string> a_defaultHeaders)
-			{
-			}			
-			
-			private void HandleUpdateFailCallback(ARequest a_request, string a_message)
-			{
-				m_onFailureCallback?.Invoke(a_message);
-			}
-		}
-
-		private class UpdateRequest : Request<UpdateObject>
-		{
-			public UpdateRequest(string a_url, Action<UpdateObject> a_successCallback) :
-				base(a_url, a_successCallback, HandleUpdateFailCallback, 1)
-			{
-			}
-
-			public override void CreateRequest(Dictionary<string, string> a_defaultHeaders)
-			{
-			}
-
-			private static void HandleUpdateFailCallback(ARequest a_request, string a_message)
-			{
-			}
-		}
+		private BatchRequestCallbacks m_batchRequestCallbacks = new();
+		private Queue<Action> m_callbackQueue = new();
 
 		[SuppressMessage("ReSharper", "InconsistentNaming")] // need to match json
 		private class BatchRequestResultHeaderData
 		{
 			public Guid batch_guid;
 		}
+		
+		public event Action<UpdateObject> OnGameLatestUpdate;
+		public event Action<List<ImmersiveSession>> OnImmersiveSessionUpdate;
+		public event Action<string> OnImmersiveSessionUpdateFailed;		
 
-		public WsServerCommunication(int a_gameSessionId, int a_teamId, int a_userId,
-			Action<UpdateObject> a_updateSuccessCallback)
+		public WsServerCommunication(int a_gameSessionId, int a_teamId, int a_userId)
 		{
 			m_teamId = a_teamId;
 			m_userId = a_userId;
@@ -152,7 +100,7 @@ namespace MSP2050.Scripts
 					Debug.LogError(
 						$"Error deserializing message from request to url: {Server.WsServerUri.AbsoluteUri}\nError message: {e.Message}");
 				}
-				ProcessPayload(result, a_updateSuccessCallback);
+				ProcessPayload(result);
 			});
 		}
 
@@ -163,20 +111,9 @@ namespace MSP2050.Scripts
 
 		public void Update()
 		{
-			ProcessBatchRequests();
-		}
-
-		private void ProcessBatchRequests()
-		{
-			while (m_batchRequestResultAndSuccessCallbackQueue.Count > 0)
+			while (m_callbackQueue.Count > 0)
 			{
-				BatchRequestResultAndSuccessCallback pair = m_batchRequestResultAndSuccessCallbackQueue.Dequeue();
-				pair.Value.Invoke(pair.Key);
-			}
-			while (m_batchRequestResultAndFailureCallbackQueue.Count > 0)
-			{
-				BatchRequestResultAndFailureCallback pair = m_batchRequestResultAndFailureCallbackQueue.Dequeue();
-				pair.Value.Invoke(pair.Key);
+				m_callbackQueue.Dequeue().Invoke();
 			}
 		}
 
@@ -184,24 +121,18 @@ namespace MSP2050.Scripts
 			Action<string> a_failureCallback)
 		{
 			UnregisterBatchRequestCallbacks(a_batchGuid);
-			m_batchRequestSuccessCallbacks.Add(a_batchGuid, a_successCallback);
-			m_batchRequestFailureCallbacks.Add(a_batchGuid, a_failureCallback);
+			m_batchRequestCallbacks.Add(a_batchGuid, (a_successCallback, a_failureCallback));
 		}
 
 		public void UnregisterBatchRequestCallbacks(Guid a_batchGuid)
 		{
-			if (m_batchRequestSuccessCallbacks.ContainsKey(a_batchGuid))
+			if (m_batchRequestCallbacks.ContainsKey(a_batchGuid))
 			{
-				m_batchRequestSuccessCallbacks.Remove(a_batchGuid);
-			}
-			if (m_batchRequestFailureCallbacks.ContainsKey(a_batchGuid))
-			{
-				m_batchRequestFailureCallbacks.Remove(a_batchGuid);
+				m_batchRequestCallbacks.Remove(a_batchGuid);
 			}
 		}
 
-		private void ProcessPayload(RequestResult a_result,
-			Action<UpdateObject> a_updateSuccessCallback)
+		private void ProcessPayload(RequestResult a_result)
 		{
 			switch (a_result.header_type)
 			{
@@ -209,7 +140,7 @@ namespace MSP2050.Scripts
                 	ProcessImmersiveSessionsUpdatePayload(a_result);
 					break;
 				case "Game/Latest":
-					ProcessGameLatestPayload(a_result, a_updateSuccessCallback);
+					ProcessGameLatestPayload(a_result);
 					break;
 				case "Batch/ExecuteBatch":
 					ProcessBatchExecuteBatchPayload(a_result);
@@ -225,25 +156,23 @@ namespace MSP2050.Scripts
 			{
 				return;
 			}
-			
-			ImmersiveSessionsUpdateRequest request = new ImmersiveSessionsUpdateRequest(
-				Server.Url,
-				sessions => OnImmersiveSessionUpdate?.Invoke(sessions),
-				message => OnImmersiveSessionUpdateFailed?.Invoke(message)
-			);
+			List<ImmersiveSession> sessions;
 			try
 			{
-				List<ImmersiveSession> sessions = request.ToObject(a_result.payload);
+				//Parse payload to expected type
+				JsonSerializer serializer = new JsonSerializer();
+				serializer.Converters.Add(new JsonConverterBinaryBool());
+				sessions = a_result.payload.ToObject<List<ImmersiveSession>>(serializer);
 			}
 			catch (System.Exception e)
 			{
-				request.failureCallback(request, e.Message + "\n" + e.StackTrace);
 				Debug.LogError("Exception in ProcessImmersiveSessionsUpdatePayload: " + e.Message + "\n" + e.StackTrace);
 				Debug.LogError("ImmersiveSessions/Update payload: " + a_result.payload);
+				m_callbackQueue.Enqueue(() => OnImmersiveSessionUpdateFailed?.Invoke(e.Message + "\n" + e.StackTrace));
 				return;
 			}
 			Debug.Log(a_result.payload.ToString().Substring(0, 80));
-			request.ProcessPayload(a_result.payload);
+			m_callbackQueue.Enqueue(() => OnImmersiveSessionUpdate?.Invoke(sessions));
 		}		
 
 		private void ProcessBatchExecuteBatchPayload(RequestResult a_result)
@@ -256,41 +185,39 @@ namespace MSP2050.Scripts
 			    // If a batch is created server side, for this client, but not by the client itself,
 			    //   the client will not have registered the batch call back, so check if it is there
 			    // E.g. when a programmer injects some batches to test with for websocket server testing
-			    m_batchRequestFailureCallbacks.ContainsKey(headerData.batch_guid))
+			    m_batchRequestCallbacks.ContainsKey(headerData.batch_guid))
 			{
-				BatchRequestResultAndFailureCallback pair =
-					new BatchRequestResultAndFailureCallback(a_result.message,
-						m_batchRequestFailureCallbacks[headerData.batch_guid]);
-				m_batchRequestResultAndFailureCallbackQueue.Enqueue(pair);
+				m_callbackQueue.Enqueue(() =>
+					m_batchRequestCallbacks[headerData.batch_guid].Item2.Invoke(a_result.message));
 				return;
 			}
 
 			// new scope
-			if (m_batchRequestSuccessCallbacks.ContainsKey(headerData.batch_guid))
+			if (m_batchRequestCallbacks.ContainsKey(headerData.batch_guid))
 			{
-				BatchExecutionResult batchExecutionResult = a_result.payload.ToObject<BatchExecutionResult>(serializer);
-				BatchRequestResultAndSuccessCallback pair =
-					new BatchRequestResultAndSuccessCallback(batchExecutionResult,
-						m_batchRequestSuccessCallbacks[headerData.batch_guid]);
-				m_batchRequestResultAndSuccessCallbackQueue.Enqueue(pair);
+				m_callbackQueue.Enqueue(() =>
+					m_batchRequestCallbacks[headerData.batch_guid].Item1.Invoke(
+						a_result.payload.ToObject<BatchExecutionResult>(serializer))
+					);				
 			}
 
 			UnregisterBatchRequestCallbacks(headerData.batch_guid);
 		}
 
-		private void ProcessGameLatestPayload(RequestResult a_result,
-			Action<UpdateObject> a_updateSuccessCallback)
+		private void ProcessGameLatestPayload(RequestResult a_result)
 		{
 			if (!a_result.success)
 			{
 				return;
 			}
 
-			UpdateRequest request = new UpdateRequest(Server.Url, a_updateSuccessCallback);
+			UpdateObject updateObject;
 			try
 			{
 				//Parse payload to expected type
-				UpdateObject updateObject = request.ToObject(a_result.payload);
+				JsonSerializer serializer = new JsonSerializer();
+				serializer.Converters.Add(new JsonConverterBinaryBool());
+				updateObject = a_result.payload.ToObject<UpdateObject>(serializer);	
 				// there is mismatch between the expected update time and given by the server
 				if (Math.Abs(updateObject.prev_update_time - m_lastUpdateTimestamp) > Double.Epsilon)
 				{
@@ -309,7 +236,7 @@ namespace MSP2050.Scripts
 				return;
 			}
 			Debug.Log(a_result.payload.ToString().Substring(0, 80));
-			request.ProcessPayload(a_result.payload);
+			m_callbackQueue.Enqueue(() => OnGameLatestUpdate?.Invoke(updateObject));
 		}
 
 		public void Stop()
