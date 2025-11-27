@@ -53,15 +53,16 @@ namespace MSP2050.Scripts
 			m_WsServerCommunication = new WsServerCommunication(
 				Server.GameSessionId,
 				SessionManager.Instance.CurrentUserTeamID,
-				SessionManager.Instance.CurrentSessionID,
-				HandleUpdateSuccessCallback
+				SessionManager.Instance.CurrentSessionID
 			);
+			m_WsServerCommunication.OnGameLatestUpdate += HandleUpdateSuccessCallback;
 			m_WsServerCommunication.Start();
 
 			// wait for a first update(s) to arrive
 			while (m_NextUpdates.Count == 0)
 			{
 				HandleWsServerConnectionChanges();
+				m_WsServerCommunication.Update();
 				yield return null;
 			}
 
@@ -201,6 +202,20 @@ namespace MSP2050.Scripts
 						kvp.Key.RedrawGameObjects(CameraManager.Instance.gameCamera);
 					}
 				}
+			}
+		}
+
+		public void RegisterImmersiveSessionListener(Action<List<ImmersiveSession>> a_success, Action<string> a_failure, bool a_register)
+		{
+			if(a_register)
+			{
+				m_WsServerCommunication.OnImmersiveSessionUpdate += a_success;
+				m_WsServerCommunication.OnImmersiveSessionUpdateFailed += a_failure;
+			}
+			else
+			{
+				m_WsServerCommunication.OnImmersiveSessionUpdate -= a_success;
+				m_WsServerCommunication.OnImmersiveSessionUpdateFailed -= a_failure;
 			}
 		}
 	}

@@ -484,7 +484,7 @@ namespace MSP2050.Scripts
 		public void LoadRestrictions()
 		{
 			NetworkForm form = new NetworkForm();
-			ServerCommunication.Instance.DoRequest<RestrictionConfigObject>(Server.GetRestrictions(), form, HandleLoadRestrictionsCallback);
+			ServerCommunication.Instance.DoRequestForm<RestrictionConfigObject>(Server.GetRestrictions(), form, HandleLoadRestrictionsCallback);
 		}
 
 		private void HandleLoadRestrictionsCallback(RestrictionConfigObject a_restrictionConfig)

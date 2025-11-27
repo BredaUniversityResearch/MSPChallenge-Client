@@ -180,7 +180,7 @@ public class EnergyVerifierObj : MonoBehaviour
 			    form.AddField("source_ids", JToken.FromObject(originalSources));
             if(originalSockets.Count > 0)
 			    form.AddField("socket_ids", JToken.FromObject(originalSockets));
-			ServerCommunication.Instance.DoRequest<GridVerificationResult>(Server.VerifyEnergyGrid(), form, result => GridVerificationResultHandler(result, gridId));
+			ServerCommunication.Instance.DoRequestForm<GridVerificationResult>(Server.VerifyEnergyGrid(), form, result => GridVerificationResultHandler(result, gridId));
 		}
 		yield return awaitingGridReponses == 0;
 		Debug.Log($"Grid content check complete, {errors} errors found.");
@@ -217,7 +217,7 @@ public class EnergyVerifierObj : MonoBehaviour
 		}
 		NetworkForm form = new NetworkForm();
 		form.AddField("ids", JToken.FromObject(ids));
-		ServerCommunication.Instance.DoRequest<string>(Server.VerifyEnergyCapacity(), form, CapacityCheckResultHandler);
+		ServerCommunication.Instance.DoRequestForm<string>(Server.VerifyEnergyCapacity(), form, CapacityCheckResultHandler);
 	}
 
 	void CapacityCheckResultHandler(string result)

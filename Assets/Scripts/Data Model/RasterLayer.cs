@@ -60,15 +60,7 @@ namespace MSP2050.Scripts
 			entityTypesSortedByValue.Sort(SortMethodEntityTypesByValue);
 			viewingRaster = rasterAtLatestTime;
 			rasterValueToEntityValueMultiplier = layerMeta.layer_entity_value_max ?? DEFAULT_RASTER_VALUE_TO_ENTITY_VALUE_MULTIPLIER;
-
-			try
-			{
-				rasterObject = JsonConvert.DeserializeObject<RasterObject>(layerMeta.layer_raster);
-			}
-			catch(Exception ex)
-			{
-				Debug.LogError("Failed to deserialize: " + FileName + "\nException message: " + ex.Message + "\nSource Data: " + layerMeta.layer_raster);
-			}
+			rasterObject = layerMeta.layer_raster;
 		}
 
 		private void AddColorType(int type, Color color)
@@ -107,7 +99,7 @@ namespace MSP2050.Scripts
 				//Debug.Log("Requesting " + FileName + " at " + imageURL);
 				NetworkForm form = new NetworkForm();
 				form.AddField("layer_name", FileName);
-				ServerCommunication.Instance.DoRequest<RasterRequestResponse>(imageURL, form, HandleImportLatestRasterCallback);
+				ServerCommunication.Instance.DoRequestForm<RasterRequestResponse>(imageURL, form, HandleImportLatestRasterCallback);
 			}
 		}
 
@@ -162,7 +154,7 @@ namespace MSP2050.Scripts
 				NetworkForm form = new NetworkForm();
 				form.AddField("layer_name", FileName);
 				form.AddField("month", month);
-				ServerCommunication.Instance.DoRequest<RasterRequestResponse>(imageURL, form, response => HandleImportRasterAtTimeCallback(response, viewingRasterTime));
+				ServerCommunication.Instance.DoRequestForm<RasterRequestResponse>(imageURL, form, response => HandleImportRasterAtTimeCallback(response, viewingRasterTime));
 			}
 		}
 
