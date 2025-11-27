@@ -114,23 +114,12 @@ namespace MSP2050.Scripts
 			if(a_layerMeta.layer_text_info != null && a_layerMeta.layer_text_info.property_per_state != null)
 				m_textInfo = new LayerTextInfo(a_layerMeta.layer_text_info);
 
-			if (a_layerMeta.layer_states != null && a_layerMeta.layer_states != "")
+			if (a_layerMeta.layer_states != null && a_layerMeta.layer_states.Length > 0)
 			{
-				List<LayerStateObject> layerstateObject = new List<LayerStateObject>();
-				try
-				{
-					layerstateObject = JsonConvert.DeserializeObject<List<LayerStateObject>>(a_layerMeta.layer_states);
-				}
-				catch
-				{
-					Debug.LogError("Failed to deserialize: " + FileName + " trying to parse " + a_layerMeta.layer_states);
-				}
-
-				foreach (LayerStateObject obj in layerstateObject)
+				foreach (LayerStateObject obj in a_layerMeta.layer_states)
 				{
 					m_layerStates.Add(obj.state, obj.time);
 				}
-
 				if (m_layerStates.ContainsKey(ASSEMBLY_STATE))
 					AssemblyTime = m_layerStates[ASSEMBLY_STATE];
 			}

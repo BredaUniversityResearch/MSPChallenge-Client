@@ -32,7 +32,7 @@ namespace MSP2050.Scripts
 			form.AddField("title", title.text);
 			form.AddField("description", description.text);
 			form.AddField("deadline", deadline.GetSelectedMonth());
-			ServerCommunication.Instance.DoRequest(Server.SendObjective(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.SendObjective(), form);
 			gameObject.SetActive(false);
 		}
 

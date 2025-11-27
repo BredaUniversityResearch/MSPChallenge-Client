@@ -39,7 +39,7 @@ namespace MSP2050.Scripts
 
 			NetworkForm form = new NetworkForm();
 			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
-			ServerCommunication.Instance.DoRequest<List<LayerMeta>>(Server.LayerMeta(), form, HandleImportLayerMetaCallback);
+			ServerCommunication.Instance.DoRequestForm<List<LayerMeta>>(Server.LayerMeta(), form, HandleImportLayerMetaCallback);
 		}
 
 		private void HandleImportLayerMetaCallback(List<LayerMeta> layerMeta)
@@ -79,7 +79,7 @@ namespace MSP2050.Scripts
 		{
 			NetworkForm form = new NetworkForm();
 			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
-			ServerCommunication.Instance.DoRequest< List<LayerMeta>>(Server.LayerMeta(), form, HandleReimportLayerTypeColorsCallback);
+			ServerCommunication.Instance.DoRequestForm< List<LayerMeta>>(Server.LayerMeta(), form, HandleReimportLayerTypeColorsCallback);
 		}
 #endif
 
@@ -132,7 +132,7 @@ namespace MSP2050.Scripts
 				{
 					NetworkForm form = new NetworkForm();
 					form.AddField("layer_id", selectedLayerID);
-					ServerCommunication.Instance.DoRequest<List<SubEntityObject>>(Server.GetLayer(), form, (objs) => HandleVectorLayerImport(objs, layer));
+					ServerCommunication.Instance.DoRequestForm<List<SubEntityObject>>(Server.GetLayer(), form, (objs) => HandleVectorLayerImport(objs, layer));
 				}
 			}
 		}

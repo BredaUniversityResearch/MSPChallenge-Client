@@ -311,7 +311,7 @@ namespace MSP2050.Scripts
 			form.AddField("short", ShortName);
 			form.AddField("id", m_id);
 
-			ServerCommunication.Instance.DoRequest(Server.PostLayerMeta(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.PostLayerMeta(), form);
 		}
 
 		protected override string MetaToJson()
