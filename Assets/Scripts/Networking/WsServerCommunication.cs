@@ -188,20 +188,23 @@ namespace MSP2050.Scripts
 			    m_batchRequestCallbacks.ContainsKey(headerData.batch_guid))
 			{
 				m_callbackQueue.Enqueue(() =>
-					m_batchRequestCallbacks[headerData.batch_guid].Item2.Invoke(a_result.message));
+				{
+					m_batchRequestCallbacks[headerData.batch_guid].Item2.Invoke(a_result.message);
+					UnregisterBatchRequestCallbacks(headerData.batch_guid);
+				});
 				return;
 			}
 
 			// new scope
 			if (m_batchRequestCallbacks.ContainsKey(headerData.batch_guid))
 			{
-				m_callbackQueue.Enqueue(() =>
+				m_callbackQueue.Enqueue(() => {
 					m_batchRequestCallbacks[headerData.batch_guid].Item1.Invoke(
-						a_result.payload.ToObject<BatchExecutionResult>(serializer))
-					);				
+						a_result.payload.ToObject<BatchExecutionResult>(serializer)
+					);
+					UnregisterBatchRequestCallbacks(headerData.batch_guid);
+				});
 			}
-
-			UnregisterBatchRequestCallbacks(headerData.batch_guid);
 		}
 
 		private void ProcessGameLatestPayload(RequestResult a_result)
