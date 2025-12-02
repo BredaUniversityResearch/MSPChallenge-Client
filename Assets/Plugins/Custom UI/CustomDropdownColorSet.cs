@@ -97,25 +97,27 @@ public class CustomDropdownColorSet : SerializedMonoBehaviour, IPointerEnterHand
         SetGraphicSetToColor(colorDisabled);
     }
 
-    void SetGraphicSetToColor(IColourContainer colourAsset)
-    {
-		if (colourAsset == null)
+	void SetGraphicSetToColor(IColourContainer colourAsset)
+	{
+		if (colorLocked)
+			return;
+		if (null == colourAsset)
 		{
-			Debug.LogError("Color set is trying to set colour to null colourasset. Source object: " + gameObject.name);
+			Debug.LogWarning("Missing colour asset: " + gameObject.name);
 			return;
 		}
 		foreach (Graphic g in targetGraphics)
 		{
-			if(g == null)
+			if (null == g)
 			{
-				Debug.LogError("Color set is trying to set colour for missing graphics. Source object: " + gameObject.name);
+				Debug.LogWarning("Missing graphic: " + gameObject.name);
 				continue;
 			}
 			g.color = colourAsset.GetColour();
 		}
-    }
+	}
 
-    void SubscribeToAssetChange()
+	void SubscribeToAssetChange()
     {
         if (Application.isPlaying)
         {
