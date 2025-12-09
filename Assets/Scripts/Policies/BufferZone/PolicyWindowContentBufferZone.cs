@@ -34,6 +34,7 @@ namespace MSP2050.Scripts
 				m_fleetGroups.Add(fleetGroup);
 			}
 			m_radiusInput.onEndEdit.AddListener(OnRadiusChanged);
+			m_initialised = true;
 		}
 
 		void OnFleetChanged(int a_gearId, bool a_value)
