@@ -123,7 +123,7 @@ namespace MSP2050.Scripts
 			NetworkForm form = new NetworkForm();
 			form.AddField("id", ID);
 			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
-			ServerCommunication.Instance.DoRequest<string>(Server.LockPlan(), form, (_) => HandleAttemptLockSuccess(actionOnSuccess), (r,m) => HandleAttemptLockFailure(actionOnFail, r, m));
+			ServerCommunication.Instance.DoRequestForm<string>(Server.LockPlan(), form, (_) => HandleAttemptLockSuccess(actionOnSuccess), (r,m) => HandleAttemptLockFailure(actionOnFail, r, m));
 		}
 
 		private void HandleAttemptLockSuccess(PlanLockAction actionOnSuccess)
@@ -856,7 +856,7 @@ namespace MSP2050.Scripts
 			form.AddField("id", ID);
 			form.AddField("force_unlock", forceUnlock ? "1" : "0");
 			form.AddField("user", SessionManager.Instance.CurrentSessionID.ToString());
-			ServerCommunication.Instance.DoRequest<string>(Server.UnlockPlan(), form, callback, ServerCommunication.EWebRequestFailureResponse.Crash);
+			ServerCommunication.Instance.DoRequestForm<string>(Server.UnlockPlan(), form, callback, ServerCommunication.EWebRequestFailureResponse.Crash);
 		}
 
 		public void AttemptUnlock(BatchRequest batch)
@@ -946,7 +946,7 @@ namespace MSP2050.Scripts
 			form.AddField("user_name", "[SYSTEM]");
 			form.AddField("text", text);
 
-			ServerCommunication.Instance.DoRequest(Server.PostPlanFeedback(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.PostPlanFeedback(), form);
 		}
 
 		public void SendMessage(string text)
@@ -961,7 +961,7 @@ namespace MSP2050.Scripts
 			form.AddField("team_id", SessionManager.Instance.CurrentUserTeamID);
 			form.AddField("user_name", SessionManager.Instance.CurrentUserName);
 			form.AddField("text", text);
-			ServerCommunication.Instance.DoRequest(Server.PostPlanFeedback(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.PostPlanFeedback(), form);
 		}
 
 		public void SendMessage(string text, BatchRequest batch)

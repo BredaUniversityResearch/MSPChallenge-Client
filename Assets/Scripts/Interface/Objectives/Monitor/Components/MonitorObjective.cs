@@ -65,7 +65,7 @@ namespace MSP2050.Scripts
 				NetworkForm form = new NetworkForm();
 				form.AddField("objective_id", ObjectiveDetails.objectiveId);
 				form.AddField("completed", newCompletedState ? 1 : 0);
-				ServerCommunication.Instance.DoRequest(Server.SetObjectiveCompleted(), form);
+				ServerCommunication.Instance.DoRequestForm(Server.SetObjectiveCompleted(), form);
 			}
 
 			objectivesMonitor.OnObjectiveUIStateChanged();
@@ -85,7 +85,7 @@ namespace MSP2050.Scripts
 		{
 			NetworkForm form = new NetworkForm();
 			form.AddField("id", objectiveId);
-			ServerCommunication.Instance.DoRequest(Server.DeleteObjective(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.DeleteObjective(), form);
 
 			//Remove the objective from the UI immediately.
 			objectivesMonitor.RemoveObjectiveFromUI(this);

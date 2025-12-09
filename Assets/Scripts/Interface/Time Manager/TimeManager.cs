@@ -422,7 +422,7 @@ namespace MSP2050.Scripts
 			form.AddField("state", state);
 			Debug.Log("Send State " + state.ToString());
 
-			ServerCommunication.Instance.DoRequest(Server.SetGameState(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.SetGameState(), form);
 		}
 
 		public static PlanningState StringToPlanningState(string value)
@@ -441,7 +441,7 @@ namespace MSP2050.Scripts
 		{
 			NetworkForm form = new NetworkForm();
 			form.AddField("state", state.ToString());
-			ServerCommunication.Instance.DoRequest(Server.SetGameState(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.SetGameState(), form);
 		}
 
 		private void ServerChangePlanningGameTime(int newMonths)
@@ -454,7 +454,7 @@ namespace MSP2050.Scripts
 
 			NetworkForm form = new NetworkForm();
 			form.AddField("months", newMonths);
-			ServerCommunication.Instance.DoRequest(Server.SetGamePlanningTime(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.SetGamePlanningTime(), form);
 		}
 
 		private void ServerChangePlanningRealTime(int newSeconds)
@@ -463,7 +463,7 @@ namespace MSP2050.Scripts
 				newSeconds = 10;
 			NetworkForm form = new NetworkForm();
 			form.AddField("realtime", newSeconds);
-			ServerCommunication.Instance.DoRequest(Server.SetRealPlanningTime(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.SetRealPlanningTime(), form);
 		}
 
 		private void ServerChangeAllPlanningRealTime()
@@ -475,7 +475,7 @@ namespace MSP2050.Scripts
 
 			NetworkForm form = new NetworkForm();
 			form.AddField("realtime", times);
-			ServerCommunication.Instance.DoRequest(Server.SetFuturePlanningTime(), form);
+			ServerCommunication.Instance.DoRequestForm(Server.SetFuturePlanningTime(), form);
 		}
 		#endregion
 	}

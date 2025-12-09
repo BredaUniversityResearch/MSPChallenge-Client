@@ -94,7 +94,7 @@ namespace MSP2050.Scripts
 			}
 			PolicyManager.Instance.RegisterBuiltInPolicies();
 			SimulationManager.Instance.RegisterBuiltInSimulations();
-			ServerCommunication.Instance.DoRequest<PolicySimSettings>(Server.PolicySimSettings(), new NetworkForm(), HandlePolicySimSettingsCallback);
+			ServerCommunication.Instance.DoRequestForm<PolicySimSettings>(Server.PolicySimSettings(), new NetworkForm(), HandlePolicySimSettingsCallback);
 		}
 
 		private void HandlePolicySimSettingsCallback(PolicySimSettings a_settings)

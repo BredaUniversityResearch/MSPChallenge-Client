@@ -102,7 +102,7 @@ namespace MSP2050.Scripts
 				NetworkForm form = new NetworkForm();
 				form.AddField("layer_name", FileName);
 				form.AddField("month", TimeManager.Instance.GetCurrentMonth());
-				ServerCommunication.Instance.DoRequest<RasterRequestResponse>(imageURL, form, HandleImportLatestRasterCallback);
+				ServerCommunication.Instance.DoRequestForm<RasterRequestResponse>(imageURL, form, HandleImportLatestRasterCallback);
 			}
 		}
 
@@ -149,7 +149,7 @@ namespace MSP2050.Scripts
 				NetworkForm form = new NetworkForm();
 				form.AddField("layer_name", FileName);
 				form.AddField("month", month);
-				ServerCommunication.Instance.DoRequest<RasterRequestResponse>(imageURL, form, response => HandleImportRasterAtTimeCallback(response, viewingRasterTime));
+				ServerCommunication.Instance.DoRequestForm<RasterRequestResponse>(imageURL, form, response => HandleImportRasterAtTimeCallback(response, viewingRasterTime));
 			}
 		}
 

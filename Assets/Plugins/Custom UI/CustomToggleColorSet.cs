@@ -148,15 +148,27 @@ public class CustomToggleColorSet : SerializedMonoBehaviour, IPointerEnterHandle
         SetGraphicSetToColor(colorDisabled);
     }
 
-    private void SetGraphicSetToColor(IColourContainer a_colorAsset)
-    {
-	    if (m_colorLocked)
-		    return;
-        foreach (Graphic g in targetGraphics)
-            g.color = a_colorAsset.GetColour();
-    }
+	void SetGraphicSetToColor(IColourContainer colourAsset)
+	{
+		if (m_colorLocked)
+			return;
+		if (null == colourAsset)
+		{
+			Debug.LogWarning("Missing colour asset: " + gameObject.name);
+			return;
+		}
+		foreach (Graphic g in targetGraphics)
+		{
+			if (null == g)
+			{
+				Debug.LogWarning("Missing graphic: " + gameObject.name);
+				continue;
+			}
+			g.color = colourAsset.GetColour();
+		}
+	}
 
-    private void SubscribeToAssetChange()
+	private void SubscribeToAssetChange()
     {
         if (!Application.isPlaying)
             return;
