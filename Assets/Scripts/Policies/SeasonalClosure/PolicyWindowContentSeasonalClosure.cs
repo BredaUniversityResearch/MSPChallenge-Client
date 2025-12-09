@@ -29,6 +29,7 @@ namespace MSP2050.Scripts
 				fleetGroup.SetFleet(i, OnFleetChanged, OnCountryChanged, OnMonthChanged);
 				m_fleetGroups.Add(fleetGroup);
 			}
+			m_initialised = true;
 		}
 
 
