@@ -385,7 +385,7 @@ namespace MSP2050.Scripts
 				}
 			}
 			//Update UI
-			InterfaceCanvas.Instance.timeBar.SetDate(month);
+			InterfaceCanvas.Instance.timeBar.UpdateDate(month, transitionMonth);
 			UpdateUI(state);
 		}
 

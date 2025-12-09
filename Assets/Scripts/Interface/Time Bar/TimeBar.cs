@@ -148,7 +148,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetDate(int month)
+		public void UpdateDate(int month, int? transitionMonth)
 		{
 			if (!TimeManager.Instance.GameStarted && !isViewingPlan)
 			{
@@ -158,7 +158,10 @@ namespace MSP2050.Scripts
 			}
 
 			fill.anchorMax = new Vector2((float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month, 1f);
-			currentDateText.text = Util.MonthToText(month);
+			if(transitionMonth.HasValue)
+				currentDateText.text = "Simulating " + Util.MonthToText(month);
+			else
+				currentDateText.text = Util.MonthToText(month);
 
 			if (isViewingPlan)
 			{
@@ -352,7 +355,7 @@ namespace MSP2050.Scripts
 
 		public void SetCatchingUp(bool a_value)
 		{
-			if (a_value && planningState == TimeManager.PlanningState.Play)
+			if (a_value && TimeManager.Instance.GameState == TimeManager.PlanningState.Play)
 			{
 				stateAndTimeText.text = "Calculating";
 			}
@@ -383,25 +386,50 @@ namespace MSP2050.Scripts
 			{
 				timeString = string.Format("{0:D1}:{1:D2}:{2:D2}", timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
 			}
-			switch (planningState)
+			string pretext = "";
+			if(TimeManager.Instance.TransitionState != PlanningState.None)
+			{
+				switch (TimeManager.Instance.CurrentState)
+				{
+					case TimeManager.PlanningState.Setup:
+						pretext = "Setup -> ";
+						break;
+					case TimeManager.PlanningState.Play:
+						pretext = "Planning -> ";
+						break;
+					case TimeManager.PlanningState.FastForward:
+						pretext = "Fast Forward -> ";
+						break;
+					case TimeManager.PlanningState.Simulation:
+						pretext = "Simulating -> ";
+						break;
+					case TimeManager.PlanningState.Pause:
+						pretext = "Paused -> ";
+						break;
+					case TimeManager.PlanningState.End:
+						pretext = "End -> ";
+						break;
+				}
+			}
+			switch (TimeManager.Instance.CurrentState)
 			{
 				case TimeManager.PlanningState.Setup:
-					stateAndTimeText.text = "Setup";
+					stateAndTimeText.text = pretext+"Setup";
 					break;
 				case TimeManager.PlanningState.Play:
-					stateAndTimeText.text = $"Planning\n{timeString}";
+					stateAndTimeText.text = pretext + $"Planning\n{timeString}";
 					break;
 				case TimeManager.PlanningState.FastForward:
-					stateAndTimeText.text = "Fast Forward";
+					stateAndTimeText.text = pretext + "Fast Forward";
 					break;
 				case TimeManager.PlanningState.Simulation:
-					stateAndTimeText.text = "Simulating";
+					stateAndTimeText.text = pretext + "Simulating";
 					break;
 				case TimeManager.PlanningState.Pause:
-					stateAndTimeText.text = $"Paused\n{timeString}";
+					stateAndTimeText.text = pretext + $"Paused\n{timeString}";
 					break;
 				case TimeManager.PlanningState.End:
-					stateAndTimeText.text = "End";
+					stateAndTimeText.text = pretext + "End";
 					break;
 			}
 		}
