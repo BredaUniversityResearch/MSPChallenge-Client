@@ -518,6 +518,48 @@ namespace MSP2050.Scripts
 			}
 		}
 
+		public void WarningIfDeletingExisting(string a_existingType, string a_warningText, Plan a_affectingPlan)
+		{
+			if (m_entity != null && m_entity.PlanLayer != null && m_entity.PlanLayer.Plan != null && a_affectingPlan.ID != m_entity.PlanLayer.Plan.ID)
+			{
+				PlayerNotifications.AddNotification(
+					$"WarningDeletingExisting{a_existingType}.{a_affectingPlan.ID}",
+					$"{a_existingType} Removed",
+					string.Format(a_warningText, a_affectingPlan.Name, m_entity.PlanLayer.Plan.StartTime < 0 ? "at the start of the game" : "in plan '" + a_affectingPlan.Name + "'")
+				);
+			}
+		}
+
+		public void WarningIfEditingExisting(string a_existingType, string a_warningText)
+		{
+			if (GetDatabaseID() != GetPersistentID())
+			{
+				Plan originalPlan = null;
+				SubEntity originalSubEntity = LayerManager.Instance.FindSubEntityByPersistentID(GetPersistentID());
+				if (originalSubEntity != null && originalSubEntity.m_entity != null && originalSubEntity.m_entity.PlanLayer != null && originalSubEntity.m_entity.PlanLayer.Plan != null)
+				{
+					originalPlan = originalSubEntity.m_entity.PlanLayer.Plan;
+				}
+				PlayerNotifications.AddNotification(
+					$"WarningEditingExisting{a_existingType}.{m_entity.PlanLayer.Plan.ID}",
+					$"{a_existingType} Edited",
+					string.Format(a_warningText, m_entity.PlanLayer.Plan.Name, (originalPlan == null || originalPlan.StartTime < 0) ? "at the start of the game" : "in plan '" + originalPlan.Name + "'")
+				);
+			}
+		}
+
+		public void WarningIfAddingToExisting(string a_existingType, string a_warningText, Plan a_affectingPlan)
+		{
+			if (m_entity != null && m_entity.PlanLayer != null && m_entity.PlanLayer.Plan != null && a_affectingPlan.ID != m_entity.PlanLayer.Plan.ID)
+			{
+				PlayerNotifications.AddNotification(
+					$"WarningAddingToExisting{a_existingType}.{a_affectingPlan.ID}",
+					$"{a_existingType} Affected",
+					string.Format(a_warningText, a_affectingPlan.Name, m_entity.PlanLayer.Plan.StartTime < 0 ? "at the start of the game" : "in plan '" + m_entity.PlanLayer.Plan.Name + "'")
+				);
+			}
+		}
+
 		#region Virtual methods
 		//Overridden for energy & shipping functions
 		public virtual void RemoveDependencies()

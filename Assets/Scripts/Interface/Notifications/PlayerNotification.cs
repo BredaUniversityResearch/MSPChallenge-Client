@@ -42,7 +42,8 @@ namespace MSP2050.Scripts
 				"Approval Action Required",
 				string.Format("Plan {0} requires an approval decision from your team", targetPlan.Name));
 			data.buttonText = "Open Plan Monitor";
-			data.onButtonPress = () => {
+			data.onButtonPress = () =>
+			{
 				if (Main.InEditMode)
 				{
 					DialogBoxManager.instance.NotificationWindow("Editing plan content", "Other plans cannot be viewed while editing a plan's content.", () => { }, "Dismiss");

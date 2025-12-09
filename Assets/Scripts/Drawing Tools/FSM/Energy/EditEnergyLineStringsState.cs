@@ -33,6 +33,11 @@ namespace MSP2050.Scripts
 						m_baseLayer.RemoveSubEntity(subEntity);
 						subEntity.RedrawGameObject();
 					}
+					subEntity.WarningIfDeletingExisting(
+						"Energy Cable",
+						"In plan '{0}' you have removed an energy cable first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+						m_planLayer.Plan
+					);
 				}
 
 				m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
@@ -79,6 +84,11 @@ namespace MSP2050.Scripts
 						subEntityToModify.RedrawGameObject();
 						m_fsm.AddToUndoStack(new BatchUndoOperationMarker());
 					}
+					subEntity.WarningIfDeletingExisting(
+						"Energy Cable",
+						"In plan '{0}' you have removed a part of an energy cable first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action.",
+						m_planLayer.Plan
+					);
 				}
 			}
 
@@ -261,7 +271,7 @@ namespace MSP2050.Scripts
 				//Duplicate linestring
 				EnergyLineStringSubEntity duplicate = CreateNewPlanLineString(a_subEntity.GetPersistentID(), a_subEntity.GetDataCopy()) as EnergyLineStringSubEntity;
 				SwitchSelectionFromBaseLineStringToDuplicate(a_subEntity, duplicate);
-            
+
 				//Add connections to new cable and reconnect attached points
 				foreach (Connection con in (a_subEntity as EnergyLineStringSubEntity).Connections)
 				{
@@ -275,6 +285,10 @@ namespace MSP2050.Scripts
 
 				if (!a_insideUndoBatch) { m_fsm.AddToUndoStack(new BatchUndoOperationMarker()); }
 			}
+			a_subEntity.WarningIfEditingExisting(
+				"Energy Cable",
+				"In plan '{0}' you have affected an energy cable first created {1}, thereby changing its energy grid. If this was unintentional, you should be able to undo this action."
+			);
 			return a_subEntity;
 		}
 	}
