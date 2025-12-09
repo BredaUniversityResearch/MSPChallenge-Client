@@ -72,10 +72,10 @@ namespace MSP2050.Scripts
 			if (a_session.connection != null)
 			{
 				m_sessionStatus.SetContent(a_session.status.ToString());
-				if(a_session.statusResponse != null && a_session.statusResponse.Length > 0 && !string.IsNullOrEmpty(a_session.statusResponse[0].message))
+				if(a_session.statusResponse != null && !string.IsNullOrEmpty(a_session.statusResponse.message))
 				{
 					m_sessionStatusMessage.gameObject.SetActive(true);
-					m_sessionStatusMessage.SetContent(a_session.statusResponse[0].message);
+					m_sessionStatusMessage.SetContent(a_session.statusResponse.message);
 				}
 				else
 					m_sessionStatusMessage.gameObject.SetActive(false);

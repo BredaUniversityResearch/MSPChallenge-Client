@@ -329,5 +329,13 @@ namespace MSP2050.Scripts
 				kvp.Value.OnPlanLayerRemoved(a_layer);
 			}
 		}
+
+		public void CheckPolicyLayerIssues(Plan a_plan)
+		{
+			foreach (var kvp in m_policyLogic)
+			{
+				kvp.Value.CheckPolicyLayerIssues(a_plan);
+			}
+		}
 	}
 }

@@ -53,15 +53,16 @@ namespace MSP2050.Scripts
 			m_WsServerCommunication = new WsServerCommunication(
 				Server.GameSessionId,
 				SessionManager.Instance.CurrentUserTeamID,
-				SessionManager.Instance.CurrentSessionID,
-				HandleUpdateSuccessCallback
+				SessionManager.Instance.CurrentSessionID
 			);
+			m_WsServerCommunication.OnGameLatestUpdate += HandleUpdateSuccessCallback;
 			m_WsServerCommunication.Start();
 
 			// wait for a first update(s) to arrive
 			while (m_NextUpdates.Count == 0)
 			{
 				HandleWsServerConnectionChanges();
+				m_WsServerCommunication.Update();
 				yield return null;
 			}
 

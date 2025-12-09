@@ -256,7 +256,7 @@ namespace MSP2050.Scripts
 					return layer;
 			}
 
-			Debug.LogWarning($"No layer found with tags: {a_layerTagsQuery}");
+			Debug.LogWarning($"No layer found with tags: {string.Join(", ", a_layerTagsQuery)}");
 			return null;
 		}
 

@@ -10,6 +10,7 @@ namespace MSP2050.Scripts
 		public const string CEL_SIM_NAME = "CEL";
 		public const string MEL_SIM_NAME = "MEL";
 		public const string SEL_SIM_NAME = "SEL";
+		public const string SE_SIM_NAME = "SandExtraction";
 		public const string OTHER_SIM_NAME = "External";
 
 		private static SimulationManager singleton;
@@ -69,6 +70,7 @@ namespace MSP2050.Scripts
 			m_simulationDefinitions.Add(MEL_SIM_NAME, new SimulationDefinition { m_name = MEL_SIM_NAME, m_updateType = typeof(SimulationUpdateMEL), m_logicType = typeof(SimulationLogicMEL), m_settingsType = typeof(SimulationSettingsMEL)});
 			m_simulationDefinitions.Add(CEL_SIM_NAME, new SimulationDefinition { m_name = CEL_SIM_NAME, m_updateType = typeof(SimulationUpdateCEL), m_logicType = typeof(SimulationLogicCEL), m_settingsType = typeof(SimulationSettingsCEL) });
 			m_simulationDefinitions.Add(SEL_SIM_NAME, new SimulationDefinition { m_name = SEL_SIM_NAME, m_updateType = typeof(SimulationUpdateSEL), m_logicType = typeof(SimulationLogicSEL), m_settingsType = typeof(SimulationSettingsSEL) });
+			m_simulationDefinitions.Add(SE_SIM_NAME, new SimulationDefinition { m_name = SE_SIM_NAME, m_updateType = typeof(SimulationUpdateOther), m_logicType = typeof(SimulationLogicOther), m_settingsType = typeof(SimulationSettingsOther) });
 			m_simulationDefinitions.Add(OTHER_SIM_NAME, new SimulationDefinition { m_name = OTHER_SIM_NAME, m_updateType = typeof(SimulationUpdateOther), m_logicType = typeof(SimulationLogicOther), m_settingsType = typeof(SimulationSettingsOther) });
 		}
 

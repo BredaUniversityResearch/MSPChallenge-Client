@@ -123,22 +123,27 @@ public class CustomButtonColorSet : SerializedMonoBehaviour, IPointerEnterHandle
         SetGraphicSetToColor(colorDisabled);
     }
 
-    void SetGraphicSetToColor(IColourContainer colourAsset)
-    {
-        if (colorLocked)
-		    return;
-        foreach (Graphic g in targetGraphics)
-        {
-            if (null == g)
-            {
-                Debug.LogError("Missing graphic: " + gameObject.name);
-                continue;
-            }
-            g.color = colourAsset.GetColour();
-        }
-    }
+	void SetGraphicSetToColor(IColourContainer colourAsset)
+	{
+		if (colorLocked)
+			return;
+		if (null == colourAsset)
+		{
+			Debug.LogWarning("Missing colour asset: " + gameObject.name);
+			return;
+		}
+		foreach (Graphic g in targetGraphics)
+		{
+			if (null == g)
+			{
+				Debug.LogWarning("Missing graphic: " + gameObject.name);
+				continue;
+			}
+			g.color = colourAsset.GetColour();
+		}
+	}
 
-    void SubscribeToAssetChange()
+	void SubscribeToAssetChange()
     {
         if (Application.isPlaying)
         {
