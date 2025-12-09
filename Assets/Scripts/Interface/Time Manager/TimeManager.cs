@@ -23,6 +23,7 @@ namespace MSP2050.Scripts
 
 		//Time
 		private int month = -1;
+		private int? transitionMonth = -1;
 		private int era = 0;
 		public int Era { get { return era; } }
 		private int[] eraRealTimes = new int[ERA_COUNT];
@@ -32,6 +33,7 @@ namespace MSP2050.Scripts
 		//Gamestate
 		public enum PlanningState { Setup, Play, Simulation, Pause, FastForward, End, None }
 		private PlanningState gameState = PlanningState.None;
+		private PlanningState transitionState = PlanningState.None;
 		private bool firstUpdateComplete;
 
 		public delegate void OnMonthChangedDelegate(int oldCurrentMonth, int newCurrentMonth);
@@ -40,6 +42,10 @@ namespace MSP2050.Scripts
 		private float m_timeLeftElapsed = 0f;
 
 		public int MonthsPerEra => eraGameTime;
+		public int? TransitionMonth => transitionMonth;
+		public int Month => month;
+		public PlanningState GameState => gameState;
+		public PlanningState TransitionState => transitionState;
 
 		public void Update()
 		{
@@ -314,7 +320,9 @@ namespace MSP2050.Scripts
 			PlanningState prevState = gameState;
 
 			gameState = StringToPlanningState(state.state);
-			month = Util.ParseToInt(state.month, 0);
+			transitionState = string.IsNullOrEmpty(state.transition_state) ? PlanningState.None : StringToPlanningState(state.transition_state);
+			month = state.month;
+			transitionMonth = state.transition_month;
 
 			//Month change
 			if (month != prevMonth)
@@ -338,7 +346,7 @@ namespace MSP2050.Scripts
 			//State change
 			if (gameState != prevState)
 			{
-				TimeBar.instance.SetState(gameState);
+				TimeBar.instance.UpdateStateAndTimeText();
 				//New state entered
 				if (gameState == PlanningState.Setup)
 				{

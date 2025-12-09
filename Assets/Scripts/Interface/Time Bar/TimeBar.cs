@@ -52,7 +52,6 @@ namespace MSP2050.Scripts
 		[SerializeField] CustomButton timeManagerButton;
 		[SerializeField] TextMeshProUGUI stateAndTimeText;
 		[SerializeField] AddTooltip toolTip;
-		PlanningState planningState;
 
 		[Header("Geometry view mode")]
 		[SerializeField] GameObject m_geomViewModeSection;
@@ -348,7 +347,6 @@ namespace MSP2050.Scripts
 
 		public void SetState(PlanningState a_newState)
 		{
-			planningState = a_newState;
 			UpdateStateAndTimeText();
 		}
 
@@ -360,7 +358,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				SetState(planningState);
+				UpdateStateAndTimeText();
 			}
 		}
 
@@ -370,7 +368,7 @@ namespace MSP2050.Scripts
 			UpdateStateAndTimeText();
 		}
 
-		void UpdateStateAndTimeText()
+		public void UpdateStateAndTimeText()
 		{
 			string timeString ="";
 			if (timeRemaining.Ticks > TimeSpan.TicksPerDay)
