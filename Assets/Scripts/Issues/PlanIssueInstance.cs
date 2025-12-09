@@ -17,7 +17,7 @@ namespace MSP2050.Scripts
 		{
 			m_planIssueData = a_planIssueData;
 			m_label.LabelType(a_planIssueData.type);
-			m_label.boxText.text = ConstraintManager.Instance.GetRestrictionMessage(a_planIssueData.restriction_id);
+			m_label.boxText.text = ConstraintManager.Instance.GetRestrictionMessage(a_planIssueData.RestrictionID);
 			m_label.gameObject.transform.position = new Vector3(a_planIssueData.x, a_planIssueData.y, m_label.gameObject.transform.parent.position.z);
 			SetLabelVisibility(true);
 		}

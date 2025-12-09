@@ -185,7 +185,7 @@ namespace MSP2050.Scripts
 			instance.m_title.text = string.IsNullOrEmpty(a_definition.categoryDisplayName) ? a_definition.categoryName : a_definition.categoryDisplayName;
 			GraphContentSelectFixedCategory cs = instance.GetComponentInChildren<GraphContentSelectFixedCategory>();
 			cs.m_categoryNames = new string[1] { a_definition.categoryName };
-			cs.m_kpiSource = GraphContentSelectFixedCategory.KPISource.Other;
+			cs.m_kpiSource = KPISource.Other;
 			instance.Initialise(null);
 			return instance;
 		}

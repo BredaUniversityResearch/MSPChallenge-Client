@@ -98,7 +98,7 @@ namespace MSP2050.Scripts
 		public void ImportGlobalData()
 		{
 			NetworkForm form = new NetworkForm();
-			ServerCommunication.Instance.DoRequest<MspGlobalData>(Server.GetGlobalData(), form, HandleGlobalData, HandleDataLoadFailure);
+			ServerCommunication.Instance.DoRequestForm<MspGlobalData>(Server.GetGlobalData(), form, HandleGlobalData, HandleDataLoadFailure);
 		}
 
 		public void HandleGlobalData(MspGlobalData data)
@@ -107,7 +107,7 @@ namespace MSP2050.Scripts
 
 			NetworkForm form = new NetworkForm();
 			form.AddField("name", data.countries);
-			ServerCommunication.Instance.DoRequest<LayerMeta>(Server.LayerMetaByName(), form, LoadTeams, HandleDataLoadFailure);
+			ServerCommunication.Instance.DoRequestForm<LayerMeta>(Server.LayerMetaByName(), form, LoadTeams, HandleDataLoadFailure);
 		}
 
 		private void HandleDataLoadFailure(ARequest request, string message)

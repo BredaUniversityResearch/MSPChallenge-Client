@@ -34,7 +34,7 @@ namespace MSP2050.Scripts
 
 			NetworkForm form = new NetworkForm();
 			form.AddField("country_id", SessionManager.Instance.CurrentUserTeamID);
-			ServerCommunication.Instance.DoRequest<List<UserInfo>>(Server.GetUserList(), form, OnUserListReceived);
+			ServerCommunication.Instance.DoRequestForm<List<UserInfo>>(Server.GetUserList(), form, OnUserListReceived);
 		}
 
 		private void OnDisable()

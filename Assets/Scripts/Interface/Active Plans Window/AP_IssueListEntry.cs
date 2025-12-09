@@ -28,7 +28,7 @@ namespace MSP2050.Scripts
 		{
 			m_issue = a_issue;
 			m_viewIssueButton.gameObject.SetActive(true);
-			m_issueText.text = ConstraintManager.Instance.GetRestrictionMessage(m_issue.restriction_id);
+			m_issueText.text = ConstraintManager.Instance.GetRestrictionMessage(m_issue.RestrictionID);
 			switch (m_issue.type)
 			{
 				case ERestrictionIssueType.Info:

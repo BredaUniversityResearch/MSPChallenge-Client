@@ -97,30 +97,44 @@ class CustomInputFieldColorSet : SerializedMonoBehaviour, IPointerEnterHandler, 
         SetGraphicSetToColor(colorDisabled);
     }
 
-    void SetGraphicSetToColor(IColourContainer colourAsset)
-    {
-        foreach (Graphic g in targetGraphics)
-            g.color = colourAsset.GetColour();
-    }
+	void SetGraphicSetToColor(IColourContainer colourAsset)
+	{
+		if (colorLocked)
+			return;
+		if (null == colourAsset)
+		{
+			Debug.LogWarning("Missing colour asset: " + gameObject.name);
+			return;
+		}
+		foreach (Graphic g in targetGraphics)
+		{
+			if (null == g)
+			{
+				Debug.LogWarning("Missing graphic: " + gameObject.name);
+				continue;
+			}
+			g.color = colourAsset.GetColour();
+		}
+	}
 
-    //public void LockToColor(Color color)
-    //{
-    //    colorLocked = true;
-    //    SetGraphicSetToColor(color);
-    //}
+	//public void LockToColor(Color color)
+	//{
+	//    colorLocked = true;
+	//    SetGraphicSetToColor(color);
+	//}
 
-    //public void UnlockColor()
-    //{
-    //    colorLocked = false;
-    //    if (UseDisabledColor)
-    //        SetGraphicsToDisabled();
-    //    else if (Highlight && pointerOnButton)
-    //        SetGraphicsToHighlight();
-    //    else
-    //        SetGraphicsToNormal();
-    //}
+	//public void UnlockColor()
+	//{
+	//    colorLocked = false;
+	//    if (UseDisabledColor)
+	//        SetGraphicsToDisabled();
+	//    else if (Highlight && pointerOnButton)
+	//        SetGraphicsToHighlight();
+	//    else
+	//        SetGraphicsToNormal();
+	//}
 
-    void SubscribeToAssetChange()
+	void SubscribeToAssetChange()
     {
         if (Application.isPlaying)
         {

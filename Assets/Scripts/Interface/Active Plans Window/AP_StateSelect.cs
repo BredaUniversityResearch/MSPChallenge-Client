@@ -57,7 +57,7 @@ namespace MSP2050.Scripts
 				m_buttonSection.SetActive(false);
 				m_infoText.text = "Implemented plans cannot change state.";
 			}
-			else
+			else if(a_content.ID != -1)
 			{ 
 				m_statusDropdown.interactable = true;
 				SetStatusDropdownOptions();
@@ -163,7 +163,7 @@ namespace MSP2050.Scripts
 						submitDelayed = true;
 						NetworkForm form = new NetworkForm();
 						form.AddField("plan_id", changedPlan.GetDataBaseOrBatchIDReference());
-						ServerCommunication.Instance.DoRequest<int[]>(Server.GetDependentEnergyPlans(), form, (planErrorsIDs) => CreatePlanChangeConfirmPopup(planErrorsIDs, changedPlan, newState, batch));
+						ServerCommunication.Instance.DoRequestForm<int[]>(Server.GetDependentEnergyPlans(), form, (planErrorsIDs) => CreatePlanChangeConfirmPopup(planErrorsIDs, changedPlan, newState, batch));
 					}
 					else if (!changedPlan.InInfluencingState && newState.IsInfluencingState())
 					{
@@ -183,14 +183,14 @@ namespace MSP2050.Scripts
 						Debug.Log("Request prev overlap for plan: " + changedPlan.ID);
 						NetworkForm form = new NetworkForm();
 						form.AddField("plan_id", changedPlan.GetDataBaseOrBatchIDReference());
-						ServerCommunication.Instance.DoRequest<int>(Server.OverlapsWithPreviousEnergyPlans(), form, (i) =>
+						ServerCommunication.Instance.DoRequestForm<int>(Server.OverlapsWithPreviousEnergyPlans(), form, (i) =>
 						{
 							if (i == 0)
 							{
 								//Check for later plans overlapping with this one
 								NetworkForm form2 = new NetworkForm();
 								form2.AddField("plan_id", changedPlan.GetDataBaseOrBatchIDReference());
-								ServerCommunication.Instance.DoRequest<int[]>(Server.GetOverlappingEnergyPlans(), form2, (planErrorsIDs2) => CreatePlanChangeConfirmPopup(planErrorsIDs2, changedPlan, newState, batch));
+								ServerCommunication.Instance.DoRequestForm<int[]>(Server.GetOverlappingEnergyPlans(), form2, (planErrorsIDs2) => CreatePlanChangeConfirmPopup(planErrorsIDs2, changedPlan, newState, batch));
 							}
 							else
 							{
