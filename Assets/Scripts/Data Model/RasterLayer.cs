@@ -23,10 +23,12 @@ namespace MSP2050.Scripts
 		private const float REFERENCE_PIXELS_PER_UNIT = 100.0f;
 
 		public RasterObject rasterObject { get; private set; }
+		public RasterScaleConfig rasterValueScale { get; private set; }
+
 		private Texture2D viewingRaster;	//The raster that is displayed, reference to either rasterAtRequestedTime, or rasterAtLatestTime
 		private Texture2D rasterAtRequestedTime = new Texture2D(1, 1, TextureFormat.ARGB32, false);
 		private Texture2D rasterAtLatestTime = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-		private int viewingRasterTime = -1; //-1 if latest
+		private int viewingRasterTime = -2; // below -1 if latest
 		private Vector2 scale;
 		private Vector2 offset;
 		private FilterMode rasterFilterMode = FilterMode.Bilinear;
@@ -53,9 +55,10 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public RasterLayer(LayerMeta layerMeta/*, PlanLayer planLayer = null*/)
-			: base(layerMeta/*, planLayer*/)
+		public RasterLayer(LayerMeta layerMeta)
+			: base(layerMeta)
 		{
+			rasterValueScale = layerMeta.scale;
 			entityTypesSortedByValue = new List<EntityType>(m_entityTypes.Values);
 			entityTypesSortedByValue.Sort(SortMethodEntityTypesByValue);
 			viewingRaster = rasterAtLatestTime;
@@ -96,9 +99,9 @@ namespace MSP2050.Scripts
 			if (rasterObject.request_from_server)
 			{
 				string imageURL = Server.GetRasterUrl();
-				//Debug.Log("Requesting " + FileName + " at " + imageURL);
 				NetworkForm form = new NetworkForm();
 				form.AddField("layer_name", FileName);
+				form.AddField("month", TimeManager.Instance.GetCurrentMonth());
 				ServerCommunication.Instance.DoRequestForm<RasterRequestResponse>(imageURL, form, HandleImportLatestRasterCallback);
 			}
 		}
@@ -121,27 +124,19 @@ namespace MSP2050.Scripts
 				UpdateRasterBounds(response.displayed_bounds);
 			}
 
-			if (viewingRasterTime < 0)
+			if (viewingRasterTime < -1)
 			{
 				SetRasterTexture(rasterAtLatestTime);
 			}
-
-			//else
-			//{
-			//	if (ServerCommunication.Instance.GetHTTPResponseCode(www) != 404)
-			//	{
-			//		Debug.LogError("Error in request. URL: " + www.url + ". Error: " + www.downloadHandler.text);
-			//	}
-			//}
 		}
 
 		private void LoadRasterAtTime(int month)
 		{
-			if(month == -1 || month == TimeManager.Instance.GetCurrentMonth())
+			if(month < -1 || month == TimeManager.Instance.GetCurrentMonth())
 			{
-				if (viewingRasterTime == -1)
+				if (viewingRasterTime < -1)
 					return;
-				viewingRasterTime = -1;
+				viewingRasterTime = -2;
 				SetRasterTexture(rasterAtLatestTime);
 				return;
 			}
@@ -160,12 +155,8 @@ namespace MSP2050.Scripts
 
 		private void HandleImportRasterAtTimeCallback(RasterRequestResponse response, int month)
 		{
-
 			if (month == viewingRasterTime)
 			{
-				//No longer required because the same Texture2D is being used
-				//Object.Destroy(rasterAtRequestedTime);
-
 				if (!string.IsNullOrEmpty(response.image_data))
 				{
 					byte[] imageBytes = Convert.FromBase64String(response.image_data);
@@ -273,6 +264,16 @@ namespace MSP2050.Scripts
 				return null;
 			}
 			return rasterValue;
+		}
+
+		public float GetUnscaledRasterValueAt(int rasterSpaceX, int rasterSpaceY)
+		{
+			return viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r;
+		}
+
+		public float GetConvertedRasterValueAt(int rasterSpaceX, int rasterSpaceY)
+		{
+			return rasterValueScale.EvaluateOutput(viewingRaster.GetPixel(rasterSpaceX, rasterSpaceY).r);
 		}
 
 		[CanBeNull]
@@ -421,15 +422,8 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		//public override void TransformAllEntities(float scale, Vector3 translate)
-		//{
-		//    throw new NotImplementedException();
-		//}
-
 		public override void UpdateScale(Camera targetCamera)
-		{
-
-		}
+		{ }
 
 		public override HashSet<Entity> GetEntitiesOfType(EntityType type)
 		{
@@ -464,9 +458,9 @@ namespace MSP2050.Scripts
 		public override void SetEntitiesActiveUpTo(int index, bool showRemovedInLatestPlan = true, bool showCurrentIfNotInfluencing = true)
 		{
 			//Reset raster to the current one
-			if (viewingRasterTime != -1)
+			if (viewingRasterTime >= -1)
 			{
-				viewingRasterTime = -1;
+				viewingRasterTime = -2;
 				viewingRaster = rasterAtLatestTime;
 				SetRasterTexture(viewingRaster);
 			}
@@ -482,7 +476,7 @@ namespace MSP2050.Scripts
 
 		public override void SetEntitiesActiveUpToCurrentTime()
 		{
-			viewingRasterTime = -1;
+			viewingRasterTime = -2;
 			viewingRaster = rasterAtLatestTime;
 			SetRasterTexture(viewingRaster);
 			m_activeEntities.Clear();

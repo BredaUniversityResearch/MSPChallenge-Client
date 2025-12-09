@@ -13,6 +13,7 @@ namespace MSP2050.Scripts
 		[SerializeField] Toggle m_detailsToggle;
 		[SerializeField] GameObject m_detailsWindowPrefab;
 		[SerializeField] Transform m_detailsWindowParent;
+		public bool m_showAggregationDropdown = true;
 
 		[SerializeField] bool m_rangeToggleValue;
 		[SerializeField] bool m_yearToggleValue;
@@ -204,7 +205,7 @@ namespace MSP2050.Scripts
 
 		void OnYearToggleChanged(bool a_newValue)
 		{
-			m_windowInstance.m_aggregationDropdown.gameObject.SetActive(a_newValue);
+			m_windowInstance.m_aggregationDropdown.gameObject.SetActive(a_newValue && m_showAggregationDropdown);
 			m_yearToggleValue = a_newValue;
 			if (m_ignoreCallback)
 				return;
@@ -271,6 +272,8 @@ namespace MSP2050.Scripts
 
 		string GetAggregationText()
 		{
+			if(!m_showAggregationDropdown)
+				return "Max";
 			switch (m_aggregationOption)
 			{
 				case 1:

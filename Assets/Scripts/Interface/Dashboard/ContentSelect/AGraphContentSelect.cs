@@ -212,5 +212,24 @@ namespace MSP2050.Scripts
 				m_contentToggles[i].m_summaryText.text = a_names[i] == null ? m_contentToggleNames[i] : a_names[i];
 			}
 		}
+
+		protected List<KPIValueCollection> GetKVCs(KPISource a_source)
+		{
+			switch (a_source)
+			{
+				case KPISource.Ecology:
+					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.MEL_SIM_NAME);
+				case KPISource.Energy:
+					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.CEL_SIM_NAME);
+				case KPISource.Shipping:
+					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SEL_SIM_NAME);
+				case KPISource.Geometry:
+					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(null);
+				case KPISource.SandExtraction:
+					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SE_SIM_NAME);
+				default:
+					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.OTHER_SIM_NAME);
+			}
+		}
 	}
 }

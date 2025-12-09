@@ -20,7 +20,22 @@ namespace MSP2050.Scripts
 		public bool active { get; set; }
 		public float x { get; set; }
 		public float y { get; set; }
-		public int restriction_id { get; set; }
+
+		[JsonProperty]
+		int? restriction_id;
+		[JsonProperty]
+		int? custom_restriction_id;
+
+		[JsonIgnore]
+		public int RestrictionID
+		{
+			get
+			{
+				if (restriction_id.HasValue)
+					return restriction_id.Value;
+				return custom_restriction_id.Value;
+			}
+		}
 
 		public PlanIssueObject()
 		{
@@ -33,7 +48,10 @@ namespace MSP2050.Scripts
 			type = restrictionType;
 			this.x = (float)Math.Round(x, 2);
 			this.y = (float)Math.Round(y, 2);
-			restriction_id = restrictionId;
+			if (restrictionId < ConstraintManager.CUSTOM_RESTRICTION_ID_THRESHOLD)
+				restriction_id = restrictionId;
+			else
+				custom_restriction_id = restrictionId;
 		}
 
 		public bool IsSameIssueAs(PlanIssueObject other)
@@ -46,13 +64,13 @@ namespace MSP2050.Scripts
 			//Idk why but inserting a const float with a value of 0.001f becomes 0 so I'm just adding the literal values in here.
 			return Mathf.Abs(x - other.x) < 0.01f &&
 			       Mathf.Abs(y - other.y) < 0.01f &&
-			       restriction_id == other.restriction_id &&
+				   RestrictionID == other.RestrictionID &&
 			       type == other.type;
 		}
 
 		public int GetIssueHash()
 		{
-			return x.GetHashCode() ^ y.GetHashCode() ^ (restriction_id | (int)type << 16);
+			return x.GetHashCode() ^ y.GetHashCode() ^ (RestrictionID | (int)type << 16);
 		}
 	}
 

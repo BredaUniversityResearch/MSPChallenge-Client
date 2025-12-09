@@ -6,50 +6,31 @@ using System.Linq;
 
 namespace MSP2050.Scripts
 {
+	public enum KPISource { Ecology, Energy, Shipping, Geometry, SandExtraction, Other }
 	public class GraphContentSelectFixedCategory : AGraphContentSelect
 	{
-		public enum KPISource { Ecology, Energy, Shipping, Geometry, Other }
 		public string[] m_categoryNames;
 		public KPISource m_kpiSource;
 		[SerializeField] protected ContentSelectFocusSelection m_focusSelection;
 		[SerializeField] protected GameObject m_singleSelectWindowPrefab;
 
-		HashSet<int> m_selectedCountries;
-		HashSet<string> m_selectedIDs;
+		protected HashSet<int> m_selectedCountries;
+		protected HashSet<string> m_selectedIDs;
 
-		List<int> m_AllCountries;
-		List<string> m_allIDs;
-		List<string> m_displayIDs;
-		List<KPICategory> m_categories;
-		List<KPIValue> m_values;
-		GraphContentSelectWindow[] m_detailsWindows;
+		protected List<int> m_AllCountries;
+		protected List<string> m_allIDs;
+		protected List<string> m_displayIDs;
+		protected List<KPICategory> m_categories;
+		protected List<KPIValue> m_values;
+		protected GraphContentSelectWindow[] m_detailsWindows;
 
 		public override void Initialise(Action a_onSettingsChanged, ADashboardWidget a_widget)
 		{
 			base.Initialise(a_onSettingsChanged, a_widget);
 			m_detailsWindows = new GraphContentSelectWindow[m_contentToggles.Length];
+			List<KPIValueCollection> kvcs = GetKVCs(m_kpiSource);
 
-			List<KPIValueCollection> kvcs = null;
-			switch(m_kpiSource)
-			{
-				case KPISource.Ecology:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.MEL_SIM_NAME); 
-					break;
-				case KPISource.Energy:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.CEL_SIM_NAME);
-					break;
-				case KPISource.Shipping:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SEL_SIM_NAME);
-					break;
-				case KPISource.Geometry:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(null);
-					break;
-				default:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.OTHER_SIM_NAME);
-					break;
-			}
-			
-			if(kvcs == null || kvcs.Count == 0)
+			if (kvcs == null || kvcs.Count == 0)
 			{
 				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
 				m_noDataEntry.text = "NO DATA AVAILABLE";
@@ -61,7 +42,8 @@ namespace MSP2050.Scripts
 			}
 			else if (kvcs.Count == 1)
 			{
-				m_contentToggles[1].gameObject.SetActive(false);
+				if(m_contentToggles.Length > 1 && m_contentToggles[1] != null)
+					m_contentToggles[1].gameObject.SetActive(false);
 				if(m_focusSelection != null)
 				{
 					Destroy(m_focusSelection.gameObject);
@@ -174,12 +156,12 @@ namespace MSP2050.Scripts
 			OnSettingsChanged();
 		}
 
-		void OnKPIChanged(KPIValue a_newValue)
+		protected void OnKPIChanged(KPIValue a_newValue)
 		{
 			OnSettingsChanged();
 		}
 
-		void OnIDToggleChanged(int a_index, bool a_value)
+		protected void OnIDToggleChanged(int a_index, bool a_value)
 		{
 			if (a_value)
 				m_selectedIDs.Add(m_allIDs[a_index]);
@@ -188,7 +170,7 @@ namespace MSP2050.Scripts
 			OnSettingsChanged();
 		}
 
-		void OnAllIDTogglesChanged(bool a_value)
+		protected void OnAllIDTogglesChanged(bool a_value)
 		{
 			if (a_value)
 			{
@@ -203,7 +185,7 @@ namespace MSP2050.Scripts
 			OnSettingsChanged();
 		}
 
-		void OnCountryToggleChanged(int a_index, bool a_value)
+		protected void OnCountryToggleChanged(int a_index, bool a_value)
 		{
 			if (a_value)
 				m_selectedCountries.Add(m_AllCountries[a_index]);
@@ -212,7 +194,7 @@ namespace MSP2050.Scripts
 			OnSettingsChanged();
 		}
 
-		void OnAllCountriesToggleChanged(bool a_value)
+		protected void OnAllCountriesToggleChanged(bool a_value)
 		{
 			if (a_value)
 			{
