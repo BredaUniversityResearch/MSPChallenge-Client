@@ -373,64 +373,53 @@ namespace MSP2050.Scripts
 
 		public void UpdateStateAndTimeText()
 		{
-			string timeString ="";
-			if (timeRemaining.Ticks > TimeSpan.TicksPerDay)
+			string preText = "";
+			if (TimeManager.Instance.TransitionState != PlanningState.None)
 			{
-				timeString = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}", timeRemaining.Days, timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
+				if (TimeManager.Instance.TransitionState == TimeManager.Instance.CurrentState)
+					preText = "-> ";
+				else
+					preText = $"{GetPlanningStateText(TimeManager.Instance.TransitionState)} -> ";
 			}
-			else if (timeRemaining.Ticks < TimeSpan.TicksPerHour)
+
+			string postText ="";
+			if (TimeManager.Instance.CurrentState == PlanningState.Pause || TimeManager.Instance.CurrentState == PlanningState.Play)
 			{
-				timeString = string.Format("{0:D1}:{1:D2}", timeRemaining.Minutes, timeRemaining.Seconds);
-			}
-			else if (timeRemaining.Ticks < TimeSpan.TicksPerDay)
-			{
-				timeString = string.Format("{0:D1}:{1:D2}:{2:D2}", timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
-			}
-			string pretext = "";
-			if(TimeManager.Instance.TransitionState != PlanningState.None)
-			{
-				switch (TimeManager.Instance.CurrentState)
+				if (timeRemaining.Ticks > TimeSpan.TicksPerDay)
 				{
-					case TimeManager.PlanningState.Setup:
-						pretext = "Setup -> ";
-						break;
-					case TimeManager.PlanningState.Play:
-						pretext = "Planning -> ";
-						break;
-					case TimeManager.PlanningState.FastForward:
-						pretext = "Fast Forward -> ";
-						break;
-					case TimeManager.PlanningState.Simulation:
-						pretext = "Simulating -> ";
-						break;
-					case TimeManager.PlanningState.Pause:
-						pretext = "Paused -> ";
-						break;
-					case TimeManager.PlanningState.End:
-						pretext = "End -> ";
-						break;
+					postText = string.Format("\n{0:D1}:{1:D2}:{2:D2}:{3:D2}", timeRemaining.Days, timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
+				}
+				else if (timeRemaining.Ticks < TimeSpan.TicksPerHour)
+				{
+					postText = string.Format("\n{0:D1}:{1:D2}", timeRemaining.Minutes, timeRemaining.Seconds);
+				}
+				else if (timeRemaining.Ticks < TimeSpan.TicksPerDay)
+				{
+					postText = string.Format("\n{0:D1}:{1:D2}:{2:D2}", timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
 				}
 			}
-			switch (TimeManager.Instance.CurrentState)
+
+			stateAndTimeText.text = $"{preText}{GetPlanningStateText(TimeManager.Instance.CurrentState)}{postText}";
+		}
+
+		string GetPlanningStateText(TimeManager.PlanningState a_state)
+		{
+			switch (a_state)
 			{
 				case TimeManager.PlanningState.Setup:
-					stateAndTimeText.text = pretext+"Setup";
-					break;
+					return "Setup";
 				case TimeManager.PlanningState.Play:
-					stateAndTimeText.text = pretext + $"Planning\n{timeString}";
-					break;
+					return "Planning";
 				case TimeManager.PlanningState.FastForward:
-					stateAndTimeText.text = pretext + "Fast Forward";
-					break;
+					return "Fast Forward";
 				case TimeManager.PlanningState.Simulation:
-					stateAndTimeText.text = pretext + "Simulating";
-					break;
+					return "Simulating";
 				case TimeManager.PlanningState.Pause:
-					stateAndTimeText.text = pretext + $"Paused\n{timeString}";
-					break;
+					return "Paused";
 				case TimeManager.PlanningState.End:
-					stateAndTimeText.text = pretext + "End";
-					break;
+					return "End";
+				default:
+					return "";
 			}
 		}
 
