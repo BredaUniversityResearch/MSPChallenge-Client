@@ -374,16 +374,15 @@ namespace MSP2050.Scripts
 		public void UpdateStateAndTimeText()
 		{
 			string preText = "";
+			string postText ="";
 			if (TimeManager.Instance.TransitionState != PlanningState.None)
 			{
 				if (TimeManager.Instance.TransitionState == TimeManager.Instance.CurrentState)
-					preText = "-> ";
+					preText = "Entering\n";
 				else
-					preText = $"{GetPlanningStateText(TimeManager.Instance.TransitionState)} -> ";
+					preText = $"{GetPlanningStateText(TimeManager.Instance.TransitionState)} ->\n";
 			}
-
-			string postText ="";
-			if (TimeManager.Instance.CurrentState == PlanningState.Pause || TimeManager.Instance.CurrentState == PlanningState.Play)
+			else if (TimeManager.Instance.CurrentState == PlanningState.Pause || TimeManager.Instance.CurrentState == PlanningState.Play)
 			{
 				if (timeRemaining.Ticks > TimeSpan.TicksPerDay)
 				{

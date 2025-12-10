@@ -858,8 +858,7 @@ namespace MSP2050.Scripts
 			{
 				m_apEnergy.RefreshContent(a_plan);
 			}
-			else
-				RecalculateGridsInEditedPlan(a_plan);
+			//RecalculateGridsInEditedPlan Not required as grids will be recalculated when energy policy is opened or the plan is canceled/accepted
 		}
 
 		public void RegisterAPEnergy(AP_Energy a_apEnergy)
