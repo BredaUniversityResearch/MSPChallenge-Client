@@ -318,6 +318,7 @@ namespace MSP2050.Scripts
 
 			int prevMonth = month;
 			PlanningState prevState = gameState;
+			PlanningState prevTransitionState = transitionState;
 
 			gameState = StringToPlanningState(state.state);
 			transitionState = string.IsNullOrEmpty(state.transition_state) ? PlanningState.None : StringToPlanningState(state.transition_state);
@@ -384,6 +385,11 @@ namespace MSP2050.Scripts
 					OnSetupPhaseEnded();
 				}
 			}
+			else if(prevTransitionState != transitionState)
+			{
+				TimeBar.instance.UpdateStateAndTimeText();
+			}
+
 			//Update UI
 			InterfaceCanvas.Instance.timeBar.UpdateDate(month, transitionMonth);
 			UpdateUI(state);
