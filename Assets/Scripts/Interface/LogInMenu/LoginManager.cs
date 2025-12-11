@@ -102,14 +102,16 @@ namespace MSP2050.Scripts
 			//Import global data for session
 			m_sessionConnectingTo = a_session;
 			SessionManager.Instance.OnImportComplete += OnTeamImportFinished;
-			m_loadingOverlay.SetActive(true);
+			if (m_loadingOverlay != null)
+				m_loadingOverlay.SetActive(true);
 			SessionManager.Instance.ImportGlobalData();
 		}
 
 		public void OnTeamImportFinished(bool success)
 		{
 			SessionManager.Instance.OnImportComplete -= OnTeamImportFinished;
-			m_loadingOverlay.SetActive(false);
+			if (m_loadingOverlay != null)
+				m_loadingOverlay.SetActive(false);
 			if (success)
 			{
 				SetTabActive(ELoginMenuTab.Login);
@@ -123,7 +125,8 @@ namespace MSP2050.Scripts
 
 		public void SetLoadingOverlayActive(bool a_active)
 		{
-			m_loadingOverlay.SetActive(a_active);
+			if(m_loadingOverlay != null)
+				m_loadingOverlay.SetActive(a_active);
 		}
 	}
 }

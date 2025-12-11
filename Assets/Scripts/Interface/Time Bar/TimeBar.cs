@@ -52,7 +52,6 @@ namespace MSP2050.Scripts
 		[SerializeField] CustomButton timeManagerButton;
 		[SerializeField] TextMeshProUGUI stateAndTimeText;
 		[SerializeField] AddTooltip toolTip;
-		PlanningState planningState;
 
 		[Header("Geometry view mode")]
 		[SerializeField] GameObject m_geomViewModeSection;
@@ -149,7 +148,7 @@ namespace MSP2050.Scripts
 			}
 		}
 
-		public void SetDate(int month)
+		public void UpdateDate(int month, int? transitionMonth)
 		{
 			if (!TimeManager.Instance.GameStarted && !isViewingPlan)
 			{
@@ -159,7 +158,10 @@ namespace MSP2050.Scripts
 			}
 
 			fill.anchorMax = new Vector2((float)month / (float)SessionManager.Instance.MspGlobalData.session_end_month, 1f);
-			currentDateText.text = Util.MonthToText(month);
+			if(transitionMonth.HasValue)
+				currentDateText.text = "Simulating " + Util.MonthToText(month);
+			else
+				currentDateText.text = Util.MonthToText(month);
 
 			if (isViewingPlan)
 			{
@@ -348,19 +350,18 @@ namespace MSP2050.Scripts
 
 		public void SetState(PlanningState a_newState)
 		{
-			planningState = a_newState;
 			UpdateStateAndTimeText();
 		}
 
 		public void SetCatchingUp(bool a_value)
 		{
-			if (a_value && planningState == TimeManager.PlanningState.Play)
+			if (a_value && TimeManager.Instance.GameState == TimeManager.PlanningState.Play)
 			{
 				stateAndTimeText.text = "Calculating";
 			}
 			else
 			{
-				SetState(planningState);
+				UpdateStateAndTimeText();
 			}
 		}
 
@@ -370,41 +371,54 @@ namespace MSP2050.Scripts
 			UpdateStateAndTimeText();
 		}
 
-		void UpdateStateAndTimeText()
+		public void UpdateStateAndTimeText()
 		{
-			string timeString ="";
-			if (timeRemaining.Ticks > TimeSpan.TicksPerDay)
+			string preText = "";
+			string postText ="";
+			if (TimeManager.Instance.TransitionState != PlanningState.None)
 			{
-				timeString = string.Format("{0:D1}:{1:D2}:{2:D2}:{3:D2}", timeRemaining.Days, timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
+				if (TimeManager.Instance.TransitionState == TimeManager.Instance.CurrentState)
+					preText = "Entering\n";
+				else
+					preText = $"{GetPlanningStateText(TimeManager.Instance.TransitionState)} ->\n";
 			}
-			else if (timeRemaining.Ticks < TimeSpan.TicksPerHour)
+			else if (TimeManager.Instance.CurrentState == PlanningState.Pause || TimeManager.Instance.CurrentState == PlanningState.Play)
 			{
-				timeString = string.Format("{0:D1}:{1:D2}", timeRemaining.Minutes, timeRemaining.Seconds);
+				if (timeRemaining.Ticks > TimeSpan.TicksPerDay)
+				{
+					postText = string.Format("\n{0:D1}:{1:D2}:{2:D2}:{3:D2}", timeRemaining.Days, timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
+				}
+				else if (timeRemaining.Ticks < TimeSpan.TicksPerHour)
+				{
+					postText = string.Format("\n{0:D1}:{1:D2}", timeRemaining.Minutes, timeRemaining.Seconds);
+				}
+				else if (timeRemaining.Ticks < TimeSpan.TicksPerDay)
+				{
+					postText = string.Format("\n{0:D1}:{1:D2}:{2:D2}", timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
+				}
 			}
-			else if (timeRemaining.Ticks < TimeSpan.TicksPerDay)
-			{
-				timeString = string.Format("{0:D1}:{1:D2}:{2:D2}", timeRemaining.Hours, timeRemaining.Minutes, timeRemaining.Seconds);
-			}
-			switch (planningState)
+
+			stateAndTimeText.text = $"{preText}{GetPlanningStateText(TimeManager.Instance.CurrentState)}{postText}";
+		}
+
+		string GetPlanningStateText(TimeManager.PlanningState a_state)
+		{
+			switch (a_state)
 			{
 				case TimeManager.PlanningState.Setup:
-					stateAndTimeText.text = "Setup";
-					break;
+					return "Setup";
 				case TimeManager.PlanningState.Play:
-					stateAndTimeText.text = $"Planning\n{timeString}";
-					break;
+					return "Planning";
 				case TimeManager.PlanningState.FastForward:
-					stateAndTimeText.text = "Fast Forward";
-					break;
+					return "Fast Forward";
 				case TimeManager.PlanningState.Simulation:
-					stateAndTimeText.text = "Simulating";
-					break;
+					return "Simulating";
 				case TimeManager.PlanningState.Pause:
-					stateAndTimeText.text = $"Paused\n{timeString}";
-					break;
+					return "Paused";
 				case TimeManager.PlanningState.End:
-					stateAndTimeText.text = "End";
-					break;
+					return "End";
+				default:
+					return "";
 			}
 		}
 
