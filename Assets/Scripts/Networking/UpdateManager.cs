@@ -338,7 +338,10 @@ namespace MSP2050.Scripts
 	public class TimelineState
 	{
 		public string state { get; set; }
-		public string month { get; set; }
+		public int month { get; set; }
+
+		public string transition_state { get; set; }
+		public int? transition_month { get; set; }
 
 		public string era_gametime { get; set; }
 		public string era_realtime { get; set; }
