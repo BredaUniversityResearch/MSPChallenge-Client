@@ -417,6 +417,8 @@ namespace MSP2050.Scripts
 					return "Paused";
 				case TimeManager.PlanningState.End:
 					return "End";
+				case TimeManager.PlanningState.Request:
+					return "Request";
 				default:
 					return "";
 			}
