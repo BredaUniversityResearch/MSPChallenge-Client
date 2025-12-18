@@ -31,7 +31,7 @@ namespace MSP2050.Scripts
 		int timeLeft = 0;
 
 		//Gamestate
-		public enum PlanningState { Setup, Play, Simulation, Pause, FastForward, End, None }
+		public enum PlanningState { Setup, Play, Simulation, Pause, FastForward, End, Request, None }
 		private PlanningState gameState = PlanningState.None;
 		private PlanningState transitionState = PlanningState.None;
 		private bool firstUpdateComplete;
