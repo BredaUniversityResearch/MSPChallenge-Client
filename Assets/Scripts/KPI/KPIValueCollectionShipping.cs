@@ -2,11 +2,6 @@
 {
 	class KPIValueCollectionShipping: KPIValueCollection
 	{
-		public KPIValueCollectionShipping(int countryId)
-			: base(countryId)
-		{
-		}
-
 		protected override bool ValueSubsetFilter(KPIValueDefinition value, KPICategoryDefinition category)
 		{
 			return value.valueDependentCountry == countryId || value.valueDependentCountry == KPIValue.CountryGlobal || countryId == KPIValue.CountryGlobal;

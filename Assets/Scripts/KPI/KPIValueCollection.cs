@@ -5,7 +5,7 @@ namespace MSP2050.Scripts
 {
 	public class KPIValueCollection
 	{
-        public readonly int countryId;
+        public int countryId { get; private set; }
         private readonly Dictionary<string, KPIValue> values = new Dictionary<string, KPIValue>(); //Includes categories.
 		private readonly List<KPICategory> valueCategories = new List<KPICategory>();
 		public int MostRecentMonthReceived
@@ -21,11 +21,16 @@ namespace MSP2050.Scripts
 		public delegate void KPIValueDefinitionsChanged(KPIValueCollection sourceCollection);
 		public event KPIValueDefinitionsChanged OnKPIValueDefinitionsChanged;	//Called when new values have been added or removed.
 
-		public KPIValueCollection(int countryId = -1)
+		public KPIValueCollection()
+		{
+			countryId = -1;
+		}
+
+		public void Initialise(int countryId = -1)
 		{
 			MostRecentMonthReceived = -1;
-            this.countryId = countryId;
-        }
+			this.countryId = countryId;
+		}
 
 		public virtual void SetupKPIValues(KPICategoryDefinition[] kpiDefinitions, int numberOfKpiMonths)
 		{

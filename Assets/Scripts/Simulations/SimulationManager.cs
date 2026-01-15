@@ -12,6 +12,8 @@ namespace MSP2050.Scripts
 		public const string SEL_SIM_NAME = "SEL";
 		public const string SE_SIM_NAME = "SandExtraction";
 		public const string OTHER_SIM_NAME = "External";
+		public const string Geometry_KPI_NAME = "Geometry";
+		public const string MultiUsePlatform_KPI_NAME = "MUP";
 
 		private static SimulationManager singleton;
 		public static SimulationManager Instance
@@ -45,9 +47,9 @@ namespace MSP2050.Scripts
 				singleton = this;
 
 			if (Main.Instance.GameLoaded)
-				CreateGeometryKPI();
+				CreateClientKPIs();
 			else
-				Main.Instance.OnFinishedLoadingLayers += CreateGeometryKPI;
+				Main.Instance.OnFinishedLoadingLayers += CreateClientKPIs;
 		}
 
 		void OnDestroy()
@@ -133,7 +135,7 @@ namespace MSP2050.Scripts
 
 		public KPIValueCollection GetKPIValuesForSimulation(string a_targetSimulation, int a_countryId = -1)
 		{
-			if(string.IsNullOrEmpty(a_targetSimulation))
+			if(string.IsNullOrEmpty(a_targetSimulation) || a_targetSimulation == Geometry_KPI_NAME)
 			{
 				return geometryKPIs.GetKPIForCountry(a_countryId);
 			}
@@ -146,7 +148,7 @@ namespace MSP2050.Scripts
 
 		public List<KPIValueCollection> GetKPIValuesForAllCountriesSimulation(string a_targetSimulation)
 		{
-			if (string.IsNullOrEmpty(a_targetSimulation))
+			if (string.IsNullOrEmpty(a_targetSimulation) || a_targetSimulation == Geometry_KPI_NAME)
 			{
 				return geometryKPIs.GetKPIForAllCountries();
 			}
@@ -157,7 +159,7 @@ namespace MSP2050.Scripts
 			return null;
 		}
 
-		private void CreateGeometryKPI()
+		private void CreateClientKPIs()
 		{
 			foreach (Team team in SessionManager.Instance.GetTeams())
 			{
@@ -169,10 +171,10 @@ namespace MSP2050.Scripts
 			//Collection for all countries together
 			geometryKPIs.AddKPIForCountry(0);
 			geometryKPIs.SetupKPIValues(null, SessionManager.Instance.MspGlobalData.session_end_month);
-			TimeManager.Instance.OnCurrentMonthChanged += UpdateGeometryKPI;
+			TimeManager.Instance.OnCurrentMonthChanged += UpdateClientKPIs;
 		}
 
-		private void UpdateGeometryKPI(int oldMonth, int newMonth)
+		private void UpdateClientKPIs(int oldMonth, int newMonth)
 		{
 			geometryKPIs.CalculateKPIValues(newMonth);
 		}
