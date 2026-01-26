@@ -93,18 +93,37 @@ namespace MSP2050.Scripts
 
 		public void RemoveConnection(Connection a_con)
 		{
-			Connections.Remove(a_con);
+			//Note: do not compare Connection directly, it is inconsistent
+			//Connections.Remove(a_con) often fails when it shouldnt
+			int i = 0;
+			foreach (Connection con in Connections)
+			{
+				if (con.cable == a_con.cable)
+				{
+					break;
+				}
+				i++;
+			}
+			if(i >= Connections.Count)
+			{
+				Debug.LogError($"Trying to remove a connection that doesn't exist. Point id: {a_con.point.m_databaseID}, cable id:{a_con.cable.GetDatabaseID()}");
+				return;
+			}
+			Connections.RemoveAt(i);
 		}
 
 		public void AddConnection(Connection a_newCon)
 		{
+			//Note: do not compare Connection directly, it is inconsistent
 			//Make sure we dont add connections multiple times
 			foreach (Connection con in Connections)
+			{
 				if (con.cable == a_newCon.cable)
 				{
 					//Debug.LogWarning("Duplicate connections added to point");
 					return;
 				}
+			}
 
 			Connections.Add(a_newCon);
 		}
