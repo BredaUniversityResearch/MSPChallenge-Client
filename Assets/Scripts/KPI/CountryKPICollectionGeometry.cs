@@ -8,7 +8,17 @@ namespace MSP2050.Scripts
 
         public override void SetupKPIValues(KPICategoryDefinition[] kpiDefinitions, int numberOfKpiMonths)
         {
-            List<KPICategoryDefinition> layerCategories = new List<KPICategoryDefinition>(LayerManager.Instance.GetLayerCount());
+			foreach (Team team in SessionManager.Instance.GetTeams())
+			{
+				if (!team.IsManager)
+				{
+					AddKPIForCountry(team.ID);
+				}
+			}
+			//Collection for all countries together
+			AddKPIForCountry(0);
+
+			List<KPICategoryDefinition> layerCategories = new List<KPICategoryDefinition>(LayerManager.Instance.GetLayerCount());
             foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
             {
                 if (layer.m_editable)

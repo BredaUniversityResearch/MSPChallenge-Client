@@ -13,7 +13,7 @@ namespace MSP2050.Scripts
 		public const string SE_SIM_NAME = "SandExtraction";
 		public const string OTHER_SIM_NAME = "External";
 		public const string Geometry_KPI_NAME = "Geometry";
-		public const string MultiUsePlatform_KPI_NAME = "MUP";
+		public const string MultiUse_KPI_NAME = "MultiUse";
 
 		private static SimulationManager singleton;
 		public static SimulationManager Instance
@@ -30,7 +30,8 @@ namespace MSP2050.Scripts
 		private Dictionary<string, ASimulationLogic> m_simulationLogic = new Dictionary<string, ASimulationLogic>();
 		private Dictionary<string, ASimulationData> m_simulationSettings = new Dictionary<string, ASimulationData>();
 
-		private CountryKPICollectionGeometry geometryKPIs = new CountryKPICollectionGeometry();
+		private CountryKPICollectionGeometry m_geometryKPIs = new CountryKPICollectionGeometry();
+		private CountryKPICollectionMUP m_MUPKPIs = new CountryKPICollectionMUP();
 
 		public delegate void SimulationsInitialisedCallback();
 		public event SimulationsInitialisedCallback m_onSimulationsInitialised;
@@ -135,9 +136,13 @@ namespace MSP2050.Scripts
 
 		public KPIValueCollection GetKPIValuesForSimulation(string a_targetSimulation, int a_countryId = -1)
 		{
-			if(string.IsNullOrEmpty(a_targetSimulation) || a_targetSimulation == Geometry_KPI_NAME)
+			if (a_targetSimulation == MultiUse_KPI_NAME)
 			{
-				return geometryKPIs.GetKPIForCountry(a_countryId);
+				return m_MUPKPIs.GetKPIForCountry(a_countryId);
+			}
+			if (string.IsNullOrEmpty(a_targetSimulation) || a_targetSimulation == Geometry_KPI_NAME)
+			{
+				return m_geometryKPIs.GetKPIForCountry(a_countryId);
 			}
 			if (m_simulationLogic.TryGetValue(a_targetSimulation, out var logic))
 			{
@@ -148,9 +153,13 @@ namespace MSP2050.Scripts
 
 		public List<KPIValueCollection> GetKPIValuesForAllCountriesSimulation(string a_targetSimulation)
 		{
+			if (a_targetSimulation == MultiUse_KPI_NAME)
+			{
+				return m_MUPKPIs.GetKPIForAllCountries();
+			}
 			if (string.IsNullOrEmpty(a_targetSimulation) || a_targetSimulation == Geometry_KPI_NAME)
 			{
-				return geometryKPIs.GetKPIForAllCountries();
+				return m_geometryKPIs.GetKPIForAllCountries();
 			}
 			if (m_simulationLogic.TryGetValue(a_targetSimulation, out var logic))
 			{
@@ -161,22 +170,15 @@ namespace MSP2050.Scripts
 
 		private void CreateClientKPIs()
 		{
-			foreach (Team team in SessionManager.Instance.GetTeams())
-			{
-				if (!team.IsManager)
-				{
-					geometryKPIs.AddKPIForCountry(team.ID);
-				}
-			}
-			//Collection for all countries together
-			geometryKPIs.AddKPIForCountry(0);
-			geometryKPIs.SetupKPIValues(null, SessionManager.Instance.MspGlobalData.session_end_month);
+			m_geometryKPIs.SetupKPIValues(null, SessionManager.Instance.MspGlobalData.session_end_month);
+			m_MUPKPIs.SetupKPIValues(null, SessionManager.Instance.MspGlobalData.session_end_month);
 			TimeManager.Instance.OnCurrentMonthChanged += UpdateClientKPIs;
 		}
 
 		private void UpdateClientKPIs(int oldMonth, int newMonth)
 		{
-			geometryKPIs.CalculateKPIValues(newMonth);
+			m_geometryKPIs.CalculateKPIValues(newMonth);
+			m_MUPKPIs.CalculateKPIValues(newMonth);
 		}
 	}
 }

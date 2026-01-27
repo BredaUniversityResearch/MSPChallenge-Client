@@ -1,9 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Linq.Expressions;
+using Unity.Plastic.Newtonsoft.Json;
 
 namespace MSP2050.Scripts
 {
 	public class KPIValueCollectionMUP: KPIValueCollection
 	{
+		const float MULTI_USE_AREA_RATIO = 0.2f;
+		public const string MUP_SAVED_KPI_NAME = "MUP Saved";
+
 		public void KPIUpdateComplete(int newMonth)
 		{
 			OnNewKpiDataReceived(newMonth);
@@ -11,37 +16,37 @@ namespace MSP2050.Scripts
 
 		public void UpdateLayerValues(PolygonLayer layer, LayerState state, int month)
 		{
-			//TODO: Make specific to MUP, get geometry policy to figure out uses
 			float total = 0;
-			Dictionary<EntityType, float> totalByEntityType = new Dictionary<EntityType, float>(layer.m_entityTypes.Count);
-			foreach (EntityType type in layer.m_entityTypes.Values)
+
+			if (layer != null)
 			{
-				totalByEntityType.Add(type, 0.0f);
-			}
-			
-			foreach (Entity entity in state.baseGeometry)
-            {
-                if (countryId != 0 && entity.Country != countryId)
-                    continue;
-
-				PolygonSubEntity subEntity = (PolygonSubEntity)entity.GetSubEntity(0);
-				float subEntityTotal = subEntity.SurfaceAreaSqrKm; ;
-
-				total += subEntityTotal;
-				foreach (EntityType type in subEntity.m_entity.EntityTypes)
+				foreach (Entity entity in state.baseGeometry)
 				{
-					float entityTypeValue;
-					totalByEntityType.TryGetValue(type, out entityTypeValue);
-					entityTypeValue += subEntityTotal;
-					totalByEntityType[type] = entityTypeValue;
+					if (countryId != 0 && entity.Country != countryId)
+						continue;
+
+					PolicyGeometryDataMUPlatform policyData = null;
+					if (entity.TryGetMetaData(PolicyManager.MU_PLATFORM_POLICY_NAME, out string policyJSON))
+					{
+						policyData = JsonConvert.DeserializeObject<PolicyGeometryDataMUPlatform>(policyJSON);
+					}
+					if (policyData == null)
+						continue;
+					bool hasMultiUse = false;
+					for (int i = 0; i < policyData.options.Length; i++)
+					{
+						if (policyData.options[i])
+						{
+							hasMultiUse = true;
+							break;
+						}
+					}
+					if (!hasMultiUse)
+						continue;
+					total += ((PolygonSubEntity)entity.GetSubEntity(0)).SurfaceAreaSqrKm * MULTI_USE_AREA_RATIO;
 				}
 			}
-
-			TryUpdateKPIValue(layer.FileName, month, total);
-			foreach (KeyValuePair<EntityType, float> entityTypeValue in totalByEntityType)
-			{
-				TryUpdateKPIValue(CountryKPICollectionGeometry.GetKPIValueNameForEntityType(layer, entityTypeValue.Key), month, entityTypeValue.Value);
-			}
+			TryUpdateKPIValue(MUP_SAVED_KPI_NAME, month, total);
 		}
 	}
 }

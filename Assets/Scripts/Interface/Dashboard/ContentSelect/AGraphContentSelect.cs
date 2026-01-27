@@ -225,6 +225,8 @@ namespace MSP2050.Scripts
 					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SEL_SIM_NAME);
 				case KPISource.Geometry:
 					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.Geometry_KPI_NAME);
+				case KPISource.MultiUse:
+					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.MultiUse_KPI_NAME);
 				case KPISource.SandExtraction:
 					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SE_SIM_NAME);
 				default:

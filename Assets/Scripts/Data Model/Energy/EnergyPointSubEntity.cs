@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
@@ -95,21 +96,16 @@ namespace MSP2050.Scripts
 		{
 			//Note: do not compare Connection directly, it is inconsistent
 			//Connections.Remove(a_con) often fails when it shouldnt
-			int i = 0;
-			foreach (Connection con in Connections)
+
+			for(int i = 0; i < Connections.Count; i++)
 			{
-				if (con.cable == a_con.cable)
+				if (Connections[i].cable == a_con.cable)
 				{
-					break;
+					Connections.RemoveAt(i);
+					return;
 				}
-				i++;
 			}
-			if(i >= Connections.Count)
-			{
-				Debug.LogError($"Trying to remove a connection that doesn't exist. Point id: {a_con.point.m_databaseID}, cable id:{a_con.cable.GetDatabaseID()}");
-				return;
-			}
-			Connections.RemoveAt(i);
+			Debug.LogError($"Trying to remove a connection that doesn't exist. Point id: {a_con.point.m_databaseID}, cable id:{a_con.cable.GetDatabaseID()}");
 		}
 
 		public void AddConnection(Connection a_newCon)
@@ -120,7 +116,6 @@ namespace MSP2050.Scripts
 			{
 				if (con.cable == a_newCon.cable)
 				{
-					//Debug.LogWarning("Duplicate connections added to point");
 					return;
 				}
 			}
