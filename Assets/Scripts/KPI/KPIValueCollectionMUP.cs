@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq.Expressions;
-using Unity.Plastic.Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace MSP2050.Scripts
 {
