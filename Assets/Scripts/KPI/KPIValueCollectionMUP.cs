@@ -30,7 +30,7 @@ namespace MSP2050.Scripts
 					{
 						policyData = JsonConvert.DeserializeObject<PolicyGeometryDataMUPlatform>(policyJSON);
 					}
-					if (policyData == null)
+					if (policyData == null || policyData.options == null)
 						continue;
 					bool hasMultiUse = false;
 					for (int i = 0; i < policyData.options.Length; i++)
