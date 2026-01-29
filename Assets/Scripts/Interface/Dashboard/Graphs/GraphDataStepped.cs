@@ -18,7 +18,8 @@ namespace MSP2050.Scripts
 
 		//Data display range
 		public float m_graphMin; //Set by value axis
-		public float m_graphRange;
+		public float m_graphMax; //Set by value axis
+		public float m_graphRange; //Rounded difference between min and max
 
 		public List<string> m_stepNames;
 		public List<int> m_absoluteCategoryIndices; //Used to keep colours consistent when values are hidden, behaves different with patterns
