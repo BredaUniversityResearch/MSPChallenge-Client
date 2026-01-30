@@ -121,6 +121,8 @@ namespace MSP2050.Scripts
 			float xmin = 0f;
 			float xmax = 1f;
 			float nextMin = 0f;
+			float stackedPositiveStart = a_data.RelativeZero;
+			float stackedNegativeStart = stackedPositiveStart;
 			for (int i = 0; i < entriesPerStep; i++)
 			{
 				if (a_data.GetPatternIndex(i) == 0) //Only really used for pattern sets
@@ -135,7 +137,7 @@ namespace MSP2050.Scripts
 
 				if (a_data.OverLapPatternSet)
 				{
-					if (m_stacked) //Stacked and overlapping sets
+					if (m_stacked) //Stacked and overlapping sets, assumes positive values only
 					{
 						ymin = ymax;
 						ymax += (a_data.m_steps[a_step][i].Value - a_data.m_graphMin) / a_data.m_graphRange;
@@ -146,21 +148,35 @@ namespace MSP2050.Scripts
 					{
 						xmin = setIndex / (float)a_data.PatternSetsPerStep;
 						xmax = (setIndex + 1) / (float)a_data.PatternSetsPerStep;
-						ymin = 0f;
-						ymax = (a_data.m_steps[a_step][i].Value - a_data.m_graphMin) / a_data.m_graphRange;
+						(float min, float max) relPosY = a_data.GetRelativePositions(a_data.m_steps[a_step][i].Value, 0);
+						ymin = relPosY.min;
+						ymax = relPosY.max;
 					}
 				}
 				else if (m_stacked) //Only stacked
 				{
-					ymin = ymax;
-					ymax += (a_data.m_steps[a_step][i].Value - a_data.m_graphMin) / a_data.m_graphRange;
+					float relativeSize = a_data.GetRelativeSize(a_data.m_steps[a_step][i].Value);
+                    if (a_data.m_steps[a_step][i].Value > 0f)
+                    {
+						ymin = stackedPositiveStart;
+						stackedPositiveStart += relativeSize;
+						ymax = stackedPositiveStart;
+					}
+					else
+					{
+						ymax = stackedNegativeStart;
+						stackedNegativeStart -= relativeSize;
+						ymin = stackedNegativeStart;
+					}
 				}
 				else //Regular
 				{
 					xmin = i / (float)entriesPerStep;
 					xmax = (i + 1) / (float)entriesPerStep;
-					ymax = (a_data.m_steps[a_step][i].Value - a_data.m_graphMin) / a_data.m_graphRange;
 
+					(float min, float max) relPosY = a_data.GetRelativePositions(a_data.m_steps[a_step][i].Value, 0);
+					ymin = relPosY.min;
+					ymax = relPosY.max;
 				}
 				m_bars[nextEntryIndex].SetData(a_data, a_step, i, xmin, xmax, ymin, ymax);
 				nextEntryIndex++;

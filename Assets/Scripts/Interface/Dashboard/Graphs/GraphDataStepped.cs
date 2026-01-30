@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 namespace MSP2050.Scripts
 {
@@ -26,6 +27,8 @@ namespace MSP2050.Scripts
 		public List<int> m_valueCountries;			//Country of all the selected values
 		public List<string> m_selectedDisplayIDs;
 
+		public float RelativeZero => Mathf.Clamp01(Mathf.Abs(m_graphMin) / m_graphRange);
+
 		public string FormatValue(float a_value)
 		{
 			return (a_value * Mathf.Pow(10, -m_scalePower)).ToString("0.#####");
@@ -44,6 +47,19 @@ namespace MSP2050.Scripts
 			return m_unit.GetUnitStringForUnitIndex(m_unitIndex);
 		}
 
+		public (float min, float max) GetRelativePositions(float a_min, float a_max)
+		{
+			float a = Mathf.Clamp01(Mathf.Abs((a_min - m_graphMin) / m_graphRange));
+			float b = Mathf.Clamp01(Mathf.Abs((a_max - m_graphMin) / m_graphRange));
+			if (a > b)
+				return (b, a);
+			return (a, b);
+		}
+
+		public float GetRelativeSize(float a_value)
+		{
+			return Mathf.Abs(a_value) / m_graphRange;
+		}
 
 		public virtual string GetDisplayName(int a_categoryIndex)
 		{

@@ -70,7 +70,7 @@ namespace MSP2050.Scripts
 			float absMax = Mathf.Max(Mathf.Abs(minT), Mathf.Abs((float)maxT));
 
 			a_data.m_graphMin = minT;
-			a_data.m_graphMin = (float)maxT;
+			a_data.m_graphMax = (float)maxT;
 			a_data.m_graphRange = maxScaled;
 			if (a_data.m_unit != null)
 			{
