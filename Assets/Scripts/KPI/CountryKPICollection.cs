@@ -30,13 +30,17 @@ namespace MSP2050.Scripts
 
         public T GetKPIForCountry(int country)
         {
-            if(KPIsPerCountry.ContainsKey(country))
-                return KPIsPerCountry[country];
+            if(KPIsPerCountry != null && KPIsPerCountry.TryGetValue(country, out var result))
+                return result;
             return null;
         }
 
         public List<KPIValueCollection> GetKPIForAllCountries()
 		{
+            if(KPIsPerCountry == null)
+            {
+                return new List<KPIValueCollection>();
+			}
             List<KPIValueCollection> result = new List<KPIValueCollection>(KPIsPerCountry.Count);
             foreach(var kvp in KPIsPerCountry)
 			{
