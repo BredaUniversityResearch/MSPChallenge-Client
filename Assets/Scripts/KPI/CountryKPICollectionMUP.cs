@@ -23,7 +23,7 @@ namespace MSP2050.Scripts
             m_MUPLayer = (PolygonLayer)LayerManager.Instance.GetLayerByUniqueTags(new string[] { "Polygon", "Electricity", "Production", "MultiUse" });
             if (m_MUPLayer == null)
             {
-                Debug.LogError($"Missing multi-use platform layer, no layers found with tags \"Polygon\", \"Electricity\", \"Production\" and \"MultiUse\". Multi-use KPIs will not be calculated.");
+                Debug.LogWarning($"Missing multi-use platform layer, no layers found with tags \"Polygon\", \"Electricity\", \"Production\" and \"MultiUse\". Multi-use KPIs will not be calculated.");
                 return;
             }
 
