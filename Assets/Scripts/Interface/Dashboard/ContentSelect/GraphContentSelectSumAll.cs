@@ -109,7 +109,7 @@ namespace MSP2050.Scripts
 				data.m_selectedDisplayIDs = new List<string>();
 
 			a_minValue = 0f;
-			a_maxValue = float.NegativeInfinity;
+			a_maxValue = 0f;
 
 			if (a_timeSettings.m_aggregationFunction != null)
 			{
@@ -175,10 +175,13 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			if (a_maxValue == Mathf.NegativeInfinity)
-				a_maxValue = 1f;
 			if (Mathf.Abs(a_maxValue - a_minValue) < 0.001f)
-				a_maxValue = a_minValue + 0.001f;
+			{
+				if (Mathf.Abs(a_maxValue) < 0.001f)
+					a_maxValue = 1f;
+				else
+					a_maxValue = a_minValue + 0.001f;
+			}
 			return data;
 		}
 
