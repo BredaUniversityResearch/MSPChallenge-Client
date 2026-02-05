@@ -72,13 +72,14 @@ namespace MSP2050.Scripts
 		protected void FetchDataInternal(List<KPIValue> a_chosenKPIs, GraphDataStepped a_data, GraphTimeSettings a_timeSettings, bool a_stacked, out float a_maxValue, out float a_minValue)
 		{
 			a_minValue = 0f;
-			a_maxValue = float.NegativeInfinity;
+			a_maxValue = 0f;
 
 			if (a_timeSettings.m_aggregationFunction != null)
 			{
 				if (a_data.OverLapPatternSet && a_stacked)
 				{
 					//Aggregated with max per set
+					//!!! Assumes no negative values
 					for (int i = 0; i < a_timeSettings.m_months.Count; i++)
 					{
 						a_data.m_steps.Add(new float?[a_chosenKPIs.Count]);
@@ -114,7 +115,8 @@ namespace MSP2050.Scripts
 					for (int i = 0; i < a_timeSettings.m_months.Count; i++)
 					{
 						a_data.m_steps.Add(new float?[a_chosenKPIs.Count]);
-						float stackedV = 0f;
+						float stackedPositive = 0f;
+						float stackedNegative = 0f;
 						for (int j = 0; j < a_chosenKPIs.Count; j++)
 						{
 							List<float?> values = new List<float?>(a_timeSettings.m_months[i].Count);
@@ -131,13 +133,16 @@ namespace MSP2050.Scripts
 									a_maxValue = Mathf.Max(a_maxValue, aggregatedV.Value);
 									a_minValue = Mathf.Min(a_minValue, aggregatedV.Value);
 								}
-								stackedV += aggregatedV.Value;
+								if (aggregatedV.Value >= 0)
+									stackedPositive += aggregatedV.Value;
+								else
+									stackedNegative += aggregatedV.Value;
 							}
 						}
 						if (a_stacked)
 						{
-							a_maxValue = Mathf.Max(a_maxValue, stackedV);
-							a_minValue = Mathf.Min(a_minValue, stackedV);
+							a_maxValue = Mathf.Max(a_maxValue, stackedPositive);
+							a_minValue = Mathf.Min(a_minValue, stackedNegative);
 						}
 					}
 				}
@@ -145,6 +150,7 @@ namespace MSP2050.Scripts
 			else if(a_data.OverLapPatternSet && a_stacked)
 			{
 				//Non-aggregated, but using max per set
+				//!!! Assumes no negative values
 				for (int i = 0; i < a_timeSettings.m_months.Count; i++)
 				{
 					a_data.m_steps.Add(new float?[a_chosenKPIs.Count]);
@@ -175,7 +181,8 @@ namespace MSP2050.Scripts
 				for (int i = 0; i < a_timeSettings.m_months.Count; i++)
 				{
 					a_data.m_steps.Add(new float?[a_chosenKPIs.Count]);
-					float stackedV = 0f;
+					float stackedPositive = 0f;
+					float stackedNegative = 0f;
 					for (int j = 0; j < a_chosenKPIs.Count; j++)
 					{
 						float? v = a_chosenKPIs[j].GetKpiValueForMonth(a_timeSettings.m_months[i][0]);
@@ -187,22 +194,27 @@ namespace MSP2050.Scripts
 								a_maxValue = Mathf.Max(a_maxValue, v.Value);
 								a_minValue = Mathf.Min(a_minValue, v.Value);
 							}
-							stackedV += v.Value;
+							if(v.Value >= 0)
+								stackedPositive += v.Value;
+							else
+								stackedNegative += v.Value;
 						}
 					}
 					if (a_stacked)
 					{
-						a_maxValue = Mathf.Max(a_maxValue, stackedV);
-						a_minValue = Mathf.Min(a_minValue, stackedV);
+						a_maxValue = Mathf.Max(a_maxValue, stackedPositive);
+						a_minValue = Mathf.Min(a_minValue, stackedNegative);
 					}
 				}
 			}
 
-			if (a_maxValue == Mathf.NegativeInfinity)
-				a_maxValue = 1f;
 			if (Mathf.Abs(a_maxValue - a_minValue) < 0.001f)
-				a_maxValue = a_minValue + 0.001f;
-
+			{
+				if (Mathf.Abs(a_maxValue) < 0.001f)
+					a_maxValue = 1f;
+				else
+					a_maxValue = a_minValue + 0.001f;
+			}
 		}
 
 		protected void SetContentToggleNames(string[] a_names)
@@ -224,7 +236,9 @@ namespace MSP2050.Scripts
 				case KPISource.Shipping:
 					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SEL_SIM_NAME);
 				case KPISource.Geometry:
-					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(null);
+					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.Geometry_KPI_NAME);
+				case KPISource.MultiUse:
+					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.MultiUse_KPI_NAME);
 				case KPISource.SandExtraction:
 					return SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SE_SIM_NAME);
 				default:

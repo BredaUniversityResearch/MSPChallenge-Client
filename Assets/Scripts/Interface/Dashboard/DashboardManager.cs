@@ -118,6 +118,12 @@ namespace MSP2050.Scripts
 					AddCategoryToggle(cat);
 					m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(true, m_numberColumns));
 				}
+				else if (cat.m_name == "Other")
+				{
+					//Always add the 'Other' category
+					AddCategoryToggle(cat);
+					m_catSelectedWidgets.Add(cat, new DashboardWidgetLayout(false, m_numberColumns));
+				}
 				else
 				{
 					foreach (var kvp in SimulationManager.Instance.Settings)
