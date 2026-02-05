@@ -2,24 +2,23 @@
 
 namespace MSP2050.Scripts
 {
-    class CountryKPICollectionGeometry
-    {
-        private Dictionary<int, KPIValueCollectionGeometry> geometryKPIs; //Geometry KPIs per country id.
+    class CountryKPICollectionGeometry : CountryKPICollection<KPIValueCollectionGeometry>
+	{
         private int mostRecentMonth = -1;
 
-        public CountryKPICollectionGeometry()
+        public override void SetupKPIValues(KPICategoryDefinition[] kpiDefinitions, int numberOfKpiMonths)
         {
-            geometryKPIs = new Dictionary<int, KPIValueCollectionGeometry>();
-        }
+			foreach (Team team in SessionManager.Instance.GetTeams())
+			{
+				if (!team.IsManager)
+				{
+					AddKPIForCountry(team.ID);
+				}
+			}
+			//Collection for all countries together
+			AddKPIForCountry(0);
 
-        public void AddKPIForCountry(int country)
-        {
-            geometryKPIs.Add(country, new KPIValueCollectionGeometry(country));
-        }
-
-        public void SetupKPIValues(KPICategoryDefinition[] kpiDefinitions, int numberOfKpiMonths)
-        {
-            List<KPICategoryDefinition> layerCategories = new List<KPICategoryDefinition>(LayerManager.Instance.GetLayerCount());
+			List<KPICategoryDefinition> layerCategories = new List<KPICategoryDefinition>(LayerManager.Instance.GetLayerCount());
             foreach (AbstractLayer layer in LayerManager.Instance.GetAllLayers())
             {
                 if (layer.m_editable)
@@ -54,7 +53,7 @@ namespace MSP2050.Scripts
 
             KPICategoryDefinition[] layerCategoryArray = layerCategories.ToArray();
 
-            foreach (KeyValuePair<int, KPIValueCollectionGeometry> kvp in geometryKPIs)
+            foreach (KeyValuePair<int, KPIValueCollectionGeometry> kvp in KPIsPerCountry)
             {
                 kvp.Value.SetupKPIValues(layerCategoryArray, numberOfKpiMonths);
             }
@@ -70,7 +69,7 @@ namespace MSP2050.Scripts
                     for (int monthId = mostRecentMonth + 1; monthId <= newMonth; ++monthId)
                     {
                         state.AdvanceStateToMonth(monthId);
-                        foreach(var kvp in geometryKPIs)
+                        foreach(var kvp in KPIsPerCountry)
                             kvp.Value.UpdateLayerValues(layer, state, monthId);
                     }
                 }
@@ -78,15 +77,8 @@ namespace MSP2050.Scripts
 
             if(newMonth > mostRecentMonth)
                 mostRecentMonth = newMonth;
-            foreach (var kvp in geometryKPIs)
+            foreach (var kvp in KPIsPerCountry)
                 kvp.Value.KPIUpdateComplete(newMonth);
-        }
-
-        public KPIValueCollectionGeometry GetKPIForCountry(int country)
-        {
-            if (geometryKPIs.ContainsKey(country))
-                return geometryKPIs[country];
-            return null;
         }
 
         public static string GetKPIValueNameForEntityType(AbstractLayer layer, EntityType entityType)
@@ -116,16 +108,6 @@ namespace MSP2050.Scripts
                     break;
             }
 
-            return result;
-        }
-
-        public List<KPIValueCollection> GetKPIForAllCountries()
-        {
-            List<KPIValueCollection> result = new List<KPIValueCollection>(geometryKPIs.Count);
-            foreach (var kvp in geometryKPIs)
-            {
-                result.Add(kvp.Value);
-            }
             return result;
         }
     }

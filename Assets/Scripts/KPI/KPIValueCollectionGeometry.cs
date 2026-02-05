@@ -4,9 +4,6 @@ namespace MSP2050.Scripts
 {
 	public class KPIValueCollectionGeometry: KPIValueCollection
 	{
-        public KPIValueCollectionGeometry(int countryId) : base(countryId)
-        { }
-
 		public void KPIUpdateComplete(int newMonth)
 		{
 			OnNewKpiDataReceived(newMonth);

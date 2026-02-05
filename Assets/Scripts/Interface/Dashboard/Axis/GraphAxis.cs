@@ -67,13 +67,15 @@ namespace MSP2050.Scripts
 			double maxT = ((double)a_max).CeilToSignificantDigits(1);
 			float maxScaled = (float)(maxT - minT).CeilToSignificantDigits(1);
 			float step = maxScaled / 5f;
+			float absMax = Mathf.Max(Mathf.Abs(minT), Mathf.Abs((float)maxT));
 
 			a_data.m_graphMin = minT;
+			a_data.m_graphMax = (float)maxT;
 			a_data.m_graphRange = maxScaled;
 			if (a_data.m_unit != null)
 			{
-				a_data.m_unitIndex = a_data.m_unit.GetConversionUnitIndexForSize(maxScaled);
-				a_data.m_scalePower = FindPower(maxScaled);// * a_data.m_unit.GetUnitEntrySize(a_data.m_unitIndex));
+				a_data.m_unitIndex = a_data.m_unit.GetConversionUnitIndexForSize(absMax);
+				a_data.m_scalePower = FindPower(absMax);
 				a_data.m_unitEOffset = a_data.m_unit.GetUnitEntryEOffset(a_data.m_unitIndex);
 			}
 			else

@@ -4,27 +4,8 @@ using UnityEngine;
 
 namespace MSP2050.Scripts
 {
-    class CountryKPICollectionEnergy
+    class CountryKPICollectionEnergy : CountryKPICollection<KPIValueCollectionEnergy>
     {
-        private Dictionary<int, KPIValueCollectionEnergy> energyKPIs; //Energy KPIs per country id.
-
-        public CountryKPICollectionEnergy()
-        {
-            energyKPIs = new Dictionary<int, KPIValueCollectionEnergy>();
-        }
-
-        public void AddKPIForCountry(int country)
-        {
-            energyKPIs.Add(country, new KPIValueCollectionEnergy(country));
-        }
-
-        public void SetupKPIValues(KPICategoryDefinition[] kpiDefinitions, int numberOfKpiMonths)
-        {
-            foreach (KeyValuePair<int, KPIValueCollectionEnergy> kvp in energyKPIs)
-            {
-                kvp.Value.SetupKPIValues(kpiDefinitions, numberOfKpiMonths);
-            }
-        }
 
         public void ProcessReceivedKPIEnergyData(KPIObjectEnergy[] updateData)
         {
@@ -69,7 +50,7 @@ namespace MSP2050.Scripts
                 AssignActualAndWastedToGrids(parsedUpdateData[lowestKey]);
 
                 //Update KPIs for individual countries
-                foreach(KeyValuePair<int, KPIValueCollectionEnergy> kvp in energyKPIs)
+                foreach(KeyValuePair<int, KPIValueCollectionEnergy> kvp in KPIsPerCountry)
                     kvp.Value.UpdateKPIValuesForMonth(lowestKey, parsedUpdateData[lowestKey]);
                 parsedUpdateData.Remove(lowestKey);
 
@@ -79,7 +60,7 @@ namespace MSP2050.Scripts
             //Notify all KPIs we have finished updating
             if (highestMonthProcessed != -1)
             {
-                foreach (KeyValuePair<int, KPIValueCollectionEnergy> kvp in energyKPIs)
+                foreach (KeyValuePair<int, KPIValueCollectionEnergy> kvp in KPIsPerCountry)
                     kvp.Value.FinishedUpdatingKPI(highestMonthProcessed);
 				EnergyGridReceivedEvent.Invoke();
 			}
@@ -111,23 +92,6 @@ namespace MSP2050.Scripts
                 //Assign the actual and wasted values to its grid. This will be overwritten in later updates.
                 associatedGrid.m_actualAndWasted = gridData.Value;
             }
-        }
-
-        public KPIValueCollectionEnergy GetKPIForCountry(int country)
-        {
-            if(energyKPIs.ContainsKey(country))
-                return energyKPIs[country];
-            return null;
-        }
-
-        public List<KPIValueCollection> GetKPIForAllCountries()
-		{
-            List<KPIValueCollection> result = new List<KPIValueCollection>(energyKPIs.Count);
-            foreach(var kvp in energyKPIs)
-			{
-                result.Add(kvp.Value);
-			}
-            return result;
         }
     }
 }
