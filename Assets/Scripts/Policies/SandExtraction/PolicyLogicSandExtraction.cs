@@ -94,8 +94,6 @@ namespace MSP2050.Scripts
             float volume = 0;
             int pitDepth = 0;
             double pitSlope = 1;
-            Debug.Log("Accurate");
-            
 
             if(!int.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName(PITDEPTHPROPERTY)), out pitDepth))
             {
@@ -205,7 +203,6 @@ namespace MSP2050.Scripts
         {
             int pitDepth = 0;
             double pitSlope = 1; // in metres
-			Debug.Log("Estimate");
 
 			if (!int.TryParse(a_subEntity.m_entity.GetPropertyMetaData(a_subEntity.m_entity.Layer.FindPropertyMetaDataByName(PITDEPTHPROPERTY)), out pitDepth))
             {

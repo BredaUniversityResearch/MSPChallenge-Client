@@ -208,9 +208,9 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			if (Mathf.Abs(a_maxValue - a_minValue) < 0.001f)
+			if (Mathf.Abs(a_maxValue - a_minValue) < 0.0001f)
 			{
-				if (Mathf.Abs(a_maxValue) < 0.001f)
+				if (Mathf.Abs(a_maxValue) < 0.0001f)
 					a_maxValue = 1f;
 				else
 					a_maxValue = a_minValue + 0.001f;
