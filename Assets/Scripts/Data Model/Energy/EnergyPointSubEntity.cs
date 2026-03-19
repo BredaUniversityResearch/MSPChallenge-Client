@@ -18,7 +18,12 @@ namespace MSP2050.Scripts
 			{
 				if (m_sourcePolygon != null)
 					return m_sourcePolygon.Capacity;
-				return m_entity.EntityTypes[0].capacity;
+				long result = 0;
+				foreach (EntityType type in m_entity.EntityTypes)
+				{
+					result += type.capacity;
+				}
+				return result;
 			}
 			set { }
 		}

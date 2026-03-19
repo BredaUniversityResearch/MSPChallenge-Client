@@ -19,7 +19,14 @@ namespace MSP2050.Scripts
 
 		public long Capacity
 		{
-			get => m_entity.EntityTypes[0].capacity * m_numberCables;
+			get {
+				long result = 0;
+				foreach (EntityType type in m_entity.EntityTypes)
+				{
+					result += type.capacity;
+				}
+				return result * m_numberCables;
+			}
 			set { }
 		}
 
