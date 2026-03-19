@@ -97,7 +97,7 @@ namespace MSP2050.Scripts
 			}
 			else
 			{
-				m_multiTypeSelect = a_layerMeta.layer_editing_type == "multitype";
+				m_multiTypeSelect = a_layerMeta.layer_editing_type.Contains("multitype");
 			}
 
 			m_selectable = a_layerMeta.layer_selectable;
@@ -142,6 +142,7 @@ namespace MSP2050.Scripts
 					PolicyLogicEnergy.Instance.AddEnergyPointLayer(this as PointLayer);
 					break;
 				case "sourcepolygon":
+				case "multitypesourcepolygon":
 					m_editingType = EditingType.SourcePolygon;
 					break;
 				default:
