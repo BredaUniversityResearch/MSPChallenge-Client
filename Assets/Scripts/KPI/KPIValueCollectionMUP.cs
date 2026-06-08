@@ -25,25 +25,28 @@ namespace MSP2050.Scripts
 					if (countryId != 0 && entity.Country != countryId)
 						continue;
 
-					PolicyGeometryDataMUPlatform policyData = null;
-					if (entity.TryGetMetaData(PolicyManager.MU_PLATFORM_POLICY_NAME, out string policyJSON))
-					{
-						policyData = JsonConvert.DeserializeObject<PolicyGeometryDataMUPlatform>(policyJSON);
-					}
-					if (policyData == null || policyData.options == null)
+					//PolicyGeometryDataMUPlatform policyData = null;
+					//if (entity.TryGetMetaData(PolicyManager.MU_PLATFORM_POLICY_NAME, out string policyJSON))
+					//{
+					//	policyData = JsonConvert.DeserializeObject<PolicyGeometryDataMUPlatform>(policyJSON);
+					//}
+					//if (policyData == null || policyData.options == null)
+					//	continue;
+					//bool hasMultiUse = false;
+					//for (int i = 0; i < policyData.options.Length; i++)
+					//{
+					//	if (policyData.options[i])
+					//	{
+					//		hasMultiUse = true;
+					//		break;
+					//	}
+					//}
+					//if (!hasMultiUse)
+					//	continue;
+
+					if (entity.EntityTypes.Count == 1)
 						continue;
-					bool hasMultiUse = false;
-					for (int i = 0; i < policyData.options.Length; i++)
-					{
-						if (policyData.options[i])
-						{
-							hasMultiUse = true;
-							break;
-						}
-					}
-					if (!hasMultiUse)
-						continue;
-					total += ((PolygonSubEntity)entity.GetSubEntity(0)).SurfaceAreaSqrKm * MULTI_USE_AREA_RATIO;
+					total += ((PolygonSubEntity)entity.GetSubEntity(0)).SurfaceAreaSqrKm * MULTI_USE_AREA_RATIO * (entity.EntityTypes.Count-1);
 				}
 			}
 			TryUpdateKPIValue(MUP_SAVED_KPI_NAME, month, total);

@@ -21,7 +21,7 @@ namespace MSP2050.Scripts
 
 				if (a_layerMeta[i].layer_geotype == "polygon")
 				{
-					if (a_layerMeta[i].layer_editing_type == "sourcepolygon")
+					if (a_layerMeta[i].layer_editing_type.Contains("sourcepolygon"))
 						layer = new EnergyPolygonLayer(a_layerMeta[i], new List<SubEntityObject>());
 					else
 						layer = new PolygonLayer(a_layerMeta[i], new List<SubEntityObject>());
