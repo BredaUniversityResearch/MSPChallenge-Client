@@ -309,7 +309,12 @@ namespace MSP2050.Scripts
 
 					Dictionary<int, PlanIssueObject> newIssues = new Dictionary<int, PlanIssueObject>();
 					foreach (PlanIssueObject issue in m_planLayer.issues)
-						newIssues.Add(issue.GetIssueHash(), issue);
+					{
+						if(!newIssues.TryAdd(issue.GetIssueHash(), issue))
+						{
+							Debug.LogWarning($"Failed to add issue of restriction {issue.RestrictionID} at position: {issue.x}, {issue.y}");
+						}
+					}
 
 					dataObject.Add("added", JToken.FromObject(newIssues.Values.ToArray()));
 					dataObject.Add("removed", JToken.FromObject(new int[] {}));

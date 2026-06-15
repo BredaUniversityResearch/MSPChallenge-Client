@@ -10,8 +10,10 @@ namespace MSP2050.Scripts
 		public const string CEL_SIM_NAME = "CEL";
 		public const string MEL_SIM_NAME = "MEL";
 		public const string SEL_SIM_NAME = "SEL";
-		public const string SE_SIM_NAME = "SandExtraction";
-		public const string OTHER_SIM_NAME = "External";
+		public const string SE_SIM_NAME = "SANDEXTRACTION";
+		public const string OTHER_SIM_NAME = "EXTERNAL";
+		public const string Geometry_KPI_NAME = "GEOMETRY";
+		public const string MultiUse_KPI_NAME = "MULTIUSE";
 
 		private static SimulationManager singleton;
 		public static SimulationManager Instance
@@ -28,7 +30,8 @@ namespace MSP2050.Scripts
 		private Dictionary<string, ASimulationLogic> m_simulationLogic = new Dictionary<string, ASimulationLogic>();
 		private Dictionary<string, ASimulationData> m_simulationSettings = new Dictionary<string, ASimulationData>();
 
-		private CountryKPICollectionGeometry geometryKPIs = new CountryKPICollectionGeometry();
+		private CountryKPICollectionGeometry m_geometryKPIs = new CountryKPICollectionGeometry();
+		private CountryKPICollectionMUP m_MUPKPIs = new CountryKPICollectionMUP();
 
 		public delegate void SimulationsInitialisedCallback();
 		public event SimulationsInitialisedCallback m_onSimulationsInitialised;
@@ -45,9 +48,9 @@ namespace MSP2050.Scripts
 				singleton = this;
 
 			if (Main.Instance.GameLoaded)
-				CreateGeometryKPI();
+				CreateClientKPIs();
 			else
-				Main.Instance.OnFinishedLoadingLayers += CreateGeometryKPI;
+				Main.Instance.OnFinishedLoadingLayers += CreateClientKPIs;
 		}
 
 		void OnDestroy()
@@ -62,7 +65,7 @@ namespace MSP2050.Scripts
 		//All possible simulations should be registered before policies are initialised
 		public void RegisterSimulation(SimulationDefinition a_simulation)
 		{
-			m_simulationDefinitions.Add(a_simulation.m_name, a_simulation);
+			m_simulationDefinitions.Add(a_simulation.m_name.ToUpper(), a_simulation);
 		}
 
 		public void RegisterBuiltInSimulations()
@@ -79,16 +82,16 @@ namespace MSP2050.Scripts
 			//Create logic instances
 			foreach (ASimulationData data in a_simulationSettings)
 			{
-				if(m_simulationDefinitions.TryGetValue(data.simulation_type, out SimulationDefinition definition))
+				if(data != null && !string.IsNullOrEmpty(data.simulation_type) && m_simulationDefinitions.TryGetValue(data.simulation_type.ToUpper(), out SimulationDefinition definition))
 				{
 					ASimulationLogic logic = (ASimulationLogic)gameObject.AddComponent(definition.m_logicType);
 					logic.Initialise(data);
-					m_simulationLogic.Add(data.simulation_type, logic);
-					m_simulationSettings.Add(data.simulation_type, data);
+					m_simulationLogic.Add(data.simulation_type.ToUpper(), logic);
+					m_simulationSettings.Add(data.simulation_type.ToUpper(), data);
 				}
 				else
 				{
-					Debug.LogError("Simulation settings received from the server for a simulation without definition: " + data.simulation_type);
+					Debug.LogError("Simulation settings received from the server for a simulation without definition: " + (data == null ? "null" : data.simulation_type));
 				}
 			}
 			if (m_onSimulationsInitialised != null)
@@ -107,24 +110,24 @@ namespace MSP2050.Scripts
 
 		public bool TryGetDefinition(string a_name, out SimulationDefinition a_definition)
 		{
-			return m_simulationDefinitions.TryGetValue(a_name, out a_definition);
+			return m_simulationDefinitions.TryGetValue(a_name.ToUpper(), out a_definition);
 		}
 
 		public bool TryGetLogic(string a_name, out ASimulationLogic a_logic)
 		{
-			return m_simulationLogic.TryGetValue(a_name, out a_logic);
+			return m_simulationLogic.TryGetValue(a_name.ToUpper(), out a_logic);
 		}
 
 		public bool TryGetSettings(string a_name, out ASimulationData a_settings)
 		{
-			return m_simulationSettings.TryGetValue(a_name, out a_settings);
+			return m_simulationSettings.TryGetValue(a_name.ToUpper(), out a_settings);
 		}
 
 		public void RunGeneralUpdate(List<ASimulationData> a_data)
 		{
 			foreach (ASimulationData data in a_data)
 			{
-				if (m_simulationLogic.TryGetValue(data.simulation_type, out ASimulationLogic simulation))
+				if (m_simulationLogic.TryGetValue(data.simulation_type.ToUpper(), out ASimulationLogic simulation))
 				{
 					simulation.HandleGeneralUpdate(data);
 				}
@@ -133,11 +136,21 @@ namespace MSP2050.Scripts
 
 		public KPIValueCollection GetKPIValuesForSimulation(string a_targetSimulation, int a_countryId = -1)
 		{
-			if(string.IsNullOrEmpty(a_targetSimulation))
+			if (string.IsNullOrEmpty(a_targetSimulation))
 			{
-				return geometryKPIs.GetKPIForCountry(a_countryId);
+				return m_geometryKPIs.GetKPIForCountry(a_countryId);
 			}
-			if (m_simulationLogic.TryGetValue(a_targetSimulation, out var logic))
+
+			string upper = a_targetSimulation.ToUpper();
+			if (upper == MultiUse_KPI_NAME)
+			{
+				return m_MUPKPIs.GetKPIForCountry(a_countryId);
+			}
+			if (upper == Geometry_KPI_NAME)
+			{
+				return m_geometryKPIs.GetKPIForCountry(a_countryId);
+			}
+			if (m_simulationLogic.TryGetValue(upper, out var logic))
 			{
 				return logic.GetKPIValuesForCountry(a_countryId);
 			}
@@ -148,33 +161,36 @@ namespace MSP2050.Scripts
 		{
 			if (string.IsNullOrEmpty(a_targetSimulation))
 			{
-				return geometryKPIs.GetKPIForAllCountries();
+				return m_geometryKPIs.GetKPIForAllCountries();
 			}
-			if (m_simulationLogic.TryGetValue(a_targetSimulation, out var logic))
+
+			string upper = a_targetSimulation.ToUpper();
+			if (upper == MultiUse_KPI_NAME)
+			{
+				return m_MUPKPIs.GetKPIForAllCountries();
+			}
+			if (upper == Geometry_KPI_NAME)
+			{
+				return m_geometryKPIs.GetKPIForAllCountries();
+			}
+			if (m_simulationLogic.TryGetValue(upper, out var logic))
 			{
 				return logic.GetKPIValuesForAllCountries();
 			}
 			return null;
 		}
 
-		private void CreateGeometryKPI()
+		private void CreateClientKPIs()
 		{
-			foreach (Team team in SessionManager.Instance.GetTeams())
-			{
-				if (!team.IsManager)
-				{
-					geometryKPIs.AddKPIForCountry(team.ID);
-				}
-			}
-			//Collection for all countries together
-			geometryKPIs.AddKPIForCountry(0);
-			geometryKPIs.SetupKPIValues(null, SessionManager.Instance.MspGlobalData.session_end_month);
-			TimeManager.Instance.OnCurrentMonthChanged += UpdateGeometryKPI;
+			m_geometryKPIs.SetupKPIValues(null, SessionManager.Instance.MspGlobalData.session_end_month);
+			m_MUPKPIs.SetupKPIValues(null, SessionManager.Instance.MspGlobalData.session_end_month);
+			TimeManager.Instance.OnCurrentMonthChanged += UpdateClientKPIs;
 		}
 
-		private void UpdateGeometryKPI(int oldMonth, int newMonth)
+		private void UpdateClientKPIs(int oldMonth, int newMonth)
 		{
-			geometryKPIs.CalculateKPIValues(newMonth);
+			m_geometryKPIs.CalculateKPIValues(newMonth);
+			m_MUPKPIs.CalculateKPIValues(newMonth);
 		}
 	}
 }

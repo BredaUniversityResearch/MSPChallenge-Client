@@ -10,7 +10,6 @@ namespace MSP2050.Scripts
 {
 	public class GraphContentSelectComparison : AGraphContentSelect
 	{
-		public enum KPISource { Ecology, Energy, Shipping, Geometry, Other }
 		[SerializeField] protected string[] m_categoryNames;
 		[SerializeField] protected string[] m_categoryDisplayNames;
 		[SerializeField] protected int[] m_kpiNameCutLength;
@@ -33,25 +32,7 @@ namespace MSP2050.Scripts
 			base.Initialise(a_onSettingsChanged, a_widget);
 			m_detailsWindows = new GraphContentSelectMultiSelectWindow[m_contentToggles.Length];
 
-			List<KPIValueCollection> kvcs = null;
-			switch(m_kpiSource)
-			{
-				case KPISource.Ecology:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.MEL_SIM_NAME); 
-					break;
-				case KPISource.Energy:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.CEL_SIM_NAME);
-					break;
-				case KPISource.Shipping:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SEL_SIM_NAME);
-					break;
-				case KPISource.Geometry:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(null);
-					break;
-				default:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.OTHER_SIM_NAME);
-					break;
-			}
+			List<KPIValueCollection> kvcs = GetKVCs(m_kpiSource);
 			
 			if(kvcs == null || kvcs.Count == 0)
 			{

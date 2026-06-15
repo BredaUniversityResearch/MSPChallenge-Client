@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace MSP2050.Scripts
 {
-	public enum KPISource { Ecology, Energy, Shipping, Geometry, SandExtraction, Other }
+	public enum KPISource { Ecology, Energy, Shipping, Geometry, SandExtraction, Other, MultiUse }
 	public class GraphContentSelectFixedCategory : AGraphContentSelect
 	{
 		public string[] m_categoryNames;

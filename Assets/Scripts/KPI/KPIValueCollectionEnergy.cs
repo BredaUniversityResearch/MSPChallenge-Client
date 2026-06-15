@@ -7,9 +7,6 @@ namespace MSP2050.Scripts
 	{	
 		private float[] investment = new float[EnergyKPI.allEnergyTypes.Length]; //Investment points of energy network of country (Cumulative cost of added/removed energy geometry) 
 
-		public KPIValueCollectionEnergy(int countryId) : base(countryId)
-		{ }
-
 		public void UpdateKPIValuesForMonth(int month, Dictionary<int, GridActualAndWasted> gridDataForMonth)
 		{
 			//Keep track of layer states so we can use the area of energy layers in KPIs

@@ -175,6 +175,7 @@ namespace MSP2050.Scripts
 
 		public override bool CalculateEffectsOfEditing(Plan a_plan)
 		{
+			//m_removedCables = ForceEnergyLayersActiveUpTo(a_plan); //Can be enabled for testing difference with freshly calculated
 			RecalculateGridsInEditedPlan(a_plan);
 			if (a_plan.Policies.ContainsKey(PolicyManager.ENERGY_POLICY_NAME) && !string.IsNullOrEmpty(SessionManager.Instance.MspGlobalData.windfarm_data_api_url))
 			{

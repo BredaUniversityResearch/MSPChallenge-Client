@@ -120,10 +120,15 @@ namespace MSP2050.Scripts
 							//Focused per type, show pure country colours
 							Team team = SessionManager.Instance.FindTeamByID(a_data.m_valueCountries[i]);
 							if (team == null)
+							{
 								color = new Color(0.5f, 0.5f, 0.5f, 1f);
+								entryName = "All";
+							}
 							else
+							{
 								color = team.color;
-							entryName = team.name;
+								entryName = team.name;
+							}
 						}
 						m_entries[i].SetData(entryName, color,
 													x / (float)m_columns,

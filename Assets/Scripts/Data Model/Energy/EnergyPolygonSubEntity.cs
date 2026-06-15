@@ -15,7 +15,14 @@ namespace MSP2050.Scripts
 			get
 			{
 				if (m_edited)
-					return (long)((double)m_entity.EntityTypes[0].capacity * (double)SurfaceAreaSqrKm);
+				{
+					long result = 0;
+					foreach(EntityType type in m_entity.EntityTypes)
+					{
+						result += (long)((double)type.capacity * (double)SurfaceAreaSqrKm);
+					}
+					return result;
+				}
 				return m_cachedMaxCapacity;
 			}
 			set => m_cachedMaxCapacity = value;
@@ -54,7 +61,11 @@ namespace MSP2050.Scripts
 		public override void Initialise()
 		{
 			CreateSourcePoint();
-			m_cachedMaxCapacity = (long)((double)m_entity.EntityTypes[0].capacity * (double)SurfaceAreaSqrKm);
+			m_cachedMaxCapacity = 0;
+			foreach (EntityType type in m_entity.EntityTypes)
+			{
+				m_cachedMaxCapacity += (long)((double)type.capacity * (double)SurfaceAreaSqrKm);
+			}
 			base.Initialise();
 		}
 

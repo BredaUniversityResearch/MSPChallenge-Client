@@ -10,7 +10,6 @@ namespace MSP2050.Scripts
 {
 	public class GraphContentSelectSumAll : AGraphContentSelect
 	{
-		public enum KPISource { Ecology, Energy, Shipping, Geometry, Other }
 		[SerializeField] protected string[] m_categoryNames;
 		[SerializeField] protected KPISource m_kpiSource;
 		[SerializeField] protected string m_entryName;
@@ -23,30 +22,11 @@ namespace MSP2050.Scripts
 		{
 			base.Initialise(a_onSettingsChanged, a_widget);
 
-			List<KPIValueCollection> kvcs = null;
 			m_categories = new List<KPICategory>();
 			m_values = new List<KPIValue>();
+			List<KPIValueCollection> kvcs = GetKVCs(m_kpiSource);
 
-			switch (m_kpiSource)
-			{
-				case KPISource.Ecology:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.MEL_SIM_NAME); 
-					break;
-				case KPISource.Energy:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.CEL_SIM_NAME);
-					break;
-				case KPISource.Shipping:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.SEL_SIM_NAME);
-					break;
-				case KPISource.Geometry:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(null);
-					break;
-				default:
-					kvcs = SimulationManager.Instance.GetKPIValuesForAllCountriesSimulation(SimulationManager.OTHER_SIM_NAME);
-					break;
-			}
-			
-			if(kvcs == null || kvcs.Count == 0)
+			if (kvcs == null || kvcs.Count == 0)
 			{
 				m_noDataEntry.gameObject.SetActive(m_categories.Count == 0);
 				m_noDataEntry.text = "NO DATA AVAILABLE";
@@ -129,7 +109,7 @@ namespace MSP2050.Scripts
 				data.m_selectedDisplayIDs = new List<string>();
 
 			a_minValue = 0f;
-			a_maxValue = float.NegativeInfinity;
+			a_maxValue = 0f;
 
 			if (a_timeSettings.m_aggregationFunction != null)
 			{
@@ -195,10 +175,13 @@ namespace MSP2050.Scripts
 				}
 			}
 
-			if (a_maxValue == Mathf.NegativeInfinity)
-				a_maxValue = 1f;
 			if (Mathf.Abs(a_maxValue - a_minValue) < 0.001f)
-				a_maxValue = a_minValue + 0.001f;
+			{
+				if (Mathf.Abs(a_maxValue) < 0.001f)
+					a_maxValue = 1f;
+				else
+					a_maxValue = a_minValue + 0.001f;
+			}
 			return data;
 		}
 
