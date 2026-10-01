@@ -1,5 +1,17 @@
 //@Library('CradleSharedLibrary') _ // Loaded implicitly
 
+// Default Unity version, used as the parameter default and as fallback on the first run of a job
+// (on the first run after adding the parameter, params.UNITY_VERSION can still be null).
+String defaultUnityVersion = '2022.3.62f2'
+
+// Exposes the Unity version as job metadata, so it can be used in List View filters.
+// Registers on the job after its first run.
+properties([
+    parameters([
+        string(name: 'UNITY_VERSION', defaultValue: defaultUnityVersion, description: 'Unity editor version used to build this project, e.g. 2022.3.62f2')
+    ])
+])
+
 String Node = ''
 String WorkingDir = ''
 //Assign a node to run the pipeline
@@ -19,7 +31,7 @@ String nexusDevRepo = "MSPChallenge-Client-Dev"
 String nexusMainRepo = "MSPChallenge-Client-Main"
 
 String unityBuildName = "MSP-Challenge"
-String unityVersion = "2022.3.62f2"
+String unityVersion = params.UNITY_VERSION?.trim() ?: defaultUnityVersion
 
 String windowsBuildName = "Windows"
 String windowsDevBuildName = "Windows-Dev"
